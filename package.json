@@ -1,0 +1,45 @@
+{
+  "name": "clinic-claim-automation",
+  "version": "1.0.0",
+  "description": "Browser automation for clinic claim processing across multiple insurance portals",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "playwright test",
+    "test-login": "node src/examples/test-login.js",
+    "test-workflow": "node src/examples/test-workflow.js",
+    "batch-extract": "node src/examples/batch-extract.js",
+    "batch-submit": "node src/examples/batch-submit.js",
+    "demo-extract": "node src/examples/demo-extract.js",
+    "install-browsers": "playwright install chromium",
+    "extract-date-range": "node src/examples/extract-date-range.js",
+    "extract-daily": "node src/examples/extract-daily.js",
+    "extract-visit-details": "node src/examples/extract-visit-details-batch.js",
+    "demo-visit-details": "node src/examples/demo-visit-details-extraction.js",
+    "test-visit-details-date": "node src/examples/test-visit-details-date.js",
+    "test-mhcasia-access": "node src/examples/test-mhcasia-access.js",
+    "setup-urban-vpn": "node scripts/setup-urban-vpn.js"
+  },
+  "keywords": [
+    "automation",
+    "playwright",
+    "clinic",
+    "insurance",
+    "claims"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@playwright/test": "^1.40.0",
+    "@supabase/supabase-js": "^2.89.0",
+    "dotenv": "^16.3.1",
+    "exceljs": "^4.4.0",
+    "pdf-parse": "^2.4.5",
+    "winston": "^3.11.0",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0"
+  }
+}
