@@ -122,8 +122,8 @@ export class MHCAsiaAutomation {
       // Wait for navigation
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
       // Don't wait for networkidle (MHC can keep connections open)
-      await this.page.waitForTimeout(2000);
-      await this.page.locator('text=/Log\\s*Out/i').first().waitFor({ state: 'attached', timeout: 30000 }).catch(() => {});
+      await this.page.waitForTimeout(500);
+      await this.page.locator('text=/Log\\s*Out/i').first().waitFor({ state: 'attached', timeout: 10000 }).catch(() => {});
       
       // Check for error messages
       const errorSelectors = [
@@ -152,19 +152,19 @@ export class MHCAsiaAutomation {
       }
 
       if (hasError) {
-        await this.page.screenshot({ path: 'screenshots/mhc-asia-login-error.png', fullPage: true });
+        await this.page.screenshot({ path: 'screenshots/mhc-asia-login-error.png', fullPage: true }).catch(() => {});
         throw new Error('Authentication failed');
       }
 
-      // Take screenshot after login
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-after-login.png', fullPage: true });
+      // Take screenshot after login (non-blocking)
+      await this.page.screenshot({ path: 'screenshots/mhc-asia-after-login.png', fullPage: true }).catch(() => {});
       
       logger.info(`Successfully logged into ${this.config.name}`);
       this._logStep('Login ok');
       return true;
     } catch (error) {
       logger.error(`Login failed for ${this.config.name}:`, error);
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-login-error.png', fullPage: true });
+      await this.page.screenshot({ path: 'screenshots/mhc-asia-login-error.png', fullPage: true }).catch(() => {});
       throw error;
     }
   }
@@ -178,7 +178,7 @@ export class MHCAsiaAutomation {
     }
     // Avoid waiting for networkidle (many portals keep connections open)
     await this.page.waitForLoadState('domcontentloaded').catch(() => {});
-    await this.page.waitForTimeout(1200);
+    await this.page.waitForTimeout(500);
     if (label) logger.info(`Clicked: ${label}`);
   }
 
@@ -446,7 +446,7 @@ export class MHCAsiaAutomation {
       logger.info('Navigating to Normal Visit > Search Other Programs...');
       
       await this.page.waitForLoadState('domcontentloaded');
-      await this.page.waitForTimeout(2000);
+      await this.page.waitForTimeout(500);
       
       // Step 1: Click on "Normal Visit" or similar
       const normalVisitSelectors = [
@@ -503,26 +503,43 @@ export class MHCAsiaAutomation {
 
   /**
    * Navigate specifically into AIA program search (user flow: Normal Visit > search under AIA program)
+   * NOTE: This method uses UI navigation instead of direct URL to avoid navigation issues
    */
   async navigateToAIAProgramSearch() {
     try {
       this._logStep('Navigate: AIA Program search');
-      logger.info('Navigating to Normal Visit > AIA Program search...');
+      logger.info('Navigating to AIA Program search through UI...');
+      
+      // Use UI navigation instead of direct URL
       await this.navigateToNormalVisit();
-
-      // This page shows 2 big tiles. We need to click "Search under AIA Program" to reach the NRIC search form.
-      const aiaTile = this.page.locator('text=/Search\\s+under\\s+AIA\\s+Program/i').first();
-      if ((await aiaTile.count().catch(() => 0)) > 0) {
-        await this._safeClick(aiaTile, 'Search under AIA Program (tile)');
-        await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-program.png', fullPage: true });
-        logger.info('Entered AIA program search');
-        this._logStep('Entered AIA Program search');
-        return true;
+      
+      // After navigating to "Search Other Programs", click on "Search under AIA Program" tile if present
+      await this.page.waitForLoadState('domcontentloaded');
+      await this.page.waitForTimeout(500);
+      
+      const aiaTileSelectors = [
+        'text=/Search\\s+under\\s+AIA\\s+Program/i',
+        'a:has-text("AIA Program")',
+        'button:has-text("AIA")',
+        '[href*="aia" i]',
+      ];
+      
+      for (const selector of aiaTileSelectors) {
+        try {
+          const tile = this.page.locator(selector).first();
+          if ((await tile.count().catch(() => 0)) > 0) {
+            await this._safeClick(tile, 'Search under AIA Program (tile)');
+            await this.page.waitForTimeout(500);
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
       }
-
-      logger.warn('Could not find AIA Program tile; will continue with NRIC search in current context.');
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-program-not-found.png', fullPage: true });
-      return false;
+      
+      await this.page.screenshot({ path: 'screenshots/mhc-asia-patient-search.png', fullPage: true });
+      this._logStep('Navigated to patient search page');
+      return true;
     } catch (error) {
       logger.error('Failed to navigate to AIA program search:', error);
       throw error;
@@ -1227,6 +1244,812 @@ export class MHCAsiaAutomation {
     } catch (error) {
       logger.error('Failed to logout:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Fill Visit Date field
+   * @param {string} date - Date in DD/MM/YYYY format
+   */
+  async fillVisitDate(date) {
+    try {
+      this._logStep('Fill visit date', { date });
+      
+      // Visit date field selectors
+      const dateSelectors = [
+        'input[name*="visitDate" i]',
+        'input[id*="visitDate" i]',
+        'input[placeholder*="visit" i]',
+        'input[type="text"][value*="/"]', // Date format
+      ];
+
+      for (const selector of dateSelectors) {
+        try {
+          const field = this.page.locator(selector).first();
+          if ((await field.count().catch(() => 0)) > 0) {
+            await field.fill(date);
+            this._logStep('Visit date filled', { date });
+            return true;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      logger.warn('Visit date field not found');
+      return false;
+    } catch (error) {
+      logger.error('Failed to fill visit date:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Fill Charge Type dropdown
+   * Maps Clinic Assist visit types to MHC options
+   * @param {string} visitType - Visit type from Clinic Assist: "New", "Follow Up", "Repeat"
+   */
+  async fillChargeType(visitType) {
+    try {
+      this._logStep('Fill charge type', { visitType });
+      
+      // Map visit types
+      const typeMap = {
+        'new': 'First Consult',
+        'follow up': 'Follow Up',
+        'follow': 'Follow Up',
+        'repeat': 'Repeat Medicine',
+        'repeat medicine': 'Repeat Medicine',
+      };
+
+      const mhcType = typeMap[visitType?.toLowerCase()] || 'Follow Up';
+
+      // Find charge type dropdown
+      const dropdownSelectors = [
+        'select[name*="charge" i]',
+        'select[id*="charge" i]',
+        'select[name*="type" i]',
+        'select option:has-text("First Consult")',
+      ];
+
+      for (const selector of dropdownSelectors) {
+        try {
+          let dropdown;
+          if (selector.includes('option:has-text')) {
+            dropdown = this.page.locator('select').first();
+          } else {
+            dropdown = this.page.locator(selector).first();
+          }
+          
+          if ((await dropdown.count().catch(() => 0)) > 0) {
+            await dropdown.selectOption({ label: mhcType });
+            this._logStep('Charge type filled', { visitType, mhcType });
+            return true;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      logger.warn('Charge type dropdown not found');
+      return false;
+    } catch (error) {
+      logger.error('Failed to fill charge type:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Fill MC Days field
+   * @param {number} mcDays - Number of MC days (usually 0)
+   */
+  async fillMcDays(mcDays) {
+    try {
+      this._logStep('Fill MC days', { mcDays });
+      
+      const mcSelectors = [
+        'input[name*="mc" i][name*="day" i]',
+        'input[id*="mc" i][id*="day" i]',
+        'input[placeholder*="mc" i]',
+      ];
+
+      for (const selector of mcSelectors) {
+        try {
+          const field = this.page.locator(selector).first();
+          if ((await field.count().catch(() => 0)) > 0) {
+            await field.fill(mcDays.toString());
+            this._logStep('MC days filled', { mcDays });
+            return true;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      logger.warn('MC days field not found');
+      return false;
+    } catch (error) {
+      logger.error('Failed to fill MC days:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Fill Consultation Fee field
+   * @param {number} fee - Consultation fee amount
+   */
+  async fillConsultationFee(fee) {
+    try {
+      this._logStep('Fill consultation fee', { fee });
+      
+      // Strategy: Enter 99999 to trigger max amount dialog, then accept it
+      const highAmount = '99999';
+      
+      // Try to find the consultation fee field
+      const feeSelectors = [
+        'input[name*="consultfee" i]',
+        'input[name*="ConsultFee" i]',
+        'input[id*="consultfee" i]',
+        'input[name*="consultation" i]',
+        'input[id*="consultation" i]',
+        'input[name*="consult" i]',
+      ];
+
+      let feeInput = null;
+      
+      // First try direct selectors
+      for (const selector of feeSelectors) {
+        try {
+          const field = this.page.locator(selector).first();
+          if ((await field.count().catch(() => 0)) > 0) {
+            feeInput = field;
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      // Try to find by label text "Consultation Fee"
+      if (!feeInput) {
+        try {
+          const feeLabel = this.page.locator('td:has-text("Consultation Fee")').first();
+          if (await feeLabel.count() > 0) {
+            const row = feeLabel.locator('xpath=ancestor::tr');
+            const input = row.locator('input[type="text"]').first();
+            if (await input.count() > 0) {
+              feeInput = input;
+            }
+          }
+        } catch (e) {
+          // Continue
+        }
+      }
+
+      if (!feeInput) {
+        // Try JavaScript to find the field
+        const found = await this.page.evaluate(() => {
+          const inputs = document.querySelectorAll('input[type="text"]');
+          for (const input of inputs) {
+            const row = input.closest('tr');
+            if (row && row.textContent.toLowerCase().includes('consultation fee')) {
+              return true;
+            }
+          }
+          return false;
+        });
+        
+        if (found) {
+          // Use JavaScript to fill
+          await this.page.evaluate((value) => {
+            const inputs = document.querySelectorAll('input[type="text"]');
+            for (const input of inputs) {
+              const row = input.closest('tr');
+              if (row && row.textContent.toLowerCase().includes('consultation fee')) {
+                input.value = value;
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+                input.dispatchEvent(new Event('blur', { bubbles: true }));
+                return;
+              }
+            }
+          }, highAmount);
+          
+          this._logStep('Consultation fee set to 99999 via JS, waiting for dialog');
+        }
+      } else {
+        // Fill the input with high amount to trigger max dialog
+        await feeInput.clear();
+        await feeInput.fill(highAmount);
+        await feeInput.press('Tab'); // Trigger blur/change
+        this._logStep('Consultation fee set to 99999, waiting for dialog');
+      }
+
+      // Wait for and accept the max amount dialog
+      await this.page.waitForTimeout(500);
+      
+      // Handle the dialog - accept to use the max amount
+      // The dialog handler should be set up before this, but also try clicking OK
+      try {
+        const okButton = this.page.locator('button:has-text("OK"), input[value="OK"], button:has-text("Yes")').first();
+        if (await okButton.count() > 0 && await okButton.isVisible()) {
+          await okButton.click();
+          this._logStep('Clicked OK on max amount dialog');
+        }
+      } catch (e) {
+        // Dialog might be handled automatically
+      }
+
+      await this.page.waitForTimeout(300);
+      this._logStep('Consultation fee filled (max amount accepted)');
+      return true;
+    } catch (error) {
+      logger.error('Failed to fill consultation fee:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Fill Primary Diagnosis using "M" button search modal
+   * @param {string} diagnosisText - Diagnosis text to search for
+   */
+  async fillDiagnosisPrimary(diagnosisText) {
+    try {
+      this._logStep('Fill primary diagnosis via M button', { diagnosis: diagnosisText?.substring(0, 50) });
+      
+      if (!diagnosisText || diagnosisText.length < 2) {
+        logger.warn('Diagnosis text too short, skipping');
+        return false;
+      }
+
+      // Find and click "M" button for Diagnosis Pri - it's an INPUT element, not button
+      // Exact selector: #visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input
+      const mButtonSelectors = [
+        '#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input',
+        'tr:has-text("Diagnosis Pri") input[value="M"]',
+        'tr:has-text("Diagnosis Pri") input[type="button"][value="M"]',
+        'input[value="M"]:near(text="Diagnosis Pri", 200)',
+        'input[type="submit"][value="M"]',
+        'input[type="button"][value="M"]',
+      ];
+
+      let mButtonFound = false;
+      for (const selector of mButtonSelectors) {
+        try {
+          const mButton = this.page.locator(selector).first();
+          if ((await mButton.count().catch(() => 0)) > 0) {
+            await mButton.click();
+            this._logStep('Clicked M button for diagnosis search', { selector });
+            mButtonFound = true;
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      if (!mButtonFound) {
+        // Try JavaScript click as fallback
+        const clicked = await this.page.evaluate(() => {
+          // Find the M button near Diagnosis Pri row
+          const rows = document.querySelectorAll('tr');
+          for (const row of rows) {
+            if (row.textContent?.includes('Diagnosis Pri')) {
+              const mButton = row.querySelector('input[value="M"]');
+              if (mButton) {
+                mButton.click();
+                return true;
+              }
+            }
+          }
+          // Try exact selector
+          const exactBtn = document.querySelector('#visit_form input[value="M"]');
+          if (exactBtn) {
+            exactBtn.click();
+            return true;
+          }
+          return false;
+        });
+        
+        if (clicked) {
+          this._logStep('Clicked M button via JavaScript');
+          mButtonFound = true;
+        }
+      }
+
+      if (!mButtonFound) {
+        logger.warn('M button for diagnosis not found');
+        return false;
+      }
+
+      // Wait for search modal to appear
+      await this.page.waitForTimeout(1000);
+
+      // Find search field in modal
+      const searchSelectors = [
+        'input[type="text"]:visible',
+        'input[placeholder*="search" i]:visible',
+        'input[name*="search" i]:visible',
+        'dialog input[type="text"]',
+        '.modal input[type="text"]',
+      ];
+
+      let searchField = null;
+      for (const selector of searchSelectors) {
+        try {
+          const field = this.page.locator(selector).first();
+          if ((await field.count().catch(() => 0)) > 0 && await field.isVisible()) {
+            searchField = field;
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      if (!searchField) {
+        logger.warn('Search field in modal not found');
+        return false;
+      }
+
+      // Enter diagnosis search text
+      await searchField.fill(diagnosisText.substring(0, 50));
+      this._logStep('Entered diagnosis search text');
+
+      // Click search/find button or press Enter
+      const searchButtonSelectors = [
+        'button:has-text("Search")',
+        'button:has-text("Find")',
+        'button[type="submit"]',
+      ];
+
+      let searchButtonFound = false;
+      for (const selector of searchButtonSelectors) {
+        try {
+          const button = this.page.locator(selector).first();
+          if ((await button.count().catch(() => 0)) > 0 && await button.isVisible()) {
+            await button.click();
+            searchButtonFound = true;
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      if (!searchButtonFound) {
+        // Try pressing Enter
+        await searchField.press('Enter');
+      }
+
+      this._logStep('Triggered diagnosis search');
+      await this.page.waitForTimeout(1500);
+
+      // Select first result
+      const resultSelectors = [
+        'table tr:visible:first-child',
+        'div[role="option"]:visible:first-child',
+        '.result:visible:first-child',
+        'li:visible:first-child',
+      ];
+
+      for (const selector of resultSelectors) {
+        try {
+          const firstResult = this.page.locator(selector).first();
+          if ((await firstResult.count().catch(() => 0)) > 0 && await firstResult.isVisible()) {
+            await firstResult.click();
+            this._logStep('Selected first diagnosis result');
+            await this.page.waitForTimeout(500);
+            return true;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      logger.warn('Could not select diagnosis result');
+      return false;
+    } catch (error) {
+      logger.error('Failed to fill primary diagnosis:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Fill a drug item using "M" button search modal
+   * @param {Object} drugData - Drug data: { name, quantity }
+   * @param {number} rowIndex - Row index (1-based)
+   */
+  async fillDrugItem(drugData, rowIndex = 1) {
+    try {
+      this._logStep('Fill drug item', { drug: drugData.name?.substring(0, 30), quantity: drugData.quantity, rowIndex });
+      
+      if (!drugData.name || drugData.name.length < 2) {
+        logger.warn('Drug name too short, skipping');
+        return false;
+      }
+
+      // Find and click "M" button for drug row
+      const mButtonSelectors = [
+        `(//button[text()='M'])[${rowIndex}]`,
+        `(//td[contains(., 'Drug Name')]/..//button[text()='M'])[${rowIndex}]`,
+        `table tr:nth-child(${rowIndex}) button:has-text("M")`,
+      ];
+
+      let mButtonFound = false;
+      for (const selector of mButtonSelectors) {
+        try {
+          const mButton = selector.startsWith('//') 
+            ? this.page.locator(selector) 
+            : this.page.locator(selector).first();
+          
+          if ((await mButton.count().catch(() => 0)) > 0) {
+            await mButton.click();
+            this._logStep(`Clicked M button for drug row ${rowIndex}`);
+            mButtonFound = true;
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      if (!mButtonFound) {
+        logger.warn(`M button for drug row ${rowIndex} not found`);
+        return false;
+      }
+
+      // Wait for search modal
+      await this.page.waitForTimeout(1000);
+
+      // Find and fill search field
+      const searchField = this.page.locator('input[type="text"]:visible').first();
+      if ((await searchField.count().catch(() => 0)) > 0) {
+        await searchField.fill(drugData.name.substring(0, 50));
+        await searchField.press('Enter');
+        this._logStep('Entered drug search text');
+        await this.page.waitForTimeout(1500);
+
+        // Select first result
+        const firstResult = this.page.locator('table tr:visible, div[role="option"]:visible').first();
+        if ((await firstResult.count().catch(() => 0)) > 0) {
+          await firstResult.click();
+          this._logStep('Selected drug from search results');
+        }
+      }
+
+      // Fill quantity if provided
+      if (drugData.quantity) {
+        await this.page.waitForTimeout(500);
+        
+        const qtySelectors = [
+          `table tr:nth-child(${rowIndex}) input[name*="qty" i]`,
+          `table tr:nth-child(${rowIndex}) input[name*="quantity" i]`,
+          `(//input[contains(@name, 'qty')])[${rowIndex}]`,
+        ];
+
+        for (const selector of qtySelectors) {
+          try {
+            const qtyField = selector.startsWith('//') 
+              ? this.page.locator(selector)
+              : this.page.locator(selector).first();
+            
+            if ((await qtyField.count().catch(() => 0)) > 0) {
+              await qtyField.fill(drugData.quantity.toString());
+              this._logStep('Filled drug quantity', { quantity: drugData.quantity });
+              break;
+            }
+          } catch (e) {
+            continue;
+          }
+        }
+      }
+
+      return true;
+    } catch (error) {
+      logger.error('Failed to fill drug item:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Click "More Drug" button to add another drug row
+   */
+  async clickMoreDrug() {
+    try {
+      this._logStep('Click More Drug button');
+      
+      const moreDrugSelectors = [
+        'button:has-text("More Drug")',
+        'button:has-text("Add Drug")',
+        'input[value*="More Drug" i]',
+      ];
+
+      for (const selector of moreDrugSelectors) {
+        try {
+          const button = this.page.locator(selector).first();
+          if ((await button.count().catch(() => 0)) > 0) {
+            await button.click();
+            await this.page.waitForTimeout(500);
+            this._logStep('More Drug button clicked');
+            return true;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      logger.warn('More Drug button not found');
+      return false;
+    } catch (error) {
+      logger.error('Failed to click More Drug:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Click "Compute claim" button to calculate totals
+   */
+  async computeClaim() {
+    try {
+      this._logStep('Click Compute claim button');
+      
+      const computeSelectors = [
+        'button:has-text("Compute claim")',
+        'button:has-text("Compute")',
+        'input[value*="Compute" i]',
+      ];
+
+      for (const selector of computeSelectors) {
+        try {
+          const button = this.page.locator(selector).first();
+          if ((await button.count().catch(() => 0)) > 0) {
+            await button.click();
+            await this.page.waitForTimeout(1000);
+            this._logStep('Compute claim clicked');
+            return true;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      logger.warn('Compute claim button not found');
+      return false;
+    } catch (error) {
+      logger.error('Failed to click Compute claim:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Fill drug name using exact selector
+   * Selector: #drugTable > tbody > tr:nth-child(2) > td:nth-child(2) > input:nth-child(3)
+   * @param {string} drugName - Drug name to fill
+   */
+  async fillDrugName(drugName) {
+    try {
+      this._logStep('Fill drug name', { drugName });
+      
+      const drugSelector = '#drugTable > tbody > tr:nth-child(2) > td:nth-child(2) > input:nth-child(3)';
+      
+      // Try the exact selector first
+      let drugInput = this.page.locator(drugSelector).first();
+      
+      if ((await drugInput.count().catch(() => 0)) === 0) {
+        // Try alternative selectors
+        const altSelectors = [
+          '#drugTable input[type="text"]',
+          'table[id*="drug" i] input[type="text"]',
+          'tr:has-text("Drug Name") input[type="text"]',
+        ];
+        
+        for (const sel of altSelectors) {
+          drugInput = this.page.locator(sel).first();
+          if ((await drugInput.count().catch(() => 0)) > 0) {
+            break;
+          }
+        }
+      }
+      
+      if ((await drugInput.count().catch(() => 0)) > 0) {
+        await drugInput.clear();
+        await drugInput.fill(drugName);
+        this._logStep('Drug name filled', { drugName });
+        return true;
+      }
+      
+      // Try JavaScript fallback
+      const filled = await this.page.evaluate((name) => {
+        const input = document.querySelector('#drugTable > tbody > tr:nth-child(2) > td:nth-child(2) > input:nth-child(3)');
+        if (input) {
+          input.value = name;
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+          return true;
+        }
+        return false;
+      }, drugName);
+      
+      if (filled) {
+        this._logStep('Drug name filled via JavaScript', { drugName });
+        return true;
+      }
+      
+      logger.warn('Drug name field not found');
+      return false;
+    } catch (error) {
+      logger.error('Failed to fill drug name:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Set charge type to New Visit
+   */
+  /**
+   * Set charge type - options: "First Consult", "Follow Up", "Repeat Medicine"
+   * @param {string} chargeType - 'first' for First Consult, 'follow' for Follow Up
+   */
+  async setChargeType(chargeType = 'first') {
+    try {
+      this._logStep('Set charge type', { chargeType });
+      
+      // Determine which option to select
+      const searchPattern = chargeType.toLowerCase().includes('follow') ? /follow/i : /first/i;
+      
+      // The select name is "subType"
+      const chargeTypeSelectors = [
+        'select[name="subType"]',
+        'select[name*="subType" i]',
+        'select[name*="charge" i]',
+      ];
+      
+      for (const selector of chargeTypeSelectors) {
+        try {
+          const select = this.page.locator(selector).first();
+          if ((await select.count().catch(() => 0)) > 0) {
+            const options = await select.locator('option').evaluateAll((opts) =>
+              opts.map((o) => ({ value: o.value, label: (o.textContent || '').trim() }))
+            );
+            
+            const targetOption = options.find((o) => searchPattern.test(o.label));
+            
+            if (targetOption) {
+              await select.selectOption({ value: targetOption.value });
+              this._logStep('Charge type set', { value: targetOption.value, label: targetOption.label });
+              return true;
+            }
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+      
+      // Try JavaScript fallback
+      const selected = await this.page.evaluate((pattern) => {
+        const select = document.querySelector('select[name="subType"]');
+        if (select) {
+          const regex = new RegExp(pattern, 'i');
+          for (const opt of select.options) {
+            if (regex.test(opt.text)) {
+              select.value = opt.value;
+              select.dispatchEvent(new Event('change', { bubbles: true }));
+              return { success: true, value: opt.value, text: opt.text };
+            }
+          }
+        }
+        return { success: false };
+      }, chargeType.toLowerCase().includes('follow') ? 'follow' : 'first');
+      
+      if (selected.success) {
+        this._logStep('Charge type set via JavaScript', selected);
+        return true;
+      }
+      
+      logger.warn('Charge type field not found');
+      return false;
+    } catch (error) {
+      logger.error('Failed to set charge type:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Set charge type to First Consult (New Visit)
+   */
+  async setChargeTypeNewVisit() {
+    return this.setChargeType('first');
+  }
+
+  /**
+   * Set charge type to Follow Up
+   */
+  async setChargeTypeFollowUp() {
+    return this.setChargeType('follow');
+  }
+
+  /**
+   * Setup dialog handler to auto-accept prompts (for consultation fee max amount)
+   */
+  setupDialogHandler() {
+    this.page.on('dialog', async (dialog) => {
+      logger.info(`Dialog appeared: ${dialog.type()} - ${dialog.message()}`);
+      await dialog.accept();
+      logger.info('Dialog accepted');
+    });
+    this._logStep('Dialog handler set up');
+  }
+
+  /**
+   * Select diagnosis from dropdown by searching for a keyword
+   * The dropdown name is "diagnosisPriIdTemp" for primary diagnosis
+   * @param {string} searchTerm - Term to search for in diagnosis options (e.g., "sprain", "headache")
+   */
+  async selectDiagnosis(searchTerm) {
+    try {
+      this._logStep('Select diagnosis from dropdown', { searchTerm });
+      
+      if (!searchTerm || searchTerm.length < 2) {
+        logger.warn('Search term too short');
+        return false;
+      }
+      
+      const searchPattern = new RegExp(searchTerm, 'i');
+      
+      // Try the diagnosis dropdown
+      const diagSelectors = [
+        'select[name="diagnosisPriIdTemp"]',
+        'select[name*="diagnosisPri" i]',
+        'select[name*="diagnosis" i]',
+      ];
+      
+      for (const selector of diagSelectors) {
+        try {
+          const select = this.page.locator(selector).first();
+          if ((await select.count().catch(() => 0)) > 0) {
+            const options = await select.locator('option').evaluateAll((opts) =>
+              opts.map((o) => ({ value: o.value, label: (o.textContent || '').trim() }))
+            );
+            
+            // Find matching option
+            const targetOption = options.find((o) => searchPattern.test(o.label));
+            
+            if (targetOption) {
+              await select.selectOption({ value: targetOption.value });
+              this._logStep('Diagnosis selected', { value: targetOption.value, label: targetOption.label });
+              return true;
+            }
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+      
+      // Try JavaScript fallback
+      const selected = await this.page.evaluate((term) => {
+        const select = document.querySelector('select[name="diagnosisPriIdTemp"]');
+        if (select) {
+          const regex = new RegExp(term, 'i');
+          for (const opt of select.options) {
+            if (regex.test(opt.text)) {
+              select.value = opt.value;
+              select.dispatchEvent(new Event('change', { bubbles: true }));
+              return { success: true, value: opt.value, text: opt.text };
+            }
+          }
+        }
+        return { success: false };
+      }, searchTerm);
+      
+      if (selected.success) {
+        this._logStep('Diagnosis selected via JavaScript', selected);
+        return true;
+      }
+      
+      logger.warn('Diagnosis not found matching:', searchTerm);
+      return false;
+    } catch (error) {
+      logger.error('Failed to select diagnosis:', error);
+      return false;
     }
   }
 }
