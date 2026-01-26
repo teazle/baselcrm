@@ -24,32 +24,76 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.EC2_PORT || 22 }}
           script: |
-            cd ${{ secrets.EC2_DEPLOY_PATH || '~/Baselrpacrm' }}
+            # Expand ~ to home directory and set deploy path
+            DEPLOY_PATH="${{ secrets.EC2_DEPLOY_PATH || '~/Baselrpacrm' }}"
+            DEPLOY_PATH="${DEPLOY_PATH/#\~/$HOME}"
+            
+            echo "📁 Deploy path: $DEPLOY_PATH"
+            cd "$DEPLOY_PATH" || { echo "❌ Error: Cannot cd to $DEPLOY_PATH"; exit 1; }
+            
+            # Verify we're in a git repository
+            if [ ! -d .git ]; then
+              echo "❌ Error: Not a git repository in $DEPLOY_PATH"
+              exit 1
+            fi
             
             # Pull latest changes
             echo "📥 Pulling latest changes from Git..."
-            git fetch origin
-            git reset --hard origin/main || git reset --hard origin/master
+            git fetch origin || { echo "⚠️  Warning: git fetch failed"; }
             
-            # Install/update dependencies if package.json changed
+            # Get current branch
+            CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
+            echo "🌿 Current branch: $CURRENT_BRANCH"
+            
+            # Reset to latest from origin
+            git reset --hard origin/main 2>/dev/null || git reset --hard origin/master 2>/dev/null || {
+              echo "⚠️  Warning: git reset failed, trying pull instead"
+              git pull origin "$CURRENT_BRANCH" || true
+            }
+            
+            # Check if package.json changed (compare with previous commit if available)
             echo "📦 Checking for dependency updates..."
-            if git diff HEAD@{1} HEAD --name-only | grep -q "package.json\|package-lock.json"; then
+            PACKAGE_CHANGED=false
+            
+            # Try to detect changes in package files
+            if git rev-parse HEAD@{1} >/dev/null 2>&1; then
+              # Previous commit exists, check diff
+              if git diff HEAD@{1} HEAD --name-only 2>/dev/null | grep -q "package.json\|package-lock.json"; then
+                PACKAGE_CHANGED=true
+              fi
+            else
+              # No previous commit, check if package files exist and are tracked
+              if git ls-files --error-unmatch package.json package-lock.json >/dev/null 2>&1; then
+                # Files are tracked, check if they changed in current commit
+                if git diff HEAD --name-only 2>/dev/null | grep -q "package.json\|package-lock.json"; then
+                  PACKAGE_CHANGED=true
+                fi
+              fi
+            fi
+            
+            if [ "$PACKAGE_CHANGED" = true ]; then
               echo "📦 Installing/updating dependencies..."
-              npm install
-              npm run install-browsers
+              npm install || { echo "⚠️  Warning: npm install failed"; }
+              npm run install-browsers || { echo "⚠️  Warning: install-browsers failed"; }
+            else
+              echo "ℹ️  No dependency changes detected"
             fi
             
             # Restart PM2 processes if running
             if command -v pm2 &> /dev/null; then
               echo "🔄 Restarting PM2 processes..."
-              pm2 restart all || true
+              pm2 restart all || pm2 reload all || true
+            else
+              echo "ℹ️  PM2 not installed, skipping process restart"
             fi
             
             echo "✅ Deployment complete!"
             
             # Show current status
             echo "📊 Current status:"
-            git log -1 --oneline
+            echo "  Branch: $(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'unknown')"
+            echo "  Commit: $(git log -1 --oneline 2>/dev/null || echo 'unknown')"
             if command -v pm2 &> /dev/null; then
-              pm2 status
+              echo "  PM2 Status:"
+              pm2 status || true
             fi
