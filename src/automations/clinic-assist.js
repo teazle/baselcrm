@@ -8,12 +8,47 @@ import path from 'path';
 
 /**
  * Clinic Assist automation module
+ * 
+ * NAVIGATION RULE: Always use UI clicks for navigation, NEVER use direct URL navigation (page.goto).
+ * Direct URLs cause "Access Denied" errors. This applies especially to:
+ * - Patient page navigation
+ * - Any page that requires authentication context
+ * 
+ * Use UI clicks (link.click(), button.click()) instead of page.goto() for all navigation.
  */
 export class ClinicAssistAutomation {
   constructor(page) {
     this.page = page;
     this.config = PORTALS.CLINIC_ASSIST;
     this._caStep = 0;
+    
+    // Set up route to block external protocol handlers (xdg-open, etc.)
+    this.page.route('**/*', (route) => {
+      const url = route.request().url();
+      // Block any non-http/https URLs that might trigger xdg-open
+      if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('data:')) {
+        logger.info(`[Route Block] Blocking external URL: ${url}`);
+        route.abort();
+        return;
+      }
+      route.continue();
+    });
+    
+    // Set up dialog handler to auto-dismiss xdg-open and other dialogs
+    this.page.on('dialog', async (dialog) => {
+      logger.info(`[Dialog] ${dialog.type()}: ${dialog.message()}`);
+      try {
+        await dialog.dismiss();
+        logger.info('[Dialog] Dismissed');
+      } catch (e) {
+        try {
+          await dialog.accept();
+          logger.info('[Dialog] Accepted');
+        } catch (e2) {
+          logger.warn('[Dialog] Could not dismiss or accept', { error: e2.message });
+        }
+      }
+    });
   }
 
   _logStep(message, meta) {
@@ -589,11 +624,59 @@ export class ClinicAssistAutomation {
     }
 
     const patientIdentifier = patientIdentifierOrKeywords;
+    
+    // Check if identifier looks like a patient number (5 digits)
+    const isPatientNumber = /^\d{4,5}$/.test(String(patientIdentifier).trim());
+    const normalizedPatientNumber = isPatientNumber ? String(patientIdentifier).trim().padStart(5, '0') : null;
+    
     // Preferred: jqGrid table used by QueueLog
     const jqGrid = this.page.locator('#queueLogGrid');
     if ((await jqGrid.count().catch(() => 0)) > 0) {
-      const row = jqGrid.locator('tr').filter({ hasText: patientIdentifier }).first();
+      let row = null;
+      
+      // If it's a patient number, search in PCNO column specifically
+      if (isPatientNumber && normalizedPatientNumber) {
+        this._logStep('Queue: searching by patient number (PCNO)', { patientNumber: normalizedPatientNumber });
+        // Try to find row by PCNO column
+        const pcnoRows = jqGrid.locator('tr.jqgrow');
+        const rowCount = await pcnoRows.count().catch(() => 0);
+        
+        for (let i = 0; i < rowCount; i++) {
+          const testRow = pcnoRows.nth(i);
+          const pcnoCell = testRow.locator('td[aria-describedby$="_PCNO"]').first();
+          if ((await pcnoCell.count().catch(() => 0)) > 0) {
+            const pcnoText = (await pcnoCell.textContent().catch(() => '') || '').trim();
+            const cellNormalized = pcnoText.padStart(5, '0');
+            if (cellNormalized === normalizedPatientNumber || pcnoText === patientIdentifier) {
+              row = testRow;
+              this._logStep('Queue: found patient by PCNO', { pcno: pcnoText, normalized: normalizedPatientNumber });
+              break;
+            }
+          }
+        }
+        
+        // Also try searching in all cells of the row
+        if (!row) {
+          for (let i = 0; i < rowCount; i++) {
+            const testRow = pcnoRows.nth(i);
+            const rowText = (await testRow.textContent().catch(() => '') || '').trim();
+            if (rowText.includes(normalizedPatientNumber) || rowText.includes(patientIdentifier)) {
+              row = testRow;
+              this._logStep('Queue: found patient by number in row text', { patientNumber });
+              break;
+            }
+          }
+        }
+      }
+      
+      // Fallback to general text search
+      if (!row) {
+        row = jqGrid.locator('tr').filter({ hasText: patientIdentifier }).first();
+      }
+      
       if ((await row.count().catch(() => 0)) === 0) {
+        // Take screenshot for debugging
+        await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-search-failed.png', fullPage: true }).catch(() => {});
         throw new Error(`Patient not found in queue by identifier: ${patientIdentifier}`);
       }
       this._logStep('Queue: opening visit for specified patient (jqGrid)', { patientIdentifier });
@@ -601,9 +684,38 @@ export class ClinicAssistAutomation {
       return;
     }
 
+    // Fallback: regular table
     const queueTable = this.page.locator('table:has(th:has-text("QNo"))').first();
-    const row = queueTable.locator('tbody tr').filter({ hasText: patientIdentifier }).first();
+    let row = null;
+    
+    // If patient number, search more carefully
+    if (isPatientNumber && normalizedPatientNumber) {
+      const rows = queueTable.locator('tbody tr');
+      const rowCount = await rows.count().catch(() => 0);
+      
+      for (let i = 0; i < rowCount; i++) {
+        const testRow = rows.nth(i);
+        const rowText = (await testRow.textContent().catch(() => '') || '').trim();
+        // Check if row contains the patient number (with or without zero padding)
+        if (rowText.includes(normalizedPatientNumber) || 
+            rowText.includes(patientIdentifier) ||
+            rowText.match(new RegExp(`\\b${patientIdentifier}\\b`)) ||
+            rowText.match(new RegExp(`\\b${normalizedPatientNumber}\\b`))) {
+          row = testRow;
+          this._logStep('Queue: found patient by number in table', { patientNumber });
+          break;
+        }
+      }
+    }
+    
+    // Fallback to general text search
+    if (!row) {
+      row = queueTable.locator('tbody tr').filter({ hasText: patientIdentifier }).first();
+    }
+    
     if ((await row.count().catch(() => 0)) === 0) {
+      // Take screenshot for debugging
+      await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-search-failed.png', fullPage: true }).catch(() => {});
       throw new Error(`Patient not found in queue by identifier: ${patientIdentifier}`);
     }
     this._logStep('Queue: opening visit for specified patient (table)', { patientIdentifier });
@@ -1097,7 +1209,7 @@ export class ClinicAssistAutomation {
       await this.page.waitForLoadState('networkidle').catch(() => {});
       await this.page.waitForTimeout(1000);
 
-      const nricPattern = /[STFG]\d{7}[A-Z]/i;
+    const nricPattern = /[STFG]\d{7}[A-Z]/i;
       
       // Method 1: Look for labeled fields (most reliable)
       // Try common labels for NRIC/IC on biodata page
@@ -1115,8 +1227,8 @@ export class ClinicAssistAutomation {
       
       for (const label of nricLabels) {
         const labeled = await this._extractLabeledValue(label);
-        if (labeled) {
-          const m = labeled.match(nricPattern);
+    if (labeled) {
+      const m = labeled.match(nricPattern);
           if (m) {
             const nric = m[0].toUpperCase();
             this._logStep('NRIC found via labeled field', { label, nric });
@@ -1180,8 +1292,8 @@ export class ClinicAssistAutomation {
       }
 
       // Method 3: Search entire page body for NRIC pattern (fallback)
-      const bodyText = await this.page.textContent('body').catch(() => '');
-      const m2 = bodyText.match(nricPattern);
+    const bodyText = await this.page.textContent('body').catch(() => '');
+    const m2 = bodyText.match(nricPattern);
       if (m2) {
         const nric = m2[0].toUpperCase();
         this._logStep('NRIC found in page body text', { nric });
@@ -1193,7 +1305,7 @@ export class ClinicAssistAutomation {
     } catch (error) {
       logger.error('Error extracting NRIC from patient info:', error);
       this._logStep('Error extracting NRIC', { error: error.message });
-      return null;
+    return null;
     }
   }
 
@@ -1291,16 +1403,138 @@ export class ClinicAssistAutomation {
         }
       }
       
-      // Now find the Reports sidebar link (similar to how Queue is found in navigateToQueue)
-      // Use getByRole for more reliable selection
+      // FIRST: Try to open sidebar/hamburger menu if it exists (might be collapsed)
+      this._logStep('Trying to open sidebar/hamburger menu');
+      const menuToggleSelectors = [
+        '[class*="hamburger"]',
+        '[class*="sidebar-toggle"]',
+        '[class*="menu-toggle"]',
+        '[class*="nav-toggle"]',
+        'button[class*="toggle"]',
+        '.fa-bars',
+        '[aria-label*="menu" i]',
+        'a[data-toggle="sidebar"]',
+        // Common hamburger patterns
+        'button:has(span:has-text("≡"))',
+        '[class*="navbar"] button',
+      ];
+      
+      for (const selector of menuToggleSelectors) {
+        try {
+          const toggle = this.page.locator(selector).first();
+          const count = await toggle.count().catch(() => 0);
+          if (count > 0) {
+            const isVisible = await toggle.isVisible().catch(() => false);
+            if (isVisible) {
+              this._logStep('Found menu toggle, clicking to open sidebar', { selector });
+              await toggle.click({ force: true }).catch(() => {});
+              await this.page.waitForTimeout(1000);
+              break;
+            }
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      // Now find the Reports sidebar link
+      this._logStep('Looking for Reports link in sidebar');
+      
+      // Wait a moment for sidebar animation to complete
+      await this.page.waitForTimeout(500);
+      
+      // Take screenshot to see sidebar state
+      await this.page.screenshot({ path: 'screenshots/clinic-assist-sidebar-open.png', fullPage: true }).catch(() => {});
+      
+      // Try multiple approaches to click Reports
+      // Approach 1: Click the LI element with SidebarmenuReports id (triggers JavaScript navigation)
+      const reportLi = this.page.locator('#SidebarmenuReports');
+      if (await reportLi.count().catch(() => 0) > 0) {
+        this._logStep('Found SidebarmenuReports, trying to trigger click via JavaScript');
+        try {
+          // Some sidebar menus use JavaScript onclick handlers
+          await this.page.evaluate(() => {
+            const li = document.querySelector('#SidebarmenuReports');
+            if (li) {
+              // Try clicking the li's child anchor
+              const anchor = li.querySelector('a.SideMenuList');
+              if (anchor) {
+                anchor.click();
+                return 'clicked anchor';
+              }
+              // Otherwise trigger click on li
+              li.click();
+              return 'clicked li';
+            }
+            return 'not found';
+          });
+          await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+          await this.page.waitForTimeout(3000); // Wait longer for navigation
+          
+          const urlAfterClick = this.page.url();
+          this._logStep('After JS click on SidebarmenuReports', { url: urlAfterClick });
+          
+          if (urlAfterClick.includes('ReportsMenu') || urlAfterClick.includes('Report')) {
+            this._logStep('Successfully navigated via SidebarmenuReports click');
+            return true;
+          }
+        } catch (e) {
+          this._logStep('JS click approach failed', { error: e.message });
+        }
+      }
+      
+      // Approach 2: Try getByRole
       const reportsSidebarLink = this.page.getByRole('link', { name: /^Reports$/i });
-      if ((await reportsSidebarLink.count().catch(() => 0)) > 0) {
-        await reportsSidebarLink.click().catch(async () => reportsSidebarLink.click({ force: true }));
-        await this.page.waitForLoadState('domcontentloaded').catch(() => {});
-        await this.page.waitForTimeout(2000);
-        this._logStep('Navigated to Reports via sidebar link');
-        await this.page.screenshot({ path: 'screenshots/clinic-assist-reports.png', fullPage: true }).catch(() => {});
-        return true;
+      const reportsLinkCount = await reportsSidebarLink.count().catch(() => 0);
+      this._logStep('Reports link count', { count: reportsLinkCount });
+      
+      if (reportsLinkCount > 0) {
+        const isVisible = await reportsSidebarLink.isVisible().catch(() => false);
+        this._logStep('Reports link visibility', { isVisible });
+        if (isVisible) {
+          const urlBefore = this.page.url();
+          await reportsSidebarLink.click().catch(async () => reportsSidebarLink.click({ force: true }));
+          await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+          await this.page.waitForTimeout(2000);
+          const newUrl = this.page.url();
+          this._logStep('Clicked Reports link', { newUrl, urlBefore });
+          
+          // Check if we actually navigated to ReportsMenu
+          if (newUrl.includes('ReportsMenu') || newUrl.includes('Report')) {
+            await this.page.screenshot({ path: 'screenshots/clinic-assist-reports.png', fullPage: true }).catch(() => {});
+            return true;
+          }
+          
+          // URL didn't change - Reports might be a sidebar toggle, try clicking again or look for submenu
+          this._logStep('URL did not change after Reports click, trying to expand submenu');
+          
+          // Look for expanded submenu with Queue Report
+          await this.page.waitForTimeout(1000);
+          const queueReportInSubmenu = this.page.locator('a:has-text("Queue Report"), [class*="Queue_Report"], a.cls_Reports_Daily_Queue_Report').first();
+          if (await queueReportInSubmenu.count().catch(() => 0) > 0) {
+            const isQrVisible = await queueReportInSubmenu.isVisible().catch(() => false);
+            if (isQrVisible) {
+              this._logStep('Found Queue Report in expanded submenu, clicking');
+              await queueReportInSubmenu.click();
+              await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+              await this.page.waitForTimeout(2000);
+              return true;
+            }
+          }
+          
+          // Try clicking Reports link that might navigate (look for link with href)
+          const reportsNavLink = this.page.locator('a[href*="ReportsMenu"]').first();
+          if (await reportsNavLink.count().catch(() => 0) > 0) {
+            this._logStep('Found Reports navigation link with href');
+            await reportsNavLink.click();
+            await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+            await this.page.waitForTimeout(2000);
+            return true;
+          }
+          
+          await this.page.screenshot({ path: 'screenshots/clinic-assist-reports.png', fullPage: true }).catch(() => {});
+          return true; // Continue anyway, navigateToQueueListReport will handle finding the report
+        }
       }
       
       // Fallback: Try other selectors
@@ -1335,7 +1569,35 @@ export class ClinicAssistAutomation {
         }
       }
 
-      this._logStep('Could not find Reports navigation link');
+      // Take a screenshot to see current state
+      await this.page.screenshot({ path: 'screenshots/clinic-assist-looking-for-reports.png', fullPage: true }).catch(() => {});
+      
+      // Last resort: List all links to see what's available
+      const allLinks = await this.page.evaluate(() => {
+        const links = Array.from(document.querySelectorAll('a, button, [role="link"], [role="button"], li, nav *'));
+        return links.slice(0, 60).map(el => ({
+          tag: el.tagName,
+          text: (el.textContent || el.innerText || '').trim().substring(0, 50),
+          href: el.href || '',
+          className: (el.className || '').substring(0, 50),
+          id: el.id || '',
+        }));
+      }).catch(() => []);
+      
+      // Look for anything related to Reports/Queue
+      const reportsRelated = allLinks.filter(l => 
+        l.text.toLowerCase().includes('report') || 
+        l.text.toLowerCase().includes('queue') ||
+        l.href.toLowerCase().includes('report') ||
+        l.href.toLowerCase().includes('queue')
+      );
+      
+      this._logStep('Could not find Reports navigation link - available elements', { 
+        currentUrl: this.page.url(),
+        reportsRelated: reportsRelated,
+        allLinks: allLinks.filter(l => l.text.length > 0).slice(0, 30)
+      });
+      
       return false;
     } catch (error) {
       this._logStep('Error navigating to Reports', { error: error.message });
@@ -1351,15 +1613,73 @@ export class ClinicAssistAutomation {
     try {
       this._logStep('Navigating to Queue List report');
       
+      // Wait for submenu to expand after Reports was clicked
+      await this.page.waitForTimeout(1000);
+      
+      // Take screenshot to see current submenu state
+      await this.page.screenshot({ path: 'screenshots/clinic-assist-reports-submenu.png', fullPage: true }).catch(() => {});
+      
       // First, try to find the specific Queue Report link by ID, class, or text
       // User provided: <a id="60017" class="cls_Reports_Daily_Queue_Report UnLocked">Queue Report</a>
       const specificSelectors = [
-        'a#60017',  // Direct ID match
+        'a[id="60017"]',  // ID match (escaped for numeric ID)
         'a.cls_Reports_Daily_Queue_Report',  // Class match
         'a[class*="Queue_Report"]',  // Partial class match
-        'a:has-text("Queue Report")',  // Text match
+        'a:has-text("Queue Report")',  // Text match - exact
+        'text=Queue Report',  // Playwright text selector
+        'a:text("Queue Report")',  // Another text match
+        '[class*="Reports"] a:has-text("Queue")',  // Queue under Reports section
+        '.SideMenuList:has-text("Queue Report")',  // In SideMenuList
+        'li:has-text("Queue Report") > a',  // Li > a pattern
       ];
       
+      // First try clicking the Queue Report link by ID=60017 using JavaScript
+      // This link has empty href and no onclick attribute, so we need to trigger its event listener
+      this._logStep('Trying to click Queue Report link by ID 60017');
+      try {
+        const clickResult = await this.page.evaluate(() => {
+          // Use getElementById for numeric IDs (querySelector doesn't work with IDs starting with numbers)
+          const link = document.getElementById('60017');
+          if (link && link.tagName === 'A') {
+            console.log('Found link by ID, triggering click and mousedown/mouseup events');
+            // Try multiple ways to trigger the click
+            // 1. Direct click
+            link.click();
+            // 2. Dispatch mouse events (in case there are event listeners)
+            link.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+            link.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
+            link.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            return { found: true, text: link.textContent?.trim(), id: '60017' };
+          }
+          // Also try by class name
+          const linkByClass = document.querySelector('a.cls_Reports_Daily_Queue_Report');
+          if (linkByClass) {
+            console.log('Found link by class, triggering click');
+            linkByClass.click();
+            linkByClass.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            return { found: true, text: linkByClass.textContent?.trim(), method: 'class' };
+          }
+          return { found: false };
+        });
+        this._logStep('JS click result for Queue Report', clickResult);
+        
+        if (clickResult.found) {
+          await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+          await this.page.waitForTimeout(4000); // Wait longer for page to load
+          
+          const finalUrl = this.page.url();
+          this._logStep('URL after JS click on Queue Report', { url: finalUrl });
+          if (finalUrl.includes('QueueReport') || finalUrl.includes('QueueLog')) {
+            this._logStep('Successfully navigated to QueueReport page via JS click', { url: finalUrl });
+            await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true }).catch(() => {});
+            return true;
+          }
+        }
+      } catch (e) {
+        this._logStep('JS click on Queue Report failed', { error: e.message });
+      }
+      
+      // Fallback: try Playwright selectors
       for (const selector of specificSelectors) {
         try {
           const link = this.page.locator(selector).first();
@@ -1367,12 +1687,12 @@ export class ClinicAssistAutomation {
             const isVisible = await link.isVisible().catch(() => false);
             if (isVisible) {
               this._logStep('Found Queue Report link by specific selector', { selector });
-              await link.click();
+              await link.click({ force: true }); // Force click to bypass interceptors
               await this.page.waitForLoadState('domcontentloaded').catch(() => {});
-              await this.page.waitForTimeout(2000);
+              await this.page.waitForTimeout(3000);
               
               const finalUrl = this.page.url();
-              if (finalUrl.includes('QueueReport')) {
+              if (finalUrl.includes('QueueReport') || finalUrl.includes('QueueLog')) {
                 this._logStep('Successfully navigated to QueueReport page', { selector, url: finalUrl });
                 await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true }).catch(() => {});
                 return true;
@@ -1386,19 +1706,30 @@ export class ClinicAssistAutomation {
       
       // Fallback: Get all links on the page for debugging and finding
       const allLinks = await this.page.evaluate(() => {
-        const links = Array.from(document.querySelectorAll('a'));
+        const links = Array.from(document.querySelectorAll('a, button, [role="menuitem"], li'));
         return links.map(link => ({
           id: link.id || '',
           className: link.className || '',
           href: link.href || link.getAttribute('href') || '',
-          text: (link.textContent || link.innerText || '').trim(),
+          text: (link.textContent || link.innerText || '').trim().substring(0, 60),
           onclick: link.getAttribute('onclick') || '',
+          tag: link.tagName,
         }));
       }).catch(() => []);
       
-      this._logStep('All links on Reports page', { count: allLinks.length, queueRelated: allLinks.filter(l => 
-        l.id === '60017' || l.className.includes('Queue_Report') || l.href.includes('Queue') || l.text.toLowerCase().includes('queue')
-      )});
+      // Find all report-related links
+      const reportRelated = allLinks.filter(l => 
+        l.text.toLowerCase().includes('report') || 
+        l.text.toLowerCase().includes('queue') ||
+        l.className.toLowerCase().includes('report') ||
+        l.className.toLowerCase().includes('queue') ||
+        (l.href && l.href.toLowerCase().includes('report'))
+      );
+      
+      this._logStep('All links on Reports page', { 
+        count: allLinks.length, 
+        reportRelated: reportRelated.slice(0, 15)
+      });
       
       // Look for QueueReport link by ID, class, or text
       const queueReportLink = allLinks.find(link => 
@@ -2102,8 +2433,8 @@ export class ClinicAssistAutomation {
                 this.page.waitForNavigation({ timeout: 15000 }).catch(() => {}),
               ]);
               
-              // Wait a bit more for dynamic content to load
-              await this.page.waitForTimeout(3000);
+              // Wait longer for report iframe to load
+              await this.page.waitForTimeout(10000);
               
               // Check if URL changed (might have navigated to report page)
               const currentUrl = this.page.url();
@@ -3018,68 +3349,66 @@ export class ClinicAssistAutomation {
         'button:has-text("Submit")',
       ];
 
+      // Click Generate button via JavaScript first (more reliable for event listeners)
       let searchClicked = false;
-      for (const selector of searchSelectors) {
-        try {
-          const searchBtn = this.page.locator(selector).first();
-          if ((await searchBtn.count().catch(() => 0)) > 0) {
-            const isVisible = await searchBtn.isVisible().catch(() => false);
-            if (isVisible) {
-              await searchBtn.click();
-              await this.page.waitForLoadState('networkidle').catch(() => {});
-              // Wait longer for the report to generate - tables may take time to populate
-              await this.page.waitForTimeout(5000);
-              
-              // After Generate, check if there are Excel/PDF export buttons
-              // The report might be displayed as PDF or we need to click Excel to download
-              const exportInfo = await this.page.evaluate(() => {
-                const buttons = Array.from(document.querySelectorAll('button, a, input[type="button"]'));
-                const exports = buttons.map(btn => ({
-                  text: (btn.textContent || btn.value || '').trim(),
-                  href: btn.href || '',
-                  onclick: btn.getAttribute('onclick') || '',
-                  className: btn.className || '',
-                  id: btn.id || '',
-                })).filter(btn => {
-                  const text = btn.text.toLowerCase();
-                  return text.includes('excel') || text.includes('pdf') || text.includes('export') ||
-                         text.includes('download') || btn.href.includes('.xlsx') || btn.href.includes('.pdf') ||
-                         btn.href.includes('.xls');
-                });
-                return exports;
-              }).catch(() => []);
-              
-              if (exportInfo.length > 0) {
-                this._logStep('Found export buttons after Generate', { exports: exportInfo });
-              }
-              
-              // Wait for table, grid, PDF viewer, or export buttons to appear
-              // Also check if page navigates to a new URL (some reports open in new page)
-              await Promise.race([
-                this.page.waitForSelector('table, #queueLogGrid, iframe[src*="pdf"], embed[type*="pdf"], button:has-text("Excel"), a:has-text("Excel"), button:has-text("PDF"), a:has-text("PDF"), button:has-text("Export"), a:has-text("Export"), img[alt*="Excel"], img[alt*="PDF"]', { timeout: 15000 }).catch(() => {}),
-                this.page.waitForNavigation({ timeout: 15000 }).catch(() => {}),
-              ]);
-              
-              // Wait a bit more for dynamic content to load
-              await this.page.waitForTimeout(3000);
-              
-              // Check if URL changed (might have navigated to report page)
-              const currentUrl = this.page.url();
-              this._logStep('Search/Generate executed', { selector, url: currentUrl });
-              await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list-results.png', fullPage: true }).catch(() => {});
-              searchClicked = true;
-              break;
-            }
+      
+      this._logStep('Trying JavaScript click on Generate button (btnOK)');
+      try {
+        const jsClickResult = await this.page.evaluate(() => {
+          const btn = document.getElementById('btnOK');
+          if (btn) {
+            btn.click();
+            btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            return { found: true, id: 'btnOK', text: btn.value || btn.textContent };
           }
-        } catch (e) {
-          continue;
+          const generateBtn = document.querySelector('input.ok-style, input[value*="Generate" i]');
+          if (generateBtn) {
+            generateBtn.click();
+            generateBtn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+            return { found: true, method: 'class/value', text: generateBtn.value };
+          }
+          return { found: false };
+        });
+        
+        if (jsClickResult.found) {
+          this._logStep('Generate button clicked via JavaScript', jsClickResult);
+          searchClicked = true;
+        }
+      } catch (e) {
+        this._logStep('JS click on Generate failed', { error: e.message });
+      }
+      
+      // Fallback to Playwright selectors if JS click didn't work
+      if (!searchClicked) {
+        for (const selector of searchSelectors) {
+          try {
+            const searchBtn = this.page.locator(selector).first();
+            if ((await searchBtn.count().catch(() => 0)) > 0) {
+              const isVisible = await searchBtn.isVisible().catch(() => false);
+              if (isVisible) {
+                await searchBtn.click({ force: true });
+                this._logStep('Generate button clicked via Playwright', { selector });
+                searchClicked = true;
+                break;
+              }
+            }
+          } catch (e) {
+            continue;
+          }
         }
       }
 
       if (!searchClicked) {
         this._logStep('Could not find search/generate button', { dateFilled });
-        // Take screenshot to see what's on the page
         await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list-no-button.png', fullPage: true }).catch(() => {});
+      } else {
+        // Wait for networkidle and report iframe to load after Generate click
+        await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+        await this.page.waitForTimeout(15000); // Wait longer for report iframe to load
+        
+        const currentUrl = this.page.url();
+        this._logStep('Search/Generate executed', { url: currentUrl });
+        await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list-results.png', fullPage: true }).catch(() => {});
       }
       
       return dateFilled || searchClicked; // Return true if date was filled OR search was clicked
@@ -4923,11 +5252,11 @@ export class ClinicAssistAutomation {
         }
       }
       
-      // Wait for navigation or dashboard
-      await this.page.waitForLoadState('networkidle');
+      // Wait for DOM to be ready (don't wait for networkidle - it's too slow)
+      await this.page.waitForLoadState('domcontentloaded');
       
       // Take screenshot after login
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-after-login.png', fullPage: true });
+      await this.page.screenshot({ path: 'screenshots/clinic-assist-after-login.png', fullPage: true }).catch(() => {});
 
       // Some accounts are forced to a profile update modal; dismiss so it doesn't break downstream extraction.
       await this._dismissUpdateUserInfoIfPresent().catch(() => false);
@@ -5749,26 +6078,19 @@ export class ClinicAssistAutomation {
           continue; // Skip rows with no identifiable information
         }
         
-        // Avoid duplicates (use identifier for comparison)
-        const existingIndex = items.findIndex(item => 
-          (nric && item.nric === nric) || 
-          (pcno && item.pcno === pcno) || 
-          (qno && item.qno === qno) ||
-          (patientName && item.patientName === patientName && patientName.length > 3)
-        );
-        
-        if (existingIndex < 0) {
-          items.push({
-            nric: nric || null,
-            patientName: patientName || null,
-            qno: qno || null,
-            pcno: pcno || null,
-            status: status || null,
-            fee: fee || null,
-            source: 'reports_queue_list_excel_extraction',
-            rawRow: row.filter(v => v !== null && v !== undefined).map(v => String(v))
-          });
-        }
+        // No deduplication - each row in Excel represents a separate visit
+        // Same patient can visit multiple times with different payments/statuses
+        // Database will handle deduplication by visit_record_no + visit_date if needed
+        items.push({
+          nric: nric || null,
+          patientName: patientName || null,
+          qno: qno || null,
+          pcno: pcno || null,
+          status: status || null,
+          fee: fee || null,
+          source: 'reports_queue_list_excel_extraction',
+          rawRow: row.filter(v => v !== null && v !== undefined).map(v => String(v))
+        });
       }
       
       this._logStep('Excel parsing complete', { itemsFound: items.length });
@@ -5868,26 +6190,30 @@ export class ClinicAssistAutomation {
 
   /**
    * Navigate to Patient Page/Search
-   * Uses same flow as navigateToReports - click Reception if needed, then navigate to Patient
+   * Goes directly to /Patient/PatientSearch URL
    * @returns {Promise<boolean>} Success status
+   */
+  /**
+   * Navigate to Patient Page
+   * 
+   * RULE: NEVER use direct URL navigation (page.goto) for Patient page.
+   * Must always use UI clicks to navigate. Direct URLs cause access denied errors.
    */
   async navigateToPatientPage() {
     try {
       this._logStep('Navigate to Patient Page');
-      await this.page.waitForLoadState('networkidle');
-      await this.page.waitForTimeout(1000);
-
-      // Check if we're already in a room (URL contains /Home/)
+      
       const currentUrl = this.page.url();
       this._logStep('Current URL before navigation', { url: currentUrl });
       
+      // STEP 1: Ensure we're in a room (click Reception if needed)
       if (!currentUrl.includes('/Home/')) {
         this._logStep('Need to select Reception/room first before accessing Patient Page');
         
-        // Look for Reception button/room (same logic as navigateToReports and navigateToQueue)
+        // Look for Reception button/room
         const roomSelectors = [
-          'a:has-text("Reception")',
           'button:has-text("Reception")',
+          'a:has-text("Reception")',
           '[role="button"]:has-text("Reception")',
           '[role="tab"]:has-text("Reception")',
           'a[href*="Reception"]',
@@ -5904,17 +6230,25 @@ export class ClinicAssistAutomation {
               const isVisible = await roomLink.isVisible().catch(() => false);
               if (isVisible) {
                 this._logStep('Clicking Reception/room to access system', { selector });
-                await roomLink.click();
-                await this.page.waitForLoadState('domcontentloaded').catch(() => {});
-                await this.page.waitForTimeout(2000);
-                // Wait for navigation to room page (e.g. /Home/Reception)
-                const urlChanged = await this.page.waitForURL(/\/Home\//, { timeout: 10000 }).catch(() => false);
-                this._logStep('Reception clicked, URL changed', { urlChanged, newUrl: this.page.url() });
-                await this.page.waitForTimeout(1000);
-                receptionClicked = true;
-                break;
-              } else {
-                this._logStep('Reception element found but not visible', { selector });
+                
+                // Dismiss any dialogs that might appear
+                this.page.on('dialog', async (dialog) => {
+                  this._logStep('Dialog appeared, dismissing', { type: dialog.type(), message: dialog.message() });
+                  await dialog.dismiss().catch(() => dialog.accept()).catch(() => {});
+                });
+                
+                await roomLink.click({ timeout: 5000 });
+                await this.page.waitForLoadState('domcontentloaded', { timeout: 3000 }).catch(() => {});
+                await this.page.waitForTimeout(500);
+                
+                const newUrl = this.page.url();
+                this._logStep('Reception clicked, checking URL', { newUrl });
+                
+                if (newUrl.includes('/Home/')) {
+                  this._logStep('Successfully entered Reception room', { newUrl });
+                  receptionClicked = true;
+                  break;
+                }
               }
             }
           } catch (e) {
@@ -5924,69 +6258,125 @@ export class ClinicAssistAutomation {
         }
         
         if (!receptionClicked) {
-          this._logStep('Could not find Reception/room button - may already be in a room or not needed');
+          this._logStep('Could not click Reception, continuing anyway');
         }
       } else {
-        this._logStep('Already in a room, skipping Reception button click', { url: currentUrl });
+        this._logStep('Already in a room, proceeding to Patient page', { currentUrl });
       }
-
-      // Wait a bit more for page to stabilize after potential Reception click
-      await this.page.waitForTimeout(1000);
-
-      // Now find the Patient sidebar link (similar to how Queue/Reports are found)
-      // Use getByRole for more reliable selection
-      this._logStep('Looking for Patient sidebar link');
-      const patientSidebarLink = this.page.getByRole('link', { name: /^Patient/i });
-      const patientLinkCount = await patientSidebarLink.count().catch(() => 0);
       
-      if (patientLinkCount > 0) {
-        const isVisible = await patientSidebarLink.isVisible().catch(() => false);
-        this._logStep('Patient sidebar link found', { count: patientLinkCount, isVisible });
-        
-        if (isVisible) {
-          await patientSidebarLink.click().catch(async () => {
-            this._logStep('First click failed, trying force click');
-            await patientSidebarLink.click({ force: true });
-          });
-          await this.page.waitForLoadState('domcontentloaded').catch(() => {});
-          await this.page.waitForTimeout(2000);
-          const finalUrl = this.page.url();
-          this._logStep('Navigated to Patient Page via sidebar link', { finalUrl });
-          return true;
-        } else {
-          this._logStep('Patient sidebar link found but not visible');
-        }
-      } else {
-        this._logStep('Patient sidebar link not found via getByRole');
-      }
-
-      // Fallback: Try other selectors
-      this._logStep('Trying fallback selectors for Patient link');
-      const patientSelectors = [
-        'a:has-text("Patient")',
-        'a:has-text("Patients")',
-        'a:has-text("Patient Search")',
-        'a[href*="Patient" i]',
-        'a[href*="patient" i]',
-        '[role="link"]:has-text("Patient")',
-        'button:has-text("Patient")',
+      // STEP 2: Click Patient sidebar link - UI NAVIGATION ONLY, NO DIRECT URLS
+      this._logStep('Looking for sidebar/hamburger menu');
+      
+      // Open sidebar/hamburger menu if it exists
+      const menuSelectors = [
+        '[class*="nav-toggle"]',
+        '[class*="hamburger"]',
+        '[class*="menu-toggle"]',
+        'button[class*="sidebar"]',
+        '.sidebar-toggle',
       ];
-
-      for (const selector of patientSelectors) {
+      
+      for (const selector of menuSelectors) {
+        try {
+          const menuBtn = this.page.locator(selector).first();
+          const count = await menuBtn.count().catch(() => 0);
+          if (count > 0) {
+            const isVisible = await menuBtn.isVisible().catch(() => false);
+            if (isVisible) {
+              this._logStep('Found menu toggle, clicking', { selector });
+              await menuBtn.click({ force: true }).catch(() => {});
+              await this.page.waitForTimeout(300);
+              break;
+            }
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+      
+      // Find and click Patient sidebar link - MUST USE UI CLICKS, NEVER DIRECT URL
+      this._logStep('Looking for Patient sidebar link');
+      const patientLinkSelectors = [
+        'a:has-text("Patient")',
+        '[role="link"]:has-text("Patient")',
+        'nav a:has-text("Patient")',
+        '.menu a:has-text("Patient")',
+      ];
+      
+      let patientClicked = false;
+      for (const selector of patientLinkSelectors) {
         try {
           const link = this.page.locator(selector).first();
           const count = await link.count().catch(() => 0);
           if (count > 0) {
             const isVisible = await link.isVisible().catch(() => false);
-            this._logStep('Found potential Patient link', { selector, count, isVisible });
+            this._logStep('Patient link status', { selector, count, isVisible });
             
             if (isVisible) {
-              await link.click();
-              await this.page.waitForLoadState('domcontentloaded').catch(() => {});
-              await this.page.waitForTimeout(2000);
-              const finalUrl = this.page.url();
-              this._logStep('Navigated to Patient Page', { selector, finalUrl });
-              return true;
+              this._logStep('Clicking Patient sidebar link via UI', { selector });
+              
+              // Try multiple click methods - UI navigation only
+              let clicked = false;
+              
+              // Method 1: Playwright click
+              try {
+                await link.click({ timeout: 5000 });
+                clicked = true;
+                this._logStep('Patient link clicked via Playwright');
+              } catch (e) {
+                this._logStep('Playwright click failed, trying JavaScript click', { error: e.message });
+              }
+              
+              // Method 2: JavaScript click if Playwright failed
+              if (!clicked) {
+                clicked = await link.evaluate(el => {
+                  try {
+                    el.click();
+                    return true;
+                  } catch (e) {
+                    return false;
+                  }
+                }).catch(() => false);
+                
+                if (clicked) {
+                  this._logStep('Patient link clicked via JavaScript');
+                }
+              }
+              
+              // Method 3: Force click if both failed
+              if (!clicked) {
+                try {
+                  await link.click({ force: true, timeout: 5000 });
+                  clicked = true;
+                  this._logStep('Patient link clicked via force click');
+                } catch (e) {
+                  this._logStep('Force click also failed', { error: e.message });
+                }
+              }
+              
+              if (clicked) {
+                await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
+                await this.page.waitForTimeout(500);
+                
+                const finalUrl = this.page.url();
+                this._logStep('After Patient click, checking URL', { finalUrl });
+                
+                if (finalUrl.includes('/Patient')) {
+                  this._logStep('Successfully navigated to Patient Page via UI click', { finalUrl });
+                  patientClicked = true;
+                  break;
+                } else {
+                  this._logStep('Click succeeded but URL not as expected, retrying', { finalUrl });
+                  // Wait a bit more and check again
+                  await this.page.waitForTimeout(500);
+                  const retryUrl = this.page.url();
+                  if (retryUrl.includes('/Patient')) {
+                    this._logStep('Successfully navigated to Patient Page after retry', { retryUrl });
+                    patientClicked = true;
+                    break;
+                  }
+                }
+              }
             }
           }
         } catch (e) {
@@ -5994,28 +6384,13 @@ export class ClinicAssistAutomation {
           continue;
         }
       }
-
-      // Last resort: List all links on the page for debugging
-      const allLinks = await this.page.evaluate(() => {
-        const links = Array.from(document.querySelectorAll('a, [role="link"], button'));
-        return links.slice(0, 30).map(link => ({
-          text: (link.textContent || link.innerText || '').trim().substring(0, 50),
-          href: link.href || '',
-          role: link.getAttribute('role') || '',
-          className: (link.className || '').substring(0, 50),
-        }));
-      }).catch(() => []);
       
-      this._logStep('Could not find Patient Page link - listing available links', { 
-        availableLinks: allLinks,
-        currentUrl: this.page.url()
-      });
+      if (!patientClicked) {
+        this._logStep('Could not click Patient link via UI - will not use direct URL navigation');
+        return false;
+      }
       
-      logger.warn('Could not find Patient Page link', { 
-        availableLinks: allLinks.slice(0, 10),
-        currentUrl: this.page.url()
-      });
-      return false;
+      return true;
     } catch (error) {
       logger.error('Failed to navigate to Patient Page:', error);
       this._logStep('Exception in navigateToPatientPage', { error: error.message, stack: error.stack });
@@ -6102,6 +6477,113 @@ export class ClinicAssistAutomation {
   }
 
   /**
+   * Search patient by patient number (PCNO - 5 digit number)
+   * @param {string} patientNumber - Patient number (PCNO) - 5 digits
+   * @returns {Promise<boolean>} True if search successful
+   */
+  async searchPatientByNumber(patientNumber) {
+    try {
+      this._logStep('Search patient by number', { patientNumber });
+      
+      await this.page.waitForLoadState('networkidle');
+      await this.page.waitForTimeout(1000);
+
+      // Find search input field
+      const searchSelectors = [
+        'input[name*="search" i]',
+        'input[id*="search" i]',
+        'input[placeholder*="number" i]',
+        'input[placeholder*="patient" i]',
+        'input[placeholder*="pcno" i]',
+        'input[placeholder*="search" i]',
+        'input[type="text"]',
+      ];
+
+      let searchInput = null;
+      for (const selector of searchSelectors) {
+        try {
+          const input = this.page.locator(selector).first();
+          if ((await input.count().catch(() => 0)) > 0) {
+            searchInput = input;
+            break;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      if (!searchInput) {
+        throw new Error('Could not find search input field');
+      }
+
+      // Wait for search field to be visible and enabled
+      await searchInput.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {
+        this._logStep('Search field not immediately visible, trying to make it visible');
+      });
+
+      // Try to fill the search field - use JS fallback if normal method fails
+      try {
+        await searchInput.click({ timeout: 5000 });
+        await searchInput.fill(patientNumber);
+      } catch (error) {
+        // Fallback: Use JavaScript to set value directly
+        this._logStep('Normal fill failed, using JavaScript fallback');
+        await this.page.evaluate((number) => {
+          const input = document.querySelector('input[id*="search" i]') || 
+                       document.querySelector('#txtMainSearchPatient');
+          if (input) {
+            input.value = number;
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }, patientNumber);
+      }
+      await this.page.waitForTimeout(500);
+
+      // Find and click search button
+      const searchButtonSelectors = [
+        'button:has-text("Search")',
+        'input[type="submit"][value*="Search" i]',
+        'button[type="submit"]',
+        'a:has-text("Search")',
+      ];
+
+      for (const selector of searchButtonSelectors) {
+        try {
+          const button = this.page.locator(selector).first();
+          if ((await button.count().catch(() => 0)) > 0) {
+            await button.click();
+            await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+            await this.page.waitForTimeout(2000);
+            this._logStep('Patient search executed by number', { patientNumber });
+            return true;
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      // Try pressing Enter if no search button found
+      // Press Enter twice to handle potential dialog + search
+      this._logStep('Pressing Enter to execute search (may need to dismiss dialog first)');
+      await this.page.keyboard.press('Enter');
+      await this.page.waitForTimeout(500);
+      
+      // Press Enter again to ensure search executes (in case first Enter dismissed a dialog)
+      await this.page.keyboard.press('Enter');
+      await this.page.waitForTimeout(500);
+      
+      // Wait for search results to load
+      await this.page.waitForTimeout(3000);
+      this._logStep('Patient search executed by number (Enter key x2)', { patientNumber });
+      return true;
+    } catch (error) {
+      logger.error(`Failed to search patient by number: ${patientNumber}`, error);
+      throw error;
+    }
+  }
+
+  /**
    * Click on patient from search results to open patient record
    * @param {string} patientName - Patient name to click
    * @returns {Promise<boolean>} Success status
@@ -6143,6 +6625,196 @@ export class ClinicAssistAutomation {
       throw new Error(`Could not find patient "${patientName}" in search results`);
     } catch (error) {
       logger.error(`Failed to open patient from search results: ${patientName}`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Click on patient from search results by patient number (PCNO)
+   * @param {string} patientNumber - Patient number (PCNO) - 5 digits
+   * @returns {Promise<boolean>} Success status
+   */
+  async openPatientFromSearchResultsByNumber(patientNumber) {
+    try {
+      this._logStep('Open patient from search results by number', { patientNumber });
+      await this.page.waitForTimeout(2000); // Wait longer for search results to load
+
+      // Method 1: Use page.evaluate to find the cell with patient number, then click the row directly
+      const rowInfo = await this.page.evaluate((pNumber) => {
+        // Normalize patient number (handle zero-padding)
+        const normalized = String(pNumber).trim();
+        const normalizedZeroPad = normalized.padStart(5, '0');
+        
+        // Find all table cells
+        const allCells = Array.from(document.querySelectorAll('td, th'));
+        
+        // Find cells that match the patient number (exact match)
+        const matchingCells = allCells.filter(cell => {
+          const cellText = (cell.textContent || '').trim();
+          return cellText === normalized || 
+                 cellText === normalizedZeroPad ||
+                 cellText === `0${normalized}`; // Handle zero-padding
+        });
+
+        if (matchingCells.length === 0) {
+          return null;
+        }
+
+        // Get the row containing the matching cell
+        const matchingCell = matchingCells[0];
+        const row = matchingCell.closest('tr');
+        
+        if (!row) {
+          return null;
+        }
+
+        // Check if row has a link
+        const link = row.querySelector('a');
+        const hasLink = !!link;
+
+        // Get unique identifier for the row (use row index or data attributes)
+        const parent = row.parentElement;
+        const siblings = parent ? Array.from(parent.children) : [];
+        const rowIndex = siblings.indexOf(row);
+
+        return {
+          hasLink: hasLink,
+          rowIndex: rowIndex,
+          rowText: (row.textContent || '').trim().substring(0, 100), // For logging
+        };
+      }, String(patientNumber).trim()).catch(() => null);
+
+      if (rowInfo) {
+        this._logStep('Found patient row by number', { rowIndex: rowInfo.rowIndex, hasLink: rowInfo.hasLink });
+
+        // Wait for table to be visible
+        await this.page.waitForSelector('tr, [role="row"]', { timeout: 5000 }).catch(() => {});
+
+        // Try multiple approaches to click the row
+        let clicked = false;
+
+        // Approach 1: Use filter to find row containing the patient number
+        try {
+          const rowByFilter = this.page.locator('tr').filter({ hasText: new RegExp(`^.*${patientNumber}.*$`, 'i') }).first();
+          if ((await rowByFilter.count().catch(() => 0)) > 0) {
+            const isVisible = await rowByFilter.isVisible().catch(() => false);
+            if (isVisible) {
+              // Try clicking link first
+              const linkInRow = rowByFilter.locator('a').first();
+              if ((await linkInRow.count().catch(() => 0)) > 0) {
+                await linkInRow.click({ timeout: 5000 });
+                clicked = true;
+                this._logStep('Clicked patient link via filter method');
+              } else {
+                // Click row directly
+                await rowByFilter.click({ timeout: 5000 });
+                clicked = true;
+                this._logStep('Clicked patient row via filter method');
+              }
+            }
+          }
+        } catch (e) {
+          this._logStep('Filter method failed', { error: e.message });
+        }
+
+        // Approach 2: Direct row index click (if filter didn't work)
+        if (!clicked && rowInfo.rowIndex >= 0) {
+          try {
+            // Get all rows (skip header rows if present)
+            const allRows = this.page.locator('tr:not([role="columnheader"]):not(thead tr)');
+            const rowCount = await allRows.count().catch(() => 0);
+            
+            if (rowInfo.rowIndex < rowCount) {
+              const targetRow = allRows.nth(rowInfo.rowIndex);
+              const isVisible = await targetRow.isVisible().catch(() => false);
+              
+              if (isVisible) {
+                // Try link first
+                if (rowInfo.hasLink) {
+                  const link = targetRow.locator('a').first();
+                  if ((await link.count().catch(() => 0)) > 0) {
+                    await link.click({ timeout: 5000 });
+                    clicked = true;
+                    this._logStep('Clicked patient link via row index');
+                  }
+                }
+                
+                // If no link or link click failed, click row
+                if (!clicked) {
+                  await targetRow.click({ timeout: 5000 });
+                  clicked = true;
+                  this._logStep('Clicked patient row via row index');
+                }
+              }
+            }
+          } catch (e) {
+            this._logStep('Row index method failed', { error: e.message });
+          }
+        }
+
+        // Approach 3: Direct DOM manipulation (last resort)
+        if (!clicked) {
+          try {
+            await this.page.evaluate((pNumber) => {
+              const normalized = String(pNumber).trim();
+              const allCells = Array.from(document.querySelectorAll('td'));
+              const matchingCell = allCells.find(cell => {
+                const cellText = (cell.textContent || '').trim();
+                return cellText === normalized || cellText === normalized.padStart(5, '0');
+              });
+              
+              if (matchingCell) {
+                const row = matchingCell.closest('tr');
+                if (row) {
+                  const link = row.querySelector('a');
+                  if (link) {
+                    link.click();
+                  } else {
+                    row.click();
+                  }
+                  return true;
+                }
+              }
+              return false;
+            }, String(patientNumber).trim());
+            
+            clicked = true;
+            this._logStep('Clicked patient via DOM manipulation');
+          } catch (e) {
+            this._logStep('DOM manipulation method failed', { error: e.message });
+          }
+        }
+
+        if (clicked) {
+          await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+          await this.page.waitForTimeout(2000);
+          this._logStep('Patient opened from search results by number');
+          return true;
+        }
+      }
+
+      // Fallback: Try simple text-based search (similar to name-based search)
+      try {
+        const rowByText = this.page.locator('tr').filter({ hasText: patientNumber }).first();
+        if ((await rowByText.count().catch(() => 0)) > 0) {
+          const link = rowByText.locator('a').first();
+          if ((await link.count().catch(() => 0)) > 0) {
+            await link.click({ timeout: 5000 });
+          } else {
+            await rowByText.click({ timeout: 5000 });
+          }
+          await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+          await this.page.waitForTimeout(2000);
+          this._logStep('Patient opened from search results by number (text fallback)');
+          return true;
+        }
+      } catch (e) {
+        // Continue to error
+      }
+
+      throw new Error(`Could not find patient with number "${patientNumber}" in search results`);
+    } catch (error) {
+      logger.error(`Failed to open patient from search results by number: ${patientNumber}`, error);
       throw error;
     }
   }
@@ -6371,34 +7043,77 @@ export class ClinicAssistAutomation {
         let code = null;
         let description = null;
 
-        // Try multiple code patterns:
+        // Try multiple code patterns - find ALL codes, then take the most recent/last one
         // 1. ICD-10 codes: S83.6, G93.9, A00-B99 format (letter + 2-3 digits + optional decimal + digits)
-        const icd10Pattern = /\b([A-Z]\d{2,3}\.?\d*)\b/;
-        const icd10Match = rawDiagnosisText.match(icd10Pattern);
+        // Note: Use non-word-boundary patterns because codes can be attached to text (e.g., "S83.6Sprain")
+        const icd10Pattern = /([A-Z]\d{2,3}(?:\.\d+)?)/g;
+        const icd10Matches = [...rawDiagnosisText.matchAll(icd10Pattern)];
         
-        // 2. SNOMED or numeric codes: 128196005, 3723001 (6+ digit numbers)
-        // Try both with and without word boundaries (numbers can be attached to text)
-        const numericCodePattern1 = /\b(\d{6,})\b/; // With word boundaries
-        const numericCodePattern2 = /(\d{6,})(?=[A-Z]|\s|$)/; // Without word boundaries (followed by capital letter, space, or end)
-        const numericCodeMatch1 = rawDiagnosisText.match(numericCodePattern1);
-        const numericCodeMatch2 = rawDiagnosisText.match(numericCodePattern2);
-        const numericCodeMatch = numericCodeMatch1 || numericCodeMatch2;
-        
-        // 3. Embedded codes (e.g., "128196005Lumbar" or "S83.6Sprain")
-        const embeddedNumericPattern = /(\d{6,})([A-Z][a-z])/;
-        const embeddedNumericMatch = rawDiagnosisText.match(embeddedNumericPattern);
-        const embeddedIcd10Pattern = /([A-Z]\d{2,3}\.?\d*)([A-Z][a-z])/;
-        const embeddedIcd10Match = rawDiagnosisText.match(embeddedIcd10Pattern);
+        // 2. SNOMED or numeric codes: 128196005, 3723001 (6+ digit numbers, not dates)
+        // Exclude numbers that look like dates (YYYYMMDD format like 20260114)
+        const numericCodePattern = /(\d{6,})(?=[A-Z][a-z]|\s|SSOC|Branch|HQ|$)/g;
+        const numericMatches = [...rawDiagnosisText.matchAll(numericCodePattern)]
+          .filter(m => {
+            const num = m[1];
+            // Exclude dates: YYYYMMDD format (starts with 19 or 20, 8 digits)
+            if (num.length === 8 && /^(19|20)\d{6}$/.test(num)) return false;
+            // Exclude dates in other formats that might be 6 digits
+            return true;
+          });
 
-        // Prioritize ICD-10 codes, then numeric codes
-        if (embeddedIcd10Match) {
-          code = embeddedIcd10Match[1];
-        } else if (icd10Match) {
-          code = icd10Match[1];
-        } else if (embeddedNumericMatch) {
-          code = embeddedNumericMatch[1];
-        } else if (numericCodeMatch) {
-          code = numericCodeMatch[1];
+        // Collect all code matches with their positions
+        const allCodes = [];
+        
+        // Add ICD-10 codes
+        icd10Matches.forEach(match => {
+          // Verify it's not part of a date or other text
+          const before = rawDiagnosisText.substring(Math.max(0, match.index - 10), match.index);
+          const after = rawDiagnosisText.substring(match.index + match[0].length, Math.min(rawDiagnosisText.length, match.index + match[0].length + 10));
+          
+          // Exclude false positives:
+          // - Not part of "Date", "State", "Code", "Description", "Branch" headers
+          // - Not preceded by date (YYYY format)
+          // - Not part of "HQ23" or similar (check if followed by "/" which indicates date)
+          // - Should be followed by text starting with capital letter (diagnosis description)
+          const isFalsePositive = 
+            /Date|State|Code|Description|Branch/i.test(before) || // Part of header
+            /^\d{4}/.test(before) || // Preceded by year
+            /HQ\d{2}$/.test(before) || // Part of "HQ23" pattern
+            (match[0].length <= 4 && /\/\d{2}\/\d{4}$/.test(after)); // Short code followed by date pattern
+          
+          // Valid code should be followed by text (capital letter) or space
+          const isValidCode = /^[A-Z][a-z]/.test(after) || /^ /.test(after) || /^SSOC/i.test(after) || /^Branch/i.test(after);
+          
+          if (!isFalsePositive && isValidCode) {
+            allCodes.push({
+              code: match[1],
+              index: match.index,
+              type: 'icd10'
+            });
+          }
+        });
+        
+        // Add numeric codes
+        numericMatches.forEach(match => {
+          allCodes.push({
+            code: match[1],
+            index: match.index,
+            type: 'numeric'
+          });
+        });
+
+        // Sort by position (most recent/last code in text)
+        allCodes.sort((a, b) => b.index - a.index);
+        
+        // Take the most recent code, prioritizing ICD-10 over numeric if both exist at similar positions
+        if (allCodes.length > 0) {
+          // If we have multiple codes, prefer ICD-10 codes
+          const icd10Codes = allCodes.filter(c => c.type === 'icd10');
+          if (icd10Codes.length > 0) {
+            code = icd10Codes[0].code; // Most recent ICD-10 code
+          } else {
+            code = allCodes[0].code; // Most recent numeric code
+          }
         }
 
         // Extract description by cleaning up the text
@@ -6406,19 +7121,26 @@ export class ClinicAssistAutomation {
         description = rawDiagnosisText
           .replace(/Loading\.\.\./g, '')
           .replace(/Date\s+State\s+Code\s+Description\s+Branch/g, '')
-          .replace(/\d{1,2}\/\d{1,2}\/\d{4}/g, '') // Remove dates
+          .replace(/Date|State|Code|Description|Branch/gi, '') // Remove individual header words
+          .replace(/\d{1,2}\/\d{1,2}\/\d{4}/g, '') // Remove dates (DD/MM/YYYY format)
+          .replace(/\d{4}\/\d{2}\/\d{2}/g, '') // Remove dates (YYYY/MM/DD format)
           .replace(/Final|Provisional/gi, '')
-          .replace(/SSOC|Branch/gi, '')
+          .replace(/SSOC|Branch|HQ/gi, '')
+          .replace(/\s+/g, ' ') // Normalize whitespace
           .trim();
 
         // Remove the code from description if found
         if (code) {
-          // Remove the code pattern from description
+          // Remove the code pattern from description (escape special regex chars in code)
+          const escapedCode = code.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          // Create regex patterns for code removal
+          const icd10Pattern = /([A-Z]\d{2,3}(?:\.\d+)?)/g;
+          const numericCodePattern = /(\d{6,})(?=[A-Z][a-z]|\s|SSOC|Branch|HQ|$)/g;
+          
           description = description
-            .replace(new RegExp(`\\b${code}\\b`, 'gi'), '')
+            .replace(new RegExp(escapedCode, 'gi'), '')
             .replace(icd10Pattern, '')
             .replace(numericCodePattern, '')
-            .replace(embeddedCodePattern, '$2') // Keep the word after embedded code
             .trim();
         }
 
@@ -6449,12 +7171,50 @@ export class ClinicAssistAutomation {
         // Look for words that look like medical terms (typically start with capital, have multiple words)
         if (description) {
           // Try to find the actual description part (skip numeric codes, dates, etc.)
-          const words = description.split(/\s+/).filter(w => 
-            w.length > 2 && 
-            !/^\d+$/.test(w) && 
-            !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(w)
-          );
+          const words = description.split(/\s+/).filter(w => {
+            const word = w.trim();
+            return word.length > 2 && 
+                   !/^\d+$/.test(word) && // Not just numbers
+                   !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(word) && // Not dates
+                   !/^\d{4}\/\d{2}\/\d{2}$/.test(word) && // Not YYYY/MM/DD dates
+                   !/^[A-Z]\d{2,3}\.?\d*$/.test(word) && // Not ICD codes
+                   !/^\d{6,}$/.test(word); // Not numeric codes
+          });
+          
           description = words.join(' ').trim();
+          
+          // If we have multiple diagnoses concatenated, try to extract the first/latest one
+          // Common pattern: "CodeDescriptionCodeDescription" or repeated text
+          if (description.length > 150) {
+            // Try splitting on code patterns to get individual diagnoses
+            const parts = description.split(/(?=[A-Z]\d{2,3}\.)|(?=\d{6,})/);
+            if (parts.length > 1) {
+              // Take the last part (most recent diagnosis)
+              const lastPart = parts[parts.length - 1].trim();
+              if (lastPart.length > 10) {
+                description = lastPart;
+              } else {
+                // If last part is short, try second to last
+                const secondLast = parts[parts.length - 2]?.trim();
+                if (secondLast && secondLast.length > 10) {
+                  description = secondLast;
+                }
+              }
+            }
+          }
+          
+          // Final cleanup: remove repeated phrases
+          // Check if description has repeated phrases (e.g., "Pain joint shoulder regionHQ" repeated)
+          const sentences = description.split(/HQ|SSOC|Branch/i);
+          if (sentences.length > 1) {
+            // Take unique sentences
+            const uniqueSentences = [...new Set(sentences.map(s => s.trim()).filter(s => s.length > 5))];
+            if (uniqueSentences.length > 0) {
+              description = uniqueSentences[0]; // Take first unique diagnosis
+            }
+          }
+          
+          description = description.trim();
         }
 
         // If we still have a code but no clean description, try to extract from original text
@@ -6491,6 +7251,652 @@ export class ClinicAssistAutomation {
     } catch (error) {
       logger.error('Failed to extract diagnosis from TX History:', error);
       return null;
+    }
+  }
+
+  /**
+   * Extract medicines from TX History Medicine Tab for a specific visit date
+   * This should be called after navigating to TX History
+   * @param {string} visitDate - Visit date in YYYY-MM-DD format  
+   * @returns {Promise<Array>} Array of medicine objects with name and quantity
+   */
+  async extractMedicinesFromTXHistory(visitDate) {
+    try {
+      this._logStep('Extracting medicines for visit date', { visitDate });
+      
+      // Open Medicine tab
+      await this.openMedicineTab();
+      
+      // Extract medicines filtered by date
+      const medicines = await this.extractMedicinesForDate(visitDate);
+      
+      return medicines;
+    } catch (error) {
+      logger.error('Failed to extract medicines from TX History:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Extract diagnosis from TX History filtered by visit date
+   * Falls back to most recent diagnosis if not found for specific date
+   * @param {string} visitDate - Visit date in YYYY-MM-DD format
+   * @returns {Promise<Object>} Diagnosis object with code and description
+   */
+  async extractDiagnosisForDate(visitDate) {
+    try {
+      this._logStep('Extract diagnosis for visit date', { visitDate });
+      await this.page.waitForTimeout(1000);
+      
+      // Parse target date
+      const targetDate = new Date(visitDate);
+      
+      // Extract all diagnoses with dates
+      const diagnoses = await this.page.evaluate((targetDateStr) => {
+        const results = [];
+        const tables = Array.from(document.querySelectorAll('table'));
+        
+        // Helper to parse dates
+        const parseDate = (dateStr) => {
+          if (!dateStr) return null;
+          const patterns = [
+            /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,  // DD/MM/YYYY or DD-MM-YYYY
+            /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/,  // YYYY-MM-DD
+          ];
+          
+          for (const pattern of patterns) {
+            const match = dateStr.match(pattern);
+            if (match) {
+              if (match[1].length === 4) {
+                return new Date(match[1], match[2] - 1, match[3]);
+              } else {
+                return new Date(match[3], match[2] - 1, match[1]);
+              }
+            }
+          }
+          return null;
+        };
+        
+        const targetDate = parseDate(targetDateStr);
+        
+        // Look for diagnosis tables
+        tables.forEach(table => {
+          const rows = Array.from(table.querySelectorAll('tbody tr, tr'));
+          
+          rows.forEach(row => {
+            const cells = Array.from(row.querySelectorAll('td, th'));
+            if (cells.length < 2) return;
+            
+            // Extract date (usually first or second column)
+            let dateStr = '';
+            let diagnosisCode = '';
+            let diagnosisDesc = '';
+            
+            for (let i = 0; i < Math.min(cells.length, 5); i++) {
+              const text = cells[i].textContent.trim();
+              
+              // Check for date
+              if (/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text) && !dateStr) {
+                dateStr = text;
+              }
+              
+              // Check for diagnosis code (short alphanumeric)
+              if (/^[A-Z]\d{2}\.?\d*$/.test(text) || /^\d{6,8}$/.test(text)) {
+                diagnosisCode = text;
+              }
+              
+              // Description is usually the longest text
+              if (text.length > diagnosisDesc.length && 
+                  !/loading/i.test(text) && 
+                  !/date/i.test(text) &&
+                  !/^\d+$/.test(text)) {
+                diagnosisDesc = text;
+              }
+            }
+            
+            if (dateStr && diagnosisDesc.length > 5) {
+              const recordDate = parseDate(dateStr);
+              results.push({
+                date: dateStr,
+                dateObj: recordDate,
+                code: diagnosisCode,
+                description: diagnosisDesc,
+                isTargetDate: recordDate && targetDate && 
+                             recordDate.getDate() === targetDate.getDate() &&
+                             recordDate.getMonth() === targetDate.getMonth() &&
+                             recordDate.getFullYear() === targetDate.getFullYear()
+              });
+            }
+          });
+        });
+        
+        return results;
+      }, visitDate);
+      
+      // Try to find diagnosis for exact date
+      let matchingDiagnosis = diagnoses.find(d => d.isTargetDate);
+      
+      if (matchingDiagnosis) {
+        this._logStep('Found diagnosis for visit date', { 
+          date: matchingDiagnosis.date,
+          code: matchingDiagnosis.code,
+          description: matchingDiagnosis.description.substring(0, 60)
+        });
+        
+        return {
+          code: matchingDiagnosis.code,
+          description: matchingDiagnosis.description,
+          date: matchingDiagnosis.date
+        };
+      }
+      
+      // Fallback: Use most recent diagnosis
+      if (diagnoses.length > 0) {
+        const mostRecent = diagnoses[0]; // Usually sorted by date desc
+        this._logStep('No diagnosis for visit date, using most recent', {
+          date: mostRecent.date,
+          code: mostRecent.code,
+          description: mostRecent.description.substring(0, 60)
+        });
+        
+        return {
+          code: mostRecent.code,
+          description: mostRecent.description,
+          date: mostRecent.date
+        };
+      }
+      
+      // No diagnosis found at all
+      this._logStep('No diagnosis found in TX History');
+      return null;
+      
+    } catch (error) {
+      logger.error('Failed to extract diagnosis for date:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Open "All" tab within TX History
+   * @returns {Promise<boolean>} Success status
+   */
+  async openAllTab() {
+    try {
+      this._logStep('Open All Tab in TX History');
+      await this.page.waitForTimeout(1000);
+
+      const allTabSelectors = [
+        '[role="tab"]:has-text("All")',
+        'a:has-text("All")',
+        'button:has-text("All")',
+        'li:has-text("All")',
+        '.tab:has-text("All")',
+        '[class*="tab"]:has-text("All")',
+      ];
+
+      for (const selector of allTabSelectors) {
+        try {
+          const tab = this.page.locator(selector).first();
+          if ((await tab.count().catch(() => 0)) > 0) {
+            const isVisible = await tab.isVisible().catch(() => false);
+            if (isVisible) {
+              await tab.click();
+              await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+              await this.page.waitForTimeout(2000);
+              this._logStep('All Tab opened');
+              return true;
+            }
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      // If "All" tab not found, it might be the default view
+      this._logStep('All Tab not found, assuming default view');
+      return true;
+    } catch (error) {
+      logger.error('Failed to open All Tab:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Check if there's a "First Consult" entry on the visit date in TX History All tab
+   * @param {string} visitDate - Visit date in YYYY-MM-DD format
+   * @returns {Promise<boolean>} True if First Consult found on visit date
+   */
+  async hasFirstConsultOnDate(visitDate) {
+    try {
+      this._logStep('Check for First Consult on visit date', { visitDate });
+      
+      // Navigate to TX History if not already there
+      await this.navigateToTXHistory().catch(() => {});
+      await this.openAllTab();
+      await this.page.waitForTimeout(2000);
+
+      // Parse target date
+      const targetDate = new Date(visitDate);
+      const targetDateStr = targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }); // DD/MM/YYYY
+      const targetDateStrAlt = targetDate.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' }); // MM/DD/YYYY
+
+      const found = await this.page.evaluate((targetDateStr, targetDateStrAlt) => {
+        // Look for tables with visit history
+        const tables = Array.from(document.querySelectorAll('table'));
+        
+        for (const table of tables) {
+          const rows = Array.from(table.querySelectorAll('tbody tr, tr'));
+          
+          for (const row of rows) {
+            const cells = Array.from(row.querySelectorAll('td, th'));
+            if (cells.length < 2) continue;
+            
+            const rowText = row.textContent || '';
+            
+            // Check if row contains the target date
+            const hasTargetDate = rowText.includes(targetDateStr) || rowText.includes(targetDateStrAlt);
+            
+            // Check if row contains "First Consult" or similar
+            const hasFirstConsult = /first\s+consult|first\s+visit|new\s+visit|initial\s+consult/i.test(rowText);
+            
+            if (hasTargetDate && hasFirstConsult) {
+              return true;
+            }
+          }
+        }
+        
+        // Also check for text content that might contain the date and "First Consult"
+        const bodyText = document.body.textContent || '';
+        const datePattern = new RegExp(`(${targetDateStr}|${targetDateStrAlt})`, 'i');
+        if (datePattern.test(bodyText)) {
+          const dateMatch = bodyText.match(datePattern);
+          if (dateMatch) {
+            const context = bodyText.substring(
+              Math.max(0, bodyText.indexOf(dateMatch[0]) - 100),
+              Math.min(bodyText.length, bodyText.indexOf(dateMatch[0]) + 200)
+            );
+            if (/first\s+consult|first\s+visit|new\s+visit|initial\s+consult/i.test(context)) {
+              return true;
+            }
+          }
+        }
+        
+        return false;
+      }, targetDateStr, targetDateStrAlt);
+
+      this._logStep('First Consult check result', { visitDate, found });
+      return found;
+    } catch (error) {
+      logger.error('Failed to check First Consult:', error);
+      return false; // Default to false (Follow Up) if check fails
+    }
+  }
+
+  /**
+   * Open Past Notes tab
+   * @returns {Promise<boolean>} Success status
+   */
+  async openPastNotesTab() {
+    try {
+      this._logStep('Open Past Notes Tab');
+      await this.page.waitForTimeout(1000);
+
+      const pastNotesSelectors = [
+        '[role="tab"]:has-text("Past Notes")',
+        'a:has-text("Past Notes")',
+        'button:has-text("Past Notes")',
+        'li:has-text("Past Notes")',
+        '.tab:has-text("Past Notes")',
+        '[class*="tab"]:has-text("Past Notes")',
+        'a:has-text("Notes")',
+        '[role="tab"]:has-text("Notes")',
+      ];
+
+      for (const selector of pastNotesSelectors) {
+        try {
+          const tab = this.page.locator(selector).first();
+          if ((await tab.count().catch(() => 0)) > 0) {
+            const isVisible = await tab.isVisible().catch(() => false);
+            if (isVisible) {
+              await tab.click();
+              await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+              await this.page.waitForTimeout(2000);
+              this._logStep('Past Notes Tab opened');
+              return true;
+            }
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      throw new Error('Could not find Past Notes Tab');
+    } catch (error) {
+      logger.error('Failed to open Past Notes Tab:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Extract diagnosis from Past Notes tab for a specific visit date
+   * @param {string} visitDate - Visit date in YYYY-MM-DD format
+   * @returns {Promise<Object|null>} { code: string, description: string } or null
+   */
+  async extractDiagnosisFromPastNotes(visitDate) {
+    try {
+      this._logStep('Extract diagnosis from Past Notes', { visitDate });
+      
+      // Navigate to TX History and open Past Notes tab
+      await this.navigateToTXHistory().catch(() => {});
+      await this.openPastNotesTab();
+      await this.page.waitForTimeout(2000);
+
+      // Parse target date
+      const targetDate = new Date(visitDate);
+      const targetDateStr = targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }); // DD/MM/YYYY
+      const targetDateStrAlt = targetDate.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' }); // MM/DD/YYYY
+
+      const result = await this.page.evaluate((targetDateStr, targetDateStrAlt) => {
+        // Look for notes/entries matching the visit date
+        const tables = Array.from(document.querySelectorAll('table'));
+        const textAreas = Array.from(document.querySelectorAll('textarea, div[contenteditable]'));
+        const noteDivs = Array.from(document.querySelectorAll('div[class*="note"], div[class*="entry"]'));
+        
+        // Combine all potential note containers
+        const allContainers = [...tables, ...textAreas, ...noteDivs];
+        
+        for (const container of allContainers) {
+          const text = container.textContent || '';
+          
+          // Check if this container has the target date
+          if (text.includes(targetDateStr) || text.includes(targetDateStrAlt)) {
+            // Look for diagnosis patterns in the text
+            const diagnosisPatterns = [
+              /diagnosis[:\s]+([^\n\r;]{10,200})/i,
+              /dx[:\s]+([^\n\r;]{10,200})/i,
+              /impression[:\s]+([^\n\r;]{10,200})/i,
+              /assessment[:\s]+([^\n\r;]{10,200})/i,
+            ];
+            
+            for (const pattern of diagnosisPatterns) {
+              const match = text.match(pattern);
+              if (match && match[1]) {
+                const diagnosisText = match[1].trim();
+                if (diagnosisText.length > 5) {
+                  // Try to extract ICD code if present
+                  const codeMatch = diagnosisText.match(/\b([A-Z]\d{2,3}(?:\.\d+)?)\b/);
+                  const code = codeMatch ? codeMatch[1] : null;
+                  const description = diagnosisText.replace(codeMatch ? codeMatch[0] : '', '').trim();
+                  
+                  return { code, description: description || diagnosisText };
+                }
+              }
+            }
+            
+            // If no explicit diagnosis pattern, try to extract meaningful medical text
+            const sentences = text.split(/[.\n\r]/).filter(s => s.trim().length > 10);
+            for (const sentence of sentences) {
+              if (sentence.length > 20 && sentence.length < 200) {
+                // Check if it looks like a diagnosis (contains medical keywords)
+                if (/pain|ache|infection|injury|sprain|strain|fracture|disorder|disease|syndrome/i.test(sentence)) {
+                  return { code: null, description: sentence.trim() };
+                }
+              }
+            }
+          }
+        }
+        
+        return null;
+      }, targetDateStr, targetDateStrAlt);
+
+      if (result) {
+        this._logStep('Diagnosis extracted from Past Notes', { 
+          code: result.code,
+          description: result.description?.substring(0, 100)
+        });
+        return result;
+      }
+
+      this._logStep('No diagnosis found in Past Notes for visit date');
+      return null;
+    } catch (error) {
+      logger.error('Failed to extract diagnosis from Past Notes:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get charge type (First Consult vs Follow Up) and diagnosis for a visit date
+   * @param {string} visitDate - Visit date in YYYY-MM-DD format
+   * @returns {Promise<Object>} { chargeType: 'first'|'follow', diagnosis: {code, description}|null }
+   */
+  async getChargeTypeAndDiagnosis(visitDate) {
+    try {
+      this._logStep('Get charge type and diagnosis for visit date', { visitDate });
+      
+      // Step 1: Check charge type from TX History All tab
+      const hasFirstConsult = await this.hasFirstConsultOnDate(visitDate);
+      const chargeType = hasFirstConsult ? 'first' : 'follow';
+      
+      this._logStep('Charge type determined', { visitDate, chargeType, hasFirstConsult });
+      
+      // Step 2: Try to get diagnosis from Diagnosis tab first
+      await this.navigateToTXHistory().catch(() => {});
+      await this.openDiagnosisTab();
+      let diagnosis = await this.extractDiagnosisForDate(visitDate);
+      
+      // Step 3: If not found, try Past Notes tab
+      if (!diagnosis || !diagnosis.description) {
+        this._logStep('Diagnosis not found in Diagnosis tab, trying Past Notes');
+        diagnosis = await this.extractDiagnosisFromPastNotes(visitDate);
+      }
+      
+      return {
+        chargeType,
+        diagnosis
+      };
+    } catch (error) {
+      logger.error('Failed to get charge type and diagnosis:', error);
+      return {
+        chargeType: 'follow', // Default to follow-up if error
+        diagnosis: null
+      };
+    }
+  }
+
+  /**
+   * Open Medicine Tab within TX History
+   * @returns {Promise<boolean>} Success status
+   */
+  async openMedicineTab() {
+    try {
+      this._logStep('Open Medicine Tab');
+      await this.page.waitForTimeout(1000);
+
+      // Try multiple selectors for Medicine tab
+      const medicineTabSelectors = [
+        '[role="tab"]:has-text("Medicine")',
+        'a:has-text("Medicine")',
+        'button:has-text("Medicine")',
+        'li:has-text("Medicine")',
+        '.tab:has-text("Medicine")',
+        '[class*="tab"]:has-text("Medicine")',
+        'a:has-text("Drug")',
+        'a:has-text("Medication")',
+        '[role="tab"]:has-text("Drug")',
+        '[role="tab"]:has-text("Medication")',
+      ];
+
+      for (const selector of medicineTabSelectors) {
+        try {
+          const tab = this.page.locator(selector).first();
+          if ((await tab.count().catch(() => 0)) > 0) {
+            const isVisible = await tab.isVisible().catch(() => false);
+            if (isVisible) {
+              await tab.click();
+              await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+              await this.page.waitForTimeout(1500);
+              this._logStep('Medicine Tab opened');
+              return true;
+            }
+          }
+        } catch (e) {
+          continue;
+        }
+      }
+
+      throw new Error('Could not find Medicine Tab');
+    } catch (error) {
+      logger.error('Failed to open Medicine Tab:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Extract medicines from TX History Medicine Tab, filtered by visit date
+   * @param {string} visitDate - Visit date in YYYY-MM-DD format
+   * @returns {Promise<Array>} Array of medicine objects: [{ name, quantity, date }]
+   */
+  async extractMedicinesForDate(visitDate) {
+    try {
+      this._logStep('Extract medicines from Medicine Tab', { visitDate });
+      await this.page.waitForTimeout(1000);
+
+      // Parse the target date for comparison
+      const targetDate = new Date(visitDate);
+      
+      // Extract medicine records from table
+      const medicines = await this.page.evaluate((targetDateStr) => {
+        const results = [];
+        const tables = Array.from(document.querySelectorAll('table'));
+        
+        // Helper to parse dates in various formats
+        const parseDate = (dateStr) => {
+          if (!dateStr) return null;
+          // Try different date formats: DD/MM/YYYY, DD-MM-YYYY, YYYY-MM-DD
+          const patterns = [
+            /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,  // DD/MM/YYYY or DD-MM-YYYY
+            /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/,  // YYYY-MM-DD
+          ];
+          
+          for (const pattern of patterns) {
+            const match = dateStr.match(pattern);
+            if (match) {
+              // Check if it's DD/MM/YYYY or YYYY-MM-DD
+              if (match[1].length === 4) {
+                // YYYY-MM-DD
+                return new Date(match[1], match[2] - 1, match[3]);
+              } else {
+                // DD/MM/YYYY
+                return new Date(match[3], match[2] - 1, match[1]);
+              }
+            }
+          }
+          return null;
+        };
+        
+        // Look for medicine tables
+        tables.forEach(table => {
+          const rows = Array.from(table.querySelectorAll('tbody tr, tr'));
+          
+          // Try to identify column indices
+          const headerRow = table.querySelector('thead tr, tr:first-child');
+          const headers = headerRow ? Array.from(headerRow.querySelectorAll('th, td')).map(h => h.textContent.trim().toLowerCase()) : [];
+          
+          const dateCol = headers.findIndex(h => h.includes('date') || h.includes('visit'));
+          const nameCol = headers.findIndex(h => h.includes('medicine') || h.includes('drug') || h.includes('item') || h.includes('description'));
+          const qtyCol = headers.findIndex(h => h.includes('qty') || h.includes('quantity') || h.includes('amount'));
+          
+          rows.forEach(row => {
+            const cells = Array.from(row.querySelectorAll('td, th'));
+            if (cells.length === 0) return;
+            
+            // Extract date
+            let dateStr = '';
+            if (dateCol >= 0 && dateCol < cells.length) {
+              dateStr = cells[dateCol].textContent.trim();
+            } else {
+              // Fallback: look for date pattern in any cell
+              for (const cell of cells) {
+                const text = cell.textContent.trim();
+                if (/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text)) {
+                  dateStr = text;
+                  break;
+                }
+              }
+            }
+            
+            const recordDate = parseDate(dateStr);
+            const targetDate = parseDate(targetDateStr);
+            
+            // Only include medicines from the target date
+            if (recordDate && targetDate && 
+                recordDate.getDate() === targetDate.getDate() &&
+                recordDate.getMonth() === targetDate.getMonth() &&
+                recordDate.getFullYear() === targetDate.getFullYear()) {
+              
+              // Extract medicine name
+              let name = '';
+              if (nameCol >= 0 && nameCol < cells.length) {
+                name = cells[nameCol].textContent.trim();
+              } else {
+                // Fallback: get the longest non-date, non-number cell
+                for (const cell of cells) {
+                  const text = cell.textContent.trim();
+                  if (text.length > name.length && 
+                      !/^\d+$/.test(text) && 
+                      !/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text)) {
+                    name = text;
+                  }
+                }
+              }
+              
+              // Extract quantity
+              let quantity = 1; // Default quantity
+              if (qtyCol >= 0 && qtyCol < cells.length) {
+                const qtyText = cells[qtyCol].textContent.trim();
+                const qtyNum = parseInt(qtyText);
+                if (!isNaN(qtyNum) && qtyNum > 0) {
+                  quantity = qtyNum;
+                }
+              } else {
+                // Fallback: look for standalone number cells
+                for (const cell of cells) {
+                  const text = cell.textContent.trim();
+                  if (/^\d+$/.test(text)) {
+                    const num = parseInt(text);
+                    if (num > 0 && num < 1000) { // Reasonable quantity range
+                      quantity = num;
+                      break;
+                    }
+                  }
+                }
+              }
+              
+              if (name && name.length > 2) {
+                results.push({
+                  name,
+                  quantity,
+                  date: dateStr
+                });
+              }
+            }
+          });
+        });
+        
+        return results;
+      }, visitDate);
+
+      this._logStep('Medicines extracted from Medicine Tab', { 
+        count: medicines.length,
+        visitDate,
+        medicines: medicines.slice(0, 5).map(m => ({ name: m.name.substring(0, 50), quantity: m.quantity }))
+      });
+
+      return medicines;
+    } catch (error) {
+      logger.error('Failed to extract medicines from Medicine Tab:', error);
+      return [];
     }
   }
 }
