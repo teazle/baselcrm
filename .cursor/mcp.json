@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "aws-basel": {
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-api-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "baselrpa",
+        "AWS_REGION": "ap-southeast-1"
+      }
+    }
+  }
+}
