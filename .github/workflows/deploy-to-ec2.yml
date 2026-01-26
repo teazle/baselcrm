@@ -1,0 +1,55 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || 22 }}
+          script: |
+            cd ${{ secrets.EC2_DEPLOY_PATH || '~/Baselrpacrm' }}
+            
+            # Pull latest changes
+            echo "📥 Pulling latest changes from Git..."
+            git fetch origin
+            git reset --hard origin/main || git reset --hard origin/master
+            
+            # Install/update dependencies if package.json changed
+            echo "📦 Checking for dependency updates..."
+            if git diff HEAD@{1} HEAD --name-only | grep -q "package.json\|package-lock.json"; then
+              echo "📦 Installing/updating dependencies..."
+              npm install
+              npm run install-browsers
+            fi
+            
+            # Restart PM2 processes if running
+            if command -v pm2 &> /dev/null; then
+              echo "🔄 Restarting PM2 processes..."
+              pm2 restart all || true
+            fi
+            
+            echo "✅ Deployment complete!"
+            
+            # Show current status
+            echo "📊 Current status:"
+            git log -1 --oneline
+            if command -v pm2 &> /dev/null; then
+              pm2 status
+            fi
