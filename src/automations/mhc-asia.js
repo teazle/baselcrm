@@ -119,11 +119,12 @@ export class MHCAsiaAutomation {
         logger.info('Login button clicked');
       }
 
-      // Wait for navigation
+      // Wait for navigation - reduced wait times
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
       // Don't wait for networkidle (MHC can keep connections open)
-      await this.page.waitForTimeout(500);
-      await this.page.locator('text=/Log\\s*Out/i').first().waitFor({ state: 'attached', timeout: 10000 }).catch(() => {});
+      await this.page.waitForTimeout(300);
+      // Reduced timeout for Log Out check - don't wait too long
+      await this.page.locator('text=/Log\\s*Out/i').first().waitFor({ state: 'attached', timeout: 3000 }).catch(() => {});
       
       // Check for error messages
       const errorSelectors = [
@@ -446,55 +447,88 @@ export class MHCAsiaAutomation {
       logger.info('Navigating to Normal Visit > Search Other Programs...');
       
       await this.page.waitForLoadState('domcontentloaded');
-      await this.page.waitForTimeout(500);
+      await this.page.waitForTimeout(300);
       
-      // Step 1: Click on "Normal Visit" or similar
+      // Step 1: Click on "Normal Visit" or similar - try multiple selectors
       const normalVisitSelectors = [
         'a:has-text("Normal Visit")',
         'a:has-text("Visit")',
         'button:has-text("Normal Visit")',
-        '[href*="visit" i]',
-        '[href*="normal" i]',
+        'a[href*="NormalVisit" i]',
+        'a[href*="normalvisit" i]',
+        'a[href*="visit" i]',
+        '[onclick*="visit" i]',
+        '[onclick*="normal" i]',
       ];
       
+      let normalVisitClicked = false;
       for (const selector of normalVisitSelectors) {
         try {
           const link = this.page.locator(selector).first();
-          if (await link.count() > 0) {
-            await this._safeClick(link, 'Normal Visit');
-            await this.page.screenshot({ path: 'screenshots/mhc-asia-after-normal-visit.png', fullPage: true });
-            break;
+          const count = await link.count().catch(() => 0);
+          if (count > 0) {
+            const isVisible = await link.isVisible().catch(() => false);
+            if (isVisible) {
+              this._logStep('Found Normal Visit link', { selector });
+              await this._safeClick(link, 'Normal Visit');
+              await this.page.waitForTimeout(300);
+              await this.page.screenshot({ path: 'screenshots/mhc-asia-after-normal-visit.png', fullPage: true });
+              normalVisitClicked = true;
+              break;
+            }
           }
         } catch (e) {
+          this._logStep('Error trying Normal Visit selector', { selector, error: e.message });
           continue;
         }
       }
       
+      if (!normalVisitClicked) {
+        this._logStep('Could not find Normal Visit link - taking screenshot for debugging');
+        await this.page.screenshot({ path: 'screenshots/mhc-asia-normal-visit-not-found.png', fullPage: true });
+        throw new Error('Could not find Normal Visit link after login');
+      }
+      
       // Step 2: Click on "Search Other Programs"
+      await this.page.waitForTimeout(300);
       const searchProgramsSelectors = [
         'a:has-text("Search Other Programs")',
         'a:has-text("Search Programs")',
         'button:has-text("Search Other Programs")',
-        '[href*="search" i]',
+        'a[href*="SearchOtherPrograms" i]',
+        'a[href*="searchother" i]',
         '[onclick*="search" i]',
       ];
       
+      let searchProgramsClicked = false;
       for (const selector of searchProgramsSelectors) {
         try {
           const link = this.page.locator(selector).first();
-          if (await link.count() > 0) {
-            await this._safeClick(link, 'Search Other Programs');
-            await this.page.screenshot({ path: 'screenshots/mhc-asia-search-programs.png', fullPage: true });
-            return true;
+          const count = await link.count().catch(() => 0);
+          if (count > 0) {
+            const isVisible = await link.isVisible().catch(() => false);
+            if (isVisible) {
+              this._logStep('Found Search Other Programs link', { selector });
+              await this._safeClick(link, 'Search Other Programs');
+              await this.page.waitForTimeout(300);
+              await this.page.screenshot({ path: 'screenshots/mhc-asia-search-programs.png', fullPage: true });
+              searchProgramsClicked = true;
+              break;
+            }
           }
         } catch (e) {
+          this._logStep('Error trying Search Other Programs selector', { selector, error: e.message });
           continue;
         }
       }
       
-      logger.warn('Could not find Search Other Programs');
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-search-programs-not-found.png', fullPage: true });
-      return false;
+      if (!searchProgramsClicked) {
+        logger.warn('Could not find Search Other Programs');
+        await this.page.screenshot({ path: 'screenshots/mhc-asia-search-programs-not-found.png', fullPage: true });
+        return false;
+      }
+      
+      return true;
     } catch (error) {
       logger.error('Failed to navigate to Normal Visit:', error);
       throw error;
