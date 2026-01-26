@@ -119,12 +119,12 @@ export class MHCAsiaAutomation {
         logger.info('Login button clicked');
       }
 
-      // Wait for navigation - reduced wait times
+      // Wait for navigation - minimal wait times
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
       // Don't wait for networkidle (MHC can keep connections open)
-      await this.page.waitForTimeout(300);
+      await this.page.waitForTimeout(100);
       // Reduced timeout for Log Out check - don't wait too long
-      await this.page.locator('text=/Log\\s*Out/i').first().waitFor({ state: 'attached', timeout: 3000 }).catch(() => {});
+      await this.page.locator('text=/Log\\s*Out/i').first().waitFor({ state: 'attached', timeout: 2000 }).catch(() => {});
       
       // Check for error messages
       const errorSelectors = [
