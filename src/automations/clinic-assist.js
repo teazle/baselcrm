@@ -7680,22 +7680,44 @@ export class ClinicAssistAutomation {
       
       this._logStep('Charge type determined', { visitDate, chargeType, hasFirstConsult });
       
-      // Step 2: Extract MC days and MC start date from All tab
+      // Step 2: Navigate to TX History and extract MC days from All tab
       let mcDays = 0;
       let mcStartDate = null;
       try {
+        await this.navigateToTXHistory().catch(() => {});
+        // Ensure we're on the All tab (default tab)
+        await this.page.waitForTimeout(1000);
+        
+        // Extract MC days and MC start date from All tab
         const mcData = await this.page.evaluate((targetDate) => {
-          const rows = Array.from(document.querySelectorAll('table tr, [role="row"]'));
+          // Try multiple date formats
+          const dateFormats = [
+            targetDate.replace(/-/g, '/'),  // 2026-01-23 -> 2026/01/23
+            targetDate.split('-').reverse().join('/'),  // 2026-01-23 -> 23/01/2026
+            targetDate.split('-').reverse().join('-'),  // 2026-01-23 -> 23-01-2026
+          ];
+          
+          const rows = Array.from(document.querySelectorAll('table tr, [role="row"], tbody tr'));
           for (const row of rows) {
             const text = row.textContent || '';
-            // Look for rows containing the visit date
-            if (text.includes(targetDate.replace(/-/g, '/'))) {
-              // Extract MC days (look for patterns like "1 day", "2 days", etc.)
+            // Check if row contains any of the date formats
+            const hasDate = dateFormats.some(format => text.includes(format));
+            
+            if (hasDate) {
+              // Extract MC days (look for patterns like "1 day", "2 days", "1 day MC", etc.)
               const mcMatch = text.match(/(\d+)\s*day/i);
               if (mcMatch) {
+                // Try to extract the date from the row
+                let extractedDate = null;
+                for (const format of dateFormats) {
+                  if (text.includes(format)) {
+                    extractedDate = format;
+                    break;
+                  }
+                }
                 return {
                   mcDays: parseInt(mcMatch[1]),
-                  mcStartDate: targetDate.replace(/-/g, '/')
+                  mcStartDate: extractedDate || dateFormats[1] // Default to DD/MM/YYYY format
                 };
               }
             }
@@ -7705,13 +7727,12 @@ export class ClinicAssistAutomation {
         
         mcDays = mcData.mcDays;
         mcStartDate = mcData.mcStartDate;
-        this._logStep('MC data extracted from All tab', { mcDays, mcStartDate });
+        this._logStep('MC data extracted from All tab', { mcDays, mcStartDate, visitDate });
       } catch (e) {
         this._logStep('Could not extract MC data, using defaults', { error: e.message });
       }
       
-      // Step 3: Try to get diagnosis from Diagnosis tab first
-      await this.navigateToTXHistory().catch(() => {});
+      // Step 3: Try to get diagnosis from Diagnosis tab
       await this.openDiagnosisTab();
       let diagnosis = await this.extractDiagnosisForDate(visitDate);
       
