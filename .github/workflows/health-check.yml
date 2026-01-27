@@ -1,0 +1,53 @@
+name: Health Check
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  health-check:
+    name: Check EC2 Health
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check EC2 Connection
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || 22 }}
+          script: |
+            echo "🏥 Health Check - $(date)"
+            echo ""
+
+            # Check disk space
+            echo "💾 Disk Space:"
+            df -h | grep -E '^/dev|Filesystem'
+            echo ""
+
+            # Check memory
+            echo "🧠 Memory:"
+            free -h
+            echo ""
+
+            # Check PM2 processes
+            if command -v pm2 &> /dev/null; then
+              echo "🔄 PM2 Status:"
+              pm2 status
+              echo ""
+            fi
+
+            # Check if automation directory exists
+            DEPLOY_PATH="${{ secrets.EC2_DEPLOY_PATH || '~/Baselrpacrm' }}"
+            DEPLOY_PATH="${DEPLOY_PATH/#\~/$HOME}"
+            if [ -d "$DEPLOY_PATH" ]; then
+              echo "✅ Project directory exists: $DEPLOY_PATH"
+            else
+              echo "❌ Project directory not found: $DEPLOY_PATH"
+            fi
+
+            echo ""
+            echo "✅ Health check complete"

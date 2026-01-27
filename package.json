@@ -19,7 +19,11 @@
     "demo-visit-details": "node src/examples/demo-visit-details-extraction.js",
     "test-visit-details-date": "node src/examples/test-visit-details-date.js",
     "test-mhcasia-access": "node src/examples/test-mhcasia-access.js",
-    "setup-urban-vpn": "node scripts/setup-urban-vpn.js"
+    "setup-urban-vpn": "node scripts/setup-urban-vpn.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "cd apps/crm && npm run lint",
+    "prepare": "husky"
   },
   "keywords": [
     "automation",
@@ -40,6 +44,18 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0"
+    "@types/node": "^20.10.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix --max-warnings=0"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }
