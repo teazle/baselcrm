@@ -262,6 +262,50 @@ export class MHCAsiaAutomation {
     }
   }
 
+  /**
+   * Fill MC Start Date field
+   * @param {string} mcStartDate - MC start date in format DD/MM/YYYY
+   */
+  async fillMcStartDate(mcStartDate) {
+    this._logStep('Fill MC start date', { mcStartDate });
+    try {
+      if (!mcStartDate) {
+        logger.warn('No MC start date provided');
+        return false;
+      }
+
+      // Try to find MC start date field
+      const mcStartDateSelectors = [
+        'tr:has-text("MC Start Date")',
+        'tr:has-text("MC Date")',
+        'tr:has-text("Start Date")',
+      ];
+
+      for (const rowSelector of mcStartDateSelectors) {
+        try {
+          const row = this.page.locator(rowSelector).first();
+          if ((await row.count().catch(() => 0)) === 0) continue;
+
+          const field = row.locator('input[type="text"], input[type="date"], input').first();
+          if ((await field.count().catch(() => 0)) === 0) continue;
+
+          await field.fill(mcStartDate);
+          await this.page.waitForTimeout(300);
+          logger.info(`MC start date filled: ${mcStartDate}`);
+          return true;
+        } catch {
+          continue;
+        }
+      }
+
+      logger.warn('Could not find MC start date field');
+      return false;
+    } catch (error) {
+      logger.warn('Could not fill MC start date:', error.message);
+      return false;
+    }
+  }
+
   async fillDiagnosisFromText(diagnosisText) {
     this._logStep('Fill diagnosis (best-effort)', { sample: (diagnosisText || '').toString().slice(0, 80) || null });
     const candidate = this._parseDiagnosisCandidate(diagnosisText);
@@ -496,44 +540,13 @@ export class MHCAsiaAutomation {
         throw new Error('Could not find Normal Visit link after login');
       }
       
-      // Step 2: Click on "Search Other Programs"
-      await this.page.waitForTimeout(300);
-      const searchProgramsSelectors = [
-        'a:has-text("Search Other Programs")',
-        'a:has-text("Search Programs")',
-        'button:has-text("Search Other Programs")',
-        'a[href*="SearchOtherPrograms" i]',
-        'a[href*="searchother" i]',
-        '[onclick*="search" i]',
-      ];
-      
-      let searchProgramsClicked = false;
-      for (const selector of searchProgramsSelectors) {
-        try {
-          const link = this.page.locator(selector).first();
-          const count = await link.count().catch(() => 0);
-          if (count > 0) {
-            const isVisible = await link.isVisible().catch(() => false);
-            if (isVisible) {
-              this._logStep('Found Search Other Programs link', { selector });
-              await this._safeClick(link, 'Search Other Programs');
-              await this.page.waitForTimeout(300);
-              await this.page.screenshot({ path: 'screenshots/mhc-asia-search-programs.png', fullPage: true });
-              searchProgramsClicked = true;
-              break;
-            }
-          }
-        } catch (e) {
-          this._logStep('Error trying Search Other Programs selector', { selector, error: e.message });
-          continue;
-        }
-      }
-      
-      if (!searchProgramsClicked) {
-        logger.warn('Could not find Search Other Programs');
-        await this.page.screenshot({ path: 'screenshots/mhc-asia-search-programs-not-found.png', fullPage: true });
-        return false;
-      }
+      // After "Normal Visit", we're on the program selection page with two tiles:
+      // 1. "Search under AIA Program" 
+      // 2. "Search under other programs"
+      // We'll proceed directly to the tile selection - no additional step needed here
+      this._logStep('At program selection page (Normal Visit clicked)');
+      await this.page.waitForTimeout(500);
+      await this.page.screenshot({ path: 'screenshots/mhc-asia-programs-page.png', fullPage: true });
       
       return true;
     } catch (error) {
@@ -620,12 +633,34 @@ export class MHCAsiaAutomation {
       }
       
       if (!searchField) {
-        // If we're still on the tile selection screen, click the AIA tile and retry once.
+        // If we're still on the tile selection screen, click the "Search under other programs" tile
         await this.page.screenshot({ path: 'screenshots/mhc-asia-before-search-field.png', fullPage: true }).catch(() => {});
-        const aiaTile = this.page.locator('text=/Search\\s+under\\s+AIA\\s+Program/i').first();
-        if ((await aiaTile.count().catch(() => 0)) > 0) {
-          await this._safeClick(aiaTile, 'Search under AIA Program (tile)');
-          await this.page.waitForTimeout(1200);
+        
+        // Try to find and click "Search under other programs" tile (NOT AIA)
+        const otherProgramsSelectors = [
+          'text=/Search\\s+under\\s+other\\s+programs/i',
+          'a:has-text("other programs")',
+          'div:has-text("other programs")',
+          '[onclick*="other" i]',
+        ];
+        
+        let otherProgramsClicked = false;
+        for (const selector of otherProgramsSelectors) {
+          try {
+            const tile = this.page.locator(selector).first();
+            if ((await tile.count().catch(() => 0)) > 0) {
+              await this._safeClick(tile, 'Search under other programs (tile)');
+              await this.page.waitForTimeout(1200);
+              otherProgramsClicked = true;
+              break;
+            }
+          } catch {
+            continue;
+          }
+        }
+        
+        if (otherProgramsClicked) {
+          // Re-locate the search field after clicking the tile
           for (const selector of searchSelectors) {
             try {
               const field = this.page.locator(selector).first();
@@ -638,6 +673,7 @@ export class MHCAsiaAutomation {
             }
           }
         }
+        
         if (!searchField) throw new Error('Could not find search field');
       }
       
@@ -2034,7 +2070,15 @@ export class MHCAsiaAutomation {
         return false;
       }
       
-      const searchPattern = new RegExp(searchTerm, 'i');
+      // Create multiple search patterns:
+      // 1. Exact search term (e.g., "Chondromalacia")
+      // 2. Individual words (e.g., "Chondromalacia", "patella")
+      // 3. Diagnosis code if present (e.g., "36071006")
+      const words = searchTerm.split(/\s+/).filter(w => w.length >= 4);
+      const searchPatterns = [
+        new RegExp(searchTerm, 'i'), // Full search term
+        ...words.map(w => new RegExp(w, 'i')), // Individual words
+      ];
       
       // Try the diagnosis dropdown
       const diagSelectors = [
@@ -2051,8 +2095,12 @@ export class MHCAsiaAutomation {
               opts.map((o) => ({ value: o.value, label: (o.textContent || '').trim() }))
             );
             
-            // Find matching option
-            const targetOption = options.find((o) => searchPattern.test(o.label));
+            // Try each search pattern
+            let targetOption = null;
+            for (const pattern of searchPatterns) {
+              targetOption = options.find((o) => pattern.test(o.label));
+              if (targetOption) break;
+            }
             
             if (targetOption) {
               await select.selectOption({ value: targetOption.value });
