@@ -6201,13 +6201,15 @@ export class ClinicAssistAutomation {
    */
   async navigateToPatientPage() {
     try {
-      this._logStep('Navigate to Patient Page');
+      const navStart = Date.now();
+      this._logStep('Navigate to Patient Page - START');
       
       const currentUrl = this.page.url();
       this._logStep('Current URL before navigation', { url: currentUrl });
       
       // STEP 1: Ensure we're in a room (click Reception if needed)
-      if (!currentUrl.includes('/Home/')) {
+      if (!currentUrl.includes('/Home/Reception') && !currentUrl.includes('/Home/Patient')) {
+        const receptionStart = Date.now();
         this._logStep('Need to select Reception/room first before accessing Patient Page');
         
         // Look for Reception button/room
@@ -6237,15 +6239,15 @@ export class ClinicAssistAutomation {
                   await dialog.dismiss().catch(() => dialog.accept()).catch(() => {});
                 });
                 
-                await roomLink.click({ timeout: 5000 });
-                await this.page.waitForLoadState('domcontentloaded', { timeout: 3000 }).catch(() => {});
-                await this.page.waitForTimeout(500);
+                await roomLink.click({ timeout: 3000 });
+                await this.page.waitForLoadState('domcontentloaded', { timeout: 2000 }).catch(() => {});
+                await this.page.waitForTimeout(200);
                 
                 const newUrl = this.page.url();
-                this._logStep('Reception clicked, checking URL', { newUrl });
+                this._logStep('Reception clicked, checking URL', { newUrl, timeTaken: Date.now() - receptionStart });
                 
                 if (newUrl.includes('/Home/')) {
-                  this._logStep('Successfully entered Reception room', { newUrl });
+                  this._logStep('Successfully entered Reception room', { newUrl, timeTaken: Date.now() - receptionStart });
                   receptionClicked = true;
                   break;
                 }
@@ -6258,13 +6260,14 @@ export class ClinicAssistAutomation {
         }
         
         if (!receptionClicked) {
-          this._logStep('Could not click Reception, continuing anyway');
+          this._logStep('Could not click Reception, continuing anyway', { timeTaken: Date.now() - receptionStart });
         }
       } else {
-        this._logStep('Already in a room, proceeding to Patient page', { currentUrl });
+        this._logStep('Already in Reception or Patient page, proceeding', { currentUrl });
       }
       
       // STEP 2: Click Patient sidebar link - UI NAVIGATION ONLY, NO DIRECT URLS
+      const patientNavStart = Date.now();
       this._logStep('Looking for sidebar/hamburger menu');
       
       // Open sidebar/hamburger menu if it exists
@@ -6285,7 +6288,7 @@ export class ClinicAssistAutomation {
             if (isVisible) {
               this._logStep('Found menu toggle, clicking', { selector });
               await menuBtn.click({ force: true }).catch(() => {});
-              await this.page.waitForTimeout(300);
+              await this.page.waitForTimeout(200);
               break;
             }
           }
@@ -6306,6 +6309,7 @@ export class ClinicAssistAutomation {
       let patientClicked = false;
       for (const selector of patientLinkSelectors) {
         try {
+          const clickStart = Date.now();
           const link = this.page.locator(selector).first();
           const count = await link.count().catch(() => 0);
           if (count > 0) {
@@ -6320,9 +6324,9 @@ export class ClinicAssistAutomation {
               
               // Method 1: Playwright click
               try {
-                await link.click({ timeout: 5000 });
+                await link.click({ timeout: 3000 });
                 clicked = true;
-                this._logStep('Patient link clicked via Playwright');
+                this._logStep('Patient link clicked via Playwright', { timeTaken: Date.now() - clickStart });
               } catch (e) {
                 this._logStep('Playwright click failed, trying JavaScript click', { error: e.message });
               }
@@ -6339,39 +6343,39 @@ export class ClinicAssistAutomation {
                 }).catch(() => false);
                 
                 if (clicked) {
-                  this._logStep('Patient link clicked via JavaScript');
+                  this._logStep('Patient link clicked via JavaScript', { timeTaken: Date.now() - clickStart });
                 }
               }
               
               // Method 3: Force click if both failed
               if (!clicked) {
                 try {
-                  await link.click({ force: true, timeout: 5000 });
+                  await link.click({ force: true, timeout: 3000 });
                   clicked = true;
-                  this._logStep('Patient link clicked via force click');
+                  this._logStep('Patient link clicked via force click', { timeTaken: Date.now() - clickStart });
                 } catch (e) {
                   this._logStep('Force click also failed', { error: e.message });
                 }
               }
               
               if (clicked) {
-                await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
-                await this.page.waitForTimeout(500);
+                await this.page.waitForLoadState('domcontentloaded', { timeout: 3000 }).catch(() => {});
+                await this.page.waitForTimeout(300);
                 
                 const finalUrl = this.page.url();
-                this._logStep('After Patient click, checking URL', { finalUrl });
+                this._logStep('After Patient click, checking URL', { finalUrl, totalTime: Date.now() - patientNavStart });
                 
                 if (finalUrl.includes('/Patient')) {
-                  this._logStep('Successfully navigated to Patient Page via UI click', { finalUrl });
+                  this._logStep('Successfully navigated to Patient Page via UI click', { finalUrl, totalTime: Date.now() - navStart });
                   patientClicked = true;
                   break;
                 } else {
                   this._logStep('Click succeeded but URL not as expected, retrying', { finalUrl });
                   // Wait a bit more and check again
-                  await this.page.waitForTimeout(500);
+                  await this.page.waitForTimeout(300);
                   const retryUrl = this.page.url();
                   if (retryUrl.includes('/Patient')) {
-                    this._logStep('Successfully navigated to Patient Page after retry', { retryUrl });
+                    this._logStep('Successfully navigated to Patient Page after retry', { retryUrl, totalTime: Date.now() - navStart });
                     patientClicked = true;
                     break;
                   }
@@ -6386,10 +6390,11 @@ export class ClinicAssistAutomation {
       }
       
       if (!patientClicked) {
-        this._logStep('Could not click Patient link via UI - will not use direct URL navigation');
+        this._logStep('Could not click Patient link via UI - will not use direct URL navigation', { totalTime: Date.now() - navStart });
         return false;
       }
       
+      this._logStep('Navigate to Patient Page - COMPLETE', { totalTime: Date.now() - navStart });
       return true;
     } catch (error) {
       logger.error('Failed to navigate to Patient Page:', error);

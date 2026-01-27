@@ -178,19 +178,30 @@ async function testMHCFormFilling() {
     logger.info(`   ✅ Clinic Assist login successful (${timings['clinic_assist_login']}ms)`);
     
     logger.info(`   👤 Searching for patient ${patientNumber}...`);
+    const navPatientStart = Date.now();
     await clinicAssist.navigateToPatientPage();
-    await clinicAssistPage.waitForTimeout(2000);
+    timings['navigate_to_patient_page'] = Date.now() - navPatientStart;
+    logger.info(`   ✅ Navigated to Patient page (${timings['navigate_to_patient_page']}ms)`);
+    await clinicAssistPage.waitForTimeout(1000);
     
+    const searchStart = Date.now();
     await clinicAssist.searchPatientByNumber(patientNumber);
-    await clinicAssistPage.waitForTimeout(2000);
+    timings['search_patient'] = Date.now() - searchStart;
+    logger.info(`   ✅ Patient searched (${timings['search_patient']}ms)`);
+    await clinicAssistPage.waitForTimeout(1000);
     
     logger.info('   📂 Opening patient record...');
+    const openPatientStart = Date.now();
     await clinicAssist.openPatientFromSearchResultsByNumber(patientNumber);
-    await clinicAssistPage.waitForTimeout(3000);
+    timings['open_patient_record'] = Date.now() - openPatientStart;
+    logger.info(`   ✅ Patient record opened (${timings['open_patient_record']}ms)`);
+    await clinicAssistPage.waitForTimeout(2000);
     
     logger.info('   🔍 Checking TX History for charge type and diagnosis...');
     logger.info(`      Visit Date: ${visitDate}`);
+    const txHistoryStart = Date.now();
     const chargeTypeAndDiagnosis = await clinicAssist.getChargeTypeAndDiagnosis(visitDate);
+    timings['get_charge_and_diagnosis'] = Date.now() - txHistoryStart;
     
     const chargeTypeLabel = chargeTypeAndDiagnosis.chargeType === 'first' ? 'First Consult' : 'Follow Up';
     const diagnosisInfo = chargeTypeAndDiagnosis.diagnosis 
@@ -454,6 +465,10 @@ async function testMHCFormFilling() {
     logger.info('⏱️  Timing Breakdown:');
     logger.info(`   Browser Init: ${timings['browser_init'] || 0}ms`);
     logger.info(`   Clinic Assist Login: ${timings['clinic_assist_login'] || 0}ms`);
+    logger.info(`   Navigate to Patient Page: ${timings['navigate_to_patient_page'] || 0}ms`);
+    logger.info(`   Search Patient: ${timings['search_patient'] || 0}ms`);
+    logger.info(`   Open Patient Record: ${timings['open_patient_record'] || 0}ms`);
+    logger.info(`   Get Charge & Diagnosis: ${timings['get_charge_and_diagnosis'] || 0}ms`);
     logger.info(`   MHC Asia Login: ${timings['mhc_asia_login'] || 0}ms`);
     logger.info(`   Navigate to Search: ${timings['navigate_to_search'] || 0}ms`);
     logger.info(`   Total Time: ${timings['total'] || 0}ms (${(timings['total'] / 1000).toFixed(1)}s)`);
