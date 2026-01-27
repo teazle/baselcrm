@@ -127,31 +127,10 @@ async function batchMHCFormFilling(targetDate) {
     logger.info(`📄 Excel File: ${excelPath}\n`);
     
     // ============================================
-    // STEP 1: Parse Excel File
+    // STEP 1: Initialize Browser and Login to Clinic Assist
     // ============================================
     logger.info('┌─────────────────────────────────────────────────────────────┐');
-    logger.info('│ STEP 1: Parse Excel File for MHC Patients                  │');
-    logger.info('└─────────────────────────────────────────────────────────────┘\n');
-    
-    const mhcPatients = parseQueueReportExcel(excelPath);
-    results.totalPatients = mhcPatients.length;
-    
-    if (mhcPatients.length === 0) {
-      logger.warn('No MHC patients found in the queue listing');
-      return results;
-    }
-    
-    logger.info(`   ✅ Found ${mhcPatients.length} MHC patient(s):`);
-    mhcPatients.forEach((p, i) => {
-      logger.info(`      ${i + 1}. ${p.pcno} - ${p.name} (${p.contract})`);
-    });
-    logger.info('');
-    
-    // ============================================
-    // STEP 2: Initialize Browsers
-    // ============================================
-    logger.info('┌─────────────────────────────────────────────────────────────┐');
-    logger.info('│ STEP 2: Initialize Browsers                                │');
+    logger.info('│ STEP 1: Initialize Browser and Login to Clinic Assist      │');
     logger.info('└─────────────────────────────────────────────────────────────┘\n');
     
     logger.info('   🌐 Initializing browser...');
@@ -169,6 +148,74 @@ async function batchMHCFormFilling(targetDate) {
     await clinicAssist.login();
     logger.info('   ✅ Clinic Assist login successful\n');
     
+    // ============================================
+    // STEP 2: Download Queue Listing for Target Date
+    // ============================================
+    logger.info('┌─────────────────────────────────────────────────────────────┐');
+    logger.info('│ STEP 2: Download Queue Listing for Target Date             │');
+    logger.info('└─────────────────────────────────────────────────────────────┘\n');
+    
+    logger.info(`   📅 Downloading queue listing for ${targetDate}...`);
+    
+    // Navigate to Queue Report page
+    await clinicAssist.navigateDirectlyToQueueReport();
+    await clinicAssistPage.waitForTimeout(2000);
+    
+    // Set the date and generate report
+    await clinicAssist.searchQueueListByDate(targetDate);
+    await clinicAssistPage.waitForTimeout(3000);
+    
+    // Try to download Excel - the extractQueueListResults method handles this
+    logger.info('   📥 Extracting queue list data...');
+    const queueItems = await clinicAssist.extractQueueListResults();
+    
+    logger.info(`   ✅ Downloaded queue listing with ${queueItems?.length || 0} items\n`);
+    
+    // Also try parsing from existing Excel file as fallback
+    let mhcPatients = [];
+    
+    // First, filter from extracted queue items
+    if (queueItems && queueItems.length > 0) {
+      mhcPatients = queueItems.filter(item => {
+        const contract = String(item.contract || item.payType || '').toUpperCase();
+        return contract.includes('MHC');
+      }).map(item => ({
+        pcno: item.pcno || item.patientNumber,
+        name: item.name || item.patientName,
+        nric: item.nric || null,
+        contract: item.contract || item.payType,
+        total: item.total || item.amount || 0,
+        portal: 'MHC'
+      }));
+    }
+    
+    // Fallback: try parsing from Excel file
+    if (mhcPatients.length === 0) {
+      logger.info('   ⚠️  Trying fallback: parsing from Excel file...');
+      mhcPatients = parseQueueReportExcel(excelPath);
+    }
+    
+    results.totalPatients = mhcPatients.length;
+    
+    if (mhcPatients.length === 0) {
+      logger.warn('No MHC patients found for the target date');
+      logger.info('\n>>> No patients to process <<<');
+      return results;
+    }
+    
+    logger.info(`   ✅ Found ${mhcPatients.length} MHC patient(s):`);
+    mhcPatients.forEach((p, i) => {
+      logger.info(`      ${i + 1}. ${p.pcno} - ${p.name} (${p.contract})`);
+    });
+    logger.info('');
+    
+    // ============================================
+    // STEP 3: Login to MHC Asia
+    // ============================================
+    logger.info('┌─────────────────────────────────────────────────────────────┐');
+    logger.info('│ STEP 3: Login to MHC Asia                                  │');
+    logger.info('└─────────────────────────────────────────────────────────────┘\n');
+    
     // Create MHC page
     mhcPage = await browserManager.newPage();
     const mhcAsia = new MHCAsiaAutomation(mhcPage);
@@ -180,10 +227,10 @@ async function batchMHCFormFilling(targetDate) {
     logger.info('   ✅ MHC Asia login successful\n');
     
     // ============================================
-    // STEP 3: Process Each Patient
+    // STEP 4: Process Each Patient
     // ============================================
     logger.info('┌─────────────────────────────────────────────────────────────┐');
-    logger.info('│ STEP 3: Process Each Patient                               │');
+    logger.info('│ STEP 4: Process Each Patient                               │');
     logger.info('└─────────────────────────────────────────────────────────────┘\n');
     
     for (let i = 0; i < mhcPatients.length; i++) {
