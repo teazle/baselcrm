@@ -353,13 +353,19 @@ async function testMHCFormFilling() {
     logger.info('      📸 Screenshot: 07-consultation-fee-set.png');
     logger.info('');
     
-    // 7d. MC Days (from Clinic Assist)
+    // 7d. MC Days and MC Start Date (from Clinic Assist)
     if (mcDays > 0) {
       logger.info('   🏥 Setting MC Days...');
-      logger.info(`      Value: ${mcDays} day(s)`);
+      logger.info(`      MC Days: ${mcDays} day(s)`);
+      logger.info(`      MC Start Date: ${mcStartDate}`);
+      
       await mhcAsia.fillMcDays(mcDays);
-      await page.waitForTimeout(500);
-      logger.info(`      ✅ MC days set to ${mcDays}`);
+      await page.waitForTimeout(300);
+      
+      await mhcAsia.fillMcStartDate(mcStartDate);
+      await page.waitForTimeout(300);
+      
+      logger.info(`      ✅ MC days set to ${mcDays}, start date: ${mcStartDate}`);
       
       await page.screenshot({ path: 'screenshots/07b-mc-days-set.png', fullPage: true }).catch(() => {});
       logger.info('      📸 Screenshot: 07b-mc-days-set.png');
@@ -372,14 +378,12 @@ async function testMHCFormFilling() {
     // 7e. Diagnosis (from Clinic Assist)
     logger.info('   🩺 Selecting Diagnosis...');
     if (chargeTypeAndDiagnosis.diagnosis && chargeTypeAndDiagnosis.diagnosis.description) {
-      const diagText = chargeTypeAndDiagnosis.diagnosis.description;
-      logger.info(`      From Clinic Assist: ${diagText.substring(0, 80)}`);
+      const diagCode = chargeTypeAndDiagnosis.diagnosis.code || '';
+      const diagText = chargeTypeAndDiagnosis.diagnosis.description || '';
+      logger.info(`      From Clinic Assist: ${diagCode} ${diagText.substring(0, 60)}`);
       
-      // Try to match diagnosis in MHC dropdown
-      // Use the description text or code to search
-      const searchTerm = chargeTypeAndDiagnosis.diagnosis.code 
-        ? chargeTypeAndDiagnosis.diagnosis.code.replace(/[^A-Z0-9]/g, '')
-        : diagText.split(/\s+/).find(w => w.length > 4) || diagText.substring(0, 20);
+      // Try to match diagnosis in MHC dropdown using the full description for better matching
+      const searchTerm = diagText || diagCode;
       
       logger.info(`      Searching MHC dropdown for: "${searchTerm}"`);
       const diagResult = await mhcAsia.selectDiagnosis(searchTerm);
