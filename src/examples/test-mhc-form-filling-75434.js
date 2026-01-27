@@ -143,22 +143,29 @@ async function testMHCFormFilling() {
     const stepStart = Date.now();
     await browserManager.init();
     
-    // Close all extra tabs (Urban VPN, about:blank, etc.)
+    // Close all extra tabs (about:blank, etc.) - but keep at least one tab
     const allPages = browserManager.context.pages();
     logger.info(`   📑 Found ${allPages.length} tabs, closing extras...`);
+    let tabsClosed = 0;
     for (const p of allPages) {
       const url = p.url();
-      if (url.includes('urban-vpn') || url === 'about:blank' || url === 'chrome://extensions') {
+      // Only close about:blank tabs, keep others
+      if (url === 'about:blank' && allPages.length > 1) {
         try {
           await p.close();
+          tabsClosed++;
           logger.info(`   ✅ Closed extra tab: ${url}`);
         } catch (e) {
           logger.warn(`   ⚠️  Could not close tab: ${url}`);
         }
       }
     }
+    if (tabsClosed === 0 && allPages.length > 0) {
+      logger.info(`   ℹ️  Keeping ${allPages.length} existing tab(s)`);
+    }
     
-    const clinicAssistPage = await browserManager.newPage();
+    // Use existing page if available, otherwise create new one
+    const clinicAssistPage = allPages.length > 0 && tabsClosed < allPages.length ? allPages[0] : await browserManager.newPage();
     timings['browser_init'] = Date.now() - stepStart;
     
     // Dialog handler is now set up in ClinicAssistAutomation constructor
