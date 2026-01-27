@@ -646,6 +646,64 @@ export class BrowserManager {
   }
 
   /**
+   * Create a new context with video recording enabled
+   * @param {Object} options - Video recording options
+   * @param {string} options.dir - Directory to save videos
+   * @param {Object} options.size - Video size {width, height}
+   * @returns {Promise<BrowserContext>} New context with video recording
+   */
+  async newContextWithVideo(options = {}) {
+    const { dir = './videos', size = { width: 1920, height: 1080 } } = options;
+    
+    // If using persistent context, we can't create new contexts with video
+    if (!this.browser && this.context) {
+      logger.warn('Cannot create video context with persistent browser context. Using existing context without video.');
+      return this.context;
+    }
+    
+    if (!this.browser) {
+      await this.init();
+    }
+    
+    // If still no browser (persistent context), return existing context
+    if (!this.browser) {
+      logger.warn('Cannot create video context with persistent browser context. Using existing context without video.');
+      return this.context;
+    }
+
+    const contextOptions = {
+      viewport: size,
+      ignoreHTTPSErrors: true,
+      recordVideo: {
+        dir: dir,
+        size: size
+      }
+    };
+
+    // Use same proxy configuration if available
+    const proxyConfig = await this.getProxyConfig();
+    if (proxyConfig) {
+      contextOptions.proxy = {
+        server: proxyConfig.server,
+      };
+      
+      if (proxyConfig.username && proxyConfig.password) {
+        contextOptions.proxy.username = proxyConfig.username;
+        contextOptions.proxy.password = proxyConfig.password;
+      }
+
+      if (PROXY_CONFIG.bypass && PROXY_CONFIG.bypass.length > 0) {
+        contextOptions.proxy.bypass = PROXY_CONFIG.bypass.join(',');
+      }
+    }
+
+    const ctx = await this.browser.newContext(contextOptions);
+    ctx.setDefaultTimeout(BROWSER_CONFIG.timeout);
+    this.extraContexts.push(ctx);
+    return ctx;
+  }
+
+  /**
    * Close browser
    */
   async close() {

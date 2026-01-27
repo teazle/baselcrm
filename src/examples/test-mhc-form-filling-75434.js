@@ -80,6 +80,7 @@ function parseQueueReportExcel(excelPath) {
 async function testMHCFormFilling() {
   const browserManager = new BrowserManager();
   let page = null;
+  let videoContext = null; // Store video context reference
   const timings = {}; // Track timing for all steps
   const startTime = Date.now();
   
@@ -236,7 +237,22 @@ async function testMHCFormFilling() {
     logger.info('');
     
     logger.info('   🌐 Creating new page for MHC Asia...');
-    page = await browserManager.newPage();
+    // Enable video recording for the entire automation
+    const videoDir = path.join(process.cwd(), 'videos');
+    if (!fs.existsSync(videoDir)) {
+      fs.mkdirSync(videoDir, { recursive: true });
+    }
+    
+    // Create a new context with video recording enabled
+    videoContext = await browserManager.newContextWithVideo({
+      dir: videoDir,
+      size: { width: 1920, height: 1080 }
+    });
+    
+    logger.info(`   🎥 Video recording enabled`);
+    logger.info(`   📹 Video will be saved to: ${videoDir}/`);
+    
+    page = await videoContext.newPage();
     const mhcAsia = new MHCAsiaAutomation(page);
     
     // Setup dialog handler FIRST
@@ -487,6 +503,8 @@ async function testMHCFormFilling() {
     logger.info('>>> BROWSER IS OPEN FOR MANUAL REVIEW <<<');
     logger.info('>>> Connect to VNC to view the filled form <<<');
     logger.info('>>> Form is NOT submitted - ready for review <<<');
+    logger.info('>>> Video recording is active - will be saved when browser closes <<<');
+    logger.info(`>>> Video location: ${path.join(process.cwd(), 'videos')}/ <<<`);
     logger.info('>>> Press Ctrl+C when done reviewing <<<');
     logger.info('='.repeat(70));
     logger.info('');
