@@ -7494,12 +7494,16 @@ export class ClinicAssistAutomation {
             
             if (dateStr && diagnosisDesc.length > 5) {
               const recordDate = parseDate(dateStr);
-              results.push({
-                date: dateStr,
-                dateObj: recordDate,
-                code: diagnosisCode,
-                description: diagnosisDesc
-              });
+              // Filter out non-medical diagnoses like "Unfit for Duty" (these are MC reasons, not diagnoses)
+              // Only include entries with proper diagnosis codes (6-8 digit SNOMED codes or ICD codes)
+              if (diagnosisCode && /^\d{6,8}$/.test(diagnosisCode)) {
+                results.push({
+                  date: dateStr,
+                  dateObj: recordDate,
+                  code: diagnosisCode,
+                  description: diagnosisDesc
+                });
+              }
             }
           });
         });
