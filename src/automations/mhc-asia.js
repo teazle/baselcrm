@@ -794,6 +794,9 @@ export class MHCAsiaAutomation {
       this._logStep('Add visit', { portal });
       logger.info(`Adding visit for portal: ${portal}`);
 
+      // Check if we need to switch to AIA Clinic system first
+      await this.switchToAIAClinicIfNeeded();
+
       // Many flows start the visit form by clicking the patient in the search results.
       // If we already see "Visit Date" / "Visit" form fields, treat as already in visit creation.
       const alreadyInVisit =
@@ -858,6 +861,169 @@ export class MHCAsiaAutomation {
     } catch (error) {
       logger.error('Failed to add visit:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Check if we need to switch to AIA Clinic system and do it if needed
+   * This handles the dialog/message that asks to go to AIA Clinic
+   * @returns {boolean} True if switch was performed or not needed
+   */
+  async switchToAIAClinicIfNeeded() {
+    try {
+      this._logStep('Check if AIA Clinic switch needed');
+      
+      // Check for dialog or message about AIA Clinic
+      const pageText = await this.page.textContent('body').catch(() => '');
+      const needsSwitch = /switch.*aia\s*clinic|go.*aia\s*clinic|aia\s*clinic.*system/i.test(pageText);
+      
+      if (!needsSwitch) {
+        // Also check for any visible prompt/message
+        const switchPromptSelectors = [
+          'text=/switch.*AIA.*Clinic/i',
+          'text=/go.*AIA.*Clinic/i',
+          '.alert:has-text("AIA Clinic")',
+          '.modal:has-text("AIA Clinic")',
+        ];
+        
+        let foundPrompt = false;
+        for (const selector of switchPromptSelectors) {
+          try {
+            if ((await this.page.locator(selector).count().catch(() => 0)) > 0) {
+              foundPrompt = true;
+              break;
+            }
+          } catch {
+            continue;
+          }
+        }
+        
+        if (!foundPrompt) {
+          logger.info('No AIA Clinic switch needed');
+          return true;
+        }
+      }
+      
+      logger.info('AIA Clinic switch detected - switching system...');
+      this._logStep('Switching to AIA Clinic system');
+      
+      // Step 1: Find and click "Switch System" in top right corner
+      const switchSystemSelectors = [
+        'a:has-text("Switch System")',
+        'button:has-text("Switch System")',
+        'text=/Switch\\s+System/i',
+        '[onclick*="switch" i]',
+        '.switch-system',
+        'a[href*="switch" i]',
+      ];
+      
+      let switchClicked = false;
+      for (const selector of switchSystemSelectors) {
+        try {
+          const switchBtn = this.page.locator(selector).first();
+          if ((await switchBtn.count().catch(() => 0)) > 0) {
+            await this._safeClick(switchBtn, 'Switch System');
+            await this.page.waitForTimeout(500);
+            switchClicked = true;
+            break;
+          }
+        } catch {
+          continue;
+        }
+      }
+      
+      if (!switchClicked) {
+        // Try to find it in a dropdown or menu
+        const menuSelectors = [
+          '.dropdown-toggle',
+          '.navbar-right a',
+          '.user-menu',
+          '[data-toggle="dropdown"]',
+        ];
+        
+        for (const menuSelector of menuSelectors) {
+          try {
+            const menu = this.page.locator(menuSelector).first();
+            if ((await menu.count().catch(() => 0)) > 0) {
+              await this._safeClick(menu, 'Open menu');
+              await this.page.waitForTimeout(300);
+              
+              // Now look for Switch System in the opened menu
+              for (const selector of switchSystemSelectors) {
+                try {
+                  const switchBtn = this.page.locator(selector).first();
+                  if ((await switchBtn.count().catch(() => 0)) > 0) {
+                    await this._safeClick(switchBtn, 'Switch System');
+                    await this.page.waitForTimeout(500);
+                    switchClicked = true;
+                    break;
+                  }
+                } catch {
+                  continue;
+                }
+              }
+              if (switchClicked) break;
+            }
+          } catch {
+            continue;
+          }
+        }
+      }
+      
+      if (!switchClicked) {
+        logger.warn('Could not find Switch System button');
+        await this.page.screenshot({ path: 'screenshots/mhc-asia-switch-system-not-found.png' }).catch(() => {});
+        return false;
+      }
+      
+      // Step 2: Select "AIA Clinic" from the list
+      const aiaClinicSelectors = [
+        'a:has-text("AIA Clinic")',
+        'button:has-text("AIA Clinic")',
+        'option:has-text("AIA Clinic")',
+        'text=/AIA\\s*Clinic/i',
+        'li:has-text("AIA Clinic")',
+        '[value*="aiaclinic" i]',
+      ];
+      
+      for (const selector of aiaClinicSelectors) {
+        try {
+          const aiaClinic = this.page.locator(selector).first();
+          if ((await aiaClinic.count().catch(() => 0)) > 0) {
+            await this._safeClick(aiaClinic, 'AIA Clinic');
+            await this.page.waitForTimeout(500);
+            logger.info('Switched to AIA Clinic system');
+            this._logStep('Switched to AIA Clinic');
+            await this.page.screenshot({ path: 'screenshots/mhc-asia-switched-to-aia-clinic.png' }).catch(() => {});
+            return true;
+          }
+        } catch {
+          continue;
+        }
+      }
+      
+      // Try select dropdown
+      const selectSelectors = ['select[name*="system" i]', 'select[id*="system" i]', 'select'];
+      for (const selectSel of selectSelectors) {
+        try {
+          const select = this.page.locator(selectSel).first();
+          if ((await select.count().catch(() => 0)) > 0) {
+            await select.selectOption({ label: /AIA.*Clinic/i });
+            await this.page.waitForTimeout(500);
+            logger.info('Selected AIA Clinic from dropdown');
+            return true;
+          }
+        } catch {
+          continue;
+        }
+      }
+      
+      logger.warn('Could not select AIA Clinic');
+      await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-clinic-not-found.png' }).catch(() => {});
+      return false;
+    } catch (error) {
+      logger.error('Failed to switch to AIA Clinic:', error);
+      return false;
     }
   }
 

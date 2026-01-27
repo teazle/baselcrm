@@ -1310,6 +1310,40 @@ export class ClinicAssistAutomation {
   }
 
   /**
+   * Get patient NRIC from the current patient record page
+   * Wrapper around extractPatientNricFromPatientInfo with additional fallbacks
+   * @returns {Promise<string|null>} NRIC if found, null otherwise
+   */
+  async getPatientNRIC() {
+    try {
+      this._logStep('Get patient NRIC');
+      
+      // First try the existing extraction method
+      const nric = await this.extractPatientNricFromPatientInfo();
+      if (nric) {
+        return nric;
+      }
+      
+      // Fallback: Try to find in Patient Basic Info tab
+      const basicInfoTab = this.page.locator('a:has-text("Basic Info"), [href*="BasicInfo"]').first();
+      if ((await basicInfoTab.count().catch(() => 0)) > 0) {
+        await basicInfoTab.click().catch(() => {});
+        await this.page.waitForTimeout(500);
+        const nricFromBasicInfo = await this.extractPatientNricFromPatientInfo();
+        if (nricFromBasicInfo) {
+          return nricFromBasicInfo;
+        }
+      }
+      
+      logger.warn('Could not find patient NRIC');
+      return null;
+    } catch (error) {
+      logger.error('Error getting patient NRIC:', error);
+      return null;
+    }
+  }
+
+  /**
    * Navigate to Reports section in Clinic Assist
    * @returns {Promise<boolean>} True if navigation successful
    */
