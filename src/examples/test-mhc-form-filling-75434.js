@@ -398,11 +398,24 @@ async function testMHCFormFilling() {
     logger.info('   ✅ Claim automatically computed by system');
     await page.waitForTimeout(1000); // Brief wait for auto-calculation
     
-    // Scroll down to see more of the page
+    // Scroll down to see more of the page - scroll multiple times to ensure full view
     await page.evaluate(() => {
+      // Scroll to bottom
       window.scrollTo(0, document.body.scrollHeight);
     }).catch(() => {});
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(300);
+    
+    // Scroll back to top to see the full form
+    await page.evaluate(() => {
+      window.scrollTo(0, 0);
+    }).catch(() => {});
+    await page.waitForTimeout(300);
+    
+    // Scroll to middle to see more content
+    await page.evaluate(() => {
+      window.scrollTo(0, document.body.scrollHeight / 2);
+    }).catch(() => {});
+    await page.waitForTimeout(300);
     
     await page.screenshot({ path: 'screenshots/09-claim-computed.png', fullPage: true }).catch(() => {});
     logger.info('   📸 Screenshot: 09-claim-computed.png\n');

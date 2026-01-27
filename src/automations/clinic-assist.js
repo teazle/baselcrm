@@ -7417,6 +7417,126 @@ export class ClinicAssistAutomation {
   }
 
   /**
+   * Extract the LATEST diagnosis from Diagnosis tab (most recent date)
+   * @returns {Promise<Object|null>} Latest diagnosis: { code, description, date }
+   */
+  async extractLatestDiagnosis() {
+    try {
+      this._logStep('Extract latest diagnosis from Diagnosis tab');
+      await this.page.waitForTimeout(1000);
+      
+      // Extract all diagnoses with dates
+      const diagnoses = await this.page.evaluate(() => {
+        const results = [];
+        const tables = Array.from(document.querySelectorAll('table'));
+        
+        // Helper to parse dates
+        const parseDate = (dateStr) => {
+          if (!dateStr) return null;
+          const patterns = [
+            /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,  // DD/MM/YYYY or DD-MM-YYYY
+            /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/,  // YYYY-MM-DD
+          ];
+          
+          for (const pattern of patterns) {
+            const match = dateStr.match(pattern);
+            if (match) {
+              if (match[1].length === 4) {
+                return new Date(match[1], match[2] - 1, match[3]);
+              } else {
+                return new Date(match[3], match[2] - 1, match[1]);
+              }
+            }
+          }
+          return null;
+        };
+        
+        // Look for diagnosis tables
+        tables.forEach(table => {
+          const rows = Array.from(table.querySelectorAll('tbody tr, tr'));
+          
+          rows.forEach(row => {
+            const cells = Array.from(row.querySelectorAll('td, th'));
+            if (cells.length < 2) return;
+            
+            // Extract date (usually first column)
+            let dateStr = '';
+            let diagnosisCode = '';
+            let diagnosisDesc = '';
+            
+            for (let i = 0; i < Math.min(cells.length, 5); i++) {
+              const text = cells[i].textContent.trim();
+              
+              // Check for date (first column usually)
+              if (/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text) && !dateStr) {
+                dateStr = text;
+              }
+              
+              // Check for diagnosis code (short alphanumeric, usually 6-8 digits)
+              if (/^\d{6,8}$/.test(text) || /^[A-Z]\d{2}\.?\d*$/.test(text)) {
+                diagnosisCode = text;
+              }
+              
+              // Description is usually the longest text that's not a date or code
+              if (text.length > diagnosisDesc.length && 
+                  !/loading/i.test(text) && 
+                  !/date/i.test(text) &&
+                  !/^\d+$/.test(text) &&
+                  !/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text)) {
+                diagnosisDesc = text;
+              }
+            }
+            
+            if (dateStr && diagnosisDesc.length > 5) {
+              const recordDate = parseDate(dateStr);
+              results.push({
+                date: dateStr,
+                dateObj: recordDate,
+                code: diagnosisCode,
+                description: diagnosisDesc
+              });
+            }
+          });
+        });
+        
+        // Sort by date descending (most recent first)
+        results.sort((a, b) => {
+          if (!a.dateObj && !b.dateObj) return 0;
+          if (!a.dateObj) return 1;
+          if (!b.dateObj) return -1;
+          return b.dateObj - a.dateObj;
+        });
+        
+        return results;
+      });
+      
+      // Get the latest (first) diagnosis
+      if (diagnoses.length > 0) {
+        const latest = diagnoses[0];
+        this._logStep('Found latest diagnosis', { 
+          date: latest.date,
+          code: latest.code,
+          description: latest.description.substring(0, 60)
+        });
+        
+        return {
+          code: latest.code,
+          description: latest.description,
+          date: latest.date
+        };
+      }
+      
+      // No diagnosis found
+      this._logStep('No diagnosis found in Diagnosis tab');
+      return null;
+      
+    } catch (error) {
+      logger.error('Failed to extract latest diagnosis:', error);
+      return null;
+    }
+  }
+
+  /**
    * Open "All" tab within TX History
    * @returns {Promise<boolean>} Success status
    */
@@ -7689,6 +7809,7 @@ export class ClinicAssistAutomation {
         await this.page.waitForTimeout(1000);
         
         // Extract MC days and MC start date from All tab
+        // Look for rows like: "23/01/2026	MC	Unfit for Duty	1.00 day	$0.00	SSOC"
         const mcData = await this.page.evaluate((targetDate) => {
           // Try multiple date formats
           const dateFormats = [
@@ -7700,12 +7821,14 @@ export class ClinicAssistAutomation {
           const rows = Array.from(document.querySelectorAll('table tr, [role="row"], tbody tr'));
           for (const row of rows) {
             const text = row.textContent || '';
-            // Check if row contains any of the date formats
+            
+            // Check if row contains "MC" and any of the date formats
+            const hasMC = /MC/i.test(text);
             const hasDate = dateFormats.some(format => text.includes(format));
             
-            if (hasDate) {
-              // Extract MC days (look for patterns like "1 day", "2 days", "1 day MC", etc.)
-              const mcMatch = text.match(/(\d+)\s*day/i);
+            if (hasMC && hasDate) {
+              // Extract MC days - look for patterns like "1.00 day", "1 day", "2 days", etc.
+              const mcMatch = text.match(/(\d+(?:\.\d+)?)\s*day/i);
               if (mcMatch) {
                 // Try to extract the date from the row
                 let extractedDate = null;
@@ -7716,7 +7839,7 @@ export class ClinicAssistAutomation {
                   }
                 }
                 return {
-                  mcDays: parseInt(mcMatch[1]),
+                  mcDays: parseInt(parseFloat(mcMatch[1])), // Handle "1.00" -> 1
                   mcStartDate: extractedDate || dateFormats[1] // Default to DD/MM/YYYY format
                 };
               }
@@ -7732,9 +7855,9 @@ export class ClinicAssistAutomation {
         this._logStep('Could not extract MC data, using defaults', { error: e.message });
       }
       
-      // Step 3: Try to get diagnosis from Diagnosis tab
+      // Step 3: Try to get LATEST diagnosis from Diagnosis tab (not filtered by date)
       await this.openDiagnosisTab();
-      let diagnosis = await this.extractDiagnosisForDate(visitDate);
+      let diagnosis = await this.extractLatestDiagnosis();
       
       // Step 4: If not found, try Past Notes tab
       if (!diagnosis || !diagnosis.description) {
