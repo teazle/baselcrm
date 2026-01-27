@@ -157,10 +157,10 @@ export class MHCAsiaAutomation {
         throw new Error('Authentication failed');
       }
 
-      // Wait for any loading/grey screen to disappear after login
-      logger.info('Waiting for post-login page to fully load...');
-      await this.page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
-      await this.page.waitForTimeout(500); // Brief wait for grey screen
+      // Wait for page to be interactive - skip networkidle (MHC keeps connections open)
+      await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+      // Brief pause for any grey overlay to clear
+      await this.page.waitForTimeout(300);
       
       // Take screenshot after login (non-blocking)
       await this.page.screenshot({ path: 'screenshots/mhc-asia-after-login.png', fullPage: true }).catch(() => {});
@@ -469,7 +469,7 @@ export class MHCAsiaAutomation {
   async handle2FA(verificationCode = null) {
     try {
       this._logStep('2FA check', { provided: !!verificationCode });
-      await this.page.waitForTimeout(3000);
+      await this.page.waitForTimeout(500);
       
       const pageText = await this.page.textContent('body').catch(() => '');
       const has2FA = pageText.includes('Verification Code') || 
@@ -497,7 +497,8 @@ export class MHCAsiaAutomation {
         const submitButton = await this.page.$('button[type="submit"], button:has-text("Submit"), button:has-text("Verify")');
         if (submitButton) {
           await submitButton.click();
-          await this.page.waitForLoadState('networkidle');
+          await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+          await this.page.waitForTimeout(500);
         }
       } else {
         logger.warn('2FA required but no verification code provided - waiting for manual input');
@@ -520,10 +521,9 @@ export class MHCAsiaAutomation {
       this._logStep('Navigate: Normal Visit');
       logger.info('Navigating to Normal Visit > Search Other Programs...');
       
-      // Wait for page to be fully loaded and ready
-      await this.page.waitForLoadState('domcontentloaded');
-      await this.page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
-      await this.page.waitForTimeout(1000); // Ensure page is stable
+      // Wait for page to be ready - skip networkidle (MHC keeps connections open)
+      await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+      await this.page.waitForTimeout(300); // Brief stabilization
       
       // Step 1: Click on "Normal Visit" or similar - try multiple selectors
       const normalVisitSelectors = [
@@ -547,8 +547,7 @@ export class MHCAsiaAutomation {
             if (isVisible) {
               this._logStep('Found Normal Visit link', { selector });
               await this._safeClick(link, 'Normal Visit');
-              await this.page.waitForTimeout(300);
-              await this.page.screenshot({ path: 'screenshots/mhc-asia-after-normal-visit.png', fullPage: true });
+              await this.page.screenshot({ path: 'screenshots/mhc-asia-after-normal-visit.png', fullPage: true }).catch(() => {});
               normalVisitClicked = true;
               break;
             }
@@ -570,8 +569,7 @@ export class MHCAsiaAutomation {
       // 2. "Search under other programs"
       // We'll proceed directly to the tile selection - no additional step needed here
       this._logStep('At program selection page (Normal Visit clicked)');
-      await this.page.waitForTimeout(500);
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-programs-page.png', fullPage: true });
+      await this.page.screenshot({ path: 'screenshots/mhc-asia-programs-page.png', fullPage: true }).catch(() => {});
       
       return true;
     } catch (error) {
@@ -675,7 +673,7 @@ export class MHCAsiaAutomation {
             const tile = this.page.locator(selector).first();
             if ((await tile.count().catch(() => 0)) > 0) {
               await this._safeClick(tile, 'Search under other programs (tile)');
-              await this.page.waitForTimeout(1200);
+              await this.page.waitForTimeout(400);
               otherProgramsClicked = true;
               break;
             }
@@ -703,7 +701,7 @@ export class MHCAsiaAutomation {
       }
       
       await searchField.fill(nric);
-      await this.page.waitForTimeout(1000);
+      await this.page.waitForTimeout(300);
       
       // Click search button
       const searchButtonSelectors = [
@@ -718,8 +716,8 @@ export class MHCAsiaAutomation {
           const button = this.page.locator(selector).first();
           if (await button.count() > 0) {
             await button.click();
-            await this.page.waitForLoadState('networkidle');
-            await this.page.waitForTimeout(3000);
+            await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+            await this.page.waitForTimeout(500);
             break;
           }
         } catch (e) {
@@ -824,8 +822,8 @@ export class MHCAsiaAutomation {
           const link = this.page.locator(selector).first();
           if (await link.count() > 0) {
             await link.click();
-            await this.page.waitForLoadState('networkidle');
-            await this.page.waitForTimeout(2000);
+            await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+            await this.page.waitForTimeout(400);
             logger.info(`Clicked on portal: ${portal}`);
             break;
           }
@@ -848,10 +846,10 @@ export class MHCAsiaAutomation {
           const button = this.page.locator(selector).first();
           if (await button.count() > 0) {
             await button.click();
-            await this.page.waitForLoadState('networkidle');
-            await this.page.waitForTimeout(2000);
+            await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+            await this.page.waitForTimeout(400);
             logger.info('Clicked Add Visit');
-            await this.page.screenshot({ path: 'screenshots/mhc-asia-add-visit-form.png', fullPage: true });
+            await this.page.screenshot({ path: 'screenshots/mhc-asia-add-visit-form.png', fullPage: true }).catch(() => {});
             return true;
           }
         } catch (e) {
@@ -1250,7 +1248,7 @@ export class MHCAsiaAutomation {
         try {
           if ((await computeLoc.count().catch(() => 0)) === 0) continue;
           await this._safeClick(computeLoc, 'Compute claim');
-          await this.page.waitForTimeout(1200);
+          await this.page.waitForTimeout(400);
           break;
         } catch {
           continue;
@@ -1287,7 +1285,7 @@ export class MHCAsiaAutomation {
           const dialogMsg = await clickWithDialogCapture(locator, 'Save As Draft');
           // Avoid networkidle (MHC keeps background connections open)
           await this.page.waitForLoadState('domcontentloaded').catch(() => {});
-          await this.page.waitForTimeout(1500);
+          await this.page.waitForTimeout(500);
 
           await this.page.screenshot({ path: 'screenshots/mhc-asia-draft-saved.png', fullPage: true }).catch(() => {});
           if (dialogMsg && /must\s+compute\s+claim/i.test(dialogMsg)) {
@@ -1332,7 +1330,7 @@ export class MHCAsiaAutomation {
           const element = await this.page.$(selector);
           if (element && await element.isVisible()) {
             await element.click();
-            await this.page.waitForLoadState('networkidle');
+            await this.page.waitForLoadState('domcontentloaded').catch(() => {});
             logger.info('Logged out successfully');
             return true;
           }
