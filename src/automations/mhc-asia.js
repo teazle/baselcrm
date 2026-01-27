@@ -157,6 +157,11 @@ export class MHCAsiaAutomation {
         throw new Error('Authentication failed');
       }
 
+      // Wait for any loading/grey screen to disappear after login
+      logger.info('Waiting for post-login page to fully load...');
+      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+      await this.page.waitForTimeout(2000); // Wait for grey screen to disappear
+      
       // Take screenshot after login (non-blocking)
       await this.page.screenshot({ path: 'screenshots/mhc-asia-after-login.png', fullPage: true }).catch(() => {});
       
@@ -446,8 +451,10 @@ export class MHCAsiaAutomation {
       this._logStep('Navigate: Normal Visit');
       logger.info('Navigating to Normal Visit > Search Other Programs...');
       
+      // Wait for page to be fully loaded and ready
       await this.page.waitForLoadState('domcontentloaded');
-      // No wait - proceed immediately to click Normal Visit
+      await this.page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+      await this.page.waitForTimeout(1000); // Ensure page is stable
       
       // Step 1: Click on "Normal Visit" or similar - try multiple selectors
       const normalVisitSelectors = [
