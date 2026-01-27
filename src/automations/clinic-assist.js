@@ -6212,6 +6212,9 @@ export class ClinicAssistAutomation {
         const receptionStart = Date.now();
         this._logStep('Need to select Reception/room first before accessing Patient Page');
         
+        // Wait 50ms before attempting to click Reception button
+        await this.page.waitForTimeout(50);
+        
         // Look for Reception button/room
         const roomSelectors = [
           'button:has-text("Reception")',
@@ -6239,9 +6242,14 @@ export class ClinicAssistAutomation {
                   await dialog.dismiss().catch(() => dialog.accept()).catch(() => {});
                 });
                 
+                // Wait a moment before clicking for stability
+                await this.page.waitForTimeout(50);
                 await roomLink.click({ timeout: 3000 });
-                await this.page.waitForLoadState('domcontentloaded', { timeout: 2000 }).catch(() => {});
-                await this.page.waitForTimeout(200);
+                
+                // Use auto wait - let Playwright handle the page load
+                await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
+                await this.page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+                await this.page.waitForTimeout(500);
                 
                 const newUrl = this.page.url();
                 this._logStep('Reception clicked, checking URL', { newUrl, timeTaken: Date.now() - receptionStart });
