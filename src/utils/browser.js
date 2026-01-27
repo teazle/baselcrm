@@ -8,6 +8,341 @@ import path from 'path';
 import os from 'os';
 import fs from 'fs';
 
+const EXTERNAL_PROTOCOL_GUARD_SCRIPT = `
+(() => {
+  const ALLOWED_PROTOCOLS = new Set(['http:', 'https:', 'data:', 'about:', 'blob:', 'javascript:']);
+  const URL_ATTRS = new Set(['href', 'src', 'action', 'data', 'poster']);
+
+  const isAllowed = (url) => {
+    if (!url) return true;
+    try {
+      const resolved = new URL(url, window.location.href);
+      return ALLOWED_PROTOCOLS.has(resolved.protocol);
+    } catch (e) {
+      return true;
+    }
+  };
+
+  const shouldBlock = (url) => !isAllowed(url);
+
+  const warn = (method, url) => {
+    try {
+      console.warn(\`[automation] blocked \${method} external protocol\`, url);
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  const sanitizeAnchor = (anchor) => {
+    if (!anchor || !anchor.getAttribute) return;
+    const href = anchor.getAttribute('href');
+    if (!href) return;
+    try {
+      const resolved = new URL(href, window.location.href);
+      if (!ALLOWED_PROTOCOLS.has(resolved.protocol)) {
+        warn('anchor.sanitize', href);
+        anchor.setAttribute('data-blocked-href', href);
+        anchor.setAttribute('href', '#');
+      }
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  const sanitizeForm = (form) => {
+    if (!form || !form.getAttribute) return;
+    const action = form.getAttribute('action');
+    if (!action) return;
+    try {
+      const resolved = new URL(action, window.location.href);
+      if (!ALLOWED_PROTOCOLS.has(resolved.protocol)) {
+        warn('form.sanitize', action);
+        form.setAttribute('data-blocked-action', action);
+        form.setAttribute('action', '#');
+      }
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  const sanitizeElementAttr = (el, attr, value) => {
+    if (!URL_ATTRS.has(attr)) return false;
+    if (!value) return false;
+    if (shouldBlock(value)) {
+      warn('element.setAttribute', value);
+      el.setAttribute('data-blocked-attr', attr);
+      el.setAttribute('data-blocked-value', value);
+      if (attr === 'href' || attr === 'action') {
+        el.setAttribute(attr, '#');
+      } else {
+        el.setAttribute(attr, 'about:blank');
+      }
+      return true;
+    }
+    return false;
+  };
+
+  const sanitizeTree = (root) => {
+    if (!root || !root.querySelectorAll) return;
+    const anchors = root.querySelectorAll('a[href]');
+    for (const anchor of anchors) sanitizeAnchor(anchor);
+    const forms = root.querySelectorAll('form[action]');
+    for (const form of forms) sanitizeForm(form);
+  };
+
+  const originalOpen = window.open;
+  window.open = function(url, ...args) {
+    if (shouldBlock(url)) {
+      warn('window.open', url);
+      return null;
+    }
+    return originalOpen.call(window, url, ...args);
+  };
+
+  const originalAssign = Location.prototype.assign;
+  Location.prototype.assign = function(url) {
+    if (shouldBlock(url)) {
+      warn('location.assign', url);
+      return;
+    }
+    return originalAssign.call(this, url);
+  };
+
+  const originalReplace = Location.prototype.replace;
+  Location.prototype.replace = function(url) {
+    if (shouldBlock(url)) {
+      warn('location.replace', url);
+      return;
+    }
+    return originalReplace.call(this, url);
+  };
+
+  const hrefDescriptor = Object.getOwnPropertyDescriptor(Location.prototype, 'href');
+  if (hrefDescriptor && hrefDescriptor.set) {
+    Object.defineProperty(Location.prototype, 'href', {
+      configurable: true,
+      get: hrefDescriptor.get,
+      set: function(url) {
+        if (shouldBlock(url)) {
+          warn('location.href', url);
+          return;
+        }
+        return hrefDescriptor.set.call(this, url);
+      },
+    });
+  }
+
+  const overrideHref = Object.getOwnPropertyDescriptor(HTMLAnchorElement.prototype, 'href');
+  if (overrideHref && overrideHref.set) {
+    Object.defineProperty(HTMLAnchorElement.prototype, 'href', {
+      configurable: true,
+      get: overrideHref.get,
+      set: function(url) {
+        if (shouldBlock(url)) {
+          warn('anchor.href', url);
+          this.setAttribute('data-blocked-href', url);
+          this.setAttribute('href', '#');
+          return;
+        }
+        return overrideHref.set.call(this, url);
+      },
+    });
+  }
+
+  const overrideAction = Object.getOwnPropertyDescriptor(HTMLFormElement.prototype, 'action');
+  if (overrideAction && overrideAction.set) {
+    Object.defineProperty(HTMLFormElement.prototype, 'action', {
+      configurable: true,
+      get: overrideAction.get,
+      set: function(url) {
+        if (shouldBlock(url)) {
+          warn('form.action', url);
+          this.setAttribute('data-blocked-action', url);
+          this.setAttribute('action', '#');
+          return;
+        }
+        return overrideAction.set.call(this, url);
+      },
+    });
+  }
+
+  const overrideSrc = (proto, label) => {
+    const descriptor = Object.getOwnPropertyDescriptor(proto, 'src');
+    if (!descriptor || !descriptor.set) return;
+    Object.defineProperty(proto, 'src', {
+      configurable: true,
+      get: descriptor.get,
+      set: function(url) {
+        if (shouldBlock(url)) {
+          warn(label, url);
+          this.setAttribute('data-blocked-src', url);
+          this.setAttribute('src', 'about:blank');
+          return;
+        }
+        return descriptor.set.call(this, url);
+      },
+    });
+  };
+
+  const overrideHrefAttr = (proto, label) => {
+    const descriptor = Object.getOwnPropertyDescriptor(proto, 'href');
+    if (!descriptor || !descriptor.set) return;
+    Object.defineProperty(proto, 'href', {
+      configurable: true,
+      get: descriptor.get,
+      set: function(url) {
+        if (shouldBlock(url)) {
+          warn(label, url);
+          this.setAttribute('data-blocked-href', url);
+          this.setAttribute('href', '#');
+          return;
+        }
+        return descriptor.set.call(this, url);
+      },
+    });
+  };
+
+  const overrideData = (proto, label) => {
+    const descriptor = Object.getOwnPropertyDescriptor(proto, 'data');
+    if (!descriptor || !descriptor.set) return;
+    Object.defineProperty(proto, 'data', {
+      configurable: true,
+      get: descriptor.get,
+      set: function(url) {
+        if (shouldBlock(url)) {
+          warn(label, url);
+          this.setAttribute('data-blocked-data', url);
+          this.setAttribute('data', 'about:blank');
+          return;
+        }
+        return descriptor.set.call(this, url);
+      },
+    });
+  };
+
+  const overridePoster = (proto, label) => {
+    const descriptor = Object.getOwnPropertyDescriptor(proto, 'poster');
+    if (!descriptor || !descriptor.set) return;
+    Object.defineProperty(proto, 'poster', {
+      configurable: true,
+      get: descriptor.get,
+      set: function(url) {
+        if (shouldBlock(url)) {
+          warn(label, url);
+          this.setAttribute('data-blocked-poster', url);
+          this.setAttribute('poster', 'about:blank');
+          return;
+        }
+        return descriptor.set.call(this, url);
+      },
+    });
+  };
+
+  overrideSrc(HTMLIFrameElement.prototype, 'iframe.src');
+  overrideSrc(HTMLImageElement.prototype, 'img.src');
+  overrideSrc(HTMLScriptElement.prototype, 'script.src');
+  overrideSrc(HTMLEmbedElement.prototype, 'embed.src');
+  overrideSrc(HTMLSourceElement.prototype, 'source.src');
+  overrideSrc(HTMLTrackElement.prototype, 'track.src');
+  overrideHrefAttr(HTMLLinkElement.prototype, 'link.href');
+  overrideData(HTMLObjectElement.prototype, 'object.data');
+  overridePoster(HTMLVideoElement.prototype, 'video.poster');
+
+  const originalSetAttribute = Element.prototype.setAttribute;
+  Element.prototype.setAttribute = function(name, value) {
+    const attr = String(name || '').toLowerCase();
+    if (sanitizeElementAttr(this, attr, value)) return;
+    return originalSetAttribute.call(this, name, value);
+  };
+
+  const guardLink = (event) => {
+    const target = event.target;
+    const anchor = target && target.closest ? target.closest('a') : null;
+    if (!anchor) return;
+    const href = anchor.getAttribute('href');
+    if (!href) return;
+    try {
+      const resolved = new URL(href, window.location.href);
+      if (!ALLOWED_PROTOCOLS.has(resolved.protocol)) {
+        warn('anchor.click', href);
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        sanitizeAnchor(anchor);
+      }
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  document.addEventListener('click', guardLink, true);
+  document.addEventListener('auxclick', guardLink, true);
+
+  const guardForm = (event) => {
+    const form = event.target;
+    if (!form || !form.action) return;
+    try {
+      const resolved = new URL(form.action, window.location.href);
+      if (!ALLOWED_PROTOCOLS.has(resolved.protocol)) {
+        warn('form.submit', form.action);
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        sanitizeForm(form);
+      }
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  document.addEventListener('submit', guardForm, true);
+
+  if (navigator && typeof navigator.registerProtocolHandler === 'function') {
+    navigator.registerProtocolHandler = () => {
+      warn('navigator.registerProtocolHandler', '');
+    };
+  }
+
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === 'childList') {
+        for (const node of mutation.addedNodes) {
+          sanitizeTree(node);
+        }
+      } else if (mutation.type === 'attributes') {
+        const target = mutation.target;
+        if (target && target.tagName === 'A' && mutation.attributeName === 'href') {
+          sanitizeAnchor(target);
+        } else if (target && target.tagName === 'FORM' && mutation.attributeName === 'action') {
+          sanitizeForm(target);
+        }
+      }
+    }
+  });
+
+  const startObserver = () => {
+    try {
+      observer.observe(document.documentElement || document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['href', 'action'],
+      });
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      sanitizeTree(document);
+      startObserver();
+    });
+  } else {
+    sanitizeTree(document);
+    startObserver();
+  }
+})();
+`;
+
 /**
  * Browser manager for creating and managing browser instances
  */
@@ -21,6 +356,15 @@ export class BrowserManager {
     this.currentProxy = null;
     this.proxyRetryCount = 0;
     this.userDataDir = path.join(os.homedir(), '.playwright-browser-data');
+  }
+
+  async _applyExternalProtocolGuard(context) {
+    try {
+      await context.addInitScript(EXTERNAL_PROTOCOL_GUARD_SCRIPT);
+      logger.info('Applied external protocol guard script');
+    } catch (error) {
+      logger.warn('Failed to apply external protocol guard script:', error.message);
+    }
   }
 
   /**
@@ -182,6 +526,9 @@ export class BrowserManager {
 
       // Set default timeout
       this.context.setDefaultTimeout(BROWSER_CONFIG.timeout);
+
+      // Apply external protocol guard for security
+      await this._applyExternalProtocolGuard(this.context);
 
       // Validate proxy if configured (skip if using persistent context with extensions)
       if (proxyConfig && !usePersistentContext) {

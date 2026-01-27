@@ -1,4 +1,5 @@
 import { logger } from '../utils/logger.js';
+import { registerRunExitHandler, markRunFinalized } from '../utils/run-exit-handler.js';
 import { ClinicAssistAutomation } from '../automations/clinic-assist.js';
 
 /**
@@ -31,13 +32,29 @@ export class VisitDetailsExtractor {
         throw new Error('Failed to navigate to Patient Page');
       }
 
-      // 3. Search for patient by name
-      logger.info(`[VisitDetails] Searching for patient: ${visit.patient_name}`);
-      await this.clinicAssist.searchPatientByName(visit.patient_name);
+      // 3. Get PCNO (patient number) from extraction_metadata or use name as fallback
+      const pcno = visit.extraction_metadata?.pcno || null;
+      const usePatientNumber = pcno && /^\d{4,5}$/.test(String(pcno).trim()); // 4-5 digit number
 
-      // 4. Open patient from search results (opens biodata/info page)
-      logger.info(`[VisitDetails] Opening patient record for: ${visit.patient_name}`);
-      await this.clinicAssist.openPatientFromSearchResults(visit.patient_name);
+      if (usePatientNumber) {
+        // 3a. Search for patient by number (more accurate)
+        logger.info(`[VisitDetails] Searching for patient by number: ${pcno} (${visit.patient_name})`);
+        await this.clinicAssist.searchPatientByNumber(String(pcno).trim());
+        await this.clinicAssist.page.waitForTimeout(2000);
+
+        // 4a. Open patient from search results by number
+        logger.info(`[VisitDetails] Opening patient record by number: ${pcno}`);
+        await this.clinicAssist.openPatientFromSearchResultsByNumber(String(pcno).trim());
+      } else {
+        // 3b. Fallback: Search for patient by name
+        logger.info(`[VisitDetails] PCNO not available, searching for patient by name: ${visit.patient_name}`);
+        await this.clinicAssist.searchPatientByName(visit.patient_name);
+        await this.clinicAssist.page.waitForTimeout(2000);
+
+        // 4b. Open patient from search results by name
+        logger.info(`[VisitDetails] Opening patient record for: ${visit.patient_name}`);
+        await this.clinicAssist.openPatientFromSearchResults(visit.patient_name);
+      }
       
       // Wait for biodata page to load
       await this.clinicAssist.page.waitForTimeout(2000);
@@ -139,47 +156,77 @@ export class VisitDetailsExtractor {
       details: [],
     };
 
-    logger.info(`[VisitDetails] Starting batch extraction for ${visits.length} visits`);
+    const runMetadata = { maxRetries, trigger: 'automation' };
+    const runId = await this._startRun('visit_details', runMetadata);
+    await this._updateRun(runId, { total_records: visits.length });
+    const updateRunBound = (id, updates) => this._updateRun(id, updates);
+    registerRunExitHandler(this.supabase, runId, updateRunBound);
 
-    for (let i = 0; i < visits.length; i++) {
-      const visit = visits[i];
-      
-      // Check if visit should be skipped (already completed or exceeded retries)
-      const metadata = visit.extraction_metadata || {};
-      const status = metadata.detailsExtractionStatus;
-      const attempts = metadata.detailsExtractionAttempts || 0;
+    try {
+      logger.info(`[VisitDetails] Starting batch extraction for ${visits.length} visits`);
 
-      if (status === 'completed') {
-        logger.info(`[VisitDetails] Skipping visit ${visit.id} - already completed`);
-        results.skipped++;
-        continue;
+      for (let i = 0; i < visits.length; i++) {
+        const visit = visits[i];
+
+        // Check if visit should be skipped (already completed or exceeded retries)
+        const metadata = visit.extraction_metadata || {};
+        const status = metadata.detailsExtractionStatus;
+        const attempts = metadata.detailsExtractionAttempts || 0;
+
+        if (status === 'completed') {
+          logger.info(`[VisitDetails] Skipping visit ${visit.id} - already completed`);
+          results.skipped++;
+          continue;
+        }
+
+        if (status === 'failed' && attempts >= maxRetries) {
+          logger.info(`[VisitDetails] Skipping visit ${visit.id} - exceeded max retries (${attempts}/${maxRetries})`);
+          results.skipped++;
+          continue;
+        }
+
+        // Extract details for this visit
+        logger.info(`[VisitDetails] Processing visit ${i + 1}/${visits.length}: ${visit.patient_name} (${visit.visit_date})`);
+        const result = await this.extractForVisit(visit);
+
+        results.details.push(result);
+
+        if (result.success) {
+          results.completed++;
+        } else {
+          results.failed++;
+        }
+
+        await this._updateRun(runId, {
+          completed_count: results.completed,
+          failed_count: results.failed,
+        });
+
+        // Small delay between visits to avoid overwhelming the system
+        await this.clinicAssist.page.waitForTimeout(1000);
       }
 
-      if (status === 'failed' && attempts >= maxRetries) {
-        logger.info(`[VisitDetails] Skipping visit ${visit.id} - exceeded max retries (${attempts}/${maxRetries})`);
-        results.skipped++;
-        continue;
-      }
+      logger.info(`[VisitDetails] Batch extraction complete: ${results.completed} completed, ${results.failed} failed, ${results.skipped} skipped`);
 
-      // Extract details for this visit
-      logger.info(`[VisitDetails] Processing visit ${i + 1}/${visits.length}: ${visit.patient_name} (${visit.visit_date})`);
-      const result = await this.extractForVisit(visit);
-
-      results.details.push(result);
-
-      if (result.success) {
-        results.completed++;
-      } else {
-        results.failed++;
-      }
-
-      // Small delay between visits to avoid overwhelming the system
-      await this.clinicAssist.page.waitForTimeout(1000);
+      await this._updateRun(runId, {
+        status: 'completed',
+        finished_at: new Date().toISOString(),
+        completed_count: results.completed,
+        failed_count: results.failed,
+        metadata: { ...runMetadata, skippedCount: results.skipped },
+      });
+      markRunFinalized();
+      return results;
+    } catch (error) {
+      await this._updateRun(runId, {
+        status: 'failed',
+        finished_at: new Date().toISOString(),
+        error_message: error.message || String(error),
+        metadata: { ...runMetadata, skippedCount: results.skipped },
+      });
+      markRunFinalized();
+      throw error;
     }
-
-    logger.info(`[VisitDetails] Batch extraction complete: ${results.completed} completed, ${results.failed} failed, ${results.skipped} skipped`);
-
-    return results;
   }
 
   /**
@@ -312,6 +359,45 @@ export class VisitDetailsExtractor {
     } catch (error) {
       logger.error(`[VisitDetails] Error updating visit details: ${error.message}`);
       throw error;
+    }
+  }
+
+  async _startRun(runType, metadata = {}) {
+    if (!this.supabase) return null;
+    try {
+      const { data, error } = await this.supabase
+        .from('rpa_extraction_runs')
+        .insert({
+          run_type: runType,
+          status: 'running',
+          started_at: new Date().toISOString(),
+          metadata,
+        })
+        .select('id')
+        .single();
+      if (error) {
+        logger.error('[VisitDetails] Failed to create run record', { error: error.message });
+        return null;
+      }
+      return data?.id ?? null;
+    } catch (error) {
+      logger.error('[VisitDetails] Error creating run record', { error: error.message });
+      return null;
+    }
+  }
+
+  async _updateRun(runId, updates) {
+    if (!this.supabase || !runId) return;
+    try {
+      const { error } = await this.supabase
+        .from('rpa_extraction_runs')
+        .update(updates)
+        .eq('id', runId);
+      if (error) {
+        logger.error('[VisitDetails] Failed to update run record', { error: error.message });
+      }
+    } catch (error) {
+      logger.error('[VisitDetails] Error updating run record', { error: error.message });
     }
   }
 }

@@ -18,46 +18,80 @@ export class BatchExtraction {
    * Extract all queue items from today
    */
   async extractAllQueueItemsToday(branchName = '__FIRST__', deptName = 'Reception') {
-    this.steps.step(1, 'Login to Clinic Assist');
-    await this.clinicAssist.login();
+    const runMetadata = { branchName, deptName, trigger: 'automation' };
+    const runId = await this._startRun('queue_list', runMetadata);
 
-    this.steps.step(2, 'Navigate to Queue', { branchName, deptName });
-    await this.clinicAssist.navigateToQueue(branchName, deptName);
+    try {
+      this.steps.step(1, 'Login to Clinic Assist');
+      await this.clinicAssist.login();
 
-    this.steps.step(3, 'Get all queue items from today');
-    const queueItems = await this.getAllQueueItems();
+      this.steps.step(2, 'Navigate to Queue', { branchName, deptName });
+      await this.clinicAssist.navigateToQueue(branchName, deptName);
 
-    this.steps.step(4, `Found ${queueItems.length} queue items; extracting data`);
-    
-    const extractedItems = [];
-    for (let i = 0; i < queueItems.length; i++) {
-      const item = queueItems[i];
-      this.steps.step(4, `Extracting item ${i + 1}/${queueItems.length}`, { 
-        patientName: item.patientName, 
-        payType: item.payType 
+      this.steps.step(3, 'Get all queue items from today');
+      const queueItems = await this.getAllQueueItems();
+      await this._updateRun(runId, { total_records: queueItems.length });
+
+      this.steps.step(4, `Found ${queueItems.length} queue items; extracting data`);
+
+      const extractedItems = [];
+      let successCount = 0;
+      let failedCount = 0;
+      for (let i = 0; i < queueItems.length; i++) {
+        const item = queueItems[i];
+        this.steps.step(4, `Extracting item ${i + 1}/${queueItems.length}`, {
+          patientName: item.patientName,
+          payType: item.payType,
+        });
+
+        try {
+          const extracted = await this.extractQueueItemData(item);
+          if (extracted) {
+            extractedItems.push(extracted);
+            if (extracted.extracted) successCount++;
+            else failedCount++;
+          } else {
+            failedCount++;
+          }
+        } catch (error) {
+          failedCount++;
+          logger.error(`[BATCH] Failed to extract item ${i + 1}`, { error: error.message, item });
+          // Continue with next item
+        }
+
+        await this._updateRun(runId, {
+          completed_count: successCount,
+          failed_count: failedCount,
+        });
+      }
+
+      this.steps.step(5, `Extracted ${extractedItems.length} items; saving to CRM`);
+      const saved = await this.saveToCRM(extractedItems);
+
+      await this._updateRun(runId, {
+        status: 'completed',
+        finished_at: new Date().toISOString(),
+        total_records: queueItems.length,
+        completed_count: successCount,
+        failed_count: failedCount,
+        metadata: { ...runMetadata, extractedCount: successCount, savedCount: saved },
       });
 
-      try {
-        const extracted = await this.extractQueueItemData(item);
-        if (extracted) {
-          extractedItems.push(extracted);
-        }
-      } catch (error) {
-        logger.error(`[BATCH] Failed to extract item ${i + 1}`, { error: error.message, item });
-        // Continue with next item
-      }
+      return {
+        success: true,
+        totalItems: queueItems.length,
+        extractedCount: extractedItems.length,
+        savedCount: saved,
+        items: extractedItems,
+      };
+    } catch (error) {
+      await this._updateRun(runId, {
+        status: 'failed',
+        finished_at: new Date().toISOString(),
+        error_message: error.message || String(error),
+      });
+      throw error;
     }
-
-    this.steps.step(5, `Extracted ${extractedItems.length} items; saving to CRM`);
-    const saved = await this.saveToCRM(extractedItems);
-
-    return {
-      success: true,
-      totalItems: queueItems.length,
-      extractedCount: extractedItems.length,
-      savedCount: saved,
-      items: extractedItems,
-    };
   }
 
   /**
@@ -278,19 +312,36 @@ export class BatchExtraction {
   }
 
   /**
-   * Fallback: Extract patients from Reports → Queue List
-   * This is used when the queue page is empty
+   * Extract patients from Reports → Queue List (date-based).
+   * Used by extract-date-range and extract-daily. We always navigate to the Queue List
+   * report, search by date, then extract (Excel export or grid). The report may return
+   * 0 items for that date; we still go there because we cannot know it's empty otherwise.
+   *
+   * @param {string|null} date - YYYY-MM-DD. Defaults to today.
+   * @param {{ skipRunLogging?: boolean }} options - If skipRunLogging, do not create/update
+   *   rpa_extraction_runs (caller already tracks the run, e.g. extract-date-range).
    */
-  async extractFromReportsQueueList(date = null) {
+  async extractFromReportsQueueList(date = null, options = {}) {
+    const { skipRunLogging = false } = options;
+    const targetDate = date || new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    const runMetadata = { date: targetDate, trigger: skipRunLogging ? 'extract-date-range' : 'manual' };
+    const runId = skipRunLogging ? null : await this._startRun('queue_list', runMetadata);
+
     try {
-      this.steps.step(3, 'Attempting fallback: Reports → Queue List');
-      const targetDate = date || new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-      logger.info(`[REPORTS] Extracting from queue list for date: ${targetDate}`);
+      this.steps.step(3, 'Reports → Queue List (date-based extraction)');
+      logger.info(`[REPORTS] Navigating to Queue List report for date: ${targetDate}`);
 
       // Navigate to Reports first (while we're still logged in and on a valid page)
       const navigated = await this.clinicAssist.navigateToReports();
       if (!navigated) {
         logger.warn('[REPORTS] Could not navigate to Reports section');
+        if (runId) {
+          await this._updateRun(runId, {
+            status: 'failed',
+            finished_at: new Date().toISOString(),
+            error_message: 'Could not navigate to Reports section',
+          });
+        }
         return [];
       }
 
@@ -298,14 +349,19 @@ export class BatchExtraction {
       await this.clinicAssist.page.waitForTimeout(2000);
       
       // Try to find and click QueueReport link from Reports page
-      // OR navigate directly from Reports context
       const queueListOpened = await this.clinicAssist.navigateToQueueListReport();
       if (!queueListOpened) {
         logger.warn('[REPORTS] Could not find QueueReport link, trying direct navigation from Reports context');
-        // Try direct navigation from Reports page (should maintain session)
         const directNav = await this.clinicAssist.navigateDirectlyToQueueReport();
         if (!directNav) {
           logger.warn('[REPORTS] Direct navigation also failed');
+          if (runId) {
+            await this._updateRun(runId, {
+              status: 'failed',
+              finished_at: new Date().toISOString(),
+              error_message: 'Could not navigate to Queue Report',
+            });
+          }
           return [];
         }
       }
@@ -314,19 +370,41 @@ export class BatchExtraction {
       await this.clinicAssist.page.waitForTimeout(2000);
       const searchResult = await this.clinicAssist.searchQueueListByDate(targetDate);
       
-      // Even if search didn't work, try to extract data (maybe data is already shown)
       if (!searchResult) {
-        logger.warn('[REPORTS] Could not search queue list by date, but will try to extract existing data');
+        logger.warn('[REPORTS] Could not search queue list by date; will try to extract whatever is shown');
       }
 
-      // Extract patient data from the results (wait a bit longer if search was executed)
+      // Extract patient data (Excel export preferred, then grid/iframe)
       await this.clinicAssist.page.waitForTimeout(searchResult ? 3000 : 1000);
       const items = await this.clinicAssist.extractQueueListResults();
-      
-      logger.info(`[REPORTS] Extracted ${items.length} items from queue list`);
+
+      if (items.length === 0) {
+        logger.info(`[REPORTS] Queue list report returned 0 items for ${targetDate} (report may be empty for this date)`);
+      } else {
+        logger.info(`[REPORTS] Extracted ${items.length} items from queue list for ${targetDate}`);
+      }
+
+      if (runId) {
+        await this._updateRun(runId, {
+          total_records: items.length,
+          completed_count: items.length,
+          failed_count: 0,
+          status: 'completed',
+          finished_at: new Date().toISOString(),
+          metadata: { ...runMetadata, extractedCount: items.length },
+        });
+      }
+
       return items || [];
     } catch (error) {
       logger.error('[REPORTS] Error extracting from reports queue list', { error: error.message });
+      if (runId) {
+        await this._updateRun(runId, {
+          status: 'failed',
+          finished_at: new Date().toISOString(),
+          error_message: error.message || String(error),
+        });
+      }
       return [];
     }
   }
@@ -401,6 +479,7 @@ export class BatchExtraction {
             extracted: item.extracted,
             extractedAt: item.extractedAt || new Date().toISOString(),
             sources: item.claimDetails?.sources || {},
+            pcno: item.pcno || null, // Save PCNO (patient number) for future searches
           },
         };
 
@@ -440,6 +519,45 @@ export class BatchExtraction {
 
     this.steps.step(6, `Saved ${savedCount}/${items.length} items to CRM`);
     return savedCount;
+  }
+
+  async _startRun(runType, metadata = {}) {
+    if (!this.supabase) return null;
+    try {
+      const { data, error } = await this.supabase
+        .from('rpa_extraction_runs')
+        .insert({
+          run_type: runType,
+          status: 'running',
+          started_at: new Date().toISOString(),
+          metadata,
+        })
+        .select('id')
+        .single();
+      if (error) {
+        logger.error('[BATCH] Failed to create run record', { error: error.message });
+        return null;
+      }
+      return data?.id ?? null;
+    } catch (error) {
+      logger.error('[BATCH] Error creating run record', { error: error.message });
+      return null;
+    }
+  }
+
+  async _updateRun(runId, updates) {
+    if (!this.supabase || !runId) return;
+    try {
+      const { error } = await this.supabase
+        .from('rpa_extraction_runs')
+        .update(updates)
+        .eq('id', runId);
+      if (error) {
+        logger.error('[BATCH] Failed to update run record', { error: error.message });
+      }
+    } catch (error) {
+      logger.error('[BATCH] Error updating run record', { error: error.message });
+    }
   }
 }
 
