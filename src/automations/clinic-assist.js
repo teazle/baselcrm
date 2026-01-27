@@ -7672,7 +7672,7 @@ export class ClinicAssistAutomation {
    */
   async getChargeTypeAndDiagnosis(visitDate) {
     try {
-      this._logStep('Get charge type and diagnosis for visit date', { visitDate });
+      this._logStep('Get charge type, diagnosis, and MC data for visit date', { visitDate });
       
       // Step 1: Check charge type from TX History All tab
       const hasFirstConsult = await this.hasFirstConsultOnDate(visitDate);
@@ -7680,12 +7680,42 @@ export class ClinicAssistAutomation {
       
       this._logStep('Charge type determined', { visitDate, chargeType, hasFirstConsult });
       
-      // Step 2: Try to get diagnosis from Diagnosis tab first
+      // Step 2: Extract MC days and MC start date from All tab
+      let mcDays = 0;
+      let mcStartDate = null;
+      try {
+        const mcData = await this.page.evaluate((targetDate) => {
+          const rows = Array.from(document.querySelectorAll('table tr, [role="row"]'));
+          for (const row of rows) {
+            const text = row.textContent || '';
+            // Look for rows containing the visit date
+            if (text.includes(targetDate.replace(/-/g, '/'))) {
+              // Extract MC days (look for patterns like "1 day", "2 days", etc.)
+              const mcMatch = text.match(/(\d+)\s*day/i);
+              if (mcMatch) {
+                return {
+                  mcDays: parseInt(mcMatch[1]),
+                  mcStartDate: targetDate.replace(/-/g, '/')
+                };
+              }
+            }
+          }
+          return { mcDays: 0, mcStartDate: null };
+        }, visitDate);
+        
+        mcDays = mcData.mcDays;
+        mcStartDate = mcData.mcStartDate;
+        this._logStep('MC data extracted from All tab', { mcDays, mcStartDate });
+      } catch (e) {
+        this._logStep('Could not extract MC data, using defaults', { error: e.message });
+      }
+      
+      // Step 3: Try to get diagnosis from Diagnosis tab first
       await this.navigateToTXHistory().catch(() => {});
       await this.openDiagnosisTab();
       let diagnosis = await this.extractDiagnosisForDate(visitDate);
       
-      // Step 3: If not found, try Past Notes tab
+      // Step 4: If not found, try Past Notes tab
       if (!diagnosis || !diagnosis.description) {
         this._logStep('Diagnosis not found in Diagnosis tab, trying Past Notes');
         diagnosis = await this.extractDiagnosisFromPastNotes(visitDate);
@@ -7693,13 +7723,17 @@ export class ClinicAssistAutomation {
       
       return {
         chargeType,
-        diagnosis
+        diagnosis,
+        mcDays,
+        mcStartDate
       };
     } catch (error) {
       logger.error('Failed to get charge type and diagnosis:', error);
       return {
         chargeType: 'follow', // Default to follow-up if error
-        diagnosis: null
+        diagnosis: null,
+        mcDays: 0,
+        mcStartDate: null
       };
     }
   }

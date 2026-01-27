@@ -119,12 +119,12 @@ export class MHCAsiaAutomation {
         logger.info('Login button clicked');
       }
 
-      // Wait for navigation - minimal wait times
+      // Wait for navigation - ultra minimal wait times
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
       // Don't wait for networkidle (MHC can keep connections open)
-      await this.page.waitForTimeout(100);
-      // Reduced timeout for Log Out check - don't wait too long
-      await this.page.locator('text=/Log\\s*Out/i').first().waitFor({ state: 'attached', timeout: 2000 }).catch(() => {});
+      // No wait - proceed immediately after domcontentloaded
+      // Reduced timeout for Log Out check - proceed quickly
+      await this.page.locator('text=/Log\\s*Out/i').first().waitFor({ state: 'attached', timeout: 1000 }).catch(() => {});
       
       // Check for error messages
       const errorSelectors = [
@@ -447,7 +447,7 @@ export class MHCAsiaAutomation {
       logger.info('Navigating to Normal Visit > Search Other Programs...');
       
       await this.page.waitForLoadState('domcontentloaded');
-      await this.page.waitForTimeout(300);
+      // No wait - proceed immediately to click Normal Visit
       
       // Step 1: Click on "Normal Visit" or similar - try multiple selectors
       const normalVisitSelectors = [

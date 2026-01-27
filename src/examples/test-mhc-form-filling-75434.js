@@ -80,6 +80,8 @@ function parseQueueReportExcel(excelPath) {
 async function testMHCFormFilling() {
   const browserManager = new BrowserManager();
   let page = null;
+  const timings = {}; // Track timing for all steps
+  const startTime = Date.now();
   
   try {
     // Patient details
@@ -138,15 +140,35 @@ async function testMHCFormFilling() {
     logger.info('');
     
     logger.info('   🌐 Initializing browser for Clinic Assist...');
+    const stepStart = Date.now();
     await browserManager.init();
+    
+    // Close all extra tabs (Urban VPN, about:blank, etc.)
+    const allPages = browserManager.context.pages();
+    logger.info(`   📑 Found ${allPages.length} tabs, closing extras...`);
+    for (const p of allPages) {
+      const url = p.url();
+      if (url.includes('urban-vpn') || url === 'about:blank' || url === 'chrome://extensions') {
+        try {
+          await p.close();
+          logger.info(`   ✅ Closed extra tab: ${url}`);
+        } catch (e) {
+          logger.warn(`   ⚠️  Could not close tab: ${url}`);
+        }
+      }
+    }
+    
     const clinicAssistPage = await browserManager.newPage();
+    timings['browser_init'] = Date.now() - stepStart;
     
     // Dialog handler is now set up in ClinicAssistAutomation constructor
     const clinicAssist = new ClinicAssistAutomation(clinicAssistPage);
     
     logger.info('   🔐 Logging into Clinic Assist...');
+    const loginStart = Date.now();
     await clinicAssist.login();
-    logger.info('   ✅ Clinic Assist login successful');
+    timings['clinic_assist_login'] = Date.now() - loginStart;
+    logger.info(`   ✅ Clinic Assist login successful (${timings['clinic_assist_login']}ms)`);
     
     logger.info(`   👤 Searching for patient ${patientNumber}...`);
     await clinicAssist.navigateToPatientPage();
@@ -168,8 +190,14 @@ async function testMHCFormFilling() {
       ? `${chargeTypeAndDiagnosis.diagnosis.code || ''} ${chargeTypeAndDiagnosis.diagnosis.description || ''}`.trim()
       : 'Not found';
     
+    // Extract MC days and MC start date from visit data
+    const mcDays = chargeTypeAndDiagnosis.mcDays || 0;
+    const mcStartDate = chargeTypeAndDiagnosis.mcStartDate || visitDateForMHC;
+    
     logger.info(`   ✅ Charge Type: ${chargeTypeLabel}`);
     logger.info(`   ✅ Diagnosis: ${diagnosisInfo}`);
+    logger.info(`   ✅ MC Days: ${mcDays}`);
+    logger.info(`   ✅ MC Start Date: ${mcStartDate}`);
     logger.info('');
     
     // Take screenshot of Clinic Assist
@@ -201,8 +229,10 @@ async function testMHCFormFilling() {
     logger.info('');
     
     logger.info('   🔐 Navigating to login page...');
+    const mhcLoginStart = Date.now();
     await mhcAsia.login();
-    logger.info('   ✅ Successfully logged in');
+    timings['mhc_asia_login'] = Date.now() - mhcLoginStart;
+    logger.info(`   ✅ Successfully logged in (${timings['mhc_asia_login']}ms)`);
     
     await page.screenshot({ path: 'screenshots/01-login-complete.png', fullPage: true }).catch(() => {});
     logger.info('   📸 Screenshot: 01-login-complete.png\n');
@@ -216,8 +246,10 @@ async function testMHCFormFilling() {
     logger.info('');
     
     logger.info('   🔍 Navigating to patient search page through UI...');
+    const navStart = Date.now();
     await mhcAsia.navigateToNormalVisit();
-    logger.info('   ✅ At patient search page');
+    timings['navigate_to_search'] = Date.now() - navStart;
+    logger.info(`   ✅ At patient search page (${timings['navigate_to_search']}ms)`);
     
     await page.screenshot({ path: 'screenshots/02-search-page.png', fullPage: true }).catch(() => {});
     logger.info('   📸 Screenshot: 02-search-page.png\n');
@@ -303,7 +335,23 @@ async function testMHCFormFilling() {
     logger.info('      📸 Screenshot: 07-consultation-fee-set.png');
     logger.info('');
     
-    // 7d. Diagnosis (from Clinic Assist)
+    // 7d. MC Days (from Clinic Assist)
+    if (mcDays > 0) {
+      logger.info('   🏥 Setting MC Days...');
+      logger.info(`      Value: ${mcDays} day(s)`);
+      await mhcAsia.fillMcDays(mcDays);
+      await page.waitForTimeout(500);
+      logger.info(`      ✅ MC days set to ${mcDays}`);
+      
+      await page.screenshot({ path: 'screenshots/07b-mc-days-set.png', fullPage: true }).catch(() => {});
+      logger.info('      📸 Screenshot: 07b-mc-days-set.png');
+      logger.info('');
+    } else {
+      logger.info('   ℹ️  No MC days for this visit');
+      logger.info('');
+    }
+    
+    // 7e. Diagnosis (from Clinic Assist)
     logger.info('   🩺 Selecting Diagnosis...');
     if (chargeTypeAndDiagnosis.diagnosis && chargeTypeAndDiagnosis.diagnosis.description) {
       const diagText = chargeTypeAndDiagnosis.diagnosis.description;
@@ -333,20 +381,27 @@ async function testMHCFormFilling() {
     logger.info('');
     
     // ============================================
-    // STEP 8: Compute Claim
+    // STEP 8: Claim automatically computed (no manual click needed)
     // ============================================
     logger.info('┌─────────────────────────────────────────────────────────────┐');
-    logger.info('│ STEP 8: Compute Claim                                      │');
+    logger.info('│ STEP 8: Claim Auto-Computed                                │');
     logger.info('└─────────────────────────────────────────────────────────────┘');
     logger.info('');
     
-    logger.info('   🧮 Clicking "Compute claim" button...');
-    await mhcAsia.computeClaim();
-    await page.waitForTimeout(3000); // Wait for calculation
-    logger.info('   ✅ Claim computed - totals calculated');
+    logger.info('   ✅ Claim automatically computed by system');
+    await page.waitForTimeout(1000); // Brief wait for auto-calculation
+    
+    // Scroll down to see more of the page
+    await page.evaluate(() => {
+      window.scrollTo(0, document.body.scrollHeight);
+    }).catch(() => {});
+    await page.waitForTimeout(500);
     
     await page.screenshot({ path: 'screenshots/09-claim-computed.png', fullPage: true }).catch(() => {});
     logger.info('   📸 Screenshot: 09-claim-computed.png\n');
+    
+    const totalTime = Date.now() - startTime;
+    timings['total'] = totalTime;
     
     // ============================================
     // FINAL SUMMARY
@@ -375,6 +430,13 @@ async function testMHCFormFilling() {
     logger.info('   07-consultation-fee-set.png');
     logger.info('   08-diagnosis-selected.png');
     logger.info('   09-claim-computed.png');
+    logger.info('');
+    logger.info('⏱️  Timing Breakdown:');
+    logger.info(`   Browser Init: ${timings['browser_init'] || 0}ms`);
+    logger.info(`   Clinic Assist Login: ${timings['clinic_assist_login'] || 0}ms`);
+    logger.info(`   MHC Asia Login: ${timings['mhc_asia_login'] || 0}ms`);
+    logger.info(`   Navigate to Search: ${timings['navigate_to_search'] || 0}ms`);
+    logger.info(`   Total Time: ${timings['total'] || 0}ms (${(timings['total'] / 1000).toFixed(1)}s)`);
     logger.info('');
     logger.info('='.repeat(70));
     logger.info('>>> BROWSER IS OPEN FOR MANUAL REVIEW <<<');
