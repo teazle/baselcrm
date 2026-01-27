@@ -157,13 +157,9 @@ export class MHCAsiaAutomation {
         throw new Error('Authentication failed');
       }
 
-      // Wait for page to be interactive - skip networkidle (MHC keeps connections open)
+      // Skip waiting for networkidle - MHC keeps connections open
+      // Just wait for DOM and proceed quickly
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
-      // Brief pause for any grey overlay to clear
-      await this.page.waitForTimeout(300);
-      
-      // Take screenshot after login (non-blocking)
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-after-login.png', fullPage: true }).catch(() => {});
       
       logger.info(`Successfully logged into ${this.config.name}`);
       this._logStep('Login ok');
@@ -547,7 +543,7 @@ export class MHCAsiaAutomation {
             if (isVisible) {
               this._logStep('Found Normal Visit link', { selector });
               await this._safeClick(link, 'Normal Visit');
-              await this.page.screenshot({ path: 'screenshots/mhc-asia-after-normal-visit.png', fullPage: true }).catch(() => {});
+              // Skip screenshot for speed
               normalVisitClicked = true;
               break;
             }
@@ -569,7 +565,7 @@ export class MHCAsiaAutomation {
       // 2. "Search under other programs"
       // We'll proceed directly to the tile selection - no additional step needed here
       this._logStep('At program selection page (Normal Visit clicked)');
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-programs-page.png', fullPage: true }).catch(() => {});
+      // Skip screenshot for speed
       
       return true;
     } catch (error) {

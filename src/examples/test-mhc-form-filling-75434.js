@@ -226,7 +226,7 @@ async function testMHCFormFilling() {
     logger.info('');
     
     // Take screenshot of Clinic Assist
-    await clinicAssistPage.screenshot({ path: 'screenshots/00-clinic-assist-data.png', fullPage: true }).catch(() => {});
+    await clinicAssistPage.screenshot({ path: 'screenshots/00-clinic-assist-data.png', fullPage: false }).catch(() => {});
     
     // ============================================
     // STEP 3: Initialize Browser for MHC
@@ -274,8 +274,8 @@ async function testMHCFormFilling() {
     timings['mhc_asia_login'] = Date.now() - mhcLoginStart;
     logger.info(`   ✅ Successfully logged in (${timings['mhc_asia_login']}ms)`);
     
-    await page.screenshot({ path: 'screenshots/01-login-complete.png', fullPage: true }).catch(() => {});
-    logger.info('   📸 Screenshot: 01-login-complete.png\n');
+    // Skip screenshot here - video is recording anyway
+    logger.info('   📸 Skipping screenshot (video recording active)\n');
     
     // ============================================
     // STEP 4: Navigate to Patient Search
@@ -291,7 +291,7 @@ async function testMHCFormFilling() {
     timings['navigate_to_search'] = Date.now() - navStart;
     logger.info(`   ✅ At patient search page (${timings['navigate_to_search']}ms)`);
     
-    await page.screenshot({ path: 'screenshots/02-search-page.png', fullPage: true }).catch(() => {});
+    await page.screenshot({ path: 'screenshots/02-search-page.png', fullPage: false }).catch(() => {});
     logger.info('   📸 Screenshot: 02-search-page.png\n');
     
     // ============================================
@@ -307,7 +307,7 @@ async function testMHCFormFilling() {
     logger.info(`   ✅ Patient found!`);
     logger.info(`   ✅ Portal: ${searchResult.portal}`);
     
-    await page.screenshot({ path: 'screenshots/03-search-results.png', fullPage: true }).catch(() => {});
+    await page.screenshot({ path: 'screenshots/03-search-results.png', fullPage: false }).catch(() => {});
     logger.info('   📸 Screenshot: 03-search-results.png\n');
     
     // ============================================
@@ -327,7 +327,7 @@ async function testMHCFormFilling() {
     await page.waitForTimeout(500);
     logger.info('   ✅ Visit form opened');
     
-    await page.screenshot({ path: 'screenshots/04-visit-form-opened.png', fullPage: true }).catch(() => {});
+    await page.screenshot({ path: 'screenshots/04-visit-form-opened.png', fullPage: false }).catch(() => {});
     logger.info('   📸 Screenshot: 04-visit-form-opened.png\n');
     
     // ============================================
@@ -345,7 +345,7 @@ async function testMHCFormFilling() {
     await page.waitForTimeout(200);
     logger.info('      ✅ Visit date filled');
     
-    await page.screenshot({ path: 'screenshots/05-visit-date-filled.png', fullPage: true }).catch(() => {});
+    await page.screenshot({ path: 'screenshots/05-visit-date-filled.png', fullPage: false }).catch(() => {});
     logger.info('      📸 Screenshot: 05-visit-date-filled.png');
     logger.info('');
     
@@ -360,7 +360,7 @@ async function testMHCFormFilling() {
     await page.waitForTimeout(200);
     logger.info(`      ✅ Charge type set to "${chargeTypeLabel}"`);
     
-    await page.screenshot({ path: 'screenshots/06-charge-type-set.png', fullPage: true }).catch(() => {});
+    await page.screenshot({ path: 'screenshots/06-charge-type-set.png', fullPage: false }).catch(() => {});
     logger.info('      📸 Screenshot: 06-charge-type-set.png');
     logger.info('');
     
@@ -371,7 +371,7 @@ async function testMHCFormFilling() {
     await page.waitForTimeout(500); // Wait for dialog to appear and be accepted
     logger.info('      ✅ Consultation fee set (max amount accepted via dialog)');
     
-    await page.screenshot({ path: 'screenshots/07-consultation-fee-set.png', fullPage: true }).catch(() => {});
+    await page.screenshot({ path: 'screenshots/07-consultation-fee-set.png', fullPage: false }).catch(() => {});
     logger.info('      📸 Screenshot: 07-consultation-fee-set.png');
     logger.info('');
     
@@ -389,7 +389,7 @@ async function testMHCFormFilling() {
       
       logger.info(`      ✅ MC days set to ${mcDays}, start date: ${mcStartDate}`);
       
-      await page.screenshot({ path: 'screenshots/07b-mc-days-set.png', fullPage: true }).catch(() => {});
+      await page.screenshot({ path: 'screenshots/07b-mc-days-set.png', fullPage: false }).catch(() => {});
       logger.info('      📸 Screenshot: 07b-mc-days-set.png');
       logger.info('');
     } else {
@@ -420,7 +420,7 @@ async function testMHCFormFilling() {
       logger.info('      ⚠️  No diagnosis found in Clinic Assist, skipping');
     }
     
-    await page.screenshot({ path: 'screenshots/08-diagnosis-selected.png', fullPage: true }).catch(() => {});
+    await page.screenshot({ path: 'screenshots/08-diagnosis-selected.png', fullPage: false }).catch(() => {});
     logger.info('      📸 Screenshot: 08-diagnosis-selected.png');
     logger.info('');
     
@@ -454,7 +454,7 @@ async function testMHCFormFilling() {
     }).catch(() => {});
     await page.waitForTimeout(300);
     
-    await page.screenshot({ path: 'screenshots/09-claim-computed.png', fullPage: true }).catch(() => {});
+    await page.screenshot({ path: 'screenshots/09-claim-computed.png', fullPage: false }).catch(() => {});
     logger.info('   📸 Screenshot: 09-claim-computed.png\n');
     
     const totalTime = Date.now() - startTime;
@@ -544,7 +544,7 @@ async function testMHCFormFilling() {
     logger.error(`\nStack Trace:\n${error.stack}`);
     
     if (page) {
-      await page.screenshot({ path: 'screenshots/ERROR-final-state.png', fullPage: true }).catch(() => {});
+      await page.screenshot({ path: 'screenshots/ERROR-final-state.png', fullPage: false }).catch(() => {});
       logger.error('\n📸 Error screenshot saved: ERROR-final-state.png');
       
       // Save video even on error
