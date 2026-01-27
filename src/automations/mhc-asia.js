@@ -159,8 +159,8 @@ export class MHCAsiaAutomation {
 
       // Wait for any loading/grey screen to disappear after login
       logger.info('Waiting for post-login page to fully load...');
-      await this.page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
-      await this.page.waitForTimeout(2000); // Wait for grey screen to disappear
+      await this.page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
+      await this.page.waitForTimeout(500); // Brief wait for grey screen
       
       // Take screenshot after login (non-blocking)
       await this.page.screenshot({ path: 'screenshots/mhc-asia-after-login.png', fullPage: true }).catch(() => {});
@@ -176,15 +176,15 @@ export class MHCAsiaAutomation {
   }
 
   async _safeClick(locator, label) {
-    const timeoutMs = 10000;
+    const timeoutMs = 5000;
     try {
       await locator.click({ timeout: timeoutMs });
     } catch {
       await locator.click({ timeout: timeoutMs, force: true }).catch(() => {});
     }
     // Avoid waiting for networkidle (many portals keep connections open)
-    await this.page.waitForLoadState('domcontentloaded').catch(() => {});
-    await this.page.waitForTimeout(500);
+    await this.page.waitForLoadState('domcontentloaded', { timeout: 3000 }).catch(() => {});
+    await this.page.waitForTimeout(200); // Reduced wait
     if (label) logger.info(`Clicked: ${label}`);
   }
 
@@ -274,9 +274,34 @@ export class MHCAsiaAutomation {
         return false;
       }
 
-      // Try to find MC start date field
+      // Try direct input selectors first (faster)
+      const directSelectors = [
+        'input[name*="mcStart" i]',
+        'input[name*="mc_start" i]',
+        'input[name*="mcDate" i]',
+        'input[name*="mcFromDate" i]',
+        'input[id*="mcStart" i]',
+        'input[id*="mcDate" i]',
+      ];
+
+      for (const selector of directSelectors) {
+        try {
+          const field = this.page.locator(selector).first();
+          if ((await field.count().catch(() => 0)) > 0) {
+            await field.fill(mcStartDate);
+            await this.page.waitForTimeout(100);
+            logger.info(`MC start date filled via direct selector: ${mcStartDate}`);
+            return true;
+          }
+        } catch {
+          continue;
+        }
+      }
+
+      // Try row-based selectors
       const mcStartDateSelectors = [
-        'tr:has-text("MC Start Date")',
+        'tr:has-text("MC Start")',
+        'tr:has-text("MC From")',
         'tr:has-text("MC Date")',
         'tr:has-text("Start Date")',
       ];
@@ -286,11 +311,11 @@ export class MHCAsiaAutomation {
           const row = this.page.locator(rowSelector).first();
           if ((await row.count().catch(() => 0)) === 0) continue;
 
-          const field = row.locator('input[type="text"], input[type="date"], input').first();
+          const field = row.locator('input').first();
           if ((await field.count().catch(() => 0)) === 0) continue;
 
           await field.fill(mcStartDate);
-          await this.page.waitForTimeout(300);
+          await this.page.waitForTimeout(100);
           logger.info(`MC start date filled: ${mcStartDate}`);
           return true;
         } catch {

@@ -6498,8 +6498,8 @@ export class ClinicAssistAutomation {
     try {
       this._logStep('Search patient by number', { patientNumber });
       
-      await this.page.waitForLoadState('networkidle');
-      await this.page.waitForTimeout(1000);
+      await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+      await this.page.waitForTimeout(200);
 
       // Find search input field
       const searchSelectors = [
@@ -6567,7 +6567,7 @@ export class ClinicAssistAutomation {
           if ((await button.count().catch(() => 0)) > 0) {
             await button.click();
             await this.page.waitForLoadState('domcontentloaded').catch(() => {});
-            await this.page.waitForTimeout(2000);
+            await this.page.waitForTimeout(500);
             this._logStep('Patient search executed by number', { patientNumber });
             return true;
           }
@@ -6580,14 +6580,15 @@ export class ClinicAssistAutomation {
       // Press Enter twice to handle potential dialog + search
       this._logStep('Pressing Enter to execute search (may need to dismiss dialog first)');
       await this.page.keyboard.press('Enter');
-      await this.page.waitForTimeout(500);
+      await this.page.waitForTimeout(300);
       
       // Press Enter again to ensure search executes (in case first Enter dismissed a dialog)
       await this.page.keyboard.press('Enter');
-      await this.page.waitForTimeout(500);
+      await this.page.waitForTimeout(300);
       
       // Wait for search results to load
-      await this.page.waitForTimeout(3000);
+      await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+      await this.page.waitForTimeout(500);
       this._logStep('Patient search executed by number (Enter key x2)', { patientNumber });
       return true;
     } catch (error) {
@@ -6604,7 +6605,7 @@ export class ClinicAssistAutomation {
   async openPatientFromSearchResults(patientName) {
     try {
       this._logStep('Open patient from search results', { patientName });
-      await this.page.waitForTimeout(1000);
+      await this.page.waitForTimeout(300);
 
       // Find patient row/link in search results
       const patientSelectors = [
