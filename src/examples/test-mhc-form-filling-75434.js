@@ -500,17 +500,41 @@ async function testMHCFormFilling() {
     logger.info(`   Total Time: ${timings['total'] || 0}ms (${(timings['total'] / 1000).toFixed(1)}s)`);
     logger.info('');
     logger.info('='.repeat(70));
-    logger.info('>>> BROWSER IS OPEN FOR MANUAL REVIEW <<<');
-    logger.info('>>> Connect to VNC to view the filled form <<<');
-    logger.info('>>> Form is NOT submitted - ready for review <<<');
-    logger.info('>>> Video recording is active - will be saved when browser closes <<<');
-    logger.info(`>>> Video location: ${path.join(process.cwd(), 'videos')}/ <<<`);
-    logger.info('>>> Press Ctrl+C when done reviewing <<<');
+    logger.info('>>> FORM FILLING COMPLETE <<<');
+    logger.info('>>> Saving video recording... <<<');
     logger.info('='.repeat(70));
     logger.info('');
     
-    // Keep browser open indefinitely
-    await new Promise(() => {});
+    // Close the page to save the video (Playwright saves video when page closes)
+    if (page) {
+      try {
+        const videoPath = await page.video()?.path();
+        await page.close();
+        if (videoPath) {
+          logger.info(`✅ Video saved: ${videoPath}`);
+        } else {
+          logger.info(`✅ Video saved to: ${path.join(process.cwd(), 'videos')}/`);
+        }
+      } catch (error) {
+        logger.warn(`Video save warning: ${error.message}`);
+      }
+    }
+    
+    // Close video context to ensure video is finalized
+    if (videoContext) {
+      try {
+        await videoContext.close();
+        logger.info('✅ Video context closed - video file finalized');
+      } catch (error) {
+        logger.warn(`Context close warning: ${error.message}`);
+      }
+    }
+    
+    logger.info('');
+    logger.info('='.repeat(70));
+    logger.info('>>> AUTOMATION COMPLETE <<<');
+    logger.info('>>> Check the videos/ directory for the recording <<<');
+    logger.info('='.repeat(70));
     
   } catch (error) {
     logger.error('\n' + '='.repeat(70));
@@ -522,12 +546,29 @@ async function testMHCFormFilling() {
     if (page) {
       await page.screenshot({ path: 'screenshots/ERROR-final-state.png', fullPage: true }).catch(() => {});
       logger.error('\n📸 Error screenshot saved: ERROR-final-state.png');
+      
+      // Save video even on error
+      try {
+        const videoPath = await page.video()?.path();
+        await page.close();
+        if (videoPath) {
+          logger.info(`✅ Video saved: ${videoPath}`);
+        }
+      } catch (e) {
+        logger.warn(`Video save error: ${e.message}`);
+      }
     }
     
-    logger.info('\n>>> Browser open for debugging <<<');
-    logger.info('>>> Press Ctrl+C to close <<<\n');
+    // Close video context to finalize video
+    if (videoContext) {
+      try {
+        await videoContext.close();
+      } catch (e) {
+        // Ignore
+      }
+    }
     
-    await new Promise(() => {});
+    logger.info('\n>>> Check videos/ directory for error recording <<<');
   }
 }
 
