@@ -79,18 +79,39 @@ jobs:
               echo "ℹ️  No dependency changes detected"
             fi
             
-            # Rebuild Next.js CRM app so client bundle is up to date
+            # Build and deploy Next.js CRM app
             if [ -d apps/crm ]; then
               echo "🏗️  Building CRM app (apps/crm)..."
-              (cd apps/crm && npm run build) || { echo "⚠️  Warning: CRM build failed"; }
+              cd apps/crm
+              
+              # Install CRM dependencies if needed
+              if [ ! -d node_modules ] || [ "$PACKAGE_CHANGED" = true ]; then
+                echo "📦 Installing CRM dependencies..."
+                npm install || { echo "⚠️  Warning: CRM npm install failed"; }
+              fi
+              
+              # Build the Next.js app for production
+              npm run build || { echo "❌ CRM build failed"; exit 1; }
+              
+              # Start/restart CRM with PM2
+              if command -v pm2 &> /dev/null; then
+                echo "🔄 Starting/restarting CRM with PM2..."
+                # Stop existing crm process if running
+                pm2 delete crm 2>/dev/null || true
+                # Start with ecosystem config
+                pm2 start ecosystem.config.cjs
+                pm2 save
+              else
+                echo "⚠️  PM2 not installed - CRM won't auto-start"
+              fi
+              
+              cd "$DEPLOY_PATH"
             fi
             
-            # Restart PM2 processes if running
+            # Restart other PM2 processes (RPA automation etc)
             if command -v pm2 &> /dev/null; then
-              echo "🔄 Restarting PM2 processes..."
-              pm2 restart all || pm2 reload all || true
-            else
-              echo "ℹ️  PM2 not installed, skipping process restart"
+              echo "🔄 Reloading other PM2 processes..."
+              pm2 reload all --update-env 2>/dev/null || true
             fi
             
             echo "✅ Deployment complete!"
