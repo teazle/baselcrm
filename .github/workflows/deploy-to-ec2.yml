@@ -84,6 +84,16 @@ jobs:
               echo "🏗️  Building CRM app (apps/crm)..."
               cd apps/crm
               
+              # STOP any existing process on port 3000 (dev or prod)
+              echo "🛑 Stopping any process on port 3000..."
+              if command -v pm2 &> /dev/null; then
+                pm2 delete crm 2>/dev/null || true
+                pm2 delete all 2>/dev/null || true
+              fi
+              # Kill any remaining process on port 3000
+              sudo fuser -k 3000/tcp 2>/dev/null || true
+              sleep 2
+              
               # Install CRM dependencies if needed
               if [ ! -d node_modules ] || [ "$PACKAGE_CHANGED" = true ]; then
                 echo "📦 Installing CRM dependencies..."
@@ -91,27 +101,29 @@ jobs:
               fi
               
               # Build the Next.js app for production
+              echo "🏗️  Running production build..."
               npm run build || { echo "❌ CRM build failed"; exit 1; }
               
-              # Start/restart CRM with PM2
+              # Verify build exists
+              if [ ! -d .next ]; then
+                echo "❌ .next folder not found after build!"
+                exit 1
+              fi
+              echo "✅ Build successful - .next folder exists"
+              
+              # Start CRM with PM2 in production mode
               if command -v pm2 &> /dev/null; then
-                echo "🔄 Starting/restarting CRM with PM2..."
-                # Stop existing crm process if running
-                pm2 delete crm 2>/dev/null || true
-                # Start with ecosystem config
+                echo "🚀 Starting CRM in production mode with PM2..."
                 pm2 start ecosystem.config.cjs
                 pm2 save
+                sleep 3
+                pm2 status
               else
-                echo "⚠️  PM2 not installed - CRM won't auto-start"
+                echo "⚠️  PM2 not installed - starting directly..."
+                nohup npm start > /tmp/crm.log 2>&1 &
               fi
               
               cd "$DEPLOY_PATH"
-            fi
-            
-            # Restart other PM2 processes (RPA automation etc)
-            if command -v pm2 &> /dev/null; then
-              echo "🔄 Reloading other PM2 processes..."
-              pm2 reload all --update-env 2>/dev/null || true
             fi
             
             echo "✅ Deployment complete!"
