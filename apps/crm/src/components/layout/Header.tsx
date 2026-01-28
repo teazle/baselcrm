@@ -26,7 +26,7 @@ export function Header() {
     const match = titleMap.find((x) =>
       x.prefix === "/crm" ? pathname === "/crm" : pathname.startsWith(x.prefix),
     );
-    return match ?? { title: "CRM" };
+    return match ?? { title: "CRM", subtitle: undefined, prefix: "/" };
   }, [pathname]);
 
   return (

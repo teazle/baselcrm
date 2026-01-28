@@ -71,44 +71,54 @@ export class VisitDetailsExtractor {
         logger.warn(`[VisitDetails] NRIC not found on biodata page for patient: ${visit.patient_name}`);
       }
 
-      // 5. Navigate to TX History
-      logger.info(`[VisitDetails] Navigating to TX History for visit ${visit.id}`);
-      await this.clinicAssist.navigateToTXHistory();
-
-      // 6. Open Diagnosis Tab
-      logger.info(`[VisitDetails] Opening Diagnosis Tab for visit ${visit.id}`);
-      await this.clinicAssist.openDiagnosisTab();
-
-      // 7. Extract diagnosis code and description from TX History Diagnosis Tab
-      logger.info(`[VisitDetails] Extracting diagnosis for visit ${visit.id}`);
-      const diagnosisResult = await this.clinicAssist.extractDiagnosisFromTXHistory();
-
-      // 8. Handle missing diagnosis - mark as "Missing diagnosis" if empty
+      // 5. Get charge type, diagnosis, and MC data for the visit date
+      // This single call extracts all the data needed for form filling:
+      // - chargeType: 'first' or 'follow' (First Consult vs Follow Up)
+      // - diagnosis: { code, description }
+      // - mcDays: number of MC days
+      // - mcStartDate: MC start date in DD/MM/YYYY format
+      logger.info(`[VisitDetails] Extracting charge type, diagnosis, and MC data for visit ${visit.id} on ${visit.visit_date}`);
+      const txData = await this.clinicAssist.getChargeTypeAndDiagnosis(visit.visit_date);
+      
+      const chargeType = txData.chargeType || 'follow';
+      const mcDays = txData.mcDays || 0;
+      const mcStartDate = txData.mcStartDate || null;
+      
+      // Extract diagnosis from txData
       let finalDiagnosis = 'Missing diagnosis';
       let diagnosisCode = null;
       
-      if (diagnosisResult) {
-        // diagnosisResult is now an object: { code: string|null, description: string|null }
-        if (diagnosisResult.description && diagnosisResult.description.trim()) {
-          finalDiagnosis = diagnosisResult.description.trim();
+      if (txData.diagnosis) {
+        if (txData.diagnosis.description && txData.diagnosis.description.trim()) {
+          finalDiagnosis = txData.diagnosis.description.trim();
         }
-        if (diagnosisResult.code && diagnosisResult.code.trim()) {
-          diagnosisCode = diagnosisResult.code.trim();
+        if (txData.diagnosis.code && txData.diagnosis.code.trim()) {
+          diagnosisCode = txData.diagnosis.code.trim();
         }
       }
+      
+      logger.info(`[VisitDetails] Extracted data for visit ${visit.id}:`, {
+        chargeType,
+        diagnosis: finalDiagnosis.substring(0, 50),
+        mcDays,
+        mcStartDate
+      });
 
-      // 9. Update database with extracted data and mark as 'completed'
-      // Note: Treatment detail (services/drugs) extraction from TX History not yet implemented
-      // For now, we only extract diagnosis
+      // 6. Update database with all extracted data and mark as 'completed'
       const treatmentDetail = null; // TODO: Extract services/drugs from TX History if needed
 
       await this._updateVisitWithDetails(visit.id, finalDiagnosis, diagnosisCode, treatmentDetail, {
-        source: 'tx_history_diagnosis_tab',
-        extractionMethod: 'tx_history'
+        source: 'tx_history_combined',
+        extractionMethod: 'getChargeTypeAndDiagnosis',
+        chargeType,
+        mcDays,
+        mcStartDate
       });
 
       logger.info(`[VisitDetails] Successfully extracted details for visit ${visit.id}`, {
-        diagnosis: finalDiagnosis.substring(0, 100)
+        diagnosis: finalDiagnosis.substring(0, 100),
+        chargeType,
+        mcDays
       });
 
       return {
@@ -116,10 +126,13 @@ export class VisitDetailsExtractor {
         visitId: visit.id,
         diagnosis: finalDiagnosis,
         diagnosisCode: diagnosisCode,
+        chargeType: chargeType,
+        mcDays: mcDays,
+        mcStartDate: mcStartDate,
         treatmentDetail: treatmentDetail,
         sources: {
-          source: 'tx_history_diagnosis_tab',
-          extractionMethod: 'tx_history'
+          source: 'tx_history_combined',
+          extractionMethod: 'getChargeTypeAndDiagnosis'
         },
       };
     } catch (error) {
@@ -308,8 +321,13 @@ export class VisitDetailsExtractor {
   }
 
   /**
-   * Update visit with extracted diagnosis and treatment details
+   * Update visit with extracted diagnosis, charge type, and MC data
    * @private
+   * @param {string} visitId - Visit ID
+   * @param {string} diagnosisText - Diagnosis description
+   * @param {string} diagnosisCode - Diagnosis code (e.g., ICD code)
+   * @param {string} treatmentDetail - Treatment/services detail
+   * @param {Object} sources - Extraction metadata including chargeType, mcDays, mcStartDate
    */
   async _updateVisitWithDetails(visitId, diagnosisText, diagnosisCode, treatmentDetail, sources) {
     if (!this.supabase) {
@@ -332,7 +350,12 @@ export class VisitDetailsExtractor {
 
       const currentMetadata = currentVisit?.extraction_metadata || {};
 
-      // Store diagnosis code in extraction_metadata since there's no separate diagnosis_code field
+      // Extract charge type and MC data from sources (if provided by getChargeTypeAndDiagnosis)
+      const chargeType = sources?.chargeType || null;
+      const mcDays = sources?.mcDays || 0;
+      const mcStartDate = sources?.mcStartDate || null;
+
+      // Store all extracted data in extraction_metadata for Flow 3 to use
       const updateData = {
         diagnosis_description: diagnosisText,
         treatment_detail: treatmentDetail,
@@ -341,7 +364,11 @@ export class VisitDetailsExtractor {
           detailsExtractionStatus: 'completed',
           detailsExtractedAt: new Date().toISOString(),
           detailsExtractionSources: sources,
-          diagnosisCode: diagnosisCode, // Store code in metadata
+          diagnosisCode: diagnosisCode,
+          // These fields are used by Flow 3 (ClaimSubmitter) for form filling
+          chargeType: chargeType,       // 'first' or 'follow'
+          mcDays: mcDays,               // Number of MC days
+          mcStartDate: mcStartDate,     // MC start date in DD/MM/YYYY format
         },
       };
 

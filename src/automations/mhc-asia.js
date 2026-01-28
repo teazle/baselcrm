@@ -789,13 +789,29 @@ export class MHCAsiaAutomation {
    * Add visit for a portal (e.g., aiaclient > add aia visit)
    * @param {string} portal - Portal name (e.g., 'aiaclient')
    */
-  async addVisit(portal) {
+  async addVisit(portal, nric = null) {
     try {
-      this._logStep('Add visit', { portal });
+      this._logStep('Add visit', { portal, nric: nric ? nric.substring(0, 4) + '...' : null });
       logger.info(`Adding visit for portal: ${portal}`);
 
       // Check if we need to switch to AIA Clinic system first
-      await this.switchToAIAClinicIfNeeded();
+      const switchedToAIA = await this.switchToAIAClinicIfNeeded();
+
+      // If we switched to AIA Clinic, we need to use the AIA-specific flow:
+      // 1. Click "Add AIA Visit"
+      // 2. Click search icon (#ctr_block > div:nth-child(2) > img)
+      // 3. Enter NRIC and search
+      // 4. Click patient name
+      if (switchedToAIA && nric) {
+        logger.info('Using AIA Clinic visit flow after system switch');
+        const aiaResult = await this.navigateToAIAVisitAndSearch(nric);
+        if (aiaResult) {
+          await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-visit-form.png', fullPage: true }).catch(() => {});
+          return true;
+        }
+        // If AIA flow failed, continue with normal flow as fallback
+        logger.warn('AIA visit flow failed, trying normal flow');
+      }
 
       // Many flows start the visit form by clicking the patient in the search results.
       // If we already see "Visit Date" / "Visit" form fields, treat as already in visit creation.
@@ -873,35 +889,44 @@ export class MHCAsiaAutomation {
     try {
       this._logStep('Check if AIA Clinic switch needed');
       
-      // Check for dialog or message about AIA Clinic
-      const pageText = await this.page.textContent('body').catch(() => '');
-      const needsSwitch = /switch.*aia\s*clinic|go.*aia\s*clinic|aia\s*clinic.*system/i.test(pageText);
+      // Check if the dialog handler flagged that we need to switch
+      // This happens when a dialog says "Please submit this claim under www.aiaclinic.com"
+      let needsSwitch = this.needsAIAClinicSwitch === true;
       
-      if (!needsSwitch) {
-        // Also check for any visible prompt/message
-        const switchPromptSelectors = [
-          'text=/switch.*AIA.*Clinic/i',
-          'text=/go.*AIA.*Clinic/i',
-          '.alert:has-text("AIA Clinic")',
-          '.modal:has-text("AIA Clinic")',
-        ];
+      if (needsSwitch) {
+        logger.info('AIA Clinic switch needed (flagged by dialog handler)');
+        // Reset the flag
+        this.needsAIAClinicSwitch = false;
+      } else {
+        // Check for dialog or message about AIA Clinic in page text
+        const pageText = await this.page.textContent('body').catch(() => '');
+        needsSwitch = /switch.*aia\s*clinic|go.*aia\s*clinic|aia\s*clinic.*system/i.test(pageText);
         
-        let foundPrompt = false;
-        for (const selector of switchPromptSelectors) {
-          try {
-            if ((await this.page.locator(selector).count().catch(() => 0)) > 0) {
-              foundPrompt = true;
-              break;
+        if (!needsSwitch) {
+          // Also check for any visible prompt/message
+          const switchPromptSelectors = [
+            'text=/switch.*AIA.*Clinic/i',
+            'text=/go.*AIA.*Clinic/i',
+            '.alert:has-text("AIA Clinic")',
+            '.modal:has-text("AIA Clinic")',
+          ];
+          
+          for (const selector of switchPromptSelectors) {
+            try {
+              if ((await this.page.locator(selector).count().catch(() => 0)) > 0) {
+                needsSwitch = true;
+                break;
+              }
+            } catch {
+              continue;
             }
-          } catch {
-            continue;
           }
         }
-        
-        if (!foundPrompt) {
-          logger.info('No AIA Clinic switch needed');
-          return true;
-        }
+      }
+      
+      if (!needsSwitch) {
+        logger.info('No AIA Clinic switch needed');
+        return false; // Return false to indicate no switch was performed
       }
       
       logger.info('AIA Clinic switch detected - switching system...');
@@ -1023,6 +1048,232 @@ export class MHCAsiaAutomation {
       return false;
     } catch (error) {
       logger.error('Failed to switch to AIA Clinic:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Navigate to AIA Visit and search for patient by NRIC
+   * This is the flow AFTER switching to AIA Clinic system:
+   * 1. Click "Add AIA Visit" 
+   * 2. Click search icon (#ctr_block > div:nth-child(2) > img)
+   * 3. Enter NRIC
+   * 4. Click patient name
+   * @param {string} nric - Patient NRIC to search
+   * @returns {boolean} True if patient found and selected
+   */
+  async navigateToAIAVisitAndSearch(nric) {
+    try {
+      this._logStep('Navigate to AIA Visit', { nric });
+      
+      // Step 1: Click "Add AIA Visit"
+      const aiaVisitSelectors = [
+        'a:has-text("Add AIA Visit")',
+        'a:has-text("AIA Visit")',
+        'button:has-text("Add AIA Visit")',
+        'text=/Add.*AIA.*Visit/i',
+        'a[href*="aiavisit" i]',
+      ];
+      
+      let clickedAIAVisit = false;
+      for (const selector of aiaVisitSelectors) {
+        try {
+          const link = this.page.locator(selector).first();
+          if ((await link.count().catch(() => 0)) > 0) {
+            await this._safeClick(link, 'Add AIA Visit');
+            await this.page.waitForTimeout(500);
+            clickedAIAVisit = true;
+            break;
+          }
+        } catch {
+          continue;
+        }
+      }
+      
+      if (!clickedAIAVisit) {
+        logger.warn('Could not find Add AIA Visit link');
+        await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-visit-not-found.png' }).catch(() => {});
+      }
+      
+      await this.page.waitForTimeout(500);
+      
+      // Check if we're already on the search form (NRIC/FIN/Member ID visible)
+      const alreadyOnSearchForm = 
+        (await this.page.locator('text=/NRIC.*FIN.*Member/i').count().catch(() => 0)) > 0 ||
+        (await this.page.locator('text=/Search using full NRIC/i').count().catch(() => 0)) > 0;
+      
+      if (alreadyOnSearchForm) {
+        logger.info('Already on AIA search form, skipping search icon click');
+      } else {
+        // Step 2: Click search icon (#ctr_block > div:nth-child(2) > img) to open search popup
+        this._logStep('Click search icon for NRIC lookup');
+        const searchIconSelectors = [
+          '#ctr_block > div:nth-child(2) > img',
+          '#ctr_block img',
+          'img[src*="search"]',
+          'img[alt*="search" i]',
+          'img[onclick*="search" i]',
+        ];
+        
+        let clickedSearchIcon = false;
+        for (const selector of searchIconSelectors) {
+          try {
+            const icon = this.page.locator(selector).first();
+            if ((await icon.count().catch(() => 0)) > 0) {
+              await this._safeClick(icon, 'Search icon');
+              await this.page.waitForTimeout(500);
+              clickedSearchIcon = true;
+              break;
+            }
+          } catch {
+            continue;
+          }
+        }
+        
+        if (!clickedSearchIcon) {
+          logger.warn('Could not find search icon, continuing anyway');
+        }
+      }
+      
+      // Step 3: Enter NRIC in search field
+      // The form shows: "NRIC/FIN/Member ID" label with input field next to it
+      this._logStep('Enter NRIC in AIA search', { nric });
+      await this.page.waitForTimeout(1000);
+      await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-before-nric.png' }).catch(() => {});
+      
+      // The NRIC input is in a form next to the label "NRIC/FIN/Member ID"
+      // Try multiple approaches to find it
+      const nricInputSelectors = [
+        // By label relationship
+        'input[name*="nric" i]',
+        'input[name*="memberid" i]',
+        'input[name*="member" i]',
+        'input[id*="nric" i]',
+        'input[id*="member" i]',
+        // The second text input on the form (after Visit Date)
+        'input[type="text"]:nth-of-type(2)',
+        // Any visible text input that's not a date
+        'td:has-text("NRIC/FIN/Member ID") + td input',
+        'tr:has-text("NRIC/FIN/Member") input[type="text"]',
+        // Generic visible text inputs (skip the first which is date)
+        'input.form-control[type="text"]',
+      ];
+      
+      let nricFilled = false;
+      for (const selector of nricInputSelectors) {
+        try {
+          const input = this.page.locator(selector).first();
+          if ((await input.count().catch(() => 0)) > 0 && await input.isVisible().catch(() => false)) {
+            // Check it's not the date field
+            const value = await input.inputValue().catch(() => '');
+            if (value.includes('/') && value.includes('2026')) {
+              continue; // Skip date field
+            }
+            await input.fill(nric);
+            await this.page.waitForTimeout(300);
+            nricFilled = true;
+            logger.info('NRIC entered in AIA search');
+            break;
+          }
+        } catch {
+          continue;
+        }
+      }
+      
+      // If still not found, try to find all visible text inputs and pick the right one
+      if (!nricFilled) {
+        try {
+          const allInputs = this.page.locator('input[type="text"]:visible');
+          const count = await allInputs.count();
+          logger.info(`Found ${count} visible text inputs`);
+          for (let i = 0; i < count; i++) {
+            const input = allInputs.nth(i);
+            const value = await input.inputValue().catch(() => '');
+            // Skip date fields
+            if (value.includes('/') || value.match(/\d{2}\/\d{2}\/\d{4}/)) {
+              continue;
+            }
+            // This should be the NRIC field
+            await input.fill(nric);
+            await this.page.waitForTimeout(300);
+            nricFilled = true;
+            logger.info(`NRIC entered in input #${i}`);
+            break;
+          }
+        } catch (e) {
+          logger.warn('Failed to iterate inputs:', e.message);
+        }
+      }
+      
+      if (!nricFilled) {
+        logger.warn('Could not find NRIC input field');
+        await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-nric-input-not-found.png' }).catch(() => {});
+        return false;
+      }
+      
+      // Press Enter or click Search button
+      const searchBtnSelectors = [
+        'input[type="submit"]',
+        'button[type="submit"]',
+        'input[value*="Search" i]',
+        'button:has-text("Search")',
+      ];
+      
+      let searchTriggered = false;
+      for (const selector of searchBtnSelectors) {
+        try {
+          const btn = this.page.locator(selector).first();
+          if ((await btn.count().catch(() => 0)) > 0 && await btn.isVisible().catch(() => false)) {
+            await this._safeClick(btn, 'Search button');
+            searchTriggered = true;
+            break;
+          }
+        } catch {
+          continue;
+        }
+      }
+      
+      if (!searchTriggered) {
+        // Try pressing Enter
+        await this.page.keyboard.press('Enter');
+      }
+      
+      await this.page.waitForTimeout(1000);
+      await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-search-results.png' }).catch(() => {});
+      
+      // Step 4: Click patient name from results
+      this._logStep('Click patient from AIA search results');
+      
+      // Look for patient link/row in results
+      const patientSelectors = [
+        `a:has-text("${nric}")`,
+        `tr:has-text("${nric}") a`,
+        `td:has-text("${nric}")`,
+        'table tr:nth-child(2) a', // First result row
+        '.search-result a',
+        'a[href*="patient" i]',
+      ];
+      
+      for (const selector of patientSelectors) {
+        try {
+          const patientLink = this.page.locator(selector).first();
+          if ((await patientLink.count().catch(() => 0)) > 0) {
+            await this._safeClick(patientLink, 'Patient in AIA results');
+            await this.page.waitForTimeout(500);
+            logger.info('Selected patient from AIA search results');
+            this._logStep('Patient selected from AIA results');
+            await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-patient-selected.png' }).catch(() => {});
+            return true;
+          }
+        } catch {
+          continue;
+        }
+      }
+      
+      logger.warn('Could not find patient in AIA search results');
+      return false;
+    } catch (error) {
+      logger.error('Failed to navigate to AIA Visit:', error);
       return false;
     }
   }
@@ -2233,10 +2484,31 @@ export class MHCAsiaAutomation {
    * Setup dialog handler to auto-accept prompts (for consultation fee max amount)
    */
   setupDialogHandler() {
+    // Track if AIA Clinic switch is needed (dialog says "submit under www.aiaclinic.com")
+    this.needsAIAClinicSwitch = false;
+    
+    // Remove existing dialog handlers to avoid duplicates
+    this.page.removeAllListeners('dialog');
+    
     this.page.on('dialog', async (dialog) => {
-      logger.info(`Dialog appeared: ${dialog.type()} - ${dialog.message()}`);
-      await dialog.accept();
-      logger.info('Dialog accepted');
+      try {
+        const msg = dialog.message();
+        logger.info(`Dialog appeared: ${dialog.type()} - ${msg}`);
+        
+        // Check if this is the AIA Clinic redirect message
+        if (/aiaclinic\.com|aia\s*clinic/i.test(msg)) {
+          this.needsAIAClinicSwitch = true;
+          logger.info('AIA Clinic switch will be needed after dialog dismissal');
+        }
+        
+        await dialog.accept();
+        logger.info('Dialog accepted');
+      } catch (e) {
+        // Dialog may already be handled if multiple fire rapidly
+        if (!e.message.includes('already handled')) {
+          logger.warn('Dialog handling error:', e.message);
+        }
+      }
     });
     this._logStep('Dialog handler set up');
   }

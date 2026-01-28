@@ -449,6 +449,9 @@ export class BatchExtraction {
         const feeAmount = item.claimDetails?.claimAmount || 
                          (item.fee ? parseFloat(item.fee.replace(/[^0-9.]/g, '')) : null);
 
+        // Extract PCNO for deduplication
+        const pcno = item.pcno || null;
+
         // Prepare visit data
         const visitData = {
           user_id: systemUserId, // Required field
@@ -479,24 +482,65 @@ export class BatchExtraction {
             extracted: item.extracted,
             extractedAt: item.extractedAt || new Date().toISOString(),
             sources: item.claimDetails?.sources || {},
-            pcno: item.pcno || null, // Save PCNO (patient number) for future searches
+            pcno: pcno, // Save PCNO (patient number) for future searches
           },
         };
 
-        // Insert visit (upsert by visit_record_no if unique, otherwise just insert)
-        // Since user_id is required, we need to handle it - try to get first user or use a system approach
-        let { data, error } = await this.supabase
-          .from('visits')
-          .insert(visitData)
-          .select();
+        // Deduplication: Check for existing record by PCNO + visit_date
+        // This prevents duplicate entries when the same patient appears multiple times in the queue
+        let existingRecord = null;
+        
+        // Primary deduplication: by PCNO + visit_date (most reliable)
+        if (pcno) {
+          // Query for existing records with same visit_date and check PCNO in metadata
+          const { data: existingData, error: queryError } = await this.supabase
+            .from('visits')
+            .select('id, extraction_metadata')
+            .eq('visit_date', targetDate)
+            .not('extraction_metadata', 'is', null)
+            .limit(100); // Get multiple to filter in JS (PostgreSQL JSONB filtering can be tricky)
+          
+          if (!queryError && existingData) {
+            // Filter in JavaScript to find matching PCNO
+            const matching = existingData.find(v => {
+              const metadata = v.extraction_metadata;
+              if (!metadata || typeof metadata !== 'object') return false;
+              return metadata.pcno === pcno || String(metadata.pcno) === String(pcno);
+            });
+            
+            if (matching) {
+              existingRecord = matching;
+              logger.info(`[BATCH] Found existing record for PCNO ${pcno} on ${targetDate}, will update instead of insert`, {
+                existingId: matching.id.substring(0, 8) + '...'
+              });
+            }
+          }
+        }
+        
+        // Fallback deduplication: by visit_record_no + visit_date (if PCNO not available)
+        if (!existingRecord && item.qno) {
+          const { data: existingByQno } = await this.supabase
+            .from('visits')
+            .select('id')
+            .eq('visit_date', targetDate)
+            .eq('visit_record_no', item.qno)
+            .limit(1)
+            .maybeSingle();
+          
+          if (existingByQno) {
+            existingRecord = existingByQno;
+            logger.info(`[BATCH] Found existing record for QNO ${item.qno} on ${targetDate}, will update instead of insert`);
+          }
+        }
 
-        // If insert fails due to duplicate, try update
-        if (error && error.code === '23505') { // Unique violation
+        let { data, error } = null;
+
+        if (existingRecord) {
+          // Update existing record instead of inserting
           const { data: updateData, error: updateError } = await this.supabase
             .from('visits')
             .update(visitData)
-            .eq('visit_record_no', item.qno)
-            .eq('visit_date', targetDate)
+            .eq('id', existingRecord.id)
             .select();
           
           if (updateError) {
@@ -504,6 +548,31 @@ export class BatchExtraction {
           }
           data = updateData;
           error = null;
+        } else {
+          // Insert new visit
+          const insertResult = await this.supabase
+            .from('visits')
+            .insert(visitData)
+            .select();
+          
+          data = insertResult.data;
+          error = insertResult.error;
+
+          // If insert fails due to duplicate (unique constraint on visit_record_no), try update
+          if (error && error.code === '23505') { // Unique violation
+            const { data: updateData, error: updateError } = await this.supabase
+              .from('visits')
+              .update(visitData)
+              .eq('visit_record_no', item.qno)
+              .eq('visit_date', targetDate)
+              .select();
+            
+            if (updateError) {
+              throw updateError;
+            }
+            data = updateData;
+            error = null;
+          }
         }
 
         if (error) {

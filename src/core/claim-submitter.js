@@ -11,6 +11,7 @@ export class ClaimSubmitter {
     this.mhcAsia = new MHCAsiaAutomation(mhcAsiaPage);
     this.steps = new StepLogger({ total: 10, prefix: 'SUBMIT' });
     this.supabase = createSupabaseClient();
+    this.mhcAsiaLoggedIn = false;
   }
 
   /**
@@ -103,23 +104,64 @@ export class ClaimSubmitter {
 
   /**
    * Submit to MHC Asia portal
+   * Uses data from extraction_metadata populated by Flow 2 (VisitDetailsExtractor):
+   * - nric: Patient NRIC
+   * - chargeType: 'first' or 'follow'
+   * - mcDays: Number of MC days
+   * - mcStartDate: MC start date in DD/MM/YYYY format
+   * - diagnosisCode: ICD diagnosis code
    */
   async submitToMHCAsia(visit) {
     this.steps.step(2, 'Submitting to MHC Asia');
 
-    // Login
-    await this.mhcAsia.login();
-    await this.mhcAsia.handle2FA();
+    const metadata = visit.extraction_metadata || {};
 
-    // Navigate to AIA Program search
-    await this.mhcAsia.navigateToAIAProgramSearch();
-
-    // Search patient by NRIC
-    const nric = visit.nric || visit.extraction_metadata?.nric;
+    // Get NRIC (required)
+    const nric = visit.nric || metadata.nric;
     if (!nric) {
-      throw new Error('NRIC not found in visit record');
+      throw new Error('NRIC not found in visit record - run Flow 2 first');
     }
 
+    // Get extracted data from Flow 2
+    const chargeType = metadata.chargeType || 'follow';
+    const mcDays = metadata.mcDays || 0;
+    const mcStartDate = metadata.mcStartDate || null;
+    const diagnosisDesc = visit.diagnosis_description;
+
+    logger.info('[SUBMIT] MHC form data:', {
+      nric,
+      chargeType,
+      mcDays,
+      mcStartDate,
+      diagnosis: diagnosisDesc?.substring(0, 50)
+    });
+
+    // Login to MHC Asia if not already logged in
+    if (!this.mhcAsiaLoggedIn) {
+      await this.mhcAsia.login();
+      this.mhcAsiaLoggedIn = true;
+    } else {
+      // Reset state: go back to MHC homepage before each patient
+      // This ensures we're not stuck in AIA Clinic mode from previous patient
+      logger.info('[SUBMIT] Resetting MHC state - navigating to homepage');
+      await this.mhcAsia.page.goto(this.mhcAsia.config.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await this.mhcAsia.page.waitForTimeout(1000);
+      
+      // Check if we need to re-login (session may have expired or navigating to homepage shows login)
+      const loginFormVisible = await this.mhcAsia.page.locator('input[name="txtPassword"], input[type="password"]').first().isVisible().catch(() => false);
+      if (loginFormVisible) {
+        logger.info('[SUBMIT] Login form visible - re-logging in');
+        await this.mhcAsia.login();
+      }
+    }
+
+    // Setup dialog handler for auto-accepting prompts (consultation fee max)
+    this.mhcAsia.setupDialogHandler();
+
+    // Navigate to Normal Visit search (not AIA Program search)
+    await this.mhcAsia.navigateToNormalVisit();
+
+    // Search patient by NRIC
     const searchResult = await this.mhcAsia.searchPatientByNRIC(nric);
     if (!searchResult || !searchResult.found) {
       throw new Error(`Patient not found in MHC Asia: ${nric}`);
@@ -128,38 +170,70 @@ export class ClaimSubmitter {
     // Open patient from search results
     await this.mhcAsia.openPatientFromSearchResults(nric);
 
-    // Add visit
+    // Add visit (pass NRIC for AIA Clinic flow after system switch)
     const portal = searchResult.portal || 'aiaclient';
-    await this.mhcAsia.addVisit(portal);
+    await this.mhcAsia.addVisit(portal, nric);
+    await this.mhcAsia.page.waitForTimeout(500);
 
-    // Select card and patient
-    await this.mhcAsia.selectCardAndPatient(null, '__FIRST__');
-
-    // Fill form fields
-    const visitType = visit.visit_type || visit.extraction_metadata?.visitType;
-    if (visitType) {
-      await this.mhcAsia.fillVisitTypeFromClinicAssist(visitType);
+    // Fill visit date
+    const visitDateFormatted = this._formatDateForMHC(visit.visit_date);
+    if (visitDateFormatted) {
+      await this.mhcAsia.fillVisitDate(visitDateFormatted);
     }
 
-    await this.mhcAsia.fillMcDays(visit.mc_required ? 1 : 0);
+    // Set charge type (First Consult vs Follow Up)
+    if (chargeType === 'first') {
+      await this.mhcAsia.setChargeTypeNewVisit();
+    } else {
+      await this.mhcAsia.setChargeTypeFollowUp();
+    }
+    await this.mhcAsia.page.waitForTimeout(200);
 
-    if (visit.diagnosis_description) {
-      await this.mhcAsia.fillDiagnosisFromText(visit.diagnosis_description);
+    // Set consultation fee (99999 triggers max amount dialog which auto-accepts)
+    await this.mhcAsia.fillConsultationFee(99999);
+    await this.mhcAsia.page.waitForTimeout(500);
+
+    // Fill MC if applicable
+    if (mcDays > 0) {
+      await this.mhcAsia.fillMcDays(mcDays);
+      if (mcStartDate) {
+        await this.mhcAsia.fillMcStartDate(mcStartDate);
+      }
     }
 
-    await this.mhcAsia.setConsultationFeeMax(9999);
-
-    if (visit.treatment_detail) {
-      await this.mhcAsia.fillServicesAndDrugs([visit.treatment_detail]);
+    // Fill diagnosis if available
+    if (diagnosisDesc && diagnosisDesc !== 'Missing diagnosis') {
+      await this.mhcAsia.selectDiagnosis(diagnosisDesc);
     }
 
-    // Save as draft (safety)
+    // Save as draft (safety - don't auto-submit)
     const saveDraft = process.env.WORKFLOW_SAVE_DRAFT !== '0';
     if (saveDraft) {
       await this.mhcAsia.saveAsDraft();
     }
 
-    return { success: true, portal: 'MHC Asia', savedAsDraft: saveDraft };
+    return { 
+      success: true, 
+      portal: 'MHC Asia', 
+      savedAsDraft: saveDraft,
+      chargeType,
+      mcDays,
+      hasDiagnosis: !!(diagnosisDesc && diagnosisDesc !== 'Missing diagnosis')
+    };
+  }
+
+  /**
+   * Format date for MHC portal (DD/MM/YYYY)
+   * @private
+   */
+  _formatDateForMHC(dateStr) {
+    if (!dateStr) return null;
+    // Already in DD/MM/YYYY format
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) return dateStr;
+    // Convert from YYYY-MM-DD
+    const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (match) return `${match[3]}/${match[2]}/${match[1]}`;
+    return dateStr;
   }
 
   /**

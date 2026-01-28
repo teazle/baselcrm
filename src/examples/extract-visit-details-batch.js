@@ -37,14 +37,40 @@ async function extractVisitDetailsBatch() {
   const maxRetries = parseInt(process.env.VISIT_DETAILS_MAX_RETRIES || '3', 10);
 
   // Build query: visits missing diagnosis, with status filtering for resume
+  // Filter to specific date if specified via --date argument
+  // Filter to only portal-related pay types (MHC, FULLERT, IHP, ALL, ALLIANZ, AIA, GE)
+  const dateArg = args.find(arg => arg.startsWith('--date='));
+  const targetDate = dateArg ? dateArg.split('=')[1] : null;
+  const payTypeArg = args.find(arg => arg.startsWith('--pay-type='));
+  const targetPayType = payTypeArg ? payTypeArg.split('=')[1].toUpperCase() : null;
+  const allPayTypes = args.includes('--all-pay-types');
+  
+  // Known portal pay types that require form submission
+  const portalPayTypes = ['MHC', 'FULLERT', 'IHP', 'ALL', 'ALLIANZ', 'AIA', 'GE', 'AIACLIENT'];
+  
   let query = supabase
     .from('visits')
-    .select('id, patient_name, visit_date, visit_record_no, nric, extraction_metadata')
+    .select('id, patient_name, visit_date, visit_record_no, nric, pay_type, extraction_metadata')
     .eq('source', 'Clinic Assist')
     .is('diagnosis_description', null)
-    .not('patient_name', 'is', null)
-    .order('visit_date', { ascending: false })
-    .limit(batchSize);
+    .not('patient_name', 'is', null);
+  
+  if (targetDate) {
+    query = query.eq('visit_date', targetDate);
+    logger.info(`Filtering to date: ${targetDate}`);
+  }
+  
+  // Filter by specific pay type, or only portal pay types by default
+  if (targetPayType) {
+    query = query.eq('pay_type', targetPayType);
+    logger.info(`Filtering to pay type: ${targetPayType}`);
+  } else if (!allPayTypes) {
+    // Default: only process visits with portal-related pay types
+    query = query.in('pay_type', portalPayTypes);
+    logger.info(`Filtering to portal pay types: ${portalPayTypes.join(', ')}`);
+  }
+  
+  query = query.order('visit_date', { ascending: false }).limit(batchSize);
 
   // Execute query and filter in JavaScript (PostgREST JSONB filtering can be complex)
   const { data: allVisits, error: queryError } = await query;

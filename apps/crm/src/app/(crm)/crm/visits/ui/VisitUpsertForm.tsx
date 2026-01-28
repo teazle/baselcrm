@@ -54,7 +54,7 @@ export default function VisitUpsertForm({
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as any,
     defaultValues: {
       case_id: initialCaseId ?? "",
       visit_date: "",
@@ -103,8 +103,8 @@ export default function VisitUpsertForm({
       light_duty_required: Boolean(res.data.light_duty_required ?? false),
       light_duty_start_date: asString(res.data.light_duty_start_date) ?? "",
       light_duty_end_date: asString(res.data.light_duty_end_date) ?? "",
-      total_amount: res.data.total_amount ?? null,
-      amount_outstanding: res.data.amount_outstanding ?? null,
+      total_amount: res.data.total_amount as number | null ?? null,
+      amount_outstanding: res.data.amount_outstanding as number | null ?? null,
     });
     setLoading(false);
   }

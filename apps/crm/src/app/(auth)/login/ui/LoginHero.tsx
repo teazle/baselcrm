@@ -1,8 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import LoginForm from "./LoginForm";
+
+function LoginFormWrapper() {
+  return (
+    <Suspense fallback={<div className="h-11 w-full animate-pulse rounded-xl bg-white/10" />}>
+      <LoginForm />
+    </Suspense>
+  );
+}
 
 const HERO_VIDEO = { width: 3840, height: 2876 };
 const HERO_BOX = { x: 703, y: 1455, width: 2048, height: 1421 };
@@ -24,7 +32,7 @@ export default function LoginHero() {
     "--ui-scale": "1",
     "--hero-text-scale": "1",
     "--hero-text-y": "0px",
-  });
+  } as React.CSSProperties);
 
   useEffect(() => {
     const updatePosition = () => {
@@ -217,7 +225,7 @@ export default function LoginHero() {
                     Sign in to continue to your workspace.
                   </p>
 
-                  <LoginForm />
+                  <LoginFormWrapper />
 
                   <div className="mt-4 text-xs text-white/70 sm:mt-6 sm:text-sm">
                     New here?{" "}

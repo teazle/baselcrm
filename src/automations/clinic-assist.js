@@ -6112,6 +6112,21 @@ export class ClinicAssistAutomation {
           continue; // Skip rows with no identifiable information
         }
         
+        // Extract contract/pay type from row (usually near the end)
+        // Known contract types: MHC, FULLERT (Fullerton), IHP, ALL (Allimed), ALLIANZ, AIA, GE
+        let payType = null;
+        const knownContracts = ['MHC', 'FULLERT', 'IHP', 'ALL', 'ALLIANZ', 'AIA', 'GE', 'AIACLIENT'];
+        for (let i = row.length - 1; i >= 0; i--) {
+          const cellValue = row[i];
+          if (!cellValue) continue;
+          const cellStr = String(cellValue).trim().toUpperCase();
+          // Check if cell matches a known contract type exactly
+          if (knownContracts.includes(cellStr)) {
+            payType = cellStr;
+            break;
+          }
+        }
+        
         // No deduplication - each row in Excel represents a separate visit
         // Same patient can visit multiple times with different payments/statuses
         // Database will handle deduplication by visit_record_no + visit_date if needed
@@ -6122,6 +6137,7 @@ export class ClinicAssistAutomation {
           pcno: pcno || null,
           status: status || null,
           fee: fee || null,
+          payType: payType,
           source: 'reports_queue_list_excel_extraction',
           rawRow: row.filter(v => v !== null && v !== undefined).map(v => String(v))
         });
@@ -7652,7 +7668,7 @@ export class ClinicAssistAutomation {
       const targetDateStr = targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }); // DD/MM/YYYY
       const targetDateStrAlt = targetDate.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' }); // MM/DD/YYYY
 
-      const found = await this.page.evaluate((targetDateStr, targetDateStrAlt) => {
+      const found = await this.page.evaluate(({ targetDateStr, targetDateStrAlt }) => {
         // Look for tables with visit history
         const tables = Array.from(document.querySelectorAll('table'));
         
@@ -7694,7 +7710,7 @@ export class ClinicAssistAutomation {
         }
         
         return false;
-      }, targetDateStr, targetDateStrAlt);
+      }, { targetDateStr, targetDateStrAlt });
 
       this._logStep('First Consult check result', { visitDate, found });
       return found;
@@ -7768,7 +7784,7 @@ export class ClinicAssistAutomation {
       const targetDateStr = targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }); // DD/MM/YYYY
       const targetDateStrAlt = targetDate.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' }); // MM/DD/YYYY
 
-      const result = await this.page.evaluate((targetDateStr, targetDateStrAlt) => {
+      const result = await this.page.evaluate(({ targetDateStr, targetDateStrAlt }) => {
         // Look for notes/entries matching the visit date
         const tables = Array.from(document.querySelectorAll('table'));
         const textAreas = Array.from(document.querySelectorAll('textarea, div[contenteditable]'));
@@ -7819,7 +7835,7 @@ export class ClinicAssistAutomation {
         }
         
         return null;
-      }, targetDateStr, targetDateStrAlt);
+      }, { targetDateStr, targetDateStrAlt });
 
       if (result) {
         this._logStep('Diagnosis extracted from Past Notes', { 

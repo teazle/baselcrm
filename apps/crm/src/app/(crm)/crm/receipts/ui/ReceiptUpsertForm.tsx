@@ -42,7 +42,7 @@ export default function ReceiptUpsertForm({
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(schema) as any,
     defaultValues: {
       transaction_type: "Receipt",
       payment_mode: "",
@@ -69,9 +69,9 @@ export default function ReceiptUpsertForm({
       payment_mode: asString(res.data.payment_mode) ?? "",
       receipt_from_account_id: asString(res.data.receipt_from_account_id),
       receipt_date: asString(res.data.receipt_date) ?? "",
-      receipt_amount: res.data.receipt_amount ?? null,
-      amount_applied: res.data.amount_applied ?? null,
-      balance: res.data.balance ?? null,
+      receipt_amount: res.data.receipt_amount as number | null ?? null,
+      amount_applied: res.data.amount_applied as number | null ?? null,
+      balance: res.data.balance as number | null ?? null,
       remarks: asString(res.data.remarks) ?? "",
     });
     setLoading(false);

@@ -391,15 +391,15 @@ export default function Flow3FillForms() {
                 header: "Portal",
                 cell: (row) => {
                   const payType = row.pay_type || "--";
-                  const isSupported = payType !== "--" && isSupported(payType);
-                  const isUnsupported = payType !== "--" && isUnsupported(payType);
+                  const supported = payType !== "--" && isSupported(payType);
+                  const unsupported = payType !== "--" && isUnsupported(payType);
                   return (
                     <span
                       className={cn(
                         "inline-flex rounded-full border px-2.5 py-1 text-xs font-medium",
-                        isSupported
+                        supported
                           ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                          : isUnsupported
+                          : unsupported
                             ? "border-amber-200 bg-amber-50 text-amber-700"
                             : "border-border bg-muted/50 text-muted-foreground",
                       )}
