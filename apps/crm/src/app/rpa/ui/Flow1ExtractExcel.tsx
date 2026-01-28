@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/ui/DataTable";
@@ -8,7 +8,8 @@ import { supabaseBrowser } from "@/lib/supabase/browser";
 import { isDemoMode } from "@/lib/env";
 import { mockGetTable } from "@/lib/mock/storage";
 import { StatusBadge, type Status } from "./StatusBadge";
-import { formatDateTimeSingapore } from "@/lib/utils/date";
+import FlowHeader from "./FlowHeader";
+import { formatDateDDMMYYYY, formatDateTimeDDMMYYYY } from "@/lib/utils/date";
 import { getTodaySingapore } from "@/lib/utils/date";
 
 type RunRow = {
@@ -22,10 +23,6 @@ type RunRow = {
   failed_count: number | null;
   metadata: Record<string, any> | null;
 };
-
-function formatDateTime(value?: string | null) {
-  return formatDateTimeSingapore(value);
-}
 
 function normalizeStatus(value?: string | null): Status {
   if (value === "completed") return "completed";
@@ -41,55 +38,59 @@ export default function Flow1ExtractExcel() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [queueBusy, setQueueBusy] = useState(false);
+  const [cancellingIds, setCancellingIds] = useState<Set<string>>(new Set());
+
+  const loadRuns = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    const supabase = supabaseBrowser();
+    if (!supabase) {
+      if (!isDemoMode()) {
+        setError("Supabase is not configured.");
+        setLoading(false);
+        return;
+      }
+      const demoRows = (mockGetTable("rpa_extraction_runs") as RunRow[]).filter(
+        (row) => row.run_type === "queue_list"
+      );
+      setRuns(demoRows.slice(0, 20));
+      setLoading(false);
+      return;
+    }
+
+    const { data, error: queryError } = await supabase
+      .from("rpa_extraction_runs")
+      .select("*")
+      .eq("run_type", "queue_list")
+      .order("started_at", { ascending: false })
+      .limit(20);
+
+    if (queryError) {
+      const errorMessage = String(queryError.message ?? queryError);
+      if (errorMessage.includes('permission denied') || errorMessage.includes('row-level security') || errorMessage.includes('RLS')) {
+        setError(`Database permission error: ${errorMessage}. Check RLS policies for 'rpa_extraction_runs' table.`);
+      } else {
+        setError(errorMessage);
+      }
+      setRuns([]);
+      setLoading(false);
+      return;
+    }
+    setRuns((data ?? []) as RunRow[]);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      setLoading(true);
-      setError(null);
-
-      const supabase = supabaseBrowser();
-      if (!supabase) {
-        if (!isDemoMode()) {
-          setError("Supabase is not configured.");
-          setLoading(false);
-          return;
-        }
-        const demoRows = (mockGetTable("rpa_extraction_runs") as RunRow[]).filter(
-          (row) => row.run_type === "queue_list"
-        );
-        if (cancelled) return;
-        setRuns(demoRows.slice(0, 20));
-        setLoading(false);
-        return;
-      }
-
-      const { data, error: queryError } = await supabase
-        .from("rpa_extraction_runs")
-        .select("*")
-        .eq("run_type", "queue_list")
-        .order("started_at", { ascending: false })
-        .limit(20);
-
+      await loadRuns();
       if (cancelled) return;
-      if (queryError) {
-        const errorMessage = String(queryError.message ?? queryError);
-        if (errorMessage.includes('permission denied') || errorMessage.includes('row-level security') || errorMessage.includes('RLS')) {
-          setError(`Database permission error: ${errorMessage}. Check RLS policies for 'rpa_extraction_runs' table.`);
-        } else {
-          setError(errorMessage);
-        }
-        setRuns([]);
-        setLoading(false);
-        return;
-      }
-      setRuns((data ?? []) as RunRow[]);
-      setLoading(false);
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadRuns]);
 
   const handleQueueExtract = async () => {
     setQueueBusy(true);
@@ -116,6 +117,45 @@ export default function Flow1ExtractExcel() {
     }
   };
 
+  const handleCancelRun = async (runId: string) => {
+    setCancellingIds((prev) => new Set(prev).add(runId));
+    try {
+      const res = await fetch("/api/rpa/cancel-runs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ runIds: [runId] }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to cancel run.");
+      }
+      
+      // Update the run in the local state
+      setRuns((prevRuns) =>
+        prevRuns.map((run) =>
+          run.id === runId
+            ? {
+                ...run,
+                status: "failed",
+                finished_at: new Date().toISOString(),
+                error_message: "Cancelled by user",
+              }
+            : run
+        )
+      );
+      
+      setNotice(data?.message || "Run cancelled successfully.");
+    } catch (err) {
+      setNotice(String((err as Error).message ?? err));
+    } finally {
+      setCancellingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(runId);
+        return next;
+      });
+    }
+  };
+
   const metrics = {
     total: runs.length,
     completed: runs.filter((r) => r.status === "completed").length,
@@ -123,15 +163,23 @@ export default function Flow1ExtractExcel() {
     running: runs.filter((r) => r.status === "running").length,
   };
 
+  const flowStatus =
+    metrics.running > 0
+      ? { label: "Running", tone: "warning" as const }
+      : metrics.failed > 0
+        ? { label: "Needs attention", tone: "danger" as const }
+        : { label: "Ready", tone: "success" as const };
+
   return (
     <div className="space-y-6">
-      <div>
-        <div className="text-xs font-medium text-muted-foreground">Flow 1</div>
-        <div className="text-2xl font-semibold">Extract Excel from Clinic Assist</div>
-        <div className="mt-2 text-sm text-muted-foreground">
-          Extract queue list data from Clinic Assist and save to database.
-        </div>
-      </div>
+      <FlowHeader
+        flow="1"
+        title="Extract Excel from Clinic Assist"
+        description="Extract queue list data from Clinic Assist and save to database."
+        accentClassName="border-blue-200 bg-blue-50 text-blue-700"
+        statusLabel={flowStatus.label}
+        statusTone={flowStatus.tone}
+      />
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card className="p-5">
@@ -208,7 +256,7 @@ export default function Flow1ExtractExcel() {
             columns={[
               {
                 header: "Extraction Time",
-                cell: (row) => formatDateTime(row.started_at) || "--",
+                cell: (row) => formatDateTimeDDMMYYYY(row.started_at) || "--",
               },
               {
                 header: "Status",
@@ -217,8 +265,8 @@ export default function Flow1ExtractExcel() {
               {
                 header: "Date",
                 cell: (row) => {
-                  const date = row.metadata?.date || row.started_at?.slice(0, 10) || "--";
-                  return date;
+                  const dateStr = row.metadata?.date || row.started_at;
+                  return dateStr ? formatDateDDMMYYYY(dateStr) : "--";
                 },
               },
               {
@@ -232,7 +280,29 @@ export default function Flow1ExtractExcel() {
               },
               {
                 header: "Finished",
-                cell: (row) => formatDateTime(row.finished_at) || "--",
+                cell: (row) => formatDateTimeDDMMYYYY(row.finished_at) || "--",
+              },
+              {
+                header: "Actions",
+                cell: (row) => {
+                  const isInProgress = row.status === "in_progress" || row.status === "running";
+                  const isCancelling = cancellingIds.has(row.id);
+                  
+                  if (!isInProgress) {
+                    return <span className="text-xs text-muted-foreground">—</span>;
+                  }
+                  
+                  return (
+                    <Button
+                      type="button"
+                      onClick={() => handleCancelRun(row.id)}
+                      disabled={isCancelling}
+                      className="h-8 px-3 text-xs"
+                    >
+                      {isCancelling ? "Cancelling..." : "Cancel"}
+                    </Button>
+                  );
+                },
               },
             ]}
             empty="No extraction runs yet."

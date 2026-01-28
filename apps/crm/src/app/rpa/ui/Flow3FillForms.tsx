@@ -8,9 +8,10 @@ import { DataTable, RowLink } from "@/components/ui/DataTable";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { isDemoMode } from "@/lib/env";
 import { mockGetTable } from "@/lib/mock/storage";
-import { formatDateTimeSingapore } from "@/lib/utils/date";
+import { formatDateDDMMYYYY, formatDateTimeDDMMYYYY } from "@/lib/utils/date";
 import { cn } from "@/lib/cn";
 import { getSupportedPortals, getUnsupportedPortals, isSupportedPortal, isUnsupportedPortal } from "@/lib/rpa/portals";
+import FlowHeader from "./FlowHeader";
 
 type VisitRow = {
   id: string;
@@ -34,10 +35,6 @@ const filters: Array<{ key: FilterKey; label: string }> = [
   { key: "not_started", label: "Not started" },
   { key: "error", label: "Error" },
 ];
-
-function formatDateTime(value?: string | null) {
-  return formatDateTimeSingapore(value);
-}
 
 export default function Flow3FillForms() {
   const [rows, setRows] = useState<VisitRow[]>([]);
@@ -219,12 +216,24 @@ export default function Flow3FillForms() {
   }, [filter, rows, portalConfig]);
 
   const metrics = useMemo(() => {
+    if (!rows.length) {
+      return { draft: 0, submitted: 0, notStarted: 0, error: 0, total: 0 };
+    }
     const draft = rows.filter((r) => getSubmissionStatus(r) === "draft").length;
     const submitted = rows.filter((r) => getSubmissionStatus(r) === "submitted").length;
     const notStarted = rows.filter((r) => getSubmissionStatus(r) === "not_started").length;
     const error = rows.filter((r) => getSubmissionStatus(r) === "error").length;
     return { draft, submitted, notStarted, error, total: rows.length };
   }, [rows, portalConfig]);
+
+  const flowStatus =
+    metrics.error > 0
+      ? { label: "Needs attention", tone: "danger" as const }
+      : portalConfig && portalConfig.supported.size === 0
+        ? { label: "Configure portals", tone: "neutral" as const }
+        : metrics.notStarted > 0
+          ? { label: "Pending", tone: "warning" as const }
+          : { label: "Ready", tone: "success" as const };
 
   const draftIds = useMemo(
     () => rows.filter((r) => getSubmissionStatus(r) === "draft").map((r) => r.id),
@@ -246,13 +255,14 @@ export default function Flow3FillForms() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <div className="text-xs font-medium text-muted-foreground">Flow 3</div>
-        <div className="text-2xl font-semibold">Fill Claim Forms</div>
-        <div className="mt-2 text-sm text-muted-foreground">
-          Submit claim forms to respective portals (MHC, Alliance, Fullerton, etc.).
-        </div>
-      </div>
+      <FlowHeader
+        flow="3"
+        title="Fill Claim Forms"
+        description="Submit claim forms to respective portals (MHC, Alliance, Fullerton, etc.)."
+        accentClassName="border-violet-200 bg-violet-50 text-violet-700"
+        statusLabel={flowStatus.label}
+        statusTone={flowStatus.tone}
+      />
 
       {portalConfig && portalConfig.supported.size === 0 ? (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
@@ -386,7 +396,7 @@ export default function Flow3FillForms() {
                   </RowLink>
                 ),
               },
-              { header: "Visit Date", cell: (row) => row.visit_date ?? "--" },
+              { header: "Visit Date", cell: (row) => formatDateDDMMYYYY(row.visit_date) ?? "--" },
               {
                 header: "Portal",
                 cell: (row) => {
@@ -438,7 +448,7 @@ export default function Flow3FillForms() {
                   const status = getSubmissionStatus(row);
                   const draftedAt = row.submission_metadata?.drafted_at;
                   const processedAt = status === "draft" ? (draftedAt || row.submitted_at) : row.submitted_at;
-                  return formatDateTime(processedAt) || "--";
+                  return formatDateTimeDDMMYYYY(processedAt) || "--";
                 },
               },
               {

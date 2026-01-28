@@ -121,3 +121,64 @@ export function parseDateSingapore(dateString: string): Date {
 export function toSingaporeDateString(value: string | Date): string {
   return formatDateSingapore(value);
 }
+
+/**
+ * Format a date to dd/mm/yyyy format (date only, no time)
+ * @param value - ISO date string or Date object
+ * @returns Formatted date string in dd/mm/yyyy format
+ */
+export function formatDateDDMMYYYY(value?: string | Date | null): string {
+  if (!value) return "--";
+  
+  const date = typeof value === 'string' ? new Date(value) : value;
+  if (Number.isNaN(date.getTime())) return typeof value === 'string' ? value : "--";
+  
+  // Format date in Singapore timezone
+  const formatter = new Intl.DateTimeFormat('en-SG', {
+    timeZone: SINGAPORE_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  
+  const parts = formatter.formatToParts(date);
+  const day = parts.find(p => p.type === 'day')?.value;
+  const month = parts.find(p => p.type === 'month')?.value;
+  const year = parts.find(p => p.type === 'year')?.value;
+  
+  return `${day}/${month}/${year}`;
+}
+
+/**
+ * Format a date/time to dd/mm/yyyy HH:MM:SS format
+ * @param value - ISO date string or Date object
+ * @returns Formatted date string in dd/mm/yyyy HH:MM:SS format
+ */
+export function formatDateTimeDDMMYYYY(value?: string | Date | null): string {
+  if (!value) return "--";
+  
+  const date = typeof value === 'string' ? new Date(value) : value;
+  if (Number.isNaN(date.getTime())) return typeof value === 'string' ? value : "--";
+  
+  // Format date in Singapore timezone
+  const formatter = new Intl.DateTimeFormat('en-SG', {
+    timeZone: SINGAPORE_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+  
+  const parts = formatter.formatToParts(date);
+  const day = parts.find(p => p.type === 'day')?.value;
+  const month = parts.find(p => p.type === 'month')?.value;
+  const year = parts.find(p => p.type === 'year')?.value;
+  const hour = parts.find(p => p.type === 'hour')?.value;
+  const minute = parts.find(p => p.type === 'minute')?.value;
+  const second = parts.find(p => p.type === 'second')?.value;
+  
+  return `${day}/${month}/${year} ${hour}:${minute}:${second}`;
+}

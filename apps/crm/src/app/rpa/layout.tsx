@@ -1,5 +1,6 @@
 import { RequireAuth } from "@/lib/auth/RequireAuth";
 import Link from "next/link";
+import Breadcrumbs from "./ui/Breadcrumbs";
 
 export default function RpaLayout({
   children,
@@ -25,22 +26,31 @@ export default function RpaLayout({
                 </div>
               </Link>
               <div className="flex-1" />
-              <Link
-                href="/rpa/settings"
-                className="text-sm text-muted-foreground hover:text-foreground transition"
-              >
-                Settings
-              </Link>
-              <Link
-                href="/crm"
-                className="text-sm text-muted-foreground hover:text-foreground transition"
-              >
-                Go to CRM →
-              </Link>
+              <nav className="flex items-center gap-4">
+                <Link
+                  href="/rpa"
+                  className="text-sm text-muted-foreground hover:text-foreground transition"
+                >
+                  Overview
+                </Link>
+                <Link
+                  href="/rpa/settings"
+                  className="text-sm text-muted-foreground hover:text-foreground transition"
+                >
+                  Settings
+                </Link>
+                <Link
+                  href="/crm"
+                  className="text-sm text-muted-foreground hover:text-foreground transition"
+                >
+                  Go to CRM →
+                </Link>
+              </nav>
             </div>
           </div>
         </header>
         <main className="px-6 py-6">
+          <Breadcrumbs className="mb-4" />
           {children}
         </main>
       </div>

@@ -7,7 +7,7 @@ import { isDemoMode } from "@/lib/env";
 import { mockGetTable } from "@/lib/mock/storage";
 import { cn } from "@/lib/cn";
 import { StatusBadge, type Status } from "./StatusBadge";
-import { formatDateTimeSingapore } from "@/lib/utils/date";
+import { formatDateDDMMYYYY, formatDateTimeDDMMYYYY } from "@/lib/utils/date";
 
 type VisitRow = {
   id: string;
@@ -42,10 +42,6 @@ const filters: Array<{ key: FilterKey; label: string }> = [
   { key: "with_pcno", label: "With PCNO" },
   { key: "without_pcno", label: "Without PCNO" },
 ];
-
-function formatDateTime(value?: string | null) {
-  return formatDateTimeSingapore(value);
-}
 
 function normalizeStatus(value?: string | null): Status {
   if (value === "completed") return "completed";
@@ -196,7 +192,7 @@ export default function VisitsStatusTable() {
               </RowLink>
             ),
           },
-          { header: "Visit Date", cell: (row) => row.visit_date ?? "--" },
+          { header: "Visit Date", cell: (row) => formatDateDDMMYYYY(row.visit_date) ?? "--" },
           {
             header: "PCNO",
             cell: (row) => row.extraction_metadata?.pcno ?? "--",
@@ -245,7 +241,7 @@ export default function VisitsStatusTable() {
                 metadata.detailsExtractedAt ??
                 metadata.detailsExtractionLastAttempt ??
                 row.updated_at;
-              return formatDateTime(lastUpdated);
+              return formatDateTimeDDMMYYYY(lastUpdated);
             },
           },
         ]}

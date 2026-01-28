@@ -8,8 +8,9 @@ import { supabaseBrowser } from "@/lib/supabase/browser";
 import { isDemoMode } from "@/lib/env";
 import { mockGetTable } from "@/lib/mock/storage";
 import { StatusBadge, type Status } from "./StatusBadge";
-import { formatDateTimeSingapore } from "@/lib/utils/date";
+import { formatDateDDMMYYYY, formatDateTimeDDMMYYYY } from "@/lib/utils/date";
 import { cn } from "@/lib/cn";
+import FlowHeader from "./FlowHeader";
 
 type VisitRow = {
   id: string;
@@ -38,10 +39,6 @@ const filters: Array<{ key: FilterKey; label: string }> = [
   { key: "alliance", label: "Alliance" },
   { key: "fullerton", label: "Fullerton" },
 ];
-
-function formatDateTime(value?: string | null) {
-  return formatDateTimeSingapore(value);
-}
 
 function normalizeStatus(value?: string | null): Status {
   if (value === "completed") return "completed";
@@ -184,15 +181,23 @@ export default function Flow2EnhanceData() {
     }).length,
   };
 
+  const flowStatus =
+    metrics.failed > 0
+      ? { label: "Needs attention", tone: "danger" as const }
+      : metrics.pending > 0
+        ? { label: "Pending", tone: "warning" as const }
+        : { label: "Ready", tone: "success" as const };
+
   return (
     <div className="space-y-6">
-      <div>
-        <div className="text-xs font-medium text-muted-foreground">Flow 2</div>
-        <div className="text-2xl font-semibold">Enhance Data for Contract Organizations</div>
-        <div className="mt-2 text-sm text-muted-foreground">
-          Extract visit details (diagnosis, PCNO) for patients with contract organizations.
-        </div>
-      </div>
+      <FlowHeader
+        flow="2"
+        title="Enhance Data for Contract Organizations"
+        description="Extract visit details (diagnosis, PCNO) for patients with contract organizations."
+        accentClassName="border-emerald-200 bg-emerald-50 text-emerald-700"
+        statusLabel={flowStatus.label}
+        statusTone={flowStatus.tone}
+      />
 
       <div className="grid gap-4 md:grid-cols-5">
         <Card className="p-5">
@@ -303,7 +308,7 @@ export default function Flow2EnhanceData() {
                   </RowLink>
                 ),
               },
-              { header: "Visit Date", cell: (row) => row.visit_date ?? "--" },
+              { header: "Visit Date", cell: (row) => formatDateDDMMYYYY(row.visit_date) ?? "--" },
               {
                 header: "Pay Type",
                 cell: (row) => row.pay_type ?? "--",
@@ -349,7 +354,7 @@ export default function Flow2EnhanceData() {
                     metadata.detailsExtractedAt ??
                     metadata.detailsExtractionLastAttempt ??
                     row.updated_at;
-                  return formatDateTime(lastUpdated);
+                  return formatDateTimeDDMMYYYY(lastUpdated);
                 },
               },
             ]}

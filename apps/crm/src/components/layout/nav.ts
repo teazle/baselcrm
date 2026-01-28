@@ -9,7 +9,6 @@ export const crmNav = [
   { href: "/crm/treatment-master", label: "Treatment Master" },
   { href: "/crm/tasks", label: "Tasks" },
   { href: "/crm/reports", label: "Reports" },
-  { href: "/rpa", label: "RPA Automation" },
   { href: "/crm/settings", label: "Settings" },
 ];
 

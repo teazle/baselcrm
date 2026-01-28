@@ -7,7 +7,7 @@ import { supabaseBrowser } from "@/lib/supabase/browser";
 import { isDemoMode } from "@/lib/env";
 import { mockGetTable } from "@/lib/mock/storage";
 import { StatusBadge } from "./StatusBadge";
-import { formatDateTimeSingapore } from "@/lib/utils/date";
+import { formatDateTimeDDMMYYYY } from "@/lib/utils/date";
 
 type RunRow = {
   id: string;
@@ -23,10 +23,6 @@ function formatRunType(value?: string | null) {
   if (value === "queue_list") return "Queue List";
   if (value === "visit_details") return "Visit Details";
   return value ?? "--";
-}
-
-function formatDateTime(value?: string | null) {
-  return formatDateTimeSingapore(value);
 }
 
 export default function RealTimeStatus() {
@@ -147,7 +143,7 @@ export default function RealTimeStatus() {
                       {formatRunType(run.run_type)}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Started {formatDateTime(run.started_at)}
+                      Started {formatDateTimeDDMMYYYY(run.started_at)}
                     </div>
                   </div>
                   <StatusBadge status="in_progress" />
@@ -182,7 +178,7 @@ export default function RealTimeStatus() {
                     {formatRunType(run.run_type)}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {formatDateTime(run.started_at)}
+                    {formatDateTimeDDMMYYYY(run.started_at)}
                   </div>
                 </div>
                 <StatusBadge

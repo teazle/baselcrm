@@ -7,7 +7,7 @@ import { supabaseBrowser } from "@/lib/supabase/browser";
 import { isDemoMode } from "@/lib/env";
 import { mockGetTable } from "@/lib/mock/storage";
 import { StatusBadge, type Status } from "./StatusBadge";
-import { formatDateTimeSingapore } from "@/lib/utils/date";
+import { formatDateTimeDDMMYYYY } from "@/lib/utils/date";
 
 type RunRow = {
   id: string;
@@ -25,10 +25,6 @@ function formatRunType(value?: string | null) {
   if (value === "queue_list") return "Queue List";
   if (value === "visit_details") return "Visit Details";
   return value ?? "--";
-}
-
-function formatDateTime(value?: string | null) {
-  return formatDateTimeSingapore(value);
 }
 
 function normalizeStatus(value?: string | null): Status {
@@ -123,8 +119,8 @@ export default function ExtractionActivityLog() {
             header: "Status",
             cell: (row) => <StatusBadge status={normalizeStatus(row.status)} />,
           },
-          { header: "Started", cell: (row) => formatDateTime(row.started_at) },
-          { header: "Finished", cell: (row) => formatDateTime(row.finished_at) },
+          { header: "Started", cell: (row) => formatDateTimeDDMMYYYY(row.started_at) },
+          { header: "Finished", cell: (row) => formatDateTimeDDMMYYYY(row.finished_at) },
           {
             header: "Counts",
             cell: (row) => {

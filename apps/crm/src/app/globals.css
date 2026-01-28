@@ -121,3 +121,13 @@ body::before {
 .animate-spin-around {
   animation: spin-around calc(var(--speed, 2.8s) * 0.9) linear infinite;
 }
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
