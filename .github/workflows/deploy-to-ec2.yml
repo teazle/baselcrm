@@ -79,6 +79,12 @@ jobs:
               echo "ℹ️  No dependency changes detected"
             fi
             
+            # Rebuild Next.js CRM app so client bundle is up to date
+            if [ -d apps/crm ]; then
+              echo "🏗️  Building CRM app (apps/crm)..."
+              (cd apps/crm && npm run build) || { echo "⚠️  Warning: CRM build failed"; }
+            fi
+            
             # Restart PM2 processes if running
             if command -v pm2 &> /dev/null; then
               echo "🔄 Restarting PM2 processes..."

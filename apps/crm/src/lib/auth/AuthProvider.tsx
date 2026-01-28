@@ -23,8 +23,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isDemoMode() || !supabase) {
-      const stored = localStorage.getItem("demo:userEmail");
-      setDemoEmail(stored || "demo@baselrpa.local");
+      try {
+        const stored =
+          typeof window !== "undefined" ? window.localStorage.getItem("demo:userEmail") : null;
+        setDemoEmail(stored || "demo@baselrpa.local");
+      } catch {
+        setDemoEmail("demo@baselrpa.local");
+      }
       setSession(null);
       setIsLoading(false);
       return;
@@ -74,14 +79,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isLoading,
     signOut: async () => {
       if (isDemoMode() || !supabase) {
-        localStorage.removeItem("demo:userEmail");
+        try {
+          if (typeof window !== "undefined") window.localStorage.removeItem("demo:userEmail");
+        } catch {
+          /* ignore */
+        }
         setDemoEmail(null);
         return;
       }
       await supabase.auth.signOut();
     },
     setDemoUserEmail: (email: string) => {
-      localStorage.setItem("demo:userEmail", email);
+      try {
+        if (typeof window !== "undefined") window.localStorage.setItem("demo:userEmail", email);
+      } catch {
+        /* ignore */
+      }
       setDemoEmail(email);
     },
   };

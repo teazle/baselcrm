@@ -6,8 +6,19 @@ function keyFor(table: string) {
   return `demo:table:${table}`;
 }
 
+function safeLocalStorage(): Storage | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
 export function mockGetTable(table: string): UnknownRecord[] {
-  const raw = localStorage.getItem(keyFor(table));
+  const storage = safeLocalStorage();
+  if (!storage) return [];
+  const raw = storage.getItem(keyFor(table));
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw) as unknown;
@@ -19,7 +30,13 @@ export function mockGetTable(table: string): UnknownRecord[] {
 }
 
 export function mockSetTable(table: string, rows: UnknownRecord[]) {
-  localStorage.setItem(keyFor(table), JSON.stringify(rows));
+  const storage = safeLocalStorage();
+  if (!storage) return;
+  try {
+    storage.setItem(keyFor(table), JSON.stringify(rows));
+  } catch {
+    // ignore (quota, private mode, etc.)
+  }
 }
 
 export function mockUpsert(table: string, row: UnknownRecord): UnknownRecord {
