@@ -144,7 +144,7 @@ function nextAutoNo(table: string, field: string, prefix: string, width = 6) {
 
 /** For Supabase: compute next running number for a table/field with prefix (e.g. case_no "C-", registration_no "REG-"). */
 async function nextAutoNoSupabase(
-  supabase: ReturnType<typeof supabaseBrowser>,
+  supabase: NonNullable<ReturnType<typeof supabaseBrowser>>,
   table: string,
   field: string,
   prefix: string,
@@ -158,7 +158,7 @@ async function nextAutoNoSupabase(
   if (error) return `${prefix}${String(1).padStart(width, '0')}`;
   let max = 0;
   for (const r of data ?? []) {
-    const v = (r as Record<string, unknown>)?.[field];
+    const v = (r as unknown as Record<string, unknown>)?.[field];
     if (typeof v !== 'string') continue;
     if (!v.startsWith(prefix)) continue;
     const n = Number(v.slice(prefix.length));
