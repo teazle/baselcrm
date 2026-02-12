@@ -23,7 +23,7 @@ Options:
   --pay-type <value>     Filter by pay type
   --from <YYYY-MM-DD>    Start date filter
   --to <YYYY-MM-DD>      End date filter
-  --portal-only          Only rows tagged for supported portals (MHC/AIA/AVIVA/SINGLIFE)
+  --portal-only          Only rows in portal scope (MHC/AIA/AVIVA/SINGLIFE + Allianz Medinet tags)
   --save-as-draft        Click "Save as Draft" after fill
   --leave-open           Keep browser open for manual verification
   --all-pending          Explicitly allow unscoped run across all pending rows
@@ -44,7 +44,7 @@ function parseCliArgs(argv) {
     help: false,
   };
 
-  const readValue = (i) => {
+  const readValue = i => {
     const next = argv[i + 1];
     if (!next || next.startsWith('--')) {
       throw new Error(`Missing value for ${argv[i]}`);
@@ -126,7 +126,7 @@ function parseCliArgs(argv) {
 
 /**
  * Batch submit claims to portals
- * 
+ *
  * Usage:
  *   node src/examples/submit-claims-batch.js
  *   node src/examples/submit-claims-batch.js --visit-ids id1,id2,id3
@@ -149,32 +149,23 @@ async function submitClaimsBatch() {
     return;
   }
 
-  const {
-    visitIds,
-    payType,
-    from,
-    to,
-    portalOnly,
-    saveAsDraft,
-    leaveOpen,
-    allPending,
-  } = parsed;
+  const { visitIds, payType, from, to, portalOnly, saveAsDraft, leaveOpen, allPending } = parsed;
 
   const hasScope = Boolean(
-    (Array.isArray(visitIds) && visitIds.length > 0) ||
-    payType ||
-    from ||
-    to ||
-    portalOnly
+    (Array.isArray(visitIds) && visitIds.length > 0) || payType || from || to || portalOnly
   );
   if (!hasScope && !allPending) {
-    logger.error('Refusing unscoped batch run. Add --from/--to and/or --portal-only, or pass --all-pending explicitly.');
+    logger.error(
+      'Refusing unscoped batch run. Add --from/--to and/or --portal-only, or pass --all-pending explicitly.'
+    );
     printUsage();
     process.exit(2);
   }
 
   logger.info('=== Batch Claim Submission ===');
-  logger.info(`Visit IDs: ${visitIds ? visitIds.join(', ') : (allPending ? 'All pending (explicit)' : 'Scoped query')}`);
+  logger.info(
+    `Visit IDs: ${visitIds ? visitIds.join(', ') : allPending ? 'All pending (explicit)' : 'Scoped query'}`
+  );
   logger.info(`Pay Type: ${payType || 'All'}`);
   logger.info(`Date Range: ${from || '-'} to ${to || '-'}`);
   logger.info(`Portal Only: ${portalOnly}`);
@@ -223,11 +214,13 @@ async function submitClaimsBatch() {
 
     for (let i = 0; i < visits.length; i++) {
       const visit = visits[i];
-      logger.info(`[${i + 1}/${visits.length}] Processing: ${visit.patient_name} (${visit.pay_type})`);
+      logger.info(
+        `[${i + 1}/${visits.length}] Processing: ${visit.patient_name} (${visit.pay_type})`
+      );
 
       try {
         const result = await submitter.submitClaim(visit);
-        
+
         if (result.success) {
           if (result.savedAsDraft) {
             draftCount++;
@@ -262,7 +255,7 @@ async function submitClaimsBatch() {
       });
 
       // Small delay between submissions
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => globalThis.setTimeout(resolve, 2000));
     }
 
     logger.info('\n=== Submission Summary ===');
@@ -279,10 +272,16 @@ async function submitClaimsBatch() {
       total_records: totalRecords,
       completed_count: submittedCount + draftCount + filledOnlyCount,
       failed_count: errorCount,
-      metadata: { ...runMetadata, submittedCount, draftCount, filledOnlyCount, errorCount, notStartedCount },
+      metadata: {
+        ...runMetadata,
+        submittedCount,
+        draftCount,
+        filledOnlyCount,
+        errorCount,
+        notStartedCount,
+      },
     });
     markRunFinalized();
-
   } catch (error) {
     logger.error('Fatal error during submission:', error);
     await updateRun(supabase, runId, {
@@ -300,7 +299,6 @@ async function submitClaimsBatch() {
       logger.info('Leaving browser open for manual verification. Press Ctrl+C to exit.');
       // Keep the Node process alive so the Playwright browser stays open.
       // (The run was already finalized above; this is strictly for human inspection.)
-      // eslint-disable-next-line no-empty
       await new Promise(() => {});
     } else {
       await browserManager.close();
@@ -334,10 +332,7 @@ async function startRun(supabase, metadata) {
 async function updateRun(supabase, runId, updates) {
   if (!supabase || !runId) return;
   try {
-    const { error } = await supabase
-      .from('rpa_extraction_runs')
-      .update(updates)
-      .eq('id', runId);
+    const { error } = await supabase.from('rpa_extraction_runs').update(updates).eq('id', runId);
     if (error) {
       logger.error('[SUBMIT-BATCH] Failed to update run record', { error: error.message });
     }

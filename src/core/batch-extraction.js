@@ -2,7 +2,11 @@ import { logger } from '../utils/logger.js';
 import { ClinicAssistAutomation } from '../automations/clinic-assist.js';
 import { StepLogger } from '../utils/step-logger.js';
 import { createSupabaseClient } from '../utils/supabase-client.js';
-import { validateNRIC, validateClaimDetails, logValidationResults } from '../utils/extraction-validator.js';
+import {
+  validateNRIC,
+  validateClaimDetails,
+  logValidationResults,
+} from '../utils/extraction-validator.js';
 
 /**
  * Batch extraction: Extract all queue items from today and save to CRM
@@ -99,16 +103,16 @@ export class BatchExtraction {
    */
   async getAllQueueItems() {
     const items = [];
-    
+
     // Try jqGrid first
     const jqGrid = this.clinicAssist.page.locator('#queueLogGrid');
     if ((await jqGrid.count().catch(() => 0)) > 0) {
       const rows = jqGrid.locator('tr.jqgrow');
       const rowCount = await rows.count().catch(() => 0);
-      
+
       for (let i = 0; i < rowCount; i++) {
         const row = rows.nth(i);
-        const getCellValue = async (ariaDesc) => {
+        const getCellValue = async ariaDesc => {
           const cell = row.locator(`td[aria-describedby$="${ariaDesc}"]`).first();
           const count = await cell.count().catch(() => 0);
           if (count === 0) return null;
@@ -146,20 +150,62 @@ export class BatchExtraction {
       if ((await table.count().catch(() => 0)) > 0) {
         const rows = table.locator('tbody tr');
         const rowCount = await rows.count().catch(() => 0);
-        
+
         for (let i = 0; i < rowCount; i++) {
           const row = rows.nth(i);
           const cells = row.locator('td');
           const cellCount = await cells.count().catch(() => 0);
           if (cellCount < 5) continue;
 
-          const qno = (await cells.nth(0).textContent().catch(() => ''))?.trim() || null;
-          const status = (await cells.nth(1).textContent().catch(() => ''))?.trim() || null;
-          const patientName = (await cells.nth(3).textContent().catch(() => ''))?.trim() || null;
-          const nric = (await cells.nth(5).textContent().catch(() => ''))?.trim() || null;
-          const payType = (await cells.nth(13).textContent().catch(() => ''))?.trim() || null;
-          const visitType = (await cells.nth(14).textContent().catch(() => ''))?.trim() || null;
-          const fee = (await cells.nth(8).textContent().catch(() => ''))?.trim() || null;
+          const qno =
+            (
+              await cells
+                .nth(0)
+                .textContent()
+                .catch(() => '')
+            )?.trim() || null;
+          const status =
+            (
+              await cells
+                .nth(1)
+                .textContent()
+                .catch(() => '')
+            )?.trim() || null;
+          const patientName =
+            (
+              await cells
+                .nth(3)
+                .textContent()
+                .catch(() => '')
+            )?.trim() || null;
+          const nric =
+            (
+              await cells
+                .nth(5)
+                .textContent()
+                .catch(() => '')
+            )?.trim() || null;
+          const payType =
+            (
+              await cells
+                .nth(13)
+                .textContent()
+                .catch(() => '')
+            )?.trim() || null;
+          const visitType =
+            (
+              await cells
+                .nth(14)
+                .textContent()
+                .catch(() => '')
+            )?.trim() || null;
+          const fee =
+            (
+              await cells
+                .nth(8)
+                .textContent()
+                .catch(() => '')
+            )?.trim() || null;
 
           if (patientName || nric) {
             items.push({
@@ -188,10 +234,13 @@ export class BatchExtraction {
       // Navigate back to queue if we're not there (unless we're in reports)
       const currentUrl = this.clinicAssist.page.url();
       const isFromReports = queueItem.source === 'reports_queue_list';
-      
+
       if (!isFromReports && !currentUrl.includes('/Queue') && !currentUrl.includes('/QueueLog')) {
         this.steps.log('Navigating back to queue');
-        await this.clinicAssist.navigateToQueue(process.env.BATCH_BRANCH || '__FIRST__', process.env.BATCH_DEPT || 'Reception');
+        await this.clinicAssist.navigateToQueue(
+          process.env.BATCH_BRANCH || '__FIRST__',
+          process.env.BATCH_DEPT || 'Reception'
+        );
         await this.clinicAssist.page.waitForTimeout(3000); // Wait longer for queue to load
       }
 
@@ -203,7 +252,7 @@ export class BatchExtraction {
       // Find the row by NRIC (most reliable) or patient name
       // Use rowIndex if available, otherwise search by NRIC
       let row = null;
-      
+
       if (queueItem.rowIndex !== undefined) {
         // Use row index if we have it (most reliable)
         if ((await jqGrid.count().catch(() => 0)) > 0) {
@@ -218,31 +267,40 @@ export class BatchExtraction {
           }
         }
       }
-      
+
       // Fallback: search by NRIC (exact match)
       if (!row && queueItem.nric) {
         // Try exact text match first
-        const nricCell = this.clinicAssist.page.locator(`td[aria-describedby$="_NRIC"]`).filter({ hasText: queueItem.nric }).first();
+        const nricCell = this.clinicAssist.page
+          .locator(`td[aria-describedby$="_NRIC"]`)
+          .filter({ hasText: queueItem.nric })
+          .first();
         if ((await nricCell.count().catch(() => 0)) > 0) {
           row = nricCell.locator('..').first(); // Get parent row
         }
-        
+
         // If still not found, try contains match
         if (!row || (await row.count().catch(() => 0)) === 0) {
-          row = this.clinicAssist.page.locator(`tr.jqgrow:has(td[aria-describedby$="_NRIC"]:has-text("${queueItem.nric}"))`).first();
+          row = this.clinicAssist.page
+            .locator(`tr.jqgrow:has(td[aria-describedby$="_NRIC"]:has-text("${queueItem.nric}"))`)
+            .first();
         }
       }
-      
+
       // Fallback: search by patient name
       if ((!row || (await row.count().catch(() => 0)) === 0) && queueItem.patientName) {
-        row = this.clinicAssist.page.locator(`tr.jqgrow:has(td[aria-describedby$="_PatientName"]:has-text("${queueItem.patientName}"))`).first();
+        row = this.clinicAssist.page
+          .locator(
+            `tr.jqgrow:has(td[aria-describedby$="_PatientName"]:has-text("${queueItem.patientName}"))`
+          )
+          .first();
       }
 
       if (!row || (await row.count().catch(() => 0)) === 0) {
-        logger.warn(`[BATCH] Could not find row for ${queueItem.patientName || queueItem.nric}`, { 
+        logger.warn(`[BATCH] Could not find row for ${queueItem.patientName || queueItem.nric}`, {
           rowIndex: queueItem.rowIndex,
           nric: queueItem.nric,
-          patientName: queueItem.patientName 
+          patientName: queueItem.patientName,
         });
         // Return basic data we have from queue
         return {
@@ -255,7 +313,9 @@ export class BatchExtraction {
       // Try to open visit record
       const opened = await this.clinicAssist._openVisitFromQueueRow(row);
       if (!opened) {
-        logger.warn(`[BATCH] Could not open visit record for ${queueItem.patientName || queueItem.nric}`);
+        logger.warn(
+          `[BATCH] Could not open visit record for ${queueItem.patientName || queueItem.nric}`
+        );
         // Return basic data we have from queue
         return {
           ...queueItem,
@@ -266,7 +326,7 @@ export class BatchExtraction {
 
       // Extract claim details
       const claimDetails = await this.clinicAssist.extractClaimDetailsFromCurrentVisit();
-      
+
       // Extract patient NRIC if not already available
       let nric = queueItem.nric;
       if (!nric) {
@@ -275,8 +335,10 @@ export class BatchExtraction {
 
       // Validate NRIC
       const nricValidation = validateNRIC(nric || queueItem.nric);
-      const validatedNric = nricValidation.isValid ? nricValidation.cleaned : (nric || queueItem.nric);
-      
+      const validatedNric = nricValidation.isValid
+        ? nricValidation.cleaned
+        : nric || queueItem.nric;
+
       if (!nricValidation.isValid && (nric || queueItem.nric)) {
         logger.warn(`[BATCH] Invalid NRIC format for ${queueItem.patientName}`, {
           original: nric || queueItem.nric,
@@ -302,7 +364,9 @@ export class BatchExtraction {
         },
       };
     } catch (error) {
-      logger.error(`[BATCH] Error extracting data for ${queueItem.patientName || queueItem.nric}`, { error: error.message });
+      logger.error(`[BATCH] Error extracting data for ${queueItem.patientName || queueItem.nric}`, {
+        error: error.message,
+      });
       return {
         ...queueItem,
         extracted: false,
@@ -324,7 +388,10 @@ export class BatchExtraction {
   async extractFromReportsQueueList(date = null, options = {}) {
     const { skipRunLogging = false } = options;
     const targetDate = date || new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-    const runMetadata = { date: targetDate, trigger: skipRunLogging ? 'extract-date-range' : 'manual' };
+    const runMetadata = {
+      date: targetDate,
+      trigger: skipRunLogging ? 'extract-date-range' : 'manual',
+    };
     const runId = skipRunLogging ? null : await this._startRun('queue_list', runMetadata);
 
     try {
@@ -347,11 +414,13 @@ export class BatchExtraction {
 
       // Wait for Reports page to load
       await this.clinicAssist.page.waitForTimeout(2000);
-      
+
       // Try to find and click QueueReport link from Reports page
       const queueListOpened = await this.clinicAssist.navigateToQueueListReport();
       if (!queueListOpened) {
-        logger.warn('[REPORTS] Could not find QueueReport link, trying direct navigation from Reports context');
+        logger.warn(
+          '[REPORTS] Could not find QueueReport link, trying direct navigation from Reports context'
+        );
         const directNav = await this.clinicAssist.navigateDirectlyToQueueReport();
         if (!directNav) {
           logger.warn('[REPORTS] Direct navigation also failed');
@@ -369,9 +438,11 @@ export class BatchExtraction {
       // Search for the target date (if date fields found)
       await this.clinicAssist.page.waitForTimeout(2000);
       const searchResult = await this.clinicAssist.searchQueueListByDate(targetDate);
-      
+
       if (!searchResult) {
-        logger.warn('[REPORTS] Could not search queue list by date; will try to extract whatever is shown');
+        logger.warn(
+          '[REPORTS] Could not search queue list by date; will try to extract whatever is shown'
+        );
       }
 
       // Extract patient data (Excel export preferred, then grid/iframe)
@@ -379,7 +450,9 @@ export class BatchExtraction {
       const items = await this.clinicAssist.extractQueueListResults();
 
       if (items.length === 0) {
-        logger.info(`[REPORTS] Queue list report returned 0 items for ${targetDate} (report may be empty for this date)`);
+        logger.info(
+          `[REPORTS] Queue list report returned 0 items for ${targetDate} (report may be empty for this date)`
+        );
       } else {
         logger.info(`[REPORTS] Extracted ${items.length} items from queue list for ${targetDate}`);
       }
@@ -421,23 +494,27 @@ export class BatchExtraction {
       const { writeFile, mkdir } = await import('fs/promises');
       const { join } = await import('path');
       const { existsSync } = await import('fs');
-      
+
       const dataDir = './data/batch-extractions';
       if (!existsSync(dataDir)) {
         await mkdir(dataDir, { recursive: true });
       }
-      
+
       const filename = `batch-extraction-${new Date().toISOString().replace(/:/g, '-')}.json`;
       const filepath = join(dataDir, filename);
-      await writeFile(filepath, JSON.stringify({ items, extractedAt: new Date().toISOString() }, null, 2));
-      
+      await writeFile(
+        filepath,
+        JSON.stringify({ items, extractedAt: new Date().toISOString() }, null, 2)
+      );
+
       logger.info(`[BATCH] Saved ${items.length} items to ${filepath}`);
       return items.length;
     }
 
     // Get system user_id for automated extractions
     // Use environment variable or default to admin user found in system
-    const systemUserId = process.env.SUPABASE_SYSTEM_USER_ID || 'c80a40d9-18f5-4364-8987-e9dd0178d00c';
+    const systemUserId =
+      process.env.SUPABASE_SYSTEM_USER_ID || 'c80a40d9-18f5-4364-8987-e9dd0178d00c';
 
     let savedCount = 0;
     // Use provided visitDate, or default to today
@@ -446,8 +523,9 @@ export class BatchExtraction {
     for (const item of items) {
       try {
         // Parse fee amount - prefer extracted claimAmount, fallback to queue fee
-        const feeAmount = item.claimDetails?.claimAmount || 
-                         (item.fee ? parseFloat(item.fee.replace(/[^0-9.]/g, '')) : null);
+        const feeAmount =
+          item.claimDetails?.claimAmount ||
+          (item.fee ? parseFloat(item.fee.replace(/[^0-9.]/g, '')) : null);
 
         // Extract PCNO for deduplication
         const pcno = item.pcno || null;
@@ -464,17 +542,17 @@ export class BatchExtraction {
           visit_record_no: visitRecordNo,
           total_amount: feeAmount,
           amount_outstanding: feeAmount,
-          
+
           // Claim details
           diagnosis_description: item.claimDetails?.diagnosisText || null,
           symptoms: item.claimDetails?.notesText || null,
           treatment_detail: item.claimDetails?.items?.join('\n') || null,
-          
+
           // MC days
           mc_required: (item.claimDetails?.mcDays || 0) > 0,
           mc_start_date: (item.claimDetails?.mcDays || 0) > 0 ? targetDate : null,
           mc_end_date: (item.claimDetails?.mcDays || 0) > 0 ? targetDate : null,
-          
+
           // Metadata
           source: 'Clinic Assist',
           pay_type: item.payType,
@@ -485,6 +563,7 @@ export class BatchExtraction {
             extractedAt: item.extractedAt || new Date().toISOString(),
             sources: item.claimDetails?.sources || {},
             pcno: pcno, // Save PCNO (patient number) for future searches
+            spCode: item.spCode || null, // Save SP code for Allianz Medinet doctor mapping in Flow 3
           },
         };
 
@@ -503,7 +582,9 @@ export class BatchExtraction {
 
           if (existingByRecordNo) {
             existingRecord = existingByRecordNo;
-            logger.info(`[BATCH] Found existing record for record_no ${visitRecordNo} on ${targetDate}, will update instead of insert`);
+            logger.info(
+              `[BATCH] Found existing record for record_no ${visitRecordNo} on ${targetDate}, will update instead of insert`
+            );
           }
         } else if (pcno) {
           // Last resort: if we have no record number, try to avoid duplicates by PCNO + time_arrived.
@@ -514,7 +595,7 @@ export class BatchExtraction {
             .not('extraction_metadata', 'is', null)
             .limit(200);
 
-          const matching = (existingData || []).find((v) => {
+          const matching = (existingData || []).find(v => {
             const md = v.extraction_metadata;
             if (!md || typeof md !== 'object') return false;
             const samePcno = md.pcno === pcno || String(md.pcno) === String(pcno);
@@ -524,7 +605,9 @@ export class BatchExtraction {
 
           if (matching) {
             existingRecord = matching;
-            logger.info(`[BATCH] Found existing record for PCNO ${pcno} at ${item.inTime || 'n/a'} on ${targetDate}, will update instead of insert`);
+            logger.info(
+              `[BATCH] Found existing record for PCNO ${pcno} at ${item.inTime || 'n/a'} on ${targetDate}, will update instead of insert`
+            );
           }
         }
 
@@ -538,7 +621,7 @@ export class BatchExtraction {
             .update(visitData)
             .eq('id', existingRecord.id)
             .select();
-          
+
           if (updateError) {
             throw updateError;
           }
@@ -546,23 +629,21 @@ export class BatchExtraction {
           error = null;
         } else {
           // Insert new visit
-          const insertResult = await this.supabase
-            .from('visits')
-            .insert(visitData)
-            .select();
-          
+          const insertResult = await this.supabase.from('visits').insert(visitData).select();
+
           data = insertResult.data;
           error = insertResult.error;
 
           // If insert fails due to duplicate (unique constraint on visit_record_no), try update
-          if (error && error.code === '23505') { // Unique violation
+          if (error && error.code === '23505') {
+            // Unique violation
             const { data: updateData, error: updateError } = await this.supabase
               .from('visits')
               .update(visitData)
               .eq('visit_record_no', visitRecordNo)
               .eq('visit_date', targetDate)
               .select();
-            
+
             if (updateError) {
               throw updateError;
             }
@@ -572,7 +653,9 @@ export class BatchExtraction {
         }
 
         if (error) {
-          logger.error(`[BATCH] Failed to save visit for ${item.patientName}`, { error: error.message });
+          logger.error(`[BATCH] Failed to save visit for ${item.patientName}`, {
+            error: error.message,
+          });
         } else {
           savedCount++;
           logger.info(`[BATCH] Saved visit for ${item.patientName}`, { visitId: data?.[0]?.id });

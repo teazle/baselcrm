@@ -3,4 +3,4 @@
  */
 export { ClinicAssistAutomation } from './clinic-assist.js';
 export { MHCAsiaAutomation } from './mhc-asia.js';
-
+export { AllianceMedinetAutomation } from './alliance-medinet.js';

@@ -4,16 +4,45 @@
  */
 
 import {
+  ALLIANCE_MEDINET_TAGS,
+  PORTAL_PAY_TYPES,
   SUPPORTED_PORTALS,
   UNSUPPORTED_PORTALS,
+  extractAllianceMedinetTag,
+  getPortalPayTypes,
+  getPortalScopeOrFilter,
   isSupportedPortal,
+  isAllianceMedinetTagMatch,
+  isAllianceMedinetVisit,
   isUnsupportedPortal,
   getSupportedPortals,
   getUnsupportedPortals,
-} from "./portals.shared";
+} from './portals.shared';
 
-export { SUPPORTED_PORTALS, UNSUPPORTED_PORTALS, isSupportedPortal, isUnsupportedPortal, getSupportedPortals, getUnsupportedPortals };
+export {
+  ALLIANCE_MEDINET_TAGS,
+  PORTAL_PAY_TYPES,
+  SUPPORTED_PORTALS,
+  UNSUPPORTED_PORTALS,
+  extractAllianceMedinetTag,
+  getPortalPayTypes,
+  getPortalScopeOrFilter,
+  isSupportedPortal,
+  isAllianceMedinetTagMatch,
+  isAllianceMedinetVisit,
+  isUnsupportedPortal,
+  getSupportedPortals,
+  getUnsupportedPortals,
+};
 
-export type SupportedPortal = "MHC" | "AIA" | "AIACLIENT";
-export type UnsupportedPortal = "IHP" | "GE" | "FULLERT" | "ALLIMED" | "ALL" | "ALLIANCE";
+export type SupportedPortal =
+  | 'MHC'
+  | 'AIA'
+  | 'AIACLIENT'
+  | 'TOKIOM'
+  | 'ALLIANC'
+  | 'ALLSING'
+  | 'AXAMED'
+  | 'PRUDEN';
+export type UnsupportedPortal = 'IHP' | 'GE' | 'FULLERT' | 'ALLIMED' | 'ALL' | 'ALLIANCE';
 export type Portal = SupportedPortal | UnsupportedPortal;

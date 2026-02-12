@@ -19,23 +19,44 @@ export function normalizeNric(value) {
 }
 
 export function normalizePatientNameForSearch(value) {
-  let s = String(value ?? '').replace(/\s+/g, ' ').trim();
+  let s = String(value ?? '')
+    .replace(/\s+/g, ' ')
+    .trim();
   if (!s) return '';
 
   // Remove leading tags/prefixes like "TAG AVIVA -", "SINGLIFE -", "AVIVA | SINGLIFE -",
   // "MHC MEDICAL NETWORK ... -", etc.
   // If there's a dash-separated prefix containing known contract/tags, keep the right-most segment.
   const upper = s.toUpperCase();
-  const tagTokens = ['TAG', 'AVIVA', 'SINGLIFE', 'MHC', 'AIA', 'AIACLIENT', 'GE', 'ALLIANZ', 'FULLERT', 'IHP'];
-  const hasTagToken = tagTokens.some((t) => upper.includes(t));
+  const tagTokens = [
+    'TAG',
+    'AVIVA',
+    'SINGLIFE',
+    'MHC',
+    'AIA',
+    'AIACLIENT',
+    'GE',
+    'ALLIANZ',
+    'FULLERT',
+    'IHP',
+    'TOKIOM',
+    'ALLIANC',
+    'ALLSING',
+    'AXAMED',
+    'PRUDEN',
+  ];
+  const hasTagToken = tagTokens.some(t => upper.includes(t));
 
   if (hasTagToken) {
     // Prefer splitting on '-' first (common format: "TAG AVIVA - NAME").
     if (s.includes('-')) {
-      const parts = s.split('-').map((p) => p.trim()).filter(Boolean);
+      const parts = s
+        .split('-')
+        .map(p => p.trim())
+        .filter(Boolean);
       if (parts.length >= 2) {
         const left = parts.slice(0, -1).join(' ').toUpperCase();
-        const leftHasToken = tagTokens.some((t) => new RegExp(`(^|\\b)${t}(\\b|$)`).test(left));
+        const leftHasToken = tagTokens.some(t => new RegExp(`(^|\\b)${t}(\\b|$)`).test(left));
         if (leftHasToken) {
           s = parts[parts.length - 1];
         }
@@ -45,7 +66,7 @@ export function normalizePatientNameForSearch(value) {
     // Also remove any remaining leading tokens and separators.
     s = s
       .replace(
-        /^(?:\s*(?:TAG\s+)?(?:AVIVA|SINGLIFE|MHC|AIA|AIACLIENT|GE|ALLIANZ|FULLERT|IHP)\s*)+(?:[|:/-]+\s*)*/i,
+        /^(?:\s*(?:TAG\s+)?(?:AVIVA|SINGLIFE|MHC|AIA|AIACLIENT|GE|ALLIANZ|FULLERT|IHP|TOKIOM|ALLIANC|ALLSING|AXAMED|PRUDEN)\s*)+(?:[|:/-]+\s*)*/i,
         ''
       )
       .trim();

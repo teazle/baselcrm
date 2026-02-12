@@ -1,7 +1,12 @@
 import { logger } from '../utils/logger.js';
 import { MHCAsiaAutomation } from '../automations/mhc-asia.js';
+import { AllianceMedinetAutomation } from '../automations/alliance-medinet.js';
 import { StepLogger } from '../utils/step-logger.js';
 import { createSupabaseClient } from '../utils/supabase-client.js';
+import {
+  extractAllianceMedinetTag,
+  getPortalScopeOrFilter,
+} from '../../apps/crm/src/lib/rpa/portals.shared.js';
 
 /**
  * Claim Submitter: Routes claims to appropriate portals based on pay type
@@ -9,6 +14,7 @@ import { createSupabaseClient } from '../utils/supabase-client.js';
 export class ClaimSubmitter {
   constructor(mhcAsiaPage) {
     this.mhcAsia = new MHCAsiaAutomation(mhcAsiaPage);
+    this.allianceMedinet = new AllianceMedinetAutomation(mhcAsiaPage);
     this.steps = new StepLogger({ total: 10, prefix: 'SUBMIT' });
     this.supabase = createSupabaseClient();
     this.mhcAsiaLoggedIn = false;
@@ -29,8 +35,6 @@ export class ClaimSubmitter {
       .from('visits')
       .select('*')
       .eq('source', 'Clinic Assist')
-      .not('pay_type', 'is', null)
-      .neq('pay_type', '')
       .is('submitted_at', null); // Not yet submitted
 
     if (payType) {
@@ -46,15 +50,7 @@ export class ClaimSubmitter {
 
     // Convenience filter for verification runs: only rows that look like portal-tagged patients.
     if (portalOnly && !payType) {
-      query = query.or(
-        [
-          'pay_type.ilike.%MHC%',
-          'pay_type.ilike.%AIA%',
-          'pay_type.ilike.%AIACLIENT%',
-          'pay_type.ilike.%AVIVA%',
-          'pay_type.ilike.%SINGLIFE%',
-        ].join(',')
-      );
+      query = query.or(getPortalScopeOrFilter());
     }
 
     if (Array.isArray(visitIds) && visitIds.length > 0) {
@@ -76,23 +72,33 @@ export class ClaimSubmitter {
    */
   async submitClaim(visit) {
     const payTypeRaw = String(visit.pay_type || '').toUpperCase();
-    
-    this.steps.step(1, `Submitting claim for ${visit.patient_name}`, { payType: payTypeRaw || null, visitId: visit.id });
+
+    this.steps.step(1, `Submitting claim for ${visit.patient_name}`, {
+      payType: payTypeRaw || null,
+      visitId: visit.id,
+    });
 
     const isVerificationOnly = process.env.WORKFLOW_SAVE_DRAFT === '0';
     const allowLiveSubmit = process.env.ALLOW_LIVE_SUBMIT === '1';
     // By default we do NOT persist per-visit error states during verification (fill-only) runs.
     // Persisting errors is only useful once we're actively saving drafts/submitting.
-    const shouldPersistErrors =
-      process.env.WORKFLOW_PERSIST_ERRORS === '1' || !isVerificationOnly;
+    const shouldPersistErrors = process.env.WORKFLOW_PERSIST_ERRORS === '1' || !isVerificationOnly;
 
     try {
       let result = null;
 
       // Route to appropriate portal based on pay type
       // Note: AVIVA/SINGLIFE are handled via MHC Asia "Switch System" -> Singlife PCP (pcpcare) flow.
-      if (/(^|[^A-Z])MHC([^A-Z]|$)/.test(payTypeRaw) || payTypeRaw.includes('AIA') || payTypeRaw.includes('AIACLIENT') || payTypeRaw.includes('AVIVA') || payTypeRaw.includes('SINGLIFE')) {
+      if (
+        /(^|[^A-Z])MHC([^A-Z]|$)/.test(payTypeRaw) ||
+        payTypeRaw.includes('AIA') ||
+        payTypeRaw.includes('AIACLIENT') ||
+        payTypeRaw.includes('AVIVA') ||
+        payTypeRaw.includes('SINGLIFE')
+      ) {
         result = await this.submitToMHCAsia(visit);
+      } else if (extractAllianceMedinetTag(visit.pay_type, visit.patient_name)) {
+        result = await this.submitToAllianceMedinet(visit);
       } else if (payTypeRaw.includes('IHP')) {
         result = await this.submitToIHP(visit);
       } else if (payTypeRaw.includes('GE')) {
@@ -115,10 +121,20 @@ export class ClaimSubmitter {
             visitId: visit.id,
             payType: payTypeRaw || null,
           });
-          result = { ...result, success: false, submitted: false, error: 'Live submit blocked (draft-only mode)' };
+          result = {
+            ...result,
+            success: false,
+            submitted: false,
+            error: 'Live submit blocked (draft-only mode)',
+          };
         }
-        const shouldPersist = Boolean(result.savedAsDraft) || (allowLiveSubmit && Boolean(result.submitted));
-        const submissionStatus = result.savedAsDraft ? 'draft' : (allowLiveSubmit && result.submitted ? 'submitted' : null);
+        const shouldPersist =
+          Boolean(result.savedAsDraft) || (allowLiveSubmit && Boolean(result.submitted));
+        const submissionStatus = result.savedAsDraft
+          ? 'draft'
+          : allowLiveSubmit && result.submitted
+            ? 'submitted'
+            : null;
         if (shouldPersist && submissionStatus) {
           await this.supabase
             .from('visits')
@@ -140,8 +156,10 @@ export class ClaimSubmitter {
 
       return result;
     } catch (error) {
-      logger.error(`[SUBMIT] Error submitting claim for ${visit.patient_name}`, { error: error.message });
-      
+      logger.error(`[SUBMIT] Error submitting claim for ${visit.patient_name}`, {
+        error: error.message,
+      });
+
       // Update visit with error status only when this run intends to advance workflow state.
       // For fill-only verification, keep the DB clean and rely on run logs/screenshots instead.
       if (this.supabase && shouldPersistErrors) {
@@ -181,62 +199,22 @@ export class ClaimSubmitter {
     const forceSinglife = payTypeRaw.includes('AVIVA') || payTypeRaw.includes('SINGLIFE');
     let routingOverride = null;
 
-    const stripLeadingTag = (value) => {
+    const stripLeadingTag = value => {
       const s = String(value || '').trim();
       if (!s) return '';
       // Search must NOT include the tag prefix (clinic requirement).
-      return s.replace(/^(MHC|AVIVA|SINGLIFE|AIA|AIACLIENT|FULLERT|ALLIANZ|ALL|IHP|GE)\\s*[-:]+\\s*/i, '').trim();
-    };
-
-    const normalizeNricLike = (value) => {
-      const raw = String(value || '').trim().toUpperCase();
-      if (!raw) return '';
-      const match = raw.match(/[STFGM]\d{7}[A-Z]/);
-      if (match) return match[0];
-      return raw.replace(/[\s\/\-]+/g, '');
-    };
-    const pickNric = () => {
-      const candidates = [
-        visit.nric,
-        visit.patient_no,
-        visit.patient_number,
-        visit.patientId,
-        metadata.nric,
-        metadata.fin,
-        metadata.finNumber,
-        metadata.idNumber,
-        metadata.idNo,
-        metadata.patientId,
-        metadata.patient_id,
-        metadata.memberId,
-        metadata.member_id,
-        metadata.ic,
-        metadata.icNumber,
-        visit.patient_id,
-        visit.member_id,
-      ].filter(Boolean);
-      for (const cand of candidates) {
-        const cleaned = normalizeNricLike(cand);
-        if (/^[STFGM]\d{7}[A-Z]$/i.test(cleaned)) return cleaned;
-      }
-      for (const value of Object.values(metadata || {})) {
-        if (typeof value !== 'string') continue;
-        const cleaned = normalizeNricLike(value);
-        if (/^[STFGM]\d{7}[A-Z]$/i.test(cleaned)) return cleaned;
-      }
-      for (const value of Object.values(visit || {})) {
-        if (typeof value !== 'string') continue;
-        const cleaned = normalizeNricLike(value);
-        if (/^[STFGM]\d{7}[A-Z]$/i.test(cleaned)) return cleaned;
-      }
-      return '';
+      return s
+        .replace(/^(MHC|AVIVA|SINGLIFE|AIA|AIACLIENT|FULLERT|ALLIANZ|ALL|IHP|GE)\\s*[-:]+\\s*/i, '')
+        .trim();
     };
 
     // NRIC/FIN/Member ID is mandatory for MHC/AIA/Singlife.
-    const nric = pickNric();
+    const nric = this._pickNricForVisit(visit, metadata);
     const fullName = stripLeadingTag(visit.patient_name);
     if (!nric) {
-      throw new Error('NRIC not found in visit record - MHC/AIA/Singlife requires NRIC/FIN/Member ID (run Flow 2 / fix Flow 1 data)');
+      throw new Error(
+        'NRIC not found in visit record - MHC/AIA/Singlife requires NRIC/FIN/Member ID (run Flow 2 / fix Flow 1 data)'
+      );
     }
 
     // Get extracted data from Flow 2
@@ -266,16 +244,23 @@ export class ClaimSubmitter {
     // Fill visit date
     const visitDateFormatted = this._formatDateForMHC(visit.visit_date);
     const visitDateForSearch =
-      visitDateFormatted && /^\d{2}\/\d{2}\/\d{4}$/.test(visitDateFormatted) ? visitDateFormatted : null;
+      visitDateFormatted && /^\d{2}\/\d{2}\/\d{4}$/.test(visitDateFormatted)
+        ? visitDateFormatted
+        : null;
     if (forceSinglife) {
       // Singlife/Aviva: MHC -> Switch System -> Singlife PCP -> Add Normal Visit -> search by NRIC.
       // This path lands directly on the visit form (no separate addVisit step).
       // Do an explicit system switch here as a fast-path; navigateToSinglifeNormalVisitAndSearch()
       // also defends against being in the wrong system.
       await this.mhcAsia.switchToSinglifeIfNeeded({ force: true }).catch(() => false);
-      const ok = await this.mhcAsia.navigateToSinglifeNormalVisitAndSearch(nric, visitDateForSearch);
+      const ok = await this.mhcAsia.navigateToSinglifeNormalVisitAndSearch(
+        nric,
+        visitDateForSearch
+      );
       if (!ok) {
-        throw new Error(`Failed to open Singlife visit form for NRIC ${nric} (see screenshots/mhc-asia-singlife-*.png)`);
+        throw new Error(
+          `Failed to open Singlife visit form for NRIC ${nric} (see screenshots/mhc-asia-singlife-*.png)`
+        );
       }
     } else {
       let routedToAia = false;
@@ -297,11 +282,17 @@ export class ClaimSubmitter {
         await this.mhcAsia.switchToAIAClinicIfNeeded();
         const ok = await this.mhcAsia.navigateToAIAVisitAndSearch(nric);
         if (!ok) {
-          throw new Error(`Failed to open AIA visit form for NRIC ${nric} (see screenshots/mhc-asia-aia-*.png)`);
+          throw new Error(
+            `Failed to open AIA visit form for NRIC ${nric} (see screenshots/mhc-asia-aia-*.png)`
+          );
         }
         routedToAia = true;
       } else if (searchResult?.memberNotFound) {
-        return { success: false, reason: 'not_found', error: `Member not found in MHC Asia: ${nric}` };
+        return {
+          success: false,
+          reason: 'not_found',
+          error: `Member not found in MHC Asia: ${nric}`,
+        };
       } else if (!searchResult || !searchResult.found) {
         // Some members trigger a portal alert: "Please submit this claim under www.aiaclinic.com".
         // In that case, we must switch system and continue the AIA Clinic flow even if no
@@ -312,19 +303,28 @@ export class ClaimSubmitter {
         alreadyOnVisitForm = opened === true;
         if (this.mhcAsia.needsAIAClinicSwitch && nric) {
           routingOverride = 'AIA_CLINIC_DIALOG';
-          logger.info('[SUBMIT] Routing override: AIA Clinic required by portal dialog (after patient click)', {
-            nric: nric,
-            msg: this.mhcAsia.lastDialogMessage || null,
-          });
+          logger.info(
+            '[SUBMIT] Routing override: AIA Clinic required by portal dialog (after patient click)',
+            {
+              nric: nric,
+              msg: this.mhcAsia.lastDialogMessage || null,
+            }
+          );
           await this.mhcAsia.switchToAIAClinicIfNeeded();
           const ok = await this.mhcAsia.navigateToAIAVisitAndSearch(nric);
           if (!ok) {
-            throw new Error(`Failed to open AIA visit form for NRIC ${nric} (see screenshots/mhc-asia-aia-*.png)`);
+            throw new Error(
+              `Failed to open AIA visit form for NRIC ${nric} (see screenshots/mhc-asia-aia-*.png)`
+            );
           }
           routedToAia = true;
         } else if (!opened) {
           if (searchResult?.memberNotFound) {
-            return { success: false, reason: 'not_found', error: `Member not found in MHC Asia: ${nric}` };
+            return {
+              success: false,
+              reason: 'not_found',
+              error: `Member not found in MHC Asia: ${nric}`,
+            };
           }
           throw new Error(`Could not open patient from search results: ${nric}`);
         }
@@ -333,10 +333,13 @@ export class ClaimSubmitter {
       // If the portal explicitly instructs a different system (e.g. "submit under aiaclinic.com"),
       // follow the portal instruction. This is more reliable than tags when data is inconsistent.
       // We still keep pay_type unchanged; the override is tracked in the run/result metadata.
-      routingOverride = routingOverride || (this.mhcAsia.needsAIAClinicSwitch ? 'AIA_CLINIC_DIALOG' : null);
+      routingOverride =
+        routingOverride || (this.mhcAsia.needsAIAClinicSwitch ? 'AIA_CLINIC_DIALOG' : null);
       if (routingOverride && !nric) {
         const msg = this.mhcAsia.lastDialogMessage || 'AIA Clinic instruction dialog detected';
-        throw new Error(`Portal requires AIA Clinic but NRIC is missing (pay_type=${payTypeRaw}): ${msg}`);
+        throw new Error(
+          `Portal requires AIA Clinic but NRIC is missing (pay_type=${payTypeRaw}): ${msg}`
+        );
       }
 
       // IMPORTANT: Do not route/switch system based on page-text heuristics (searchResult.portal).
@@ -344,7 +347,11 @@ export class ClaimSubmitter {
       // addVisit() is only a guard in case the click lands on a page that still requires an "Add Visit" action.
       // If we detected the AIA Clinic instruction dialog, override to the AIA flow (Switch System -> AIA Clinic).
       // If we already routed via AIA Clinic in the search step, don't run addVisit again.
-      if (!routingOverride && !routedToAia && !(typeof alreadyOnVisitForm !== 'undefined' && alreadyOnVisitForm)) {
+      if (
+        !routingOverride &&
+        !routedToAia &&
+        !(typeof alreadyOnVisitForm !== 'undefined' && alreadyOnVisitForm)
+      ) {
         await this.mhcAsia.addVisit('mhc', nric || null);
         await this.mhcAsia.page.waitForTimeout(500);
       }
@@ -392,19 +399,24 @@ export class ClaimSubmitter {
 
     // Fill services/drugs from Flow 2 if we have them.
     const meds = Array.isArray(metadata.medicines) ? metadata.medicines : null;
-    const isJunkItem = (name) => {
+    const isJunkItem = name => {
       const n = String(name || '').trim();
       if (!n) return true;
       const lower = n.toLowerCase();
       if (lower === 'medicine') return true;
       if (lower.startsWith('unfit for ')) return true;
-      if (lower.startsWith('take ') || lower.startsWith('apply ') || lower.startsWith('use ')) return true;
-      if (/(tab\/s|tablet|capsule|cap\/s)\b/i.test(n) && /(daily|once|twice|bd|tds|after\s+food|before\s+food)\b/i.test(n)) return true;
+      if (lower.startsWith('take ') || lower.startsWith('apply ') || lower.startsWith('use '))
+        return true;
+      if (
+        /(tab\/s|tablet|capsule|cap\/s)\b/i.test(n) &&
+        /(daily|once|twice|bd|tds|after\s+food|before\s+food)\b/i.test(n)
+      )
+        return true;
       if (/^to be taken\b/i.test(lower) || /\bto be taken\b/i.test(lower)) return true;
       return false;
     };
     const seenItems = new Set();
-    const normalizeQty = (value) => {
+    const normalizeQty = value => {
       if (value === null || value === undefined) return null;
       const s = String(value).trim();
       if (!s) return null;
@@ -412,7 +424,7 @@ export class ClaimSubmitter {
       return m ? m[0] : s;
     };
     const items = (meds && meds.length ? meds : [])
-      .map((m) => {
+      .map(m => {
         if (typeof m === 'string') return { name: m, quantity: null };
         const name = m?.name || m?.description || '';
         const quantityRaw =
@@ -420,9 +432,14 @@ export class ClaimSubmitter {
         const quantity = normalizeQty(quantityRaw);
         return { name, quantity };
       })
-      .map((m) => ({ ...m, name: String(m?.name || '').trim().replace(/\s+/g, ' ') }))
-      .filter((m) => m.name && !isJunkItem(m.name))
-      .filter((m) => {
+      .map(m => ({
+        ...m,
+        name: String(m?.name || '')
+          .trim()
+          .replace(/\s+/g, ' '),
+      }))
+      .filter(m => m.name && !isJunkItem(m.name))
+      .filter(m => {
         const key = m.name.toUpperCase();
         if (!key) return false;
         if (seenItems.has(key)) return false;
@@ -431,7 +448,7 @@ export class ClaimSubmitter {
       });
     if (items.length) {
       const qtyCount = items.filter(
-        (m) => m.quantity !== null && m.quantity !== undefined && m.quantity !== ''
+        m => m.quantity !== null && m.quantity !== undefined && m.quantity !== ''
       ).length;
       const saveDraftMode = process.env.WORKFLOW_SAVE_DRAFT !== '0';
       const skipProceduresForDraft = process.env.MHC_SKIP_PROCEDURES_FOR_DRAFT !== '0';
@@ -441,13 +458,13 @@ export class ClaimSubmitter {
         count: items.length,
         qtyCount,
         skipProcedures,
-        sample: items.slice(0, 5).map((m) => ({ name: m.name, quantity: m.quantity })),
+        sample: items.slice(0, 5).map(m => ({ name: m.name, quantity: m.quantity })),
       });
       await this.mhcAsia.fillServicesAndDrugs(items, { skipProcedures }).catch(() => {});
     } else if (visit.treatment_detail) {
       const lines = String(visit.treatment_detail)
         .split(/\r?\n/)
-        .map((s) => s.trim())
+        .map(s => s.trim())
         .filter(Boolean);
       if (lines.length) {
         const saveDraftMode = process.env.WORKFLOW_SAVE_DRAFT !== '0';
@@ -466,26 +483,173 @@ export class ClaimSubmitter {
       .screenshot({ path: `screenshots/mhc-asia-final-form-${visit.id}.png`, fullPage: true })
       .catch(() => {});
     await this.mhcAsia.page.bringToFront().catch(() => {});
-    await this.mhcAsia.page.evaluate(() => window.focus()).catch(() => {});
+    await this.mhcAsia.page
+      .evaluate(() => {
+        if (typeof globalThis.focus === 'function') globalThis.focus();
+      })
+      .catch(() => {});
 
     // Save as draft (safety - don't auto-submit)
     const saveDraft = process.env.WORKFLOW_SAVE_DRAFT !== '0';
     if (saveDraft) {
       const ok = await this.mhcAsia.saveAsDraft();
       if (!ok) {
-        throw new Error('Failed to save as draft (see screenshots/mhc-asia-save-draft-not-found.png and screenshots/mhc-asia-before-save-draft.png)');
+        throw new Error(
+          'Failed to save as draft (see screenshots/mhc-asia-save-draft-not-found.png and screenshots/mhc-asia-before-save-draft.png)'
+        );
       }
     }
 
-    return { 
-      success: true, 
-      portal: 'MHC Asia', 
+    return {
+      success: true,
+      portal: 'MHC Asia',
       savedAsDraft: saveDraft,
       persisted: saveDraft,
       routingOverride,
       chargeType,
       mcDays,
-      hasDiagnosis: !!(diagnosisDesc && diagnosisDesc !== 'Missing diagnosis')
+      hasDiagnosis: !!(diagnosisDesc && diagnosisDesc !== 'Missing diagnosis'),
+    };
+  }
+
+  _normalizeNricLike(value) {
+    const raw = String(value || '')
+      .trim()
+      .toUpperCase();
+    if (!raw) return '';
+    const match = raw.match(/[STFGM]\d{7}[A-Z]/);
+    if (match) return match[0];
+    return raw.replace(/[\s\/\-]+/g, '');
+  }
+
+  _pickNricForVisit(visit, metadata = null) {
+    const md = metadata || visit?.extraction_metadata || {};
+    const candidates = [
+      visit?.nric,
+      visit?.patient_no,
+      visit?.patient_number,
+      visit?.patientId,
+      md?.nric,
+      md?.fin,
+      md?.finNumber,
+      md?.idNumber,
+      md?.idNo,
+      md?.patientId,
+      md?.patient_id,
+      md?.memberId,
+      md?.member_id,
+      md?.ic,
+      md?.icNumber,
+      visit?.patient_id,
+      visit?.member_id,
+    ].filter(Boolean);
+    for (const cand of candidates) {
+      const cleaned = this._normalizeNricLike(cand);
+      if (/^[STFGM]\d{7}[A-Z]$/i.test(cleaned)) return cleaned;
+    }
+    for (const value of Object.values(md || {})) {
+      if (typeof value !== 'string') continue;
+      const cleaned = this._normalizeNricLike(value);
+      if (/^[STFGM]\d{7}[A-Z]$/i.test(cleaned)) return cleaned;
+    }
+    for (const value of Object.values(visit || {})) {
+      if (typeof value !== 'string') continue;
+      const cleaned = this._normalizeNricLike(value);
+      if (/^[STFGM]\d{7}[A-Z]$/i.test(cleaned)) return cleaned;
+    }
+    return '';
+  }
+
+  _mapAllianceDoctorFromSpCode(spCodeRaw) {
+    const raw = String(spCodeRaw || '')
+      .toUpperCase()
+      .trim();
+    const compact = raw.replace(/[^A-Z]/g, '');
+    if (!compact) {
+      return { doctorName: null, matchedCode: null, normalizedSpCode: raw || null };
+    }
+
+    const priority = [
+      { code: 'ARU', doctorName: 'Palanisamy Arul Murugan' },
+      { code: 'KT', doctorName: 'Tan Guoping Kelvin' },
+      { code: 'KY', doctorName: 'Yip Man Hing Kevin' },
+      { code: 'MT', doctorName: 'Tung Yu Kee Mathew' },
+    ];
+    for (const entry of priority) {
+      if (compact.includes(entry.code)) {
+        return { doctorName: entry.doctorName, matchedCode: entry.code, normalizedSpCode: raw };
+      }
+    }
+
+    return { doctorName: null, matchedCode: null, normalizedSpCode: raw };
+  }
+
+  async submitToAllianceMedinet(visit) {
+    this.steps.step(2, 'Submitting to Alliance Medinet');
+
+    const metadata = visit.extraction_metadata || {};
+    const nric = this._pickNricForVisit(visit, metadata);
+    if (!nric) {
+      throw new Error(
+        'NRIC not found in visit record - Alliance Medinet requires Member UIN/Membership ID'
+      );
+    }
+
+    const matchedTag = extractAllianceMedinetTag(visit.pay_type, visit.patient_name);
+    const spCode = metadata.spCode || metadata.sp_code || null;
+    const doctor = this._mapAllianceDoctorFromSpCode(spCode);
+    if (!doctor.doctorName) {
+      throw new Error(
+        `Unable to map doctor from SP code "${spCode || ''}" (required for Alliance Medinet flow)`
+      );
+    }
+
+    logger.info('[SUBMIT] Alliance form data:', {
+      nric,
+      matchedTag: matchedTag || null,
+      spCode: doctor.normalizedSpCode || null,
+      doctorName: doctor.doctorName,
+    });
+
+    await this.allianceMedinet.login();
+    await this.allianceMedinet.navigateToMedicalTreatmentClaim();
+
+    const found = await this.allianceMedinet.searchMemberByNric(nric, visit.visit_date || null);
+    if (!found?.found) {
+      return {
+        success: false,
+        reason: 'not_found',
+        error: `Member not found in Alliance Medinet: ${nric}`,
+      };
+    }
+
+    await this.allianceMedinet.selectMemberAndAdd();
+    await this.allianceMedinet.fillClaimForm(
+      {
+        ...visit,
+        nric,
+      },
+      doctor.doctorName
+    );
+
+    const saveDraft = process.env.WORKFLOW_SAVE_DRAFT !== '0';
+    if (saveDraft) {
+      const ok = await this.allianceMedinet.saveAsDraft();
+      if (!ok) {
+        throw new Error('Failed to save Alliance Medinet claim as draft');
+      }
+    }
+
+    return {
+      success: true,
+      portal: 'Alliance Medinet',
+      matchedTag: matchedTag || null,
+      spCode: doctor.normalizedSpCode || null,
+      doctorCode: doctor.matchedCode || null,
+      doctorName: doctor.doctorName,
+      savedAsDraft: saveDraft,
+      persisted: saveDraft,
+      submitted: false,
     };
   }
 
@@ -506,7 +670,7 @@ export class ClaimSubmitter {
   /**
    * Submit to IHP portal (placeholder - implement when IHP automation is available)
    */
-  async submitToIHP(visit) {
+  async submitToIHP(_visit) {
     this.steps.step(2, 'Submitting to IHP portal');
     logger.warn('[SUBMIT] IHP portal automation not yet implemented');
     return { success: false, reason: 'not_implemented', portal: 'IHP' };
@@ -515,7 +679,7 @@ export class ClaimSubmitter {
   /**
    * Submit to GE portal (placeholder)
    */
-  async submitToGE(visit) {
+  async submitToGE(_visit) {
     this.steps.step(2, 'Submitting to GE portal');
     logger.warn('[SUBMIT] GE portal automation not yet implemented');
     return { success: false, reason: 'not_implemented', portal: 'GE' };
@@ -524,7 +688,7 @@ export class ClaimSubmitter {
   /**
    * Submit to Fullert portal (placeholder)
    */
-  async submitToFullert(visit) {
+  async submitToFullert(_visit) {
     this.steps.step(2, 'Submitting to Fullert portal');
     logger.warn('[SUBMIT] Fullert portal automation not yet implemented');
     return { success: false, reason: 'not_implemented', portal: 'Fullert' };
@@ -533,7 +697,7 @@ export class ClaimSubmitter {
   /**
    * Submit to Allimed portal (placeholder)
    */
-  async submitToAllimed(visit) {
+  async submitToAllimed(_visit) {
     this.steps.step(2, 'Submitting to Allimed portal');
     logger.warn('[SUBMIT] Allimed portal automation not yet implemented');
     return { success: false, reason: 'not_implemented', portal: 'Allimed' };
@@ -551,16 +715,16 @@ export class ClaimSubmitter {
     const results = [];
     for (let i = 0; i < pendingClaims.length; i++) {
       const claim = pendingClaims[i];
-      this.steps.step(3, `Submitting claim ${i + 1}/${pendingClaims.length}`, { 
+      this.steps.step(3, `Submitting claim ${i + 1}/${pendingClaims.length}`, {
         patientName: claim.patient_name,
-        payType: claim.pay_type 
+        payType: claim.pay_type,
       });
 
       const result = await this.submitClaim(claim);
       results.push({ claim, result });
 
       // Small delay between submissions
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => globalThis.setTimeout(resolve, 2000));
     }
 
     const successCount = results.filter(r => r.result.success).length;

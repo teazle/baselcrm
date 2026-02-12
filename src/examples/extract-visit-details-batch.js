@@ -3,13 +3,17 @@ import { BrowserManager } from '../utils/browser.js';
 import { VisitDetailsExtractor } from '../core/visit-details-extractor.js';
 import { createSupabaseClient } from '../utils/supabase-client.js';
 import { logger } from '../utils/logger.js';
+import {
+  getPortalPayTypes,
+  getPortalScopeOrFilter,
+} from '../../apps/crm/src/lib/rpa/portals.shared.js';
 
 dotenv.config();
 
 /**
  * Extract visit details (diagnosis, medicines, MC, charge type) for visits that have not been enhanced yet
  * Supports resume capability and progress tracking
- * 
+ *
  * Usage:
  *   node src/examples/extract-visit-details-batch.js
  *   node src/examples/extract-visit-details-batch.js --retry-failed
@@ -18,9 +22,9 @@ dotenv.config();
  */
 async function extractVisitDetailsBatch() {
   const args = process.argv.slice(2);
-  const getArgValue = (name) => {
+  const getArgValue = name => {
     const prefixed = `${name}=`;
-    const fromEquals = args.find((arg) => arg.startsWith(prefixed));
+    const fromEquals = args.find(arg => arg.startsWith(prefixed));
     if (fromEquals) {
       return fromEquals.slice(prefixed.length);
     }
@@ -33,7 +37,12 @@ async function extractVisitDetailsBatch() {
   const retryFailed = args.includes('--retry-failed');
   const force = args.includes('--force');
   const visitIdsArg = getArgValue('--visit-ids');
-  const visitIds = visitIdsArg ? visitIdsArg.split(',').map((s) => s.trim()).filter(Boolean) : null;
+  const visitIds = visitIdsArg
+    ? visitIdsArg
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean)
+    : null;
 
   logger.info('=== Visit Details Extraction Batch ===');
   if (retryFailed) {
@@ -54,7 +63,7 @@ async function extractVisitDetailsBatch() {
   // instead of diagnosis_description, because Flow 1 may already populate diagnosis_description
   // from the queue/visit notes, but Flow 2 is still required for diagnosis code, medicines, MC, etc.
   logger.info('Querying database for visits needing enhancement...');
-  
+
   const batchSize = parseInt(process.env.VISIT_DETAILS_BATCH_SIZE || '100', 10);
   const maxRetries = parseInt(process.env.VISIT_DETAILS_MAX_RETRIES || '3', 10);
 
@@ -66,10 +75,10 @@ async function extractVisitDetailsBatch() {
   const toDate = getArgValue('--to');
   const targetPayType = getArgValue('--pay-type')?.toUpperCase() || null;
   const allPayTypes = args.includes('--all-pay-types');
-  
-  // Known portal pay types that require form submission (include AVIVA/SINGLIFE which run via MHC Singlife PCP)
-  const portalPayTypes = ['MHC', 'FULLERT', 'IHP', 'ALL', 'ALLIANZ', 'AIA', 'GE', 'AIACLIENT', 'AVIVA', 'SINGLIFE'];
-  
+
+  // Known portal pay types that require form submission.
+  const portalPayTypes = getPortalPayTypes();
+
   let query = supabase
     .from('visits')
     .select('id, patient_name, visit_date, visit_record_no, nric, pay_type, extraction_metadata')
@@ -80,7 +89,7 @@ async function extractVisitDetailsBatch() {
     query = query.in('id', visitIds);
     logger.info(`Filtering to visit IDs: ${visitIds.join(', ')}`);
   }
-  
+
   if (targetDate) {
     query = query.eq('visit_date', targetDate);
     logger.info(`Filtering to date: ${targetDate}`);
@@ -94,17 +103,19 @@ async function extractVisitDetailsBatch() {
       logger.info(`Filtering to date: ${toDate}`);
     }
   }
-  
+
   // Filter by specific pay type, or only portal pay types by default
   if (targetPayType) {
     query = query.eq('pay_type', targetPayType);
     logger.info(`Filtering to pay type: ${targetPayType}`);
   } else if (!allPayTypes) {
-    // Default: only process visits with portal-related pay types
-    query = query.in('pay_type', portalPayTypes);
-    logger.info(`Filtering to portal pay types: ${portalPayTypes.join(', ')}`);
+    // Default: only process portal-scoped visits (pay_type and alliance tag-aware patient name fallback).
+    query = query.or(getPortalScopeOrFilter());
+    logger.info(
+      `Filtering to portal scope: ${portalPayTypes.join(', ')} + Allianz tags in patient name`
+    );
   }
-  
+
   query = query.order('visit_date', { ascending: false }).limit(batchSize);
 
   // Execute query and filter in JavaScript (PostgREST JSONB filtering can be complex)
@@ -151,7 +162,9 @@ async function extractVisitDetailsBatch() {
   }
 
   logger.info(`Found ${allVisits.length} candidate visit(s)`);
-  logger.info(`Processing ${visitsToProcess.length} visits (${allVisits.length - visitsToProcess.length} skipped)`);
+  logger.info(
+    `Processing ${visitsToProcess.length} visits (${allVisits.length - visitsToProcess.length} skipped)`
+  );
 
   // Initialize browser and extractor
   const browserManager = new BrowserManager();
@@ -184,12 +197,9 @@ async function extractVisitDetailsBatch() {
 
     // Calculate statistics
     const elapsed = (Date.now() - progress.startTime) / 1000; // seconds
-    const successRate = progress.total > 0 
-      ? ((progress.completed / progress.total) * 100).toFixed(1) 
-      : 0;
-    const avgTimePerVisit = progress.completed > 0 
-      ? (elapsed / progress.completed).toFixed(1) 
-      : 0;
+    const successRate =
+      progress.total > 0 ? ((progress.completed / progress.total) * 100).toFixed(1) : 0;
+    const avgTimePerVisit = progress.completed > 0 ? (elapsed / progress.completed).toFixed(1) : 0;
 
     // Summary report
     logger.info('\n=== Extraction Summary ===');
@@ -209,7 +219,9 @@ async function extractVisitDetailsBatch() {
       logger.info(`\nFailed visits (${failedVisits.length}):`);
       failedVisits.slice(0, 10).forEach(result => {
         const visit = visitsToProcess.find(v => v.id === result.visitId);
-        logger.info(`  - Visit ${result.visitId}: ${visit?.patient_name || 'Unknown'} (${visit?.visit_date || 'Unknown'}) - ${result.error || 'Unknown error'}`);
+        logger.info(
+          `  - Visit ${result.visitId}: ${visit?.patient_name || 'Unknown'} (${visit?.visit_date || 'Unknown'}) - ${result.error || 'Unknown error'}`
+        );
       });
       if (failedVisits.length > 10) {
         logger.info(`  ... and ${failedVisits.length - 10} more`);
@@ -224,7 +236,6 @@ async function extractVisitDetailsBatch() {
       // Some failed, but some succeeded
       process.exit(0); // Still successful run (partial success)
     }
-
   } catch (error) {
     logger.error('Fatal error during batch extraction:', error);
     process.exit(1);
