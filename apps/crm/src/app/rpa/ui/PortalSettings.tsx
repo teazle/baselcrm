@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { isDemoMode } from "@/lib/env";
 import { getSupportedPortals, getUnsupportedPortals } from "@/lib/rpa/portals";
 import { cn } from "@/lib/cn";
 
@@ -40,27 +39,7 @@ export default function PortalSettings() {
 
     const supabase = supabaseBrowser();
     if (!supabase) {
-      if (!isDemoMode()) {
-        setError("Supabase is not configured.");
-        setLoading(false);
-        return;
-      }
-
-      const demoRows: PortalRow[] = [
-        ...getSupportedPortals().map((code) => ({
-          id: `demo-${code}`,
-          portal_code: code,
-          label: code,
-          status: "supported",
-        })),
-        ...getUnsupportedPortals().map((code) => ({
-          id: `demo-${code}`,
-          portal_code: code,
-          label: code,
-          status: "unsupported",
-        })),
-      ];
-      setRows(demoRows);
+      setError("Supabase is not configured.");
       setLoading(false);
       return;
     }

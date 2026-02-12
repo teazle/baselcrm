@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Progress } from "@/components/ui/Progress";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { isDemoMode } from "@/lib/env";
-import { mockGetTable } from "@/lib/mock/storage";
 import { StatusBadge } from "./StatusBadge";
 import { formatDateTimeSingapore } from "@/lib/utils/date";
 
@@ -42,16 +40,8 @@ export default function RealTimeStatus() {
     const load = async () => {
       const supabase = supabaseBrowser();
       if (!supabase) {
-        if (!isDemoMode()) {
-          if (!cancelled) setError("Supabase is not configured.");
-          if (!cancelled) setLoading(false);
-          return;
-        }
-        const demoRows = mockGetTable("rpa_extraction_runs") as RunRow[];
-        if (cancelled) return;
-        setActiveRuns(demoRows.filter((row) => row.status === "running"));
-        setRecentRuns(demoRows.slice(0, 8));
-        setLoading(false);
+        if (!cancelled) setError("Supabase is not configured.");
+        if (!cancelled) setLoading(false);
         return;
       }
 

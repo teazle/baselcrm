@@ -1,6 +1,7 @@
 import { logger } from '../utils/logger.js';
 import { registerRunExitHandler, markRunFinalized } from '../utils/run-exit-handler.js';
 import { ClinicAssistAutomation } from '../automations/clinic-assist.js';
+import { normalizePatientNameForSearch } from '../utils/patient-normalize.js';
 
 /**
  * Visit Details Extractor
@@ -47,13 +48,14 @@ export class VisitDetailsExtractor {
         await this.clinicAssist.openPatientFromSearchResultsByNumber(String(pcno).trim());
       } else {
         // 3b. Fallback: Search for patient by name
-        logger.info(`[VisitDetails] PCNO not available, searching for patient by name: ${visit.patient_name}`);
-        await this.clinicAssist.searchPatientByName(visit.patient_name);
+        const cleanName = normalizePatientNameForSearch(visit.patient_name);
+        logger.info(`[VisitDetails] PCNO not available, searching for patient by name: ${cleanName || visit.patient_name}`);
+        await this.clinicAssist.searchPatientByName(cleanName || visit.patient_name);
         await this.clinicAssist.page.waitForTimeout(2000);
 
         // 4b. Open patient from search results by name
-        logger.info(`[VisitDetails] Opening patient record for: ${visit.patient_name}`);
-        await this.clinicAssist.openPatientFromSearchResults(visit.patient_name);
+        logger.info(`[VisitDetails] Opening patient record for: ${cleanName || visit.patient_name}`);
+        await this.clinicAssist.openPatientFromSearchResults(cleanName || visit.patient_name);
       }
       
       // Wait for biodata page to load
@@ -63,6 +65,7 @@ export class VisitDetailsExtractor {
       // This is the best place to get NRIC as it's displayed on the patient biodata/info page
       logger.info(`[VisitDetails] Extracting NRIC from biodata page for: ${visit.patient_name}`);
       const extractedNric = await this.clinicAssist.extractPatientNricFromPatientInfo();
+      const nricExtractionStatus = extractedNric ? 'found' : 'missing';
       if (extractedNric) {
         logger.info(`[VisitDetails] Found NRIC: ${extractedNric} for patient: ${visit.patient_name}`);
         // Update visit with NRIC immediately
@@ -105,14 +108,34 @@ export class VisitDetailsExtractor {
       });
 
       // 6. Update database with all extracted data and mark as 'completed'
-      const treatmentDetail = null; // TODO: Extract services/drugs from TX History if needed
+      // Store medicines/services extracted from TX History Medicine tab (Flow 2).
+      // Keep it both as a newline string (treatment_detail) and a structured array in extraction_metadata.
+      const medicines = (txData.medicines || [])
+        .map((m) => {
+          if (!m) return null;
+          if (typeof m === 'string') return { name: m, quantity: null };
+          const name = (m.name || m.description || '').toString().trim();
+          if (!name) return null;
+          const quantity = m.quantity ?? null;
+          return { name, quantity };
+        })
+        .filter(Boolean);
+      const treatmentDetail = medicines.length
+        ? medicines.map((m) => (m.quantity ? `${m.name} x${m.quantity}` : m.name)).join('\n')
+        : null;
 
       await this._updateVisitWithDetails(visit.id, finalDiagnosis, diagnosisCode, treatmentDetail, {
         source: 'tx_history_combined',
         extractionMethod: 'getChargeTypeAndDiagnosis',
         chargeType,
         mcDays,
-        mcStartDate
+        mcStartDate,
+        medicines,
+        diagnosisSource: txData.diagnosisSource || null,
+        diagnosisMissingReason: txData.diagnosisMissingReason || null,
+        diagnosisAttempts: txData.diagnosisAttempts || [],
+        medicineFilterStats: txData.medicineFilterStats || null,
+        nricExtractionStatus,
       });
 
       logger.info(`[VisitDetails] Successfully extracted details for visit ${visit.id}`, {
@@ -161,6 +184,7 @@ export class VisitDetailsExtractor {
    */
   async extractBatch(visits, options = {}) {
     const maxRetries = options.maxRetries || 3;
+    const force = !!options.force;
     const results = {
       total: visits.length,
       completed: 0,
@@ -186,13 +210,13 @@ export class VisitDetailsExtractor {
         const status = metadata.detailsExtractionStatus;
         const attempts = metadata.detailsExtractionAttempts || 0;
 
-        if (status === 'completed') {
+        if (!force && status === 'completed') {
           logger.info(`[VisitDetails] Skipping visit ${visit.id} - already completed`);
           results.skipped++;
           continue;
         }
 
-        if (status === 'failed' && attempts >= maxRetries) {
+        if (!force && status === 'failed' && attempts >= maxRetries) {
           logger.info(`[VisitDetails] Skipping visit ${visit.id} - exceeded max retries (${attempts}/${maxRetries})`);
           results.skipped++;
           continue;
@@ -354,6 +378,7 @@ export class VisitDetailsExtractor {
       const chargeType = sources?.chargeType || null;
       const mcDays = sources?.mcDays || 0;
       const mcStartDate = sources?.mcStartDate || null;
+      const medicines = Array.isArray(sources?.medicines) ? sources.medicines : null;
 
       // Store all extracted data in extraction_metadata for Flow 3 to use
       const updateData = {
@@ -369,6 +394,7 @@ export class VisitDetailsExtractor {
           chargeType: chargeType,       // 'first' or 'follow'
           mcDays: mcDays,               // Number of MC days
           mcStartDate: mcStartDate,     // MC start date in DD/MM/YYYY format
+          medicines: medicines,         // [{name, quantity}] from TX History Medicine tab (optional)
         },
       };
 

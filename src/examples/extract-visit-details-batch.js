@@ -7,20 +7,40 @@ import { logger } from '../utils/logger.js';
 dotenv.config();
 
 /**
- * Extract visit details (diagnosis and services/drugs) for visits missing diagnosis
+ * Extract visit details (diagnosis, medicines, MC, charge type) for visits that have not been enhanced yet
  * Supports resume capability and progress tracking
  * 
  * Usage:
  *   node src/examples/extract-visit-details-batch.js
  *   node src/examples/extract-visit-details-batch.js --retry-failed
+ *   node src/examples/extract-visit-details-batch.js --visit-ids id1,id2,id3 --force
+ *   node src/examples/extract-visit-details-batch.js --from 2026-02-02 --to 2026-02-07 --force
  */
 async function extractVisitDetailsBatch() {
   const args = process.argv.slice(2);
+  const getArgValue = (name) => {
+    const prefixed = `${name}=`;
+    const fromEquals = args.find((arg) => arg.startsWith(prefixed));
+    if (fromEquals) {
+      return fromEquals.slice(prefixed.length);
+    }
+    const idx = args.indexOf(name);
+    if (idx !== -1 && idx + 1 < args.length && !args[idx + 1].startsWith('--')) {
+      return args[idx + 1];
+    }
+    return null;
+  };
   const retryFailed = args.includes('--retry-failed');
+  const force = args.includes('--force');
+  const visitIdsArg = getArgValue('--visit-ids');
+  const visitIds = visitIdsArg ? visitIdsArg.split(',').map((s) => s.trim()).filter(Boolean) : null;
 
   logger.info('=== Visit Details Extraction Batch ===');
   if (retryFailed) {
     logger.info('Mode: Retry failed visits');
+  }
+  if (force) {
+    logger.info('Mode: Force re-extract (includes completed visits)');
   }
 
   // Initialize Supabase client
@@ -30,34 +50,49 @@ async function extractVisitDetailsBatch() {
     process.exit(1);
   }
 
-  // Query for visits missing diagnosis
-  logger.info('Querying database for visits missing diagnosis...');
+  // Query for visits to enhance (Flow 2). We key off extraction_metadata.detailsExtractionStatus
+  // instead of diagnosis_description, because Flow 1 may already populate diagnosis_description
+  // from the queue/visit notes, but Flow 2 is still required for diagnosis code, medicines, MC, etc.
+  logger.info('Querying database for visits needing enhancement...');
   
   const batchSize = parseInt(process.env.VISIT_DETAILS_BATCH_SIZE || '100', 10);
   const maxRetries = parseInt(process.env.VISIT_DETAILS_MAX_RETRIES || '3', 10);
 
-  // Build query: visits missing diagnosis, with status filtering for resume
+  // Build query: visits for enhancement, with status filtering for resume
   // Filter to specific date if specified via --date argument
   // Filter to only portal-related pay types (MHC, FULLERT, IHP, ALL, ALLIANZ, AIA, GE)
-  const dateArg = args.find(arg => arg.startsWith('--date='));
-  const targetDate = dateArg ? dateArg.split('=')[1] : null;
-  const payTypeArg = args.find(arg => arg.startsWith('--pay-type='));
-  const targetPayType = payTypeArg ? payTypeArg.split('=')[1].toUpperCase() : null;
+  const targetDate = getArgValue('--date');
+  const fromDate = getArgValue('--from');
+  const toDate = getArgValue('--to');
+  const targetPayType = getArgValue('--pay-type')?.toUpperCase() || null;
   const allPayTypes = args.includes('--all-pay-types');
   
-  // Known portal pay types that require form submission
-  const portalPayTypes = ['MHC', 'FULLERT', 'IHP', 'ALL', 'ALLIANZ', 'AIA', 'GE', 'AIACLIENT'];
+  // Known portal pay types that require form submission (include AVIVA/SINGLIFE which run via MHC Singlife PCP)
+  const portalPayTypes = ['MHC', 'FULLERT', 'IHP', 'ALL', 'ALLIANZ', 'AIA', 'GE', 'AIACLIENT', 'AVIVA', 'SINGLIFE'];
   
   let query = supabase
     .from('visits')
     .select('id, patient_name, visit_date, visit_record_no, nric, pay_type, extraction_metadata')
     .eq('source', 'Clinic Assist')
-    .is('diagnosis_description', null)
     .not('patient_name', 'is', null);
+
+  if (visitIds?.length) {
+    query = query.in('id', visitIds);
+    logger.info(`Filtering to visit IDs: ${visitIds.join(', ')}`);
+  }
   
   if (targetDate) {
     query = query.eq('visit_date', targetDate);
     logger.info(`Filtering to date: ${targetDate}`);
+  } else if (fromDate || toDate) {
+    if (fromDate) {
+      query = query.gte('visit_date', fromDate);
+      logger.info(`Filtering from date: ${fromDate}`);
+    }
+    if (toDate) {
+      query = query.lte('visit_date', toDate);
+      logger.info(`Filtering to date: ${toDate}`);
+    }
   }
   
   // Filter by specific pay type, or only portal pay types by default
@@ -81,7 +116,7 @@ async function extractVisitDetailsBatch() {
   }
 
   if (!allVisits || allVisits.length === 0) {
-    logger.info('No visits found that need diagnosis extraction.');
+    logger.info('No visits found that need enhancement.');
     process.exit(0);
   }
 
@@ -92,7 +127,7 @@ async function extractVisitDetailsBatch() {
     const attempts = metadata.detailsExtractionAttempts || 0;
 
     // Skip completed visits
-    if (status === 'completed') {
+    if (!force && status === 'completed') {
       return false;
     }
 
@@ -102,7 +137,7 @@ async function extractVisitDetailsBatch() {
     }
 
     // Skip failed visits that exceeded max retries (unless retry-failed mode)
-    if (status === 'failed' && attempts >= maxRetries && !retryFailed) {
+    if (!force && status === 'failed' && attempts >= maxRetries && !retryFailed) {
       return false;
     }
 
@@ -115,7 +150,7 @@ async function extractVisitDetailsBatch() {
     process.exit(0);
   }
 
-  logger.info(`Found ${allVisits.length} visits missing diagnosis`);
+  logger.info(`Found ${allVisits.length} candidate visit(s)`);
   logger.info(`Processing ${visitsToProcess.length} visits (${allVisits.length - visitsToProcess.length} skipped)`);
 
   // Initialize browser and extractor
@@ -141,7 +176,7 @@ async function extractVisitDetailsBatch() {
     logger.info(`\nStarting batch extraction for ${visitsToProcess.length} visits...`);
     logger.info(`Max retries: ${maxRetries}, Batch size: ${batchSize}`);
 
-    const results = await extractor.extractBatch(visitsToProcess, { maxRetries });
+    const results = await extractor.extractBatch(visitsToProcess, { maxRetries, force });
 
     progress.completed = results.completed;
     progress.failed = results.failed;

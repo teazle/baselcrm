@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { isDemoMode } from "@/lib/env";
-import { mockGetTable } from "@/lib/mock/storage";
 import { getTodaySingapore, toSingaporeDateString } from "@/lib/utils/date";
 
 type Metrics = {
@@ -43,44 +41,7 @@ export default function RpaDashboard() {
 
       const supabase = supabaseBrowser();
       if (!supabase) {
-        if (!isDemoMode()) {
-          setError("Supabase is not configured.");
-          setLoading(false);
-          return;
-        }
-
-        const rows = (mockGetTable("visits") as Array<Record<string, any>>).filter(
-          (row) => row?.source === "Clinic Assist",
-        );
-        const pendingRows = rows.filter(
-          (row) => !row?.extraction_metadata?.detailsExtractionStatus,
-        );
-        const completedRows = rows.filter(
-          (row) => row?.extraction_metadata?.detailsExtractionStatus === "completed",
-        );
-        const failedRows = rows.filter(
-          (row) => row?.extraction_metadata?.detailsExtractionStatus === "failed",
-        );
-        const pcnoRows = rows.filter((row) => {
-          const pcno = row?.extraction_metadata?.pcno;
-          return typeof pcno === "string" ? pcno.trim() !== "" : Boolean(pcno);
-        });
-        const todayRows = rows.filter((row) => {
-          const extractedAt = row?.extraction_metadata?.detailsExtractedAt;
-          if (!extractedAt) return false;
-          const date = toSingaporeDateString(String(extractedAt));
-          return date === getTodaySingapore();
-        });
-
-        if (cancelled) return;
-        setMetrics({
-          totalVisits: rows.length,
-          completedCount: completedRows.length,
-          failedCount: failedRows.length,
-          pendingCount: pendingRows.length,
-          pcnoCount: pcnoRows.length,
-          todayCount: todayRows.length,
-        });
+        setError("Supabase is not configured.");
         setLoading(false);
         return;
       }

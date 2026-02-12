@@ -1,0 +1,201 @@
+{
+  "generated_at": "2026-02-11T16:37:33.041Z",
+  "range": {
+    "from": "2026-02-02",
+    "to": "2026-02-07"
+  },
+  "scope": "Clinic Assist + pay_type contains MHC/AIA/AIACLIENT/AVIVA/SINGLIFE",
+  "counts": {
+    "total": 12,
+    "null": 5,
+    "draft": 5,
+    "error": 2
+  },
+  "rows": [
+    {
+      "id": "6eb5aa60-ee97-472b-a904-c4ccf2855b18",
+      "patient_name": "FAN HONGYI",
+      "nric": "S8481103C",
+      "visit_date": "2026-02-02",
+      "pay_type": "MHC",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_metadata": null,
+      "submission_error": null,
+      "source": "Clinic Assist"
+    },
+    {
+      "id": "6af6ea13-14d9-43c6-917e-d0ca5da4ab0f",
+      "patient_name": "HASLINA BINTE HASSAN BASRI",
+      "nric": "S7349449D",
+      "visit_date": "2026-02-02",
+      "pay_type": "MHC",
+      "submission_status": "draft",
+      "submitted_at": "2026-02-11T13:37:53.194+00:00",
+      "submission_metadata": {
+        "mcDays": 0,
+        "portal": "MHC Asia",
+        "success": true,
+        "persisted": true,
+        "chargeType": "follow",
+        "hasDiagnosis": false,
+        "savedAsDraft": true,
+        "routingOverride": "AIA_CLINIC_DIALOG"
+      },
+      "submission_error": "Failed to save as draft (see screenshots/mhc-asia-save-draft-not-found.png and screenshots/mhc-asia-before-save-draft.png)",
+      "source": "Clinic Assist"
+    },
+    {
+      "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+      "patient_name": "MITTAL SACHIN KUMAR",
+      "nric": "M4539893L",
+      "visit_date": "2026-02-02",
+      "pay_type": "MHC",
+      "submission_status": "error",
+      "submitted_at": null,
+      "submission_metadata": null,
+      "submission_error": "Failed to save as draft (see screenshots/mhc-asia-save-draft-not-found.png and screenshots/mhc-asia-before-save-draft.png)",
+      "source": "Clinic Assist"
+    },
+    {
+      "id": "b19f4854-6445-4965-a695-befdc5f1c531",
+      "patient_name": "SZENTIRMAY IBOLYA MARGARET",
+      "nric": "M4427511W",
+      "visit_date": "2026-02-02",
+      "pay_type": "MHC",
+      "submission_status": "error",
+      "submitted_at": null,
+      "submission_metadata": null,
+      "submission_error": "Patient not found in MHC Asia: SZENTIRMAY IBOLYA",
+      "source": "Clinic Assist"
+    },
+    {
+      "id": "0a1695ab-8ea3-4fba-b5a5-ec47ea933e40",
+      "patient_name": "CHEW SIEW LING",
+      "nric": "S8635560D",
+      "visit_date": "2026-02-03",
+      "pay_type": "MHC",
+      "submission_status": "draft",
+      "submitted_at": "2026-02-11T15:39:21.512+00:00",
+      "submission_metadata": {
+        "mcDays": 1,
+        "portal": "MHC Asia",
+        "success": true,
+        "persisted": true,
+        "chargeType": "follow",
+        "hasDiagnosis": true,
+        "savedAsDraft": true,
+        "routingOverride": null
+      },
+      "submission_error": null,
+      "source": "Clinic Assist"
+    },
+    {
+      "id": "60e0c382-d6cb-4d35-a5b9-e17ce5b20c73",
+      "patient_name": "ENG CHAI PIN ELYNE XANDRIA",
+      "nric": "S8570522I",
+      "visit_date": "2026-02-03",
+      "pay_type": "MHC",
+      "submission_status": "draft",
+      "submitted_at": "2026-02-11T15:18:19.432+00:00",
+      "submission_metadata": {
+        "mcDays": 0,
+        "portal": "MHC Asia",
+        "success": true,
+        "persisted": true,
+        "chargeType": "first",
+        "hasDiagnosis": false,
+        "savedAsDraft": true,
+        "routingOverride": "AIA_CLINIC_DIALOG"
+      },
+      "submission_error": null,
+      "source": "Clinic Assist"
+    },
+    {
+      "id": "c3c483d2-83d4-46be-936e-77767dd568b3",
+      "patient_name": "FAN HONGYI",
+      "nric": "S8481103C",
+      "visit_date": "2026-02-03",
+      "pay_type": "MHC",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_metadata": null,
+      "submission_error": null,
+      "source": "Clinic Assist"
+    },
+    {
+      "id": "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
+      "patient_name": "CAROLINE ADRIANA ARCHER",
+      "nric": "S7288611I",
+      "visit_date": "2026-02-04",
+      "pay_type": "MHC",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_metadata": null,
+      "submission_error": null,
+      "source": "Clinic Assist"
+    },
+    {
+      "id": "78f0430c-6d4f-4043-a54f-d529e7ef57fb",
+      "patient_name": "YIP CHOI YEAN",
+      "nric": "S0121655D",
+      "visit_date": "2026-02-05",
+      "pay_type": "MHC",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_metadata": null,
+      "submission_error": null,
+      "source": "Clinic Assist"
+    },
+    {
+      "id": "416a02fb-3feb-435b-b3f8-3f3197a60e0f",
+      "patient_name": "TJIA NATHANAEL THOMAS",
+      "nric": "T1208937B",
+      "visit_date": "2026-02-06",
+      "pay_type": "MHC",
+      "submission_status": "draft",
+      "submitted_at": "2026-02-09T09:27:31.29+00:00",
+      "submission_metadata": {
+        "mcDays": 0,
+        "portal": "MHC Asia",
+        "success": true,
+        "chargeType": "first",
+        "hasDiagnosis": true,
+        "savedAsDraft": true
+      },
+      "submission_error": null,
+      "source": "Clinic Assist"
+    },
+    {
+      "id": "1e48b9cf-fe14-4c33-bbb3-f25c2b8e3bb7",
+      "patient_name": "YEONG MEI-YI",
+      "nric": "S7839254A",
+      "visit_date": "2026-02-06",
+      "pay_type": "AVIVA",
+      "submission_status": "draft",
+      "submitted_at": "2026-02-09T09:26:09.014+00:00",
+      "submission_metadata": {
+        "mcDays": 1,
+        "portal": "MHC Asia",
+        "success": true,
+        "chargeType": "first",
+        "hasDiagnosis": true,
+        "savedAsDraft": true
+      },
+      "submission_error": null,
+      "source": "Clinic Assist"
+    },
+    {
+      "id": "a50239f6-9cd2-44a8-9bbf-4784e1dc51e1",
+      "patient_name": "LIM CHUI KIOW",
+      "nric": "S7030442B",
+      "visit_date": "2026-02-07",
+      "pay_type": "AVIVA",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_metadata": null,
+      "submission_error": null,
+      "source": "Clinic Assist"
+    }
+  ]
+}

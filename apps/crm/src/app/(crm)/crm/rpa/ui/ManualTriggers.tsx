@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { isDemoMode } from "@/lib/env";
-import { mockGetTable } from "@/lib/mock/storage";
 import { getTodaySingapore } from "@/lib/utils/date";
 
 export default function ManualTriggers() {
@@ -19,17 +17,7 @@ export default function ManualTriggers() {
     let cancelled = false;
     (async () => {
       const supabase = supabaseBrowser();
-      if (!supabase) {
-        if (!isDemoMode()) return;
-        const rows = (mockGetTable("visits") as Array<Record<string, any>>).filter(
-          (row) => row?.source === "Clinic Assist",
-        );
-        const pendingRows = rows.filter(
-          (row) => !row?.extraction_metadata?.detailsExtractionStatus,
-        );
-        if (!cancelled) setPendingCount(pendingRows.length);
-        return;
-      }
+      if (!supabase) return;
 
       const { count, error } = await supabase
         .from("visits")

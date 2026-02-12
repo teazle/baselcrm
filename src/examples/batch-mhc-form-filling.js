@@ -165,11 +165,23 @@ async function batchMHCFormFilling(targetDate) {
     // Navigate to Queue Report via UI (Reports menu)
     logger.info('   📋 Navigating to Queue Report...');
     try {
-      // Try to navigate to Reports -> Queue Report
-      await clinicAssist.navigateToReports();
+      // Reports menu
+      const navigated = await clinicAssist.navigateToReports();
+      if (!navigated) {
+        throw new Error('Could not navigate to Reports section');
+      }
       await clinicAssistPage.waitForTimeout(2000);
-      
+
+      // Queue report link inside reports
+      const queueListOpened = await clinicAssist.navigateToQueueListReport();
+      if (!queueListOpened) {
+        logger.warn('   ⚠️  Could not find Queue Report link, trying direct navigation from Reports context...');
+        const directNav = await clinicAssist.navigateDirectlyToQueueReport();
+        if (!directNav) throw new Error('Direct navigation to Queue Report failed');
+      }
+
       // Set the date and generate report
+      await clinicAssistPage.waitForTimeout(2000);
       await clinicAssist.searchQueueListByDate(targetDate);
       await clinicAssistPage.waitForTimeout(3000);
     } catch (e) {
@@ -330,7 +342,8 @@ async function batchMHCFormFilling(targetDate) {
         // 3d. Open patient and add visit (handles AIA Clinic switch if needed)
         logger.info('   📝 Opening patient record and adding visit...');
         await mhcAsia.openPatientFromSearchResults(nric);
-        await mhcAsia.addVisit(searchResult.portal);
+        // Pass NRIC so the AIA Clinic flow (after system switch) can search/select the patient correctly.
+        await mhcAsia.addVisit(searchResult.portal, nric);
         
         // 3e. Fill form fields
         logger.info('   ✏️  Filling form fields...');

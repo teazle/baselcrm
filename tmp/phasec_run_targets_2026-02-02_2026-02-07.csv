@@ -1,0 +1,13 @@
+order,visit_id,patient_name,nric,visit_date,pay_type,crm_status,submitted_at,submission_error
+1,6eb5aa60-ee97-472b-a904-c4ccf2855b18,FAN HONGYI,S8481103C,2026-02-02,MHC,draft,2026-02-11T16:47:55.473+00:00,
+2,dcbbe4e8-586c-45c4-905a-c76bacfcd860,CAROLINE ADRIANA ARCHER,S7288611I,2026-02-04,MHC,error,,Failed to open AIA visit form for NRIC S7288611I (see screenshots/mhc-asia-aia-*.png)
+3,6af6ea13-14d9-43c6-917e-d0ca5da4ab0f,HASLINA BINTE HASSAN BASRI,S7349449D,2026-02-02,MHC,draft,2026-02-11T16:50:26.368+00:00,
+4,60e0c382-d6cb-4d35-a5b9-e17ce5b20c73,ENG CHAI PIN ELYNE XANDRIA,S8570522I,2026-02-03,MHC,error,,Failed to save as draft (see screenshots/mhc-asia-save-draft-not-found.png and screenshots/mhc-asia-before-save-draft.png)
+5,0a1695ab-8ea3-4fba-b5a5-ec47ea933e40,CHEW SIEW LING,S8635560D,2026-02-03,MHC,draft,2026-02-11T16:51:48.985+00:00,
+6,a50239f6-9cd2-44a8-9bbf-4784e1dc51e1,LIM CHUI KIOW,S7030442B,2026-02-07,AVIVA,draft,2026-02-11T16:52:54.153+00:00,
+7,b19f4854-6445-4965-a695-befdc5f1c531,SZENTIRMAY IBOLYA MARGARET,M4427511W,2026-02-02,MHC,,,
+8,416a02fb-3feb-435b-b3f8-3f3197a60e0f,TJIA NATHANAEL THOMAS,T1208937B,2026-02-06,MHC,draft,2026-02-11T16:53:53.46+00:00,
+9,31b5a688-9104-4507-bd7a-347a9f9ce866,MITTAL SACHIN KUMAR,M4539893L,2026-02-02,MHC,draft,2026-02-11T16:54:28.261+00:00,
+10,1e48b9cf-fe14-4c33-bbb3-f25c2b8e3bb7,YEONG MEI-YI,S7839254A,2026-02-06,AVIVA,error,,Failed to save as draft (see screenshots/mhc-asia-save-draft-not-found.png and screenshots/mhc-asia-before-save-draft.png)
+11,c3c483d2-83d4-46be-936e-77767dd568b3,FAN HONGYI,S8481103C,2026-02-03,MHC,draft,2026-02-11T16:56:24.611+00:00,
+12,78f0430c-6d4f-4043-a54f-d529e7ef57fb,YIP CHOI YEAN,S0121655D,2026-02-05,MHC,draft,2026-02-11T16:57:07.091+00:00,

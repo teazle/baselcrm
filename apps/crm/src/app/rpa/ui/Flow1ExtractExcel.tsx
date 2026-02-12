@@ -5,8 +5,6 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/ui/DataTable";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { isDemoMode } from "@/lib/env";
-import { mockGetTable } from "@/lib/mock/storage";
 import { StatusBadge, type Status } from "./StatusBadge";
 import FlowHeader from "./FlowHeader";
 import { formatDateDDMMYYYY, formatDateTimeDDMMYYYY } from "@/lib/utils/date";
@@ -39,6 +37,7 @@ export default function Flow1ExtractExcel() {
   const [notice, setNotice] = useState<string | null>(null);
   const [queueBusy, setQueueBusy] = useState(false);
   const [cancellingIds, setCancellingIds] = useState<Set<string>>(new Set());
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
 
   const loadRuns = useCallback(async () => {
     setLoading(true);
@@ -46,15 +45,7 @@ export default function Flow1ExtractExcel() {
 
     const supabase = supabaseBrowser();
     if (!supabase) {
-      if (!isDemoMode()) {
-        setError("Supabase is not configured.");
-        setLoading(false);
-        return;
-      }
-      const demoRows = (mockGetTable("rpa_extraction_runs") as RunRow[]).filter(
-        (row) => row.run_type === "queue_list"
-      );
-      setRuns(demoRows.slice(0, 20));
+      setError("Supabase is not configured.");
       setLoading(false);
       return;
     }
@@ -120,35 +111,55 @@ export default function Flow1ExtractExcel() {
   const handleCancelRun = async (runId: string) => {
     setCancellingIds((prev) => new Set(prev).add(runId));
     try {
-      const res = await fetch("/api/rpa/cancel-runs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ runIds: [runId] }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(data?.error || "Failed to cancel run.");
+      const supabase = supabaseBrowser();
+      if (supabase) {
+        const res = await fetch("/api/rpa/cancel-runs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ runIds: [runId] }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || "Failed to cancel run.");
+        setNotice(data?.message || "Run cancelled successfully.");
       }
-      
-      // Update the run in the local state
       setRuns((prevRuns) =>
         prevRuns.map((run) =>
           run.id === runId
-            ? {
-                ...run,
-                status: "failed",
-                finished_at: new Date().toISOString(),
-                error_message: "Cancelled by user",
-              }
+            ? { ...run, status: "failed", finished_at: new Date().toISOString(), error_message: "Cancelled by user" }
             : run
         )
       );
-      
-      setNotice(data?.message || "Run cancelled successfully.");
+      await loadRuns();
     } catch (err) {
       setNotice(String((err as Error).message ?? err));
     } finally {
       setCancellingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(runId);
+        return next;
+      });
+    }
+  };
+
+  const handleDeleteRun = async (runId: string) => {
+    setDeletingIds((prev) => new Set(prev).add(runId));
+    try {
+      const supabase = supabaseBrowser();
+      if (supabase) {
+        const res = await fetch("/api/rpa/delete-runs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ runIds: [runId] }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error || "Failed to delete run.");
+        setNotice(data?.message || "Run deleted.");
+      }
+      setRuns((prev) => prev.filter((r) => r.id !== runId));
+    } catch (err) {
+      setNotice(String((err as Error).message ?? err));
+    } finally {
+      setDeletingIds((prev) => {
         const next = new Set(prev);
         next.delete(runId);
         return next;
@@ -287,19 +298,31 @@ export default function Flow1ExtractExcel() {
                 cell: (row) => {
                   const isInProgress = row.status === "in_progress" || row.status === "running";
                   const isCancelling = cancellingIds.has(row.id);
-                  
-                  if (!isInProgress) {
-                    return <span className="text-xs text-muted-foreground">—</span>;
+                  const isDeleting = deletingIds.has(row.id);
+                  if (isInProgress) {
+                    return (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleCancelRun(row.id)}
+                        disabled={isCancelling}
+                        className="h-8 px-3 text-xs"
+                      >
+                        {isCancelling ? "Cancelling…" : "Stop"}
+                      </Button>
+                    );
                   }
-                  
                   return (
                     <Button
                       type="button"
-                      onClick={() => handleCancelRun(row.id)}
-                      disabled={isCancelling}
-                      className="h-8 px-3 text-xs"
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 px-3 text-xs text-destructive hover:text-destructive"
+                      onClick={() => handleDeleteRun(row.id)}
+                      disabled={isDeleting}
                     >
-                      {isCancelling ? "Cancelling..." : "Cancel"}
+                      {isDeleting ? "Deleting…" : "Delete"}
                     </Button>
                   );
                 },

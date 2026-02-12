@@ -1,4 +1,3 @@
-// CRM sidebar navigation
 export const crmNav = [
   { href: '/crm', label: 'Dashboard' },
   { href: '/crm/contacts', label: 'Contacts' },

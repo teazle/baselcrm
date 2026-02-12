@@ -6,8 +6,6 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { isDemoMode } from "@/lib/env";
-import { useAuth } from "@/lib/auth/AuthProvider";
 
 const schema = z.object({
   email: z.string().email(),
@@ -18,7 +16,6 @@ type FormValues = z.infer<typeof schema>;
 
 export default function LoginForm() {
   const supabase = useMemo(() => supabaseBrowser(), []);
-  const { setDemoUserEmail } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -37,14 +34,14 @@ export default function LoginForm() {
       onSubmit={form.handleSubmit(async (values) => {
         setServerError(null);
         setInfo(null);
-        if (isDemoMode() || !supabase) {
-          setDemoUserEmail?.(values.email);
-        } else {
-          const { error } = await supabase.auth.signInWithPassword(values);
-          if (error) {
-            setServerError(error.message);
-            return;
-          }
+        if (!supabase) {
+          setServerError("Supabase is not configured.");
+          return;
+        }
+        const { error } = await supabase.auth.signInWithPassword(values);
+        if (error) {
+          setServerError(error.message);
+          return;
         }
         router.replace(next);
       })}
@@ -89,7 +86,7 @@ export default function LoginForm() {
         </div>
       ) : null}
 
-      {!isDemoMode() && supabase && serverError?.toLowerCase().includes("not confirmed") ? (
+      {supabase && serverError?.toLowerCase().includes("not confirmed") ? (
         <div className="rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-xs text-white/80">
           <div>Email confirmation is enabled in Supabase.</div>
           <button
@@ -123,14 +120,8 @@ export default function LoginForm() {
         disabled={form.formState.isSubmitting}
         className="mt-2 inline-flex h-11 w-full items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {form.formState.isSubmitting
-          ? "Signing in…"
-          : isDemoMode()
-            ? "Enter Demo"
-            : "Sign in"}
+        {form.formState.isSubmitting ? "Signing in…" : "Sign in"}
       </button>
     </form>
   );
 }
-
-

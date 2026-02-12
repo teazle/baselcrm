@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import RealTimeStatus from "./RealTimeStatus";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { isDemoMode } from "@/lib/env";
-import { mockGetTable } from "@/lib/mock/storage";
 import FlowStepper from "./FlowStepper";
 
 type RunSummary = {
@@ -38,6 +36,9 @@ export default function RpaOverview() {
   const [claimSummary, setClaimSummary] = useState<ClaimSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cleanupBusy, setCleanupBusy] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [cleanupMessage, setCleanupMessage] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -48,47 +49,7 @@ export default function RpaOverview() {
 
       const supabase = supabaseBrowser();
       if (!supabase) {
-        if (!isDemoMode()) {
-          setError("Supabase is not configured.");
-          setLoading(false);
-          return;
-        }
-
-        const demoRuns = mockGetTable("rpa_extraction_runs") as Array<Record<string, any>>;
-        const demoVisits = (mockGetTable("visits") as Array<Record<string, any>>).filter(
-          (row) => row?.source === "Clinic Assist",
-        );
-
-        if (cancelled) return;
-
-        setRunSummary({
-          total: demoRuns.length,
-          completed: demoRuns.filter((r) => r.status === "completed").length,
-          failed: demoRuns.filter((r) => r.status === "failed").length,
-          running: demoRuns.filter((r) => r.status === "running").length,
-        });
-
-        setVisitSummary({
-          total: demoVisits.length,
-          pending: demoVisits.filter(
-            (v) => !v?.extraction_metadata?.detailsExtractionStatus,
-          ).length,
-          completed: demoVisits.filter(
-            (v) => v?.extraction_metadata?.detailsExtractionStatus === "completed",
-          ).length,
-          failed: demoVisits.filter(
-            (v) => v?.extraction_metadata?.detailsExtractionStatus === "failed",
-          ).length,
-        });
-
-        setClaimSummary({
-          total: demoVisits.length,
-          draft: demoVisits.filter((v) => v?.submission_status === "draft").length,
-          submitted: demoVisits.filter((v) => v?.submission_status === "submitted").length,
-          notStarted: demoVisits.filter((v) => !v?.submission_status).length,
-          error: demoVisits.filter((v) => v?.submission_status === "error").length,
-        });
-
+        setError("Supabase is not configured.");
         setLoading(false);
         return;
       }
@@ -164,7 +125,32 @@ export default function RpaOverview() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, []);
+  }, [refreshTrigger]);
+
+  const handleCleanup = async () => {
+    setCleanupBusy(true);
+    setError(null);
+    setCleanupMessage(null);
+    try {
+      const supabase = supabaseBrowser();
+      if (supabase) {
+        const res = await fetch("/api/rpa/cleanup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ clearVisitExtraction: false }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error ?? "Cleanup failed.");
+        setRefreshTrigger((t) => t + 1);
+        setCleanupMessage(data?.message ?? "RPA data cleaned. Start a run from Flow 1 (e.g. date 2023-01-23).");
+        setTimeout(() => setCleanupMessage(null), 8000);
+      }
+    } catch (err) {
+      setError(String((err as Error).message ?? err));
+    } finally {
+      setCleanupBusy(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -258,6 +244,12 @@ export default function RpaOverview() {
         ]}
       />
 
+      {cleanupMessage ? (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+          {cleanupMessage}
+        </div>
+      ) : null}
+
       <RealTimeStatus />
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -305,7 +297,15 @@ export default function RpaOverview() {
           <div className="text-xs font-medium text-muted-foreground">Quick Actions</div>
           <div className="text-lg font-semibold">Start Automation</div>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCleanup}
+            disabled={cleanupBusy || (runSummary?.total ?? 0) === 0}
+          >
+            {cleanupBusy ? "Cleaning…" : "Clean up RPA data"}
+          </Button>
           <Link href="/rpa?tab=flow1">
             <Button type="button" variant="outline">
               Flow 1: Extract Excel

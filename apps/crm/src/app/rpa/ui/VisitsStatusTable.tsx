@@ -3,8 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { DataTable, RowLink } from "@/components/ui/DataTable";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { isDemoMode } from "@/lib/env";
-import { mockGetTable } from "@/lib/mock/storage";
 import { cn } from "@/lib/cn";
 import { StatusBadge, type Status } from "./StatusBadge";
 import { formatDateDDMMYYYY, formatDateTimeDDMMYYYY } from "@/lib/utils/date";
@@ -64,17 +62,7 @@ export default function VisitsStatusTable() {
 
       const supabase = supabaseBrowser();
       if (!supabase) {
-        if (!isDemoMode()) {
-          setError("Supabase is not configured.");
-          setLoading(false);
-          return;
-        }
-
-        const demoRows = (mockGetTable("visits") as Array<Record<string, any>>)
-          .filter((row) => row?.source === "Clinic Assist")
-          .slice(0, 200) as VisitRow[];
-        if (cancelled) return;
-        setRows(demoRows);
+        setError("Supabase is not configured.");
         setLoading(false);
         return;
       }

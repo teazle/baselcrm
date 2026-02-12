@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
 import { Progress } from "@/components/ui/Progress";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { isDemoMode } from "@/lib/env";
-import { mockGetTable } from "@/lib/mock/storage";
 import { StatusBadge } from "./StatusBadge";
 import { formatDateTimeDDMMYYYY } from "@/lib/utils/date";
 
@@ -30,23 +29,13 @@ export default function RealTimeStatus() {
   const [recentRuns, setRecentRuns] = useState<RunRow[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [stoppingIds, setStoppingIds] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    let cancelled = false;
-    let intervalId: ReturnType<typeof setInterval> | null = null;
-
-    const load = async () => {
+  const load = useCallback(async () => {
       const supabase = supabaseBrowser();
       if (!supabase) {
-        if (!isDemoMode()) {
-          if (!cancelled) setError("Supabase is not configured.");
-          if (!cancelled) setLoading(false);
-          return;
-        }
-        const demoRows = mockGetTable("rpa_extraction_runs") as RunRow[];
-        if (cancelled) return;
-        setActiveRuns(demoRows.filter((row) => row.status === "running"));
-        setRecentRuns(demoRows.slice(0, 8));
+        setError("Supabase is not configured.");
         setLoading(false);
         return;
       }
@@ -57,7 +46,7 @@ export default function RealTimeStatus() {
           .select(
             "id,run_type,status,started_at,total_records,completed_count,failed_count",
           )
-          .eq("status", "running")
+          .in("status", ["running", "in_progress"])
           .order("started_at", { ascending: false }),
         supabase
           .from("rpa_extraction_runs")
@@ -68,7 +57,6 @@ export default function RealTimeStatus() {
           .limit(8),
       ]);
 
-      if (cancelled) return;
       if (activeRes.error) {
         const errorMessage = String(activeRes.error.message ?? activeRes.error);
         if (errorMessage.includes('permission denied') || errorMessage.includes('row-level security') || errorMessage.includes('RLS')) {
@@ -93,16 +81,42 @@ export default function RealTimeStatus() {
       setActiveRuns((activeRes.data ?? []) as RunRow[]);
       setRecentRuns((recentRes.data ?? []) as RunRow[]);
       setLoading(false);
-    };
+    },
+  []);
 
+  useEffect(() => {
+    let cancelled = false;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
     load();
     intervalId = setInterval(load, 60000);
-
     return () => {
       cancelled = true;
       if (intervalId) clearInterval(intervalId);
     };
-  }, []);
+  }, [load, refreshTrigger]);
+
+  const handleStop = async (runId: string) => {
+    setStoppingIds((prev) => new Set(prev).add(runId));
+    try {
+      const supabase = supabaseBrowser();
+      if (supabase) {
+        const res = await fetch("/api/rpa/cancel-runs", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ runIds: [runId] }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error ?? "Failed to stop run.");
+      }
+      setRefreshTrigger((t) => t + 1);
+    } finally {
+      setStoppingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(runId);
+        return next;
+      });
+    }
+  };
 
   return (
     <Card className="space-y-5">
@@ -146,7 +160,18 @@ export default function RealTimeStatus() {
                       Started {formatDateTimeDDMMYYYY(run.started_at)}
                     </div>
                   </div>
-                  <StatusBadge status="in_progress" />
+                  <div className="flex items-center gap-2">
+                    <StatusBadge status="in_progress" />
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleStop(run.id)}
+                      disabled={stoppingIds.has(run.id)}
+                    >
+                      {stoppingIds.has(run.id) ? "Stopping…" : "Stop"}
+                    </Button>
+                  </div>
                 </div>
                 <div className="mt-3 space-y-2">
                   <Progress value={progress} />

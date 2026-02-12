@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import { DataTable } from "@/components/ui/DataTable";
 import { Button } from "@/components/ui/Button";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { isDemoMode } from "@/lib/env";
-import { mockGetTable } from "@/lib/mock/storage";
 import { StatusBadge, type Status } from "./StatusBadge";
 import { formatDateTimeSingapore } from "@/lib/utils/date";
 
@@ -51,14 +49,7 @@ export default function ExtractionActivityLog() {
 
       const supabase = supabaseBrowser();
       if (!supabase) {
-        if (!isDemoMode()) {
-          setError("Supabase is not configured.");
-          setLoading(false);
-          return;
-        }
-        const demoRows = mockGetTable("rpa_extraction_runs").slice(0, 50) as RunRow[];
-        if (cancelled) return;
-        setRows(demoRows);
+        setError("Supabase is not configured.");
         setLoading(false);
         return;
       }

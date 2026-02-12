@@ -1,0 +1,25 @@
+{
+  "date": "2026-01-23",
+  "totalPatients": 2,
+  "successful": 2,
+  "failed": 0,
+  "skipped": 0,
+  "patients": [
+    {
+      "pcno": "77959",
+      "name": "LI MEIQIN",
+      "nric": "S8176620G",
+      "status": "success",
+      "error": null,
+      "timeTaken": 80407
+    },
+    {
+      "pcno": "75434",
+      "name": "CHEW SIEW LING",
+      "nric": "S8635560D",
+      "status": "success",
+      "error": null,
+      "timeTaken": 55777
+    }
+  ]
+}

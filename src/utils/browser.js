@@ -434,6 +434,46 @@ export class BrowserManager {
     return extensions;
   }
 
+  _resolveChromiumExecutablePath() {
+    const fromEnv = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+    if (fromEnv && fs.existsSync(fromEnv)) return fromEnv;
+
+    const preferred = typeof chromium.executablePath === 'function' ? chromium.executablePath() : null;
+    if (preferred && fs.existsSync(preferred)) return preferred;
+
+    const candidates = [];
+    if (preferred) {
+      candidates.push(preferred.replace('/chrome-mac-x64/', '/chrome-mac-arm64/'));
+      candidates.push(preferred.replace('/chrome-mac-arm64/', '/chrome-mac-x64/'));
+    }
+
+    const cacheRoot = path.join(os.homedir(), 'Library', 'Caches', 'ms-playwright');
+    if (fs.existsSync(cacheRoot)) {
+      const versions = fs
+        .readdirSync(cacheRoot, { withFileTypes: true })
+        .filter((d) => d.isDirectory() && /^chromium-\d+$/i.test(d.name))
+        .map((d) => d.name)
+        .sort((a, b) => {
+          const av = Number(a.split('-')[1] || '0');
+          const bv = Number(b.split('-')[1] || '0');
+          return bv - av;
+        });
+      for (const v of versions) {
+        candidates.push(
+          path.join(cacheRoot, v, 'chrome-mac-arm64', 'Google Chrome for Testing.app', 'Contents', 'MacOS', 'Google Chrome for Testing')
+        );
+        candidates.push(
+          path.join(cacheRoot, v, 'chrome-mac-x64', 'Google Chrome for Testing.app', 'Contents', 'MacOS', 'Google Chrome for Testing')
+        );
+      }
+    }
+
+    for (const p of candidates) {
+      if (p && fs.existsSync(p)) return p;
+    }
+    return null;
+  }
+
   /**
    * Initialize browser instance with proxy support and optional extensions
    */
@@ -455,6 +495,13 @@ export class BrowserManager {
       
       // Use persistent context if extensions are configured or explicitly requested
       if (usePersistentContext) {
+        const executablePath = this._resolveChromiumExecutablePath();
+        if (executablePath) {
+          logger.info(`Using Chromium executable: ${executablePath}`);
+        } else {
+          logger.warn('No explicit Chromium executable found; using Playwright default resolution');
+        }
+
         // Ensure user data directory exists
         if (!fs.existsSync(this.userDataDir)) {
           fs.mkdirSync(this.userDataDir, { recursive: true });
@@ -474,6 +521,7 @@ export class BrowserManager {
           viewport: BROWSER_CONFIG.viewport,
           ignoreHTTPSErrors: true,
         };
+        if (executablePath) contextOptions.executablePath = executablePath;
 
         // Add extension loading args
         if (extensionPaths.length > 0) {
@@ -491,10 +539,18 @@ export class BrowserManager {
         this.browser = null;
       } else {
         // Standard browser launch
+        const executablePath = this._resolveChromiumExecutablePath();
+        if (executablePath) {
+          logger.info(`Using Chromium executable: ${executablePath}`);
+        } else {
+          logger.warn('No explicit Chromium executable found; using Playwright default resolution');
+        }
+
         const launchOptions = {
           headless: BROWSER_CONFIG.headless,
           slowMo: BROWSER_CONFIG.slowMo,
         };
+        if (executablePath) launchOptions.executablePath = executablePath;
 
         this.browser = await chromium.launch(launchOptions);
 
@@ -728,4 +784,3 @@ export class BrowserManager {
     }
   }
 }
-

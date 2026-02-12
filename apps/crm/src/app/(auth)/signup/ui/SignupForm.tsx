@@ -6,8 +6,6 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { isDemoMode } from "@/lib/env";
-import { useAuth } from "@/lib/auth/AuthProvider";
 
 const schema = z.object({
   email: z.string().email(),
@@ -19,7 +17,6 @@ type FormValues = z.infer<typeof schema>;
 export default function SignupForm() {
   const supabase = useMemo(() => supabaseBrowser(), []);
   const router = useRouter();
-  const { setDemoUserEmail } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
 
@@ -34,18 +31,17 @@ export default function SignupForm() {
       onSubmit={form.handleSubmit(async (values) => {
         setServerError(null);
         setInfo(null);
-        if (isDemoMode() || !supabase) {
-          setDemoUserEmail?.(values.email);
-        } else {
-          const { data, error } = await supabase.auth.signUp(values);
-          if (error) return setServerError(error.message);
-          // If email confirmations are enabled in Supabase, session can be null.
-          if (!data.session) {
-            setInfo(
-              "Account created. Please check your email to confirm before signing in.",
-            );
-            return;
-          }
+        if (!supabase) {
+          setServerError("Supabase is not configured.");
+          return;
+        }
+        const { data, error } = await supabase.auth.signUp(values);
+        if (error) return setServerError(error.message);
+        if (!data.session) {
+          setInfo(
+            "Account created. Please check your email to confirm before signing in.",
+          );
+          return;
         }
         router.replace("/crm");
       })}
@@ -101,14 +97,8 @@ export default function SignupForm() {
         disabled={form.formState.isSubmitting}
         className="mt-2 inline-flex h-11 w-full items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {form.formState.isSubmitting
-          ? "Creating…"
-          : isDemoMode()
-            ? "Enter Demo"
-            : "Create account"}
+        {form.formState.isSubmitting ? "Creating…" : "Create account"}
       </button>
     </form>
   );
 }
-
-

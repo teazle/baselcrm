@@ -1,0 +1,248 @@
+{
+  "generated_at": "2026-02-12T02:54:24.126Z",
+  "contexts": {
+    "mhc_base": {
+      "url": "https://www.mhcasia.net/mhc/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=VHEO-GON7-OLW4-XTS8-ZUP2-ZGR4-7559-TNEH",
+      "title": "Clinic announcement",
+      "links": [
+        {
+          "tag": "a",
+          "text": "Switch System ||",
+          "href": "#",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "AIA Clinic",
+          "href": "SwitchSystem.ec?url=https://www.aiaclinic.com",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "SinglifePcpcare",
+          "href": "SwitchSystem.ec?url=https://www.pcpcare.com",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Singlife Global 8",
+          "href": "SwitchSystem.ec?url=https://www.myglobalbenefit.com",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Add Normal Visit",
+          "href": "ClinicEmpVisitSelectPatient.ec?OWASP_CSRFTOKEN=VHEO-GON7-OLW4-XTS8-ZUP2-ZGR4-7559-TNEH",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "View Submitted Visits",
+          "href": "ClinicEmpVisitPlusAList.ec?OWASP_CSRFTOKEN=VHEO-GON7-OLW4-XTS8-ZUP2-ZGR4-7559-TNEH",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Edit/Draft Visits",
+          "href": "ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=VHEO-GON7-OLW4-XTS8-ZUP2-ZGR4-7559-TNEH",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Add Checkup (Name Search)",
+          "href": "ClinicCheckupVisitSelectPatient.ec?OWASP_CSRFTOKEN=VHEO-GON7-OLW4-XTS8-ZUP2-ZGR4-7559-TNEH",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Add Checkup (Company Search)",
+          "href": "ClinicSelectCompany.ec?OWASP_CSRFTOKEN=VHEO-GON7-OLW4-XTS8-ZUP2-ZGR4-7559-TNEH",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "QR Code Download",
+          "href": "ClinicUtilizationReviewFormAndQRCode.ec?OWASP_CSRFTOKEN=VHEO-GON7-OLW4-XTS8-ZUP2-ZGR4-7559-TNEH",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Utilization Review Form",
+          "href": "http://b6.caspio.com/dp.asp?AppKey=e7923000398df35e6a66458295c4",
+          "onclick": "return openNewWindow(this.href);"
+        },
+        {
+          "tag": "a",
+          "text": "Drug Price Review Form",
+          "href": "http://b6.caspio.com/dp.asp?AppKey=e792300020dbe860ed9248b79292",
+          "onclick": "return openNewWindow(this.href);"
+        },
+        {
+          "tag": "a",
+          "text": "SINGLIFE PCP Portal",
+          "href": "https://www.pcpcare.com/",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "SINGLIFE PCP Portal",
+          "href": "https://www.pcpcare.com/",
+          "onclick": ""
+        }
+      ],
+      "inputs": []
+    },
+    "aia": {
+      "url": "https://www.aiaclinic.com/aia/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=1J4E-3G6S-8AIX-2I09-T2V7-EZV3-WDIG-VCW3",
+      "title": "Clinic announcement",
+      "links": [
+        {
+          "tag": "a",
+          "text": "Switch System ||",
+          "href": "#",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Singlife Pcpcare",
+          "href": "SwitchSystem.ec?url=https://www.pcpcare.com",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Singlife Global 8",
+          "href": "SwitchSystem.ec?url=https://www.myglobalbenefit.com",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Add AIA Visit",
+          "href": "ClinicAddIECCardImage.ec?OWASP_CSRFTOKEN=1J4E-3G6S-8AIX-2I09-T2V7-EZV3-WDIG-VCW3",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "View Submitted Visits",
+          "href": "ClinicIECAIAEmpVisitList.ec?OWASP_CSRFTOKEN=1J4E-3G6S-8AIX-2I09-T2V7-EZV3-WDIG-VCW3",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Edit/Draft Visits",
+          "href": "ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=1J4E-3G6S-8AIX-2I09-T2V7-EZV3-WDIG-VCW3",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Add Imaging AIA Visit",
+          "href": "ClinicIECXrayVisitSelectPatient.ec?OWASP_CSRFTOKEN=1J4E-3G6S-8AIX-2I09-T2V7-EZV3-WDIG-VCW3",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Add Lab AIA Visit",
+          "href": "ClinicIECLabVisitSelectPatient.ec?OWASP_CSRFTOKEN=1J4E-3G6S-8AIX-2I09-T2V7-EZV3-WDIG-VCW3",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Utilization Review Form Download",
+          "href": "javascript:openNewWindow('http://b6.caspio.com/dp.asp?AppKey=e7923000398df35e6a66458295c4')",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Drug Price Review Form",
+          "href": "javascript:openNewWindow('http://b6.caspio.com/dp.asp?AppKey=e792300020dbe860ed9248b79292')",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "https://www.aiaclinic.com/",
+          "href": "../?OWASP_CSRFTOKEN=1J4E-3G6S-8AIX-2I09-T2V7-EZV3-WDIG-VCW3",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "https://www.aiaclinic.com/",
+          "href": "../?OWASP_CSRFTOKEN=1J4E-3G6S-8AIX-2I09-T2V7-EZV3-WDIG-VCW3",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "1800 248 8000",
+          "href": "https://www.google.com/search \nq=aia+contact+centre&rlz=1C1CHBF_enSG887SG887&oq=aia+contact+centre&aqs=chrome..69i57j46i175i199j0i22i30l2.2693j1j7&sourceid=chrome&ie=UTF-8",
+          "onclick": ""
+        }
+      ],
+      "inputs": []
+    },
+    "singlife": {
+      "url": "https://www.pcpcare.com/pcpcare/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=48E0-4VH0-1IQQ-80IK-WLNV-31EG-HC8E-C8IC",
+      "title": "Clinic announcement",
+      "links": [
+        {
+          "tag": "a",
+          "text": "Singlife",
+          "href": "https://singlife.com/",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Switch System",
+          "href": "#",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "AIA Clinic",
+          "href": "SwitchSystem.ec?url=https://www.aiaclinic.com",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Singlife Global 8",
+          "href": "SwitchSystem.ec?url=https://www.myglobalbenefit.com",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Add Normal Visit",
+          "href": "ClinicIECAvivaPatientSearch.ec?OWASP_CSRFTOKEN=48E0-4VH0-1IQQ-80IK-WLNV-31EG-HC8E-C8IC",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "View Submitted Visits",
+          "href": "ClinicIECAvivaEmpVisitList.ec?OWASP_CSRFTOKEN=48E0-4VH0-1IQQ-80IK-WLNV-31EG-HC8E-C8IC",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Edit/Draft Visits",
+          "href": "ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=48E0-4VH0-1IQQ-80IK-WLNV-31EG-HC8E-C8IC",
+          "onclick": ""
+        },
+        {
+          "tag": "a",
+          "text": "Utilization Review Form",
+          "href": "http://b6.caspio.com/dp.asp?AppKey=e7923000faec4d7662784dd79e9e",
+          "onclick": "return openNewWindow(this.href);"
+        },
+        {
+          "tag": "a",
+          "text": "Drug Price Review Form",
+          "href": "http://b6.caspio.com/dp.asp?AppKey=e792300020dbe860ed9248b79292",
+          "onclick": "return openNewWindow(this.href);"
+        },
+        {
+          "tag": "a",
+          "text": "Singlife PCP SP Listing",
+          "href": "https://b6.caspio.com/dp.asp?AppKey=e79230003cda8b078ffc4e158323",
+          "onclick": "return openNewWindow(this.href);"
+        }
+      ],
+      "inputs": []
+    }
+  }
+}

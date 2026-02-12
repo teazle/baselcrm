@@ -6,9 +6,13 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { DataTable, RowLink } from "@/components/ui/DataTable";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { isDemoMode } from "@/lib/env";
-import { mockGetTable } from "@/lib/mock/storage";
-import { formatDateDDMMYYYY, formatDateTimeDDMMYYYY } from "@/lib/utils/date";
+import {
+  formatDateDDMMYYYY,
+  formatDateTimeDDMMYYYY,
+  formatDateSingapore,
+  getTodaySingapore,
+  parseDateSingapore,
+} from "@/lib/utils/date";
 import { cn } from "@/lib/cn";
 import { getSupportedPortals, getUnsupportedPortals, isSupportedPortal, isUnsupportedPortal } from "@/lib/rpa/portals";
 import FlowHeader from "./FlowHeader";
@@ -18,6 +22,7 @@ type VisitRow = {
   patient_name: string | null;
   visit_date: string | null;
   pay_type: string | null;
+  nric: string | null;
   submission_status: string | null;
   submitted_at: string | null;
   submission_metadata: Record<string, any> | null;
@@ -36,6 +41,12 @@ const filters: Array<{ key: FilterKey; label: string }> = [
   { key: "error", label: "Error" },
 ];
 
+function shiftSingaporeDate(dateString: string, days: number): string {
+  const d = parseDateSingapore(dateString);
+  d.setDate(d.getDate() + days);
+  return formatDateSingapore(d);
+}
+
 export default function Flow3FillForms() {
   const [rows, setRows] = useState<VisitRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,6 +54,10 @@ export default function Flow3FillForms() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [notice, setNotice] = useState<string | null>(null);
   const [submitBusy, setSubmitBusy] = useState(false);
+  const [fromDate, setFromDate] = useState(() => shiftSingaporeDate(getTodaySingapore(), -6));
+  const [toDate, setToDate] = useState(() => getTodaySingapore());
+  const [portalOnly, setPortalOnly] = useState(true);
+  const [leaveBrowserOpen, setLeaveBrowserOpen] = useState(false);
   const [portalConfig, setPortalConfig] = useState<{
     supported: Set<string>;
     unsupported: Set<string>;
@@ -96,32 +111,25 @@ export default function Flow3FillForms() {
 
       const supabase = supabaseBrowser();
       if (!supabase) {
-        if (!isDemoMode()) {
-          setError("Supabase is not configured.");
-          setLoading(false);
-          return;
-        }
-
-        const demoRows = (mockGetTable("visits") as Array<Record<string, any>>)
-          .filter((row) => row?.source === "Clinic Assist")
-          .slice(0, 200) as VisitRow[];
-        setPortalConfig({
-          supported: new Set(getSupportedPortals()),
-          unsupported: new Set(getUnsupportedPortals()),
-        });
-        if (cancelled) return;
-        setRows(demoRows);
+        setError("Supabase is not configured.");
         setLoading(false);
         return;
       }
 
+      const portalPayTypes = ["MHC", "FULLERT", "IHP", "ALL", "ALLIANZ", "AIA", "GE", "AIACLIENT", "AVIVA", "SINGLIFE"];
+
+      let visitsQuery = supabase
+        .from("visits")
+        .select("id,patient_name,visit_date,pay_type,nric,submission_status,submitted_at,submission_metadata,extraction_metadata")
+        .eq("source", "Clinic Assist")
+        .order("visit_date", { ascending: false })
+        .limit(1000);
+      if (fromDate) visitsQuery = visitsQuery.gte("visit_date", fromDate);
+      if (toDate) visitsQuery = visitsQuery.lte("visit_date", toDate);
+      if (portalOnly) visitsQuery = visitsQuery.in("pay_type", portalPayTypes);
+
       const [visitsRes, portalsRes] = await Promise.all([
-        supabase
-          .from("visits")
-          .select("id,patient_name,visit_date,pay_type,submission_status,submitted_at,submission_metadata,extraction_metadata")
-          .eq("source", "Clinic Assist")
-          .order("visit_date", { ascending: false })
-          .limit(200),
+        visitsQuery,
         supabase
           .from("rpa_portals")
           .select("portal_code,status"),
@@ -171,7 +179,7 @@ export default function Flow3FillForms() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [fromDate, portalOnly, toDate]);
 
   const handleSubmitClaims = async (visitIds?: string[], saveAsDraft?: boolean) => {
     setSubmitBusy(true);
@@ -180,7 +188,14 @@ export default function Flow3FillForms() {
       const res = await fetch("/api/rpa/flow3/submit-claims", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ visitIds, saveAsDraft }),
+        body: JSON.stringify({
+          visitIds,
+          saveAsDraft,
+          leaveOpen: leaveBrowserOpen,
+          from: fromDate,
+          to: toDate,
+          portalOnly,
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -235,11 +250,6 @@ export default function Flow3FillForms() {
           ? { label: "Pending", tone: "warning" as const }
           : { label: "Ready", tone: "success" as const };
 
-  const draftIds = useMemo(
-    () => rows.filter((r) => getSubmissionStatus(r) === "draft").map((r) => r.id),
-    [rows, portalConfig],
-  );
-
   const errorIds = useMemo(
     () => rows.filter((r) => getSubmissionStatus(r) === "error").map((r) => r.id),
     [rows, portalConfig],
@@ -273,6 +283,42 @@ export default function Flow3FillForms() {
           before submitting claims.
         </div>
       ) : null}
+
+      <Card className="p-5">
+        <div className="text-xs font-medium text-muted-foreground">Scope</div>
+        <div className="mt-2 flex flex-wrap items-end gap-3">
+          <label className="space-y-1">
+            <div className="text-xs text-muted-foreground">From</div>
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => setFromDate(e.target.value)}
+              className="h-10 rounded-xl border border-border bg-background px-3 text-sm"
+            />
+          </label>
+          <label className="space-y-1">
+            <div className="text-xs text-muted-foreground">To</div>
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => setToDate(e.target.value)}
+              className="h-10 rounded-xl border border-border bg-background px-3 text-sm"
+            />
+          </label>
+          <label className="flex items-center gap-2 pb-1 text-sm">
+            <input
+              type="checkbox"
+              checked={portalOnly}
+              onChange={(e) => setPortalOnly(e.target.checked)}
+              className="h-4 w-4 rounded border border-border"
+            />
+            <span className="text-sm">Portal pay types only</span>
+          </label>
+        </div>
+        <div className="mt-2 text-xs text-muted-foreground">
+          Showing {portalOnly ? "portal-tagged visits" : "all visits"} between {fromDate} and {toDate}.
+        </div>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-5">
         <Card className="p-5">
@@ -308,13 +354,22 @@ export default function Flow3FillForms() {
 
         <div className="rounded-2xl border border-border bg-card p-4 space-y-3">
           <div className="text-sm font-medium">Submit Claims</div>
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={leaveBrowserOpen}
+              onChange={(e) => setLeaveBrowserOpen(e.target.checked)}
+              className="h-4 w-4 rounded border border-border"
+            />
+            Leave browser open for manual review
+          </label>
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
               onClick={() => handleSubmitClaims(undefined, false)}
               disabled={submitBusy}
             >
-              {submitBusy ? "Starting..." : "Submit All Pending"}
+              {submitBusy ? "Starting..." : "Fill All Pending (no save)"}
             </Button>
               <Button
                 type="button"
@@ -327,10 +382,10 @@ export default function Flow3FillForms() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => handleSubmitClaims(draftIds, false)}
-                disabled={submitBusy || draftIds.length === 0}
+                onClick={() => handleSubmitClaims(errorIds, true)}
+                disabled={submitBusy || errorIds.length === 0}
               >
-                Submit Drafts ({draftIds.length})
+                Retry Errors (save draft) ({errorIds.length})
               </Button>
               <Button
                 type="button"
@@ -338,7 +393,7 @@ export default function Flow3FillForms() {
                 onClick={() => handleSubmitClaims(errorIds, false)}
                 disabled={submitBusy || errorIds.length === 0}
               >
-                Retry Errors ({errorIds.length})
+                Retry Errors (fill only) ({errorIds.length})
               </Button>
             </div>
           </div>
@@ -417,6 +472,14 @@ export default function Flow3FillForms() {
                       {payType}
                     </span>
                   );
+                },
+              },
+              {
+                header: "NRIC",
+                cell: (row) => {
+                  const nric = row.nric || row.extraction_metadata?.nric;
+                  if (!nric) return <span className="text-red-700">Missing</span>;
+                  return <span className="font-mono text-xs">{nric}</span>;
                 },
               },
               {

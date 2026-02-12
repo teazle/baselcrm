@@ -7,6 +7,123 @@ import { registerRunExitHandler, markRunFinalized } from '../utils/run-exit-hand
 
 dotenv.config();
 
+function printUsage() {
+  console.log(`
+Batch submit claims to portals
+
+Usage:
+  node src/examples/submit-claims-batch.js --from 2026-02-02 --to 2026-02-07 --portal-only
+  node src/examples/submit-claims-batch.js --visit-ids id1,id2,id3
+  node src/examples/submit-claims-batch.js --pay-type MHC
+  node src/examples/submit-claims-batch.js --save-as-draft --from 2026-02-02 --to 2026-02-07 --portal-only
+  node src/examples/submit-claims-batch.js --all-pending
+
+Options:
+  --visit-ids <csv>      Specific visit IDs (comma separated)
+  --pay-type <value>     Filter by pay type
+  --from <YYYY-MM-DD>    Start date filter
+  --to <YYYY-MM-DD>      End date filter
+  --portal-only          Only rows tagged for supported portals (MHC/AIA/AVIVA/SINGLIFE)
+  --save-as-draft        Click "Save as Draft" after fill
+  --leave-open           Keep browser open for manual verification
+  --all-pending          Explicitly allow unscoped run across all pending rows
+  --help, -h             Show this help
+`);
+}
+
+function parseCliArgs(argv) {
+  const opts = {
+    visitIds: undefined,
+    payType: null,
+    from: null,
+    to: null,
+    portalOnly: false,
+    saveAsDraft: false,
+    leaveOpen: process.env.BROWSER_LEAVE_OPEN === '1',
+    allPending: false,
+    help: false,
+  };
+
+  const readValue = (i) => {
+    const next = argv[i + 1];
+    if (!next || next.startsWith('--')) {
+      throw new Error(`Missing value for ${argv[i]}`);
+    }
+    return next;
+  };
+
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === '--help' || arg === '-h') {
+      opts.help = true;
+      continue;
+    }
+    if (arg === '--portal-only') {
+      opts.portalOnly = true;
+      continue;
+    }
+    if (arg === '--save-as-draft') {
+      opts.saveAsDraft = true;
+      continue;
+    }
+    if (arg === '--leave-open') {
+      opts.leaveOpen = true;
+      continue;
+    }
+    if (arg === '--all-pending') {
+      opts.allPending = true;
+      continue;
+    }
+    if (arg.startsWith('--visit-ids=')) {
+      opts.visitIds = arg.split('=')[1]?.split(',').filter(Boolean) || undefined;
+      continue;
+    }
+    if (arg === '--visit-ids') {
+      opts.visitIds = readValue(i).split(',').filter(Boolean);
+      i++;
+      continue;
+    }
+    if (arg.startsWith('--pay-type=')) {
+      opts.payType = arg.split('=')[1] || null;
+      continue;
+    }
+    if (arg === '--pay-type') {
+      opts.payType = readValue(i);
+      i++;
+      continue;
+    }
+    if (arg.startsWith('--from=')) {
+      opts.from = arg.split('=')[1] || null;
+      continue;
+    }
+    if (arg === '--from') {
+      opts.from = readValue(i);
+      i++;
+      continue;
+    }
+    if (arg.startsWith('--to=')) {
+      opts.to = arg.split('=')[1] || null;
+      continue;
+    }
+    if (arg === '--to') {
+      opts.to = readValue(i);
+      i++;
+      continue;
+    }
+    throw new Error(`Unknown argument: ${arg}`);
+  }
+
+  const dateRe = /^\d{4}-\d{2}-\d{2}$/;
+  if (opts.from && !dateRe.test(opts.from)) {
+    throw new Error(`Invalid --from date format: ${opts.from} (expected YYYY-MM-DD)`);
+  }
+  if (opts.to && !dateRe.test(opts.to)) {
+    throw new Error(`Invalid --to date format: ${opts.to} (expected YYYY-MM-DD)`);
+  }
+
+  return opts;
+}
+
 /**
  * Batch submit claims to portals
  * 
@@ -14,23 +131,55 @@ dotenv.config();
  *   node src/examples/submit-claims-batch.js
  *   node src/examples/submit-claims-batch.js --visit-ids id1,id2,id3
  *   node src/examples/submit-claims-batch.js --pay-type MHC
+ *   node src/examples/submit-claims-batch.js --from 2026-02-02 --to 2026-02-07 --portal-only
  *   node src/examples/submit-claims-batch.js --save-as-draft
  */
 async function submitClaimsBatch() {
-  const args = process.argv.slice(2);
-  const visitIdsArg = args.find(arg => arg.startsWith('--visit-ids='))?.split('=')[1] || 
-                     (args.includes('--visit-ids') && args[args.indexOf('--visit-ids') + 1]);
-  const payTypeArg = args.find(arg => arg.startsWith('--pay-type='))?.split('=')[1] || 
-                    (args.includes('--pay-type') && args[args.indexOf('--pay-type') + 1]);
-  const saveAsDraft = args.includes('--save-as-draft');
+  let parsed;
+  try {
+    parsed = parseCliArgs(process.argv.slice(2));
+  } catch (error) {
+    logger.error(error.message);
+    printUsage();
+    process.exit(2);
+  }
 
-  const visitIds = visitIdsArg ? visitIdsArg.split(',').filter(Boolean) : undefined;
-  const payType = payTypeArg || null;
+  if (parsed.help) {
+    printUsage();
+    return;
+  }
+
+  const {
+    visitIds,
+    payType,
+    from,
+    to,
+    portalOnly,
+    saveAsDraft,
+    leaveOpen,
+    allPending,
+  } = parsed;
+
+  const hasScope = Boolean(
+    (Array.isArray(visitIds) && visitIds.length > 0) ||
+    payType ||
+    from ||
+    to ||
+    portalOnly
+  );
+  if (!hasScope && !allPending) {
+    logger.error('Refusing unscoped batch run. Add --from/--to and/or --portal-only, or pass --all-pending explicitly.');
+    printUsage();
+    process.exit(2);
+  }
 
   logger.info('=== Batch Claim Submission ===');
-  logger.info(`Visit IDs: ${visitIds ? visitIds.join(', ') : 'All pending'}`);
+  logger.info(`Visit IDs: ${visitIds ? visitIds.join(', ') : (allPending ? 'All pending (explicit)' : 'Scoped query')}`);
   logger.info(`Pay Type: ${payType || 'All'}`);
+  logger.info(`Date Range: ${from || '-'} to ${to || '-'}`);
+  logger.info(`Portal Only: ${portalOnly}`);
   logger.info(`Save as Draft: ${saveAsDraft}`);
+  logger.info(`Leave Browser Open: ${leaveOpen}`);
 
   const supabase = createSupabaseClient();
   if (!supabase) {
@@ -38,7 +187,7 @@ async function submitClaimsBatch() {
     process.exit(1);
   }
 
-  const runMetadata = { visitIds, payType, saveAsDraft, trigger: 'manual' };
+  const runMetadata = { visitIds, payType, from, to, portalOnly, saveAsDraft, trigger: 'manual' };
   const runId = await startRun(supabase, runMetadata);
   if (runId) {
     const updateRunBound = (id, updates) => updateRun(supabase, id, updates);
@@ -59,12 +208,13 @@ async function submitClaimsBatch() {
   let totalRecords = 0;
   let submittedCount = 0;
   let draftCount = 0;
+  let filledOnlyCount = 0;
   let errorCount = 0;
   let notStartedCount = 0;
 
   try {
     // Get visits to submit (either specific IDs or all pending)
-    const visits = await submitter.getPendingClaims(payType, visitIds);
+    const visits = await submitter.getPendingClaims(payType, visitIds, { from, to, portalOnly });
 
     totalRecords = visits.length;
     logger.info(`Found ${totalRecords} visit(s) to process`);
@@ -81,12 +231,22 @@ async function submitClaimsBatch() {
         if (result.success) {
           if (result.savedAsDraft) {
             draftCount++;
-          } else {
+          } else if (result.submitted) {
             submittedCount++;
+          } else {
+            // Fill-only verification run (no draft/submission).
+            filledOnlyCount++;
           }
-        } else if (result.reason === 'not_implemented') {
+        } else if (result.reason === 'not_found') {
           notStartedCount++;
-          logger.warn(`Portal not implemented for pay type: ${visit.pay_type}`);
+          logger.warn(`Member not found in portal: ${visit.patient_name} (${visit.pay_type})`);
+        } else if (result.reason === 'not_implemented' || result.reason === 'unknown_pay_type') {
+          notStartedCount++;
+          if (result.reason === 'unknown_pay_type') {
+            logger.warn(`Unsupported/unknown pay type: ${visit.pay_type}`);
+          } else {
+            logger.warn(`Portal not implemented for pay type: ${visit.pay_type}`);
+          }
         } else {
           errorCount++;
           logger.error(`Failed to submit: ${result.error || result.reason}`);
@@ -109,6 +269,7 @@ async function submitClaimsBatch() {
     logger.info(`Total: ${totalRecords}`);
     logger.info(`Submitted: ${submittedCount}`);
     logger.info(`Drafts: ${draftCount}`);
+    logger.info(`Filled only (no DB update): ${filledOnlyCount}`);
     logger.info(`Errors: ${errorCount}`);
     logger.info(`Not Started (unsupported): ${notStartedCount}`);
 
@@ -116,9 +277,9 @@ async function submitClaimsBatch() {
       status: 'completed',
       finished_at: new Date().toISOString(),
       total_records: totalRecords,
-      completed_count: submittedCount + draftCount,
+      completed_count: submittedCount + draftCount + filledOnlyCount,
       failed_count: errorCount,
-      metadata: { ...runMetadata, submittedCount, draftCount, errorCount, notStartedCount },
+      metadata: { ...runMetadata, submittedCount, draftCount, filledOnlyCount, errorCount, notStartedCount },
     });
     markRunFinalized();
 
@@ -135,7 +296,15 @@ async function submitClaimsBatch() {
     markRunFinalized();
     process.exit(1);
   } finally {
-    await browserManager.close();
+    if (leaveOpen) {
+      logger.info('Leaving browser open for manual verification. Press Ctrl+C to exit.');
+      // Keep the Node process alive so the Playwright browser stays open.
+      // (The run was already finalized above; this is strictly for human inspection.)
+      // eslint-disable-next-line no-empty
+      await new Promise(() => {});
+    } else {
+      await browserManager.close();
+    }
   }
 }
 

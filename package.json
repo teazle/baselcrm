@@ -55,6 +55,7 @@
       "prettier --write",
       "eslint --fix --max-warnings=0 --no-warn-ignored"
     ],
+    "apps/crm/**/*.{js,jsx,ts,tsx}": "bash -c 'cd apps/crm && npx eslint --fix .'",
     "*.{json,md,yml,yaml}": [
       "prettier --write"
     ]

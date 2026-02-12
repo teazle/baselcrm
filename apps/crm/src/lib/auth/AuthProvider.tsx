@@ -3,14 +3,12 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { isDemoMode } from "@/lib/env";
 
 type AuthContextValue = {
   user: User | null;
   session: Session | null;
   isLoading: boolean;
   signOut: () => Promise<void>;
-  setDemoUserEmail?: (email: string) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -19,17 +17,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = useMemo(() => supabaseBrowser(), []);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [demoEmail, setDemoEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isDemoMode() || !supabase) {
-      try {
-        const stored =
-          typeof window !== "undefined" ? window.localStorage.getItem("demo:userEmail") : null;
-        setDemoEmail(stored || "demo@baselrpa.local");
-      } catch {
-        setDemoEmail("demo@baselrpa.local");
-      }
+    if (!supabase) {
       setSession(null);
       setIsLoading(false);
       return;
@@ -40,8 +30,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(({ data, error }) => {
       if (!mounted) return;
       if (error) {
-        // If env vars are missing, supabase client throws earlier.
-        // If session fetch fails, treat as signed out.
         setSession(null);
       } else {
         setSession(data.session ?? null);
@@ -63,39 +51,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase]);
 
   const value: AuthContextValue = {
-    user:
-      isDemoMode() || !supabase
-        ? (({
-            id: "00000000-0000-0000-0000-000000000000",
-            aud: "authenticated",
-            role: "authenticated",
-            email: demoEmail ?? "demo@baselrpa.local",
-            app_metadata: {},
-            user_metadata: {},
-            created_at: new Date(0).toISOString(),
-          } as unknown) as User)
-        : session?.user ?? null,
+    user: session?.user ?? null,
     session,
     isLoading,
     signOut: async () => {
-      if (isDemoMode() || !supabase) {
-        try {
-          if (typeof window !== "undefined") window.localStorage.removeItem("demo:userEmail");
-        } catch {
-          /* ignore */
-        }
-        setDemoEmail(null);
-        return;
-      }
-      await supabase.auth.signOut();
-    },
-    setDemoUserEmail: (email: string) => {
-      try {
-        if (typeof window !== "undefined") window.localStorage.setItem("demo:userEmail", email);
-      } catch {
-        /* ignore */
-      }
-      setDemoEmail(email);
+      if (supabase) await supabase.auth.signOut();
     },
   };
 
@@ -107,5 +67,3 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used within <AuthProvider />");
   return ctx;
 }
-
-

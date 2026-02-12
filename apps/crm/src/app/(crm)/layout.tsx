@@ -3,6 +3,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { RequireAuth } from "@/lib/auth/RequireAuth";
 import { QuickCreateFab } from "@/components/crm/QuickCreateFab";
 import { CrmShell } from "@/components/layout/CrmShell";
+import { SupabaseRequired } from "@/components/providers/SupabaseRequired";
 
 export default function CrmLayout({
   children,
@@ -10,6 +11,7 @@ export default function CrmLayout({
   children: React.ReactNode;
 }) {
   return (
+    <SupabaseRequired>
     <RequireAuth>
       <div className="min-h-screen bg-background text-foreground">
         <div className="mx-auto flex min-h-screen w-full">
@@ -24,6 +26,7 @@ export default function CrmLayout({
       </div>
       <QuickCreateFab />
     </RequireAuth>
+    </SupabaseRequired>
   );
 }
 

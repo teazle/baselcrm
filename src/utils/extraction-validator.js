@@ -87,8 +87,8 @@ export function validateNRIC(nric) {
   // Remove spaces and convert to uppercase
   const cleaned = nric.replace(/\s+/g, '').toUpperCase();
 
-  // Singapore NRIC format: S/T/F/G + 7 digits + 1 letter
-  const nricPattern = /^[STFG]\d{7}[A-Z]$/;
+  // Singapore NRIC/FIN format: S/T/F/G/M + 7 digits + 1 letter
+  const nricPattern = /^[STFGM]\d{7}[A-Z]$/;
   
   if (!nricPattern.test(cleaned)) {
     return { isValid: false, cleaned: null, reason: 'invalid_format' };
@@ -284,4 +284,3 @@ export function logValidationResults(validationResult, context = '') {
     });
   }
 }
-

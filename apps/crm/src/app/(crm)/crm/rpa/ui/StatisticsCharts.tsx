@@ -4,8 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Progress } from "@/components/ui/Progress";
 import { supabaseBrowser } from "@/lib/supabase/browser";
-import { isDemoMode } from "@/lib/env";
-import { mockGetTable } from "@/lib/mock/storage";
 import { StatusBadge } from "./StatusBadge";
 import { formatDateSingapore } from "@/lib/utils/date";
 
@@ -43,14 +41,7 @@ export default function StatisticsCharts() {
 
       const supabase = supabaseBrowser();
       if (!supabase) {
-        if (!isDemoMode()) {
-          setError("Supabase is not configured.");
-          setLoading(false);
-          return;
-        }
-        const demoRows = mockGetTable("rpa_extraction_runs") as RunRow[];
-        if (cancelled) return;
-        setRuns(demoRows);
+        setError("Supabase is not configured.");
         setLoading(false);
         return;
       }

@@ -451,6 +451,8 @@ export class BatchExtraction {
 
         // Extract PCNO for deduplication
         const pcno = item.pcno || null;
+        // Prefer invoice/visit record number for deduplication (PCNO can repeat on the same day).
+        const visitRecordNo = item.invNo || item.qno || null;
 
         // Prepare visit data
         const visitData = {
@@ -459,7 +461,7 @@ export class BatchExtraction {
           time_arrived: item.inTime || null,
           time_left: item.outTime || null,
           patient_name: item.patientName || null,
-          visit_record_no: item.qno || null,
+          visit_record_no: visitRecordNo,
           total_amount: feeAmount,
           amount_outstanding: feeAmount,
           
@@ -486,54 +488,48 @@ export class BatchExtraction {
           },
         };
 
-        // Deduplication: Check for existing record by PCNO + visit_date
-        // This prevents duplicate entries when the same patient appears multiple times in the queue
+        // Deduplication:
+        // Use visit_record_no + visit_date when possible (invoice/record number is unique per visit/claim).
+        // Do NOT dedupe solely by PCNO because a patient can have multiple visits/invoices on the same day.
         let existingRecord = null;
-        
-        // Primary deduplication: by PCNO + visit_date (most reliable)
-        if (pcno) {
-          // Query for existing records with same visit_date and check PCNO in metadata
-          const { data: existingData, error: queryError } = await this.supabase
-            .from('visits')
-            .select('id, extraction_metadata')
-            .eq('visit_date', targetDate)
-            .not('extraction_metadata', 'is', null)
-            .limit(100); // Get multiple to filter in JS (PostgreSQL JSONB filtering can be tricky)
-          
-          if (!queryError && existingData) {
-            // Filter in JavaScript to find matching PCNO
-            const matching = existingData.find(v => {
-              const metadata = v.extraction_metadata;
-              if (!metadata || typeof metadata !== 'object') return false;
-              return metadata.pcno === pcno || String(metadata.pcno) === String(pcno);
-            });
-            
-            if (matching) {
-              existingRecord = matching;
-              logger.info(`[BATCH] Found existing record for PCNO ${pcno} on ${targetDate}, will update instead of insert`, {
-                existingId: matching.id.substring(0, 8) + '...'
-              });
-            }
-          }
-        }
-        
-        // Fallback deduplication: by visit_record_no + visit_date (if PCNO not available)
-        if (!existingRecord && item.qno) {
-          const { data: existingByQno } = await this.supabase
+        if (visitRecordNo) {
+          const { data: existingByRecordNo } = await this.supabase
             .from('visits')
             .select('id')
             .eq('visit_date', targetDate)
-            .eq('visit_record_no', item.qno)
+            .eq('visit_record_no', visitRecordNo)
             .limit(1)
             .maybeSingle();
-          
-          if (existingByQno) {
-            existingRecord = existingByQno;
-            logger.info(`[BATCH] Found existing record for QNO ${item.qno} on ${targetDate}, will update instead of insert`);
+
+          if (existingByRecordNo) {
+            existingRecord = existingByRecordNo;
+            logger.info(`[BATCH] Found existing record for record_no ${visitRecordNo} on ${targetDate}, will update instead of insert`);
+          }
+        } else if (pcno) {
+          // Last resort: if we have no record number, try to avoid duplicates by PCNO + time_arrived.
+          const { data: existingData } = await this.supabase
+            .from('visits')
+            .select('id, extraction_metadata, time_arrived')
+            .eq('visit_date', targetDate)
+            .not('extraction_metadata', 'is', null)
+            .limit(200);
+
+          const matching = (existingData || []).find((v) => {
+            const md = v.extraction_metadata;
+            if (!md || typeof md !== 'object') return false;
+            const samePcno = md.pcno === pcno || String(md.pcno) === String(pcno);
+            const sameTime = (v.time_arrived || null) === (item.inTime || null);
+            return samePcno && sameTime;
+          });
+
+          if (matching) {
+            existingRecord = matching;
+            logger.info(`[BATCH] Found existing record for PCNO ${pcno} at ${item.inTime || 'n/a'} on ${targetDate}, will update instead of insert`);
           }
         }
 
-        let { data, error } = null;
+        let data = null;
+        let error = null;
 
         if (existingRecord) {
           // Update existing record instead of inserting
@@ -563,7 +559,7 @@ export class BatchExtraction {
             const { data: updateData, error: updateError } = await this.supabase
               .from('visits')
               .update(visitData)
-              .eq('visit_record_no', item.qno)
+              .eq('visit_record_no', visitRecordNo)
               .eq('visit_date', targetDate)
               .select();
             
@@ -629,4 +625,3 @@ export class BatchExtraction {
     }
   }
 }
-

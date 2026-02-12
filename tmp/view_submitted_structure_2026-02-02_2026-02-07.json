@@ -1,0 +1,3282 @@
+{
+  "generatedAt": "2026-02-12T02:58:48.109Z",
+  "contexts": {
+    "mhc": {
+      "nav": {
+        "ok": true,
+        "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitPlusAList.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733"
+      },
+      "structure": {
+        "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitPlusAList.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+        "title": "Employee Visit List",
+        "bodyTextSample": "#banner { text-align: center; } .table-bg { background-color: #eeeeee; } .style1 { background-image: url('singaporeImage/Blue_Bar.png'); } .style2 { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; } .style5 { font-family: Arial, Helvetica, sans-serif; font-size: 9pt; } .useful-link { float: right; } .useful-link a { color: #FFFFFF; font-family: Arial, Helvetica, sans-serif; font-weight: bold; text-decoration: none; } .dropdown-link { color: #FFFFFF; background-image: url('singaporeImage/Blue_Bar.png'); font-family: Arial, Helvetica, sans-serif; } Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out /* Base styles */ .menu-item { text-decoration: none; } ul.menu-list { list-style: none; padding: 0; margin: 0; } ul.separator { background-image: none; } .separator-line { height: 5px; width: 75%; } .empty-line { height: 5px; } /* Dynamic styles rendered server-side */ #menu .menu-color-4b100340b918 { color: #000000; } #menu .menu-color-18636bd3af2e { color: #000000; } #menu .menu-color-106f26247000 { color: #000000; } #menu .menu-color-106f2629f001 { color: #000000; } #menu .menu-color-764b01bf0488 { color: #000000; } #menu .menu-color-10feaccad04e { color: #000000; } #menu .menu-color-10feacc0b04d { color: #000000; } #menu .menu-color-10feacb5604c { color: #000000; } #menu .menu-color-10feaca35045 { color: #000000; } #menu .menu-color-15e2f0f6c6ae { color: #000000; } #menu .menu-color-1443ec8433b6 { color: #663300; } #menu .menu-color-11937e91d772 { color: #000000; } #menu .menu-color-18648798a53d { color: #FF0000; } #menu .menu-color-127aca4b63fb { color: #009900; } #menu .menu-color-13c3ddc96dbc { color: #009900; } #menu .menu-color-1192da0ead1c { color: #009900; } #menu .menu-color-154e098114f5 { color: #000000; } #menu .menu-color-10b631304006 { color: #000000; } function openNewWindow(url) { var load = window.open( url, '', 'scrollbars=yes,menubar=yes,height=600,width=800,resizable=yes,toolbar=yes,location=yes,status=yes' ); return false; // Prevent default link behavior } Announcement (19) Add QR Visit Add Normal Visit View Submitted Visits Edit/Draft Visits Add Imaging Visit Add Lab Visit Add Checkup (Name Search) Add Checkup (Company Search) Invoice Client List QR Code Download Utilization Review Form Drug Price Rev",
+        "forms": [
+          {
+            "index": 0,
+            "id": null,
+            "name": "visit_form",
+            "action": "ClinicEmpVisitPlusAListSubmit.ec",
+            "method": "post",
+            "inputCount": 15,
+            "buttonCount": 18
+          }
+        ],
+        "inputs": [
+          {
+            "index": 0,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "fromDateDay",
+            "value": "01",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "inputDate"
+          },
+          {
+            "index": 1,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "fromDateMonth",
+            "value": "02",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "inputDate"
+          },
+          {
+            "index": 2,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "fromDateYear",
+            "value": "2026",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 3,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "toDateDay",
+            "value": "12",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "inputDate"
+          },
+          {
+            "index": 4,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "toDateMonth",
+            "value": "02",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "inputDate"
+          },
+          {
+            "index": 5,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "toDateYear",
+            "value": "2026",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 6,
+            "tag": "select",
+            "type": null,
+            "id": null,
+            "name": "key",
+            "value": "",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 7,
+            "tag": "select",
+            "type": null,
+            "id": null,
+            "name": "keyType",
+            "value": "",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 8,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "keyValue",
+            "value": "",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 9,
+            "tag": "input",
+            "type": "submit",
+            "id": null,
+            "name": "SearchAction",
+            "value": "Search",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 10,
+            "tag": "input",
+            "type": "hidden",
+            "id": null,
+            "name": "format_DateTime",
+            "value": "DD/MM/YYYY",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 11,
+            "tag": "input",
+            "type": "submit",
+            "id": null,
+            "name": "ExportToExelAction",
+            "value": "ExportToExcel",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 12,
+            "tag": "input",
+            "type": "button",
+            "id": null,
+            "name": "PrintAction",
+            "value": "View/Print",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 13,
+            "tag": "input",
+            "type": "submit",
+            "id": null,
+            "name": "RefreshAction",
+            "value": "Refresh",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 14,
+            "tag": "input",
+            "type": "hidden",
+            "id": null,
+            "name": "OWASP_CSRFTOKEN",
+            "value": "RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": ""
+          }
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "tag": "a",
+            "text": "Switch System ||",
+            "id": null,
+            "name": null,
+            "href": "#",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 1,
+            "tag": "a",
+            "text": "AIA Clinic",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.aiaclinic.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 2,
+            "tag": "a",
+            "text": "SinglifePcpcare",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.pcpcare.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 3,
+            "tag": "a",
+            "text": "Singlife Global 8",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.myglobalbenefit.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 4,
+            "tag": "a",
+            "text": "AXA Clinicare (HSBC)",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.clcare.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 5,
+            "tag": "a",
+            "text": "Better Health",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://betterhealth.mhcasia.net",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 6,
+            "tag": "a",
+            "text": "FWD Travel Insurance",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.fwdclinic.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 7,
+            "tag": "a",
+            "text": "Great Eastern",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://ge.mhcasia.net/ge",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 8,
+            "tag": "a",
+            "text": "INCOME iMedicare",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.mhc-imedicare.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 9,
+            "tag": "a",
+            "text": "PHI System",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://phi.mhcasia.net",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 10,
+            "tag": "a",
+            "text": "QBE Primary Care",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.qbeprimarycare.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 11,
+            "tag": "a",
+            "text": "Log Out",
+            "id": null,
+            "name": null,
+            "href": "Logout.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 12,
+            "tag": "a",
+            "text": "Announcement (19)",
+            "id": null,
+            "name": null,
+            "href": "ClinicAnnouncement.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-4b100340b918"
+          },
+          {
+            "index": 13,
+            "tag": "a",
+            "text": "Add QR Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpOpenVisitNewList.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-18636bd3af2e"
+          },
+          {
+            "index": 14,
+            "tag": "a",
+            "text": "Add Normal Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitSelectPatient.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-106f26247000"
+          },
+          {
+            "index": 15,
+            "tag": "a",
+            "text": "View Submitted Visits",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitPlusAList.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-106f2629f001"
+          },
+          {
+            "index": 16,
+            "tag": "a",
+            "text": "Edit/Draft Visits",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-764b01bf0488"
+          },
+          {
+            "index": 17,
+            "tag": "a",
+            "text": "Add Imaging Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicXRayVisitSelectPatient.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-10feaccad04e"
+          },
+          {
+            "index": 18,
+            "tag": "a",
+            "text": "Add Lab Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicLabVisitSelectPatient.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-10feacc0b04d"
+          },
+          {
+            "index": 19,
+            "tag": "a",
+            "text": "Add Checkup (Name Search)",
+            "id": null,
+            "name": null,
+            "href": "ClinicCheckupVisitSelectPatient.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-10feacb5604c"
+          },
+          {
+            "index": 20,
+            "tag": "a",
+            "text": "Add Checkup (Company Search)",
+            "id": null,
+            "name": null,
+            "href": "ClinicSelectCompany.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-10feaca35045"
+          },
+          {
+            "index": 21,
+            "tag": "a",
+            "text": "Invoice",
+            "id": null,
+            "name": null,
+            "href": "ClinicPaymentAdviceAllSystemList.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-15e2f0f6c6ae"
+          },
+          {
+            "index": 22,
+            "tag": "a",
+            "text": "Client List",
+            "id": null,
+            "name": null,
+            "href": "http://b6.caspio.com/dp.asp?AppKey=e7923000e9496b289e8c441da427",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu-item menu-color-1443ec8433b6"
+          },
+          {
+            "index": 23,
+            "tag": "a",
+            "text": "QR Code Download",
+            "id": null,
+            "name": null,
+            "href": "ClinicUtilizationReviewFormAndQRCode.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-11937e91d772"
+          },
+          {
+            "index": 24,
+            "tag": "a",
+            "text": "Utilization Review Form",
+            "id": null,
+            "name": null,
+            "href": "http://b6.caspio.com/dp.asp?AppKey=e7923000398df35e6a66458295c4",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu-item menu-color-18648798a53d"
+          },
+          {
+            "index": 25,
+            "tag": "a",
+            "text": "Drug Price Review Form",
+            "id": null,
+            "name": null,
+            "href": "http://b6.caspio.com/dp.asp?AppKey=e792300020dbe860ed9248b79292",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu-item menu-color-127aca4b63fb"
+          },
+          {
+            "index": 26,
+            "tag": "a",
+            "text": "Procedure Request Form",
+            "id": null,
+            "name": null,
+            "href": "http://b6.caspio.com/dp.asp?AppKey=e792300090be4f97b8be4a4fae71",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu-item menu-color-13c3ddc96dbc"
+          },
+          {
+            "index": 27,
+            "tag": "a",
+            "text": "Order Drugs via MHC",
+            "id": null,
+            "name": null,
+            "href": "https://product.mhcasia.net/?storeRedirect=mhchealthcare",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu-item menu-color-1192da0ead1c"
+          },
+          {
+            "index": 28,
+            "tag": "a",
+            "text": "MEMO for clinics",
+            "id": null,
+            "name": null,
+            "href": "http://b6.caspio.com/dp.asp?AppKey=e79230005064fa49c7de4b599fc9",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu-item menu-color-154e098114f5"
+          },
+          {
+            "index": 29,
+            "tag": "a",
+            "text": "Change Password",
+            "id": null,
+            "name": null,
+            "href": "ClinicChangePassword.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-10b631304006"
+          },
+          {
+            "index": 30,
+            "tag": "input",
+            "text": "",
+            "id": null,
+            "name": "SearchAction",
+            "href": null,
+            "onclick": null,
+            "value": "Search",
+            "className": "text"
+          },
+          {
+            "index": 31,
+            "tag": "a",
+            "text": "02/02/2026",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 32,
+            "tag": "a",
+            "text": "EV16085124",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 33,
+            "tag": "a",
+            "text": "Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 34,
+            "tag": "a",
+            "text": "SACHIN MITTAL",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 35,
+            "tag": "a",
+            "text": "$283.40",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 36,
+            "tag": "a",
+            "text": "$283.40",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 37,
+            "tag": "a",
+            "text": "0.0",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 38,
+            "tag": "a",
+            "text": "03/02/2026",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bf8df3f4&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 39,
+            "tag": "a",
+            "text": "EV16085316",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bf8df3f4&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 40,
+            "tag": "a",
+            "text": "Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bf8df3f4&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 41,
+            "tag": "a",
+            "text": "CHEW SIEW LING",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bf8df3f4&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 42,
+            "tag": "a",
+            "text": "$87.20",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bf8df3f4&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 43,
+            "tag": "a",
+            "text": "$82.20",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bf8df3f4&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 44,
+            "tag": "a",
+            "text": "0.0",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bf8df3f4&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 45,
+            "tag": "input",
+            "text": "",
+            "id": null,
+            "name": "ExportToExelAction",
+            "href": null,
+            "onclick": null,
+            "value": "ExportToExcel",
+            "className": "text"
+          },
+          {
+            "index": 46,
+            "tag": "input",
+            "text": "",
+            "id": null,
+            "name": "PrintAction",
+            "href": null,
+            "onclick": "printEmpVisitList();",
+            "value": "View/Print",
+            "className": "text"
+          },
+          {
+            "index": 47,
+            "tag": "input",
+            "text": "",
+            "id": null,
+            "name": "RefreshAction",
+            "href": null,
+            "onclick": null,
+            "value": "Refresh",
+            "className": "text"
+          }
+        ],
+        "tables": [
+          {
+            "index": 0,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 3,
+            "rows": [
+              [
+                "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out",
+                "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic",
+                "Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out"
+              ],
+              [
+                "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic",
+                "Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out"
+              ]
+            ]
+          },
+          {
+            "index": 1,
+            "id": null,
+            "className": "table-bg",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic",
+                "Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out"
+              ]
+            ]
+          },
+          {
+            "index": 2,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 11,
+            "rows": [
+              [
+                "Visit List - Click On The Visit To View"
+              ],
+              [
+                "Visit Date Between / /(dd/mm/yyyy) and / /(dd/mm/yyyy)",
+                "Visit Date Between / /(dd/mm/yyyy)",
+                "and",
+                "/ /(dd/mm/yyyy)"
+              ],
+              [
+                "Visit Date Between / /(dd/mm/yyyy)",
+                "and",
+                "/ /(dd/mm/yyyy)"
+              ],
+              [
+                "Visit No Patient Name Patient Nric that contains starts with equals to",
+                "Visit No Patient Name Patient Nric",
+                "that",
+                "contains starts with equals to"
+              ],
+              [
+                "Visit No Patient Name Patient Nric",
+                "that",
+                "contains starts with equals to"
+              ],
+              [
+                "1 - 2 of 2",
+                "1 - 2 of 2"
+              ],
+              [
+                "1 - 2 of 2"
+              ],
+              [
+                "Visit Date Visit No Type Patient Name Total Fee Total Claim MC Days Remarks 02/02/2026 EV16085124 Visit SACHIN MITTAL $283.40 $283.40 0.0 03/02/2026 EV16085316 Visit CHEW SIEW LING $87.20 $82.20 0.0",
+                "Visit Date",
+                "Visit No",
+                "Type",
+                "Patient Name",
+                "Total Fee",
+                "Total Claim",
+                "MC Days",
+                "Remarks",
+                "02/02/2026",
+                "EV16085124",
+                "Visit",
+                "SACHIN MITTAL",
+                "$283.40",
+                "$283.40"
+              ],
+              [
+                "Visit Date",
+                "Visit No",
+                "Type",
+                "Patient Name",
+                "Total Fee",
+                "Total Claim",
+                "MC Days",
+                "Remarks"
+              ],
+              [
+                "02/02/2026",
+                "EV16085124",
+                "Visit",
+                "SACHIN MITTAL",
+                "$283.40",
+                "$283.40",
+                "0.0"
+              ],
+              [
+                "03/02/2026",
+                "EV16085316",
+                "Visit",
+                "CHEW SIEW LING",
+                "$87.20",
+                "$82.20",
+                "0.0"
+              ]
+            ]
+          },
+          {
+            "index": 3,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Visit Date Between / /(dd/mm/yyyy)",
+                "and",
+                "/ /(dd/mm/yyyy)"
+              ]
+            ]
+          },
+          {
+            "index": 4,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Visit No Patient Name Patient Nric",
+                "that",
+                "contains starts with equals to"
+              ]
+            ]
+          },
+          {
+            "index": 5,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "1 - 2 of 2"
+              ]
+            ]
+          },
+          {
+            "index": 6,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 3,
+            "rows": [
+              [
+                "Visit Date",
+                "Visit No",
+                "Type",
+                "Patient Name",
+                "Total Fee",
+                "Total Claim",
+                "MC Days",
+                "Remarks"
+              ],
+              [
+                "02/02/2026",
+                "EV16085124",
+                "Visit",
+                "SACHIN MITTAL",
+                "$283.40",
+                "$283.40",
+                "0.0"
+              ],
+              [
+                "03/02/2026",
+                "EV16085316",
+                "Visit",
+                "CHEW SIEW LING",
+                "$87.20",
+                "$82.20",
+                "0.0"
+              ]
+            ]
+          },
+          {
+            "index": 7,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Total Visits",
+                "2",
+                "Total Claim",
+                "365.6",
+                "Total MC Days",
+                "0.0"
+              ]
+            ]
+          },
+          {
+            "index": 8,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 1,
+            "rows": []
+          }
+        ]
+      }
+    },
+    "aia": {
+      "nav": {
+        "ok": true,
+        "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitPlusAList.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733"
+      },
+      "structure": {
+        "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitPlusAList.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+        "title": "Employee Visit List",
+        "bodyTextSample": "#banner { text-align: center; } .table-bg { background-color: #eeeeee; } .style1 { background-image: url('singaporeImage/Blue_Bar.png'); } .style2 { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; } .style5 { font-family: Arial, Helvetica, sans-serif; font-size: 9pt; } .useful-link { float: right; } .useful-link a { color: #FFFFFF; font-family: Arial, Helvetica, sans-serif; font-weight: bold; text-decoration: none; } .dropdown-link { color: #FFFFFF; background-image: url('singaporeImage/Blue_Bar.png'); font-family: Arial, Helvetica, sans-serif; } Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out /* Base styles */ .menu-item { text-decoration: none; } ul.menu-list { list-style: none; padding: 0; margin: 0; } ul.separator { background-image: none; } .separator-line { height: 5px; width: 75%; } .empty-line { height: 5px; } /* Dynamic styles rendered server-side */ #menu .menu-color-4b100340b918 { color: #000000; } #menu .menu-color-18636bd3af2e { color: #000000; } #menu .menu-color-106f26247000 { color: #000000; } #menu .menu-color-106f2629f001 { color: #000000; } #menu .menu-color-764b01bf0488 { color: #000000; } #menu .menu-color-10feaccad04e { color: #000000; } #menu .menu-color-10feacc0b04d { color: #000000; } #menu .menu-color-10feacb5604c { color: #000000; } #menu .menu-color-10feaca35045 { color: #000000; } #menu .menu-color-15e2f0f6c6ae { color: #000000; } #menu .menu-color-1443ec8433b6 { color: #663300; } #menu .menu-color-11937e91d772 { color: #000000; } #menu .menu-color-18648798a53d { color: #FF0000; } #menu .menu-color-127aca4b63fb { color: #009900; } #menu .menu-color-13c3ddc96dbc { color: #009900; } #menu .menu-color-1192da0ead1c { color: #009900; } #menu .menu-color-154e098114f5 { color: #000000; } #menu .menu-color-10b631304006 { color: #000000; } function openNewWindow(url) { var load = window.open( url, '', 'scrollbars=yes,menubar=yes,height=600,width=800,resizable=yes,toolbar=yes,location=yes,status=yes' ); return false; // Prevent default link behavior } Announcement (19) Add QR Visit Add Normal Visit View Submitted Visits Edit/Draft Visits Add Imaging Visit Add Lab Visit Add Checkup (Name Search) Add Checkup (Company Search) Invoice Client List QR Code Download Utilization Review Form Drug Price Rev",
+        "forms": [
+          {
+            "index": 0,
+            "id": null,
+            "name": "visit_form",
+            "action": "ClinicEmpVisitPlusAListSubmit.ec",
+            "method": "post",
+            "inputCount": 15,
+            "buttonCount": 18
+          }
+        ],
+        "inputs": [
+          {
+            "index": 0,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "fromDateDay",
+            "value": "01",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "inputDate"
+          },
+          {
+            "index": 1,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "fromDateMonth",
+            "value": "02",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "inputDate"
+          },
+          {
+            "index": 2,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "fromDateYear",
+            "value": "2026",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 3,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "toDateDay",
+            "value": "12",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "inputDate"
+          },
+          {
+            "index": 4,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "toDateMonth",
+            "value": "02",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "inputDate"
+          },
+          {
+            "index": 5,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "toDateYear",
+            "value": "2026",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 6,
+            "tag": "select",
+            "type": null,
+            "id": null,
+            "name": "key",
+            "value": "",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 7,
+            "tag": "select",
+            "type": null,
+            "id": null,
+            "name": "keyType",
+            "value": "",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 8,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "keyValue",
+            "value": "",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 9,
+            "tag": "input",
+            "type": "submit",
+            "id": null,
+            "name": "SearchAction",
+            "value": "Search",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 10,
+            "tag": "input",
+            "type": "hidden",
+            "id": null,
+            "name": "format_DateTime",
+            "value": "DD/MM/YYYY",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 11,
+            "tag": "input",
+            "type": "submit",
+            "id": null,
+            "name": "ExportToExelAction",
+            "value": "ExportToExcel",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 12,
+            "tag": "input",
+            "type": "button",
+            "id": null,
+            "name": "PrintAction",
+            "value": "View/Print",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 13,
+            "tag": "input",
+            "type": "submit",
+            "id": null,
+            "name": "RefreshAction",
+            "value": "Refresh",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 14,
+            "tag": "input",
+            "type": "hidden",
+            "id": null,
+            "name": "OWASP_CSRFTOKEN",
+            "value": "RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": ""
+          }
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "tag": "a",
+            "text": "Switch System ||",
+            "id": null,
+            "name": null,
+            "href": "#",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 1,
+            "tag": "a",
+            "text": "AIA Clinic",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.aiaclinic.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 2,
+            "tag": "a",
+            "text": "SinglifePcpcare",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.pcpcare.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 3,
+            "tag": "a",
+            "text": "Singlife Global 8",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.myglobalbenefit.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 4,
+            "tag": "a",
+            "text": "AXA Clinicare (HSBC)",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.clcare.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 5,
+            "tag": "a",
+            "text": "Better Health",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://betterhealth.mhcasia.net",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 6,
+            "tag": "a",
+            "text": "FWD Travel Insurance",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.fwdclinic.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 7,
+            "tag": "a",
+            "text": "Great Eastern",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://ge.mhcasia.net/ge",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 8,
+            "tag": "a",
+            "text": "INCOME iMedicare",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.mhc-imedicare.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 9,
+            "tag": "a",
+            "text": "PHI System",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://phi.mhcasia.net",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 10,
+            "tag": "a",
+            "text": "QBE Primary Care",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.qbeprimarycare.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 11,
+            "tag": "a",
+            "text": "Log Out",
+            "id": null,
+            "name": null,
+            "href": "Logout.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 12,
+            "tag": "a",
+            "text": "Announcement (19)",
+            "id": null,
+            "name": null,
+            "href": "ClinicAnnouncement.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-4b100340b918"
+          },
+          {
+            "index": 13,
+            "tag": "a",
+            "text": "Add QR Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpOpenVisitNewList.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-18636bd3af2e"
+          },
+          {
+            "index": 14,
+            "tag": "a",
+            "text": "Add Normal Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitSelectPatient.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-106f26247000"
+          },
+          {
+            "index": 15,
+            "tag": "a",
+            "text": "View Submitted Visits",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitPlusAList.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-106f2629f001"
+          },
+          {
+            "index": 16,
+            "tag": "a",
+            "text": "Edit/Draft Visits",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-764b01bf0488"
+          },
+          {
+            "index": 17,
+            "tag": "a",
+            "text": "Add Imaging Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicXRayVisitSelectPatient.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-10feaccad04e"
+          },
+          {
+            "index": 18,
+            "tag": "a",
+            "text": "Add Lab Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicLabVisitSelectPatient.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-10feacc0b04d"
+          },
+          {
+            "index": 19,
+            "tag": "a",
+            "text": "Add Checkup (Name Search)",
+            "id": null,
+            "name": null,
+            "href": "ClinicCheckupVisitSelectPatient.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-10feacb5604c"
+          },
+          {
+            "index": 20,
+            "tag": "a",
+            "text": "Add Checkup (Company Search)",
+            "id": null,
+            "name": null,
+            "href": "ClinicSelectCompany.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-10feaca35045"
+          },
+          {
+            "index": 21,
+            "tag": "a",
+            "text": "Invoice",
+            "id": null,
+            "name": null,
+            "href": "ClinicPaymentAdviceAllSystemList.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-15e2f0f6c6ae"
+          },
+          {
+            "index": 22,
+            "tag": "a",
+            "text": "Client List",
+            "id": null,
+            "name": null,
+            "href": "http://b6.caspio.com/dp.asp?AppKey=e7923000e9496b289e8c441da427",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu-item menu-color-1443ec8433b6"
+          },
+          {
+            "index": 23,
+            "tag": "a",
+            "text": "QR Code Download",
+            "id": null,
+            "name": null,
+            "href": "ClinicUtilizationReviewFormAndQRCode.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-11937e91d772"
+          },
+          {
+            "index": 24,
+            "tag": "a",
+            "text": "Utilization Review Form",
+            "id": null,
+            "name": null,
+            "href": "http://b6.caspio.com/dp.asp?AppKey=e7923000398df35e6a66458295c4",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu-item menu-color-18648798a53d"
+          },
+          {
+            "index": 25,
+            "tag": "a",
+            "text": "Drug Price Review Form",
+            "id": null,
+            "name": null,
+            "href": "http://b6.caspio.com/dp.asp?AppKey=e792300020dbe860ed9248b79292",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu-item menu-color-127aca4b63fb"
+          },
+          {
+            "index": 26,
+            "tag": "a",
+            "text": "Procedure Request Form",
+            "id": null,
+            "name": null,
+            "href": "http://b6.caspio.com/dp.asp?AppKey=e792300090be4f97b8be4a4fae71",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu-item menu-color-13c3ddc96dbc"
+          },
+          {
+            "index": 27,
+            "tag": "a",
+            "text": "Order Drugs via MHC",
+            "id": null,
+            "name": null,
+            "href": "https://product.mhcasia.net/?storeRedirect=mhchealthcare",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu-item menu-color-1192da0ead1c"
+          },
+          {
+            "index": 28,
+            "tag": "a",
+            "text": "MEMO for clinics",
+            "id": null,
+            "name": null,
+            "href": "http://b6.caspio.com/dp.asp?AppKey=e79230005064fa49c7de4b599fc9",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu-item menu-color-154e098114f5"
+          },
+          {
+            "index": 29,
+            "tag": "a",
+            "text": "Change Password",
+            "id": null,
+            "name": null,
+            "href": "ClinicChangePassword.ec?OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": "menu-item menu-color-10b631304006"
+          },
+          {
+            "index": 30,
+            "tag": "input",
+            "text": "",
+            "id": null,
+            "name": "SearchAction",
+            "href": null,
+            "onclick": null,
+            "value": "Search",
+            "className": "text"
+          },
+          {
+            "index": 31,
+            "tag": "a",
+            "text": "02/02/2026",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 32,
+            "tag": "a",
+            "text": "EV16085124",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 33,
+            "tag": "a",
+            "text": "Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 34,
+            "tag": "a",
+            "text": "SACHIN MITTAL",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 35,
+            "tag": "a",
+            "text": "$283.40",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 36,
+            "tag": "a",
+            "text": "$283.40",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 37,
+            "tag": "a",
+            "text": "0.0",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 38,
+            "tag": "a",
+            "text": "03/02/2026",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bf8df3f4&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 39,
+            "tag": "a",
+            "text": "EV16085316",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bf8df3f4&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 40,
+            "tag": "a",
+            "text": "Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bf8df3f4&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 41,
+            "tag": "a",
+            "text": "CHEW SIEW LING",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bf8df3f4&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 42,
+            "tag": "a",
+            "text": "$87.20",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bf8df3f4&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 43,
+            "tag": "a",
+            "text": "$82.20",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bf8df3f4&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 44,
+            "tag": "a",
+            "text": "0.0",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitEdit.ec?id=19c4bf8df3f4&OWASP_CSRFTOKEN=RV6N-HU3N-A4NF-1JM5-BZ8N-8U4U-D7BP-X733",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 45,
+            "tag": "input",
+            "text": "",
+            "id": null,
+            "name": "ExportToExelAction",
+            "href": null,
+            "onclick": null,
+            "value": "ExportToExcel",
+            "className": "text"
+          },
+          {
+            "index": 46,
+            "tag": "input",
+            "text": "",
+            "id": null,
+            "name": "PrintAction",
+            "href": null,
+            "onclick": "printEmpVisitList();",
+            "value": "View/Print",
+            "className": "text"
+          },
+          {
+            "index": 47,
+            "tag": "input",
+            "text": "",
+            "id": null,
+            "name": "RefreshAction",
+            "href": null,
+            "onclick": null,
+            "value": "Refresh",
+            "className": "text"
+          }
+        ],
+        "tables": [
+          {
+            "index": 0,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 3,
+            "rows": [
+              [
+                "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out",
+                "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic",
+                "Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out"
+              ],
+              [
+                "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic",
+                "Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out"
+              ]
+            ]
+          },
+          {
+            "index": 1,
+            "id": null,
+            "className": "table-bg",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic",
+                "Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out"
+              ]
+            ]
+          },
+          {
+            "index": 2,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 11,
+            "rows": [
+              [
+                "Visit List - Click On The Visit To View"
+              ],
+              [
+                "Visit Date Between / /(dd/mm/yyyy) and / /(dd/mm/yyyy)",
+                "Visit Date Between / /(dd/mm/yyyy)",
+                "and",
+                "/ /(dd/mm/yyyy)"
+              ],
+              [
+                "Visit Date Between / /(dd/mm/yyyy)",
+                "and",
+                "/ /(dd/mm/yyyy)"
+              ],
+              [
+                "Visit No Patient Name Patient Nric that contains starts with equals to",
+                "Visit No Patient Name Patient Nric",
+                "that",
+                "contains starts with equals to"
+              ],
+              [
+                "Visit No Patient Name Patient Nric",
+                "that",
+                "contains starts with equals to"
+              ],
+              [
+                "1 - 2 of 2",
+                "1 - 2 of 2"
+              ],
+              [
+                "1 - 2 of 2"
+              ],
+              [
+                "Visit Date Visit No Type Patient Name Total Fee Total Claim MC Days Remarks 02/02/2026 EV16085124 Visit SACHIN MITTAL $283.40 $283.40 0.0 03/02/2026 EV16085316 Visit CHEW SIEW LING $87.20 $82.20 0.0",
+                "Visit Date",
+                "Visit No",
+                "Type",
+                "Patient Name",
+                "Total Fee",
+                "Total Claim",
+                "MC Days",
+                "Remarks",
+                "02/02/2026",
+                "EV16085124",
+                "Visit",
+                "SACHIN MITTAL",
+                "$283.40",
+                "$283.40"
+              ],
+              [
+                "Visit Date",
+                "Visit No",
+                "Type",
+                "Patient Name",
+                "Total Fee",
+                "Total Claim",
+                "MC Days",
+                "Remarks"
+              ],
+              [
+                "02/02/2026",
+                "EV16085124",
+                "Visit",
+                "SACHIN MITTAL",
+                "$283.40",
+                "$283.40",
+                "0.0"
+              ],
+              [
+                "03/02/2026",
+                "EV16085316",
+                "Visit",
+                "CHEW SIEW LING",
+                "$87.20",
+                "$82.20",
+                "0.0"
+              ]
+            ]
+          },
+          {
+            "index": 3,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Visit Date Between / /(dd/mm/yyyy)",
+                "and",
+                "/ /(dd/mm/yyyy)"
+              ]
+            ]
+          },
+          {
+            "index": 4,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Visit No Patient Name Patient Nric",
+                "that",
+                "contains starts with equals to"
+              ]
+            ]
+          },
+          {
+            "index": 5,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "1 - 2 of 2"
+              ]
+            ]
+          },
+          {
+            "index": 6,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 3,
+            "rows": [
+              [
+                "Visit Date",
+                "Visit No",
+                "Type",
+                "Patient Name",
+                "Total Fee",
+                "Total Claim",
+                "MC Days",
+                "Remarks"
+              ],
+              [
+                "02/02/2026",
+                "EV16085124",
+                "Visit",
+                "SACHIN MITTAL",
+                "$283.40",
+                "$283.40",
+                "0.0"
+              ],
+              [
+                "03/02/2026",
+                "EV16085316",
+                "Visit",
+                "CHEW SIEW LING",
+                "$87.20",
+                "$82.20",
+                "0.0"
+              ]
+            ]
+          },
+          {
+            "index": 7,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Total Visits",
+                "2",
+                "Total Claim",
+                "365.6",
+                "Total MC Days",
+                "0.0"
+              ]
+            ]
+          },
+          {
+            "index": 8,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 1,
+            "rows": []
+          }
+        ]
+      }
+    },
+    "singlife": {
+      "nav": {
+        "ok": true,
+        "url": "https://www.pcpcare.com/pcpcare/ClinicIECAvivaEmpVisitList.ec?OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN"
+      },
+      "structure": {
+        "url": "https://www.pcpcare.com/pcpcare/ClinicIECAvivaEmpVisitList.ec?OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+        "title": "Singlife IEC Employee Visit List",
+        "bodyTextSample": "/* Top menu styles */ .menu-top { margin-top: 5px; margin-right: 3px; } .system-menu { font-family: Arial; color: #808080; font-size: 10px; /* equivalent to size=\"1\" */ } #header_Useful_link { background-color: #ffffff; } /* Log off link style */ .log-off-link { color: #808080; } /* Divider style */ .menu-divider { display: inline-block; margin: 0 8px; } Singlife MHC Asia Contact us Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Switch System AIA Clinic Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern MHC Medical Network INCOME iMedicare PHI System QBE Primary Care || Log Off /* Base table styles */ .menu-table { width: 100%; border: 0; background-color: #F4F4F4; padding: 0; border-spacing: 0; } /* Menu link base style */ .menu { text-decoration: none; } /* Separator styles */ .separator { height: 5px; width: 75%; } .empty-cell { height: 5px; } /* Dynamically generated color classes */ #menu .menu-color-4f61682abe2a { color: #000000; } #menu .menu-color-106f26247000 { color: #000000; } #menu .menu-color-106f2629f001 { color: #000000; } #menu .menu-color-2ce9f3d4fdbd { color: #000000; } #menu .menu-color-15e489b7700f { color: #000000; } #menu .menu-color-12408a2720d6 { color: #000000; } #menu .menu-color-1211e45be186 { color: #FF0000; } #menu .menu-color-127acc1c9454 { color: #009900; } #menu .menu-color-13c3dea10eca { color: #009900; } #menu .menu-color-126876d27ff8 { color: #009900; } #menu .menu-color-154e0a700841 { color: #000000; } #menu .menu-color-1888ae1feb92 { color: #000000; } #menu .menu-color-10b631304006 { color: #000000; } function openNewWindow(url) { var load = window.open( url, '', 'scrollbars=yes,menubar=yes,height=600,width=800,resizable=yes,toolbar=yes,location=yes,status=yes' ); return false; // Prevent default link behavior } Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password function doSelectDate(which) { var left = (screen.width - 250) / 2; var top = (screen.height - 290) / 2; window.open(\"SelectDate.ec?formName=visit_form&dateField=\" + which, \"SelectDate\", \"scrollbars, resizable, width=250, height=290, top=\" + top + \",left=\" + left); } function isNum(val) { return !isNaN(parseFloat(val)); } function ChangeToDateDay() { var toDateDay = '12'; if((!isNum(document.visit_form.toDateDay.value))) { alert(\"Invalid",
+        "forms": [
+          {
+            "index": 0,
+            "id": null,
+            "name": "visit_form",
+            "action": "ClinicIECAvivaEmpVisitListSubmit.ec",
+            "method": "post",
+            "inputCount": 15,
+            "buttonCount": 25
+          }
+        ],
+        "inputs": [
+          {
+            "index": 0,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "fromDateDay",
+            "value": "01",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "inputDate"
+          },
+          {
+            "index": 1,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "fromDateMonth",
+            "value": "02",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "inputDate"
+          },
+          {
+            "index": 2,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "fromDateYear",
+            "value": "2026",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 3,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "toDateDay",
+            "value": "12",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "inputDate"
+          },
+          {
+            "index": 4,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "toDateMonth",
+            "value": "02",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "inputDate"
+          },
+          {
+            "index": 5,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "toDateYear",
+            "value": "2026",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 6,
+            "tag": "select",
+            "type": null,
+            "id": null,
+            "name": "key",
+            "value": "",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 7,
+            "tag": "select",
+            "type": null,
+            "id": null,
+            "name": "keyType",
+            "value": "",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 8,
+            "tag": "input",
+            "type": "text",
+            "id": null,
+            "name": "keyValue",
+            "value": "",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 9,
+            "tag": "input",
+            "type": "submit",
+            "id": null,
+            "name": "SearchAction",
+            "value": "Search",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 10,
+            "tag": "input",
+            "type": "hidden",
+            "id": null,
+            "name": "format_DateTime",
+            "value": "DD/MM/YYYY",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 11,
+            "tag": "input",
+            "type": "submit",
+            "id": null,
+            "name": "ExportToExelAction",
+            "value": "ExportToExcel",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 12,
+            "tag": "input",
+            "type": "button",
+            "id": null,
+            "name": "PrintAction",
+            "value": "View/Print",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 13,
+            "tag": "input",
+            "type": "submit",
+            "id": null,
+            "name": "RefreshAction",
+            "value": "Refresh",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": "text"
+          },
+          {
+            "index": 14,
+            "tag": "input",
+            "type": "hidden",
+            "id": null,
+            "name": "OWASP_CSRFTOKEN",
+            "value": "KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "placeholder": null,
+            "ariaLabel": null,
+            "title": null,
+            "className": ""
+          }
+        ],
+        "buttons": [
+          {
+            "index": 0,
+            "tag": "a",
+            "text": "Singlife",
+            "id": null,
+            "name": null,
+            "href": "https://singlife.com/",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 1,
+            "tag": "a",
+            "text": "MHC Asia",
+            "id": null,
+            "name": null,
+            "href": "https://www.mhcasia.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 2,
+            "tag": "a",
+            "text": "Contact us",
+            "id": null,
+            "name": null,
+            "href": "#",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 3,
+            "tag": "a",
+            "text": "Switch System",
+            "id": null,
+            "name": null,
+            "href": "#",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 4,
+            "tag": "a",
+            "text": "AIA Clinic",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.aiaclinic.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 5,
+            "tag": "a",
+            "text": "Singlife Global 8",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.myglobalbenefit.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 6,
+            "tag": "a",
+            "text": "AXA Clinicare (HSBC)",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.clcare.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 7,
+            "tag": "a",
+            "text": "Better Health",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://betterhealth.mhcasia.net",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 8,
+            "tag": "a",
+            "text": "FWD Travel Insurance",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.fwdclinic.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 9,
+            "tag": "a",
+            "text": "Great Eastern",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://ge.mhcasia.net/ge",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 10,
+            "tag": "a",
+            "text": "MHC Medical Network",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.mhcasia.net/mhc",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 11,
+            "tag": "a",
+            "text": "INCOME iMedicare",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.mhc-imedicare.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 12,
+            "tag": "a",
+            "text": "PHI System",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://phi.mhcasia.net",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 13,
+            "tag": "a",
+            "text": "QBE Primary Care",
+            "id": null,
+            "name": null,
+            "href": "SwitchSystem.ec?url=https://www.qbeprimarycare.com",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 14,
+            "tag": "a",
+            "text": "Log Off",
+            "id": null,
+            "name": null,
+            "href": "Logout.ec?OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": "log-off-link"
+          },
+          {
+            "index": 15,
+            "tag": "a",
+            "text": "Announcement",
+            "id": null,
+            "name": null,
+            "href": "ClinicAnnouncement.ec?OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": "menu menu-color-4f61682abe2a"
+          },
+          {
+            "index": 16,
+            "tag": "a",
+            "text": "Add Normal Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaPatientSearch.ec?OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": "menu menu-color-106f26247000"
+          },
+          {
+            "index": 17,
+            "tag": "a",
+            "text": "View Submitted Visits",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitList.ec?OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": "menu menu-color-106f2629f001"
+          },
+          {
+            "index": 18,
+            "tag": "a",
+            "text": "Edit/Draft Visits",
+            "id": null,
+            "name": null,
+            "href": "ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": "menu menu-color-2ce9f3d4fdbd"
+          },
+          {
+            "index": 19,
+            "tag": "a",
+            "text": "Invoice",
+            "id": null,
+            "name": null,
+            "href": "ClinicPaymentAdviceAllSystemList.ec?OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": "menu menu-color-15e489b7700f"
+          },
+          {
+            "index": 20,
+            "tag": "a",
+            "text": "Diagnostic Centres",
+            "id": null,
+            "name": null,
+            "href": "http://b6.caspio.com/dp.asp?AppKey=e7923000639af9b4f2d9460da934",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu menu-color-12408a2720d6"
+          },
+          {
+            "index": 21,
+            "tag": "a",
+            "text": "Utilization Review Form",
+            "id": null,
+            "name": null,
+            "href": "http://b6.caspio.com/dp.asp?AppKey=e7923000faec4d7662784dd79e9e",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu menu-color-1211e45be186"
+          },
+          {
+            "index": 22,
+            "tag": "a",
+            "text": "Drug Price Review Form",
+            "id": null,
+            "name": null,
+            "href": "http://b6.caspio.com/dp.asp?AppKey=e792300020dbe860ed9248b79292",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu menu-color-127acc1c9454"
+          },
+          {
+            "index": 23,
+            "tag": "a",
+            "text": "Procedure Request Form",
+            "id": null,
+            "name": null,
+            "href": "http://b6.caspio.com/dp.asp?AppKey=e792300090be4f97b8be4a4fae71",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu menu-color-13c3dea10eca"
+          },
+          {
+            "index": 24,
+            "tag": "a",
+            "text": "Order Drugs via MHC",
+            "id": null,
+            "name": null,
+            "href": "https://product.mhcasia.net/?storeRedirect=mhchealthcare",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu menu-color-126876d27ff8"
+          },
+          {
+            "index": 25,
+            "tag": "a",
+            "text": "MEMO for clinics",
+            "id": null,
+            "name": null,
+            "href": "http://b6.caspio.com/dp.asp?AppKey=e79230005064fa49c7de4b599fc9",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu menu-color-154e0a700841"
+          },
+          {
+            "index": 26,
+            "tag": "a",
+            "text": "Singlife PCP SP Listing",
+            "id": null,
+            "name": null,
+            "href": "https://b6.caspio.com/dp.asp?AppKey=e79230003cda8b078ffc4e158323",
+            "onclick": "return openNewWindow(this.href);",
+            "value": null,
+            "className": "menu menu-color-1888ae1feb92"
+          },
+          {
+            "index": 27,
+            "tag": "a",
+            "text": "Change Password",
+            "id": null,
+            "name": null,
+            "href": "ClinicChangePassword.ec?OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": "menu menu-color-10b631304006"
+          },
+          {
+            "index": 28,
+            "tag": "input",
+            "text": "",
+            "id": null,
+            "name": "SearchAction",
+            "href": null,
+            "onclick": null,
+            "value": "Search",
+            "className": "text"
+          },
+          {
+            "index": 29,
+            "tag": "a",
+            "text": "06/02/2026",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4c18fc7ae&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 30,
+            "tag": "a",
+            "text": "EV7116057",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4c18fc7ae&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 31,
+            "tag": "a",
+            "text": "Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4c18fc7ae&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 32,
+            "tag": "a",
+            "text": "YEONG MEI-YI",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4c18fc7ae&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 33,
+            "tag": "a",
+            "text": "$283.4",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4c18fc7ae&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 34,
+            "tag": "a",
+            "text": "$263.40",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4c18fc7ae&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 35,
+            "tag": "a",
+            "text": "0.0",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4c18fc7ae&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 36,
+            "tag": "a",
+            "text": "07/02/2026",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4c1b427c6&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 37,
+            "tag": "a",
+            "text": "EV7116058",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4c1b427c6&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 38,
+            "tag": "a",
+            "text": "Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4c1b427c6&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 39,
+            "tag": "a",
+            "text": "LIM CHUI KIOW DEBBY",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4c1b427c6&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 40,
+            "tag": "a",
+            "text": "$374.09",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4c1b427c6&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 41,
+            "tag": "a",
+            "text": "$374.09",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4c1b427c6&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 42,
+            "tag": "a",
+            "text": "0.0",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4c1b427c6&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 43,
+            "tag": "a",
+            "text": "10/02/2026",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4f5b44b83&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 44,
+            "tag": "a",
+            "text": "EV7116577",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4f5b44b83&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 45,
+            "tag": "a",
+            "text": "Visit",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4f5b44b83&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 46,
+            "tag": "a",
+            "text": "MITMA CASTRO RODRIGO",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4f5b44b83&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 47,
+            "tag": "a",
+            "text": "$130.8",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4f5b44b83&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 48,
+            "tag": "a",
+            "text": "$130.80",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4f5b44b83&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 49,
+            "tag": "a",
+            "text": "0.0",
+            "id": null,
+            "name": null,
+            "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4f5b44b83&OWASP_CSRFTOKEN=KTM3-855F-V5PN-GIA6-P165-WH07-DBK6-WOHN",
+            "onclick": null,
+            "value": null,
+            "className": ""
+          },
+          {
+            "index": 50,
+            "tag": "input",
+            "text": "",
+            "id": null,
+            "name": "ExportToExelAction",
+            "href": null,
+            "onclick": null,
+            "value": "ExportToExcel",
+            "className": "text"
+          },
+          {
+            "index": 51,
+            "tag": "input",
+            "text": "",
+            "id": null,
+            "name": "PrintAction",
+            "href": null,
+            "onclick": "printEmpVisitList();",
+            "value": "View/Print",
+            "className": "text"
+          },
+          {
+            "index": 52,
+            "tag": "input",
+            "text": "",
+            "id": null,
+            "name": "RefreshAction",
+            "href": null,
+            "onclick": null,
+            "value": "Refresh",
+            "className": "text"
+          }
+        ],
+        "tables": [
+          {
+            "index": 0,
+            "id": null,
+            "className": "layout-table",
+            "headers": [],
+            "rowCount": 31,
+            "rows": [
+              [
+                "/* Top menu styles */ .menu-top { margin-top: 5px; margin-right: 3px; } .system-menu { font-family: Arial; color: #808080; font-size: 10px; /* equivalent to size=\"1\" */ } #header_Useful_link { background-color: #ffffff; } /* Log off link style */ .log-off-link { color: #808080; } /* Divider style */ .menu-divider { display: inline-block; margin: 0 8px; } Singlife MHC Asia Contact us Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Switch System AIA Clinic Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern MHC Medical Network INCOME iMedicare PHI System QBE Primary Care || Log Off"
+              ],
+              [
+                "/* Base table styles */ .menu-table { width: 100%; border: 0; background-color: #F4F4F4; padding: 0; border-spacing: 0; } /* Menu link base style */ .menu { text-decoration: none; } /* Separator styles */ .separator { height: 5px; width: 75%; } .empty-cell { height: 5px; } /* Dynamically generated color classes */ #menu .menu-color-4f61682abe2a { color: #000000; } #menu .menu-color-106f26247000 { color: #000000; } #menu .menu-color-106f2629f001 { color: #000000; } #menu .menu-color-2ce9f3d4fdbd { color: #000000; } #menu .menu-color-15e489b7700f { color: #000000; } #menu .menu-color-12408a2720d6 { color: #000000; } #menu .menu-color-1211e45be186 { color: #FF0000; } #menu .menu-color-127acc1c9454 { color: #009900; } #menu .menu-color-13c3dea10eca { color: #009900; } #menu .menu-color-126876d27ff8 { color: #009900; } #menu .menu-color-154e0a700841 { color: #000000; } #menu .menu-color-1888ae1feb92 { color: #000000; } #menu .menu-color-10b631304006 { color: #000000; } function openNewWindow(url) { var load = window.open( url, '', 'scrollbars=yes,menubar=yes,height=600,width=800,resizable=yes,toolbar=yes,location=yes,status=yes' ); return false; // Prevent default link behavior } Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password function doSelectDate(which) { var left = (screen.width - 250) / 2; var top = (screen.height - 290) / 2; window.open(\"SelectDate.ec?formName=visit_form&dateField=\" + which, \"SelectDate\", \"scrollbars, resizable, width=250, height=290, top=\" + top + \",left=\" + left); } function isNum(val) { return !isNaN(parseFloat(val)); } function ChangeToDateDay() { var toDateDay = '12'; if((!isNum(document.visit_form.toDateDay.value))) { alert(\"Invalid visit date day value!\"); document.visit_form.toDateDay.value=toDateDay; } } function ChangeToDateMonth() { var toDateMonth = '02'; if((!isNum(document.visit_form.toDateMonth.value))) { alert(\"Invalid visit date month value!\"); document.visit_form.toDateMonth.value=toDateMonth; } } function ChangeToDateYear() { var toDateYear = '2026'; if((!isNum(document.visit_form.toDateYear.value))) { alert(\"Invalid visit date year value!\"); document.visit_form.toDateYear.value=toDateYear; } } function ChangeFromDateDay() { var fromDateDay = '01'; if((!isNum(document.visit_form.fromDateDay.value))) { alert(\"Invalid visit date day value!\"); document.visit_form.fromDateDay.value=fromDateDay; } } function ChangeFromDateMonth() { var fromDateMonth = '02'; if((!isNum(document.visit_form.fromDateMonth.value))) { alert(\"Invalid visit date month value!\"); document.visit_form.fromDateMonth.value=fromDateMonth; } } function ChangeFromDateYear() { var fromDateYear = '2026'; if((!isNum(document.visit_form.fromDateYear.value))) { alert(\"Invalid visit date year value!\"); document.visit_form.fromDateYear.value=fromDateYear; } } function printEmpVisitList() { var left = (screen.width - 800) /2; var top = (screen.height - 600) /2; var fromDate = document.visit_form.fromDateDay.value+'/'+document.visit_form.fromDateMonth.value+'/'+document.visit_form.fromDateYear.value; var toDate = document.visit_form.toDateDay.value+'/'+document.visit_form.toDateMonth.value+'/'+document.visit_form.toDateYear.value; var key = document.visit_form.key.value; var keyType = document.visit_form.keyType.value; var keyValue = document.visit_form.keyValue.value; var invoice = window.open(\"ClinicIECAvivaEmpVisitListPlusPrint.ec?key=\" + key + \"&keyValue=\" + keyValue + \"&keyType=\" + keyType + \"&fromDate=\" + fromDate + \"&toDate=\" + toDate, \"EmpVisitIECAVListPrint\", \"scrollbars, resizable, width=800 height=600 top=\" + top + \",left=\" + left); } function checkClaimAudit(clinicCode,visitNo,visitDate,batchNo) { CheckAuthorize.checkClaimAudit(clinicCode,visitNo,visitDate,batchNo,{callback:function(report){result=report;}, async:false}); if(result) { alert(\"This claim is under audit, please contact MHC for more information.\"); return false; } return true; } Visit List - Click On The Visit To View Visit Date Between / /(dd/mm/yyyy) and / /(dd/mm/yyyy) Visit No Patient Name Patient Nric that contains starts with equals to 1 - 3 of 3 Visit Date Visit No Type Patient Name Total Fee Total Claim MC Days 06/02/2026 EV7116057 Visit YEONG MEI-YI $283.4 $263.40 0.0 07/02/2026 EV7116058 Visit LIM CHUI KIOW DEBBY $374.09 $374.09 0.0 10/02/2026 EV7116577 Visit MITMA CASTRO RODRIGO $130.8 $130.80 0.0 Total Visits 3 Total Claim 768.29 Total MC Days 0.0",
+                "/* Base table styles */ .menu-table { width: 100%; border: 0; background-color: #F4F4F4; padding: 0; border-spacing: 0; } /* Menu link base style */ .menu { text-decoration: none; } /* Separator styles */ .separator { height: 5px; width: 75%; } .empty-cell { height: 5px; } /* Dynamically generated color classes */ #menu .menu-color-4f61682abe2a { color: #000000; } #menu .menu-color-106f26247000 { color: #000000; } #menu .menu-color-106f2629f001 { color: #000000; } #menu .menu-color-2ce9f3d4fdbd { color: #000000; } #menu .menu-color-15e489b7700f { color: #000000; } #menu .menu-color-12408a2720d6 { color: #000000; } #menu .menu-color-1211e45be186 { color: #FF0000; } #menu .menu-color-127acc1c9454 { color: #009900; } #menu .menu-color-13c3dea10eca { color: #009900; } #menu .menu-color-126876d27ff8 { color: #009900; } #menu .menu-color-154e0a700841 { color: #000000; } #menu .menu-color-1888ae1feb92 { color: #000000; } #menu .menu-color-10b631304006 { color: #000000; } function openNewWindow(url) { var load = window.open( url, '', 'scrollbars=yes,menubar=yes,height=600,width=800,resizable=yes,toolbar=yes,location=yes,status=yes' ); return false; // Prevent default link behavior } Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+                "Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+                "Announcement",
+                "Add Normal Visit",
+                "View Submitted Visits",
+                "Edit/Draft Visits",
+                "Invoice",
+                "Diagnostic Centres",
+                "Utilization Review Form",
+                "Drug Price Review Form",
+                "Procedure Request Form",
+                "Order Drugs via MHC",
+                "MEMO for clinics",
+                "Singlife PCP SP Listing"
+              ],
+              [
+                "/* Base table styles */ .menu-table { width: 100%; border: 0; background-color: #F4F4F4; padding: 0; border-spacing: 0; } /* Menu link base style */ .menu { text-decoration: none; } /* Separator styles */ .separator { height: 5px; width: 75%; } .empty-cell { height: 5px; } /* Dynamically generated color classes */ #menu .menu-color-4f61682abe2a { color: #000000; } #menu .menu-color-106f26247000 { color: #000000; } #menu .menu-color-106f2629f001 { color: #000000; } #menu .menu-color-2ce9f3d4fdbd { color: #000000; } #menu .menu-color-15e489b7700f { color: #000000; } #menu .menu-color-12408a2720d6 { color: #000000; } #menu .menu-color-1211e45be186 { color: #FF0000; } #menu .menu-color-127acc1c9454 { color: #009900; } #menu .menu-color-13c3dea10eca { color: #009900; } #menu .menu-color-126876d27ff8 { color: #009900; } #menu .menu-color-154e0a700841 { color: #000000; } #menu .menu-color-1888ae1feb92 { color: #000000; } #menu .menu-color-10b631304006 { color: #000000; } function openNewWindow(url) { var load = window.open( url, '', 'scrollbars=yes,menubar=yes,height=600,width=800,resizable=yes,toolbar=yes,location=yes,status=yes' ); return false; // Prevent default link behavior } Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+                "Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+                "Announcement",
+                "Add Normal Visit",
+                "View Submitted Visits",
+                "Edit/Draft Visits",
+                "Invoice",
+                "Diagnostic Centres",
+                "Utilization Review Form",
+                "Drug Price Review Form",
+                "Procedure Request Form",
+                "Order Drugs via MHC",
+                "MEMO for clinics",
+                "Singlife PCP SP Listing",
+                "Change Password"
+              ],
+              [
+                "Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+                "Announcement",
+                "Add Normal Visit",
+                "View Submitted Visits",
+                "Edit/Draft Visits",
+                "Invoice",
+                "Diagnostic Centres",
+                "Utilization Review Form",
+                "Drug Price Review Form",
+                "Procedure Request Form",
+                "Order Drugs via MHC",
+                "MEMO for clinics",
+                "Singlife PCP SP Listing",
+                "Change Password"
+              ],
+              [
+                "Announcement"
+              ],
+              [
+                "Add Normal Visit"
+              ],
+              [
+                "View Submitted Visits"
+              ],
+              [
+                "Edit/Draft Visits"
+              ],
+              [
+                "Invoice"
+              ],
+              [
+                "Diagnostic Centres"
+              ],
+              [
+                "Utilization Review Form"
+              ],
+              [
+                "Drug Price Review Form"
+              ]
+            ]
+          },
+          {
+            "index": 1,
+            "id": null,
+            "className": "content-table",
+            "headers": [],
+            "rowCount": 29,
+            "rows": [
+              [
+                "/* Base table styles */ .menu-table { width: 100%; border: 0; background-color: #F4F4F4; padding: 0; border-spacing: 0; } /* Menu link base style */ .menu { text-decoration: none; } /* Separator styles */ .separator { height: 5px; width: 75%; } .empty-cell { height: 5px; } /* Dynamically generated color classes */ #menu .menu-color-4f61682abe2a { color: #000000; } #menu .menu-color-106f26247000 { color: #000000; } #menu .menu-color-106f2629f001 { color: #000000; } #menu .menu-color-2ce9f3d4fdbd { color: #000000; } #menu .menu-color-15e489b7700f { color: #000000; } #menu .menu-color-12408a2720d6 { color: #000000; } #menu .menu-color-1211e45be186 { color: #FF0000; } #menu .menu-color-127acc1c9454 { color: #009900; } #menu .menu-color-13c3dea10eca { color: #009900; } #menu .menu-color-126876d27ff8 { color: #009900; } #menu .menu-color-154e0a700841 { color: #000000; } #menu .menu-color-1888ae1feb92 { color: #000000; } #menu .menu-color-10b631304006 { color: #000000; } function openNewWindow(url) { var load = window.open( url, '', 'scrollbars=yes,menubar=yes,height=600,width=800,resizable=yes,toolbar=yes,location=yes,status=yes' ); return false; // Prevent default link behavior } Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+                "Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+                "Announcement",
+                "Add Normal Visit",
+                "View Submitted Visits",
+                "Edit/Draft Visits",
+                "Invoice",
+                "Diagnostic Centres",
+                "Utilization Review Form",
+                "Drug Price Review Form",
+                "Procedure Request Form",
+                "Order Drugs via MHC",
+                "MEMO for clinics",
+                "Singlife PCP SP Listing",
+                "Change Password"
+              ],
+              [
+                "Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+                "Announcement",
+                "Add Normal Visit",
+                "View Submitted Visits",
+                "Edit/Draft Visits",
+                "Invoice",
+                "Diagnostic Centres",
+                "Utilization Review Form",
+                "Drug Price Review Form",
+                "Procedure Request Form",
+                "Order Drugs via MHC",
+                "MEMO for clinics",
+                "Singlife PCP SP Listing",
+                "Change Password"
+              ],
+              [
+                "Announcement"
+              ],
+              [
+                "Add Normal Visit"
+              ],
+              [
+                "View Submitted Visits"
+              ],
+              [
+                "Edit/Draft Visits"
+              ],
+              [
+                "Invoice"
+              ],
+              [
+                "Diagnostic Centres"
+              ],
+              [
+                "Utilization Review Form"
+              ],
+              [
+                "Drug Price Review Form"
+              ],
+              [
+                "Procedure Request Form"
+              ],
+              [
+                "Order Drugs via MHC"
+              ]
+            ]
+          },
+          {
+            "index": 2,
+            "id": null,
+            "className": "menu-table",
+            "headers": [],
+            "rowCount": 14,
+            "rows": [
+              [
+                "Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+                "Announcement",
+                "Add Normal Visit",
+                "View Submitted Visits",
+                "Edit/Draft Visits",
+                "Invoice",
+                "Diagnostic Centres",
+                "Utilization Review Form",
+                "Drug Price Review Form",
+                "Procedure Request Form",
+                "Order Drugs via MHC",
+                "MEMO for clinics",
+                "Singlife PCP SP Listing",
+                "Change Password"
+              ],
+              [
+                "Announcement"
+              ],
+              [
+                "Add Normal Visit"
+              ],
+              [
+                "View Submitted Visits"
+              ],
+              [
+                "Edit/Draft Visits"
+              ],
+              [
+                "Invoice"
+              ],
+              [
+                "Diagnostic Centres"
+              ],
+              [
+                "Utilization Review Form"
+              ],
+              [
+                "Drug Price Review Form"
+              ],
+              [
+                "Procedure Request Form"
+              ],
+              [
+                "Order Drugs via MHC"
+              ],
+              [
+                "MEMO for clinics"
+              ]
+            ]
+          },
+          {
+            "index": 3,
+            "id": null,
+            "className": "menu-table",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Announcement"
+              ]
+            ]
+          },
+          {
+            "index": 4,
+            "id": null,
+            "className": "menu-table",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Add Normal Visit"
+              ]
+            ]
+          },
+          {
+            "index": 5,
+            "id": null,
+            "className": "menu-table",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "View Submitted Visits"
+              ]
+            ]
+          },
+          {
+            "index": 6,
+            "id": null,
+            "className": "menu-table",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Edit/Draft Visits"
+              ]
+            ]
+          },
+          {
+            "index": 7,
+            "id": null,
+            "className": "menu-table",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Invoice"
+              ]
+            ]
+          },
+          {
+            "index": 8,
+            "id": null,
+            "className": "menu-table",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Diagnostic Centres"
+              ]
+            ]
+          },
+          {
+            "index": 9,
+            "id": null,
+            "className": "menu-table",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Utilization Review Form"
+              ]
+            ]
+          },
+          {
+            "index": 10,
+            "id": null,
+            "className": "menu-table",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Drug Price Review Form"
+              ]
+            ]
+          },
+          {
+            "index": 11,
+            "id": null,
+            "className": "menu-table",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Procedure Request Form"
+              ]
+            ]
+          },
+          {
+            "index": 12,
+            "id": null,
+            "className": "menu-table",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Order Drugs via MHC"
+              ]
+            ]
+          },
+          {
+            "index": 13,
+            "id": null,
+            "className": "menu-table",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "MEMO for clinics"
+              ]
+            ]
+          },
+          {
+            "index": 14,
+            "id": null,
+            "className": "menu-table",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Singlife PCP SP Listing"
+              ]
+            ]
+          },
+          {
+            "index": 15,
+            "id": null,
+            "className": "menu-table",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Change Password"
+              ]
+            ]
+          },
+          {
+            "index": 16,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 12,
+            "rows": [
+              [
+                "Visit List - Click On The Visit To View"
+              ],
+              [
+                "Visit Date Between / /(dd/mm/yyyy) and / /(dd/mm/yyyy)",
+                "Visit Date Between / /(dd/mm/yyyy)",
+                "and",
+                "/ /(dd/mm/yyyy)"
+              ],
+              [
+                "Visit Date Between / /(dd/mm/yyyy)",
+                "and",
+                "/ /(dd/mm/yyyy)"
+              ],
+              [
+                "Visit No Patient Name Patient Nric that contains starts with equals to",
+                "Visit No Patient Name Patient Nric",
+                "that",
+                "contains starts with equals to"
+              ],
+              [
+                "Visit No Patient Name Patient Nric",
+                "that",
+                "contains starts with equals to"
+              ],
+              [
+                "1 - 3 of 3",
+                "1 - 3 of 3"
+              ],
+              [
+                "1 - 3 of 3"
+              ],
+              [
+                "Visit Date Visit No Type Patient Name Total Fee Total Claim MC Days 06/02/2026 EV7116057 Visit YEONG MEI-YI $283.4 $263.40 0.0 07/02/2026 EV7116058 Visit LIM CHUI KIOW DEBBY $374.09 $374.09 0.0 10/02/2026 EV7116577 Visit MITMA CASTRO RODRIGO $130.8 $130.80 0.0",
+                "Visit Date",
+                "Visit No",
+                "Type",
+                "Patient Name",
+                "Total Fee",
+                "Total Claim",
+                "MC Days",
+                "06/02/2026",
+                "EV7116057",
+                "Visit",
+                "YEONG MEI-YI",
+                "$283.4",
+                "$263.40",
+                "0.0"
+              ],
+              [
+                "Visit Date",
+                "Visit No",
+                "Type",
+                "Patient Name",
+                "Total Fee",
+                "Total Claim",
+                "MC Days"
+              ],
+              [
+                "06/02/2026",
+                "EV7116057",
+                "Visit",
+                "YEONG MEI-YI",
+                "$283.4",
+                "$263.40",
+                "0.0"
+              ],
+              [
+                "07/02/2026",
+                "EV7116058",
+                "Visit",
+                "LIM CHUI KIOW DEBBY",
+                "$374.09",
+                "$374.09",
+                "0.0"
+              ],
+              [
+                "10/02/2026",
+                "EV7116577",
+                "Visit",
+                "MITMA CASTRO RODRIGO",
+                "$130.8",
+                "$130.80",
+                "0.0"
+              ]
+            ]
+          },
+          {
+            "index": 17,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Visit Date Between / /(dd/mm/yyyy)",
+                "and",
+                "/ /(dd/mm/yyyy)"
+              ]
+            ]
+          },
+          {
+            "index": 18,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Visit No Patient Name Patient Nric",
+                "that",
+                "contains starts with equals to"
+              ]
+            ]
+          },
+          {
+            "index": 19,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "1 - 3 of 3"
+              ]
+            ]
+          },
+          {
+            "index": 20,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 4,
+            "rows": [
+              [
+                "Visit Date",
+                "Visit No",
+                "Type",
+                "Patient Name",
+                "Total Fee",
+                "Total Claim",
+                "MC Days"
+              ],
+              [
+                "06/02/2026",
+                "EV7116057",
+                "Visit",
+                "YEONG MEI-YI",
+                "$283.4",
+                "$263.40",
+                "0.0"
+              ],
+              [
+                "07/02/2026",
+                "EV7116058",
+                "Visit",
+                "LIM CHUI KIOW DEBBY",
+                "$374.09",
+                "$374.09",
+                "0.0"
+              ],
+              [
+                "10/02/2026",
+                "EV7116577",
+                "Visit",
+                "MITMA CASTRO RODRIGO",
+                "$130.8",
+                "$130.80",
+                "0.0"
+              ]
+            ]
+          },
+          {
+            "index": 21,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 1,
+            "rows": [
+              [
+                "Total Visits",
+                "3",
+                "Total Claim",
+                "768.29",
+                "Total MC Days",
+                "0.0"
+              ]
+            ]
+          },
+          {
+            "index": 22,
+            "id": null,
+            "className": "",
+            "headers": [],
+            "rowCount": 1,
+            "rows": []
+          }
+        ]
+      }
+    }
+  }
+}

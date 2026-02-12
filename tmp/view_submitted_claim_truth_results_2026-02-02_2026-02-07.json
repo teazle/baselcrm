@@ -1,0 +1,249 @@
+{
+  "generatedAt": "2026-02-12T03:04:35.883Z",
+  "details": [
+    {
+      "visit_id": "6eb5aa60-ee97-472b-a904-c4ccf2855b18",
+      "context": "mhc",
+      "found": false,
+      "matched_row": null,
+      "rows_seen": [],
+      "page_url": "https://www.mhcasia.net/mhc/ClinicEmpVisitPlusAListSubmit.ec"
+    },
+    {
+      "visit_id": "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
+      "context": "mhc",
+      "found": false,
+      "matched_row": null,
+      "rows_seen": [],
+      "page_url": "https://www.mhcasia.net/mhc/ClinicEmpVisitPlusAListSubmit.ec"
+    },
+    {
+      "visit_id": "6af6ea13-14d9-43c6-917e-d0ca5da4ab0f",
+      "context": "mhc",
+      "found": false,
+      "matched_row": null,
+      "rows_seen": [],
+      "page_url": "https://www.mhcasia.net/mhc/ClinicEmpVisitPlusAListSubmit.ec"
+    },
+    {
+      "visit_id": "60e0c382-d6cb-4d35-a5b9-e17ce5b20c73",
+      "context": "mhc",
+      "found": false,
+      "matched_row": null,
+      "rows_seen": [],
+      "page_url": "https://www.mhcasia.net/mhc/ClinicEmpVisitPlusAListSubmit.ec"
+    },
+    {
+      "visit_id": "0a1695ab-8ea3-4fba-b5a5-ec47ea933e40",
+      "context": "mhc",
+      "found": true,
+      "matched_row": {
+        "visitDate": "03/02/2026",
+        "visitNo": "EV16085316",
+        "type": "Visit",
+        "patientName": "CHEW SIEW LING",
+        "totalFee": "$87.20",
+        "totalClaim": "$82.20",
+        "mcDays": "0.0",
+        "raw": [
+          "03/02/2026",
+          "EV16085316",
+          "Visit",
+          "CHEW SIEW LING",
+          "$87.20",
+          "$82.20",
+          "0.0",
+          ""
+        ]
+      },
+      "rows_seen": [
+        {
+          "visitDate": "03/02/2026",
+          "visitNo": "EV16085316",
+          "type": "Visit",
+          "patientName": "CHEW SIEW LING",
+          "totalFee": "$87.20",
+          "totalClaim": "$82.20",
+          "mcDays": "0.0",
+          "raw": [
+            "03/02/2026",
+            "EV16085316",
+            "Visit",
+            "CHEW SIEW LING",
+            "$87.20",
+            "$82.20",
+            "0.0",
+            ""
+          ]
+        }
+      ],
+      "page_url": "https://www.mhcasia.net/mhc/ClinicEmpVisitPlusAListSubmit.ec"
+    },
+    {
+      "visit_id": "a50239f6-9cd2-44a8-9bbf-4784e1dc51e1",
+      "context": "singlife",
+      "found": true,
+      "matched_row": {
+        "visitDate": "07/02/2026",
+        "visitNo": "EV7116058",
+        "type": "Visit",
+        "patientName": "LIM CHUI KIOW DEBBY",
+        "totalFee": "$374.09",
+        "totalClaim": "$374.09",
+        "mcDays": "0.0",
+        "raw": [
+          "07/02/2026",
+          "EV7116058",
+          "Visit",
+          "LIM CHUI KIOW DEBBY",
+          "$374.09",
+          "$374.09",
+          "0.0"
+        ]
+      },
+      "rows_seen": [
+        {
+          "visitDate": "07/02/2026",
+          "visitNo": "EV7116058",
+          "type": "Visit",
+          "patientName": "LIM CHUI KIOW DEBBY",
+          "totalFee": "$374.09",
+          "totalClaim": "$374.09",
+          "mcDays": "0.0",
+          "raw": [
+            "07/02/2026",
+            "EV7116058",
+            "Visit",
+            "LIM CHUI KIOW DEBBY",
+            "$374.09",
+            "$374.09",
+            "0.0"
+          ]
+        }
+      ],
+      "page_url": "https://www.pcpcare.com/pcpcare/ClinicIECAvivaEmpVisitListSubmit.ec"
+    },
+    {
+      "visit_id": "b19f4854-6445-4965-a695-befdc5f1c531",
+      "context": "mhc",
+      "found": false,
+      "matched_row": null,
+      "rows_seen": [],
+      "page_url": "https://www.mhcasia.net/mhc/ClinicEmpVisitPlusAListSubmit.ec"
+    },
+    {
+      "visit_id": "416a02fb-3feb-435b-b3f8-3f3197a60e0f",
+      "context": "mhc",
+      "found": false,
+      "matched_row": null,
+      "rows_seen": [],
+      "page_url": "https://www.mhcasia.net/mhc/ClinicEmpVisitPlusAListSubmit.ec"
+    },
+    {
+      "visit_id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+      "context": "mhc",
+      "found": true,
+      "matched_row": {
+        "visitDate": "02/02/2026",
+        "visitNo": "EV16085124",
+        "type": "Visit",
+        "patientName": "SACHIN MITTAL",
+        "totalFee": "$283.40",
+        "totalClaim": "$283.40",
+        "mcDays": "0.0",
+        "raw": [
+          "02/02/2026",
+          "EV16085124",
+          "Visit",
+          "SACHIN MITTAL",
+          "$283.40",
+          "$283.40",
+          "0.0",
+          ""
+        ]
+      },
+      "rows_seen": [
+        {
+          "visitDate": "02/02/2026",
+          "visitNo": "EV16085124",
+          "type": "Visit",
+          "patientName": "SACHIN MITTAL",
+          "totalFee": "$283.40",
+          "totalClaim": "$283.40",
+          "mcDays": "0.0",
+          "raw": [
+            "02/02/2026",
+            "EV16085124",
+            "Visit",
+            "SACHIN MITTAL",
+            "$283.40",
+            "$283.40",
+            "0.0",
+            ""
+          ]
+        }
+      ],
+      "page_url": "https://www.mhcasia.net/mhc/ClinicEmpVisitPlusAListSubmit.ec"
+    },
+    {
+      "visit_id": "1e48b9cf-fe14-4c33-bbb3-f25c2b8e3bb7",
+      "context": "singlife",
+      "found": true,
+      "matched_row": {
+        "visitDate": "06/02/2026",
+        "visitNo": "EV7116057",
+        "type": "Visit",
+        "patientName": "YEONG MEI-YI",
+        "totalFee": "$283.4",
+        "totalClaim": "$263.40",
+        "mcDays": "0.0",
+        "raw": [
+          "06/02/2026",
+          "EV7116057",
+          "Visit",
+          "YEONG MEI-YI",
+          "$283.4",
+          "$263.40",
+          "0.0"
+        ]
+      },
+      "rows_seen": [
+        {
+          "visitDate": "06/02/2026",
+          "visitNo": "EV7116057",
+          "type": "Visit",
+          "patientName": "YEONG MEI-YI",
+          "totalFee": "$283.4",
+          "totalClaim": "$263.40",
+          "mcDays": "0.0",
+          "raw": [
+            "06/02/2026",
+            "EV7116057",
+            "Visit",
+            "YEONG MEI-YI",
+            "$283.4",
+            "$263.40",
+            "0.0"
+          ]
+        }
+      ],
+      "page_url": "https://www.pcpcare.com/pcpcare/ClinicIECAvivaEmpVisitListSubmit.ec"
+    },
+    {
+      "visit_id": "c3c483d2-83d4-46be-936e-77767dd568b3",
+      "context": "mhc",
+      "found": false,
+      "matched_row": null,
+      "rows_seen": [],
+      "page_url": "https://www.mhcasia.net/mhc/ClinicEmpVisitPlusAListSubmit.ec"
+    },
+    {
+      "visit_id": "78f0430c-6d4f-4043-a54f-d529e7ef57fb",
+      "context": "mhc",
+      "found": false,
+      "matched_row": null,
+      "rows_seen": [],
+      "page_url": "https://www.mhcasia.net/mhc/ClinicEmpVisitPlusAListSubmit.ec"
+    }
+  ]
+}

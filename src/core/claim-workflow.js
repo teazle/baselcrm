@@ -130,23 +130,37 @@ export class ClaimWorkflow {
       await this.mhcAsia.navigateToAIAProgramSearch();
       
       // Step 10: Search patient by NRIC and determine portal
-      this.steps.step(11, 'MHC: search patient by NRIC', { nric: patientInfo.nric });
-      const searchResult = await this.mhcAsia.searchPatientByNRIC(patientInfo.nric);
+      this.steps.step(11, 'MHC: search patient (NRIC/Member ID)', { nric: patientInfo.nric });
+      const searchResult = await this.mhcAsia.searchPatientByNRIC({
+        nric: patientInfo.nric,
+        visitDate: patientInfo.visit_date || patientInfo.visitDate || null,
+      });
       if (!searchResult.found || !searchResult.portal) {
-        throw new Error(`Patient not found or portal not determined for NRIC: ${patientInfo.nric}`);
+        // Some members trigger a portal alert: "Please submit this claim under www.aiaclinic.com".
+        // In that case, proceed with an AIA Clinic system switch even if no patient row appears.
+        if (this.mhcAsia.needsAIAClinicSwitch && patientInfo.nric) {
+          this.steps.step(11, 'MHC: portal requires AIA Clinic (dialog)', {
+            msg: this.mhcAsia.lastDialogMessage || null,
+          });
+        } else {
+          throw new Error(`Patient not found or portal not determined for NRIC: ${patientInfo.nric}`);
+        }
       }
       this.steps.step(11, 'MHC: search result', searchResult);
 
       // Step 10b: Click into the patient in results if required by portal flow
       this.steps.step(12, 'MHC: open patient from search results');
-      const opened = await this.mhcAsia.openPatientFromSearchResults(patientInfo.nric).catch(() => false);
-      if (!opened) {
-        throw new Error(`Could not open patient from search results for NRIC: ${patientInfo.nric}`);
+      if (!this.mhcAsia.needsAIAClinicSwitch) {
+        const opened = await this.mhcAsia.openPatientFromSearchResults(searchResult.usedTerm || patientInfo.nric).catch(() => false);
+        if (!opened) {
+          throw new Error(`Could not open patient from search results for NRIC: ${patientInfo.nric}`);
+        }
       }
       
       // Step 11: Add visit for the portal
-      this.steps.step(13, 'MHC: add visit', { portal: searchResult.portal });
-      await this.mhcAsia.addVisit(searchResult.portal);
+      const portalForAdd = this.mhcAsia.needsAIAClinicSwitch ? 'aia' : searchResult.portal;
+      this.steps.step(13, 'MHC: add visit', { portal: portalForAdd });
+      await this.mhcAsia.addVisit(portalForAdd, patientInfo.nric || null);
       
       // Step 12: Select card and patient
       this.steps.step(14, 'MHC: select card + patient', { cardNumber: cardNumber || null, patient: effectivePatientName });
@@ -195,12 +209,19 @@ export class ClaimWorkflow {
         await this.mhcAsia.fillChargeType(chargeAndRemarks.chargeType);
       }
       
-      // Step 19: Process special remarks (AI context understanding)
+      // Step 19: Process special remarks (legacy).
+      // Skip this on AIA Clinic because it can incorrectly target Special Remarks fields.
       this.steps.step(21, 'MHC: process remarks + waiver (legacy)');
-      const processedRemarks = await this.mhcAsia.processSpecialRemarks(chargeAndRemarks.specialRemarks);
-      
-      // Step 20: Fill diagnosis category and check waiver
-      await this.mhcAsia.fillDiagnosisAndWaiver(processedRemarks);
+      const mhcUrlNow = this.mhcAsia.page?.url?.() || '';
+      const isAiaClinic = /aiaclinic\.com/i.test(mhcUrlNow) || portalForAdd === 'aia';
+      let processedRemarks = null;
+      if (!isAiaClinic) {
+        processedRemarks = await this.mhcAsia.processSpecialRemarks(chargeAndRemarks.specialRemarks);
+        // Step 20: Fill diagnosis category and check waiver
+        await this.mhcAsia.fillDiagnosisAndWaiver(processedRemarks);
+      } else {
+        logger.info('Skipping legacy remarks/waiver fill for AIA Clinic');
+      }
       
       // Step 21: Save as draft (optional; default off so we just stop after filling for review)
       this.steps.step(22, 'MHC: save as draft (optional)', { enabled: !!(saveDraft || process.env.WORKFLOW_SAVE_DRAFT) });
@@ -239,4 +260,3 @@ export class ClaimWorkflow {
     }
   }
 }
-

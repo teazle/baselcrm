@@ -24,7 +24,7 @@ export const PORTALS = {
  */
 export const BROWSER_CONFIG = {
   headless: process.env.HEADLESS === 'true',
-  slowMo: parseInt(process.env.SLOW_MO || '500'),
+  slowMo: parseInt(process.env.SLOW_MO || '0'),
   timeout: parseInt(process.env.TIMEOUT || '30000'),
   viewport: {
     width: 1920,
@@ -45,4 +45,3 @@ export const PROXY_CONFIG = {
   autoDiscover: process.env.PROXY_AUTO_DISCOVER !== 'false', // Default to true
   maxRetries: parseInt(process.env.PROXY_MAX_RETRIES || '3'),
 };
-

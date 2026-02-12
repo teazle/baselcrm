@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/ui/PageHeader";
 import VisitUpsertForm from "../ui/VisitUpsertForm";
 import VisitTreatmentsList from "../ui/VisitTreatmentsList";
+import VisitRpaPanel from "../ui/VisitRpaPanel";
 
 export default async function VisitDetailPage({
   params,
@@ -11,10 +12,10 @@ export default async function VisitDetailPage({
   return (
     <div className="space-y-6">
       <PageHeader title="Visit" backHref="/crm/visits" />
+      <VisitRpaPanel visitId={id} />
       <VisitUpsertForm mode="edit" id={id} />
       <VisitTreatmentsList visitId={id} />
     </div>
   );
 }
-
 

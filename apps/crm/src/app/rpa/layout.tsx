@@ -1,4 +1,5 @@
 import { RequireAuth } from "@/lib/auth/RequireAuth";
+import { SupabaseRequired } from "@/components/providers/SupabaseRequired";
 import Link from "next/link";
 import Breadcrumbs from "./ui/Breadcrumbs";
 
@@ -8,6 +9,7 @@ export default function RpaLayout({
   children: React.ReactNode;
 }) {
   return (
+    <SupabaseRequired>
     <RequireAuth>
       <div className="min-h-screen bg-background text-foreground">
         <header className="sticky top-0 z-10 border-b border-border bg-background/70 backdrop-blur">
@@ -55,5 +57,6 @@ export default function RpaLayout({
         </main>
       </div>
     </RequireAuth>
+    </SupabaseRequired>
   );
 }
