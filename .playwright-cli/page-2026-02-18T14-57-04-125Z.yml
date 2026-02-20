@@ -1,0 +1,212 @@
+- generic [ref=e49]:
+  - generic [ref=e51]:
+    - generic [ref=e52]:
+      - img "logo" [ref=e55] [cursor=pointer]
+      - button [ref=e56] [cursor=pointer]:
+        - img [ref=e57]: keyboard_double_arrow_left
+    - list [ref=e61]:
+      - listitem [ref=e62]:
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e64]:
+            - img [ref=e65]
+          - paragraph [ref=e67]: Panel Services
+          - img [ref=e68]: expand_more
+      - listitem [ref=e69]:
+        - generic [ref=e70] [cursor=pointer]:
+          - img [ref=e71]:
+            - img [ref=e72]
+          - paragraph [ref=e74]: Pre-Authorisation
+          - img [ref=e75]: expand_more
+      - listitem [ref=e76]:
+        - generic [ref=e77] [cursor=pointer]:
+          - img [ref=e78]:
+            - img [ref=e79]
+          - paragraph [ref=e81]: Finance
+          - img [ref=e82]: expand_more
+  - generic [ref=e83]:
+    - generic [ref=e86]:
+      - heading "Provider Dashboard" [level=1] [ref=e89]
+      - button [ref=e92] [cursor=pointer]:
+        - img [ref=e93]: more_vert
+    - generic [ref=e102]:
+      - tablist [ref=e105]:
+        - generic [ref=e106]:
+          - tab "Announcements" [selected] [ref=e107] [cursor=pointer]:
+            - generic [ref=e109]: Announcements
+          - tab "Pending action from clinic" [ref=e110] [cursor=pointer]:
+            - generic [ref=e112]: Pending action from clinic
+      - generic [ref=e113]:
+        - tabpanel "Announcements" [ref=e114]:
+          - generic [ref=e116]:
+            - table [ref=e117]:
+              - row "Launch of Alliance-LocktonEx Programme" [ref=e118]:
+                - cell "Launch of Alliance-LocktonEx Programme" [ref=e119]:
+                  - generic [ref=e120]:
+                    - heading "Launch of Alliance-LocktonEx Programme" [level=4] [ref=e121]
+                    - separator [ref=e123]
+                    - paragraph [ref=e126]:
+                      - img [ref=e127]
+              - row "Common Login Page for Alliance Medinet Portal" [ref=e128]:
+                - cell "Common Login Page for Alliance Medinet Portal" [ref=e129]:
+                  - generic [ref=e130]:
+                    - heading "Common Login Page for Alliance Medinet Portal" [level=4] [ref=e131]
+                    - separator [ref=e133]
+                    - paragraph [ref=e136]:
+                      - img [ref=e137]
+              - row [ref=e138]:
+                - cell [ref=e139]:
+                  - generic [ref=e140]:
+                    - heading "Strict Prohibition on Sharing Alliance Corporate Rates or Portal Information" [level=4] [ref=e141]
+                    - separator [ref=e143]
+                    - generic [ref=e145]:
+                      - paragraph [ref=e146]:
+                        - img [ref=e147]
+                      - paragraph [ref=e148]
+                      - paragraph [ref=e149]: 8 December 2025
+                      - paragraph [ref=e150]
+                      - paragraph [ref=e151]:
+                        - strong [ref=e153]:
+                          - generic [ref=e154]: "Reminder: Strict Prohibition on Sharing Alliance Corporate Rates/Portal Information"
+                      - paragraph [ref=e155]
+                      - paragraph [ref=e156]:
+                        - generic [ref=e157]:
+                          - text: Dear
+                          - strong [ref=e158]
+                          - text: clinics,
+                      - paragraph [ref=e159]
+                      - paragraph [ref=e160]: "We would like to remind all panel clinics that all information provided in our Alliance Medinet Service Agreements and all associated documents, our Portal and our correspondences with you is strictly confidential. This includes and is not limited to:"
+                      - paragraph [ref=e161]
+                      - list [ref=e162]:
+                        - listitem [ref=e163]: Corporate rates;
+                        - listitem [ref=e164]: Screenshots or extracts from the panel portal;
+                        - listitem [ref=e165]: Any internal information shared in our Service Agreements and associated documents; and
+                        - listitem [ref=e166]: All correspondences between us.
+                      - paragraph [ref=e167]
+                      - paragraph [ref=e168]:
+                        - generic [ref=e169]:
+                          - text: It has come to our attention that some panel clinics have shared confidential information such as our corporate rates and portal screenshots directly with our Members.
+                          - strong [ref=e170]: Such actions breach confidentiality obligations under our Service Agreements
+                          - text: "and may result in:"
+                      - paragraph [ref=e171]
+                      - list [ref=e172]:
+                        - listitem [ref=e173]: Suspension from all Alliance programmes; and/or
+                        - listitem [ref=e174]: Removal from our panel network
+                      - paragraph [ref=e175]
+                      - paragraph [ref=e176]:
+                        - generic [ref=e177]:
+                          - text: To prevent future breaches,
+                          - strong [ref=e178]: please ensure that your staff are informed of and comply with this requirement immediately.
+                          - text: Members should always be directed to contact us directly if they request such information as prices or plan arrangements.
+                      - paragraph [ref=e179]: We appreciate your utmost cooperation to protect the confidentiality and integrity of our partnership and member data. Thank you.
+                      - paragraph [ref=e180]
+                      - paragraph [ref=e181]
+                      - paragraph [ref=e182]: Best regards,
+                      - paragraph [ref=e183]: Provider Relations Team
+                      - paragraph [ref=e184]
+              - row "Enhancements to Claim Section for Drugs" [ref=e185]:
+                - cell "Enhancements to Claim Section for Drugs" [ref=e186]:
+                  - generic [ref=e187]:
+                    - heading "Enhancements to Claim Section for Drugs" [level=4] [ref=e188]
+                    - separator [ref=e190]
+                    - paragraph [ref=e193]:
+                      - img [ref=e194]
+              - 'row "PUAF for HSBC Life 25 July 2025 Dear Doctors and Clinic Administrators, Subject: New PUAF for HSBC Life Please be informed that the PUAF for HSBC Life has been updated. Kindly use the new form available in the \"Download Resources\" section with immediate effect. Should you require assistance on verifying our members’ and dependants’ eligibility, please contact us at 6664 0244 or provider@alliancemedinet.com. Thank you. Best Regards, Provider Relations | Alliance Medinet" [ref=e195]':
+                - 'cell "PUAF for HSBC Life 25 July 2025 Dear Doctors and Clinic Administrators, Subject: New PUAF for HSBC Life Please be informed that the PUAF for HSBC Life has been updated. Kindly use the new form available in the \"Download Resources\" section with immediate effect. Should you require assistance on verifying our members’ and dependants’ eligibility, please contact us at 6664 0244 or provider@alliancemedinet.com. Thank you. Best Regards, Provider Relations | Alliance Medinet" [ref=e196]':
+                  - generic [ref=e197]:
+                    - heading "PUAF for HSBC Life" [level=4] [ref=e198]
+                    - separator [ref=e200]
+                    - generic [ref=e202]:
+                      - paragraph [ref=e203]
+                      - paragraph [ref=e204]
+                      - paragraph [ref=e205]: 25 July 2025
+                      - paragraph [ref=e206]
+                      - paragraph [ref=e207]: Dear Doctors and Clinic Administrators,
+                      - paragraph [ref=e208]
+                      - paragraph [ref=e209]:
+                        - strong [ref=e210]: "Subject: New PUAF for HSBC Life"
+                      - paragraph [ref=e211]
+                      - paragraph [ref=e212]:
+                        - text: Please be informed that the PUAF for HSBC Life has been updated. Kindly use the new form available in the
+                        - strong [ref=e213]: "\"Download Resources\""
+                        - text: section with immediate effect. Should you require assistance on verifying our members’ and dependants’ eligibility, please contact us at 6664 0244 or provider@alliancemedinet.com.
+                      - paragraph [ref=e214]
+                      - paragraph [ref=e215]: Thank you.
+                      - paragraph [ref=e216]
+                      - paragraph [ref=e217]: Best Regards,
+                      - paragraph [ref=e218]
+                      - paragraph [ref=e219]: Provider Relations | Alliance Medinet
+                      - paragraph [ref=e220]
+              - row "Portal Announcement - Epilepsy Medication" [ref=e221]:
+                - cell "Portal Announcement - Epilepsy Medication" [ref=e222]:
+                  - generic [ref=e223]:
+                    - heading "Portal Announcement - Epilepsy Medication" [level=4] [ref=e224]
+                    - separator [ref=e226]
+                    - paragraph [ref=e229]:
+                      - img [ref=e230]
+              - row "Type 2 Diabetes Mellitus (T2DM) Medication" [ref=e231]:
+                - cell "Type 2 Diabetes Mellitus (T2DM) Medication" [ref=e232]:
+                  - generic [ref=e233]:
+                    - heading "Type 2 Diabetes Mellitus (T2DM) Medication" [level=4] [ref=e234]
+                    - separator [ref=e236]
+                    - paragraph [ref=e239]:
+                      - img [ref=e240]
+              - row "ART TEST / INFLUENZA TEST FOR HSBC BANK" [ref=e241]:
+                - cell "ART TEST / INFLUENZA TEST FOR HSBC BANK" [ref=e242]:
+                  - generic [ref=e243]:
+                    - heading "ART TEST / INFLUENZA TEST FOR HSBC BANK" [level=4] [ref=e244]
+                    - separator [ref=e246]
+                    - paragraph [ref=e249]
+              - row [ref=e250]:
+                - cell [ref=e251]:
+                  - generic [ref=e252]:
+                    - heading "Alliance-HSBC Life Portal Updates" [level=4] [ref=e253]
+                    - separator [ref=e255]
+                    - generic [ref=e257]:
+                      - paragraph [ref=e258]: 16 June 2025
+                      - paragraph [ref=e259]
+                      - paragraph [ref=e260]: Dear Doctors and Clinic Administrators,
+                      - paragraph [ref=e261]:
+                        - strong [ref=e262]
+                      - paragraph [ref=e263]: Welcome to our enhanced Alliance-HSBC Life portal!
+                      - paragraph [ref=e264]
+                      - paragraph [ref=e265]:
+                        - text: Commencing from
+                        - strong [ref=e266]: 16 June 2025
+                        - text: ", please visit this enhanced portal to verify our Alliance-HSBC Life members' eligibility and benefits, and to submit your claims. Here, you will also be able to view your clinic’s payment advice for claims submitted in"
+                        - strong [ref=e267]: June 2025
+                        - text: onwards.
+                      - paragraph [ref=e268]
+                      - paragraph [ref=e269]: Should you need to download past payment advices for claims submitted in May 2025 and earlier, please use your previous login credentials to access this URL.
+                      - paragraph [ref=e270]
+                      - paragraph [ref=e271]:
+                        - link "https://www.alliance-hsbclife.com.sg/" [ref=e272] [cursor=pointer]:
+                          - /url: https://www.alliance-hsbclife.com.sg/
+                      - paragraph [ref=e273]
+                      - paragraph [ref=e274]:
+                        - text: Please note that access to this URL is restricted solely to downloading of past payment advices. This access will remain active only until
+                        - strong [ref=e275]: 31 October 2025
+                        - text: . We strongly encourage you to complete your downloads promptly.
+                      - paragraph [ref=e276]
+                      - paragraph [ref=e277]: If you require further assistance, please don’t hesitate to contact us at 6664 0244 or provider@alliancemedinet.com.
+                      - paragraph [ref=e278]
+                      - paragraph [ref=e279]: We thank you for your continued support for our Alliance Healthcare Programme.
+                      - paragraph [ref=e280]
+                      - paragraph [ref=e281]
+                      - paragraph [ref=e282]: Best regards,
+                      - paragraph [ref=e283]: Provider Relations Team
+            - generic [ref=e284]: No Result Found
+            - group [ref=e285]:
+              - generic [ref=e287]:
+                - generic [ref=e288]:
+                  - generic [ref=e289]: "Items per page:"
+                  - combobox "50 Items per page:" [ref=e294] [cursor=pointer]:
+                    - generic [ref=e295]:
+                      - generic [ref=e297]: "50"
+                      - img [ref=e300]
+                - generic [ref=e303]:
+                  - generic [ref=e304]: Showing 0 – 0 of 0 records
+                  - button "Previous page" [disabled] [ref=e305]:
+                    - img [ref=e306]
+                  - button "Next page" [disabled] [ref=e310]:
+                    - img [ref=e311]
+        - tabpanel [ref=e315]

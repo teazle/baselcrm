@@ -1,0 +1,19 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T11:53:31.231Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T11:53:31.234Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T11:53:31.235Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T11:53:31.235Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T11:53:33.345Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T11:53:33.345Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T11:53:35.736Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T11:53:37.662Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T11:53:39.621Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T11:53:40.216Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T11:53:41.728Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T11:53:43.247Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T11:53:44.760Z"}
+locator.waitFor: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for locator('[role="dialog"]').filter({ hasText: /Search\s*Member/i }).first() to be visible[22m
+
+    at /Users/vincent/Baselrpacrm/tmp/probe_alliance_t120_other_entry.mjs:34:16
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T11:54:02.927Z"}

@@ -1,0 +1,49 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T11:46:23.393Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T11:46:23.397Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T11:46:23.397Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T11:46:23.398Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T11:46:25.652Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T11:46:25.657Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T11:46:28.939Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T11:46:30.777Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T11:46:32.943Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T11:46:34.538Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T11:46:36.094Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T11:46:39.566Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T11:46:41.114Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T11:46:42.622Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T11:46:43.823Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T11:46:44.444Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-14/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T11:46:47.181Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-14/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T11:46:49.023Z"}
+{
+  "nric": "T1204303H",
+  "visitDate": "2026-02-14",
+  "pre": {
+    "url": "https://connect.alliancemedinet.com/claim/panel-create",
+    "textSample": "Search Member\nclose\nClaim Type\nSP (Panel)\nMember Name\nMember UIN./Membership ID\nCompany Entity Name\nDate of Visit\nSearch OthersSearch AIA MemberClear Filters\nMember Name\nMember UIN\nMember Type\nCompany Entity Name\nPolicy Number\nNetwork\nCheam Xi Qing Jacqueline\nT****303H\nDependent\nHilti Asia Pacific Pte. Ltd.\n00105158-50650424\nPCUBE\nItems per page:\n50\nShowing 1 – 1 of 1 records\n1\nAdd",
+    "rowDivs": 1,
+    "rowTrs": 0,
+    "allCheckboxes": 2,
+    "enabledCheckboxes": 1,
+    "addVisible": true,
+    "addEnabled": false,
+    "noCoverage": 0,
+    "zeroRecords": 0
+  },
+  "post": {
+    "url": "https://connect.alliancemedinet.com/claim/panel-create",
+    "hasClaimInfo": false,
+    "hasSearchMemberDialog": false
+  },
+  "result": "selectMemberAndAdd_error",
+  "error": "Add closed Search Member but claim form did not render (portal runtime state: ERROR TypeError: Cannot read properties of undefined (reading 'res')\n    at <computed> (https://connect.alliancemedinet.com/463.2a90d0d779c4b349.js:1:5176555)\n    at Object.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:2944987)\n    at _0x33c12b.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3046069)\n    at _0x321261._next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3045302)\n    at _0x321261.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3044527)\n    at https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:1371207\n    at _0x5b0c12 (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3055691)\n    at _0x49c078.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:1370878)\n    at _0x32f59f.close (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3357186)\n    at _0x183d2f._finishDialogClose (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3394070))",
+  "found": {
+    "found": true,
+    "rowCount": 1,
+    "memberNotFound": false,
+    "searchKind": "search_others"
+  },
+  "allianceError": null
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T11:47:15.997Z"}

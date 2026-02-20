@@ -1,0 +1,99 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T07:04:07.277Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T07:04:07.282Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T07:04:07.282Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T07:04:07.282Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T07:04:09.257Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T07:04:09.258Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T07:04:12.246Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:04:14.679Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T07:04:16.634Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:04:17.194Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:04:18.710Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:04:20.253Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T07:04:21.807Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T07:04:23.322Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:04:24.452Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T07:04:25.010Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:04:27.736Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T07:04:29.554Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":10000,"service":"clinic-automation","timestamp":"2026-02-19T07:04:40.272Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":20000,"service":"clinic-automation","timestamp":"2026-02-19T07:04:50.900Z"}
+[probe] stateAfterDx {
+  "msg": "",
+  "primaryText": "Crushing injury and traumatic amputation of part of abdomen, lower back and pelvis",
+  "primaryCode": "",
+  "primaryId": "f512a95a-a7af-4608-8bc5-ca7a4aff4592",
+  "feeType": "",
+  "fee": "",
+  "calcRowText": "",
+  "buttons": [
+    {
+      "id": "",
+      "name": "",
+      "value": "Show Benefit",
+      "text": "",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+      "name": "ctl00$MainContent$uc_MakeClaim$btnmcreasons",
+      "value": "+",
+      "text": "",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnCancel",
+      "name": "ctl00$MainContent$uc_MakeClaim$btnCancel",
+      "value": "Cancel",
+      "text": "",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnReloadData",
+      "name": "ctl00$MainContent$uc_MakeClaim$btnReloadData",
+      "value": "",
+      "text": "",
+      "visible": true
+    }
+  ]
+}
+[probe] stateAfterFee {
+  "msg": "Please select either a chronic diagnosis or an acute diagnosis.Please select a valid diagnosis.",
+  "primaryText": "Crushing injury and traumatic amputation of part of abdomen, lower back and pelvis",
+  "primaryCode": "",
+  "primaryId": "f512a95a-a7af-4608-8bc5-ca7a4aff4592",
+  "feeType": "",
+  "fee": "38.00",
+  "calcRowText": "",
+  "buttons": [
+    {
+      "id": "",
+      "name": "",
+      "value": "Show Benefit",
+      "text": "",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+      "name": "ctl00$MainContent$uc_MakeClaim$btnmcreasons",
+      "value": "+",
+      "text": "",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnCancel",
+      "name": "ctl00$MainContent$uc_MakeClaim$btnCancel",
+      "value": "Cancel",
+      "text": "",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnReloadData",
+      "name": "ctl00$MainContent$uc_MakeClaim$btnReloadData",
+      "value": "",
+      "text": "",
+      "visible": true
+    }
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T07:05:17.017Z"}

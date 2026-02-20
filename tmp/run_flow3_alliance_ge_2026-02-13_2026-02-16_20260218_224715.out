@@ -1,0 +1,62 @@
+[32minfo[39m: === Batch Claim Submission === {"service":"clinic-automation","timestamp":"2026-02-18T15:47:16.694Z"}
+[32minfo[39m: Visit IDs: Scoped query {"service":"clinic-automation","timestamp":"2026-02-18T15:47:16.697Z"}
+[32minfo[39m: Pay Type: All {"service":"clinic-automation","timestamp":"2026-02-18T15:47:16.697Z"}
+[32minfo[39m: Portal Targets: ALLIANCE_MEDINET, GE_NTUC {"service":"clinic-automation","timestamp":"2026-02-18T15:47:16.698Z"}
+[32minfo[39m: Date Range: 2026-02-13 to 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-18T15:47:16.698Z"}
+[32minfo[39m: Portal Only: true {"service":"clinic-automation","timestamp":"2026-02-18T15:47:16.698Z"}
+[32minfo[39m: Save as Draft: true {"service":"clinic-automation","timestamp":"2026-02-18T15:47:16.698Z"}
+[32minfo[39m: Leave Browser Open: false {"service":"clinic-automation","timestamp":"2026-02-18T15:47:16.698Z"}
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-18T15:47:17.199Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-18T15:47:17.201Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-18T15:47:17.201Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-18T15:47:17.202Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-18T15:47:19.356Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-18T15:47:19.357Z"}
+[32minfo[39m: Found 3 visit(s) to process {"service":"clinic-automation","timestamp":"2026-02-18T15:47:20.191Z"}
+[32minfo[39m: [1/3] Processing: CHEAM XI-QING JACQUELINE (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-18T15:47:20.465Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for CHEAM XI-QING JACQUELINE {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-18T15:47:20.466Z","visitId":"588d28b0-d736-49d7-b121-b7b72c8a3e6e"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to GE / NTUC IM portal service {"service":"clinic-automation","timestamp":"2026-02-18T15:47:20.745Z"}
+[33mwarn[39m: [SUBMIT] GE / NTUC IM portal automation not yet implemented {"allianceNetwork":"GE","payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-18T15:47:20.746Z","visitId":"588d28b0-d736-49d7-b121-b7b72c8a3e6e"}
+[33mwarn[39m: Portal service not implemented: GE_NTUC (pay type: ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-18T15:47:20.746Z"}
+[32minfo[39m: [2/3] Processing: KIARA SINGH (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-18T15:47:22.989Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for KIARA SINGH {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-18T15:47:22.990Z","visitId":"d3a164b7-1b4f-490d-afbf-f9ef6dc1bd14"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Alliance Medinet {"service":"clinic-automation","timestamp":"2026-02-18T15:47:22.991Z"}
+[32minfo[39m: [SUBMIT] Alliance form data: {"doctorName":"Palanisamy Arul Murugan","matchedTag":"ALLIANC","nric":"T1722895H","service":"clinic-automation","spCode":"PAM","timestamp":"2026-02-18T15:47:22.997Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-18T15:47:25.225Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:47:28.181Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-18T15:47:30.150Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:47:32.151Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:47:33.662Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-18T15:47:35.190Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-18T15:47:36.701Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:47:37.804Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-18T15:47:38.370Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-14/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:47:41.102Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-14/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-18T15:47:42.933Z"}
+[32minfo[39m: [ALLIANCE] Selected member and opened claim form {"service":"clinic-automation","timestamp":"2026-02-18T15:47:53.593Z"}
+[32minfo[39m: [ALLIANCE] Set MC Days {"selector":"input[placeholder*=\"MC Days\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:47:57.052Z"}
+[32minfo[39m: [ALLIANCE] Clicked Add Diagnosis {"selector":"button:has-text(\"Add Diagnosis\")","service":"clinic-automation","timestamp":"2026-02-18T15:47:57.664Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Code (S10) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Code\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:47:58.784Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (S10) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-18T15:47:59.443Z"}
+[33mwarn[39m: [ALLIANCE] Consultation Fee capped for Follow Up type {"cappedAmount":69,"originalAmount":76.3,"service":"clinic-automation","timestamp":"2026-02-18T15:48:13.172Z"}
+[32minfo[39m: [ALLIANCE] Set Consultation Fee {"selector":"input[placeholder*=\"Consultation Fee\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:48:15.299Z"}
+[32minfo[39m: [ALLIANCE] Filled remark {"selector":"textarea[placeholder*=\"remark\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:48:16.421Z"}
+[32minfo[39m: [ALLIANCE] Draft mode enabled: skipping strict calculate/validation gate {"service":"clinic-automation","timestamp":"2026-02-18T15:48:16.422Z"}
+[32minfo[39m: [ALLIANCE] Clicked Calculate Claim (pre-draft) {"selector":"button:has-text(\"Calculate Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:48:17.770Z"}
+[33mwarn[39m: [ALLIANCE] Calculate before draft save did not reach summary {"error":"Could not trigger Calculate Claim","service":"clinic-automation","timestamp":"2026-02-18T15:48:18.982Z"}
+[32minfo[39m: [ALLIANCE] Clicked Save on Claim Summary for draft persistence {"service":"clinic-automation","timestamp":"2026-02-18T15:48:19.623Z"}
+[32minfo[39m: [ALLIANCE] Clicked Confirm Save as Draft {"selector":"[role=\"dialog\"] button:has-text(\"Confirm\")","service":"clinic-automation","timestamp":"2026-02-18T15:48:20.579Z"}
+[32minfo[39m: [3/3] Processing: WOO CHERN SEE (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-18T15:48:24.297Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for WOO CHERN SEE {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-18T15:48:24.298Z","visitId":"2c78d589-8d45-4788-99d9-6c619bec31e7"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to GE / NTUC IM portal service {"service":"clinic-automation","timestamp":"2026-02-18T15:48:24.299Z"}
+[33mwarn[39m: [SUBMIT] GE / NTUC IM portal automation not yet implemented {"allianceNetwork":"GE","payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-18T15:48:24.299Z","visitId":"2c78d589-8d45-4788-99d9-6c619bec31e7"}
+[33mwarn[39m: Portal service not implemented: GE_NTUC (pay type: ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-18T15:48:24.299Z"}
+[32minfo[39m: 
+=== Submission Summary === {"service":"clinic-automation","timestamp":"2026-02-18T15:48:26.538Z"}
+[32minfo[39m: Total: 3 {"service":"clinic-automation","timestamp":"2026-02-18T15:48:26.538Z"}
+[32minfo[39m: Submitted: 0 {"service":"clinic-automation","timestamp":"2026-02-18T15:48:26.539Z"}
+[32minfo[39m: Drafts: 1 {"service":"clinic-automation","timestamp":"2026-02-18T15:48:26.539Z"}
+[32minfo[39m: Filled only (no DB update): 0 {"service":"clinic-automation","timestamp":"2026-02-18T15:48:26.539Z"}
+[32minfo[39m: Errors: 0 {"service":"clinic-automation","timestamp":"2026-02-18T15:48:26.539Z"}
+[32minfo[39m: Not Started (unsupported): 2 {"service":"clinic-automation","timestamp":"2026-02-18T15:48:26.539Z"}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-18T15:48:26.940Z"}

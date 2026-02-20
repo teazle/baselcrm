@@ -1,0 +1,32 @@
+{
+  "generatedAt": "2026-02-12T09:55:02.046Z",
+  "visit_id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+  "submitted_truth": {
+    "visit_id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "patient_name": "MITTAL SACHIN KUMAR",
+    "nric": "M4539893L",
+    "visit_date": "2026-02-02",
+    "pay_type": "MHC",
+    "portal_found": "yes",
+    "portal_status": "submitted:Visit",
+    "portal_reference": "EV16085124",
+    "evidence_path": "/Users/vincent/Baselrpacrm/screenshots/view-submitted-2026-02-02_2026-02-07/mhc/31b5a688-9104-4507-bd7a-347a9f9ce866.png",
+    "notes": "auto-check:mhc; result_rows=1; url=https://www.mhcasia.net/mhc/ClinicEmpVisitPlusAListSubmit.ec"
+  },
+  "draft_truth": {
+    "visit_id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "patient_name": "MITTAL SACHIN KUMAR",
+    "nric": "M4539893L",
+    "visit_date": "2026-02-02",
+    "pay_type": "MHC",
+    "crm_status": "error",
+    "draft_found": "no",
+    "draft_status": "not_found_in_edit_draft",
+    "draft_reference": "",
+    "draft_total_fee": "",
+    "draft_total_claim": "",
+    "draft_mc_days": "",
+    "evidence_path": "/Users/vincent/Baselrpacrm/screenshots/edit-draft-2026-02-02_2026-02-07/mhc/31b5a688-9104-4507-bd7a-347a9f9ce866.png",
+    "notes": "auto-check:mhc; result_rows=0; url=https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec"
+  }
+}

@@ -7,6 +7,7 @@ import { DataTable } from "@/components/ui/DataTable";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { StatusBadge, type Status } from "./StatusBadge";
 import FlowHeader from "./FlowHeader";
+import RunSummaryPanel from "./RunSummaryPanel";
 import { formatDateDDMMYYYY, formatDateTimeDDMMYYYY } from "@/lib/utils/date";
 import { getTodaySingapore } from "@/lib/utils/date";
 
@@ -191,6 +192,8 @@ export default function Flow1ExtractExcel() {
         statusLabel={flowStatus.label}
         statusTone={flowStatus.tone}
       />
+
+      <RunSummaryPanel flowPrefix="flow1" />
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card className="p-5">

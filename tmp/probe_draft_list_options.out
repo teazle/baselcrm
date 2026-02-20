@@ -1,0 +1,179 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-12T06:34:28.008Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-12T06:34:28.016Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-12T06:34:28.016Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-12T06:34:28.016Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-12T06:34:31.985Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-12T06:34:31.987Z"}
+[32minfo[39m: [MHC 01] Login start {"attempt":1,"maxAttempts":3,"service":"clinic-automation","timestamp":"2026-02-12T06:34:32.503Z"}
+[32minfo[39m: Logging into MHC Asia... {"service":"clinic-automation","timestamp":"2026-02-12T06:34:32.508Z"}
+[32minfo[39m: [MHC 02] Country selected (best-effort) {"label":"MHC SINGAPORE","service":"clinic-automation","timestamp":"2026-02-12T06:34:35.168Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-12T06:34:35.740Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-12T06:34:36.271Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-12T06:34:37.743Z"}
+[32minfo[39m: Successfully logged into MHC Asia {"service":"clinic-automation","timestamp":"2026-02-12T06:34:38.549Z"}
+[32minfo[39m: [MHC 03] Login ok {"service":"clinic-automation","timestamp":"2026-02-12T06:34:38.549Z"}
+[32minfo[39m: [MHC 04] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-12T06:34:38.549Z"}
+[32minfo[39m: [MHC 05] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-12T06:34:44.277Z"}
+[32minfo[39m: [MHC 06] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-12T06:34:49.998Z"}
+{
+  "context": "mhc",
+  "before": {
+    "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=KPED-B37Y-ZZ11-XA0B-3PCD-A31K-QZUQ-A2QT",
+    "title": "Employee Visit Draft List",
+    "keyOptions": [
+      {
+        "value": "visitNo",
+        "text": "Visit No",
+        "selected": true
+      },
+      {
+        "value": "patientNric",
+        "text": "NRIC",
+        "selected": false
+      }
+    ],
+    "keyTypeOptions": [
+      {
+        "value": "C",
+        "text": "contains",
+        "selected": true
+      },
+      {
+        "value": "S",
+        "text": "starts with",
+        "selected": false
+      },
+      {
+        "value": "E",
+        "text": "equals to",
+        "selected": false
+      }
+    ],
+    "rowCount": 0,
+    "rowSample": [],
+    "searchInputExists": true,
+    "searchBtnExists": true
+  },
+  "afterByPatientNric": {
+    "skipped": false,
+    "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+    "title": "Employee Visit Draft List",
+    "keyOptions": [
+      {
+        "value": "visitNo",
+        "text": "Visit No",
+        "selected": false
+      },
+      {
+        "value": "patientNric",
+        "text": "NRIC",
+        "selected": true
+      }
+    ],
+    "keyTypeOptions": [
+      {
+        "value": "C",
+        "text": "contains",
+        "selected": false
+      },
+      {
+        "value": "S",
+        "text": "starts with",
+        "selected": false
+      },
+      {
+        "value": "E",
+        "text": "equals to",
+        "selected": true
+      }
+    ],
+    "rowCount": 0,
+    "rowSample": [],
+    "searchInputExists": true,
+    "searchBtnExists": true
+  },
+  "afterByVisitNo": {
+    "skipped": false,
+    "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+    "title": "Employee Visit Draft List",
+    "keyOptions": [
+      {
+        "value": "visitNo",
+        "text": "Visit No",
+        "selected": true
+      },
+      {
+        "value": "patientNric",
+        "text": "NRIC",
+        "selected": false
+      }
+    ],
+    "keyTypeOptions": [
+      {
+        "value": "C",
+        "text": "contains",
+        "selected": false
+      },
+      {
+        "value": "S",
+        "text": "starts with",
+        "selected": false
+      },
+      {
+        "value": "E",
+        "text": "equals to",
+        "selected": true
+      }
+    ],
+    "rowCount": 0,
+    "rowSample": [],
+    "searchInputExists": true,
+    "searchBtnExists": true
+  }
+}
+[32minfo[39m: [MHC 07] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-12T06:34:52.010Z"}
+[32minfo[39m: Clicked: Switch System {"service":"clinic-automation","timestamp":"2026-02-12T06:34:52.868Z"}
+[32minfo[39m: Clicked: AIA Clinic {"service":"clinic-automation","timestamp":"2026-02-12T06:34:55.039Z"}
+[32minfo[39m: [MHC 08] Dialog handler set up {"service":"clinic-automation","timestamp":"2026-02-12T06:34:59.389Z"}
+[32minfo[39m: [MHC 09] Switch system verification {"hasAddAiaVisit":true,"hasPolicyNoHeader":false,"hasSearchAiaMember":false,"hasSwitchSystem":false,"isAiaDomain":true,"isMhcDomain":false,"isSinglifeDomain":false,"labelForLog":"AIA Clinic","looksLikeAiaFlow":true,"service":"clinic-automation","timestamp":"2026-02-12T06:34:59.444Z","url":"https://www.aiaclinic.com/aia/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2"}
+[32minfo[39m: Switched system to: AIA Clinic {"service":"clinic-automation","timestamp":"2026-02-12T06:34:59.445Z"}
+[32minfo[39m: [MHC 10] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-12T06:35:04.429Z"}
+[32minfo[39m: Login form visible after ensureAtMhcHome; re-logging in {"service":"clinic-automation","timestamp":"2026-02-12T06:35:06.139Z"}
+[32minfo[39m: [MHC 11] Login start {"attempt":1,"maxAttempts":3,"service":"clinic-automation","timestamp":"2026-02-12T06:35:06.141Z"}
+[32minfo[39m: Logging into MHC Asia... {"service":"clinic-automation","timestamp":"2026-02-12T06:35:06.142Z"}
+[32minfo[39m: [MHC 12] Country selected (best-effort) {"label":"MHC SINGAPORE","service":"clinic-automation","timestamp":"2026-02-12T06:35:08.535Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-12T06:35:09.084Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-12T06:35:09.617Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-12T06:35:11.233Z"}
+[32minfo[39m: Successfully logged into MHC Asia {"service":"clinic-automation","timestamp":"2026-02-12T06:35:12.278Z"}
+[32minfo[39m: [MHC 13] Login ok {"service":"clinic-automation","timestamp":"2026-02-12T06:35:12.278Z"}
+[32minfo[39m: Clicked: Switch System {"service":"clinic-automation","timestamp":"2026-02-12T06:35:13.041Z"}
+[32minfo[39m: Clicked: AIA Clinic {"service":"clinic-automation","timestamp":"2026-02-12T06:35:14.705Z"}
+[32minfo[39m: [MHC 14] Dialog handler set up {"service":"clinic-automation","timestamp":"2026-02-12T06:35:19.563Z"}
+[32minfo[39m: [MHC 15] Switch system verification {"hasAddAiaVisit":true,"hasPolicyNoHeader":false,"hasSearchAiaMember":false,"hasSwitchSystem":false,"isAiaDomain":true,"isMhcDomain":false,"isSinglifeDomain":false,"labelForLog":"AIA Clinic","looksLikeAiaFlow":true,"service":"clinic-automation","timestamp":"2026-02-12T06:35:19.606Z","url":"https://www.aiaclinic.com/aia/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2"}
+[32minfo[39m: Switched system to: AIA Clinic {"service":"clinic-automation","timestamp":"2026-02-12T06:35:19.606Z"}
+[32minfo[39m: [MHC 16] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-12T06:35:24.686Z"}
+[32minfo[39m: Login form visible after ensureAtMhcHome; re-logging in {"service":"clinic-automation","timestamp":"2026-02-12T06:35:26.311Z"}
+[32minfo[39m: [MHC 17] Login start {"attempt":1,"maxAttempts":3,"service":"clinic-automation","timestamp":"2026-02-12T06:35:26.313Z"}
+[32minfo[39m: Logging into MHC Asia... {"service":"clinic-automation","timestamp":"2026-02-12T06:35:26.313Z"}
+[32minfo[39m: [MHC 18] Country selected (best-effort) {"label":"MHC SINGAPORE","service":"clinic-automation","timestamp":"2026-02-12T06:35:28.690Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-12T06:35:29.244Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-12T06:35:29.772Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-12T06:35:31.183Z"}
+[32minfo[39m: Successfully logged into MHC Asia {"service":"clinic-automation","timestamp":"2026-02-12T06:35:31.931Z"}
+[32minfo[39m: [MHC 19] Login ok {"service":"clinic-automation","timestamp":"2026-02-12T06:35:31.932Z"}
+[32minfo[39m: Clicked: Switch System {"service":"clinic-automation","timestamp":"2026-02-12T06:35:32.691Z"}
+[32minfo[39m: Clicked: AIA Clinic {"service":"clinic-automation","timestamp":"2026-02-12T06:35:34.287Z"}
+[32minfo[39m: [MHC 20] Switch system verification {"hasAddAiaVisit":false,"hasPolicyNoHeader":false,"hasSearchAiaMember":false,"hasSwitchSystem":false,"isAiaDomain":true,"isMhcDomain":false,"isSinglifeDomain":false,"labelForLog":"AIA Clinic","looksLikeAiaFlow":true,"service":"clinic-automation","timestamp":"2026-02-12T06:35:38.126Z","url":"https://www.aiaclinic.com/aia/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2"}
+[32minfo[39m: Switched system to: AIA Clinic {"service":"clinic-automation","timestamp":"2026-02-12T06:35:38.126Z"}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-12T06:35:38.127Z"}
+file:///Users/vincent/Baselrpacrm/tmp/probe_draft_list_options.mjs:28
+  if (!ok) throw new Error('cannot open draft list');
+                 ^
+
+Error: cannot open draft list
+    at openDraft (file:///Users/vincent/Baselrpacrm/tmp/probe_draft_list_options.mjs:28:18)
+    at async enterContext (file:///Users/vincent/Baselrpacrm/tmp/probe_draft_list_options.mjs:39:3)
+    at async file:///Users/vincent/Baselrpacrm/tmp/probe_draft_list_options.mjs:113:7
+
+Node.js v24.5.0

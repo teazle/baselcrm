@@ -1,0 +1,31 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T07:37:01.667Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T07:37:01.669Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T07:37:01.669Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T07:37:01.669Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T07:37:03.623Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T07:37:03.628Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T07:37:06.061Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:37:10.050Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T07:37:11.987Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:37:12.574Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:37:14.082Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T07:37:15.599Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T07:37:17.129Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:37:18.326Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T07:37:18.913Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:37:21.646Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T07:37:23.500Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":10000,"searchKind":"search_others","service":"clinic-automation","timestamp":"2026-02-19T07:37:34.188Z"}
+[33mwarn[39m: [SUBMIT] GE / NTUC IM portal automation failed {"error":"locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#TB_iframeContent').contentFrame().locator('tr').nth(6).locator('a[href*=\"lbtnPrimaryDiagnosis\"]').first()\u001b[22m\n","payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-19T07:38:09.398Z","visitId":"probe-ge-t0801699i"}
+{
+  "success": false,
+  "reason": "submission_failed",
+  "error": "locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#TB_iframeContent').contentFrame().locator('tr').nth(6).locator('a[href*=\"lbtnPrimaryDiagnosis\"]').first()\u001b[22m\n",
+  "portal": "GE_NTUC",
+  "portalService": "GE_NTUC",
+  "portalUrl": null,
+  "savedAsDraft": false,
+  "submitted": false,
+  "screenshot": "screenshots/ge-ntuc-error-probe-ge-t0801699i-1771486689278.png"
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T07:38:09.544Z"}

@@ -1,0 +1,33 @@
+[32minfo[39m: === Batch Claim Submission === {"service":"clinic-automation","timestamp":"2026-02-17T12:15:37.942Z"}
+[32minfo[39m: Visit IDs: Scoped query {"service":"clinic-automation","timestamp":"2026-02-17T12:15:37.943Z"}
+[32minfo[39m: Pay Type: All {"service":"clinic-automation","timestamp":"2026-02-17T12:15:37.943Z"}
+[32minfo[39m: Portal Targets: GE {"service":"clinic-automation","timestamp":"2026-02-17T12:15:37.943Z"}
+[32minfo[39m: Date Range: 2026-02-13 to 2026-02-13 {"service":"clinic-automation","timestamp":"2026-02-17T12:15:37.943Z"}
+[32minfo[39m: Portal Only: true {"service":"clinic-automation","timestamp":"2026-02-17T12:15:37.944Z"}
+[32minfo[39m: Save as Draft: true {"service":"clinic-automation","timestamp":"2026-02-17T12:15:37.944Z"}
+[32minfo[39m: Leave Browser Open: false {"service":"clinic-automation","timestamp":"2026-02-17T12:15:37.944Z"}
+(node:31070) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vincent/Baselrpacrm/apps/crm/src/lib/rpa/portals.shared.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vincent/Baselrpacrm/apps/crm/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-17T12:15:38.400Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-17T12:15:38.400Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-17T12:15:38.400Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-17T12:15:38.400Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-17T12:15:40.683Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-17T12:15:40.687Z"}
+[32minfo[39m: Found 1 visit(s) to process {"service":"clinic-automation","timestamp":"2026-02-17T12:15:41.228Z"}
+[32minfo[39m: [1/1] Processing: WOO CHERN SEE (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-17T12:15:41.483Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for WOO CHERN SEE {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-17T12:15:41.484Z","visitId":"2c78d589-8d45-4788-99d9-6c619bec31e7"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to GE portal service {"service":"clinic-automation","timestamp":"2026-02-17T12:15:41.484Z"}
+[33mwarn[39m: [SUBMIT] GE portal automation not yet implemented {"allianceNetwork":"GE","payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-17T12:15:41.485Z","visitId":"2c78d589-8d45-4788-99d9-6c619bec31e7"}
+[33mwarn[39m: Portal not implemented for pay type: ALLIANC {"service":"clinic-automation","timestamp":"2026-02-17T12:15:41.485Z"}
+[32minfo[39m: 
+=== Submission Summary === {"service":"clinic-automation","timestamp":"2026-02-17T12:15:43.787Z"}
+[32minfo[39m: Total: 1 {"service":"clinic-automation","timestamp":"2026-02-17T12:15:43.788Z"}
+[32minfo[39m: Submitted: 0 {"service":"clinic-automation","timestamp":"2026-02-17T12:15:43.788Z"}
+[32minfo[39m: Drafts: 0 {"service":"clinic-automation","timestamp":"2026-02-17T12:15:43.788Z"}
+[32minfo[39m: Filled only (no DB update): 0 {"service":"clinic-automation","timestamp":"2026-02-17T12:15:43.788Z"}
+[32minfo[39m: Errors: 0 {"service":"clinic-automation","timestamp":"2026-02-17T12:15:43.788Z"}
+[32minfo[39m: Not Started (unsupported): 1 {"service":"clinic-automation","timestamp":"2026-02-17T12:15:43.788Z"}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-17T12:15:44.245Z"}

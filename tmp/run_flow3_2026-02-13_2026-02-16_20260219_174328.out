@@ -1,0 +1,104 @@
+[32minfo[39m: === Batch Claim Submission === {"service":"clinic-automation","timestamp":"2026-02-19T10:43:28.782Z"}
+[32minfo[39m: Visit IDs: Scoped query {"service":"clinic-automation","timestamp":"2026-02-19T10:43:28.785Z"}
+[32minfo[39m: Pay Type: All {"service":"clinic-automation","timestamp":"2026-02-19T10:43:28.785Z"}
+[32minfo[39m: Portal Targets: All routes {"service":"clinic-automation","timestamp":"2026-02-19T10:43:28.785Z"}
+[32minfo[39m: Date Range: 2026-02-13 to 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-19T10:43:28.785Z"}
+[32minfo[39m: Portal Only: true {"service":"clinic-automation","timestamp":"2026-02-19T10:43:28.786Z"}
+[32minfo[39m: Save as Draft: true {"service":"clinic-automation","timestamp":"2026-02-19T10:43:28.786Z"}
+[32minfo[39m: Leave Browser Open: false {"service":"clinic-automation","timestamp":"2026-02-19T10:43:28.786Z"}
+(node:21988) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vincent/Baselrpacrm/apps/crm/src/lib/rpa/portals.shared.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vincent/Baselrpacrm/apps/crm/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T10:43:29.641Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T10:43:29.644Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T10:43:29.645Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T10:43:29.645Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T10:43:32.188Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T10:43:32.194Z"}
+[32minfo[39m: Found 14 visit(s) to process {"service":"clinic-automation","timestamp":"2026-02-19T10:43:33.190Z"}
+[32minfo[39m: [1/14] Processing: SION HUI CHIN (IHP) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:33.402Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for SION HUI CHIN {"payType":"IHP","service":"clinic-automation","timestamp":"2026-02-19T10:43:33.404Z","visitId":"485f285f-b8c6-4b2b-a6b8-d836e436c01f"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to IHP portal service {"service":"clinic-automation","timestamp":"2026-02-19T10:43:33.772Z"}
+[33mwarn[39m: [SUBMIT] IHP portal automation not yet implemented {"payType":"IHP","service":"clinic-automation","timestamp":"2026-02-19T10:43:33.773Z","visitId":"485f285f-b8c6-4b2b-a6b8-d836e436c01f"}
+[33mwarn[39m: Portal service not implemented: IHP (pay type: IHP) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:33.773Z"}
+[32minfo[39m: [2/14] Processing: HAN SUIANG-SHIUH (ALLIANZ) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:35.984Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for HAN SUIANG-SHIUH {"payType":"ALLIANZ","service":"clinic-automation","timestamp":"2026-02-19T10:43:35.986Z","visitId":"ad17c70e-ee17-4cc8-a29b-dfb95bea4844"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Allianz portal service {"service":"clinic-automation","timestamp":"2026-02-19T10:43:35.988Z"}
+[33mwarn[39m: [SUBMIT] Allianz portal automation not yet implemented {"payType":"ALLIANZ","service":"clinic-automation","timestamp":"2026-02-19T10:43:35.988Z","visitId":"ad17c70e-ee17-4cc8-a29b-dfb95bea4844"}
+[33mwarn[39m: Portal service not implemented: ALLIANZ (pay type: ALLIANZ) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:35.988Z"}
+[32minfo[39m: [3/14] Processing: MUHAMMAD FIRDAUS BIN JUMAT (IHP) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:38.209Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for MUHAMMAD FIRDAUS BIN JUMAT {"payType":"IHP","service":"clinic-automation","timestamp":"2026-02-19T10:43:38.210Z","visitId":"8de88552-6df1-4698-ba44-245d0c876d13"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to IHP portal service {"service":"clinic-automation","timestamp":"2026-02-19T10:43:38.211Z"}
+[33mwarn[39m: [SUBMIT] IHP portal automation not yet implemented {"payType":"IHP","service":"clinic-automation","timestamp":"2026-02-19T10:43:38.211Z","visitId":"8de88552-6df1-4698-ba44-245d0c876d13"}
+[33mwarn[39m: Portal service not implemented: IHP (pay type: IHP) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:38.211Z"}
+[32minfo[39m: [4/14] Processing: LEONG JIE XIANG (FULLERT) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:40.428Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for LEONG JIE XIANG {"payType":"FULLERT","service":"clinic-automation","timestamp":"2026-02-19T10:43:40.429Z","visitId":"d62618f8-5506-45d7-9148-0d8aec4132d7"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Fullerton portal service {"service":"clinic-automation","timestamp":"2026-02-19T10:43:40.431Z"}
+[33mwarn[39m: [SUBMIT] Fullerton portal automation not yet implemented {"payType":"FULLERT","service":"clinic-automation","timestamp":"2026-02-19T10:43:40.431Z","visitId":"d62618f8-5506-45d7-9148-0d8aec4132d7"}
+[33mwarn[39m: Portal service not implemented: FULLERTON (pay type: FULLERT) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:40.431Z"}
+[32minfo[39m: [5/14] Processing: WANG WEI TING SARAH (IHP) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:42.660Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for WANG WEI TING SARAH {"payType":"IHP","service":"clinic-automation","timestamp":"2026-02-19T10:43:42.660Z","visitId":"abc41d6e-c387-46bd-867b-2e5e7698761c"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to IHP portal service {"service":"clinic-automation","timestamp":"2026-02-19T10:43:42.661Z"}
+[33mwarn[39m: [SUBMIT] IHP portal automation not yet implemented {"payType":"IHP","service":"clinic-automation","timestamp":"2026-02-19T10:43:42.661Z","visitId":"abc41d6e-c387-46bd-867b-2e5e7698761c"}
+[33mwarn[39m: Portal service not implemented: IHP (pay type: IHP) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:42.661Z"}
+[32minfo[39m: [6/14] Processing: CHEAM XI-QING JACQUELINE (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:44.894Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for CHEAM XI-QING JACQUELINE {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-19T10:43:44.895Z","visitId":"588d28b0-d736-49d7-b121-b7b72c8a3e6e"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Alliance Medinet {"service":"clinic-automation","timestamp":"2026-02-19T10:43:44.901Z"}
+[32minfo[39m: [SUBMIT] Alliance form data: {"doctorName":"Palanisamy Arul Murugan","matchedTag":"ALLIANC","nric":"T1204303H","service":"clinic-automation","spCode":"PAM","timestamp":"2026-02-19T10:43:44.905Z"}
+[31merror[39m: [ALLIANCE] Login failed {"error":"ALLIANCE_MEDINET_USERNAME / ALLIANCE_MEDINET_PASSWORD must be set","service":"clinic-automation","timestamp":"2026-02-19T10:43:45.028Z"}
+[33mwarn[39m: [SUBMIT] Alliance visit attempt failed {"attempt":1,"canRetry":false,"error":"ALLIANCE_MEDINET_USERNAME / ALLIANCE_MEDINET_PASSWORD must be set","lastAction":"login.open","maxAttempts":2,"retryable":false,"service":"clinic-automation","timestamp":"2026-02-19T10:43:45.029Z","traceId":null}
+[31merror[39m: [SUBMIT] Error submitting claim for CHEAM XI-QING JACQUELINE {"error":"ALLIANCE_MEDINET_USERNAME / ALLIANCE_MEDINET_PASSWORD must be set","service":"clinic-automation","timestamp":"2026-02-19T10:43:45.029Z"}
+[31merror[39m: Failed to submit: ALLIANCE_MEDINET_USERNAME / ALLIANCE_MEDINET_PASSWORD must be set {"service":"clinic-automation","timestamp":"2026-02-19T10:43:45.238Z"}
+[32minfo[39m: [7/14] Processing: WOO CHERN SEE (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:47.535Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for WOO CHERN SEE {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-19T10:43:47.537Z","visitId":"2c78d589-8d45-4788-99d9-6c619bec31e7"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Alliance Medinet {"service":"clinic-automation","timestamp":"2026-02-19T10:43:47.538Z"}
+[32minfo[39m: [SUBMIT] Alliance form data: {"doctorName":"Tung Yu Yee Mathew","matchedTag":"ALLIANC","nric":"T0801699I","service":"clinic-automation","spCode":"MT","timestamp":"2026-02-19T10:43:47.539Z"}
+[31merror[39m: [ALLIANCE] Login failed {"error":"ALLIANCE_MEDINET_USERNAME / ALLIANCE_MEDINET_PASSWORD must be set","service":"clinic-automation","timestamp":"2026-02-19T10:43:47.636Z"}
+[33mwarn[39m: [SUBMIT] Alliance visit attempt failed {"attempt":1,"canRetry":false,"error":"ALLIANCE_MEDINET_USERNAME / ALLIANCE_MEDINET_PASSWORD must be set","lastAction":"login.open","maxAttempts":2,"retryable":false,"service":"clinic-automation","timestamp":"2026-02-19T10:43:47.637Z","traceId":null}
+[31merror[39m: [SUBMIT] Error submitting claim for WOO CHERN SEE {"error":"ALLIANCE_MEDINET_USERNAME / ALLIANCE_MEDINET_PASSWORD must be set","service":"clinic-automation","timestamp":"2026-02-19T10:43:47.637Z"}
+[31merror[39m: Failed to submit: ALLIANCE_MEDINET_USERNAME / ALLIANCE_MEDINET_PASSWORD must be set {"service":"clinic-automation","timestamp":"2026-02-19T10:43:47.858Z"}
+[32minfo[39m: [8/14] Processing: LIM KIM HONG (IHP) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:50.076Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for LIM KIM HONG {"payType":"IHP","service":"clinic-automation","timestamp":"2026-02-19T10:43:50.076Z","visitId":"c463bac2-ae92-4a9c-a185-0715ae8d07e7"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to IHP portal service {"service":"clinic-automation","timestamp":"2026-02-19T10:43:50.079Z"}
+[33mwarn[39m: [SUBMIT] IHP portal automation not yet implemented {"payType":"IHP","service":"clinic-automation","timestamp":"2026-02-19T10:43:50.079Z","visitId":"c463bac2-ae92-4a9c-a185-0715ae8d07e7"}
+[33mwarn[39m: Portal service not implemented: IHP (pay type: IHP) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:50.080Z"}
+[32minfo[39m: [9/14] Processing: WANG YIXIN (ALL) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:52.290Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for WANG YIXIN {"payType":"ALL","service":"clinic-automation","timestamp":"2026-02-19T10:43:52.291Z","visitId":"7eafcb82-5406-4de9-abbd-3e5f6f803218"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to IXCHANGE portal service {"service":"clinic-automation","timestamp":"2026-02-19T10:43:52.294Z"}
+[33mwarn[39m: [SUBMIT] IXCHANGE portal automation not yet implemented {"payType":"ALL","service":"clinic-automation","timestamp":"2026-02-19T10:43:52.294Z","visitId":"7eafcb82-5406-4de9-abbd-3e5f6f803218"}
+[33mwarn[39m: Portal service not implemented: IXCHANGE (pay type: ALL) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:52.294Z"}
+[32minfo[39m: [10/14] Processing: TAN YE CHIEN JOYCE (FULLERT) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:54.502Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for TAN YE CHIEN JOYCE {"payType":"FULLERT","service":"clinic-automation","timestamp":"2026-02-19T10:43:54.503Z","visitId":"74ccb258-340d-42a1-8e1f-ae13ec2556cd"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Fullerton portal service {"service":"clinic-automation","timestamp":"2026-02-19T10:43:54.503Z"}
+[33mwarn[39m: [SUBMIT] Fullerton portal automation not yet implemented {"payType":"FULLERT","service":"clinic-automation","timestamp":"2026-02-19T10:43:54.503Z","visitId":"74ccb258-340d-42a1-8e1f-ae13ec2556cd"}
+[33mwarn[39m: Portal service not implemented: FULLERTON (pay type: FULLERT) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:54.503Z"}
+[32minfo[39m: [11/14] Processing: SAURABH CHANDAN (ALLIANZ) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:56.723Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for SAURABH CHANDAN {"payType":"ALLIANZ","service":"clinic-automation","timestamp":"2026-02-19T10:43:56.724Z","visitId":"96b158ba-8d89-4f84-ba02-a544190e867f"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Allianz portal service {"service":"clinic-automation","timestamp":"2026-02-19T10:43:56.724Z"}
+[33mwarn[39m: [SUBMIT] Allianz portal automation not yet implemented {"payType":"ALLIANZ","service":"clinic-automation","timestamp":"2026-02-19T10:43:56.724Z","visitId":"96b158ba-8d89-4f84-ba02-a544190e867f"}
+[33mwarn[39m: Portal service not implemented: ALLIANZ (pay type: ALLIANZ) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:56.724Z"}
+[32minfo[39m: [12/14] Processing: GOH YIH EN GERMAINE (IHP) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:58.943Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for GOH YIH EN GERMAINE {"payType":"IHP","service":"clinic-automation","timestamp":"2026-02-19T10:43:58.944Z","visitId":"c49257b7-4cfc-4d92-83cf-7d83e104e09a"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to IHP portal service {"service":"clinic-automation","timestamp":"2026-02-19T10:43:58.944Z"}
+[33mwarn[39m: [SUBMIT] IHP portal automation not yet implemented {"payType":"IHP","service":"clinic-automation","timestamp":"2026-02-19T10:43:58.944Z","visitId":"c49257b7-4cfc-4d92-83cf-7d83e104e09a"}
+[33mwarn[39m: Portal service not implemented: IHP (pay type: IHP) {"service":"clinic-automation","timestamp":"2026-02-19T10:43:58.945Z"}
+[32minfo[39m: [13/14] Processing: YEE JUNG YIEN VICTOR (FULLERT) {"service":"clinic-automation","timestamp":"2026-02-19T10:44:01.329Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for YEE JUNG YIEN VICTOR {"payType":"FULLERT","service":"clinic-automation","timestamp":"2026-02-19T10:44:01.330Z","visitId":"79c79753-47f0-4000-a30a-a7fd15703ea6"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Fullerton portal service {"service":"clinic-automation","timestamp":"2026-02-19T10:44:01.331Z"}
+[33mwarn[39m: [SUBMIT] Fullerton portal automation not yet implemented {"payType":"FULLERT","service":"clinic-automation","timestamp":"2026-02-19T10:44:01.331Z","visitId":"79c79753-47f0-4000-a30a-a7fd15703ea6"}
+[33mwarn[39m: Portal service not implemented: FULLERTON (pay type: FULLERT) {"service":"clinic-automation","timestamp":"2026-02-19T10:44:01.331Z"}
+[32minfo[39m: [14/14] Processing: CHEN SIWEI (ALL) {"service":"clinic-automation","timestamp":"2026-02-19T10:44:03.540Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for CHEN SIWEI {"payType":"ALL","service":"clinic-automation","timestamp":"2026-02-19T10:44:03.540Z","visitId":"65af5f38-85f9-406c-82dc-82425efd9f84"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to IXCHANGE portal service {"service":"clinic-automation","timestamp":"2026-02-19T10:44:03.541Z"}
+[33mwarn[39m: [SUBMIT] IXCHANGE portal automation not yet implemented {"payType":"ALL","service":"clinic-automation","timestamp":"2026-02-19T10:44:03.541Z","visitId":"65af5f38-85f9-406c-82dc-82425efd9f84"}
+[33mwarn[39m: Portal service not implemented: IXCHANGE (pay type: ALL) {"service":"clinic-automation","timestamp":"2026-02-19T10:44:03.541Z"}
+[32minfo[39m: 
+=== Submission Summary === {"service":"clinic-automation","timestamp":"2026-02-19T10:44:05.809Z"}
+[32minfo[39m: Total: 14 {"service":"clinic-automation","timestamp":"2026-02-19T10:44:05.810Z"}
+[32minfo[39m: Submitted: 0 {"service":"clinic-automation","timestamp":"2026-02-19T10:44:05.810Z"}
+[32minfo[39m: Drafts: 0 {"service":"clinic-automation","timestamp":"2026-02-19T10:44:05.810Z"}
+[32minfo[39m: Filled only (no DB update): 0 {"service":"clinic-automation","timestamp":"2026-02-19T10:44:05.810Z"}
+[32minfo[39m: Errors: 2 {"service":"clinic-automation","timestamp":"2026-02-19T10:44:05.811Z"}
+[32minfo[39m: Not Started (unsupported): 12 {"service":"clinic-automation","timestamp":"2026-02-19T10:44:05.811Z"}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T10:44:06.572Z"}

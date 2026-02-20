@@ -1,0 +1,140 @@
+- generic [ref=e1]:
+  - generic [ref=e49]:
+    - generic [ref=e51]:
+      - generic [ref=e52]:
+        - img [ref=e342] [cursor=pointer]
+        - button [ref=e56] [cursor=pointer]:
+          - img [ref=e57]: keyboard_double_arrow_left
+      - list [ref=e61]:
+        - listitem [ref=e62]:
+          - generic [ref=e63] [cursor=pointer]:
+            - img [ref=e64]:
+              - img [ref=e65]
+            - paragraph [ref=e67]: Panel Services
+            - img [ref=e68]: expand_more
+          - list [ref=e318]:
+            - listitem [ref=e319]:
+              - generic [ref=e321] [cursor=pointer]: Create Panel Claim
+            - listitem [ref=e322]:
+              - generic [ref=e324] [cursor=pointer]: Search Panel Claims
+            - listitem [ref=e325]:
+              - generic [ref=e327] [cursor=pointer]: Download Resources
+        - listitem [ref=e69]:
+          - generic [ref=e70] [cursor=pointer]:
+            - img [ref=e71]:
+              - img [ref=e72]
+            - paragraph [ref=e74]: Pre-Authorisation
+            - img [ref=e75]: expand_more
+        - listitem [ref=e76]:
+          - generic [ref=e77] [cursor=pointer]:
+            - img [ref=e78]:
+              - img [ref=e79]
+            - paragraph [ref=e81]: Finance
+            - img [ref=e82]: expand_more
+    - generic [ref=e83]:
+      - generic [ref=e86]:
+        - heading [level=1] [ref=e343]: Create Panel Claim
+        - button [ref=e92] [cursor=pointer]:
+          - img [ref=e93]: more_vert
+      - generic [ref=e336]:
+        - heading [level=4] [ref=e344]: Member Details
+        - generic [ref=e338]:
+          - button [ref=e345] [cursor=pointer]: Medical Treatment
+          - button [ref=e346] [cursor=pointer]: Other Services
+          - img [ref=e341]: info
+  - dialog "Search Member Close" [ref=e350]:
+    - generic [ref=e353]:
+      - generic [ref=e354]:
+        - generic [ref=e355]: Search Member
+        - button "Close" [ref=e356] [cursor=pointer]:
+          - img [ref=e357]: close
+      - generic [ref=e358]:
+        - generic [ref=e360]:
+          - generic [ref=e363] [cursor=pointer]:
+            - generic [ref=e364]: Claim Type
+            - combobox "Claim Type SP (Panel)" [ref=e366]:
+              - generic [ref=e367]:
+                - generic [ref=e369]: SP (Panel)
+                - img [ref=e372]
+          - generic [ref=e377]:
+            - generic [ref=e378]: Member Name
+            - textbox "Member Name" [ref=e380]
+          - generic [ref=e384]:
+            - generic [ref=e385]: Member UIN./Membership ID
+            - textbox "Member UIN./Membership ID" [ref=e387]: S7137124G
+          - generic [ref=e391]:
+            - generic [ref=e392]: Company Entity Name
+            - textbox "Company Entity Name" [ref=e394]
+          - generic [ref=e398]:
+            - generic [ref=e399]:
+              - text: Date of Visit
+              - generic [ref=e400]: "*"
+            - textbox "Date of Visit" [ref=e402]: 13/2/2026
+            - button "Open calendar" [ref=e405] [cursor=pointer]:
+              - img [ref=e406]
+          - generic [ref=e411]:
+            - button "Search Others" [ref=e412] [cursor=pointer]
+            - button "Search AIA Member" [ref=e413] [cursor=pointer]
+            - button "Clear Filters" [ref=e414] [cursor=pointer]
+        - generic [ref=e416]:
+          - table [ref=e417]:
+            - row "Member Name Member UIN Member Type Company Entity Name Policy Number Network" [ref=e418]:
+              - columnheader [ref=e419]:
+                - generic:
+                  - generic:
+                    - generic:
+                      - checkbox [checked] [disabled]
+                      - generic:
+                        - img
+              - columnheader "Member Name" [ref=e420] [cursor=pointer]:
+                - button "Member Name" [ref=e421]:
+                  - generic [ref=e422]: Member Name
+                  - img [ref=e424]
+              - columnheader "Member UIN" [ref=e426] [cursor=pointer]:
+                - button "Member UIN" [ref=e427]:
+                  - generic [ref=e428]: Member UIN
+                  - img [ref=e430]
+              - columnheader "Member Type" [ref=e432] [cursor=pointer]:
+                - button "Member Type" [ref=e433]:
+                  - generic [ref=e434]: Member Type
+                  - img [ref=e436]
+              - columnheader "Company Entity Name" [ref=e438] [cursor=pointer]:
+                - button "Company Entity Name" [ref=e439]:
+                  - generic [ref=e440]: Company Entity Name
+                  - img [ref=e442]
+              - columnheader "Policy Number" [ref=e444] [cursor=pointer]:
+                - button "Policy Number" [ref=e445]:
+                  - generic [ref=e446]: Policy Number
+                  - img [ref=e448]
+              - columnheader "Network" [ref=e450] [cursor=pointer]:
+                - button "Network" [ref=e451]:
+                  - generic [ref=e452]: Network
+                  - img [ref=e454]
+            - row "Tan Wee Hiong Kevin S****124G Employee Straits Financial Group Pte. Ltd BGDC211000068 HSBCLIFE" [ref=e456]:
+              - cell [ref=e457]:
+                - generic [ref=e460] [cursor=pointer]:
+                  - checkbox [checked] [active] [ref=e462]
+                  - generic:
+                    - img
+              - cell "Tan Wee Hiong Kevin" [ref=e463]
+              - cell "S****124G" [ref=e464]
+              - cell "Employee" [ref=e465]
+              - cell "Straits Financial Group Pte. Ltd" [ref=e466]
+              - cell "BGDC211000068" [ref=e467]
+              - cell "HSBCLIFE" [ref=e468]
+          - group [ref=e469]:
+            - generic [ref=e471]:
+              - generic [ref=e472]:
+                - generic [ref=e473]: "Items per page:"
+                - combobox "50 Items per page:" [ref=e478] [cursor=pointer]:
+                  - generic [ref=e479]:
+                    - generic [ref=e481]: "50"
+                    - img [ref=e484]
+              - generic [ref=e487]:
+                - generic [ref=e488]: Showing 1 – 1 of 1 records
+                - button "Previous page" [disabled] [ref=e489]:
+                  - img [ref=e490]
+                - button "1" [disabled] [ref=e494]
+                - button "Next page" [disabled] [ref=e495]:
+                  - img [ref=e496]
+      - button "Add" [ref=e503] [cursor=pointer]

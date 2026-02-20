@@ -1,0 +1,39 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T07:52:30.348Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T07:52:30.350Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T07:52:30.351Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T07:52:30.351Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T07:52:32.242Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T07:52:32.246Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T07:52:34.953Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:52:36.922Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T07:52:38.889Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:52:39.931Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:52:41.438Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T07:52:42.963Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T07:52:44.472Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:52:45.574Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T07:52:46.150Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:52:48.870Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T07:52:50.695Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":10000,"searchKind":"search_others","service":"clinic-automation","timestamp":"2026-02-19T07:53:01.336Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":20000,"searchKind":"search_others","service":"clinic-automation","timestamp":"2026-02-19T07:53:12.005Z"}
+{
+  "success": false,
+  "reason": "save_button_missing",
+  "error": "Calculate Claim did not reach save-ready state",
+  "portal": "GE_NTUC",
+  "portalService": "GE_NTUC",
+  "portalUrl": null,
+  "savedAsDraft": false,
+  "submitted": false,
+  "screenshot": "screenshots/ge-ntuc-after-calculate-probe-ge-t0801699i-1771487798338.png",
+  "screenshotBeforeCalculate": "screenshots/ge-ntuc-filled-before-calculate-probe-ge-t0801699i-1771487675521.png",
+  "diagnosisPortalMatch": {
+    "portal": "GE_NTUC",
+    "match_text": "Pain, not elsewhere classified",
+    "match_score": 0,
+    "match_method": "generic_fallback",
+    "matched_by": "generic_draft_fallback"
+  }
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T07:56:38.671Z"}

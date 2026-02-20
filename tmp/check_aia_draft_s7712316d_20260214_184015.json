@@ -1,0 +1,44 @@
+{
+  "checkedAt": "2026-02-14T11:40:33.278Z",
+  "screenshot": "/Users/vincent/Baselrpacrm/screenshots/check_aia_draft_s7712316d_20260214_184015.png",
+  "result": {
+    "found": true,
+    "context": "aia",
+    "row": {
+      "visitDate": "13/02/2026",
+      "visitNo": "EV59956155",
+      "type": "Employee Visit",
+      "patientNric": "S7712316D",
+      "patientName": "HO NGAI LEONG",
+      "totalFee": "$49.05",
+      "totalClaim": "$49.05",
+      "mcDays": "0.0",
+      "remarks": ""
+    },
+    "rowsSeen": 1,
+    "url": "https://www.aiaclinic.com/aia/ClinicEmpVisitDraftListSubmit.ec",
+    "attempts": [
+      {
+        "context": "aia",
+        "attemptNo": 1,
+        "opened": true,
+        "rowsSeen": 1,
+        "url": "https://www.aiaclinic.com/aia/ClinicEmpVisitDraftListSubmit.ec",
+        "matched": true,
+        "reason": null,
+        "expectedVisitNo": "EV59956155",
+        "match": {
+          "visitDate": "13/02/2026",
+          "visitNo": "EV59956155",
+          "type": "Employee Visit",
+          "patientNric": "S7712316D",
+          "patientName": "HO NGAI LEONG",
+          "totalFee": "$49.05",
+          "totalClaim": "$49.05",
+          "mcDays": "0.0",
+          "remarks": ""
+        }
+      }
+    ]
+  }
+}

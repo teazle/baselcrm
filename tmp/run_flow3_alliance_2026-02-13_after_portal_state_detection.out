@@ -1,0 +1,54 @@
+[32minfo[39m: === Batch Claim Submission === {"service":"clinic-automation","timestamp":"2026-02-17T09:25:26.347Z"}
+[32minfo[39m: Visit IDs: Scoped query {"service":"clinic-automation","timestamp":"2026-02-17T09:25:26.350Z"}
+[32minfo[39m: Pay Type: All {"service":"clinic-automation","timestamp":"2026-02-17T09:25:26.351Z"}
+[32minfo[39m: Portal Targets: ALLIANCE_MEDINET {"service":"clinic-automation","timestamp":"2026-02-17T09:25:26.351Z"}
+[32minfo[39m: Date Range: 2026-02-13 to 2026-02-13 {"service":"clinic-automation","timestamp":"2026-02-17T09:25:26.351Z"}
+[32minfo[39m: Portal Only: true {"service":"clinic-automation","timestamp":"2026-02-17T09:25:26.351Z"}
+[32minfo[39m: Save as Draft: true {"service":"clinic-automation","timestamp":"2026-02-17T09:25:26.351Z"}
+[32minfo[39m: Leave Browser Open: false {"service":"clinic-automation","timestamp":"2026-02-17T09:25:26.351Z"}
+(node:7346) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vincent/Baselrpacrm/apps/crm/src/lib/rpa/portals.shared.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vincent/Baselrpacrm/apps/crm/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-17T09:25:26.738Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-17T09:25:26.738Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-17T09:25:26.738Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-17T09:25:26.739Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-17T09:25:28.725Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-17T09:25:28.728Z"}
+[32minfo[39m: Found 1 visit(s) to process {"service":"clinic-automation","timestamp":"2026-02-17T09:25:29.186Z"}
+[32minfo[39m: [1/1] Processing: WOO CHERN SEE (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-17T09:25:29.423Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for WOO CHERN SEE {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-17T09:25:29.425Z","visitId":"2c78d589-8d45-4788-99d9-6c619bec31e7"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Alliance Medinet {"service":"clinic-automation","timestamp":"2026-02-17T09:25:29.426Z"}
+[32minfo[39m: [SUBMIT] Alliance form data: {"doctorName":"Tung Yu Yee Mathew","matchedTag":"ALLIANC","nric":"T0801699I","service":"clinic-automation","spCode":"MT","timestamp":"2026-02-17T09:25:29.427Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-17T09:25:31.135Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Panel Service {"selector":"div.sidebar a.nav-link:has-text(\"Panel Service\")","service":"clinic-automation","timestamp":"2026-02-17T09:25:33.164Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-17T09:25:33.823Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-17T09:25:34.524Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-17T09:25:36.029Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-17T09:25:36.094Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-17T09:25:36.152Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-17T09:25:36.263Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-17T09:25:36.567Z"}
+[33mwarn[39m: [SUBMIT] Alliance visit attempt failed {"attempt":1,"canRetry":false,"error":"Add closed Search Member but claim form did not render (portal runtime state: ERROR TypeError: Cannot read properties of undefined (reading 'res')\n    at <computed> (https://connect.alliancemedinet.com/463.2a90d0d779c4b349.js:1:5176555)\n    at Object.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:2944987)\n    at _0x33c12b.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3046069)\n    at _0x321261._next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3045302)\n    at _0x321261.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3044527)\n    at https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:1371207\n    at _0x5b0c12 (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3055691)\n    at _0x49c078.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:1370878)\n    at _0x32f59f.close (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3357186)\n    at _0x183d2f._finishDialogClose (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3394070))","lastAction":"select-member.clicked-add","maxAttempts":2,"retryable":false,"service":"clinic-automation","timestamp":"2026-02-17T09:25:56.291Z","traceId":null}
+[31merror[39m: [SUBMIT] Error submitting claim for WOO CHERN SEE {"error":"Add closed Search Member but claim form did not render (portal runtime state: ERROR TypeError: Cannot read properties of undefined (reading 'res')\n    at <computed> (https://connect.alliancemedinet.com/463.2a90d0d779c4b349.js:1:5176555)\n    at Object.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:2944987)\n    at _0x33c12b.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3046069)\n    at _0x321261._next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3045302)\n    at _0x321261.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3044527)\n    at https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:1371207\n    at _0x5b0c12 (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3055691)\n    at _0x49c078.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:1370878)\n    at _0x32f59f.close (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3357186)\n    at _0x183d2f._finishDialogClose (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3394070))","service":"clinic-automation","timestamp":"2026-02-17T09:25:56.291Z"}
+[31merror[39m: Failed to submit: Add closed Search Member but claim form did not render (portal runtime state: ERROR TypeError: Cannot read properties of undefined (reading 'res')
+    at <computed> (https://connect.alliancemedinet.com/463.2a90d0d779c4b349.js:1:5176555)
+    at Object.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:2944987)
+    at _0x33c12b.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3046069)
+    at _0x321261._next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3045302)
+    at _0x321261.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3044527)
+    at https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:1371207
+    at _0x5b0c12 (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3055691)
+    at _0x49c078.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:1370878)
+    at _0x32f59f.close (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3357186)
+    at _0x183d2f._finishDialogClose (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3394070)) {"service":"clinic-automation","timestamp":"2026-02-17T09:25:56.827Z"}
+[32minfo[39m: 
+=== Submission Summary === {"service":"clinic-automation","timestamp":"2026-02-17T09:25:59.153Z"}
+[32minfo[39m: Total: 1 {"service":"clinic-automation","timestamp":"2026-02-17T09:25:59.154Z"}
+[32minfo[39m: Submitted: 0 {"service":"clinic-automation","timestamp":"2026-02-17T09:25:59.154Z"}
+[32minfo[39m: Drafts: 0 {"service":"clinic-automation","timestamp":"2026-02-17T09:25:59.154Z"}
+[32minfo[39m: Filled only (no DB update): 0 {"service":"clinic-automation","timestamp":"2026-02-17T09:25:59.154Z"}
+[32minfo[39m: Errors: 1 {"service":"clinic-automation","timestamp":"2026-02-17T09:25:59.154Z"}
+[32minfo[39m: Not Started (unsupported): 0 {"service":"clinic-automation","timestamp":"2026-02-17T09:25:59.154Z"}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-17T09:25:59.552Z"}

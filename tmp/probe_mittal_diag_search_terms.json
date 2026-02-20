@@ -1,0 +1,292 @@
+{
+  "generatedAt": "2026-02-13T00:05:54.644Z",
+  "results": [
+    {
+      "term": "M25.51",
+      "url": "https://www.mhcasia.net/mhc/SelectDiagnosisSubmit.ec",
+      "hasShoulder": false,
+      "hasM25": false,
+      "firstDataRows": [
+        {
+          "idx": 0,
+          "text": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 0 - 0 of 0 Code Description"
+        },
+        {
+          "idx": 1,
+          "text": "Click on the diagnosis to select it"
+        },
+        {
+          "idx": 2,
+          "text": "Description Code that contains starts with equals to Sort Code Description"
+        },
+        {
+          "idx": 3,
+          "text": "Description Code that contains starts with equals to"
+        },
+        {
+          "idx": 4,
+          "text": "Sort Code Description"
+        },
+        {
+          "idx": 5,
+          "text": "0 - 0 of 0"
+        },
+        {
+          "idx": 6,
+          "text": "0 - 0 of 0"
+        },
+        {
+          "idx": 7,
+          "text": "Code Description"
+        }
+      ],
+      "bodySample": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 0 - 0 of 0 Code Description"
+    },
+    {
+      "term": "M2551",
+      "url": "https://www.mhcasia.net/mhc/SelectDiagnosisSubmit.ec",
+      "hasShoulder": false,
+      "hasM25": false,
+      "firstDataRows": [
+        {
+          "idx": 0,
+          "text": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 0 - 0 of 0 Code Description"
+        },
+        {
+          "idx": 1,
+          "text": "Click on the diagnosis to select it"
+        },
+        {
+          "idx": 2,
+          "text": "Description Code that contains starts with equals to Sort Code Description"
+        },
+        {
+          "idx": 3,
+          "text": "Description Code that contains starts with equals to"
+        },
+        {
+          "idx": 4,
+          "text": "Sort Code Description"
+        },
+        {
+          "idx": 5,
+          "text": "0 - 0 of 0"
+        },
+        {
+          "idx": 6,
+          "text": "0 - 0 of 0"
+        },
+        {
+          "idx": 7,
+          "text": "Code Description"
+        }
+      ],
+      "bodySample": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 0 - 0 of 0 Code Description"
+    },
+    {
+      "term": "M25",
+      "url": "https://www.mhcasia.net/mhc/SelectDiagnosisSubmit.ec",
+      "hasShoulder": false,
+      "hasM25": false,
+      "firstDataRows": [
+        {
+          "idx": 0,
+          "text": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 0 - 0 of 0 Code Description"
+        },
+        {
+          "idx": 1,
+          "text": "Click on the diagnosis to select it"
+        },
+        {
+          "idx": 2,
+          "text": "Description Code that contains starts with equals to Sort Code Description"
+        },
+        {
+          "idx": 3,
+          "text": "Description Code that contains starts with equals to"
+        },
+        {
+          "idx": 4,
+          "text": "Sort Code Description"
+        },
+        {
+          "idx": 5,
+          "text": "0 - 0 of 0"
+        },
+        {
+          "idx": 6,
+          "text": "0 - 0 of 0"
+        },
+        {
+          "idx": 7,
+          "text": "Code Description"
+        }
+      ],
+      "bodySample": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 0 - 0 of 0 Code Description"
+    },
+    {
+      "term": "shoulder",
+      "url": "https://www.mhcasia.net/mhc/SelectDiagnosisSubmit.ec",
+      "hasShoulder": true,
+      "hasM25": true,
+      "firstDataRows": [
+        {
+          "idx": 0,
+          "text": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 1 - 9 of 9 Code Description C446 Other malignant neoplasms of skin (upper limb, including shoulder) M25.511 Pain in the right shoulder M25.512 Pain in the left shoulder M750 Adhesive capsulitis of shoulder M758 Other shoulder lesions M87.011 Avascular necrosis shoulder S409 Superficial injury of shoulder and upper arm S430 Dislocation of shoulder joint S434 Sprain and strain of shoulder joint"
+        },
+        {
+          "idx": 1,
+          "text": "Click on the diagnosis to select it"
+        },
+        {
+          "idx": 2,
+          "text": "Description Code that contains starts with equals to Sort Code Description"
+        },
+        {
+          "idx": 3,
+          "text": "Description Code that contains starts with equals to"
+        },
+        {
+          "idx": 4,
+          "text": "Sort Code Description"
+        },
+        {
+          "idx": 5,
+          "text": "1 - 9 of 9"
+        },
+        {
+          "idx": 6,
+          "text": "1 - 9 of 9"
+        },
+        {
+          "idx": 7,
+          "text": "Code Description C446 Other malignant neoplasms of skin (upper limb, including shoulder) M25.511 Pain in the right shoulder M25.512 Pain in the left shoulder M750 Adhesive capsulitis of shoulder M758 Other shoulder lesions M87.011 Avascular necrosis shoulder S409 Superficial injury of shoulder and upper arm S430 Dislocation of shoulder joint S434 Sprain and strain of shoulder joint"
+        }
+      ],
+      "bodySample": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 1 - 9 of 9 Code Description C446 Other malignant neoplasms of skin (upper limb, including shoulder) M25.511 Pain in the right shoulder M25.512 Pain in the left shoulder M750 Adhesive capsulitis of shoulder M758 Other shoulder lesions M87.011 Avascular necrosis shoulder S409 Superficial injury of shoulder and upper arm S430 Dislocation of shoulder joint S434 Sprain and strain of shoulder joint"
+    },
+    {
+      "term": "right shoulder",
+      "url": "https://www.mhcasia.net/mhc/SelectDiagnosisSubmit.ec",
+      "hasShoulder": true,
+      "hasM25": true,
+      "firstDataRows": [
+        {
+          "idx": 0,
+          "text": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 1 - 1 of 1 Code Description M25.511 Pain in the right shoulder"
+        },
+        {
+          "idx": 1,
+          "text": "Click on the diagnosis to select it"
+        },
+        {
+          "idx": 2,
+          "text": "Description Code that contains starts with equals to Sort Code Description"
+        },
+        {
+          "idx": 3,
+          "text": "Description Code that contains starts with equals to"
+        },
+        {
+          "idx": 4,
+          "text": "Sort Code Description"
+        },
+        {
+          "idx": 5,
+          "text": "1 - 1 of 1"
+        },
+        {
+          "idx": 6,
+          "text": "1 - 1 of 1"
+        },
+        {
+          "idx": 7,
+          "text": "Code Description M25.511 Pain in the right shoulder"
+        }
+      ],
+      "bodySample": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 1 - 1 of 1 Code Description M25.511 Pain in the right shoulder"
+    },
+    {
+      "term": "pain in right shoulder",
+      "url": "https://www.mhcasia.net/mhc/SelectDiagnosisSubmit.ec",
+      "hasShoulder": false,
+      "hasM25": false,
+      "firstDataRows": [
+        {
+          "idx": 0,
+          "text": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 0 - 0 of 0 Code Description"
+        },
+        {
+          "idx": 1,
+          "text": "Click on the diagnosis to select it"
+        },
+        {
+          "idx": 2,
+          "text": "Description Code that contains starts with equals to Sort Code Description"
+        },
+        {
+          "idx": 3,
+          "text": "Description Code that contains starts with equals to"
+        },
+        {
+          "idx": 4,
+          "text": "Sort Code Description"
+        },
+        {
+          "idx": 5,
+          "text": "0 - 0 of 0"
+        },
+        {
+          "idx": 6,
+          "text": "0 - 0 of 0"
+        },
+        {
+          "idx": 7,
+          "text": "Code Description"
+        }
+      ],
+      "bodySample": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 0 - 0 of 0 Code Description"
+    },
+    {
+      "term": "acj",
+      "url": "https://www.mhcasia.net/mhc/SelectDiagnosisSubmit.ec",
+      "hasShoulder": false,
+      "hasM25": false,
+      "firstDataRows": [
+        {
+          "idx": 0,
+          "text": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 0 - 0 of 0 Code Description"
+        },
+        {
+          "idx": 1,
+          "text": "Click on the diagnosis to select it"
+        },
+        {
+          "idx": 2,
+          "text": "Description Code that contains starts with equals to Sort Code Description"
+        },
+        {
+          "idx": 3,
+          "text": "Description Code that contains starts with equals to"
+        },
+        {
+          "idx": 4,
+          "text": "Sort Code Description"
+        },
+        {
+          "idx": 5,
+          "text": "0 - 0 of 0"
+        },
+        {
+          "idx": 6,
+          "text": "0 - 0 of 0"
+        },
+        {
+          "idx": 7,
+          "text": "Code Description"
+        }
+      ],
+      "bodySample": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 0 - 0 of 0 Code Description"
+    }
+  ]
+}

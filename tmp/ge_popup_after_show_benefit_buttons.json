@@ -1,0 +1,38 @@
+[
+  {
+    "id": null,
+    "name": null,
+    "type": "button",
+    "value": "Show Benefit",
+    "text": null,
+    "visible": true,
+    "disabled": false
+  },
+  {
+    "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+    "name": "ctl00$MainContent$uc_MakeClaim$btnmcreasons",
+    "type": "button",
+    "value": "+",
+    "text": null,
+    "visible": true,
+    "disabled": false
+  },
+  {
+    "id": "ctl00_MainContent_uc_MakeClaim_btnCancel",
+    "name": "ctl00$MainContent$uc_MakeClaim$btnCancel",
+    "type": "submit",
+    "value": "Cancel",
+    "text": null,
+    "visible": true,
+    "disabled": false
+  },
+  {
+    "id": "ctl00_MainContent_uc_MakeClaim_btnReloadData",
+    "name": "ctl00$MainContent$uc_MakeClaim$btnReloadData",
+    "type": "submit",
+    "value": null,
+    "text": null,
+    "visible": true,
+    "disabled": false
+  }
+]

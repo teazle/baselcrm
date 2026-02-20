@@ -1,0 +1,79 @@
+[32minfo[39m: === Batch Claim Submission === {"service":"clinic-automation","timestamp":"2026-02-18T15:22:17.702Z"}
+[32minfo[39m: Visit IDs: 6c890353-6baf-4b3b-ac77-3fc99e96c79b, d3a164b7-1b4f-490d-afbf-f9ef6dc1bd14 {"service":"clinic-automation","timestamp":"2026-02-18T15:22:17.705Z"}
+[32minfo[39m: Pay Type: All {"service":"clinic-automation","timestamp":"2026-02-18T15:22:17.705Z"}
+[32minfo[39m: Portal Targets: ALLIANCE_MEDINET {"service":"clinic-automation","timestamp":"2026-02-18T15:22:17.705Z"}
+[32minfo[39m: Date Range: - to - {"service":"clinic-automation","timestamp":"2026-02-18T15:22:17.705Z"}
+[32minfo[39m: Portal Only: true {"service":"clinic-automation","timestamp":"2026-02-18T15:22:17.705Z"}
+[32minfo[39m: Save as Draft: false {"service":"clinic-automation","timestamp":"2026-02-18T15:22:17.706Z"}
+[32minfo[39m: Leave Browser Open: false {"service":"clinic-automation","timestamp":"2026-02-18T15:22:17.706Z"}
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-18T15:22:19.128Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-18T15:22:19.129Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-18T15:22:19.130Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-18T15:22:19.130Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-18T15:22:21.123Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-18T15:22:21.124Z"}
+[32minfo[39m: Found 2 visit(s) to process {"service":"clinic-automation","timestamp":"2026-02-18T15:22:21.945Z"}
+[32minfo[39m: [1/2] Processing: TAN WEE HIONG KEVIN (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-18T15:22:22.204Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for TAN WEE HIONG KEVIN {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-18T15:22:22.206Z","visitId":"6c890353-6baf-4b3b-ac77-3fc99e96c79b"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Alliance Medinet {"service":"clinic-automation","timestamp":"2026-02-18T15:22:22.578Z"}
+[32minfo[39m: [SUBMIT] Alliance form data: {"doctorName":"Tan Guoping Kelvin","matchedTag":"ALLIANC","nric":"S7137124G","service":"clinic-automation","spCode":"KT","timestamp":"2026-02-18T15:22:22.579Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-18T15:22:25.416Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:22:26.749Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-18T15:22:28.723Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:22:30.245Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:22:31.784Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-18T15:22:33.299Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-18T15:22:34.806Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:22:35.944Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-18T15:22:36.560Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-14/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:22:39.262Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-14/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-18T15:22:41.079Z"}
+[32minfo[39m: [ALLIANCE] Selected member and opened claim form {"service":"clinic-automation","timestamp":"2026-02-18T15:22:50.116Z"}
+[32minfo[39m: [ALLIANCE] Set MC Days {"selector":"input[placeholder*=\"MC Days\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:22:53.372Z"}
+[32minfo[39m: [ALLIANCE] Clicked Add Diagnosis {"selector":"button:has-text(\"Add Diagnosis\")","service":"clinic-automation","timestamp":"2026-02-18T15:22:53.969Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Name (Pain in left foot) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Name\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:22:55.037Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (Pain in left foot) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-18T15:22:55.656Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Name (Pain) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Name\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:23:01.447Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (Pain) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-18T15:23:02.054Z"}
+[32minfo[39m: [ALLIANCE] Set Consultation Fee {"selector":"input[placeholder*=\"Consultation Fee\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:23:14.837Z"}
+[32minfo[39m: [ALLIANCE] Filled remark {"selector":"textarea[placeholder*=\"remark\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:23:15.957Z"}
+[32minfo[39m: [ALLIANCE] Clicked Calculate Claim {"selector":"button:has-text(\"Calculate Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:23:16.560Z"}
+[32minfo[39m: [ALLIANCE] Clicked Calculate Claim (consultation-type retry) {"selector":"button:has-text(\"Calculate Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:23:19.754Z"}
+[33mwarn[39m: [SUBMIT] Alliance visit attempt failed {"attempt":1,"canRetry":false,"error":"Calculate Claim validation failed: Invalid field: claimPanelOutpatientConsultations","lastAction":"fill.consultation-type.open","maxAttempts":2,"retryable":false,"service":"clinic-automation","timestamp":"2026-02-18T15:23:20.406Z","traceId":null}
+[31merror[39m: [SUBMIT] Error submitting claim for TAN WEE HIONG KEVIN {"error":"Calculate Claim validation failed: Invalid field: claimPanelOutpatientConsultations","service":"clinic-automation","timestamp":"2026-02-18T15:23:20.406Z"}
+[32minfo[39m: [SUBMIT] Verification run: not persisting submission_status=error {"error":"Calculate Claim validation failed: Invalid field: claimPanelOutpatientConsultations","payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-18T15:23:20.406Z","visitId":"6c890353-6baf-4b3b-ac77-3fc99e96c79b"}
+[31merror[39m: Failed to submit: Calculate Claim validation failed: Invalid field: claimPanelOutpatientConsultations {"service":"clinic-automation","timestamp":"2026-02-18T15:23:20.406Z"}
+[32minfo[39m: [2/2] Processing: KIARA SINGH (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-18T15:23:22.930Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for KIARA SINGH {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-18T15:23:22.930Z","visitId":"d3a164b7-1b4f-490d-afbf-f9ef6dc1bd14"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Alliance Medinet {"service":"clinic-automation","timestamp":"2026-02-18T15:23:22.931Z"}
+[32minfo[39m: [SUBMIT] Alliance form data: {"doctorName":"Palanisamy Arul Murugan","matchedTag":"ALLIANC","nric":"T1722895H","service":"clinic-automation","spCode":"PAM","timestamp":"2026-02-18T15:23:22.933Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-18T15:23:24.827Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:23:28.723Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-18T15:23:29.967Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-18T15:23:31.478Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:23:32.563Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-18T15:23:33.148Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-14/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:23:35.863Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-14/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-18T15:23:37.694Z"}
+[32minfo[39m: [ALLIANCE] Selected member and opened claim form {"service":"clinic-automation","timestamp":"2026-02-18T15:23:46.710Z"}
+[32minfo[39m: [ALLIANCE] Set MC Days {"selector":"input[placeholder*=\"MC Days\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:23:50.107Z"}
+[32minfo[39m: [ALLIANCE] Clicked Add Diagnosis {"selector":"button:has-text(\"Add Diagnosis\")","service":"clinic-automation","timestamp":"2026-02-18T15:23:50.773Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Code (S10) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Code\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:23:51.923Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (S10) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-18T15:23:52.571Z"}
+[32minfo[39m: [ALLIANCE] Set Consultation Fee {"selector":"input[placeholder*=\"Consultation Fee\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:24:09.015Z"}
+[32minfo[39m: [ALLIANCE] Filled remark {"selector":"textarea[placeholder*=\"remark\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:24:10.132Z"}
+[32minfo[39m: [ALLIANCE] Clicked Calculate Claim {"selector":"button:has-text(\"Calculate Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:24:10.749Z"}
+[32minfo[39m: [ALLIANCE] Clicked Calculate Claim (consultation-type retry) {"selector":"button:has-text(\"Calculate Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:24:13.997Z"}
+[33mwarn[39m: [SUBMIT] Alliance visit attempt failed {"attempt":1,"canRetry":false,"error":"Calculate Claim validation failed: Invalid field: claimPanelOutpatientConsultations","lastAction":"fill.consultation-type.open","maxAttempts":2,"retryable":false,"service":"clinic-automation","timestamp":"2026-02-18T15:24:14.655Z","traceId":null}
+[31merror[39m: [SUBMIT] Error submitting claim for KIARA SINGH {"error":"Calculate Claim validation failed: Invalid field: claimPanelOutpatientConsultations","service":"clinic-automation","timestamp":"2026-02-18T15:24:14.656Z"}
+[32minfo[39m: [SUBMIT] Verification run: not persisting submission_status=error {"error":"Calculate Claim validation failed: Invalid field: claimPanelOutpatientConsultations","payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-18T15:24:14.656Z","visitId":"d3a164b7-1b4f-490d-afbf-f9ef6dc1bd14"}
+[31merror[39m: Failed to submit: Calculate Claim validation failed: Invalid field: claimPanelOutpatientConsultations {"service":"clinic-automation","timestamp":"2026-02-18T15:24:14.656Z"}
+[32minfo[39m: 
+=== Submission Summary === {"service":"clinic-automation","timestamp":"2026-02-18T15:24:17.069Z"}
+[32minfo[39m: Total: 2 {"service":"clinic-automation","timestamp":"2026-02-18T15:24:17.070Z"}
+[32minfo[39m: Submitted: 0 {"service":"clinic-automation","timestamp":"2026-02-18T15:24:17.070Z"}
+[32minfo[39m: Drafts: 0 {"service":"clinic-automation","timestamp":"2026-02-18T15:24:17.070Z"}
+[32minfo[39m: Filled only (no DB update): 0 {"service":"clinic-automation","timestamp":"2026-02-18T15:24:17.070Z"}
+[32minfo[39m: Errors: 2 {"service":"clinic-automation","timestamp":"2026-02-18T15:24:17.070Z"}
+[32minfo[39m: Not Started (unsupported): 0 {"service":"clinic-automation","timestamp":"2026-02-18T15:24:17.070Z"}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-18T15:24:17.611Z"}

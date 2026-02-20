@@ -1,0 +1,49 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T09:51:17.243Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T09:51:17.248Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T09:51:17.248Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T09:51:17.248Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T09:51:19.437Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T09:51:19.438Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T09:51:21.933Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:51:24.351Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T09:51:26.355Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:51:26.947Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:51:28.458Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T09:51:29.978Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T09:51:31.491Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T09:51:32.655Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T09:51:33.243Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T09:51:35.964Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T09:51:37.803Z"}
+{
+  "selectors": {
+    "parent": false,
+    "insurer": false,
+    "refType": true,
+    "oldRefType": true,
+    "refInput": true
+  },
+  "matchedLines": [
+    {
+      "i": 227,
+      "line": "data: \"{ 'prefixText': '\" + request.term + \"','count':'\" + count + \"','contextKey':'\" + ContextKey + \"','ClinicID':'\" + $(\"input:hidden[id$='hfParentClinicID']\").val() + \"','insurer':'\" + $(\"input:hidden[id$='hfInsurer']\").val() + \"'}\","
+    },
+    {
+      "i": 253,
+      "line": "$(\"input:hidden[id$='hfParentClinicID']\").val(i.item.val);"
+    },
+    {
+      "i": 278,
+      "line": "data: \"{ 'prefixText': '\" + request.term + \"','count':'\" + count + \"','contextKey':'\" + ContextKey + \"','ClinicID':'\" + $(\"input:hidden[id$='hfParentClinicID']\").val() + \"','insurer':'\" + $(\"input:hidden[id$='hfInsurer']\").val() + \"'}\","
+    },
+    {
+      "i": 749,
+      "line": "data: \"{ 'prefixText': '\" + request.term + \"','count':'\" + count + \"','contextKey':'\" + ContextKey + \"','ClinicID':'\" + $(\"input:hidden[id$='hfParentClinicID']\").val() + \"','insurer':'\" + $(\"input:hidden[id$='hfInsurer']\").val() + \"'}\","
+    },
+    {
+      "i": 773,
+      "line": "$(\"input:hidden[id$='hfParentClinicID']\").val(i.item.val);"
+    }
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T09:51:44.873Z"}

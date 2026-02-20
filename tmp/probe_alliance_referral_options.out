@@ -1,0 +1,96 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-18T15:17:12.269Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-18T15:17:12.282Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-18T15:17:12.282Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-18T15:17:12.282Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-18T15:17:14.356Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-18T15:17:14.357Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-18T15:17:17.753Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:17:20.142Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-18T15:17:22.123Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:17:22.717Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:17:24.229Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-18T15:17:25.743Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-18T15:17:27.253Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:17:28.343Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-18T15:17:28.910Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-14/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:17:31.647Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-14/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-18T15:17:33.478Z"}
+[32minfo[39m: [ALLIANCE] Selected member and opened claim form {"service":"clinic-automation","timestamp":"2026-02-18T15:17:44.675Z"}
+[32minfo[39m: [ALLIANCE] Set MC Days {"selector":"input[placeholder*=\"MC Days\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:17:48.092Z"}
+[32minfo[39m: [ALLIANCE] Clicked Add Diagnosis {"selector":"button:has-text(\"Add Diagnosis\")","service":"clinic-automation","timestamp":"2026-02-18T15:17:48.717Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Code (S10) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Code\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:17:49.862Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (S10) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-18T15:17:50.493Z"}
+TYPE_OPTIONS [
+  "Clinic",
+  "Government Restructured Hospital",
+  "Individual",
+  "Polyclinic",
+  "Private Hospital",
+  "Retailer",
+  "Shop"
+]
+ENTITY_OPTIONS_S [
+  "171 STIRLING FAMILY CLINIC",
+  "1DOC REDHILL FAMILY CLINIC (FKA REDHILL CLINIC BY SILKROUTES MEDIHEALTH)",
+  "57 MEDICAL CLINIC (WOODLANDS)",
+  "57 MEDICAL CLINIC (YISHUN)",
+  "94 DAWSON FAMILY CLINIC",
+  "A SPECIALIST CLINIC FOR SINUS, SNORING & ENT",
+  "A&G MEDICAL CLINIC (FORMERLY KNOWN AS WL&H MEDICAL)",
+  "ABEL SOH DIABETES, THYROID AND ENDOCRINE CLINIC PTE LTD",
+  "ACE SPECIALIST SURGERY & ENDOSCOPY CENTRE (GLENEAGLES)",
+  "ACE SPECIALIST SURGERY & ENDOSCOPY CENTRE (MOUNT ELIZABETH)",
+  "ACE UROLOGY CLINIC & SURGERY",
+  "ACHIEVE SPINE AND ORTHOPAEDIC ALVERNIA CENTRE",
+  "ACHIEVE SPINE AND ORTHOPAEDIC CENTRE",
+  "ACHIEVE SPINE AND ORTHOPAEDIC NOVENA CENTRE",
+  "ACME ORTHOPAEDICS (NOVENA)",
+  "ACME ORTHOPAEDICS (PARKWAY EAST)",
+  "ACORN GASTROENTEROLOGY (FARRER PARK)",
+  "ACORN GASTROENTEROLOGY (GLENEAGLES)",
+  "ACORN GASTROENTEROLOGY (MOUNT ELIZABETH)",
+  "ACORN GASTROENTEROLOGY (PARKWAY EAST)",
+  "ACTIV ORTHOPAEDIC CENTRE (GLENEAGLES)",
+  "ACUMED MEDICAL GROUP (SENGKANG)",
+  "ACUMED MEDICAL GROUP (TAMPINES WEST)",
+  "ACUMED MEDICAL GROUP (TEBAN GARDENS)",
+  "ACUMED MEDICAL GROUP (TUAS AMENITY)",
+  "ACUMED MEDICAL GROUP (WOODLANDS)",
+  "ADVANCE CLINIC & SURGERY PTE LTD",
+  "ADVANCED BRAIN & SPINE SURGICAL CENTRE (MOUNT ELIZABETH)",
+  "ADVANCED BRAIN AND SPINE SURGICAL CENTRE (GLENEAGLES)",
+  "ADVANCED COLORECTAL AND GENERAL SURGERY"
+]
+ENTITY_OPTIONS_C [
+  "1 MEDICAL TECK GHEE",
+  "171 STIRLING FAMILY CLINIC",
+  "1DOC MEDICAL CENTRE (BEDOK)",
+  "1DOC REDHILL FAMILY CLINIC (FKA REDHILL CLINIC BY SILKROUTES MEDIHEALTH)",
+  "360 CLINIC",
+  "360 CLINIC (BOON LAY)",
+  "57 MEDICAL CLINIC (GEYLANG BAHRU)",
+  "57 MEDICAL CLINIC (KALLANG AIRPORT)",
+  "57 MEDICAL CLINIC (PARKWAY CENTRE)",
+  "57 MEDICAL CLINIC (PEK KIO)",
+  "57 MEDICAL CLINIC (WOODLANDS)",
+  "57 MEDICAL CLINIC (YISHUN)",
+  "94 DAWSON FAMILY CLINIC",
+  "A SPECIALIST CLINIC FOR SINUS, SNORING & ENT",
+  "A&G MEDICAL CLINIC (FORMERLY KNOWN AS WL&H MEDICAL)",
+  "A+FFORDABLE CLINIC (AMK AVE 10)",
+  "A1 MEDICAL CLINIC",
+  "A1 MEDICAL CLINIC (KOVAN)",
+  "AARE UROCARE PTE LTD",
+  "ABEL SOH DIABETES, THYROID AND ENDOCRINE CLINIC PTE LTD",
+  "ACCORD MEDICAL CLINIC (UBI)",
+  "ACE CARDIOLOGY CLINIC",
+  "ACE INTERNATIONAL ORTHOPAEDIC CENTRE (FARRER PARK)",
+  "ACE INTERNATIONAL ORTHOPAEDIC CENTRE (NOVENA)",
+  "ACE SPECIALIST SURGERY & ENDOSCOPY CENTRE (GLENEAGLES)",
+  "ACE SPECIALIST SURGERY & ENDOSCOPY CENTRE (MOUNT ELIZABETH)",
+  "ACE UROLOGY CLINIC & SURGERY",
+  "ACHIEVE SPINE AND ORTHOPAEDIC ALVERNIA CENTRE",
+  "ACHIEVE SPINE AND ORTHOPAEDIC CENTRE",
+  "ACHIEVE SPINE AND ORTHOPAEDIC NOVENA CENTRE"
+]
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-18T15:17:59.102Z"}

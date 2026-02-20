@@ -1,0 +1,543 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T09:43:03.823Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T09:43:03.826Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T09:43:03.826Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T09:43:03.827Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T09:43:06.160Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T09:43:06.162Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T09:43:08.732Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:43:09.709Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T09:43:11.616Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:43:12.176Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:43:13.661Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:43:15.217Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T09:43:16.739Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T09:43:18.251Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T09:43:19.351Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T09:43:19.909Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T09:43:22.542Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T09:43:24.320Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"Lower back pain","timestamp":"2026-02-19T09:43:38.216Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":5,"service":"clinic-automation","term":"Lower back","timestamp":"2026-02-19T09:43:40.090Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":5,"service":"clinic-automation","term":"pain","timestamp":"2026-02-19T09:43:42.838Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"lower back pain","timestamp":"2026-02-19T09:43:50.721Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"back pain","timestamp":"2026-02-19T09:43:58.419Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"backache","timestamp":"2026-02-19T09:44:06.170Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"L","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:44:12.894Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"B","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:44:19.674Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"P","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:44:26.458Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"F","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:44:33.170Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"H","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:44:39.885Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"A","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:44:46.605Z"}
+[32minfo[39m: [GE DX] soft fallback click {"clicked":true,"fallbackTerm":"pain","score":0.25,"selectedCode":"R52","selectedText":"Pain, not elsewhere classified","service":"clinic-automation","timestamp":"2026-02-19T09:44:48.949Z"}
+[probe] suggestion-items [
+  {
+    "text": "SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD",
+    "display": "list-item",
+    "visible": true
+  }
+]
+[probe] requests [
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "POST",
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "post": "ctl00_AllianceUser_ScriptManager_HiddenField=&__EVENTTARGET=&__EVENTARGUMENT=&__VIEWSTATE=YhBH6QyVP5oO%2BFT0uUsIsVxEHKTojWIYLZUjcgseItzb4U5aqHE0eFDiEQqhkCZm9W%2F%2BGgfcAgmf%2F%2F4RhOtWyS6n0uG2kxv0GgpTgmRIlH2bHPUGG7nevwAtwyXd8uI8iT9jzS3OqI81RQP8BgbXmLblno9LmE85HYF5tumnAeV8hxh7JFLsobP%2FTjMzRUBCoQJ135c7wukrzvSP2qGG%2BvLtmVYWdQjq2izrKe%2FpI7V5YQlG2oGiyUapPn2Ih7z8YjIQSZPHMAdH5gkLHr%2FEteqQMkRqSLW1LqQQswlDaCjSHVU74xsIBC4LwpFkx7%2F%2FosoZwMhiJ6QG0PgbrcMMuZ998aP9ZIYZ42gefQ4OV02lIB9sGhDM1bA%2BJk7JcP8%2BiO2QFSmPqHrPnTldw3BRWU%2B0hQKpEEtLPJtf49aDQEbiBIBVSlV8YwlLhdfxr4emBuq9wyA8xnP9ZkbXY3RgDIyvPQN3uub0VWFd9Psz20otkw9XchGfHoJHBNMDNDBvYH26smhdJTbRGZ4F6XXo82eFOa5ptne7DCDvy1Xlj5LA0lA935cxw1WseSPQMk96kxaMJ5zUW63YM41Fsr7IEVgoGI0XOMbbN5vnqRjTzY5f5%2FqgPA1jSJR8ylSEmrFG0yuWJP%2Bp2t%2FpSAe1JZLLgMVes7H9fKtY6nC%2F8PCvQimQMJht9uzPY%2BFDrsLx5iVtrQ8i1NJxPNNGiGGGshrHg0rypR0hyt0YG796vkrKyX3pekRuSk8TCfBgxBk3h0S4C4j0llrqH3LyGL8IWhPl6BdC0vCadxJZFumAAJvvumtlNMpVYHhXUnGqWmXd8LhiXner6r3m%2FLvv4kaJf9oUeFFbh0dfLBz6Mnx%2FB7i3%2FsXU3OB9lQuAjPx%2FjIYjvqWwZ1H1HvcxTV9MlsDm9w0dOzsgvkTiclsZ%2BH6NxoGvyt8j0p9md3OkFOCG2OwB71YYWFyXe9ORE7pwOURMct1N3zaQNrylzoTGK5NG9avHF95Hgs7fpf8BvMAvzQz0mXDr6ttlxF7RqPQ%2F6mVbEY5uDhPrkhwpTJcUHCsst0DKDvUdj7XPNLZYmTv06u9ckADyAGxYskm14%2FUB484DhWibiTgoJZrkSUxSvsObMTFFYjULBcvzlW%2FlqsF1vjgLSWQLmWcVM22wUTtVWDEjl5ona4aEn%2FmmEgfUR8FgIQgiZtJEOEI4T%2FbblRKhwZFGa9DS6XbZn2zl4zMzVzKAD0bcDcEtNA4cUEQbBVNKtTHuD1Mrhx4S9HkgYlRrCDP%2BZ3RYL0Zk4g9pTrat12T8Atd5CbwXTCHBDTsqPKewpNBPKnao67NMaSTVIt5Ze2ywNkyw%2FDX15ajZlFG1si41JXCiUxd8HrwpzUsPSHFSofER5XAriqbzYyM7Vol6w7b4lzcVdjsHwr2u%2FlTnPapWTcCXsGgTjoMunCC6zb%2BTy2sFvrXLQj4FUmobrN7r%2FIqfci7oRcSvGUHJaiItXhUXrr2f1Xepwoa%2BYCxMhikIgAEQjSyQU8fcO6bmEFzGAmrVLLVhtBvV%2B6KgOUfDhQY7Rk1IvGuHQSGwXpeFC2DAXHahOdmEWj7ZCVv96ygFlgPCq4KokkkeSQal1z%2Bj2KeTC0u3PsnaMl16AQI266YmkPJqkRm0WZfmX%2BmfCGO39KKTNbGczd2wCfTGSbb5mNjewN0lN1MHgn9YbKFs4HrAFum61K6B2iJ%2BdLm0CvwIcwg3hVpfbXyJbCbhK3R2g1%2FG3HjVst0ya%2FMe62mZFCNo6dH3gpatm8fnKQ3KOStf2mhmQn96sapwbtdoqrlT0nQFRVcqsO9yGZZkyrzxZ5XDWlDbSNrhQmmZDcZKtOkqrb%2BOSFo%2BoNuwSv4bE8tJdT2aoAvTyHqHY%2B%2BNJhT%2F%2BAf61TNadBfwc4kIEPBOvrsYS1Hlj0hPTtHblOvsOQd4tDRLFgeieY6EIKD3jauXSOEvDdedVPsvNeF%2FFmDDJwPVkN0i5n%2Bg2taBisvucTPBtee%2Ffi13vAbzu5T5uz6%2FygiZHpTqu3bYXiPcOZA%2FXM%2FVjq2vE%2BiX9l1uh9ajQ2%2Fd%2BkxviJ96cGK99kcoD3yc9NSO%2BzUa9WsyvmJA1ACBi0eqAcLSU7FYoFGz5HCZKSyot1u2HehNVMrhIgmbHhGlxCh3Z39SYRpzbFx5K0g3WqVTuc7883jZOFRMqO7VR%2FvlEuQq1iNNTwxPSgdIvuqR%2F6l3vHac2RqLyj5RGbZRaOYME006HwOU6Hq7%2BO7OgWET8FTQZBzs3rKBy7lHHcWTLTJKlJmwPitR%2BV0tC%2FTDXUD8HEaJtxcx2A2QsXh3FLmI2cFuAdTY3tWXI1x3LhlEjvduwZE17rpNMW2PSJ8z4vgEx0NTvymLrCiGwrIjsCiykXpGAZdMuSyHhQ%2BlTKGHZFjYb%2FnPtNYrs8TG3K7R8zsmasgNkIZ%2Fcrb2IVaIEDUrzbrEyDCEYM9goLpkbqqpEuL4HXSf5E%2FmOKFohc2yr5iER6t8fXdCBgs0qDK8qogho%2BwvpHvydT63iSAfgKE9CcUEGTooluLhfABzAp6hU0Kskj7JObRnbmWfxOBTph11jpgMjOc8Rm8Q57EHB1AOL19gC%2BflhrfNe9qVHdYwsfgbQ25hz9GLpP8oAbQGzc1up3yOz%2BugBEDegTo9dPqGG9oSscS7lEcsCQ8%2F7NTgUDa%2FeMuVq9DuBQwmhgQCIySeXttwD%2BcTB8BWfxEWU6WYXSc%2FJP3Rs9pofBNWEUjocTfu8ZHp9efrRnWBgFFWo%2B7yPFE5P3RgA63GZ0yKfQTYvf8Bxu9qkke2Zzz0RzQKh0gV4jpalhLYywOTNmkSpH9zgdsMrtGHRcq8lUZ3zlHCwdao2neilqRXyrtBsLaUPBJ5m%2F%2BxYqxJ2qoML19gS3kE%2FRE2TIAJ0HWH8BoSrT4IA6tE%2F8pA8VpL8BDW4RECiWELDqV%2BD6tPKMdIVllUjO7p4unV0Y1Ypji4ZElM8fk8fKTcoJNAi2pJH9cShAOUuRwXTsrJ1Nl1BxWLAHB7iFf7YxOdiE9d3AXCXJCXf96shRtrwfIIaXrhcPRjdNQzPk4GO1Yq28zBMaRFhNP1OYY5oraAoL0%2FzqmS7ktEx0dEQND8ZuN9pAJ1s91y3%2B92H2p4%2BGki8LrYKR%2FUR8n12kZRwX1K4kvk%2BzCEAHbz68B1FaEbrGDD7tMz%2FEt8u%2BYzrqcyNIq7uWoIQ0upEIjKFkaD6%2FLSknLstwl4fY9VPTJJptu7gJIuopgaasdWOAfXyKZbbH799Nb7H2dXrdwqSoi4c8a91PO16of%2BJRHTZ0Y2uQtNQULiooy6iH2fEvWXUhEl3fwpTNk59lmowNyAK7agxYYzFu0n8mR%2BlFyu807AyvY13lWTbQw4SU076LELlD%2FJdkhCRJMJutOR7Uu5q3oCfukDwHkANG7wdJcis3XHbWzZrAgnTF8vvAQdphIK06WpyzLr8M01uqUYZcpqiuR20UkMOffLkWbaHlo6HMQfn9%2Ff7OJkI%2FF3J3Ry9Ln%2FQrTqMM0E%2F0roe7WYWmhgKy5%2Bkwh0UUhomhdwdp2zQTmSXJYk53O2RwXgrhoNUWifSgN8vvP2KSsc7OUeV5xuRwSoOddUEZKvDHOSKqwAm0ii5eQ9Wr6Sc45IUV5PlVkXMAIrUqwCOR6gDUQ5Hfz1eU08InNQpkxpswiToK%2BcBAbUMviKPSZz3XHLOK569%2FOVCgmEy6SUQEohHDTGd%2F0j4wntL6cIoQvgaoX3A66EXT%2BWpA%2BnGYerGd%2FOqpowu%2B73rcyE1W4UMWMn%2BaQEuYlUJheE34MeFKikTtdNo5hPEKMZrmS0hTejS979wY6wRizP4gMu0lDyCuiu3ZYiKN4xeIYJkF1S7JzHjtdSfCfpAux4DJVnNYw3DPIBD2jlbKzI19Q41R6eOYvD5Dw%2Fo%2FHx6aDX3uoZchmgwF32%2B0E8Iu5c1nGBA%2BeAU6owa49nUYaRVXAGXLnUt%2Bm8dNCEpvB43k%2FtHbPB3dtpWqDu5xJ%2B63QF7rUOR5UegOjT4l5cwdjKf%2B9aY13c3pQs7Q16O56II%2BnHC2RO0Ht5l2A3QlgIuoYuHKh%2FOFRd2Xt1eO0I0peHmjTeEzway92t5RTCLf0KKVfYKLpRqezC%2FlAE6aEk%2FqLF8cYCYh2gBFjvA4kW7Ys54kKvPPx1wMNYxAMMx2O%2B1mGZ19dmI8iZh6T3cbU7uEhegZRACc0VGhEKKjrYp1qNoHvZ7xoQ9iFrHc%2BS2jtMXKtK06vOQtsU8OnuhBMujJ0Ncj5r8yyXj2G1%2FEDZzk3ee37fISajqdp7QSxQWOX3i7%2BLfxUlpSFSl8kgEOQ7elfqRLeG%2FyLQtNBVebQrwV1LQON%2BbE8Q6rDZgRw2YcBuqM%2BSQzgMdaMFhWYLUDIMzlNz1xYsNYQ4PuHn9aUPRVaTj%2BdIYCShGeC%2FEVsHTgXxFvobvScZaaFr5yly4taQpG5fFsLRK0qoBSb8FI3flCSfjoBoytsfv7sMLGslprp72azgeDjWh7ILFDM%2FM2LafSysZaon8JFFVVIHDe6olfOHvIqxqftC23aYd6L5AEhVqlDYwe13PkNDZBPHhD7KVAcuQ0BggICu6dSv%2Btk34r%2BaXCJrTlmsM8lG%2FpucxD1nPO%2BaocK7e5q2TQZtwJ0UicOebPkRf2K70fkQm9sdH73J7MHTHTFNooV%2B1sfU0zRK9ZKTVLgQPCM0V2CW6WG1Xy5HQW2y6%2FnA12xwzpTybdq71%2BmAX1cH1jgLSE6uUAl4KEOueUTxeNkLKasByRhnc5UW1YYFOJtb6bw%2B%2FvhQZp3k0%2BIEdonPey8R%2BX9ck4klKNV6XvVpt4qTQlMBOTD%2BLg%2F1AYXc2GxaKMD%2F9stBD68maDYzDIyQKydL57rPZb2CE7j77cMhXnayxvYdSU1tTu%2FoIyTJJBeB5KZAZp1W2dCChmTML5zvwdNBEoHblLxs0sAJgMcEPHyaBhyod6A2UItEi8fuE7PSh5YAZ8%2FzC9cd16qaPdMV1S%2FJ%2FtfXtMck%2FmtJX7Th892mAPGbfwRsSCS%2BazxVX0Uc6ACo0aHz%2FEqStYk9IkMM9Xhe%2BBr487U4IxoubF5v5vkoG97j51PCTJG2HrMoC4BgmMfNP4mBir4y%2FBGRa1SM30faN1uTAlem81dBfQ9XBZ2PF7WjNrARl72oDNqtwq9QrgbEmYe%2Fbw7PdVfSQ98FprHli0z6Ai008ST89kRTSwveArdP%2Bczo1O0x9ErAth1mhZeIhLjBw4uDfns0JwByA8jVQhnNc8bc1N27jJcIzptxlLj95kBYSEJLzWItCM9GprhKnpTX1E5tXMJ2OCxq%2FxQV1yTI7kVekCBWKfpQOnjTSjFfWHnDiJWYsdxtja4f6o0Hh5NsNKPaOhlTSEg%2B6%2BSbiAy6%2F%2FFpc8Wk9W68AxIO1g3IxuEY6s3BTbpe3pSOshJ74h5wKjxG6SPu5j3mgW%2FklhH%2BSwqC2XnrExCnZgLafdLUM2a6Z65Ns09i3G8Af2jL2mMxd8aEbnAJy3LEP%2B1mXYJ53WJP7UNsXHthS1zHDPgbsvkh2wXZluNh%2FZZv%2BVMF7U1xB259pVMdxHyRqx7%2F8w7rz%2FZcoEZMc9b%2FSP9WzVKH8PZoji47uuHeAd7Tc%2BuaswIZQyWCnYIOcQ0XKHFbt8VWqoErEI%2FKznoNmuaZBwP71e%2F5FwT4F2FW%2FnuXRYDPbHKtc79%2FQO%2BNVSi2Z0zzWDJXBjSqoWtpVSJrzVpxiJgo2%2BorKPCm7YZWXxALpBxonfRhyUdq6mOjGAHGApoj7Jqf7Z%2Fvim175hhBw%2BSNTQHIJGejH%2B93V%2BSBZI7CbmHjGPyoSyqMoY9Sm9vKhDYXMDp8BqiWQESjMyfMDsI4vL7Kw4%2F7yi%2BCo1kUjJfHqJfud2nfn2v8MS3HJbzTEYEr3ZLZQ0yuYmSiDodRIgU4mtUXRLgZJ1Unoxz2pW4Oqj4yCgRAEvT%2BA3DjuEr3n7GBki72zAXHOsY9zCSqcc7GMyERKqKovw8UnFHOtYITSD4wnE9tm5WDOHOYQg97TbPJNpPER20bNqObn5OEmn5vKgZN0zA561GUYnOT0vQXDOCkxHE5NgVR6cGkaPaMFUwfhwSMvKzhStbOZtYl8VqxTPOdWXxkb1TvonEc0A0aZ0kleH7ZvDCditFTFGJGxHju1aUpNOhANM3HE3sp9h0KWH%2Bhzb2eV4kWXnE1BEhlnmIbgfen2VkHHw67WLVxbxBhr53TJqJxiOGJ8gDsMvTjPQ6NjltjnMHXVunCj6XShRY1mr%2FCZwf%2BFqVIda23HdUN%2Fx0VVm4lidaaL%2FMks7VyNy9mF3whKRVkRaKSGqyuinHsLAvl6OgqIWqQAmkS522kW4HqgaZBPSpU3PR8B%2B1xu%2BXunT01X9WdXlIpATm7f9nW3pea3Lafd4SsHpVlzZ1vkI%2FAR2r%2FwoyuQwoF9W4w0YOjDOH9ZvmMDSDIQW6xI9%2Ftg64DmT%2FvgJd2sgAzG%2FipwsaxxN4CMRNGQm5qBikRgWmmdvx3MLIbIjTdAqihgf4Y%2Fv1%2BwHoBfiv%2FijBE%2BKJkQmDX88zxOAPR8mEGNpqYbfK5H7DvhI%2Bd%2FNRG7edy7hOT5kwmGMteGCc7nAAj5LIsu2Z3MpGGxFe0MSQBjpj64AhAAuMrN6OwHSRU8byZZif%2FwrANhUCayc7KYv340ooTWyVI162P%2Bi63AQ1BSuj6W8R%2B3BX0Kk%2F%2Bf%2FgF%2FnLTvl8D6KOlacRYUIR%2BfTD7EYtm7%2B51XD73olrGtQ5xnn%2BxkI%2BHEGat7BXLHi0OaxbLXwTYuIQAKj3veSxXpsv65HjIvbXFU99X8TsYUKfdxvMXpoLMcksfZBxGPnTTHYeisAfzHCiFXa%2FEO9JmRQ1n3AiaGGvlLuH3NK3u0NtkHyV3rOuEpFaYIzIoIXrJuhQUkBGBtFj1iPap3bZQyur6Kj44DYxWPNe%2BaNg6S0ukb5V054QH66SoLn0bK5XF5oftA5tkVyRH1gUhgDcDzQsly3s%2FxUrvfwiGti7cppBfXUz2WhgWyeY%2FgYY3QdjFHO26XtxZWEvlPO%2FjGfM0F%2BjBv7FeOKHJjPtrtfWcs2Qn1BBuhLN0YiID19HVK0iuVUuLabLgwiqU7CwI1Q08pnl80KvB4xNe1ZiujGolrFd3gTtaVwbfup9%2BOoTGo%2BGmJ3mh9h7TPGd98DAGiOtNSKKkr%2BozAWJy2ji3wUBVqXu%2BWoAs2gYPyMA0muh%2FOyR0HU4IG5LuEThr%2B2o77teHTaeIAO%2Bix9mBUFZCiXknLLWR4C%2FlkZn2RN8Tl98hTwRyXfaOeKeXJG8EwQG7QrzKLp%2BE4tM87pz5lhTvdrD5qic0iwZhixl5%2Bcd%2B8XTinfJWvf1I%2BTVDxJL%2Bo8yhRrQVsDAtyuhbNQW%2BM8wFc3CYqzBZH%2BOMrDHkoJm%2FnFCjPZKfSb%2BdrHDoSYwz%2FjZq3WbaEvK3rgVbXbUEwufh3OI5j4lLAz1vy%2FB2HKRY5PoVImNtp1ut86QAv6a%2B9eJQ%2FH8347LV7%2B9dmUcFat%2Fh280Wz69f7RgOzeQwGhtVnBQpdjU%2BHspQG37OQND7Vdwxdk1P3D3L4M2XXKVA4uSsIFISqzqBSR%2FtjY7UeBiZO4i25%2BbU6sDZH2ttX3K7GNjvQX%2F%2F854TEGQ3w9QW80zy6Z%2Bt8p8Kx427WhvhkX0bg%2FXrJNtCxs4OKng4ZrowaYi2Vo0FeHmcO1Vs5wQXb6CTt73qEjcRJbz7ENy99j0GM%2FqI7dJlkR0AH3GOhYxNEhul1WysUY%2BhVu1rmKI%2F1ukJ9DYUjs11h52hNVYYMSMYVCMlokWszju%2FDXST59%2FMsVio%2FhtpX6HiNYbYZTVKfYNFlYat3OI4UcYg8FG6i5%2BvK3YTDZGxsz7RgPOTngHs8Ixu5QkyxXwKOvKBa2fel62BkAIRYjUe%2BLLnvVgg%2FSY3kx%2Fii1H1irHGX9ufSYul30BvzjLA9gXY3qIdcmPszc4YEKJu6HmRFI7Fh9yNhWgdwHKq2iN1YdO6U7QDtVh%2BiIOvLfJk7Q0%2B%2B4Ao3NR%2F0iUCGuwKpczA63EUR5xG%2FID70EFtVpLaLmFtNCo3bZfyDBJ84TGynewTaWXf%2FcpY1PqUvFgrer1XHMK2ZfWWXdU5sMovceUMd3c4QmiuYlNlNw2VxUnZ30DvBdFDo8MIWDRNBo6STdIs5UXC9gexz2dBSvWR6TDBdLl6PZ90197F4hTV2mIntO8M47lOQN2UuPPNBIps03CQew7M9dth35Ci%2BYxMaPmTtv7%2BxskZaY3SSMn3g8clod0U%2FMwhDZ1inkSo1RqPJdsiZoviYskjM0u7hEf57lf33uPKfTfR8Jnf7CpQxc3ftNki1VwjFpd%2FVVFe1itr2mxlFzIPD4qDoBxTTestuOgjq%2FFLIwkeuE%2BwWIZFFch%2BI5HRoZVrvfYeIZWiZUmlh2ngTCbAFKpLbZhiek9My5SmqYFXDpmodXn3YVZWiyx0o0gGBUUo5dQjD28TZNS3qi2ZE4V88w%2BrPQ0VzowuhnLuBNSEUq5vjbwmhodEr5Zr93%2BwxxhexIs1myKTIiVR%2FZI1Qzpt0cGLpV7hO8X%2F2iYUfyGT1Hjf4vIl%2Bmm%2BJx%2BArk8qeD9I06%2Br84LdWoSGqOfsBuTEhJjTj3rD5KHrpEFzxOkUS2s32kWJRw8Xg5BgAJGBecmyeXc%2FvivUTbaYR%2BDCQqfYEAM3GK1ZO55F%2BHhBAOYbdvJHvB0RQCxedc%2Fs0h4nyHjTmAqvBf%2BltnStHztLUTcZ7rougUuNYWsCV2nYMAfZZFUIvTNmJM5qbJk%2BitT12DF8WvD2H2pMXMJ2QYp6ICzVj2C1F8er1Nu6YU72VuqwnPe2jPaRRdKdG0M5W3IfDqr31DzXfpJ2w5dLJbn4XRZWJB3MtNU%2BXXwsZjWBI4syVQcB4cx36gSr%2Fb6LlG%2BVeeH8cck2GrylTiPdm596omRYvs7fLVe8p3GtBTUZjQhIlZjReGoRaplFkKV1ZGrha1uvcdGDoLj8TfQfPOCJUWMA%2F2A8JqpSujK1qWjzKTvLy%2FQhOLQT2XBfneqQ09axAHksRJ%2BYMh9FAtpBC2oTBVaz2WNP%2FD%2BiTh1E1moQdZxuqEkaTvxopWgen3s0rjyfSpdqmRVnm5I343vAChkkZ8BhQrpwM%2B9zmgrKtixCfJ%2BqIFPLceuxCw60pKb5Z7RH7oUZUzJc3ZbIVBOtI9gtemzFfJHOonMvEXT0V%2F011VD12RQdt1zhQSFa5WqrJm%2BLj09i0JkjaxXq1%2B0tl85SQKnspiRdBJuM%2BiSqrTY2g1loGjzCrvSvn%2BVXucE7F5Rp3eTfB0MNv1bQWuby2tUAbJ2zSezpmvVpcwp%2FpERyM2VvbEDRTSyoqnXA%2BufWr%2FEOQuVxZg%2FzcxrneqUOlrYqBwq65J3ixPcokMuY0ez5OvPXl1zISrp2Po3Ur7K3Do5sfgSMQdv6JS0bZQqBqDQ%2BxgURqg8%2F5Vu0LRwGDEd31%2FnloAtksS1psuYCKrE3tFLIzazFI2AYjufZrIICXA84YPa047WQ7L%2BtOmfwdoSMreNoj7KiWvQjYEl%2FS%2BZpWlF0gVv7jrw%2F3QJQypI8zuqUgWjZOO64pGW00C%2F5F24OiAhWXyDSzVsdbWOatxuiugm52RPWRBIEedVumDns8PSna9oH4JpIuXpZgpnjQVQHrjrRcYHwUVpN8H4bkiOUYm6tQ66y3ym9%2FrhhXFZyDt%2FnMHEXqnM85slOPvpTmsS%2Ba9wUlZN8zpNkv6eMaqPvf1nL%2F%2Fl5ykVYS5ymG7BgnePJpUc3RHQDT4zuRK%2BpwKsvo8mKe%2FmVOg7rk7C7Ma01unqrLChWJVxwzxFmMZERNsUd9lC%2Fgz%2B8SJfG4uRwB4CDUByWWth%2FUZSUb39cihf7dlXKiTbI1zTXKYaPnUT0yHiNZ6Ik5AqW70%2FeM4OTq9oYd8xp0vnpvT3hqbtV6V%2F%2BfnPJe%2BghfLV07zIQhMDzGa0VaSnlsmw5eW%2F2cXm8ZciGt%2FqXq1DYRA4ktDJ9EC9v9yjndF5%2BnQsqkzD5wAGxBbeH6Ohc44bvTsjXbAxHGg6UJ84prxnosl%2BjoVC0Zjcg%2BPNcfIPzUPATLEaGSwwF7fLmJNEkRV2WHLvWu%2BBQiH%2B1iSz3NwmAs%2BasBkFIrsoOT6g4Q42mE7OX7h%2B7TcjNtmiZR0PPrRbTfshnBPVKQsPwPpjmr0wd%2FzZ6%2FKY8LIhZFtE5JRUUZaDbOsapy1crkZRo%2BJYO%2BgKNs%2BmKkWwEH18%2BUZNGsMX6W6TruYciUh9URo81ZcJgpxbx8Eh3nJ52c3xo6lgFXeIXYYLx3u%2FVM6Xpu8u%2FgkCy%2FJUjYIpyu2IQSa8OgP%2B3zSdP8gPYGrBJGEymPW7xE5t4Z%2BbMCN32QYo0jHbl4D2avhF7YLPjCllqVAxKNOtCpdCTC5J5dQgNJBarzAk0yKLz8H79Qj4rkocqsN7UJw0eNljGnjV%2FCMiRFQ%2FmCqmzo%2B7Iksa7TKOo4Zb7jJUXEG4BjL9exms9Iga9eg91Ap4RBrzLjbXMfKhpANUP%2B%2FOVz%2BJxLhvXqPVkLPaAWxwp%2FNzLaOI69W2%2B1cVlcceRq5HOYkKpKpvCbY7G9201IZySrLJ932kP65CTEah1Y9%2FtPYSgSUaqxeQmeG%2BUKRUvHqc9MTiSRN7HeHqR1IwVwJvIGcmR03sER7EmbxHQx%2F3KaV4s8BYwbX9kgAMgqKDdSJY%3D&__VIEWSTATEGENERATOR=ADB7A49D&__EVENTVALIDATION=86qeFuInpexpuWjQ4V5U9LbxnkCWIL1MhzRlioyoEncj9xGmRJ3HUQZxf%2FjPpjkQ8gjVMV7zYoRNGXYHac1sfoGkaX7ntgIxCZxzOu8YkGQBtD7R8R5%2FWzEh2aBj%2BvP4sEmLoepo4p7t7M0SF6IevRNJ9BncHeXSc%2FQVwQZ3PMs173xcs8L8kkB7HlGt%2B66uw9qQHHhtc6sPtXWykoofA1%2BRsT4F3%2FanSi1Jek1v1XJ0GIROB9VFE98AeHDXWsP%2FybG6sczMfkFC2QBZJJJX%2B75KiQXazQ2W3hf8Q1vMMvW2O0M8R%2FhEiuLxBxS7P%2BETQrWl6GFmG2HyCM06O69gQhUgIqwka8pxWHEJRrDzhhXozO%2BB7SAa8p7rpB5wefJKg1UOhCPHSQY6WOy6KyQfH7sW6NWIu6rcvw1g0p4zWO3NxJr3v7l5UWilykhmvzbyq7AkaEBAE7cuCdo0Iwxj3e%2FKADTszsjZYeVSYOHp2rRBwOKCuhV%2BtN5D%2FYVgb3a%2FVRXzfJ1b2uYv4KXWSl7zoRPfpvV2xHO2bK9P79E8QxrcRPH7ygpFXuJ%2FWNooxLBjVy7JLHpb%2Fg2WTcnROJKHg4%2B5H6oEMmTDVF6d8bHEhSW4Y4X%2FeiwMYX3VYBAaQ78g3lplHZt6jAx0SoeTXFX9Zc7%2FQi%2FP9fnbQjlnetXgD88faEebtj0Mgca1ee7nmzr5lJ0EXPNYmhYpIDsvxoFX8fvPWpT62%2FRxoZXw%2B2rMOn%2FvEwB%2FLH70j13GpOdpR5UxicXUaF%2BfKZxhhS%2FjGYn6R%2FIrGiBDveasMGMEWzUr17Lmo84%2FzDWMSY4O6xU1b781AXMMPYJWV6sAntd3uIWy1H0gP1Dyl5poetil1GBLB7SWMfzw4QBwi9bL5n2osp2S5dDHCBRDuLpU1tttkHeMjf8PWBxMzsuSWmF9b5YolOz%2FJGKXbKaanOLS172Y8cNPzgtWlhFIGQHNP87HN626weENn1vmI2oHzAHUaIWx6od6ord7Ggzja05HEgAjpzu6pp%2FBbdr2Oyr12CVk41YIhkV93PnMaa8jiZWG3BYQ4K2usVDkVyUoCLpDuhcq7MrJHSO0dQjUNnYRg1Q31fbzujvAAoRHLSmuPzLmi6x4fiCs6ZRi3%2FwubeLWl4TMqI1oaRMTzQfjXsDTxe4z%2F%2BkGc6oFBdh%2BoMa1tA7VxIPGeMwdYT%2Fe5%2BmQTHZXpHx4AaDmyZVMdVLawpiGHCtg2hz6sOVnhkwFGDoNber9yWbZBRC%2FMKEP7JM%2F9IBYDrLgpdNImzhyGwo81qfuzcu9yn5QlHddbdOsbjxgG6wFwDE%2FeyQtsodcDdQUKXj18x272z69wAlD%2B%2F0tmNtc80quZvMyQqhvAojWk4KvT%2FWNX1FXZKbVnlCEDVfO13efQer8g1CqDZeYfcCAdfG6hURPcCjE0ZecyvCiHECsxoRtpGrBFPxRT8HP2%2BNJqiI6H34oe6OvkEr3eyDaH7r%2FEsO3yYUaVNCzgZ8vyGS%2BmaV6jVoTIbpzGGirKCR5JLvIsbV8FZVsMdzfmTIw6988qBhOeiaIt7plIkqlUd6KYGsmmMGokfsVnUoJ0M1qV5Mdm7jM%2FijvtM1liLmnT71OqcSVPoAEwABXe%2BLVTCcBYCoB4AqPClUTRBX%2FTiRd5Bk40kxwSwtwPE2sJnh59c8ZrDvG2nEmsGdUn%2F%2Fz8ukKgyfw1E80tOzJyE4eEkBKIYWGZIF5qVVDfdg8UQfBDJvU6Gpt3n3fQk8i4BTB7hwQVbUQOSP8O14bEMULh45Bx1soeCFlAqldcVW7dZyQmzLcBQwWK%2FNBQD4%2BomWvfn0xcrCFNVlO%2BDmlvNfM92sYD1E%2BsQB0JtX4YcI2bOdDCUU%2FMmGVxXqMk4fcLlVs4lA%2BNKZPXxivJR95aL8cAwIGcDr5dpePHrRkA4mJ8Gos8Jdh%2BWW8kNQeuky6jbwcAwE%2BAB%2F%2BmYSOpBmYFp7qwwVPw%2FcP%2BJmMMPFxgNjgmsiTbF%2F6vfZMUu%2BId7NioANxhWZSb4ISbNWEJVbELFfK57hsyBZa6jKHLh3AchTXOwFX8iqeDkE9yiRtDbArig7k8Lzt%2F4H0t4ofdNejMpveJ9g%2F6R0xXivO2qI%2BSXFXV7%2F3Sn5xylyAa%2BLwnXH5z34YPcln7n4Zdb%2F99CgQVfQ1446BkwHqCNRZj%2FLz0yf5i5Zgyh7muehO%2FKPXraI2gM0ewhDJ98v9QVAT0mLMjR3%2BU0e58siKEuZ3ZCBLdL9Ns4xkEch9XJMvQJIdGggBTrdxrWnZUJ%2FvNiHtTngjx6bKthRTw9H4TJh36HNAB3mqxSKC%2FSUYCnggabWwcdn2aXXqjOEFalz9oVmQN7ET3inM7H3mOCAZLSWUKOo7Vk%2FkfcnRUtLb6ETiRXWE14A%2FI9WQxwehKrnIUONsOToh%2BjmPBQNp1qQ6u%2BUi787qA7pejXZjWMbox9IvH3sxZC5RTzqwoAYycSCxgczOBPsLtl29xPHADmmQKi9A5GKezlrCsn2XiZ3WLjD8MxkuyBWjdW3ZmseRLvY5zAlbi%2BpbRGbeb1linu%2BuB63JNJHiSfBmVNWmoUBd5k3oMZ%2B0Q2aDpA8QEfqg23MnGI0Zfy8gO3HJ2xNYZFQEA8dWb6mXgfm107BSnJ7ei3C4rpL9TGZlJL6S58iu4tDEi%2B9o4ZfR0zxlrV%2FRsAAE4nQbIyrFqm%2BUkSU%2FNQyTsSCNwCpdk6GZro%2BrSEnAU96bhNncenzDh5qAElclHxs1wBRir9AkH%2FpVL3%2BnWZ5UvXqXPc%2BtfB4i5qjmuvfYP18ikcOQSfY1hKpSPKXDUscHHB32G5yjAO%2BTlGPucvKTb6Dj%2FmA%2FGsfNUOR%2BWO05q2%2Bg%2B8SMqCALRe3obSrdLYCRbLOFmGJw8nObevh0mJtNrC1W0cRqHE22BiR3TD6EdHfDm6bzpdXlUBAb97cwxbv2Ib7qsKz%2Bh5Y3nhJfFvIqJ7lN7tUjm1BrXO9wl5BwMi079T5JaOUDkC3z6feMj2qK72YmVkr8iUv3FlQyHzUOZRzcL1Qk0judmbJKlemFx18ex67Bld%2F0niZ9xQhesLXSsrk6kUj%2FHQj2N9zFKx%2BkG3xQInKCQ%2BC9Q8stoWW%2FkDvyTZimAjL5yywIPTgJ5P5PWPjTbMCBwErG%2F90LfAJDw2%2F5nBkoIjVooH1%2BJFTtoex0%2FjsVoM5q2eSXzGV%2FjiQc0duyFKIiEfd%2BvBD%2BEZlLe%2F3saBihBb8u47MtBeaat33ych1BXxFmP1aTgnuKXeZPcMXH3%2FNaxK3umDHaEhdV0JcCAmeGmHi1m6QvtFk6eJAKNhkSrUA%3D&ctl00%24PopupPageContent%24txtSearchContent=Lower+back+pain&ctl00%24PopupPageContent%24btnSearch=Search&ctl00%24PopupPageContent%24hfDiagnosisType=primarydiagnosis&ctl00%24PopupPageContent%24hfDiagnosisGroupID=e158e455-2a81-4583-92d0-863f3e7797e6"
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "POST",
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "post": "ctl00_AllianceUser_ScriptManager_HiddenField=&__EVENTTARGET=&__EVENTARGUMENT=&__VIEWSTATE=F3QObRvn%2FPRlseSs1cVJu60yn9ZqH%2BsEGRgUCZiUnUGPa1OdFkUirPqG6kRphx7%2FJssc%2FrKBy5jquQEdWtqAABU8gi2OX8gPL9mg9dz5XcoHTVUzMx0kBU6muMFsSIdHnijFiGzIOQvhSCkHuxauoBsnkeXZ%2FVcreHpy4%2BBIhhNi0HtBG8EekpA2UkwooGeQLxkq0Y0%2FhV1NRGS2OvvOOMb39Ox1RoCMg6lI9ICeOaqYCnuMrcoU1mQJ2CfwnVpFSt%2BT9zDrKBRhtKQlreVVQirzAGCAjrArTqFe3JX8DhlCeNJV2wpjChKIuRmoiNzxJi1v0yAVg05CprIhvIe62Q%3D%3D&__VIEWSTATEGENERATOR=ADB7A49D&__EVENTVALIDATION=hrHyQ7J%2BsFbPCbV4bHuetoX8GGypA0%2B09SboGP5p314zlQj1f5dBndWkPWfH77nHg0wi7yBj3H6gS%2F23z6yEWEDUR9WepCezzIkwYd%2Fc0NOenfaWQ6QZmQBjzgbkUQj3vNqs7a2WHCW6r9YtFT41JjEPckUi3tRbSDkSZcIMQExzBCV6AdQg9HtCeBc86lFRflhC4wuqV2ucb%2Fygnk4tppMbShy3d89m8EkJAzkXZ7f9gDrXU4tS5n28QIrw6MZ5vdfOYwdEatFz4oP5Og%2FOHABsRHkm3kUbiPwTrbTKnbKyiGRPA5h%2B9tUV%2FTDJcHMwJGBA4H%2F%2F3yXrkJYHa5d4iDojEhyIDtw%2FkA4cKvwaDF32PVmZFomu%2FRZcqN1PZVukL1gO6uh%2FRLoLlckwg4R0esKxeNRGk9H8fEqy2Zpj5%2B%2BL9XFZ4Oqn9VQLV3HfdOyQ1R%2BQuXJObdnl8RcPlM6IuxnnfgtJrAe4syM1WLUNh0o37pZ5vPreQJ3VoRbV78RTz38RF6E6ZlchhxJXDK1Qg3Tixnvgd9lf2QN5DnzirU5r0oRiGiPORqezrrrNaWZANoLRpzkfGUk6yihMsfT6CFOFCWu3pRa0Uv8OUwWG5jqIbLgCrrtRQaUg7QCDkD2o7Ga%2BQDyWjyPk1DnKPBIQQKHptk7pfcZNHiqb5ZMrTl7ZnJ6JC7krCpXG7qH7Tsqn3MK5Sv2XrSKGq4uORNdveTDSErFIY8JTU94KK1%2FiZW1jhPL9T2z4HULv8z1Y4KID&ctl00%24PopupPageContent%24txtSearchContent=Lower+back&ctl00%24PopupPageContent%24btnSearch=Search&ctl00%24PopupPageContent%24hfDiagnosisType=primarydiagnosis&ctl00%24PopupPageContent%24hfDiagnosisGroupID=e158e455-2a81-4583-92d0-863f3e7797e6"
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "POST",
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "post": "ctl00_AllianceUser_ScriptManager_HiddenField=&__EVENTTARGET=&__EVENTARGUMENT=&__VIEWSTATE=BCV%2F4XLEDTRm5srgar5iC6VYZSVenhQ6e%2FjuejJRfXEzvQy1JjaOtDeCKKIE3yXRWY5%2Fm4r%2F1v1SSv%2B4qFn9v8Drze6%2FW7IN4AYzV%2FhTcqVJ7gvzSKt%2Fs%2BUhomLfGNkZ70L1bPwIIqIyaL%2FYeW826Zv%2FUvJ8S%2BRnJ4e9OD4eP30uH%2Fiqj%2BzlBEBAC8wOhuc2MXqHpMAPgjN79vBv7fBJUVrK%2FsCgEushmlvhwcDgGP77oUKTjy4URVGljc2qyc66SBHrbg1uRz3cgZMT84pWdMTYjD%2Bx%2FKcIOleD7VpjDbXigjKmcNmOwRqpzQrHXx3G0XbiGNF2tc2l969SVgRS6ofdDAAj4c9cW51%2BKoy9OsTflxuKBwI3JgS3uwcjI%2BaSJIBnE7tnmMvgsVLR1%2FURMuIsJ9fdFxgyoC%2FOYvAijF0Y41l8gG6rJUWqa4BzWKADuOAGsuwLWICaH%2BcjSWMtDftujLl2UAO7BLKGwmeRmtNO3YbpccKGA8UE0lQTPq4v3Ho1Tomz7DaQIjkdipiG5AzQuPhO3deAfc%2BSyH5lgKuiXUeiPRiGTY8wWjO7dM31%2BfDtoqSYuKHWY51Ke5hcjR%2B0ZKvxkntqakHzl%2FbR9%2BSrWSjT4d1lfdOmeCPzl19Q6Hsdhv1d%2FwU1fpuMLxUe6JFiD73%2FibMRioXu2oo6QaoqzT7%2FpxHWhZJj2%2FTFvJXEYyo7qhSwzVcXt0RHA%2BQWEr5hBGhlJ9QvKDw9FJAELLHud3OcjL%2B5Mr0FsWJ3uCbV77e%2FqMJU1ol4ykMLkWe5IMK0miYjcbCrJJzFf4B%2B1kqLb8SI%2F%2BJjzPzA%2FYgcA6mJigTWEwnf%2BxBCY8vU7Vr2k4Iu%2BTkVO%2FgjJEumvpsl78atBTpXNttbs1t3ldfwIgeEAfwsb0uGL28mD0ADHBwkMEXWzARMNS0pGuCqSkJvyjM8GzCA6n34TS8TOH%2FXTWR%2FZrSEI61A%2BB17aC2qvOBlMg%3D%3D&__VIEWSTATEGENERATOR=ADB7A49D&__EVENTVALIDATION=aa2knT52LmqldIpeYj1eXzxpD5xinuCFn98gaE8xKuhPkYwwGfrtr3G%2BWRLF2OlSRZWON4C9Mp6izG5W42%2BOGmWGBiA4bjzDokA77%2FGrkqOm%2BzJG7dCPcLeQuoHIlfAt%2FuHpBS62jPYYvl72FNOiltI6jcvneW5DdBRLWLVJfYgaOCSzaLAmDD6JN3wRk%2FIetM2SLcdUSHI9uOHMFRconmxNG5JLZAufkBbWDGKQzv1oVjIRplnBTWfRtfFkMLNtSNlX0BQ8HnfPClxJvMvhWAYKQvAprXZ%2BWZ6w%2BmOSjdpVtnrY3jojW3Gv24U9muNIV3TfE3lI%2F0n6ddykcWBAzLs31YB%2FDcvxQLmwNzCJprN200skI%2F482WwTBCzc0nBhzWKCsV9N6QmUholCCmeIJD7DOHmt3G%2FU6x1AnnLrBFqZKqn5WRNpTwU%2BaQ0Fnx1KnXst0WPuIs3bokU%2FY%2FZP7FotxfA3%2BUWvY%2FT90zEka1C%2B4IFrKzOwbHHnEQTEHuHvhXMIPICs4dzPA0iPHOVD1T80xaqA4OtbocoSJk3JuDGX6OHm09i0XHgb4d6fmJZKzpfcg1VAIaiv7SRyz8XQMkFnRj1BvLK2tiVaH08IcLqvKbp%2FdtxRm1zz%2F7rEg%2B6zDPK8%2BEEXmUgLMgnhUn0fnf1L3q5U8gPlTz6p2SwAv6hxBMe9LUJvrT14M2vkzkDxkiPjwybI5dXZs73so8pmVWnCFKolsD35Piu2eMuuRoug4omSWs8LNLO8csCHKRDzTOL9qJaqt9Fg69iTAGAzirCsM%2FLe62LSQKse30VUTJMMv0MsNctUmcsQhFpiuqdC%2Bz3diT%2BCypjNBukdWrcKjIv2Ru23iAmYsg9XzEJX7cY%3D&ctl00%24PopupPageContent%24txtSearchContent=pain&ctl00%24PopupPageContent%24btnSearch=Search&ctl00%24PopupPageContent%24hfDiagnosisType=primarydiagnosis&ctl00%24PopupPageContent%24hfDiagnosisGroupID=e158e455-2a81-4583-92d0-863f3e7797e6"
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "POST",
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "post": "ctl00_AllianceUser_ScriptManager_HiddenField=&__EVENTTARGET=&__EVENTARGUMENT=&__VIEWSTATE=tuKt5oCSpToyHWLMXaD5gQoriKb1urjIbmljh3jwIWt2mJ%2B65z234PA%2Feu%2BJEXEKcuEI4Q1kXldhvheBygnUjYFynTzzDS1rECT%2FOHF1l%2FjMAg3nssLi6m9xXHCBUGOzQJAyDrbWQBOMDt%2F1Y3JrINmzFoWxu8%2FzRZ4fscR6kOqxw8%2FUm%2Be8TMDc%2FVLQkkcCC3mRRJhfUFYMZ5s8U1gvqGIM7l7q%2FNSItfYZODcBAOCT5xG4EdpFhS%2FvzEYftNNkfyDc5d3P90ZvOlxgAZ7nK4JtGsMqo7C7P0hebQKDEYYvWaZtPu7OQ%2Fjt5lKhoKxh91qxaDu3u0Kk6fyKE4%2FtvYfvYlZcq7IeaZ2vtGmzdbbXqhrVq0fzvDSQ8AgPmEi4NB37K%2FprBID6xgEyba1a6PBYyJCGmT51DqwLzWS3qq9AZN9JkQb1afgwtLs21gXgIRSdFF7pDkOTVHpiWGWlOEVOCiueuGM5mBSAuBKgY4ud5nkzn3e5YSN%2FcYneStjjE%2BRp3yXGBnbjctrwMzvRJJuRfVPjcc4VSvCtRDAjZ%2BU%2BxDH2%2Fq%2FMCfXDTQDVNvoTmigNGhVf1BFDUa8I%2BLMSq5Tr8NcrZ%2BxexwK%2BT0kOzvFHhMRCPnnD57Wnwxb1nrZxsKts5jgtqZdJv%2Fi8tQyrsXO8fMelHwl5AJ6PYp7rD6Q6UF9Yht00VjoAf0%2B9DprvLAR4DAnpHzf9BLd2bXNuJwJDSLcght%2FhoE5FEvZTqqOBr%2B5JsT3Rn0YPemxueBEgKWEnwU2qplT8gTMTG4VD%2FqLa0D17h26N2eeE0pYYtOCg12%2Bhiwn4Kra1YXag4i3KWcDRu9uiMgf4dz40Pp3YhkBdq%2BMNAzti81F5jbNgZX%2F%2F6RYoHNl6XsCSKVt0p3ZyveQX8qQTXcU9qoedvpLr5lYs%2FketG7CuTn21kbIm1XNPBWLvLyd7BDNyPiAaH2qszO4RKWrAyG7OqUHfuaz91g%3D%3D&__VIEWSTATEGENERATOR=ADB7A49D&__EVENTVALIDATION=iYJX6IsYSkFMUxNbsG0rdnqSoJfH%2B%2FaYcq2TCohV5jI2p3DA4rl59Sbzli5B0rbifrHV5J%2FLWIhTMKNBu%2BJW2imw7j3rgx8XjEgWLYOAgqNfJixB1PlJDOrKDD3R9sHnQG%2BfKhWnkjLHKxjIWFnC7eYlCQ3KuHShFGk0xO1CBDSfs1XLf9ktvkFi3e16N4c%2BtILzzjAPFNv18yVF5GrseNLwQj4II0YSwEHrWEOpnJJHon%2F8PbhIoAq1TBTnUx7hs%2BjMxIA%2BFiB3WF60KTUl0SJnJAcUe7DMSGvGjtfYwJ29Md7Gg0FGtfrPJuBRCvb27U%2FWmY0GsyVIP7SAQqbRmGHKotzEANQaxCvaHUPdkoU9CJskDesPr9dk93xRj49wcdpAOj61tGgH%2F10o7cSZX2PlHlXMGh10trVlx%2FaMt6UY2KnrZfRJErXuv37Kv3wsZSkZYHaIqQMFQS6%2BCkY5JiVBJScRF7g1rZEFhTFOtCvPAlcTArRYs0zykuwRQXLflQfWuNEaKULlPqm6KQp9pvlyQ%2FxDukEANLRDCs%2BPuQA652hrwtl5k1b6ZR4xSItMG5%2FAKHHhYhCHLarLfu%2BZ9oKdflizMhZ1lis276hrIX9HV0QbVI3ktOI1MGtiHESEdyVUvUTdgFNXCF53c%2FhkcPN8U1ZeemLEUZSu2bf3Y86dtDTfxpU3nOVwKLgALwfkv7XgK0GHTP9gVYGTeP5laSXdl20NTugm3YR1663yls1d6bEP%2FMnN29u8ZgybkOR%2BJjDShBtBxkl5siQX4t4u5Xz26qo4HVJWW8dzRzQjmUYIdrulDSceeBAm%2BMZkBeAJbmGz9qyxhmZRp4yWH5qoj3ysJCVJqM%2BvV31HdxSesoA%3D&ctl00%24PopupPageContent%24txtSearchContent=lower+back+pain&ctl00%24PopupPageContent%24btnSearch=Search&ctl00%24PopupPageContent%24hfDiagnosisType=primarydiagnosis&ctl00%24PopupPageContent%24hfDiagnosisGroupID=e158e455-2a81-4583-92d0-863f3e7797e6"
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "POST",
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "post": "ctl00_AllianceUser_ScriptManager_HiddenField=&__EVENTTARGET=&__EVENTARGUMENT=&__VIEWSTATE=VKblFQiMowkkmQewbyrIs0nv7y34TSPrCgWiVsIE3tEOk%2BHc1f8Jn7pMmVwjVIJZScHMeISHtn%2F0BDe4OHUQ67QbQRc9nzpAwaYwU07GpmWWkYF0XE%2FHMHgV8OhpOgw8%2BIyfmQ1ha2%2FyjAExfa85%2Fo2cnHlXKNaUpAiCMenzTYivxOV5fnQt29P9Sul8C2AeixgQBv0JMeobwuUF8xk4BLb%2Bk8L3HpsjM4rF5BgTfTd0jyIkvZ8Yc93Vn3AUp%2BDTNuYaF%2FNDigcU1STxm0nyToHXwuw3P8KdE4XZ2krhO7KiEWCbzkFoXUdlySdD4LMKrPmHYS2T6l6V94wGcQHJSA%3D%3D&__VIEWSTATEGENERATOR=ADB7A49D&__EVENTVALIDATION=Nk9OBRP3cQi5EW%2BaZFDK49S%2BC2sHOnAfIc8WAhhIHQk0%2Fos5ub08PQCctWdbZkQ5EOp6XswGY8hdw%2BtWt%2F1VK2jLd9OhLOSDAzGKeTUmNQYeYXAv57%2FBzRCFteM9%2FjNlxzPBxAp%2FWg%2Fgcjg06r2Q149HqibGiyiwNInPhmJOggbjTSCBC3gq%2Bes9yYGNrXqp5gdXKWZ8oiU4itKdJQojlfd9bbmBYcLaOlvquU3cvRwyYYLeGMT4uFbxfM7UO1j4f66dXa6FY8N2Dn4RkT9sAnEIA%2FcyP7UsCiJVHzkry0ApiIIPcfLPFgnmc0F4UeK2vLmQYXCsg3goJ%2FcEfg16BycRyifSF%2F6Z%2FAVsfbi7IQPTD8ae03QqL2lzu0%2FIzCmj8B2zyW4iYLakXTNCmsjotVXND3Wa3t1VzfZCsw5W0%2FOQ%2BquCa%2FO1qAfj8ZKqvg8%2FrYpJo3gMGYBu%2BQOT7OYTfEaERCCIMzHbkQ%2BZmfJU8dxq5lM6TGvdd4BMb4rMg%2FmfCF9yEI%2F3rlm%2BZT3m%2FEXK3fxdPe%2FjgBE6jCuVrdeqHZhzj2UUCp5IvPGP8123q8zkKo16C7QmdMySiGXCo7qyMd8R1UBfQwEd0lYySldt1rliaen4ebjJ0AiB2x0CupVIlrDZZ8YKYIkI7%2BjoSZMSYzKB3cEhf50NTiVYkyHcHx9sPHWPmSQhjSVsiXG0eDVihC0y7DAlCSz%2Fd2vu1LtCXUHpv6%2BZux45zqagJvrRi5%2BWZ2nElpj2mkPAMixClWNi&ctl00%24PopupPageContent%24txtSearchContent=back+pain&ctl00%24PopupPageContent%24btnSearch=Search&ctl00%24PopupPageContent%24hfDiagnosisType=primarydiagnosis&ctl00%24PopupPageContent%24hfDiagnosisGroupID=e158e455-2a81-4583-92d0-863f3e7797e6"
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "POST",
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "post": "ctl00_AllianceUser_ScriptManager_HiddenField=&__EVENTTARGET=&__EVENTARGUMENT=&__VIEWSTATE=42DxkcCdV%2FXsitisB3wByFYZyd9Li9itgbFMGm8Ct%2Foff5fmmTU9Z38NkWymwhy5rXrZf1El%2FUziKbCercjWMCOlmGEzdEtY2y5Y0QNOhvmlDfCor6LnwRyKgTxMjXkn1JPWGPbc%2F1zI6ZtOknQ9x78PFBC%2B1rxV6oIstsmOrwNYNKZTAOorgv9gbBk6euQYJ%2FMtHrJQJBaQnoClSLPq9Nq6TxENArsnUrM%2Fxc4Br64SLr51h4vULGA%2F52IHJJ42hUAC7p86hxqC4eyGVzUZYL5fDoe7mzbw15GR%2F0dBGspZ3T1I7eIeyiTNcEZA3NFZFZU5BSWo5opOjeiTObAEXw%3D%3D&__VIEWSTATEGENERATOR=ADB7A49D&__EVENTVALIDATION=3QEKr5%2BuO11Mr7ZK3VpipoOFhzYQAZ53ZWdgGNXrAc4%2FsZnRBMFQgFJ5yls9jeD2RPwrVUBN1ao9vm%2FffxBYDTWmSyOf%2B9KtH8tzA%2B%2FN7JfW4BTO%2BYGVc0O4mXybhJ%2B0NUhJ3WBILV5GNkYuUix8M8nwPPRCgtQC8ap6y%2Fhu%2F3o%2BSB0Nb8E11Nc5PhjPi%2Bc1zSFKmB%2BZyfddd8ZIzW87NRlweXdx%2BmNB%2Fp6vMUIWYETrbxl6PigonJPPVX%2B75RTRGssjpynm0UYeeJJGVFssgwoPehCxzIWGLOo1udgERO9Nv7k%2BEUIZZGVPH8LqTbbshUBoxr3%2FNUS9uM9WPmim4G3dIz65e0icOuF0bLss8UqUleFKsc923hEB6uxt8dwyt0Esj%2B1df0%2F6AY4Nji%2BI6tXKVsenYrmMnYo%2BrG3nLra9FSDUWxkHyT%2BOKQR2cw%2F9BorfNd7g9iPn0W0%2FFkzxv7wtUxLnrG5KcuWMwIFx1SjTGou0tbSHfpkE4iOrKD4bdEu3uUqf0UEQW%2BMNq8Pf2j2vdYgO%2FGDyXOKVkTwqLpRLKDAgMtMF94WVhlvDWqBIz4NFU2b37bQRetvuMILXspIZJSWb1erC7phkHyTm1IhdcO42azLVkt%2F21%2F8dWWtRovWD7SP4REsDU5YHVvfxLTTmZIr0B8zK89tfWAgogklLc7Km7Y259bCKeB6%2Byy6MXwcCz3%2F0KzT4iLFQPD13ot4xlmIRIDd2t2wVngGzorlU1WtostJTFRNCextq4orV&ctl00%24PopupPageContent%24txtSearchContent=backache&ctl00%24PopupPageContent%24btnSearch=Search&ctl00%24PopupPageContent%24hfDiagnosisType=primarydiagnosis&ctl00%24PopupPageContent%24hfDiagnosisGroupID=e158e455-2a81-4583-92d0-863f3e7797e6"
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "POST",
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "post": "ctl00_AllianceUser_ScriptManager_HiddenField=&__EVENTTARGET=ctl00%24PopupPageContent%24lnkL&__EVENTARGUMENT=&__VIEWSTATE=XSDjzfoftJhmcEf02Sh1DXRYtrit%2FnGe%2BCXYBgBhpvu5voZ%2FlJaFP%2BfotWX9jtTl3Sa4vrzjdjdTfM498Zi7Bc0MFdlIzjf%2FpmaiuftH7M%2FG%2FLfrrFiDwJZLwivLJtsvFeCH5TnMqlwcLzuGE47wfQ8w7A2e4bzl%2FM4Z1Gsp1CFHc76o5flSzMJ8ud0w2LjOSF50cT1x4F%2BH0fgYzZE6ErMx9vElu7AIuK1bS6cRWOILlUoj4jGEss44fT1Y8ahKophYw%2B%2FeQxU3zAqQeYwYbLTmwUFTZ%2FKq%2B4NQGessN12HCDir0uoXU2yhI%2FHcsJxQS87oSWMuXv%2FKqvUoRYhdTQ%3D%3D&__VIEWSTATEGENERATOR=ADB7A49D&__EVENTVALIDATION=OhT7NylvMoJ9bG%2BkNFKbz7nK4NvPbEjU1CLed0nImyeIuIF2oBcpJIJzqqzmizy4N9xnWsyhoE5yTTlTh5CpkQZgQzk3IXjv%2FZlSwXr%2BburR4bVGF3B06wgr8eEpyvHVXbLPDEPgFrfFotZRliG1HctZcWvvnwwHaTGE%2B3vSdCzUZoxvNUWKHtrWwoBkvPOIJyzl7T0LkRoO2BrSeMpZNTfmMd%2FvNE3%2FXkAhjc7QoA1LgBaqhXAjdTXg7JzIub2CybT8Q1FQvM2IAaM14KH7yUN9PPGKPBPiFRHcozF4XLYslxLjmY96fMnTGmw%2FTBMvVrwjcZcDuCnDSsYVvj08kKsRtvhXYjyW8Y8YdhF0O1M2NXC6q%2FPMl3wUl2lD5IAeqZIfD5ERIcYGNvLV9DWgoqWKCUSe%2BLh7XlSubuHgZsvgbszrA8RNC0qgZC9aV1YLo6j0u5ydIhaWIK8ARJSyF8Ay7%2F%2F%2BlJKr9XV2jqMgLfiev4YxInftFyHxXS%2FEyIVyqccD5ZffmMJNbGiHmnLWQWzrkkW3BWLsOeSBHSCErYtuq12v0p277VXcx9uCWf3TOx82qk8z9a3wlapltigYVmQCs1sCLvO%2BWs5JfCrXNPEt%2FocBavMxU8AY32%2BbiDkxEnMnozlrKTXfD8jQvAfBUh3pzlDzn679V%2FIXnDiCH29vcBlV5OjzgJSHjam%2FqWfAeFzpbU%2BeD%2BLOlbQEilt5B2A8WygsReLf%2FMFxkYsaSgnnr0TB1qb9ZTUUyROB5x1B&ctl00%24PopupPageContent%24txtSearchContent=backache&ctl00%24PopupPageContent%24hfDiagnosisType=primarydiagnosis&ctl00%24PopupPageContent%24hfDiagnosisGroupID=e158e455-2a81-4583-92d0-863f3e7797e6"
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "POST",
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "post": "ctl00_AllianceUser_ScriptManager_HiddenField=&__EVENTTARGET=ctl00%24PopupPageContent%24lnkB&__EVENTARGUMENT=&__VIEWSTATE=ejz1hQ5jI8VjTapS%2BsZipEYsMmPgmbp0DJsNL99qtBXuLZr%2FHXonH0gt2SJK2yhHPtfyfa4F9mfh6rxMol21WFmcCN7galqV5MRXKdpy7WT%2BG%2BpZD0hUjUZq2HT7jY4C6ESqn9EutEAIulIq390jxvXcqK7wyeKNTvUGeAG4Alcr5wc%2B%2Fj6PovdBHAR0ZrySHnDBaRRn7OBpsZlxJt%2FOyaySILsnxt2IzZakGDFM00xRUi5ettpBkVaxUyZ8NvTmAtnPHWIABnHTg%2BWVLTBhG25ExGsHyLuHL3Mkh%2Bl9J7fIRzh7uugt7qOOPBJjB5BcIGit38LErjX%2BfGc92TrSoA%3D%3D&__VIEWSTATEGENERATOR=ADB7A49D&__EVENTVALIDATION=DuzPsZvHqEu%2FUiQBZFRkQxWe32QtgS2WCDJNj6kmtI9n7bLElpWHiKyhPvoNrOtSAv8FrJTrdBVG9FG1%2BC%2Biu%2Bnvh%2F43U3FyHDR0pvsSOsgvgZ3wrT1L2yRAXUVcwa%2BeBGaRHtq8PXh%2FvvIdz0yOY6k7I4zRMxXtPl%2Fsz3UTlX6utNkFaY9Lq9UhnL%2FWo8Gg%2BbMuOH7s2q0PwTnpWlaUg7qhWikKU2FQ76VZ1TK6T%2F2uSpTOP%2FFsLIa3Q4yNydy4nhUCEIUdSF0W0JX08YXN9JK3V4KWPwG2vZdIT0xiXkN7XgXywJmEE3gKxUAdK6q2W4lSBd99q1rXRb74nLDvM3CI3HbBNMEKDAp7EBPG33sjnLASpQ78CTyoXG1aMMQwMR%2B1LZ%2Bc1HgmrpcsYiW2DJiAEXMyuKGU%2B%2BOTD0tRMWxa5b2wAeIzIW6f%2BFctS9cSzkPpldVhWhzwVxNDDlTChwU%2BPbOB7s8g7wxOU48lOMcZp5pN3jxBvr5e%2BtMOwVGN3JMIVrg%2BI2A2oy1DFjw2YzjfIcQBc3oKDApsw8EAjSvlxM8BjzZncmZ0swJqfjhooDBN4bvB8UGOj70Mk6bezvTzEvRqNqirIQ1ORu2tFtS9IYIF3BHtRhSoYqRUxVkdgQhxuK7GQItmp1b5h3azc%2B4vufR%2FUD2ZtZkM1nfKoGIj3W1fsMwd0IwEN7WR%2FCnKoYqdipooPVgsvcP9X36ZOdOBezyvjb2cTTu9nn5R3rAyWzAMq3y9jlnBo%2FlK9WFx&ctl00%24PopupPageContent%24txtSearchContent=backache&ctl00%24PopupPageContent%24hfDiagnosisType=primarydiagnosis&ctl00%24PopupPageContent%24hfDiagnosisGroupID=e158e455-2a81-4583-92d0-863f3e7797e6"
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "POST",
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "post": "ctl00_AllianceUser_ScriptManager_HiddenField=&__EVENTTARGET=ctl00%24PopupPageContent%24lnkP&__EVENTARGUMENT=&__VIEWSTATE=U8xZPLVVJyZcSpVLzYmPLoN1u2QoQR51sjwFCdv0bsFF%2B179ebEI4PBiUASci2ABM0mR9OUSry%2FwnEF8iLEVgdJc72Rzr1GxTHLuz4x%2FHj6e6f88RY4nqMkrDdZzm65x1eJiCfBz3Cg8TW4TvCro5yLqRgDBz4G8GdVhaBeqGJ9KQBATc5ZrgEzTlp59vFJ1bUme9ns5EZkK0EDsaj2YDVGCLf6nodg2%2F%2FfFLq6AIuOxdpVsaPfo4gFEjtHOPA%2BdDMA0CIiPXR%2FNy96nRtcJbunlFKU2qXnA2KeeoJO%2BvoQcr8xndWipr3Q5EF45z0B3KscjPN3rpM06zh1zhCuQ7w%3D%3D&__VIEWSTATEGENERATOR=ADB7A49D&__EVENTVALIDATION=vxTrVJ0NmlfzKNJBjG%2F689Lzm5VXBZm1cZAUoK8R6ygZQVbbthxKYCLZ4IzV%2Bh9NESI3ngRqiNVTJLBoypFJ9ccbheJdwWEAwOS%2FGKJ2VbpU%2F44QwKr7UlsfFv2LsP8jdEV18ptaezJJikbDBIhRY9jcA0QT67qdQMtdn5Qs3DRRtrGAxsnPKRwSEsuPD%2Bs3muTHh04awT5bV7%2FBSOx2rdgIyGE3keD0Sns3dqjK3QnVKY6s17HCgnsMNSCl7z4WGf%2F6Lh1hTn0BjU5yrx2eUpLXAJegGKZGaDkUW13F04YgqPimhTmLaXiZJ9%2FF3v6m5e36GKkuBkJwYKGVE4tX98srFKzYg6H%2BwFWpGorCSQdq25vYnnnev0g4OOE1%2Bwq5mMj2wZOpl85gxynj6b%2FC3iZlRU%2BOpVH%2BXPgy34yoiJHMPnC37N9oILb8qyVGQKg7o4DKUkB%2BmfxYlcBwr6AivNcXILrOsYeZTz4%2F2x4C9JUtFEMWGVdrWm3x3gOgzyPZhvQ1KGkkzC17Ye5E9bysixRTpUtRvgfiWfq7xhLdFXUajSH9RIEIPdHi3O5JxTIlXy45cbMvm%2FLdQEvqkgCSNil%2BQtdQFxylCN0Cfr6PNBzlIi9nB%2BhTvEAq2fdb5TfVqpwMl7op%2FYLndolwCiUJ%2Fw%2BisFlBULcw4y6rUTxrhCC9ZInPY%2Fr5vp5LHiMZ9iI6GVUldz7wNLNgj%2BHm%2F1DxGXXJB8rMDDo76ht7BLXbcK%2FnD29ubJ%2BzrZ1PSVY2TObw&ctl00%24PopupPageContent%24txtSearchContent=backache&ctl00%24PopupPageContent%24hfDiagnosisType=primarydiagnosis&ctl00%24PopupPageContent%24hfDiagnosisGroupID=e158e455-2a81-4583-92d0-863f3e7797e6"
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "POST",
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "post": "ctl00_AllianceUser_ScriptManager_HiddenField=&__EVENTTARGET=ctl00%24PopupPageContent%24lnkF&__EVENTARGUMENT=&__VIEWSTATE=oje8%2Fie4LyZc427iI5irNYapAMA5BVzunPjPcLgAQXIxhPD1obzqV5fJ7SWZXnMgYukRp4t496G1phXrBS6TS7jYgQ2eF7mzzqwhQBRz3QoliqWqc0wH7P2vuy5G1QYjU1XVVmkEl7QAoXDWnnY9ildxg8O8akgUdjBJvs9rHYa%2FbeiwwfBUACgWoiU3OAoXU2e1ykPU%2FPcLEVUIY%2FMkJZ%2FsIn9njEHo9LYcBJ8EfdMns2dmZtBS4f4A4WmRXRg%2BzAXxIoezirYo5VOusVpgDOEisPLyaIY%2B2pMxgAH0uSSL9TZpM2pV%2Bb4Zx0rXe9C%2BHpkeOLbUaFycoQyOUJm44A%3D%3D&__VIEWSTATEGENERATOR=ADB7A49D&__EVENTVALIDATION=9Czu1zZZhhZcKW4eDioBHNMCEBnRcFqBMYMKp2Umy7h5FYGgOb4UAedOm4otXdPwvkje7avIl1SGC7iu734GPMlGd%2FNe236tni4CFBavrdgSmKxMLgMaprjfXmbG%2BR5uxdAFhpQAa%2FhrVadgWyw3KjbcXx3%2BVAFvN%2FhSQXVkzzI7AP1Bmbpn4evwtJssylDdIEMrD%2FoimQkgTSk3hUN0OK7J9x9qzdBdypo%2BpYLKMkpTNdEKYW9aFo2lCOvkdNHKjmPcnlWRVfqI0apslNZLlOsYQODH2lu1%2BMCKTLwNamFtloFwoSOCEygFkBrEpCJYrcLC1E6NUZnddMgvWQuN011IgE5W%2BkfuhhW4jG3gPRk4Y9Ptq9Hm5hrwuUeOe6QAFb2tH8YESMB8EehuuJ97oKfcHs3ZuB9GLFzT0MaDvFXEStLiLdGySqw4Cecv8Seo52j56vVomLknuiyj6mfzcdGjw2dCPQVqDT5%2B7swOllUKPk26kte6EYOvV%2FBWXxc4gd5sy%2BzvSEXVhlEqaGnNyv9JBXr%2F2VQsGzkv11rQRSEUQoSMXgGWK0e6blkyW2ER%2BnAMY4KoN9ROpKqNnVpOcGFSh15BLbMQi5%2BAQ2X7VS5I%2B2fqRFH6zTusuQsj%2FrBnXRWaZkPrt%2BrRIlbM72vDcyviiPDdtyp0W%2BDSFMAjSZGYvm%2FpNNNiFvFcAdO9Qi8OzhWADAIbtQY4dnDSentbSBYpkrWyxYtI4vaD15U3xBF9wOdH11yrcb%2BMqk14USwd&ctl00%24PopupPageContent%24txtSearchContent=backache&ctl00%24PopupPageContent%24hfDiagnosisType=primarydiagnosis&ctl00%24PopupPageContent%24hfDiagnosisGroupID=e158e455-2a81-4583-92d0-863f3e7797e6"
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "POST",
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "post": "ctl00_AllianceUser_ScriptManager_HiddenField=&__EVENTTARGET=ctl00%24PopupPageContent%24lnkH&__EVENTARGUMENT=&__VIEWSTATE=G6YifP58oPvvS42Bfkv5pRFaj1L4x%2Fx0DsiJZkhZc1Tf%2FRzqJbsG6zMRn2XXiz%2BGvk2LvJiAkHJwwkSjg0UDHGDW8fIpH7hYmSJRGYvM6ABxIPzPQh%2FTxYI%2BUKsz9CP3fiHensvzj6z%2Fh1Ne4gflnJRjz0VA4HfK77WtROsoNwkPLUHDjKySjUR%2FB4EK6%2Btle6RhgGaAFCsmuEdn3txuT3wk%2Fdpn5DFghJnYb7k75GoXNKuaDM7uwpqAwQgHjkuu%2Fp0AtEkR1ZxJJkhpBbelXFQ2uN63H46NolHt9BsmbblCWIAA8TL5PQCKcUAaFPS%2Fttq%2BONiX1me67toT3hX94g%3D%3D&__VIEWSTATEGENERATOR=ADB7A49D&__EVENTVALIDATION=ZZrTbnljItzPyR1822j4xzeNl6Fe3xsCHrbIkYuNAmE1QJz2BgTQz4NOVLkuvfmRCoLkM%2FRQQRmdJcWKVKxY4zTy4RugjaTRhfWLHURfcx3fFjT6lKHYNPfmSu2mJCR%2B4c8vEUsF2pb9dzRBdnHiVw1qk62ZUvlMMVaA%2B4gzHl%2FZBSh5RRn9dWvQBSg7%2FUssdtUnt0wHPsrgXk%2FaUlR%2F4nwwlvNPIdeSw%2BZlg6h56W7Z2n2HM1QAqPNyFfpFIBMsRXAjZ0wTyNuBGChFCHGp6eS4G39vxqwVihK%2Fe9Ldx6VIt2Ow2nZKvszbI8TqEkttsTKa6GQvAQInB%2F83p65zK7M0sYM9Lpu03neWEfbqyLw8DL7rDIouqxS9iIz67T5vGTUeMKFE2bYnShLrf8aG4U%2Fd3WpBlTTTMOVZVyzB2uu2JBn5he%2FszYsnr%2F%2FLkE9Bf2%2Bh33vHlDDcJ9GjGoukn0sg6QIW4g8zbDI9jqfU%2FDl0EkOMcm%2Bvk1CEklrAKl47Tt8qObEPDLFyqEs%2FJnqcIvaDaTkQbAD6Bi6zRssopblZulPvuZhkWliPTQVuv5bb9HEdl3TbK%2FgqBtzODeNLCjs5%2FfGTvRJpBT8Iiyf6wgHtbWsc6gcA%2BxeL%2F8ieRHd1FVrHHY2Cgr5v4X5l8UBt38z8p3p66DFqclmE3w3vpjQfi7a%2BBTrIqXZMvqiW%2BE9kyzBjzbl%2Bmm%2BtEe%2F60z3irEjba3Ct0lD8BqmVxIgR%2FyPnyBBgOn4Q0Wc4jJo8xM7n&ctl00%24PopupPageContent%24txtSearchContent=backache&ctl00%24PopupPageContent%24hfDiagnosisType=primarydiagnosis&ctl00%24PopupPageContent%24hfDiagnosisGroupID=e158e455-2a81-4583-92d0-863f3e7797e6"
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "POST",
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "post": "ctl00_AllianceUser_ScriptManager_HiddenField=&__EVENTTARGET=ctl00%24PopupPageContent%24lnkA&__EVENTARGUMENT=&__VIEWSTATE=crAsn4ndfC5zJDhHp4hGssjhxABjjvEx4jn1SoVTSCCqkzg2f4LsXD4JFWYBQoHpDH6MwR8p1H43vot9A9QNBBy6FVGrOsGs1xhHCCnK7JqTjVzX4BSu2wQIKnDi6oE3l1MBVaJ5V0ifN609fL56Maa%2B%2F7%2B%2BmCLXq5Oy8xn9In18XBeawjv8Hh15cR%2F32xgR33enxxPMdeUHTqReMGVK4ia2ryZhasD5vlzEH0ys0Oy%2BO4mfZ3PhSj1J3DCEZxXM67JUW0Zyr0WDcrsu63vyE7hnON%2F6ub%2BIwuTmE%2F6UoPq9T%2FoiEyynQC6QhYpOH4l5X32Ocr8HnEjR%2BCdL8idrJA%3D%3D&__VIEWSTATEGENERATOR=ADB7A49D&__EVENTVALIDATION=ybBi%2FE2kEg%2Fe1PAYm%2Fg2dJ4VPmx5vNuUd%2F7YYcrNVxxQaPeV%2BFuJ%2FvgDvG2d2nFEF1%2FRFASmnW7FYnWi7KYyhrUr66vziY%2FqNZHD2yLRigGuEuMV%2Bh32JrNZpFcYrnqbReCDb3ECjIdLytvSRbOr1QGNVdcQkuF4KOaOhuSw1MQLC%2BdHsF5bZRneo3nFiG%2FB3Vy0TcAKdgFVf5aB1OFENYNSO7Av%2F4ms6HdIGRcIMKteURwxGEbWWFSD7LHmx%2FLYj9S4NNNrQN%2Fvijk5AB%2F8Sm4Jl5BX84DTF6YSfh%2FZfJAlmdZ4BnaDUAmd1vZQXyE1hUKc02M7ZeI1%2BbXBtTq%2BlnNE5NfY30sgs5VwPoJecQ%2FTl%2Fo9ag7Zz%2BYtFJf6tWJdIGrSlDSoHdPPzcIyg13oZ7W0GaogZLl2I5ziTWgC4D38dA0f0uib8S21U1hfV%2BltyXhdbjI6HWIIPvve2YCq%2BQ495h2kcL2sV0YVKvSI8EaeamvhE869IxvbCMaM6kVeHMo4tWMdwlU%2FM7AB1D46g96ceJJ3baK1Xn0RPiPrnxSRLRgnWxrF7pRj0nif8kB94kYSO4xkFn168fi651v6TM7Y6jL6pYXiQPupDijACxzCFn21Okohq4VPIqD9WgHCIH0PhD3qKk3WxYQIZhjHTb7sV4a62iv0pSczCBtVk8D8aFDTwV%2BhcUpeLLybSgDi26wan%2FofVF0lJdj%2BpW7OT9SCRs%2FyoF2Bi9vPSJr%2B0VnS01btiENDheJhQVKARCGu&ctl00%24PopupPageContent%24txtSearchContent=backache&ctl00%24PopupPageContent%24hfDiagnosisType=primarydiagnosis&ctl00%24PopupPageContent%24hfDiagnosisGroupID=e158e455-2a81-4583-92d0-863f3e7797e6"
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "POST",
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "post": "ctl00_AllianceUser_ScriptManager_HiddenField=&__EVENTTARGET=&__EVENTARGUMENT=&__VIEWSTATE=3E8uZV5Bo3aL9yb0O09%2FL2KL%2BDvrXQCZ70rZa1aa9TUkrGx0C22JQ%2BFTE3aSt2rhZ3AlUYv0xSylDRvn3ufy%2BxhUV5VbNlVlYxcKG%2BYuoZ5nmanhpMIj8uRnjWIhUKrlPlwFJvGEwMqNbCnTNi3%2FylDHIQu6ygW%2B9AqLcPt2sqIOp7FbZ%2BXbFLXVnHn3KJGHv%2BF7w%2BSXrkiHcFTthKitbbTR%2F9JSc495qouR5S9ZuvFAUAUMmR4%2F6jrzJ82W3mTEbiizdMO9m6eMU%2BGfmqZuJOaX9JxdrjhuJ5lJQrVAwwnxUmYcMOoP05sheExvLErnHnunMwkGVsw5UswjvRmeKQ%3D%3D&__VIEWSTATEGENERATOR=ADB7A49D&__EVENTVALIDATION=TIy9QfM%2B49TnRy69MPCJo97Qr52Asb2pa%2Ffy7dCp%2Boq1aXqylGkJBzJJt4y%2FykjSjfZRwWQj2IsVKVyVXjh1C%2B25En5EB9ZdW6NMrURn8W6NAd6g99wtnrrKbNDp7irgebQGqR5hnTemQww67q94CCNQDowCJz%2B9PdmpwwFLPcxaAkvTpelc%2F2twKBq2ZeLceGDTHPJFnfxFvGwHR45mIt2qPPIIeSmA68AxZsZ%2ByevzEpG4QHLt%2BkD5SDIS3pP%2B1AKW7tFnycLj7uZtUDKd%2BP60AWyHAb%2F3AM1ygRLJ9yHebarGf%2BNC%2FwG8fCin5GJ1CugZM75%2BnLCK4BHLjY0Df8IsM11d0CcWTVGUGyts7QZOYCsk%2BqXa%2BYcVDr9yjAhunmx6Da%2F8onxUu9vrCjhXI7r8qiu%2Fxxk%2FBQBs3Wc%2BBYYDjpVYor%2BADTShP7HHz3Hqb8IvCSeF80GzBXbdIx%2BR%2F%2BD4xJKNdCVflNAH6zIcAOk6e%2FCbk5pAKWgh61XpzvzD4EfNTIc54PfBfLbKxXQUFDNuLwXs8QYdopGj6HF722jRatIE45MFoa5ZZZOEcyke79CwvFxbE6OcPx8Vv828bll3BnQqjHdv0jUwiU%2BbV8sNlGM5kxrdEuLrRjwczOknlOcFiDFE5fWyl6WhBfOs1ggq6KekNYE6BEXTko8gdgh1K00QXsyEFF5%2FIkjJJ7jSwXpw56I%2B8ZAjeJas7ZWIJi%2FYHSuauhUirQT8RBmotLtKDCch6Vk%2FRWN4YCWLP7pY&ctl00%24PopupPageContent%24txtSearchContent=pain&ctl00%24PopupPageContent%24btnSearch=Search&ctl00%24PopupPageContent%24hfDiagnosisType=primarydiagnosis&ctl00%24PopupPageContent%24hfDiagnosisGroupID=e158e455-2a81-4583-92d0-863f3e7797e6"
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "POST",
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "post": "ctl00_AllianceUser_ScriptManager_HiddenField=&__EVENTTARGET=ctl00%24PopupPageContent%24dgDiagnosis%24ctl06%24lbtnPrimaryDiagnosis&__EVENTARGUMENT=&__VIEWSTATE=MqJVKN0V5VhbRmA8FXBGbfiHmMFlEAgTxX9ZJHqFVZbuw24OXPo88GkJZq6lXrzhDN4xZkhZFENpAJw4q2WSWBw3BBOezIE74JS0GUMnm7AkZ8YLFIFAJUmwMoKZBRVRClXZuhPUyq3h55B3NHXwgKPRqyNyFwJusCyefqavDJ1D4NFUBFH7Z36y9%2B7aJTPHu%2FlJieEVA4wh57V36Zh0e1tjycX%2FBd9e36fHxAlDR9SXFtOKredGp3WANEGIHfPuz3pMEOZFuzqdSFgNUcrWK8TitoMTrEP1X4ukNM4e0xDVuIv%2FzcLP7fhZaClCiT5r1pBnpRtvoyL3GA9h8lA1L3WvHm4OxaHLfpyOgTdG8LOiErBpY8mjfm2SCg2ynHMrTAng38FrOBoN5DQyWjAf9pZ%2B1%2FrAfAKPfPE3hJI1fsC4IR6E23R5V2nTYMbcueWaAJS9yucvbCEXntdlY45dLphDhRq4dMdnkRPuCTirI6UBwRGIlq%2BLx%2BXN%2BDFtM3oY9BvUX8RnsraCgX7CdgddoAsc89pOtFvcF2JD%2Fwwl49Bj9w5khiSoG%2BVteseVZep%2BZxHg6sV1GeBGhtELyFOutk5lztw7pFE%2F2Z6Zj2LHsLoj3ri7ecJzBjTaFodnwacgYblGb6QopfcHjgo4daKKRNOYKpb%2FfJwE8lYdNVdxO5QNvORD1WZYZmTJMl%2BlTbzySpSCjwYQ4jpoVFRe2qY7X%2FydKY12tZWpb6VMzF2DiuBf37YJ0tDAdXLqUFZjFCnzDF99t2QitO67UtqOKgGImly4Er0i8hPdSnSLdYh0M6kuIK5aYJaTahKZpVsTx9V0Z469sVuznNaMzhEdbzA3fwBqG4keqI1XrcMKqYg7D63fLBGWl%2B2e3pKUbMGGsX0UU500ahkuEu3nB9%2BfrdeTvtToDVN%2Bst4rJHdCdk4cMok%2F9ZDk0LEQWeTFC4K6%2BMl3NZZtFv%2BQqpfpHZGzslKOFg%3D%3D&__VIEWSTATEGENERATOR=ADB7A49D&__EVENTVALIDATION=vYRTrJyaHKob4oQxe8AcfNgxVR%2FM8z77wj1slZenjGZVNPPxf9i2sfJCB0znXnwUPV7lkdzvROcUil2NDN3BE7XDFkVyGCnKRKBe%2Bu68SCghC%2Bu1iALqvCN9wGYGfOTPjoUQRSRLWbjEJmdukBO9rj%2BPmKlrIcB8FvM8UORlfz5bSyFX7tCaewD3gSDH2OB9Loyppl%2BqfiDXCKO%2BpoHL%2FJWhqYbISEdiB%2BNAztoiVA0g%2F9g2djuKraNVCKrRedGlfMu%2F%2FuPZFYgyeKQXYcnE6oCieXVuMuLhnKf1CGtJzlTIblyaROXwOskNMz%2F0HOXTaEnqs1hFtcEJgKH2FRLxjEE%2BaFfbt0Q8Eo0P0LBnLDWxkidvq%2F1MY%2BX8fi%2FK%2FCND0Ba5w7%2FfdFpeJ776CgkwIbUYGNxqdVQQaXw%2BYTSu5mOu84Kke1x1DOQFarwK6gdMb8DF6bdBm39HzPu%2Bxtl2ixxKcK%2FuQVKs7003UnMvUEeNjon0XGQ4vIU5MW2B5MqKmHd0xcdfyA68oftvExG5Ynf0aswIHDN3xCRaKELprTfP3DxO%2F4CCkg1CFJQaNTlS3vm8kCqvMr22%2BvdN39pHapjYzCvNRl9Rdw6m8dEGfgIFRFt%2BXqzIsxxDMwUV%2FkvilwXzXCGm0mcVd8oAH0aP7u6F%2FWEK2UvkfCoNqgm4Y%2BIr2NYVX5l1IzOtTxUYWvcjx0yghyWSwk7KhaP8GVhXwasa9XbiVjmbVlZNRGXWVoyj0WKj07D5UEhjAL3qz52JGGnx0Pw2DKKxbLPrTwLqSFMJdZLOPQhgLiYvrET8hs0Ts2dTSxuqutp%2B1JP3XJHAeuN8G0EzD21RZjiXnjWFoz%2B9co%2F3m%2FkEjyS2mJq4PFg%3D&ctl00%24PopupPageContent%24txtSearchContent=pain&ctl00%24PopupPageContent%24hfDiagnosisType=primarydiagnosis&ctl00%24PopupPageContent%24hfDiagnosisGroupID=e158e455-2a81-4583-92d0-863f3e7797e6"
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "post": ""
+  },
+  {
+    "method": "GET",
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "post": ""
+  },
+  {
+    "method": "POST",
+    "url": "https://supremecare.greateasternlife.com/Services/AutoCompletionService.asmx/SuggestPanelGPClinics",
+    "post": "{ 'prefixText': 'SINGAPORE SPORTS','count':'1','contextKey':'CLINICSEARCH','ClinicID':'undefined','insurer':'undefined'}"
+  }
+]
+[probe] responses [
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "body": "\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head><meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" /><meta http-equiv=\"Pragma\" content=\"no-cache\" /><meta http-equiv=\"Expires\" content=\"0\" /><title>\r\n\tAlliance Healthcare\r\n</title><link href=\"/App_Themes/Global/metropolis.css\" rel=\"stylesheet\" type=\"text/css\" />\r\n    \r\n    \r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/jquery.js\"></script>\r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/Jquery-Ui/jquery-ui.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"/Script/jquery.pstrength-min.1.2.js\"></script>\r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Scri"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "body": "\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head><meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" /><meta http-equiv=\"Pragma\" content=\"no-cache\" /><meta http-equiv=\"Expires\" content=\"0\" /><title>\r\n\tAlliance Healthcare\r\n</title><link href=\"/App_Themes/Global/metropolis.css\" rel=\"stylesheet\" type=\"text/css\" />\r\n    \r\n    \r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/jquery.js\"></script>\r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/Jquery-Ui/jquery-ui.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"/Script/jquery.pstrength-min.1.2.js\"></script>\r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Scri"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "body": "\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head><meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" /><meta http-equiv=\"Pragma\" content=\"no-cache\" /><meta http-equiv=\"Expires\" content=\"0\" /><title>\r\n\tAlliance Healthcare\r\n</title><link href=\"/App_Themes/Global/metropolis.css\" rel=\"stylesheet\" type=\"text/css\" />\r\n    \r\n    \r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/jquery.js\"></script>\r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/Jquery-Ui/jquery-ui.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"/Script/jquery.pstrength-min.1.2.js\"></script>\r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Scri"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "body": "\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head><meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" /><meta http-equiv=\"Pragma\" content=\"no-cache\" /><meta http-equiv=\"Expires\" content=\"0\" /><title>\r\n\tAlliance Healthcare\r\n</title><link href=\"/App_Themes/Global/metropolis.css\" rel=\"stylesheet\" type=\"text/css\" />\r\n    \r\n    \r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/jquery.js\"></script>\r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/Jquery-Ui/jquery-ui.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"/Script/jquery.pstrength-min.1.2.js\"></script>\r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Scri"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "body": "\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head><meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" /><meta http-equiv=\"Pragma\" content=\"no-cache\" /><meta http-equiv=\"Expires\" content=\"0\" /><title>\r\n\tAlliance Healthcare\r\n</title><link href=\"/App_Themes/Global/metropolis.css\" rel=\"stylesheet\" type=\"text/css\" />\r\n    \r\n    \r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/jquery.js\"></script>\r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/Jquery-Ui/jquery-ui.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"/Script/jquery.pstrength-min.1.2.js\"></script>\r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Scri"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "body": "\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head><meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" /><meta http-equiv=\"Pragma\" content=\"no-cache\" /><meta http-equiv=\"Expires\" content=\"0\" /><title>\r\n\tAlliance Healthcare\r\n</title><link href=\"/App_Themes/Global/metropolis.css\" rel=\"stylesheet\" type=\"text/css\" />\r\n    \r\n    \r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/jquery.js\"></script>\r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/Jquery-Ui/jquery-ui.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"/Script/jquery.pstrength-min.1.2.js\"></script>\r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Scri"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "body": "\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head><meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" /><meta http-equiv=\"Pragma\" content=\"no-cache\" /><meta http-equiv=\"Expires\" content=\"0\" /><title>\r\n\tAlliance Healthcare\r\n</title><link href=\"/App_Themes/Global/metropolis.css\" rel=\"stylesheet\" type=\"text/css\" />\r\n    \r\n    \r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/jquery.js\"></script>\r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/Jquery-Ui/jquery-ui.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"/Script/jquery.pstrength-min.1.2.js\"></script>\r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Scri"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "body": "\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head><meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" /><meta http-equiv=\"Pragma\" content=\"no-cache\" /><meta http-equiv=\"Expires\" content=\"0\" /><title>\r\n\tAlliance Healthcare\r\n</title><link href=\"/App_Themes/Global/metropolis.css\" rel=\"stylesheet\" type=\"text/css\" />\r\n    \r\n    \r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/jquery.js\"></script>\r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/Jquery-Ui/jquery-ui.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"/Script/jquery.pstrength-min.1.2.js\"></script>\r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Scri"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "body": "\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head><meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" /><meta http-equiv=\"Pragma\" content=\"no-cache\" /><meta http-equiv=\"Expires\" content=\"0\" /><title>\r\n\tAlliance Healthcare\r\n</title><link href=\"/App_Themes/Global/metropolis.css\" rel=\"stylesheet\" type=\"text/css\" />\r\n    \r\n    \r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/jquery.js\"></script>\r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/Jquery-Ui/jquery-ui.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"/Script/jquery.pstrength-min.1.2.js\"></script>\r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Scri"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "body": "\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head><meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" /><meta http-equiv=\"Pragma\" content=\"no-cache\" /><meta http-equiv=\"Expires\" content=\"0\" /><title>\r\n\tAlliance Healthcare\r\n</title><link href=\"/App_Themes/Global/metropolis.css\" rel=\"stylesheet\" type=\"text/css\" />\r\n    \r\n    \r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/jquery.js\"></script>\r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/Jquery-Ui/jquery-ui.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"/Script/jquery.pstrength-min.1.2.js\"></script>\r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Scri"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "body": "\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head><meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" /><meta http-equiv=\"Pragma\" content=\"no-cache\" /><meta http-equiv=\"Expires\" content=\"0\" /><title>\r\n\tAlliance Healthcare\r\n</title><link href=\"/App_Themes/Global/metropolis.css\" rel=\"stylesheet\" type=\"text/css\" />\r\n    \r\n    \r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/jquery.js\"></script>\r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/Jquery-Ui/jquery-ui.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"/Script/jquery.pstrength-min.1.2.js\"></script>\r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Scri"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "body": "\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head><meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" /><meta http-equiv=\"Pragma\" content=\"no-cache\" /><meta http-equiv=\"Expires\" content=\"0\" /><title>\r\n\tAlliance Healthcare\r\n</title><link href=\"/App_Themes/Global/metropolis.css\" rel=\"stylesheet\" type=\"text/css\" />\r\n    \r\n    \r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/jquery.js\"></script>\r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/Jquery-Ui/jquery-ui.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"/Script/jquery.pstrength-min.1.2.js\"></script>\r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Scri"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "body": "\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head><meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" /><meta http-equiv=\"Pragma\" content=\"no-cache\" /><meta http-equiv=\"Expires\" content=\"0\" /><title>\r\n\tAlliance Healthcare\r\n</title><link href=\"/App_Themes/Global/metropolis.css\" rel=\"stylesheet\" type=\"text/css\" />\r\n    \r\n    \r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/jquery.js\"></script>\r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/Jquery-Ui/jquery-ui.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"/Script/jquery.pstrength-min.1.2.js\"></script>\r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Scri"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "body": "\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head><meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" /><meta http-equiv=\"Pragma\" content=\"no-cache\" /><meta http-equiv=\"Expires\" content=\"0\" /><title>\r\n\tAlliance Healthcare\r\n</title><link href=\"/App_Themes/Global/metropolis.css\" rel=\"stylesheet\" type=\"text/css\" />\r\n    \r\n    \r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/jquery.js\"></script>\r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/Jquery-Ui/jquery-ui.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"/Script/jquery.pstrength-min.1.2.js\"></script>\r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Scri"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+    "body": "<script language='javascript'>self.parent.updated();</script>\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head><meta http-equiv=\"Cache-Control\" content=\"no-cache, no-store, must-revalidate\" /><meta http-equiv=\"Pragma\" content=\"no-cache\" /><meta http-equiv=\"Expires\" content=\"0\" /><title>\r\n\tAlliance Healthcare\r\n</title><link href=\"/App_Themes/Global/metropolis.css\" rel=\"stylesheet\" type=\"text/css\" />\r\n    \r\n    \r\n    \r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/jquery.js\"></script>\r\n    \r\n    <script type=\"text/javascript\" src=\"/Script/Jquery-Ui/jquery-ui.min.js\"></script>\r\n    <script type=\"text/javascript\" src=\"/Script/jquery.pstrength-min.1.2.js\"></scrip"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": ""
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": ""
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/GE.css",
+    "body": "/*Html*/\r\nhtml {\r\n    font-size: 100.01%;\r\n}\r\n\r\nbody {\r\n    /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n    color: #00024D;\r\n    background-color: #f4f9f5;\r\n    font-size: 12px;\r\n    margin: 0;\r\n}\r\n\r\n    body.popup {\r\n        /* font-family: Lucida Sans, Arial, Helvetica, sans-serif; */\r\n        color: #00024D;\r\n        background-color: #FFF;\r\n        font-size: 12px;\r\n        margin: 0;\r\n        padding: 5px;\r\n    }\r\n\r\na {\r\n    color: #18427e;\r\n    text-decoration: underline;\r\n}\r\n\r\n    a:active, a:hover {\r\n        color: #ed1b24;\r\n    }\r\n\r\n.whitelink:link {\r\n    color: #fff;\r\n    font-size: 11px;\r\n    text-decoration: none;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:visited {\r\n    color: #fff;\r\n    outline: none;\r\n}\r\n\r\n.whitelink:hover {\r\n    color: #ccc;\r\n    outline: none;"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/App_Themes/GETheme/thickbox.css",
+    "body": "*{padding: 0; margin: 0;}\r\n#TB_window {\r\n\tfont: 12px Arial, Helvetica, sans-serif;\r\n\tcolor: #333333;\r\n}\r\n#TB_secondLine {\r\n\tfont: 10px Arial, Helvetica, sans-serif;\r\n\tcolor:#666666;\r\n}\r\n#TB_window a:link {color: #666666;}\r\n#TB_window a:visited {color: #666666;}\r\n#TB_window a:hover {color: #000;}\r\n#TB_window a:active {color: #666666;}\r\n#TB_window a:focus{color: #666666;}\r\n#TB_overlay {\r\n\tposition: fixed;\r\n\tz-index:10000;\r\n\ttop: 0px;\r\n\tleft: 0px;\r\n\theight:100%;\r\n\twidth:100%;\r\n}\r\n.TB_overlayMacFFBGHack {background: url(macFFBgHack.png) repeat;}\r\n.TB_overlayBG {\r\n\tbackground-color:#000;\r\n\tfilter:alpha(opacity=75);\r\n\t-moz-opacity: 0.75;\r\n\topacity: 0.75;\r\n}\r\n* html #TB_overlay { /* ie6 hack */\r\n     position: absolute;\r\n     height: expression(document.body.scrollHeight > document.body.offsetHei"
+  },
+  {
+    "status": 200,
+    "url": "https://supremecare.greateasternlife.com/Services/AutoCompletionService.asmx/SuggestPanelGPClinics",
+    "body": "{\"d\":[\"SINGAPORE SPORTS \\u0026 ORTHOPAEDIC CLINIC PTE LTD|7b820cae-c206-4537-a164-ef28dc2641f9\"]}"
+  }
+]
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T09:44:56.962Z"}

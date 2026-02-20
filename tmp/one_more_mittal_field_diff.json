@@ -1,0 +1,2377 @@
+{
+  "generatedAt": "2026-02-12T09:59:30.819Z",
+  "visit": {
+    "visit_id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "patient_name": "MITTAL SACHIN KUMAR",
+    "nric": "M4539893L",
+    "crm_visit_date": "2026-02-02",
+    "pay_type": "MHC"
+  },
+  "runResult": {
+    "generatedAt": "2026-02-12T09:56:18.249Z",
+    "visitId": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "logPath": "/Users/vincent/Baselrpacrm/logs/one_more_mittal_save_draft_20260212_165520.log",
+    "summary": {
+      "total": 1,
+      "submitted": 0,
+      "drafts": 0,
+      "filledOnly": 0,
+      "errors": 1,
+      "notStarted": 0
+    },
+    "db": {
+      "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+      "patient_name": "MITTAL SACHIN KUMAR",
+      "nric": "M4539893L",
+      "visit_date": "2026-02-02",
+      "pay_type": "MHC",
+      "submission_status": "error",
+      "submitted_at": null,
+      "submission_error": "Failed to save as draft (see screenshots/mhc-asia-save-draft-not-found.png and screenshots/mhc-asia-before-save-draft.png)",
+      "submission_metadata": null
+    },
+    "runOutcome": "failed"
+  },
+  "draftTruth": {
+    "visit_id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "patient_name": "MITTAL SACHIN KUMAR",
+    "nric": "M4539893L",
+    "visit_date": "2026-02-02",
+    "pay_type": "MHC",
+    "draft_found": "no",
+    "draft_reference": "",
+    "draft_visit_date": "",
+    "draft_total_fee": "",
+    "draft_total_claim": "",
+    "mc_days": "",
+    "portal_context": "mhc|aia",
+    "evidence_path": "/Users/vincent/Baselrpacrm/screenshots/one-more-mittal/draft/31b5a688-9104-4507-bd7a-347a9f9ce866.png"
+  },
+  "submittedReference": "EV16085124",
+  "submittedOpened": true,
+  "comparison": {
+    "diffSummary": {
+      "totalKeys": 319,
+      "match": 0,
+      "mismatch": 0,
+      "missing_in_draft": 319,
+      "missing_in_submitted": 0
+    },
+    "checks": {
+      "runSummary": false,
+      "crmStatusDraft": false,
+      "draftExistsInPortal": false,
+      "draftDateMatchesCrmDate": false,
+      "criticalFieldMismatchFree": true
+    },
+    "verdict": "FAIL",
+    "failReasons": [
+      "Run summary not successful (Drafts=0, Errors=1)",
+      "CRM status is error not draft",
+      "Draft not found in Edit/Draft",
+      "Draft visit date mismatch (none vs expected 02/02/2026)"
+    ],
+    "highSignal": [
+      {
+        "key": "basicdrugnoofdays",
+        "submitted": "-1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bsinpanel drugmaxpricecheck",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "checkdrugdiagnosis",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "cleardrug",
+        "submitted": "C ",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "clearprocedure",
+        "submitted": "C ",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "consultfee",
+        "submitted": "120.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosis3desc",
+        "submitted": "",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosis3idtemp",
+        "submitted": "|NA",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosis4desc",
+        "submitted": "",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosis4idtemp",
+        "submitted": "|NA",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosispridesc",
+        "submitted": "M25.511 - Pain in the right shoulder",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosispriid",
+        "submitted": "1971ee360aa4",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosispriidtemp",
+        "submitted": "|NA",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosissecdesc",
+        "submitted": "",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosissecidtemp",
+        "submitted": "|NA",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug amount",
+        "submitted": "140.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug checkstr",
+        "submitted": "-1,0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug defaultunitprice",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug drugcode",
+        "submitted": "CAPCELEB2940",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug drugname",
+        "submitted": "CELEBREX CAP 200MG (CELECOXIB)",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug eligibleforadjusted",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug eligibleforadjusted2",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug maxqty",
+        "submitted": "60",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug maxunitprice",
+        "submitted": "2.8",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug multiplier",
+        "submitted": "-1.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug oldmultiplier",
+        "submitted": "-1.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug pos",
+        "submitted": "-1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug quantity",
+        "submitted": "40.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug unit",
+        "submitted": "CAP",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug unitprice",
+        "submitted": "3.5",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug version",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drugfee",
+        "submitted": "140.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drugformulary",
+        "submitted": "4",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drugsetforworkmencomponly",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "exclconsultfee",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "extradrugcostperday",
+        "submitted": "-1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "freeconsult",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "freeconsultcount",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "freetextdrug",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "istier2consult",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "limitexclconsult",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "maxdrugnoofdays",
+        "submitted": "-1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "noofdaysdrugprescribed",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "noofdrugrows",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "noofprocedurerows",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedure amount",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedure amountb4copay",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedure copay",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedure pos",
+        "submitted": "-1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedure procedurename",
+        "submitted": "",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedure version",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedurecopay",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedurefee",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedurefeeclaim",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "selectdiagnosisfrommaster",
+        "submitted": "M  | M  | M  | M ",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "selectmasterdrug",
+        "submitted": "M ",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "selectmasterprocedure",
+        "submitted": "M ",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "show4diagnosis",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showclaimremarks",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showdiagnosis",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showprocedurecopay",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "specialremarks",
+        "submitted": "TCM:1 VISIT PER DAY SP:WAIVER OF REFERRAL LETTER PRESCRIBED BIRTH CONTROL PILLS IS COVERED. PLEASE SEND REQUEST TO MHC TO SUBMIT CLAIM.",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "tier2consult",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "voidremarks",
+        "submitted": "",
+        "draft": "",
+        "category": "missing_in_draft"
+      }
+    ],
+    "fieldDiffs": [
+      {
+        "key": "accredited",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "add",
+        "submitted": "More Drug | More Procedure",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "addmore",
+        "submitted": "More Diagnosis",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "adjustforcopaymentgst",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "admdischdate",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "allowbookappt",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "allowmodify",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "allowrefundidvisit",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "applymhcgst",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "auditstatus",
+        "submitted": "Approved",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "basicdrugnoofdays",
+        "submitted": "-1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "benefitcode",
+        "submitted": "A00357L0C0A6000SPDTTCMEHSEMP (2025)",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "benefitschemecode",
+        "submitted": "A00357L0C0A6000SPDTTCMEHSEMP (2025)",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "benefitschemeid",
+        "submitted": "197b087ae1eb",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bookappointmenturl",
+        "submitted": "https://www.appmydoctor.net/ApptBooking.aspx",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bscopayment",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bscopaytype",
+        "submitted": "$",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bsinpanel adjustforcopaydeductiblegst",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bsinpanel adjustforgst",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bsinpanel copaycutoff",
+        "submitted": "-1.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bsinpanel copaydeductible",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bsinpanel copayment",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bsinpanel copayment2",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bsinpanel copaytype",
+        "submitted": "$",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bsinpanel copaytype2",
+        "submitted": "$",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bsinpanel drugmaxpricecheck",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bsinpanel limitpervisit",
+        "submitted": "-1.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bsinpanel startcopaymentamount",
+        "submitted": "-1.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bsinpanel usecopay2",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bsinpanelid",
+        "submitted": "197b091984cd",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "bsstartdateasstring",
+        "submitted": "01/07/2025",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "cancelaction",
+        "submitted": "Cancel",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "cashcollected",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "cashcollectedb4gst",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "changeform",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "checkdrugdiagnosis",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "checklimitlifetime",
+        "submitted": "Please contact MHC",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "checkstripe",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "checkup amount",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "checkup payclinic",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "checkup version",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "checkupfee",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "checkupunitfee",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "chekadjustforcopaymentgst",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "chkerrstripe",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "claimhospital",
+        "submitted": "1296d6336a11",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "claimstatus",
+        "submitted": "A",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "clear",
+        "submitted": "C  | C  | C ",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "cleardrug",
+        "submitted": "C ",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "clearmore",
+        "submitted": "Clear Diagnosis",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "clearprocedure",
+        "submitted": "C ",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "clearreferralmaster",
+        "submitted": "Clear Referring Visits",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "clienttype",
+        "submitted": "Direct",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "cliniccode",
+        "submitted": "SSP000170",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "clinicid",
+        "submitted": "1296d6336a11",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "clinicname",
+        "submitted": "SINGAPORE SPORTS & ORTHOPAEDIC CLINIC",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "companycode",
+        "submitted": "A00357Z",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "companyid",
+        "submitted": "1626f1ca158d",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "companytag",
+        "submitted": "SHELL",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "compapplymhcgst",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "computeaction",
+        "submitted": "Compute claim",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "consultfee",
+        "submitted": "120.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "copayment",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "copaymentdeductible",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "copaymenttiering",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "copaymenttotal",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "costcenter",
+        "submitted": "AMAZON ASIA-PACIFIC HOLDINGS PRIVATE LIMITED",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "costcentre",
+        "submitted": "AMAZON ASIA-PACIFIC HOLDINGS PRIVATE LIMITED",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "countpageload",
+        "submitted": "8",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "creationdateasstring",
+        "submitted": "11/02/2026 16:08:54",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "cumulativeutilisation",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "darwinbalance",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosis3desc",
+        "submitted": "",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosis3idtemp",
+        "submitted": "|NA",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosis4desc",
+        "submitted": "",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosis4idtemp",
+        "submitted": "|NA",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosispridesc",
+        "submitted": "M25.511 - Pain in the right shoulder",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosispriid",
+        "submitted": "1971ee360aa4",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosispriidtemp",
+        "submitted": "|NA",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosissecdesc",
+        "submitted": "",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "diagnosissecidtemp",
+        "submitted": "|NA",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "display labxray",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "doctortrack",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug amount",
+        "submitted": "140.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug checkstr",
+        "submitted": "-1,0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug defaultunitprice",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug drugcode",
+        "submitted": "CAPCELEB2940",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug drugname",
+        "submitted": "CELEBREX CAP 200MG (CELECOXIB)",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug eligibleforadjusted",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug eligibleforadjusted2",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug maxqty",
+        "submitted": "60",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug maxunitprice",
+        "submitted": "2.8",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug multiplier",
+        "submitted": "-1.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug oldmultiplier",
+        "submitted": "-1.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug pos",
+        "submitted": "-1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug quantity",
+        "submitted": "40.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug unit",
+        "submitted": "CAP",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug unitprice",
+        "submitted": "3.5",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drug version",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drugfee",
+        "submitted": "140.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drugformulary",
+        "submitted": "4",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "drugsetforworkmencomponly",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "empclinicname",
+        "submitted": "SINGAPORE SPORTS & ORTHOPAEDIC CLINIC",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "employeeid",
+        "submitted": "196a5aff90ca",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "empvisitdetail cashcollected",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "empvisitdetail copayment",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "empvisitdetail providertypeid",
+        "submitted": "2",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "empvisitdetail totalclaim",
+        "submitted": "283.4",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "empvisitdetail totalfee",
+        "submitted": "283.4",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "empvisitdetail totalunitclaim",
+        "submitted": "283.4",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "empvisitdetail totalunitfee",
+        "submitted": "283.4",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "empvisitdetail unitcashcollected",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "empvisitdetail unitcopayment",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "empvisitdetail version",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "enablepanelauditsetting",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "enforcenric",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "enforcepa",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "enforcereferral",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "enforceworkmencomp",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "exceptiondatetime",
+        "submitted": "2026-02-11 16:08:54.52",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "exceptionreason",
+        "submitted": "{#Diagnosis Secondary#:#NA#,#Client Type#:#Direct#,#Provider Type#:#SP_P#,#Diagnosis Primary#:#Acute#,#Bill Size#:#260.0#}",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "exclconsultfee",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "excludecliniccode",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "externalreferencenumber",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "extradrugcostperday",
+        "submitted": "-1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "format datetime",
+        "submitted": "DD/MM/YYYY",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "freeconsult",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "freeconsultcount",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "freetextdrug",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "gpclinicphone",
+        "submitted": "64712696",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "gpdoctorname",
+        "submitted": "YIP MAN HING KEVIN",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "gpemail",
+        "submitted": "-@test.com",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "gpmcr",
+        "submitted": "M18659G",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "gpmobile",
+        "submitted": "6471269",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "gpur",
+        "submitted": "A000000",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "groupcode",
+        "submitted": "MA",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "groupid",
+        "submitted": "106f7a402000",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "gst",
+        "submitted": "23.40",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "gstrate",
+        "submitted": "9",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "gstunit",
+        "submitted": "23.40",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "id",
+        "submitted": "19c4bbeff2e5",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "isclinics",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "iscomputed",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "iscopaymenttiering",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "isdarwingroup",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "isgst",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "isok",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "ispageload",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "issgpclinic",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "istier2consult",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "lab amount",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "lab code",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "lab pos",
+        "submitted": "-1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "lab unitamount",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "lab version",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "labfee",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "labunitfee",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "limitexclconsult",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "lowestbal",
+        "submitted": "5,825.71",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "maxcopay",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "maxdrugnoofdays",
+        "submitted": "-1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "maxprocpricechk",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "maxunitprice",
+        "submitted": "100.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "mcday",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "mcreasonid",
+        "submitted": "10",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "mcreasonidtemp",
+        "submitted": "|NA",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "mcreasonother",
+        "submitted": "",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "mcselectdate",
+        "submitted": "Select",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "mcstartdateasstring",
+        "submitted": "",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "memberno",
+        "submitted": "100206037",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "mhcgst",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "mhctotalclaim",
+        "submitted": "283.40",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "mycliniccodes",
+        "submitted": "MGP,MSP,MHP",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "networkid",
+        "submitted": "13cd7916a127",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "nomorebalance",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "noofcheckuprows",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "noofdaysdrugprescribed",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "noofdrugrows",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "noofempvisitdetailrows",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "nooflabrows",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "noofprocedurerows",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "noofrefmasterrows",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "noofservicerows",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "noofxrayrows",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "oldauditstatus",
+        "submitted": "Approved",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "oldempvisitid",
+        "submitted": "19c4bbeff2e5",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "oldrefno",
+        "submitted": "Auto",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "oldvisitdateasstring",
+        "submitted": "02/02/2026",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "owasp csrftoken",
+        "submitted": "QXSB-S3E5-8IUV-E6PR-UUUW-47PL-NB0C-5X85",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "pathconsentform",
+        "submitted": "C:\\Download\\MA\\consent.pdf",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "patientdob",
+        "submitted": "18/06/1987",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "patientgender",
+        "submitted": "M",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "patientid",
+        "submitted": "196a5aff90ca",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "patientname",
+        "submitted": "SACHIN MITTAL",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "patientnric",
+        "submitted": "M4539893L",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "pcopayment",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "pcopaytype",
+        "submitted": "$",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "prescriptionfee",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "pricecategory",
+        "submitted": "Very High",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedure amount",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedure amountb4copay",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedure copay",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedure pos",
+        "submitted": "-1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedure procedurename",
+        "submitted": "",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedure version",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedurecopay",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedurefee",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "procedurefeeclaim",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "providertypeid",
+        "submitted": "2",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "referral",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "referralfee",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "referralno",
+        "submitted": "Auto",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "referralvisitno",
+        "submitted": "",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "refreshaction",
+        "submitted": "Refresh",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "reservedamount",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "selectdate",
+        "submitted": "Select",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "selectdiagnosisfrommaster",
+        "submitted": "M  | M  | M  | M ",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "selectmasterdrug",
+        "submitted": "M ",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "selectmasterprocedure",
+        "submitted": "M ",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "selectvisitref",
+        "submitted": "Select Referring Visits",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "service amount",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "service basic",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "service claimamount",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "service eligible",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "service excess",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "service ineligible",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "service major",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "service pf",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "service pf cb",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "service philhealth",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "service taxable",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "service version",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "servicefee",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "servicefeeclaim",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "servicenonpfcharges",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "servicepfcharges",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "show4diagnosis",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showbuttonvoid",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showcaseno",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showclaimremarks",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showconsentform",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showdelete",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showdiagnosis",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showdisability",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showemr",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showlifetimelimitbalance",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showmcreason",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showpa",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showpanelaudit",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showpopup",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showprocedurecopay",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showreferral",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "showtrackflu",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "specialremarks",
+        "submitted": "TCM:1 VISIT PER DAY SP:WAIVER OF REFERRAL LETTER PRESCRIBED BIRTH CONTROL PILLS IS COVERED. PLEASE SEND REQUEST TO MHC TO SUBMIT CLAIM.",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "spixvalue",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "staffcode",
+        "submitted": "100206037",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "startdate2",
+        "submitted": "05/05/2025",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "str",
+        "submitted": "no cap no copay",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "stripechargeamount",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "subtype",
+        "submitted": "2|First Consult | 2",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "subtypechange",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "systemcode",
+        "submitted": "MHC",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "taxableservicefeeclaim",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "taxabletotalb4gst",
+        "submitted": "260.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "taxabletotalunitb4gst",
+        "submitted": "260.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "tempauditstatus",
+        "submitted": "Approved",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "tempreferral",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "tier2consult",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "tieringclainamt",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totaladjusted",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totaladminfee",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totaladminfee2",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totalb4gst",
+        "submitted": "260.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totalclaim",
+        "submitted": "283.40",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totalclaimb4gst",
+        "submitted": "260.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totalclaiminitial",
+        "submitted": "283.4",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totalclaimrevised",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totalcopayment",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totalfee",
+        "submitted": "283.40",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totalfeerevised",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totalunitb4gst",
+        "submitted": "260.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totalunitclaim",
+        "submitted": "283.40",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totalunitclaimb4gst",
+        "submitted": "260.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totalunitcopayment",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "totalunitfee",
+        "submitted": "283.40",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "unitcashcollected",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "unitcashcollectedb4gst",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "unitcopayment",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "unitcopaymentdeductible",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "unitcopaymenttiering",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "unitcumulativeutilisation",
+        "submitted": "0.0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "unitmhcgst",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "unitmhctotalclaim",
+        "submitted": "283.40",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "unittieringclainamt",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "usebnsbalance",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "version",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "visitdateasstring",
+        "submitted": "02/02/2026",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "visitdateday",
+        "submitted": "02",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "visitdatemonth",
+        "submitted": "02",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "visitdateyear",
+        "submitted": "2026",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "visitdisplaydetailid",
+        "submitted": "107f94baa114",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "visitdisplayid",
+        "submitted": "147a1a2720e8",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "visitgroup",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "visitno",
+        "submitted": "EV16085124",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "visittype",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "voidaction",
+        "submitted": "Void",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "voidremarks",
+        "submitted": "",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "waitperiodfromjoindate",
+        "submitted": "-1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "waitperiodfromstartdate",
+        "submitted": "-1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "waiverofreferral",
+        "submitted": "Y",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "workmencomp",
+        "submitted": "N",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "xray amount",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "xray code",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "xray pos",
+        "submitted": "-1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "xray unitamount",
+        "submitted": "0",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "xray version",
+        "submitted": "1",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "xrayfee",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "xrayunitfee",
+        "submitted": "0.00",
+        "draft": "",
+        "category": "missing_in_draft"
+      },
+      {
+        "key": "yearlybal",
+        "submitted": "5,542.31",
+        "draft": "",
+        "category": "missing_in_draft"
+      }
+    ]
+  }
+}

@@ -3,6 +3,8 @@ import { BrowserManager } from '../utils/browser.js';
 import { BatchExtraction } from '../core/batch-extraction.js';
 import { createSupabaseClient } from '../utils/supabase-client.js';
 import { logger } from '../utils/logger.js';
+import { resolveFlow3PortalTarget } from '../../apps/crm/src/lib/rpa/portals.shared.js';
+import { portalTargetToLabel, writeRunSummaryReport } from '../utils/run-summary-report.js';
 
 dotenv.config();
 
@@ -42,6 +44,7 @@ async function extractDateRange() {
 
   logger.info('=== Date Range Extraction ===');
   logger.info(`Date range: ${startDateStr} to ${endDateStr}`);
+  const reportRows = [];
 
   // Query existing dates from database
   const supabase = createSupabaseClient();
@@ -85,6 +88,40 @@ async function extractDateRange() {
 
   if (datesToProcess.length === 0) {
     logger.info('All dates in range already have data. Nothing to process.');
+    const totals = {
+      total_dates: 0,
+      successful_dates: 0,
+      failed_dates: 0,
+      skipped_dates: 0,
+      extracted_rows: 0,
+      saved_rows: 0,
+    };
+    const report = await writeRunSummaryReport({
+      flowName: 'Flow 1 Queue Extraction',
+      filePrefix: 'flow1',
+      scope: {
+        from: startDateStr,
+        to: endDateStr,
+        date: null,
+        payType: 'All',
+        portalTargets: 'N/A',
+        visitIds: 'N/A',
+      },
+      totals,
+      rows: [
+        {
+          date: `${startDateStr}..${endDateStr}`,
+          patientName: '-',
+          nric: '-',
+          payType: '-',
+          portal: '-',
+          status: 'no_dates_to_process',
+          diagnosisStatus: '-',
+          notes: 'All dates already exist in DB for this range',
+        },
+      ],
+    });
+    logger.info(`Flow 1 summary report: ${report.mdPath}`);
     process.exit(0);
   }
 
@@ -92,6 +129,14 @@ async function extractDateRange() {
 
   const browserManager = new BrowserManager();
   const batchExtractor = new BatchExtraction(await browserManager.newPage());
+  let reportTotals = {
+    total_dates: datesToProcess.length,
+    successful_dates: 0,
+    failed_dates: 0,
+    skipped_dates: 0,
+    extracted_rows: 0,
+    saved_rows: 0,
+  };
 
   try {
     // Initialize browser and login once (reuse session)
@@ -118,10 +163,21 @@ async function extractDateRange() {
         if (!items || items.length === 0) {
           logger.warn(`No items extracted for ${date}`);
           results.skipped++;
+          reportRows.push({
+            date,
+            patientName: '-',
+            nric: '-',
+            payType: '-',
+            portal: '-',
+            status: 'no_data',
+            diagnosisStatus: '-',
+            notes: 'No queue-list rows extracted',
+          });
           continue;
         }
 
         logger.info(`Extracted ${items.length} items for ${date}`);
+        reportTotals.extracted_rows += items.length;
 
         // Prepare items for saving
         const extractedItems = items.map(item => ({
@@ -132,7 +188,11 @@ async function extractDateRange() {
         }));
 
         // Save to CRM with the correct visit date
-        const savedCount = await batchExtractor.saveToCRM(extractedItems, date);
+        const saveResult = await batchExtractor.saveToCRM(extractedItems, date, { withDetails: true });
+        const savedCount =
+          typeof saveResult === 'number' ? saveResult : Number(saveResult?.savedCount || 0);
+        const detailRows = Array.isArray(saveResult?.details) ? saveResult.details : [];
+        reportTotals.saved_rows += savedCount;
 
         if (savedCount > 0) {
           logger.info(`✅ Successfully saved ${savedCount}/${items.length} items for ${date}`);
@@ -141,6 +201,36 @@ async function extractDateRange() {
           logger.warn(`⚠️ No items saved for ${date} (extracted ${items.length})`);
           results.failed++;
           results.errors.push({ date, error: 'No items saved' });
+        }
+
+        if (detailRows.length > 0) {
+          for (const item of detailRows) {
+            const route = resolveFlow3PortalTarget(item.payType, item.patientName, null);
+            reportRows.push({
+              date: item.visitDate || date,
+              patientName: item.patientName || '-',
+              nric: item.nric || '-',
+              payType: item.payType || '-',
+              portal: portalTargetToLabel(route || item.payType || 'Unknown'),
+              status: item.status || 'unknown',
+              diagnosisStatus: '-',
+              notes: item.message || '',
+            });
+          }
+        } else {
+          for (const item of extractedItems) {
+            const route = resolveFlow3PortalTarget(item.payType, item.patientName, null);
+            reportRows.push({
+              date,
+              patientName: item.patientName || '-',
+              nric: item.nric || '-',
+              payType: item.payType || '-',
+              portal: portalTargetToLabel(route || item.payType || 'Unknown'),
+              status: savedCount > 0 ? 'save_attempted' : 'save_failed',
+              diagnosisStatus: '-',
+              notes: '',
+            });
+          }
         }
 
         // Small delay between dates to avoid overwhelming the system
@@ -152,6 +242,16 @@ async function extractDateRange() {
         logger.error(`❌ Error processing ${date}:`, error.message);
         results.failed++;
         results.errors.push({ date, error: error.message });
+        reportRows.push({
+          date,
+          patientName: '-',
+          nric: '-',
+          payType: '-',
+          portal: '-',
+          status: 'date_failed',
+          diagnosisStatus: '-',
+          notes: error.message,
+        });
         // Continue with next date instead of stopping
       }
     }
@@ -169,6 +269,29 @@ async function extractDateRange() {
         logger.info(`  ${date}: ${error}`);
       });
     }
+    reportTotals = {
+      total_dates: results.total,
+      successful_dates: results.success,
+      failed_dates: results.failed,
+      skipped_dates: results.skipped,
+      extracted_rows: reportTotals.extracted_rows,
+      saved_rows: reportTotals.saved_rows,
+    };
+    const report = await writeRunSummaryReport({
+      flowName: 'Flow 1 Queue Extraction',
+      filePrefix: 'flow1',
+      scope: {
+        from: startDateStr,
+        to: endDateStr,
+        date: null,
+        payType: 'All',
+        portalTargets: 'N/A',
+        visitIds: 'N/A',
+      },
+      totals: reportTotals,
+      rows: reportRows,
+    });
+    logger.info(`Flow 1 summary report: ${report.mdPath}`);
 
     if (results.failed > 0) {
       process.exit(1);
@@ -176,6 +299,33 @@ async function extractDateRange() {
 
   } catch (error) {
     logger.error('Fatal error during extraction:', error);
+    const report = await writeRunSummaryReport({
+      flowName: 'Flow 1 Queue Extraction',
+      filePrefix: 'flow1',
+      scope: {
+        from: startDateStr,
+        to: endDateStr,
+        date: null,
+        payType: 'All',
+        portalTargets: 'N/A',
+        visitIds: 'N/A',
+      },
+      totals: reportTotals,
+      rows: [
+        ...reportRows,
+        {
+          date: `${startDateStr}..${endDateStr}`,
+          patientName: '-',
+          nric: '-',
+          payType: '-',
+          portal: '-',
+          status: 'fatal_error',
+          diagnosisStatus: '-',
+          notes: error?.message || String(error),
+        },
+      ],
+    });
+    logger.info(`Flow 1 summary report: ${report.mdPath}`);
     process.exit(1);
   } finally {
     await browserManager.close();

@@ -1,0 +1,60 @@
+- table [ref=e4]:
+  - rowgroup [ref=e5]:
+    - row "Due to the security reason, your current session was forced to log out! Click HERE to log in again." [ref=e6]:
+      - cell [ref=e7]
+      - cell "Due to the security reason, your current session was forced to log out! Click HERE to log in again." [ref=e8]:
+        - table [ref=e9]:
+          - rowgroup [ref=e10]:
+            - row [ref=e11]:
+              - cell [ref=e12]:
+                - link [ref=e13] [cursor=pointer]:
+                  - /url: /Home.aspx
+                  - img [ref=e14]
+              - cell [ref=e15]:
+                - generic:
+                  - table:
+                    - rowgroup:
+                      - row:
+                        - cell
+                        - cell
+            - row "Due to the security reason, your current session was forced to log out! Click HERE to log in again." [ref=e16]:
+              - cell "Due to the security reason, your current session was forced to log out! Click HERE to log in again." [ref=e17]:
+                - table [ref=e20]:
+                  - rowgroup [ref=e21]:
+                    - row [ref=e22]:
+                      - cell [ref=e23]:
+                        - heading [level=2]
+                    - row "Due to the security reason, your current session was forced to log out!" [ref=e24]:
+                      - cell "Due to the security reason, your current session was forced to log out!" [ref=e25]:
+                        - heading "Due to the security reason, your current session was forced to log out!" [level=3] [ref=e26]
+                    - row "Click HERE to log in again." [ref=e27]:
+                      - cell "Click HERE to log in again." [ref=e28]:
+                        - text: Click
+                        - link "HERE" [ref=e29] [cursor=pointer]:
+                          - /url: javascript:__doPostBack('ctl00$ContentBanner$LinkButton1','')
+                        - text: to log in again.
+            - row [ref=e30]:
+              - cell [ref=e31]
+            - row [ref=e32]:
+              - cell [ref=e33]
+      - cell [ref=e34]
+    - row "© 2010 Alliance Healthcare Terms of Use | Privacy | Careers | Site Map | Links" [ref=e35]:
+      - cell [ref=e36]
+      - cell "© 2010 Alliance Healthcare" [ref=e37]
+      - cell "Terms of Use | Privacy | Careers | Site Map | Links" [ref=e38]:
+        - generic [ref=e39]:
+          - link "Terms of Use" [ref=e40] [cursor=pointer]:
+            - /url: /pages/terms.aspx
+          - text: "|"
+          - link "Privacy" [ref=e41] [cursor=pointer]:
+            - /url: /pages/privacy.aspx
+          - text: "|"
+          - link "Careers" [ref=e42] [cursor=pointer]:
+            - /url: /pages/careers.aspx
+          - text: "|"
+          - link "Site Map" [ref=e43] [cursor=pointer]:
+            - /url: /pages/sitemap.aspx
+          - text: "|"
+          - link "Links" [ref=e44] [cursor=pointer]:
+            - /url: /links/links.htm
+      - cell [ref=e45]

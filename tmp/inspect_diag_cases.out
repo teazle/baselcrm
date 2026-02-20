@@ -1,0 +1,437 @@
+{
+  "visit_id": "6eb5aa60-ee97-472b-a904-c4ccf2855b18",
+  "patient_name": "FAN HONGYI",
+  "nric": "S8481103C",
+  "visit_date": "2026-02-02",
+  "pay_type": "MHC",
+  "answer_diagnosis_code": "S83.411A",
+  "answer_diagnosis_desc": "Sprain of the knee",
+  "stored_diagnosis_desc": "Sprain & strain oth & unsp parts knee",
+  "canonical": {
+    "side": null,
+    "code_raw": "S83.6",
+    "body_part": "knee",
+    "condition": "sprain",
+    "source_date": "2026-02-02",
+    "code_normalized": "S83.6",
+    "description_raw": "Sprain & strain oth & unsp parts knee",
+    "source_age_days": 0,
+    "description_canonical": "Sprain Of The Knee",
+    "source_date_match_type": "exact"
+  },
+  "resolution": {
+    "status": "ambiguous",
+    "date_ok": true,
+    "confidence": 0.74,
+    "date_policy": "on_or_before_30_days",
+    "source_chain": [
+      {
+        "found": true,
+        "source": "diagnosis_tab",
+        "source_date": "2026-02-02",
+        "source_age_days": 0
+      },
+      {
+        "found": false,
+        "source": "all_tab",
+        "source_date": null,
+        "source_age_days": null
+      },
+      {
+        "found": false,
+        "source": "visit_tab",
+        "source_date": null,
+        "source_age_days": null
+      },
+      {
+        "found": true,
+        "source": "past_notes",
+        "source_date": "2026-02-02",
+        "source_age_days": 0
+      }
+    ],
+    "fallback_age_days": 0,
+    "reason_if_unresolved": "generic_without_laterality",
+    "source_date_match_type": "exact"
+  },
+  "attempts": [],
+  "candidates": [
+    {
+      "rank": 1,
+      "score": 0.74,
+      "source": "diagnosis_tab",
+      "code_raw": "S83.6",
+      "selected": true,
+      "source_date": "2026-02-02",
+      "code_normalized": "S83.6",
+      "description_raw": "Sprain & strain oth & unsp parts knee",
+      "source_age_days": 0,
+      "description_canonical": "Sprain Of The Knee"
+    },
+    {
+      "rank": 2,
+      "score": 1,
+      "source": "diagnosis_tab",
+      "code_raw": "S83.6",
+      "selected": false,
+      "source_date": "2026-02-02",
+      "code_normalized": "S83.6",
+      "description_raw": "Sprain & strain oth & unsp parts knee",
+      "source_age_days": 0,
+      "description_canonical": "Sprain & strain oth & unsp parts knee"
+    },
+    {
+      "rank": 3,
+      "score": 0.55,
+      "source": "past_notes",
+      "code_raw": null,
+      "selected": false,
+      "source_date": "2026-02-02",
+      "code_normalized": null,
+      "description_raw": "shows ACL is loose or completely torn, patient and surgeon should have a pre‑agreed plan on whether to proceed with ACL reconstruction during the same operation or defer it to a la",
+      "source_age_days": 0,
+      "description_canonical": "shows ACL is loose or completely torn, patient and surgeon should have a pre‑agreed plan on whether to proceed with ACL reconstruction during the same operation or defer it to a la"
+    }
+  ]
+}
+---
+{
+  "visit_id": "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
+  "patient_name": "CAROLINE ADRIANA ARCHER",
+  "nric": "S7288611I",
+  "visit_date": "2026-02-04",
+  "pay_type": "MHC",
+  "answer_diagnosis_code": "M54.5",
+  "answer_diagnosis_desc": "Low back pain (Loin pain; Low back strain; Lumbago NOS)",
+  "stored_diagnosis_desc": "Pain in back",
+  "canonical": {
+    "side": null,
+    "code_raw": null,
+    "body_part": "back",
+    "condition": "pain",
+    "source_date": "2026-02-04",
+    "code_normalized": null,
+    "description_raw": "Pain in back",
+    "source_age_days": 0,
+    "description_canonical": "Pain in back",
+    "source_date_match_type": "exact"
+  },
+  "resolution": {
+    "status": "resolved",
+    "date_ok": true,
+    "confidence": 0.65,
+    "date_policy": "on_or_before_30_days",
+    "source_chain": [
+      {
+        "found": true,
+        "source": "diagnosis_tab",
+        "source_date": "2026-01-21",
+        "source_age_days": 14
+      },
+      {
+        "found": false,
+        "source": "all_tab",
+        "source_date": null,
+        "source_age_days": null
+      },
+      {
+        "found": false,
+        "source": "visit_tab",
+        "source_date": null,
+        "source_age_days": null
+      },
+      {
+        "found": true,
+        "source": "past_notes",
+        "source_date": "2026-02-04",
+        "source_age_days": 0
+      }
+    ],
+    "fallback_age_days": 0,
+    "reason_if_unresolved": null,
+    "portal_option_verified": true,
+    "source_date_match_type": "exact"
+  },
+  "attempts": [],
+  "candidates": [
+    {
+      "rank": 1,
+      "score": 0.65,
+      "source": "past_notes",
+      "code_raw": null,
+      "selected": true,
+      "source_date": "2026-02-04",
+      "code_normalized": null,
+      "description_raw": "Pain in back",
+      "source_age_days": 0,
+      "description_canonical": "Pain in back"
+    },
+    {
+      "rank": 2,
+      "score": 1,
+      "source": "diagnosis_tab",
+      "code_raw": "S83.6",
+      "selected": false,
+      "source_date": "2026-01-21",
+      "code_normalized": "S83.6",
+      "description_raw": "Sprain & strain oth & unsp parts knee",
+      "source_age_days": 14,
+      "description_canonical": "Sprain & strain oth & unsp parts knee"
+    }
+  ]
+}
+---
+{
+  "visit_id": "6af6ea13-14d9-43c6-917e-d0ca5da4ab0f",
+  "patient_name": "HASLINA BINTE HASSAN BASRI",
+  "nric": "S7349449D",
+  "visit_date": "2026-02-02",
+  "pay_type": "MHC",
+  "answer_diagnosis_code": "S83.411A",
+  "answer_diagnosis_desc": "Sprain of the knee",
+  "stored_diagnosis_desc": "Pain in right knee",
+  "canonical": {
+    "side": "right",
+    "code_raw": null,
+    "body_part": "knee",
+    "condition": "pain",
+    "source_date": "2026-02-02",
+    "code_normalized": null,
+    "description_raw": "Pain in right knee",
+    "source_age_days": 0,
+    "description_canonical": "Pain in right knee",
+    "source_date_match_type": "exact"
+  },
+  "resolution": {
+    "status": "resolved",
+    "date_ok": true,
+    "confidence": 0.75,
+    "date_policy": "on_or_before_30_days",
+    "source_chain": [
+      {
+        "found": false,
+        "source": "diagnosis_tab",
+        "source_date": null,
+        "source_age_days": null
+      },
+      {
+        "found": false,
+        "source": "diagnosis_tab_latest",
+        "source_date": null,
+        "source_age_days": null
+      },
+      {
+        "found": false,
+        "source": "diagnosis_tab_raw",
+        "source_date": null,
+        "source_age_days": null
+      },
+      {
+        "found": false,
+        "source": "all_tab",
+        "source_date": null,
+        "source_age_days": null
+      },
+      {
+        "found": false,
+        "source": "visit_tab",
+        "source_date": null,
+        "source_age_days": null
+      },
+      {
+        "found": true,
+        "source": "past_notes",
+        "source_date": "2026-02-02",
+        "source_age_days": 0
+      }
+    ],
+    "fallback_age_days": 0,
+    "reason_if_unresolved": null,
+    "portal_option_verified": true,
+    "source_date_match_type": "exact"
+  },
+  "attempts": [],
+  "candidates": [
+    {
+      "rank": 1,
+      "score": 0.75,
+      "source": "past_notes",
+      "code_raw": null,
+      "selected": true,
+      "source_date": "2026-02-02",
+      "code_normalized": null,
+      "description_raw": "Pain in right knee",
+      "source_age_days": 0,
+      "description_canonical": "Pain in right knee"
+    }
+  ]
+}
+---
+{
+  "visit_id": "60e0c382-d6cb-4d35-a5b9-e17ce5b20c73",
+  "patient_name": "ENG CHAI PIN ELYNE XANDRIA",
+  "nric": null,
+  "visit_date": "2026-02-03",
+  "pay_type": "MHC",
+  "answer_diagnosis_code": "M79. 672",
+  "answer_diagnosis_desc": "Left foot/heel pain",
+  "stored_diagnosis_desc": "Missing diagnosis",
+  "canonical": {},
+  "resolution": {},
+  "attempts": [],
+  "candidates": []
+}
+---
+{
+  "visit_id": "416a02fb-3feb-435b-b3f8-3f3197a60e0f",
+  "patient_name": "TJIA NATHANAEL THOMAS",
+  "nric": "T1208937B",
+  "visit_date": "2026-02-06",
+  "pay_type": "MHC",
+  "answer_diagnosis_code": "S635",
+  "answer_diagnosis_desc": "Sprain and strain of wrist",
+  "stored_diagnosis_desc": "Sprain & strain wrist part unspecified",
+  "canonical": {
+    "side": null,
+    "code_raw": "S63.50",
+    "body_part": "wrist",
+    "condition": "sprain",
+    "source_date": "2026-02-06",
+    "code_normalized": "S63.50",
+    "description_raw": "Sprain & strain wrist part unspecified",
+    "source_age_days": 0,
+    "description_canonical": "Sprain & strain wrist part unspecified",
+    "source_date_match_type": "exact"
+  },
+  "resolution": {
+    "status": "resolved",
+    "date_ok": true,
+    "confidence": 0.95,
+    "date_policy": "on_or_before_30_days",
+    "source_chain": [
+      {
+        "found": true,
+        "source": "diagnosis_tab",
+        "source_date": "2026-02-06",
+        "source_age_days": 0
+      }
+    ],
+    "fallback_age_days": 0,
+    "reason_if_unresolved": null,
+    "source_date_match_type": "exact"
+  },
+  "attempts": [],
+  "candidates": [
+    {
+      "rank": 1,
+      "score": 0.95,
+      "source": "diagnosis_tab",
+      "code_raw": "S63.50",
+      "selected": true,
+      "source_date": "2026-02-06",
+      "code_normalized": "S63.50",
+      "description_raw": "Sprain & strain wrist part unspecified",
+      "source_age_days": 0,
+      "description_canonical": "Sprain & strain wrist part unspecified"
+    }
+  ]
+}
+---
+{
+  "visit_id": "c3c483d2-83d4-46be-936e-77767dd568b3",
+  "patient_name": "FAN HONGYI",
+  "nric": "S8481103C",
+  "visit_date": "2026-02-03",
+  "pay_type": "MHC",
+  "answer_diagnosis_code": "S83.411A",
+  "answer_diagnosis_desc": "Sprain of the knee",
+  "stored_diagnosis_desc": "Pain in left knee",
+  "canonical": {
+    "side": "left",
+    "code_raw": null,
+    "body_part": "knee",
+    "condition": "pain",
+    "source_date": "2026-02-03",
+    "code_normalized": null,
+    "description_raw": "Pain in left knee",
+    "source_age_days": 0,
+    "description_canonical": "Pain in left knee",
+    "source_date_match_type": "exact"
+  },
+  "resolution": {
+    "status": "resolved",
+    "date_ok": true,
+    "confidence": 0.8,
+    "date_policy": "on_or_before_30_days",
+    "source_chain": [
+      {
+        "found": true,
+        "source": "diagnosis_tab",
+        "source_date": "2026-02-03",
+        "source_age_days": 0
+      },
+      {
+        "found": false,
+        "source": "all_tab",
+        "source_date": null,
+        "source_age_days": null
+      },
+      {
+        "found": false,
+        "source": "visit_tab",
+        "source_date": null,
+        "source_age_days": null
+      },
+      {
+        "found": true,
+        "source": "past_notes",
+        "source_date": "2026-02-03",
+        "source_age_days": 0
+      }
+    ],
+    "fallback_age_days": 0,
+    "reason_if_unresolved": null,
+    "portal_option_verified": true,
+    "source_date_match_type": "exact"
+  },
+  "attempts": [],
+  "candidates": [
+    {
+      "rank": 1,
+      "score": 0.8,
+      "source": "diagnosis_tab",
+      "code_raw": null,
+      "selected": true,
+      "source_date": "2026-02-03",
+      "code_normalized": null,
+      "description_raw": "Pain in left knee",
+      "source_age_days": 0,
+      "description_canonical": "Pain in left knee"
+    },
+    {
+      "rank": 2,
+      "score": 0.55,
+      "source": "diagnosis_tab",
+      "code_raw": null,
+      "selected": false,
+      "source_date": "2026-02-03",
+      "code_normalized": null,
+      "description_raw": "Deficiency of anterior cruciate ligament",
+      "source_age_days": 0,
+      "description_canonical": "Deficiency of anterior cruciate ligament"
+    },
+    {
+      "rank": 3,
+      "score": 0.55,
+      "source": "past_notes",
+      "code_raw": null,
+      "selected": false,
+      "source_date": "2026-02-03",
+      "code_normalized": null,
+      "description_raw": "shows ACL is loose or completely torn, patient and surgeon should have a pre‑agreed plan on whether to proceed with ACL reconstruction during the same operation or defer it to a la",
+      "source_age_days": 0,
+      "description_canonical": "shows ACL is loose or completely torn, patient and surgeon should have a pre‑agreed plan on whether to proceed with ACL reconstruction during the same operation or defer it to a la"
+    }
+  ]
+}
+---

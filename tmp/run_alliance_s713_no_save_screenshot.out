@@ -1,0 +1,33 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-14T10:16:29.234Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-14T10:16:29.239Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-14T10:16:29.239Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-14T10:16:29.239Z"}
+[33mwarn[39m: Persistent profile launch failed, retrying with run-scoped profile: /Users/vincent/.playwright-browser-data-run-20260214101629 {"service":"clinic-automation","timestamp":"2026-02-14T10:16:29.980Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-14T10:16:32.229Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-14T10:16:32.231Z"}
+[32minfo[39m: [ALLIANCE] Filled username {"selector":"input[placeholder*=\"login id\" i]","service":"clinic-automation","timestamp":"2026-02-14T10:16:34.866Z"}
+[32minfo[39m: [ALLIANCE] Filled password {"selector":"input[placeholder*=\"pass\" i]","service":"clinic-automation","timestamp":"2026-02-14T10:16:35.805Z"}
+[32minfo[39m: [ALLIANCE] Clicked login {"selector":"button:has-text(\"Login\")","service":"clinic-automation","timestamp":"2026-02-14T10:16:35.858Z"}
+[32minfo[39m: [ALLIANCE] Login successful {"service":"clinic-automation","timestamp":"2026-02-14T10:16:37.869Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Panel Service {"selector":"div.sidebar a.nav-link:has-text(\"Panel Service\")","service":"clinic-automation","timestamp":"2026-02-14T10:16:40.243Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-14T10:16:40.893Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-14T10:16:41.556Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-14T10:16:43.058Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-14T10:16:43.154Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-14T10:16:43.214Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-12/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-14T10:16:43.373Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-12/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-14T10:16:43.649Z"}
+[32minfo[39m: [ALLIANCE] Selected member and opened claim form {"service":"clinic-automation","timestamp":"2026-02-14T10:16:49.434Z"}
+[32minfo[39m: [ALLIANCE] Set MC Days {"selector":"input[placeholder*=\"MC Days\" i]","service":"clinic-automation","timestamp":"2026-02-14T10:16:49.818Z"}
+[32minfo[39m: [ALLIANCE] Clicked Add Diagnosis {"selector":"button:has-text(\"Add Diagnosis\")","service":"clinic-automation","timestamp":"2026-02-14T10:16:49.879Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Name (Fever) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Name\" i]","service":"clinic-automation","timestamp":"2026-02-14T10:16:50.166Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (Fever) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-14T10:16:50.245Z"}
+[32minfo[39m: [ALLIANCE] Set Consultation Fee {"selector":"input[placeholder*=\"Consultation Fee\" i]","service":"clinic-automation","timestamp":"2026-02-14T10:16:58.909Z"}
+[32minfo[39m: [ALLIANCE] Filled remark {"selector":"textarea[placeholder*=\"remark\" i]","service":"clinic-automation","timestamp":"2026-02-14T10:16:58.971Z"}
+[32minfo[39m: [ALLIANCE] Draft mode enabled: skipping strict calculate/validation gate {"service":"clinic-automation","timestamp":"2026-02-14T10:16:58.971Z"}
+{
+  "ok": true,
+  "screenshot": "screenshots/alliance-s713-before-save.png",
+  "saved": false
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-14T10:17:01.063Z"}

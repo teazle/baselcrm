@@ -1,0 +1,514 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-18T15:15:42.227Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-18T15:15:42.233Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-18T15:15:42.234Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-18T15:15:42.234Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-18T15:15:44.370Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-18T15:15:44.373Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-18T15:15:46.674Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:15:48.598Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-18T15:15:50.593Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:15:52.662Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:15:54.184Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-18T15:15:55.721Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-18T15:15:57.233Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:15:58.358Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-18T15:15:58.910Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-14/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:16:01.626Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-14/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-18T15:16:03.463Z"}
+[32minfo[39m: [ALLIANCE] Selected member and opened claim form {"service":"clinic-automation","timestamp":"2026-02-18T15:16:12.546Z"}
+[32minfo[39m: [ALLIANCE] Set MC Days {"selector":"input[placeholder*=\"MC Days\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:16:15.957Z"}
+[32minfo[39m: [ALLIANCE] Clicked Add Diagnosis {"selector":"button:has-text(\"Add Diagnosis\")","service":"clinic-automation","timestamp":"2026-02-18T15:16:16.588Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Code (S10) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Code\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:16:17.728Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (S10) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-18T15:16:18.388Z"}
+{
+  "nativeSelects": [],
+  "consultationCandidates": [
+    {
+      "tag": "HTML",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "",
+      "text": "Medinet @font-face{font-family:'Roboto';font-style:normal;font-weight:300;font-stretch:100%;font-display:swap;src:url(https://fonts.gstatic.com/s/roboto/v50/KFO",
+      "value": null
+    },
+    {
+      "tag": "BODY",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mat-typography",
+      "text": "keyboard_double_arrow_left Panel Servicesexpand_moreCreate Panel ClaimSearch Panel ClaimsDownload Resources Pre-Authorisationexpand_moreCreate Pre-Authorisation",
+      "value": null
+    },
+    {
+      "tag": "APP-ROOT",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "",
+      "text": "keyboard_double_arrow_left Panel Servicesexpand_moreCreate Panel ClaimSearch Panel ClaimsDownload Resources Pre-Authorisationexpand_moreCreate Pre-Authorisation",
+      "value": null
+    },
+    {
+      "tag": "APP-MAIN",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "",
+      "text": "keyboard_double_arrow_left Panel Servicesexpand_moreCreate Panel ClaimSearch Panel ClaimsDownload Resources Pre-Authorisationexpand_moreCreate Pre-Authorisation",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "wrapper",
+      "text": "keyboard_double_arrow_left Panel Servicesexpand_moreCreate Panel ClaimSearch Panel ClaimsDownload Resources Pre-Authorisationexpand_moreCreate Pre-Authorisation",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "main-panel",
+      "text": "Create Panel Claim logoutLogoutProviderSINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTDmore_vertCalculate Claim Member Details View Benefit Plan Member NameMember ",
+      "value": null
+    },
+    {
+      "tag": "APP-PANEL-CREATE",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "",
+      "text": "Calculate Claim Member Details View Benefit Plan Member NameMember CodeMember UINMember DOBMember GenderMedinet Start DateGroup Policy NumberCompany NameCoverag",
+      "value": null
+    },
+    {
+      "tag": "APP-MAIN-CONTENT-HEADER",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "ng-invalid ng-touched ng-dirty",
+      "text": "Calculate Claim Member Details View Benefit Plan Member NameMember CodeMember UINMember DOBMember GenderMedinet Start DateGroup Policy NumberCompany NameCoverag",
+      "value": null
+    },
+    {
+      "tag": "FORM",
+      "id": "contentForm",
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "ng-invalid ng-touched ng-dirty",
+      "text": "Calculate Claim Member Details View Benefit Plan Member NameMember CodeMember UINMember DOBMember GenderMedinet Start DateGroup Policy NumberCompany NameCoverag",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "main-container",
+      "text": "Member Details View Benefit Plan Member NameMember CodeMember UINMember DOBMember GenderMedinet Start DateGroup Policy NumberCompany NameCoverage Start DateCove",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "container-fluid",
+      "text": "Member Details View Benefit Plan Member NameMember CodeMember UINMember DOBMember GenderMedinet Start DateGroup Policy NumberCompany NameCoverage Start DateCove",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "",
+      "text": "Member Details View Benefit Plan Member NameMember CodeMember UINMember DOBMember GenderMedinet Start DateGroup Policy NumberCompany NameCoverage Start DateCove",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "",
+      "text": "ConsultationConsultation FeeConsultation Fee TypeConsultation Fee TypeConsultation FeeIncurred Amount After Tax:$",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "card",
+      "text": "ConsultationConsultation FeeConsultation Fee TypeConsultation Fee TypeConsultation FeeIncurred Amount After Tax:$",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "card-body row",
+      "text": "ConsultationConsultation FeeConsultation Fee TypeConsultation Fee TypeConsultation FeeIncurred Amount After Tax:$",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "col-12",
+      "text": "Consultation FeeConsultation Fee TypeConsultation Fee TypeConsultation FeeIncurred Amount After Tax:$",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "card",
+      "text": "Consultation FeeConsultation Fee TypeConsultation Fee TypeConsultation FeeIncurred Amount After Tax:$",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "card-body row ng-untouched ng-pristine ng-invalid",
+      "text": "Consultation FeeConsultation Fee TypeConsultation Fee TypeConsultation FeeIncurred Amount After Tax:$",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "d-flex",
+      "text": "Consultation Fee",
+      "value": null
+    },
+    {
+      "tag": "H4",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "card-title",
+      "text": "Consultation Fee",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "col-12 ng-untouched ng-pristine ng-invalid",
+      "text": "Consultation Fee TypeConsultation Fee TypeConsultation FeeIncurred Amount After Tax:$",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "card",
+      "text": "Consultation Fee TypeConsultation Fee TypeConsultation FeeIncurred Amount After Tax:$",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "card-body row",
+      "text": "Consultation Fee TypeConsultation Fee TypeConsultation FeeIncurred Amount After Tax:$",
+      "value": null
+    },
+    {
+      "tag": "MAT-FORM-FIELD",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mat-mdc-form-field col-xl-2 col-md-4 col-xs-12 mat-mdc-form-field-type-mat-select mat-form-field-appearance-outline mat-form-field-hide-placeholder mat-primary ng-untouched ng-pristine ng-invalid",
+      "text": "Consultation Fee TypeConsultation Fee Type",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mat-mdc-text-field-wrapper mdc-text-field mdc-text-field--outlined",
+      "text": "Consultation Fee TypeConsultation Fee Type",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mat-mdc-form-field-flex",
+      "text": "Consultation Fee TypeConsultation Fee Type",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mdc-notched-outline mdc-notched-outline--upgraded",
+      "text": "Consultation Fee Type",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mat-mdc-notch-piece mdc-notched-outline__notch",
+      "text": "Consultation Fee Type",
+      "value": null
+    },
+    {
+      "tag": "LABEL",
+      "id": "mat-mdc-form-field-label-39",
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mdc-floating-label mat-mdc-floating-label",
+      "text": "Consultation Fee Type",
+      "value": null
+    },
+    {
+      "tag": "MAT-LABEL",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "",
+      "text": "Consultation Fee Type",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mat-mdc-form-field-infix",
+      "text": "Consultation Fee Type",
+      "value": null
+    },
+    {
+      "tag": "MAT-SELECT",
+      "id": "mat-select-10",
+      "name": null,
+      "formcontrolname": "consultationFeeGroupItem",
+      "placeholder": "Consultation Fee Type",
+      "ariaLabel": null,
+      "cls": "mat-mdc-select mat-mdc-select-required mat-mdc-select-empty ng-untouched ng-pristine ng-invalid",
+      "text": "Consultation Fee Type",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mat-mdc-select-trigger",
+      "text": "Consultation Fee Type",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": "mat-select-value-10",
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mat-mdc-select-value",
+      "text": "Consultation Fee Type",
+      "value": null
+    },
+    {
+      "tag": "SPAN",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mat-mdc-select-placeholder mat-mdc-select-min-line",
+      "text": "Consultation Fee Type",
+      "value": null
+    },
+    {
+      "tag": "MAT-FORM-FIELD",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mat-mdc-form-field col-xl-2 col-md-4 col-xs-12 mat-mdc-form-field-type-mat-input mat-form-field-appearance-outline mat-primary ng-untouched ng-pristine ng-valid",
+      "text": "Consultation Fee",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mat-mdc-text-field-wrapper mdc-text-field mdc-text-field--outlined",
+      "text": "Consultation Fee",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mat-mdc-form-field-flex",
+      "text": "Consultation Fee",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mdc-notched-outline mdc-notched-outline--notched mdc-notched-outline--upgraded",
+      "text": "Consultation Fee",
+      "value": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mat-mdc-notch-piece mdc-notched-outline__notch",
+      "text": "Consultation Fee",
+      "value": null
+    },
+    {
+      "tag": "LABEL",
+      "id": "mat-mdc-form-field-label-40",
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "mdc-floating-label mat-mdc-floating-label mdc-floating-label--float-above",
+      "text": "Consultation Fee",
+      "value": null
+    },
+    {
+      "tag": "MAT-LABEL",
+      "id": null,
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "cls": "",
+      "text": "Consultation Fee",
+      "value": null
+    }
+  ],
+  "consultationInputs": [
+    {
+      "tag": "MAT-SELECT",
+      "id": "mat-select-10",
+      "name": null,
+      "formcontrolname": "consultationFeeGroupItem",
+      "placeholder": "Consultation Fee Type",
+      "ariaLabel": null,
+      "cls": "mat-mdc-select mat-mdc-select-required mat-mdc-select-empty ng-untouched ng-pristine ng-invalid",
+      "text": "Consultation Fee Type",
+      "value": null
+    },
+    {
+      "tag": "INPUT",
+      "id": "mat-input-29",
+      "name": null,
+      "formcontrolname": "feeAmount",
+      "placeholder": "Consultation Fee",
+      "ariaLabel": null,
+      "cls": "mat-mdc-input-element ng-untouched ng-pristine ng-valid mat-mdc-form-field-input-control mdc-text-field__input cdk-text-field-autofill-monitored",
+      "text": "",
+      "value": "0.00"
+    }
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-18T15:16:20.458Z"}

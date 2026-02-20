@@ -1,0 +1,433 @@
+{
+  "url": "https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=YS7n8P1u4p7BTiHTj+y5NC/JwgZb6AMYI18LK0CFo2OeM8080/FtFjs7tWF1Yj3eXsXTMtcIAEKQAkJUtouiguzTPlh+p6Tn1PO7e7DUAgA=",
+  "title": "Patient Biodata",
+  "bodyTextSample": "SSOC Patient: 78145 / MITTAL SACHIN KUMAR (M4539893L) M : 38 y RECEPTION Vincent Home Appointment Queue Patient Submission Communication Inventory Finance Reports Hospital Learning Management Setup Support/Training Clock In/Out Patient Info Biodata Med Alert Pop Up Family History Financial Tx History Past Notes eDoc Lab / Vital Sign Appt Referral Comm Delivery Visit Notes Past 02-Feb-2026 10:59 AM - WeeY ( SSOC ) Append ▼ Casenote Diagnosis Rt ACJ degeneration History Pain lasted for 10 days. Gym, had supplement and pain meds and got better . Did bench press and experienced pain. Aggravating factor Bench press Relieving factor Rest Evening No Morning No General Health Good Job Deskjob Interest Gym, ROM Horizontal abduction - pain at end range Tenderness on right ACJ, right upperback myofascial , Right teres minor and biceps tendon Right mid trap inactivation Rx) US on right ACJ, 5 minutes IFC on right shoulder, 10 minutes STR on right upperback myofascial , Right teres minor and biceps tendon Gentle right ACJ mobilization Acute care injury education MPlan Review shoulder pain 02-Feb-2026 10:15 AM - WeeY ( SSOC ) Append ▼ 02-Feb-2026 09:19 AM - PAM ( SSOC ) Append ▼",
+  "interestingLines": [
+    "SSOC Patient: 78145 / MITTAL SACHIN KUMAR (M4539893L) M : 38 y RECEPTION Vincent Home Appointment Queue Patient Submission Communication Inventory Finance Reports Hospital Learning Management Setup Support/Training Clock In/Out Patient Info Biodata Med Alert Pop Up Family History Financial Tx History Past Notes eDoc Lab / Vital Sign Appt Referral Comm Delivery Visit Notes Past 02-Feb-2026 10:59 AM - WeeY ( SSOC ) Append ▼ Casenote Diagnosis Rt ACJ degeneration History Pain lasted for 10 days. Gym, had supplement and pain meds and got better . Did bench press and experienced pain. Aggravating factor Bench press Relieving factor Rest Evening No Morning No General Health Good Job Deskjob Interest Gym, ROM Horizontal abduction - pain at end range Tenderness on right ACJ, right upperback myofascial , Right teres minor and biceps tendon Right mid trap inactivation Rx) US on right ACJ, 5 minutes IFC on right shoulder, 10 minutes STR on right upperback myofascial , Right teres minor and biceps tendon Gentle right ACJ mobilization Acute care injury education MPlan Review shoulder pain 02-Feb-2026 10:15 AM - WeeY ( SSOC ) Append ▼ 02-Feb-2026 09:19 AM - PAM ( SSOC ) Append ▼"
+  ],
+  "tables": [
+    {
+      "tableIdx": 0,
+      "rowCount": 0,
+      "headerSample": [],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 1,
+      "rowCount": 1,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "Date",
+            "Grp",
+            "Description",
+            "Amount",
+            "Charge",
+            "Branch"
+          ],
+          "text": "Date Grp Description Amount Charge Branch"
+        }
+      ],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 2,
+      "rowCount": 4,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "text": ""
+        },
+        {
+          "rowIdx": 1,
+          "cells": [
+            "02/02/2026",
+            "Pcr",
+            "EXTENDED PHYSIOTHERAPY - WY",
+            "1.00 1",
+            "$260.00",
+            "SSOC"
+          ],
+          "text": "02/02/2026PcrEXTENDED PHYSIOTHERAPY - WY1.00 1$260.00SSOC"
+        }
+      ],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 3,
+      "rowCount": 0,
+      "headerSample": [],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 4,
+      "rowCount": 0,
+      "headerSample": [],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 5,
+      "rowCount": 0,
+      "headerSample": [],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 6,
+      "rowCount": 0,
+      "headerSample": [],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 7,
+      "rowCount": 0,
+      "headerSample": [],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 8,
+      "rowCount": 0,
+      "headerSample": [],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 9,
+      "rowCount": 0,
+      "headerSample": [],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 10,
+      "rowCount": 1,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "Visit Date",
+            "Visit NO",
+            "Clinic",
+            "Case Note",
+            "Management",
+            "MED / PROC / INV"
+          ],
+          "text": "Visit Date Visit NO Clinic Case Note Management MED / PROC / INV"
+        }
+      ],
+      "interestingRows": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "Visit Date",
+            "Visit NO",
+            "Clinic",
+            "Case Note",
+            "Management",
+            "MED / PROC / INV"
+          ],
+          "text": "Visit Date Visit NO Clinic Case Note Management MED / PROC / INV"
+        }
+      ]
+    },
+    {
+      "tableIdx": 11,
+      "rowCount": 3,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "text": ""
+        },
+        {
+          "rowIdx": 1,
+          "cells": [
+            "02 Feb 2026",
+            "127873",
+            "SSOC",
+            "<02-Feb-2026 09:19 AM PAM> <02-Feb-2026 10:59 AM Weeyong>DiagnosisRt ACJ degeneration History Pain lasted for 10 days. Gym, had supplement and pain meds and got better . Did bench press and experienced pain. Aggravating factorBench press Relieving factorRest EveningNo Morning No General HealthGood Job Deskjob Interest Gym, ROM Horizontal abduction - pain at end range Tenderness on right ACJ, right upperback myofascial , Right teres minor and biceps tendon Right mid trap inactivation Rx)US on right ACJ, 5 minutesIFC on right shoulder, 10 minutesSTR on right upperback myofascial , Right teres minor and biceps tendon Gentle right ACJ mobilization Acute care injury education",
+            "<02-Feb-2026 10:59 AM (Weeyong)>Review shoulder pain",
+            "Medicine: Celebrex (200 mg) - Qty(40.00 Tabs) - 1 tab/s 2 times a day Procedure: SPECIALIST FIRST CONSULTATION - Qty(1.00 )"
+          ],
+          "text": "02 Feb 2026127873SSOC <02-Feb-2026 09:19 AM PAM> <02-Feb-2026 10:59 AM Weeyong>DiagnosisRt ACJ degeneration History Pain lasted for 10 days. Gym, had supplement and pain meds and got better . Did bench press and experienced pain. Aggravating factorBench press Relieving factorRest EveningNo Morning No General HealthGood Job Deskjob Interest Gym, ROM Horizontal abduction - pain at end range Tenderness on right ACJ, right upperback myofascial , Right teres minor and biceps tendon Right mid trap inactivation Rx)US on right ACJ, 5 minutesIFC on right shoulder, 10 minutesSTR on right upperback myofascial , Right teres minor and biceps tendon Gentle right ACJ mobilization Acute care injury education <02-Feb-2026 10:59 AM (Weeyong)>Review shoulder pain Medicine: Celebrex (200 mg) - Qty(40.00 Tabs) - 1 tab/s 2 times a day Procedure: SPECIALIST FIRST CONSULTATION - Qty(1.00 )"
+        }
+      ],
+      "interestingRows": [
+        {
+          "rowIdx": 1,
+          "cells": [
+            "02 Feb 2026",
+            "127873",
+            "SSOC",
+            "<02-Feb-2026 09:19 AM PAM> <02-Feb-2026 10:59 AM Weeyong>DiagnosisRt ACJ degeneration History Pain lasted for 10 days. Gym, had supplement and pain meds and got better . Did bench press and experienced pain. Aggravating factorBench press Relieving factorRest EveningNo Morning No General HealthGood Job Deskjob Interest Gym, ROM Horizontal abduction - pain at end range Tenderness on right ACJ, right upperback myofascial , Right teres minor and biceps tendon Right mid trap inactivation Rx)US on right ACJ, 5 minutesIFC on right shoulder, 10 minutesSTR on right upperback myofascial , Right teres minor and biceps tendon Gentle right ACJ mobilization Acute care injury education",
+            "<02-Feb-2026 10:59 AM (Weeyong)>Review shoulder pain",
+            "Medicine: Celebrex (200 mg) - Qty(40.00 Tabs) - 1 tab/s 2 times a day Procedure: SPECIALIST FIRST CONSULTATION - Qty(1.00 )"
+          ],
+          "text": "02 Feb 2026127873SSOC <02-Feb-2026 09:19 AM PAM> <02-Feb-2026 10:59 AM Weeyong>DiagnosisRt ACJ degeneration History Pain lasted for 10 days. Gym, had supplement and pain meds and got better . Did bench press and experienced pain. Aggravating factorBench press Relieving factorRest EveningNo Morning No General HealthGood Job Deskjob Interest Gym, ROM Horizontal abduction - pain at end range Tenderness on right ACJ, right upperback myofascial , Right teres minor and biceps tendon Right mid trap inactivation Rx)US on right ACJ, 5 minutesIFC on right shoulder, 10 minutesSTR on right upperback myofascial , Right teres minor and biceps tendon Gentle right ACJ mobilization Acute care injury education <02-Feb-2026 10:59 AM (Weeyong)>Review shoulder pain Medicine: Celebrex (200 mg) - Qty(40.00 Tabs) - 1 tab/s 2 times a day Procedure: SPECIALIST FIRST CONSULTATION - Qty(1.00 )"
+        }
+      ]
+    },
+    {
+      "tableIdx": 12,
+      "rowCount": 1,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "",
+            "Code",
+            "Description",
+            "Type"
+          ],
+          "text": "Code Description Type"
+        }
+      ],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 13,
+      "rowCount": 1,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "text": ""
+        }
+      ],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 14,
+      "rowCount": 1,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "",
+            "Type",
+            "Description",
+            "Onset Date",
+            "Severity",
+            "Reaction",
+            "Remarks"
+          ],
+          "text": "Type Description Onset Date Severity Reaction Remarks"
+        }
+      ],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 15,
+      "rowCount": 1,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            ""
+          ],
+          "text": ""
+        }
+      ],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 16,
+      "rowCount": 0,
+      "headerSample": [],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 17,
+      "rowCount": 4,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "Drug"
+          ],
+          "text": "Drug"
+        },
+        {
+          "rowIdx": 1,
+          "cells": [
+            "Stock"
+          ],
+          "text": "Stock"
+        }
+      ],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 18,
+      "rowCount": 2,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "Company"
+          ],
+          "text": "Company"
+        },
+        {
+          "rowIdx": 1,
+          "cells": [
+            "Expenses"
+          ],
+          "text": "Expenses"
+        }
+      ],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 19,
+      "rowCount": 2,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "Patient"
+          ],
+          "text": "Patient"
+        },
+        {
+          "rowIdx": 1,
+          "cells": [
+            "Finance"
+          ],
+          "text": "Finance"
+        }
+      ],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 20,
+      "rowCount": 2,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "Reception"
+          ],
+          "text": "Reception"
+        },
+        {
+          "rowIdx": 1,
+          "cells": [
+            "Submission"
+          ],
+          "text": "Submission"
+        }
+      ],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 21,
+      "rowCount": 8,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "Daily"
+          ],
+          "text": "Daily"
+        },
+        {
+          "rowIdx": 1,
+          "cells": [
+            "Inventory"
+          ],
+          "text": "Inventory"
+        }
+      ],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 22,
+      "rowCount": 10,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "Treatment"
+          ],
+          "text": "Treatment"
+        },
+        {
+          "rowIdx": 1,
+          "cells": [
+            "Visit"
+          ],
+          "text": "Visit"
+        }
+      ],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 23,
+      "rowCount": 1,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "Staff"
+          ],
+          "text": "Staff"
+        }
+      ],
+      "interestingRows": []
+    },
+    {
+      "tableIdx": 24,
+      "rowCount": 17,
+      "headerSample": [
+        {
+          "rowIdx": 0,
+          "cells": [
+            "Program"
+          ],
+          "text": "Program"
+        },
+        {
+          "rowIdx": 1,
+          "cells": [
+            "Forms"
+          ],
+          "text": "Forms"
+        }
+      ],
+      "interestingRows": [
+        {
+          "rowIdx": 9,
+          "cells": [
+            "Case Note"
+          ],
+          "text": "Case Note"
+        }
+      ]
+    }
+  ]
+}

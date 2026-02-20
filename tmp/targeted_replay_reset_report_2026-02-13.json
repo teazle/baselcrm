@@ -1,0 +1,47 @@
+{
+  "reset_at": "2026-02-13T05:26:54.697Z",
+  "ids": [
+    "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "0a1695ab-8ea3-4fba-b5a5-ec47ea933e40",
+    "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
+    "416a02fb-3feb-435b-b3f8-3f3197a60e0f"
+  ],
+  "rows": [
+    {
+      "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+      "patient_name": "MITTAL SACHIN KUMAR",
+      "visit_date": "2026-02-02",
+      "pay_type": "MHC",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_error": null
+    },
+    {
+      "id": "0a1695ab-8ea3-4fba-b5a5-ec47ea933e40",
+      "patient_name": "CHEW SIEW LING",
+      "visit_date": "2026-02-03",
+      "pay_type": "MHC",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_error": null
+    },
+    {
+      "id": "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
+      "patient_name": "CAROLINE ADRIANA ARCHER",
+      "visit_date": "2026-02-04",
+      "pay_type": "MHC",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_error": null
+    },
+    {
+      "id": "416a02fb-3feb-435b-b3f8-3f3197a60e0f",
+      "patient_name": "TJIA NATHANAEL THOMAS",
+      "visit_date": "2026-02-06",
+      "pay_type": "MHC",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_error": null
+    }
+  ]
+}

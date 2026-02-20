@@ -1,0 +1,255 @@
+{
+  "captured_at": "2026-02-13T05:26:40.779Z",
+  "ids": [
+    "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "0a1695ab-8ea3-4fba-b5a5-ec47ea933e40",
+    "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
+    "416a02fb-3feb-435b-b3f8-3f3197a60e0f"
+  ],
+  "rows": [
+    {
+      "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+      "patient_name": "MITTAL SACHIN KUMAR",
+      "nric": "M4539893L",
+      "visit_date": "2026-02-02",
+      "pay_type": "MHC",
+      "submission_status": "draft",
+      "submitted_at": "2026-02-13T02:32:53.243+00:00",
+      "submission_error": null,
+      "submission_metadata": {
+        "mcDays": 0,
+        "portal": "MHC Asia",
+        "success": true,
+        "persisted": true,
+        "chargeType": "first",
+        "hasDiagnosis": true,
+        "savedAsDraft": true,
+        "draftReference": "EV16090142",
+        "routingOverride": null,
+        "draftVerification": {
+          "row": {
+            "type": "Employee Visit",
+            "mcDays": "0.0",
+            "remarks": "",
+            "visitNo": "EV16090142",
+            "totalFee": "$283.40",
+            "visitDate": "02/02/2026",
+            "totalClaim": "$283.40",
+            "patientName": "SACHIN MITTAL",
+            "patientNric": "M4539893L"
+          },
+          "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+          "found": true,
+          "context": "mhc",
+          "attempts": [
+            {
+              "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+              "match": {
+                "type": "Employee Visit",
+                "mcDays": "0.0",
+                "remarks": "",
+                "visitNo": "EV16090142",
+                "totalFee": "$283.40",
+                "visitDate": "02/02/2026",
+                "totalClaim": "$283.40",
+                "patientName": "SACHIN MITTAL",
+                "patientNric": "M4539893L"
+              },
+              "opened": true,
+              "context": "mhc",
+              "matched": true,
+              "rowsSeen": 1,
+              "attemptNo": 1,
+              "expectedVisitNo": null
+            }
+          ],
+          "rowsSeen": 1
+        },
+        "diagnosisResolution": {
+          "status": "resolved",
+          "confidence": 1,
+          "source_chain": [
+            {
+              "found": true,
+              "source": "diagnosis_tab"
+            }
+          ],
+          "reason_if_unresolved": null
+        }
+      }
+    },
+    {
+      "id": "0a1695ab-8ea3-4fba-b5a5-ec47ea933e40",
+      "patient_name": "CHEW SIEW LING",
+      "nric": "S8635560D",
+      "visit_date": "2026-02-03",
+      "pay_type": "MHC",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_error": null,
+      "submission_metadata": null
+    },
+    {
+      "id": "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
+      "patient_name": "CAROLINE ADRIANA ARCHER",
+      "nric": "S7288611I",
+      "visit_date": "2026-02-04",
+      "pay_type": "MHC",
+      "submission_status": "error",
+      "submitted_at": null,
+      "submission_error": "Failed to open AIA visit form for NRIC S7288611I (see screenshots/mhc-asia-aia-*.png)",
+      "submission_metadata": {
+        "nric": "S7288611I",
+        "stage": "post_diagnosis",
+        "portal": "MHC Asia",
+        "reason": "diagnosis_mapping_failed",
+        "payType": "MHC",
+        "success": false,
+        "visitId": "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
+        "rawDiagnosis": {
+          "code": "S83.6",
+          "description": "sprain of left hip"
+        },
+        "savedAsDraft": false,
+        "domDiagnosisState": {
+          "url": "https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAddSubmit.ec",
+          "reasons": [
+            "missing_diagnosis_pri_id",
+            "missing_or_invalid_diagnosis_pri_desc",
+            "diagnosis_dropdown_still_na"
+          ],
+          "resolved": false,
+          "checkedAt": "2026-02-13T02:33:34.306Z",
+          "diagnosisPriId": "",
+          "diagnosisPriDesc": "",
+          "diagnosisPriIdTemp": "NA",
+          "hasPrimaryRequiredError": false
+        },
+        "attemptedSelectors": [
+          "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+          "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+          "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+          "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+          "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+          "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+        ],
+        "canonicalDiagnosis": {
+          "side": "left",
+          "code_raw": "S83.6",
+          "body_part": "hip",
+          "condition": "sprain",
+          "code_normalized": "S83.6",
+          "description_raw": "sprain of left hip",
+          "description_canonical": "sprain of left hip"
+        },
+        "diagnosisSelection": {
+          "ok": false,
+          "method": "modal",
+          "reason": "diagnosis_mapping_failed",
+          "checkedAt": "2026-02-13T02:33:34.001Z",
+          "diagnosis": {
+            "code": "S83.6",
+            "description": "sprain of left hip"
+          },
+          "attemptedSelectors": [
+            "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+            "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+            "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+            "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+            "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+            "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+          ]
+        },
+        "lastPortalDialogMessage": "Consult fee cannot be be more than 80.0!",
+        "flow2DiagnosisResolution": {
+          "status": "resolved",
+          "confidence": 1,
+          "source_chain": [
+            {
+              "found": true,
+              "source": "diagnosis_tab"
+            }
+          ],
+          "reason_if_unresolved": null
+        }
+      }
+    },
+    {
+      "id": "416a02fb-3feb-435b-b3f8-3f3197a60e0f",
+      "patient_name": "TJIA NATHANAEL THOMAS",
+      "nric": "T1208937B",
+      "visit_date": "2026-02-06",
+      "pay_type": "MHC",
+      "submission_status": "draft",
+      "submitted_at": "2026-02-13T02:35:13.794+00:00",
+      "submission_error": null,
+      "submission_metadata": {
+        "mcDays": 0,
+        "portal": "MHC Asia",
+        "success": true,
+        "persisted": true,
+        "chargeType": "first",
+        "hasDiagnosis": true,
+        "savedAsDraft": true,
+        "draftReference": "EV59953056",
+        "routingOverride": "AIA_CLINIC_DIALOG",
+        "draftVerification": {
+          "row": {
+            "type": "Employee Visit",
+            "mcDays": "0.0",
+            "remarks": "",
+            "visitNo": "EV59953056",
+            "totalFee": "$130.80",
+            "visitDate": "13/02/2026",
+            "totalClaim": "$130.80",
+            "patientName": "TJIA NATHANAEL THOMAS",
+            "patientNric": "T1208937B"
+          },
+          "url": "https://www.aiaclinic.com/aia/ClinicEmpVisitDraftListSubmit.ec",
+          "found": true,
+          "context": "aia",
+          "attempts": [
+            {
+              "url": "https://www.aiaclinic.com/aia/ClinicEmpVisitDraftListSubmit.ec",
+              "match": {
+                "type": "Employee Visit",
+                "mcDays": "0.0",
+                "remarks": "",
+                "visitNo": "EV59953056",
+                "totalFee": "$130.80",
+                "visitDate": "13/02/2026",
+                "totalClaim": "$130.80",
+                "patientName": "TJIA NATHANAEL THOMAS",
+                "patientNric": "T1208937B"
+              },
+              "opened": true,
+              "context": "aia",
+              "matched": true,
+              "rowsSeen": 1,
+              "attemptNo": 1,
+              "expectedVisitNo": null
+            }
+          ],
+          "rowsSeen": 1
+        },
+        "diagnosisResolution": {
+          "status": "resolved",
+          "confidence": 0.95,
+          "source_chain": [
+            {
+              "found": true,
+              "source": "diagnosis_tab"
+            }
+          ],
+          "reason_if_unresolved": null
+        }
+      }
+    }
+  ]
+}

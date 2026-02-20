@@ -1,0 +1,2 @@
+visit_id,patient_name,nric,visit_date,pay_type,draft_found,draft_reference,draft_visit_date,draft_total_fee,draft_total_claim,mc_days,portal_context,evidence_path
+31b5a688-9104-4507-bd7a-347a9f9ce866,MITTAL SACHIN KUMAR,M4539893L,2026-02-02,MHC,no,,,,,,mhc|aia,/Users/vincent/Baselrpacrm/screenshots/one-more-mittal/draft/31b5a688-9104-4507-bd7a-347a9f9ce866.png

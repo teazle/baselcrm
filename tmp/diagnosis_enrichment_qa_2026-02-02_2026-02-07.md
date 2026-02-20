@@ -1,0 +1,7 @@
+[32minfo[39m: Diagnosis enrichment QA report generated {"jsonPath":"/Users/vincent/Baselrpacrm/tmp/diagnosis_enrichment_qa_2026-02-02_2026-02-07.json","mdPath":"/Users/vincent/Baselrpacrm/tmp/diagnosis_enrichment_qa_2026-02-02_2026-02-07.md","service":"clinic-automation","summary":{"blocked_before_save":5,"matches":7,"mismatch_should_not_save":0,"missing_answer_sheet":2,"missing_flow2":0,"total":12},"timestamp":"2026-02-13T17:56:02.089Z"}
+-- | --- | --- | --- |
+| b19f4854-6445-4965-a695-befdc5f1c531 | SZENTIRMAY IBOLYA MARGARET | 2026-02-02 |  |  | false | Pain in right hip |  | blocked_before_save | missing_answer_sheet |
+| 60e0c382-d6cb-4d35-a5b9-e17ce5b20c73 | ENG CHAI PIN ELYNE XANDRIA | 2026-02-03 | missing | latest | false | Missing diagnosis | M79. 672 - Left foot/heel pain | blocked_before_save | date_policy_not_ok |
+| 78f0430c-6d4f-4043-a54f-d529e7ef57fb | YIP CHOI YEAN | 2026-02-05 | resolved | exact | true | Pain in left hip |  | blocked_before_save | missing_answer_sheet |
+| 1e48b9cf-fe14-4c33-bbb3-f25c2b8e3bb7 | YEONG MEI-YI | 2026-02-06 | ambiguous | exact | true | Sprain Of The Knee | S934 - Sprain and strain of ankle | blocked_before_save | flow2_status_ambiguous |
+| a50239f6-9cd2-44a8-9bbf-4784e1dc51e1 | LIM CHUI KIOW | 2026-02-07 | ambiguous | on_before | false | Low back pain | S134 - Sprain and strain of cervical spine | blocked_before_save | date_policy_not_ok |

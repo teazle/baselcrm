@@ -1,0 +1,328 @@
+{
+  "captured_at": "2026-02-13T05:29:10.817Z",
+  "ids": [
+    "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "0a1695ab-8ea3-4fba-b5a5-ec47ea933e40",
+    "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
+    "416a02fb-3feb-435b-b3f8-3f3197a60e0f"
+  ],
+  "rows": [
+    {
+      "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+      "patient_name": "MITTAL SACHIN KUMAR",
+      "nric": "M4539893L",
+      "visit_date": "2026-02-02",
+      "pay_type": "MHC",
+      "submission_status": "draft",
+      "submitted_at": "2026-02-13T05:28:18.554+00:00",
+      "submission_error": null,
+      "submission_metadata": {
+        "mcDays": 0,
+        "portal": "MHC Asia",
+        "success": true,
+        "persisted": true,
+        "chargeType": "first",
+        "hasDiagnosis": true,
+        "savedAsDraft": true,
+        "draftReference": "EV16090142",
+        "routingOverride": null,
+        "draftVerification": {
+          "row": {
+            "type": "Employee Visit",
+            "mcDays": "0.0",
+            "remarks": "",
+            "visitNo": "EV16090142",
+            "totalFee": "$283.40",
+            "visitDate": "02/02/2026",
+            "totalClaim": "$283.40",
+            "patientName": "SACHIN MITTAL",
+            "patientNric": "M4539893L"
+          },
+          "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+          "found": true,
+          "context": "mhc",
+          "attempts": [
+            {
+              "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+              "match": {
+                "type": "Employee Visit",
+                "mcDays": "0.0",
+                "remarks": "",
+                "visitNo": "EV16090142",
+                "totalFee": "$283.40",
+                "visitDate": "02/02/2026",
+                "totalClaim": "$283.40",
+                "patientName": "SACHIN MITTAL",
+                "patientNric": "M4539893L"
+              },
+              "opened": true,
+              "reason": null,
+              "context": "mhc",
+              "matched": true,
+              "rowsSeen": 1,
+              "attemptNo": 1,
+              "expectedVisitNo": null
+            }
+          ],
+          "rowsSeen": 1
+        },
+        "diagnosisResolution": {
+          "status": "resolved",
+          "date_ok": true,
+          "confidence": 1,
+          "date_policy": "on_or_before_30_days",
+          "source_chain": [
+            {
+              "found": true,
+              "source": "diagnosis_tab",
+              "source_date": "2026-02-02",
+              "source_age_days": 0
+            }
+          ],
+          "fallback_age_days": 0,
+          "reason_if_unresolved": null,
+          "source_date_match_type": "exact"
+        }
+      }
+    },
+    {
+      "id": "0a1695ab-8ea3-4fba-b5a5-ec47ea933e40",
+      "patient_name": "CHEW SIEW LING",
+      "nric": "S8635560D",
+      "visit_date": "2026-02-03",
+      "pay_type": "MHC",
+      "submission_status": "error",
+      "submitted_at": null,
+      "submission_error": "diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=0a1695ab-8ea3-4fba-b5a5-ec47ea933e40, nric=S8635560D)",
+      "submission_metadata": {
+        "nric": "S8635560D",
+        "stage": "post_diagnosis",
+        "portal": "MHC Asia",
+        "reason": "diagnosis_mapping_failed",
+        "payType": "MHC",
+        "success": false,
+        "visitId": "0a1695ab-8ea3-4fba-b5a5-ec47ea933e40",
+        "flow2DateOk": false,
+        "rawDiagnosis": {
+          "code": "36071006",
+          "description": "Pain in right knee"
+        },
+        "savedAsDraft": false,
+        "fallbackAgeDays": 42,
+        "flow2DatePolicy": "on_or_before_30_days",
+        "domDiagnosisState": {
+          "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitAddSubmit.ec",
+          "reasons": [
+            "missing_diagnosis_pri_id",
+            "diagnosis_dropdown_still_na"
+          ],
+          "resolved": true,
+          "checkedAt": "2026-02-13T05:27:41.849Z",
+          "diagnosisPriId": "",
+          "diagnosisPriDesc": "36071006 - Pain in right knee",
+          "diagnosisPriIdTemp": "NA",
+          "hasPrimaryRequiredError": false
+        },
+        "attemptedSelectors": [
+          "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+          "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+          "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+          "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+          "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+          "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+        ],
+        "canonicalDiagnosis": {
+          "side": "right",
+          "code_raw": "36071006",
+          "body_part": "knee",
+          "condition": "pain",
+          "source_date": "2025-12-23",
+          "code_normalized": null,
+          "description_raw": "Pain in right knee",
+          "source_age_days": 42,
+          "description_canonical": "Pain in right knee",
+          "source_date_match_type": "on_before"
+        },
+        "diagnosisSelection": {
+          "ok": true,
+          "mode": "no_confident_match",
+          "method": "in_form_text_fallback",
+          "reason": null,
+          "checkedAt": "2026-02-13T05:27:41.542Z",
+          "diagnosis": {
+            "code": "36071006",
+            "description": "Pain in right knee"
+          },
+          "resolution": {
+            "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitAddSubmit.ec",
+            "reasons": [
+              "missing_diagnosis_pri_id",
+              "diagnosis_dropdown_still_na"
+            ],
+            "resolved": true,
+            "checkedAt": "2026-02-13T05:27:41.541Z",
+            "diagnosisPriId": "",
+            "diagnosisPriDesc": "36071006 - Pain in right knee",
+            "diagnosisPriIdTemp": "NA",
+            "hasPrimaryRequiredError": false
+          },
+          "searchText": "knee",
+          "searchSample": [
+            {
+              "idx": 0,
+              "text": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 1 - 7 of 7 Code Description M23 Internal derangement of knee M235 Chr",
+              "hasLink": true,
+              "hasIcdLikeCode": true
+            },
+            {
+              "idx": 1,
+              "text": "Click on the diagnosis to select it",
+              "hasLink": false,
+              "hasIcdLikeCode": false
+            },
+            {
+              "idx": 2,
+              "text": "Description Code that contains starts with equals to Sort Code Description",
+              "hasLink": true,
+              "hasIcdLikeCode": false
+            },
+            {
+              "idx": 3,
+              "text": "Description Code that contains starts with equals to",
+              "hasLink": true,
+              "hasIcdLikeCode": false
+            },
+            {
+              "idx": 4,
+              "text": "Sort Code Description",
+              "hasLink": false,
+              "hasIcdLikeCode": false
+            },
+            {
+              "idx": 5,
+              "text": "1 - 7 of 7",
+              "hasLink": false,
+              "hasIcdLikeCode": false
+            },
+            {
+              "idx": 6,
+              "text": "1 - 7 of 7",
+              "hasLink": false,
+              "hasIcdLikeCode": false
+            },
+            {
+              "idx": 7,
+              "text": "Code Description M23 Internal derangement of knee M235 Chronic instability of knee S800 Contusion of knee S83 Dislocation, sprain and strain of joints and ligaments of knee S833 Te",
+              "hasLink": true,
+              "hasIcdLikeCode": true
+            },
+            {
+              "idx": 8,
+              "text": "Code Description",
+              "hasLink": false,
+              "hasIcdLikeCode": false
+            },
+            {
+              "idx": 9,
+              "text": "M23 Internal derangement of knee",
+              "hasLink": true,
+              "hasIcdLikeCode": true
+            },
+            {
+              "idx": 10,
+              "text": "M235 Chronic instability of knee",
+              "hasLink": true,
+              "hasIcdLikeCode": true
+            },
+            {
+              "idx": 11,
+              "text": "S800 Contusion of knee",
+              "hasLink": true,
+              "hasIcdLikeCode": true
+            },
+            {
+              "idx": 12,
+              "text": "S83 Dislocation, sprain and strain of joints and ligaments of knee",
+              "hasLink": true,
+              "hasIcdLikeCode": true
+            },
+            {
+              "idx": 13,
+              "text": "S833 Tear of articular cartilage of knee, current",
+              "hasLink": true,
+              "hasIcdLikeCode": true
+            },
+            {
+              "idx": 14,
+              "text": "S835 Sprain and strain involving (anterior)(posterior) cruciate ligament of knee",
+              "hasLink": true,
+              "hasIcdLikeCode": true
+            },
+            {
+              "idx": 15,
+              "text": "S836 Sprain and strain of other and unspecified parts of knee",
+              "hasLink": true,
+              "hasIcdLikeCode": true
+            }
+          ],
+          "attemptedSelectors": [
+            "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+            "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+            "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+            "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+            "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+            "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+          ]
+        },
+        "flow2DateGatePassed": false,
+        "fallbackAgeLimitDays": 30,
+        "lastPortalDialogMessage": null,
+        "flow2DiagnosisResolution": {
+          "status": "ambiguous",
+          "date_ok": false,
+          "confidence": 0.69,
+          "date_policy": "on_or_before_30_days",
+          "source_chain": [
+            {
+              "found": true,
+              "source": "diagnosis_tab",
+              "source_date": "2025-12-23",
+              "source_age_days": 42
+            }
+          ],
+          "fallback_age_days": 42,
+          "reason_if_unresolved": "diagnosis_source_too_old_for_on_before_policy",
+          "source_date_match_type": "on_before"
+        }
+      }
+    },
+    {
+      "id": "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
+      "patient_name": "CAROLINE ADRIANA ARCHER",
+      "nric": "S7288611I",
+      "visit_date": "2026-02-04",
+      "pay_type": "MHC",
+      "submission_status": "error",
+      "submitted_at": null,
+      "submission_error": "Failed to open AIA visit form for NRIC S7288611I (see screenshots/mhc-asia-aia-*.png)",
+      "submission_metadata": null
+    },
+    {
+      "id": "416a02fb-3feb-435b-b3f8-3f3197a60e0f",
+      "patient_name": "TJIA NATHANAEL THOMAS",
+      "nric": "T1208937B",
+      "visit_date": "2026-02-06",
+      "pay_type": "MHC",
+      "submission_status": "error",
+      "submitted_at": null,
+      "submission_error": "Failed to open AIA visit form for NRIC T1208937B (see screenshots/mhc-asia-aia-*.png)",
+      "submission_metadata": null
+    }
+  ]
+}

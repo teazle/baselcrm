@@ -1,0 +1,233 @@
+{
+  "generatedAt": "2026-02-12T23:59:10.606Z",
+  "visit": {
+    "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "patient_name": "MITTAL SACHIN KUMAR",
+    "nric": "M4539893L",
+    "visit_date": "2026-02-02",
+    "pay_type": "MHC",
+    "submission_status": "error",
+    "submitted_at": null,
+    "submission_error": "diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=31b5a688-9104-4507-bd7a-347a9f9ce866, nric=M4539893L)",
+    "submission_metadata": {
+      "nric": "M4539893L",
+      "stage": "post_diagnosis",
+      "portal": "MHC Asia",
+      "reason": "diagnosis_mapping_failed",
+      "payType": "MHC",
+      "success": false,
+      "visitId": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+      "rawDiagnosis": {
+        "code": "M25.51",
+        "description": "Pain in a joint shoulder region"
+      },
+      "savedAsDraft": false,
+      "domDiagnosisState": {
+        "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitAddSubmit.ec",
+        "reasons": [
+          "missing_diagnosis_pri_id",
+          "diagnosis_dropdown_still_na"
+        ],
+        "resolved": false,
+        "checkedAt": "2026-02-12T23:46:12.621Z",
+        "diagnosisPriId": "",
+        "diagnosisPriDesc": "M25.51 - Pain In The Shoulder",
+        "diagnosisPriIdTemp": "NA",
+        "hasPrimaryRequiredError": false
+      },
+      "attemptedSelectors": [
+        "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+        "tr:has-text(\"Diagnosis Pri\") input[value=\"M\"]",
+        "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value=\"M\"]",
+        "input[value=\"M\"]:near(text=\"Diagnosis Pri\", 200)",
+        "input[type=\"submit\"][value=\"M\"]",
+        "input[type=\"button\"][value=\"M\"]"
+      ],
+      "canonicalDiagnosis": {
+        "side": null,
+        "code_raw": "M25.51",
+        "body_part": "shoulder",
+        "condition": "pain",
+        "code_normalized": "M25.51",
+        "description_raw": "Pain in a joint shoulder region",
+        "description_canonical": "Pain In The Shoulder"
+      },
+      "diagnosisSelection": {
+        "ok": false,
+        "mode": "no_confident_match",
+        "method": "in_form_text_fallback",
+        "reason": "diagnosis_mapping_failed",
+        "checkedAt": "2026-02-12T23:46:12.314Z",
+        "diagnosis": {
+          "code": "M25.51",
+          "description": "Pain In The Shoulder"
+        },
+        "resolution": {
+          "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitAddSubmit.ec",
+          "reasons": [
+            "missing_diagnosis_pri_id",
+            "diagnosis_dropdown_still_na"
+          ],
+          "resolved": false,
+          "checkedAt": "2026-02-12T23:46:12.313Z",
+          "diagnosisPriId": "",
+          "diagnosisPriDesc": "M25.51 - Pain In The Shoulder",
+          "diagnosisPriIdTemp": "NA",
+          "hasPrimaryRequiredError": false
+        },
+        "attemptedSelectors": [
+          "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+          "tr:has-text(\"Diagnosis Pri\") input[value=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value=\"M\"]",
+          "input[value=\"M\"]:near(text=\"Diagnosis Pri\", 200)",
+          "input[type=\"submit\"][value=\"M\"]",
+          "input[type=\"button\"][value=\"M\"]"
+        ]
+      },
+      "lastPortalDialogMessage": "Consult fee cannot be be more than 120.0!",
+      "flow2DiagnosisResolution": {
+        "status": "ambiguous",
+        "confidence": 0.74,
+        "source_chain": [
+          {
+            "found": true,
+            "source": "diagnosis_tab"
+          }
+        ],
+        "reason_if_unresolved": "generic_without_laterality"
+      }
+    },
+    "extraction_metadata": {
+      "pcno": "78145",
+      "mcDays": 0,
+      "sources": {},
+      "extracted": true,
+      "medicines": [
+        {
+          "name": "EXTENDED PHYSIOTHERAPY - WY",
+          "quantity": 1
+        },
+        {
+          "name": "Celebrex (200 mg)",
+          "quantity": 1
+        },
+        {
+          "name": "SPECIALIST FIRST CONSULTATION",
+          "quantity": 1
+        }
+      ],
+      "chargeType": "first",
+      "extractedAt": "2026-02-09T13:29:58.044Z",
+      "mcStartDate": null,
+      "diagnosisCode": "M25.51",
+      "detailsExtractedAt": "2026-02-12T23:58:43.211Z",
+      "diagnosisCanonical": {
+        "side": "right",
+        "code_raw": "M25.51",
+        "body_part": "shoulder",
+        "condition": "pain",
+        "code_normalized": "M25.51",
+        "description_raw": "Pain in right shoulder",
+        "description_canonical": "Pain in right shoulder"
+      },
+      "diagnosisCandidates": [
+        {
+          "rank": 1,
+          "side": "right",
+          "source": "diagnosis_tab",
+          "code_raw": "M25.51",
+          "body_part": "shoulder",
+          "condition": "pain",
+          "confidence": 1,
+          "code_normalized": "M25.51",
+          "description_raw": "Pain in right shoulder",
+          "description_canonical": "Pain in right shoulder"
+        }
+      ],
+      "diagnosisResolution": {
+        "status": "resolved",
+        "confidence": 1,
+        "source_chain": [
+          {
+            "found": true,
+            "source": "diagnosis_tab"
+          }
+        ],
+        "reason_if_unresolved": null
+      },
+      "detailsExtractionError": "Failed to navigate to Patient Page",
+      "detailsExtractionStatus": "completed",
+      "detailsExtractionSources": {
+        "mcDays": 0,
+        "source": "tx_history_combined",
+        "medicines": [
+          {
+            "name": "EXTENDED PHYSIOTHERAPY - WY",
+            "quantity": 1
+          },
+          {
+            "name": "Celebrex (200 mg)",
+            "quantity": 1
+          },
+          {
+            "name": "SPECIALIST FIRST CONSULTATION",
+            "quantity": 1
+          }
+        ],
+        "chargeType": "first",
+        "mcStartDate": null,
+        "diagnosisSource": "diagnosis_tab",
+        "extractionMethod": "getChargeTypeAndDiagnosis",
+        "diagnosisAttempts": [
+          {
+            "found": true,
+            "source": "diagnosis_tab"
+          }
+        ],
+        "diagnosisCanonical": {
+          "side": "right",
+          "code_raw": "M25.51",
+          "body_part": "shoulder",
+          "condition": "pain",
+          "code_normalized": "M25.51",
+          "description_raw": "Pain in right shoulder",
+          "description_canonical": "Pain in right shoulder"
+        },
+        "diagnosisCandidates": [
+          {
+            "rank": 1,
+            "side": "right",
+            "source": "diagnosis_tab",
+            "code_raw": "M25.51",
+            "body_part": "shoulder",
+            "condition": "pain",
+            "confidence": 1,
+            "code_normalized": "M25.51",
+            "description_raw": "Pain in right shoulder",
+            "description_canonical": "Pain in right shoulder"
+          }
+        ],
+        "diagnosisResolution": {
+          "status": "resolved",
+          "confidence": 1,
+          "source_chain": [
+            {
+              "found": true,
+              "source": "diagnosis_tab"
+            }
+          ],
+          "reason_if_unresolved": null
+        },
+        "medicineFilterStats": {
+          "after": 3,
+          "before": 3,
+          "filteredOut": 0
+        },
+        "nricExtractionStatus": "found",
+        "diagnosisMissingReason": null
+      },
+      "detailsExtractionAttempts": 2,
+      "detailsExtractionLastAttempt": "2026-02-12T23:57:16.567Z"
+    }
+  }
+}

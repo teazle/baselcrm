@@ -1,0 +1,252 @@
+{
+  "generatedAt": "2026-02-13T00:10:28.780Z",
+  "visitId": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+  "before": {
+    "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "submission_status": "error",
+    "submitted_at": null,
+    "submission_error": "diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=31b5a688-9104-4507-bd7a-347a9f9ce866, nric=M4539893L)",
+    "submission_metadata": {
+      "nric": "M4539893L",
+      "stage": "post_diagnosis",
+      "portal": "MHC Asia",
+      "reason": "diagnosis_mapping_failed",
+      "payType": "MHC",
+      "success": false,
+      "visitId": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+      "rawDiagnosis": {
+        "code": "M25.51",
+        "description": "Pain in right shoulder"
+      },
+      "savedAsDraft": false,
+      "domDiagnosisState": {
+        "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitAddSubmit.ec",
+        "reasons": [
+          "missing_diagnosis_pri_id",
+          "diagnosis_dropdown_still_na"
+        ],
+        "resolved": false,
+        "checkedAt": "2026-02-13T00:07:40.310Z",
+        "diagnosisPriId": "",
+        "diagnosisPriDesc": "M25.51 - Pain in right shoulder",
+        "diagnosisPriIdTemp": "NA",
+        "hasPrimaryRequiredError": false
+      },
+      "attemptedSelectors": [
+        "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+        "tr:has-text(\"Diagnosis Pri\") input[value=\"M\"]",
+        "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value=\"M\"]",
+        "input[value=\"M\"]:near(text=\"Diagnosis Pri\", 200)",
+        "input[type=\"submit\"][value=\"M\"]",
+        "input[type=\"button\"][value=\"M\"]"
+      ],
+      "canonicalDiagnosis": {
+        "side": "right",
+        "code_raw": "M25.51",
+        "body_part": "shoulder",
+        "condition": "pain",
+        "code_normalized": "M25.51",
+        "description_raw": "Pain in right shoulder",
+        "description_canonical": "Pain in right shoulder"
+      },
+      "diagnosisSelection": {
+        "ok": false,
+        "mode": "no_confident_match",
+        "method": "in_form_text_fallback",
+        "reason": "diagnosis_mapping_failed",
+        "checkedAt": "2026-02-13T00:07:40.002Z",
+        "diagnosis": {
+          "code": "M25.51",
+          "description": "Pain in right shoulder"
+        },
+        "resolution": {
+          "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitAddSubmit.ec",
+          "reasons": [
+            "missing_diagnosis_pri_id",
+            "diagnosis_dropdown_still_na"
+          ],
+          "resolved": false,
+          "checkedAt": "2026-02-13T00:07:40.002Z",
+          "diagnosisPriId": "",
+          "diagnosisPriDesc": "M25.51 - Pain in right shoulder",
+          "diagnosisPriIdTemp": "NA",
+          "hasPrimaryRequiredError": false
+        },
+        "searchText": "M25.51",
+        "searchSample": [
+          {
+            "idx": 0,
+            "text": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 1 - 15 of 913 Next Code Description 1119302008 Acute COVID-19 2688900",
+            "hasLink": true,
+            "hasIcdLikeCode": true
+          },
+          {
+            "idx": 1,
+            "text": "Click on the diagnosis to select it",
+            "hasLink": false,
+            "hasIcdLikeCode": false
+          },
+          {
+            "idx": 2,
+            "text": "Description Code that contains starts with equals to Sort Code Description",
+            "hasLink": true,
+            "hasIcdLikeCode": false
+          },
+          {
+            "idx": 3,
+            "text": "Description Code that contains starts with equals to",
+            "hasLink": true,
+            "hasIcdLikeCode": false
+          },
+          {
+            "idx": 4,
+            "text": "Sort Code Description",
+            "hasLink": false,
+            "hasIcdLikeCode": false
+          },
+          {
+            "idx": 5,
+            "text": "1 - 15 of 913 Next",
+            "hasLink": true,
+            "hasIcdLikeCode": false
+          },
+          {
+            "idx": 6,
+            "text": "1 - 15 of 913 Next",
+            "hasLink": true,
+            "hasIcdLikeCode": false
+          },
+          {
+            "idx": 7,
+            "text": "Code Description 1119302008 Acute COVID-19 26889001 Myositis 802.0 Closed fracture of nasal bones A049 Bacterial intestinal infection / enteritis, unspecified A05 Other bacterial f",
+            "hasLink": true,
+            "hasIcdLikeCode": true
+          },
+          {
+            "idx": 8,
+            "text": "Code Description",
+            "hasLink": false,
+            "hasIcdLikeCode": false
+          },
+          {
+            "idx": 9,
+            "text": "1119302008 Acute COVID-19",
+            "hasLink": true,
+            "hasIcdLikeCode": false
+          },
+          {
+            "idx": 10,
+            "text": "26889001 Myositis",
+            "hasLink": true,
+            "hasIcdLikeCode": false
+          },
+          {
+            "idx": 11,
+            "text": "802.0 Closed fracture of nasal bones",
+            "hasLink": true,
+            "hasIcdLikeCode": false
+          },
+          {
+            "idx": 12,
+            "text": "A049 Bacterial intestinal infection / enteritis, unspecified",
+            "hasLink": true,
+            "hasIcdLikeCode": true
+          },
+          {
+            "idx": 13,
+            "text": "A05 Other bacterial foodborne intoxications, not elsewhere classified",
+            "hasLink": true,
+            "hasIcdLikeCode": true
+          },
+          {
+            "idx": 14,
+            "text": "A079 Worms (protozoa intestinal disease)",
+            "hasLink": true,
+            "hasIcdLikeCode": true
+          },
+          {
+            "idx": 15,
+            "text": "A09 Gastroenteritis",
+            "hasLink": true,
+            "hasIcdLikeCode": true
+          },
+          {
+            "idx": 16,
+            "text": "A090 Gastroenteritis and colitis of infectious origin-NOS",
+            "hasLink": true,
+            "hasIcdLikeCode": true
+          },
+          {
+            "idx": 17,
+            "text": "A15 Respiratory tuberculosis, bacteriologically and histologically confirmed",
+            "hasLink": true,
+            "hasIcdLikeCode": true
+          },
+          {
+            "idx": 18,
+            "text": "A156 Tuberculous pleurisy, confirmed bacteriologically and histologically",
+            "hasLink": true,
+            "hasIcdLikeCode": true
+          },
+          {
+            "idx": 19,
+            "text": "A16 Respiratory tuberculosis, not confirmed bacteriologically or histologically",
+            "hasLink": true,
+            "hasIcdLikeCode": true
+          },
+          {
+            "idx": 20,
+            "text": "A165 Tuberculous pleurisy,w/o mention of bacteriological or histological confirm",
+            "hasLink": true,
+            "hasIcdLikeCode": true
+          },
+          {
+            "idx": 21,
+            "text": "A182 Tuberculous peripheral lymphadenopathy",
+            "hasLink": true,
+            "hasIcdLikeCode": true
+          },
+          {
+            "idx": 22,
+            "text": "A30 Leprosy [Hansens disease]",
+            "hasLink": true,
+            "hasIcdLikeCode": true
+          },
+          {
+            "idx": 23,
+            "text": "A310 Pulmonary mycobacterial infection",
+            "hasLink": true,
+            "hasIcdLikeCode": true
+          }
+        ],
+        "attemptedSelectors": [
+          "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+          "tr:has-text(\"Diagnosis Pri\") input[value=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value=\"M\"]",
+          "input[value=\"M\"]:near(text=\"Diagnosis Pri\", 200)",
+          "input[type=\"submit\"][value=\"M\"]",
+          "input[type=\"button\"][value=\"M\"]"
+        ]
+      },
+      "lastPortalDialogMessage": "Consult fee cannot be be more than 120.0!",
+      "flow2DiagnosisResolution": {
+        "status": "resolved",
+        "confidence": 1,
+        "source_chain": [
+          {
+            "found": true,
+            "source": "diagnosis_tab"
+          }
+        ],
+        "reason_if_unresolved": null
+      }
+    }
+  },
+  "after": {
+    "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "submission_status": null,
+    "submitted_at": null,
+    "submission_error": null,
+    "submission_metadata": null
+  }
+}

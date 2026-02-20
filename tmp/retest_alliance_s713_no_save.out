@@ -1,0 +1,29 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-17T12:19:39.320Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-17T12:19:39.327Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-17T12:19:39.327Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-17T12:19:39.328Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-17T12:19:42.000Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-17T12:19:42.003Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-17T12:19:44.314Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Panel Service {"selector":"div.sidebar a.nav-link:has-text(\"Panel Service\")","service":"clinic-automation","timestamp":"2026-02-17T12:19:45.280Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-17T12:19:45.910Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-17T12:19:46.585Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-17T12:19:48.274Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-17T12:19:48.353Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-17T12:19:48.417Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-12/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-17T12:19:48.527Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-12/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-17T12:19:48.811Z"}
+[32minfo[39m: [ALLIANCE] Selected member and opened claim form {"service":"clinic-automation","timestamp":"2026-02-17T12:19:52.093Z"}
+[32minfo[39m: [ALLIANCE] Set MC Days {"selector":"input[placeholder*=\"MC Days\" i]","service":"clinic-automation","timestamp":"2026-02-17T12:19:52.547Z"}
+[32minfo[39m: [ALLIANCE] Clicked Add Diagnosis {"selector":"button:has-text(\"Add Diagnosis\")","service":"clinic-automation","timestamp":"2026-02-17T12:19:52.602Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Name (Fever) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Name\" i]","service":"clinic-automation","timestamp":"2026-02-17T12:19:52.884Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (Fever) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-17T12:19:52.944Z"}
+[32minfo[39m: [ALLIANCE] Set Consultation Fee {"selector":"input[placeholder*=\"Consultation Fee\" i]","service":"clinic-automation","timestamp":"2026-02-17T12:20:01.032Z"}
+[32minfo[39m: [ALLIANCE] Filled remark {"selector":"textarea[placeholder*=\"remark\" i]","service":"clinic-automation","timestamp":"2026-02-17T12:20:01.098Z"}
+[32minfo[39m: [ALLIANCE] Draft mode enabled: skipping strict calculate/validation gate {"service":"clinic-automation","timestamp":"2026-02-17T12:20:01.098Z"}
+{
+  "ok": true,
+  "screenshot": "screenshots/alliance-s713-before-save.png",
+  "saved": false
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-17T12:20:03.145Z"}

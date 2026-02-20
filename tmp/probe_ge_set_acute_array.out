@@ -1,0 +1,101 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T07:13:26.368Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T07:13:26.370Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T07:13:26.370Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T07:13:26.370Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T07:13:28.395Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T07:13:28.396Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T07:13:31.012Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:13:32.224Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T07:13:34.178Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:13:34.766Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:13:36.255Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T07:13:37.768Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T07:13:39.272Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:13:40.455Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T07:13:41.012Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:13:43.781Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T07:13:45.644Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":10000,"service":"clinic-automation","timestamp":"2026-02-19T07:13:56.331Z"}
+[probe] after-set {
+  "msg": "",
+  "code": "R52",
+  "text": "Pain, not elsewhere classified",
+  "id": "88cf96b2-e915-4b47-ab23-3f4fcb00be90",
+  "arr": "[{\"label\":\"Pain, not elsewhere classified\",\"val\":\"R52\"}]",
+  "feeType": "",
+  "row": "",
+  "buttons": [
+    {
+      "id": "",
+      "v": "Show Benefit",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+      "v": "+",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnCancel",
+      "v": "Cancel",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnReloadData",
+      "v": "",
+      "vis": true
+    }
+  ]
+}
+[probe] after-fee {
+  "msg": "",
+  "code": "R52",
+  "text": "Pain, not elsewhere classified",
+  "id": "88cf96b2-e915-4b47-ab23-3f4fcb00be90",
+  "arr": "[{\"label\":\"Pain, not elsewhere classified\",\"val\":\"R52\"}]",
+  "feeType": "consultationfee",
+  "row": "",
+  "buttons": [
+    {
+      "id": "",
+      "v": "Show Benefit",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+      "v": "+",
+      "vis": true
+    },
+    {
+      "id": "",
+      "v": "Add Drug",
+      "vis": true
+    },
+    {
+      "id": "btnSearchProcedure",
+      "v": "Select",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnsaveprocedure",
+      "v": "Add Item",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btncalculateclaim",
+      "v": "Calculate Claim",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnCancel",
+      "v": "Cancel",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnReloadData",
+      "v": "",
+      "vis": true
+    }
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T07:14:24.627Z"}

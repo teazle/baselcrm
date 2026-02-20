@@ -25,6 +25,7 @@ import {
   isUnsupportedPortal,
 } from '@/lib/rpa/portals';
 import FlowHeader from './FlowHeader';
+import RunSummaryPanel from './RunSummaryPanel';
 
 type VisitRow = {
   id: string;
@@ -342,6 +343,8 @@ export default function Flow3FillForms() {
         statusLabel={flowStatus.label}
         statusTone={flowStatus.tone}
       />
+
+      <RunSummaryPanel flowPrefix="flow3" />
 
       {portalConfig && portalConfig.supported.size === 0 ? (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">

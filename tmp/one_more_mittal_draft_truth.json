@@ -1,0 +1,67 @@
+{
+  "generatedAt": "2026-02-12T09:57:37.151Z",
+  "visit": {
+    "visit_id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "patient_name": "MITTAL SACHIN KUMAR",
+    "nric": "M4539893L",
+    "visit_date": "2026-02-02",
+    "pay_type": "MHC"
+  },
+  "row": {
+    "visit_id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "patient_name": "MITTAL SACHIN KUMAR",
+    "nric": "M4539893L",
+    "visit_date": "2026-02-02",
+    "pay_type": "MHC",
+    "draft_found": "no",
+    "draft_reference": "",
+    "draft_visit_date": "",
+    "draft_total_fee": "",
+    "draft_total_claim": "",
+    "mc_days": "",
+    "portal_context": "mhc|aia",
+    "evidence_path": "/Users/vincent/Baselrpacrm/screenshots/one-more-mittal/draft/31b5a688-9104-4507-bd7a-347a9f9ce866.png"
+  },
+  "verification": {
+    "found": false,
+    "contextTried": [
+      "mhc",
+      "aia"
+    ],
+    "attempts": [
+      {
+        "context": "mhc",
+        "attemptNo": 1,
+        "opened": true,
+        "rowsSeen": 0,
+        "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+        "matched": false,
+        "match": null
+      },
+      {
+        "context": "mhc",
+        "attemptNo": 2,
+        "opened": true,
+        "rowsSeen": 0,
+        "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+        "matched": false,
+        "match": null
+      },
+      {
+        "context": "mhc",
+        "attemptNo": 3,
+        "opened": true,
+        "rowsSeen": 0,
+        "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+        "matched": false,
+        "match": null
+      },
+      {
+        "context": "aia",
+        "opened": false,
+        "rowsSeen": 0,
+        "reason": "context_switch_failed"
+      }
+    ]
+  }
+}

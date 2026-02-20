@@ -1,0 +1,196 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-18T15:20:08.018Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-18T15:20:08.025Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-18T15:20:08.025Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-18T15:20:08.025Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-18T15:20:10.195Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-18T15:20:10.200Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-18T15:20:12.931Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:20:16.510Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-18T15:20:18.489Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:20:20.562Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:20:22.076Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-18T15:20:23.598Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-18T15:20:25.107Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:20:26.181Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-18T15:20:26.764Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-14/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:20:29.544Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-14/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-18T15:20:31.466Z"}
+[32minfo[39m: [ALLIANCE] Selected member and opened claim form {"service":"clinic-automation","timestamp":"2026-02-18T15:20:42.027Z"}
+{
+  "found": true,
+  "inputs": [
+    {
+      "id": "referringProviderEntity",
+      "name": null,
+      "placeholder": "Type To Search",
+      "ariaLabel": null,
+      "cls": "mat-mdc-autocomplete-trigger mat-mdc-input-element ng-untouched ng-pristine ng-invalid mat-mdc-form-field-input-control mdc-text-field__input cdk-text-field-autofill-monitored",
+      "value": ""
+    }
+  ],
+  "controls": [
+    {
+      "tag": "MAT-FORM-FIELD",
+      "id": null,
+      "role": null,
+      "cls": "mat-mdc-form-field w-100 mat-mdc-form-field-type-mat-input mat-mdc-form-field-has-icon-suffix mat-form-field-appearance-outline mat-form-field-hide-placeholder mat-primary ng-untouched ng-pristine ng-invalid mat-form-field-animations-enabled",
+      "text": "Referring Provider Entitysearch",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "role": null,
+      "cls": "mat-mdc-text-field-wrapper mdc-text-field mdc-text-field--outlined",
+      "text": "Referring Provider Entitysearch",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "role": null,
+      "cls": "mat-mdc-form-field-flex",
+      "text": "Referring Provider Entitysearch",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "role": null,
+      "cls": "mdc-notched-outline mdc-notched-outline--upgraded",
+      "text": "Referring Provider Entity",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "role": null,
+      "cls": "mat-mdc-notch-piece mdc-notched-outline__leading",
+      "text": "",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "role": null,
+      "cls": "mat-mdc-notch-piece mdc-notched-outline__notch",
+      "text": "Referring Provider Entity",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "LABEL",
+      "id": "mat-mdc-form-field-label-13",
+      "role": null,
+      "cls": "mdc-floating-label mat-mdc-floating-label",
+      "text": "Referring Provider Entity",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "MAT-LABEL",
+      "id": null,
+      "role": null,
+      "cls": "",
+      "text": "Referring Provider Entity",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "SPAN",
+      "id": null,
+      "role": null,
+      "cls": "mat-mdc-form-field-required-marker mdc-floating-label--required",
+      "text": "",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "role": null,
+      "cls": "mat-mdc-notch-piece mdc-notched-outline__trailing",
+      "text": "",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "role": null,
+      "cls": "mat-mdc-form-field-infix",
+      "text": "",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "INPUT",
+      "id": "referringProviderEntity",
+      "role": "combobox",
+      "cls": "mat-mdc-autocomplete-trigger mat-mdc-input-element ng-untouched ng-pristine ng-invalid mat-mdc-form-field-input-control mdc-text-field__input cdk-text-field-autofill-monitored",
+      "text": "",
+      "placeholder": "Type To Search",
+      "ariaLabel": null
+    },
+    {
+      "tag": "MAT-AUTOCOMPLETE",
+      "id": null,
+      "role": null,
+      "cls": "mat-mdc-autocomplete",
+      "text": "",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "role": null,
+      "cls": "mat-mdc-form-field-icon-suffix",
+      "text": "search",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "MAT-ICON",
+      "id": null,
+      "role": "img",
+      "cls": "mat-icon notranslate material-icons mat-ligature-font mat-icon-no-color",
+      "text": "search",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "role": null,
+      "cls": "mat-mdc-form-field-subscript-wrapper mat-mdc-form-field-bottom-align",
+      "text": "",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "role": null,
+      "cls": "mat-mdc-form-field-hint-wrapper",
+      "text": "",
+      "placeholder": null,
+      "ariaLabel": null
+    },
+    {
+      "tag": "DIV",
+      "id": null,
+      "role": null,
+      "cls": "mat-mdc-form-field-hint-spacer",
+      "text": "",
+      "placeholder": null,
+      "ariaLabel": null
+    }
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-18T15:20:46.426Z"}

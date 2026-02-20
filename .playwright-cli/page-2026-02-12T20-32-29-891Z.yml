@@ -1,0 +1,128 @@
+- generic [ref=e49]:
+  - generic [ref=e51]:
+    - generic [ref=e52]:
+      - img "logo" [ref=e782] [cursor=pointer]
+      - button [ref=e56] [cursor=pointer]:
+        - img [ref=e57]: keyboard_double_arrow_left
+    - list [ref=e61]:
+      - listitem [ref=e62]:
+        - generic [ref=e63] [cursor=pointer]:
+          - img [ref=e64]:
+            - img [ref=e65]
+          - paragraph [ref=e67]: Panel Services
+          - img [ref=e68]: expand_more
+      - listitem [ref=e69]:
+        - generic [ref=e70] [cursor=pointer]:
+          - img [ref=e71]:
+            - img [ref=e72]
+          - paragraph [ref=e74]: Pre-Authorisation
+          - img [ref=e75]: expand_more
+      - listitem [ref=e76]:
+        - generic [ref=e77] [cursor=pointer]:
+          - img [ref=e78]:
+            - img [ref=e79]
+          - paragraph [ref=e81]: Finance
+          - img [ref=e82]: expand_more
+  - generic [ref=e83]:
+    - generic [ref=e86]:
+      - heading "Create Panel Claim" [level=1] [ref=e783]
+      - button [ref=e92] [cursor=pointer]:
+        - img [ref=e93]: more_vert
+    - generic [ref=e331]:
+      - button "Calculate Claim" [ref=e784] [cursor=pointer]
+      - generic [ref=e334]:
+        - generic [ref=e336]:
+          - heading "Member Details" [level=4] [ref=e785]
+          - generic [ref=e510]:
+            - button "View Benefit Plan" [ref=e786] [cursor=pointer]
+            - generic [ref=e512]:
+              - generic [ref=e515]:
+                - generic [ref=e516]: Member Name
+                - textbox "Member Name" [ref=e787]: Tan Wee Hiong Kevin
+              - generic [ref=e522]:
+                - generic [ref=e523]: Member Code
+                - textbox "Member Code" [ref=e788]: BGDC211000068-S7137124G
+              - generic [ref=e529]:
+                - generic [ref=e530]: Member UIN
+                - textbox "Member UIN" [ref=e789]: S****124G
+              - generic [ref=e536]:
+                - generic [ref=e537]: Member DOB
+                - textbox "Member DOB" [ref=e790]: 18/10/1971
+              - generic [ref=e543]:
+                - generic [ref=e544]: Member Gender
+                - textbox "Member Gender" [ref=e791]: Male
+              - generic [ref=e550]:
+                - generic [ref=e551]: Medinet Start Date
+                - textbox "Medinet Start Date" [ref=e792]: 01/09/2016
+              - generic [ref=e557]:
+                - generic [ref=e558]: Group Policy Number
+                - textbox "Group Policy Number" [ref=e793]: BGDC211000068
+              - generic [ref=e564]:
+                - generic [ref=e565]: Company Name
+                - textbox "Company Name" [ref=e794]: Straits Financial Group Pte. Ltd
+              - generic [ref=e571]:
+                - generic [ref=e572]: Coverage Start Date
+                - textbox "Coverage Start Date" [ref=e795]: 01/09/2016
+              - generic [ref=e578]:
+                - generic [ref=e579]: Coverage End Date
+                - textbox "Coverage End Date" [ref=e796]: 31/12/2026
+        - generic [ref=e584]:
+          - heading "Claim Information" [level=4] [ref=e797]
+          - generic [ref=e588]:
+            - generic [ref=e589]: Claim Code
+            - textbox "Claim Code" [ref=e798]:
+              - /placeholder: AUTO GENERATE<Claim Code>
+          - separator [ref=e594]
+          - heading "Visit Details" [level=6] [ref=e799]
+          - generic [ref=e598] [cursor=pointer]:
+            - generic [ref=e599]:
+              - text: Purpose of Visit
+              - generic [ref=e600]: "*"
+            - combobox "Purpose of Visit SP (Panel)" [ref=e800]:
+              - generic [ref=e603]:
+                - generic [ref=e605]: SP (Panel)
+                - img [ref=e608]
+          - text: "*"
+          - generic [ref=e613] [cursor=pointer]:
+            - generic [ref=e614]:
+              - text: Doctor
+              - generic [ref=e615]: "*"
+            - combobox "Doctor Yip Man Hing Kevin" [ref=e801]:
+              - generic [ref=e618]:
+                - generic [ref=e708]: Yip Man Hing Kevin
+                - img [ref=e623]
+          - generic [ref=e628]:
+            - generic [ref=e629]:
+              - text: Visit Date
+              - generic [ref=e630]: "*"
+            - textbox "Visit Date" [ref=e802]: 13/2/2026
+            - button "Open calendar" [ref=e803] [cursor=pointer]:
+              - img [ref=e636]
+        - generic [ref=e642]:
+          - heading "MC Details" [level=6] [ref=e804]
+          - generic [ref=e646]:
+            - generic [ref=e647]:
+              - text: MC Days
+              - generic [ref=e648]: "*"
+            - spinbutton "MC Days" [ref=e805]: "0"
+          - generic [ref=e652]:
+            - generic:
+              - generic:
+                - generic [ref=e655]: MC Start Date
+                - textbox "MC Start Date" [disabled] [ref=e806]
+                - generic [ref=e659]:
+                  - button "Open calendar" [disabled]:
+                    - img
+        - generic [ref=e667]:
+          - heading "Diagnoses" [level=4] [ref=e807]
+          - button "Add Diagnosis" [ref=e808] [cursor=pointer]
+          - generic [ref=e671]:
+            - img [ref=e673]: close
+            - generic [ref=e674]: Diagnosis not added
+        - generic [ref=e677]:
+          - heading "Remarks" [level=4] [ref=e809]
+          - generic [ref=e679]:
+            - generic [ref=e681]:
+              - generic [ref=e682]: External Remarks
+              - textbox "External Remarks" [ref=e810]
+            - generic [ref=e688]: 0/1000

@@ -1,0 +1,31 @@
+- generic [ref=e3]:
+  - generic [ref=e7]:
+    - img "logo" [ref=e8]
+    - generic [ref=e11]:
+      - generic [ref=e12]: Login ID
+      - textbox "Login ID" [ref=e14]
+      - img [ref=e16]: person
+    - generic [ref=e20]:
+      - generic [ref=e21]: Password
+      - textbox "Password" [ref=e23]
+      - img [ref=e25] [cursor=pointer]: visibility_off
+    - generic [ref=e27]:
+      - generic [ref=e29]:
+        - generic [ref=e30] [cursor=pointer]:
+          - checkbox "Remember Me" [ref=e32]
+          - generic:
+            - img
+        - generic [ref=e34] [cursor=pointer]: Remember Me
+      - link "Forgot Password" [ref=e36] [cursor=pointer]:
+        - /url: /forgot-password
+    - button "Login" [ref=e37] [cursor=pointer]
+  - generic [ref=e40]:
+    - generic [ref=e41]:
+      - link "Privacy Policy" [ref=e42] [cursor=pointer]:
+        - /url: https://www.alliancemedinet.com/privacy-statement/
+      - link "Terms And Conditions" [ref=e43] [cursor=pointer]:
+        - /url: https://www.alliancemedinet.com/privacy-statement/
+    - generic [ref=e44]:
+      - generic [ref=e45]: Copyright © 2026
+      - generic [ref=e46]: Alliance MediNet Pte Ltd.
+      - generic [ref=e47]: All Rights Reserved.

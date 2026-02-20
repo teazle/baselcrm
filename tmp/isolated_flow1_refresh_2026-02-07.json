@@ -1,0 +1,274 @@
+{
+  "targetDate": "2026-02-07",
+  "extractedCount": 28,
+  "limRows": [
+    {
+      "nric": null,
+      "patientName": "LIM CHUI KIOW",
+      "patientNameClean": "LIM CHUI KIOW",
+      "qno": "129728",
+      "pcno": "75010",
+      "status": null,
+      "fee": "0.00",
+      "payType": "AVIVA",
+      "sex": "F",
+      "spCode": "MT",
+      "timeIn": "09:00",
+      "timeOut": "09:45",
+      "invNo": "129728",
+      "source": "reports_queue_list_excel_extraction",
+      "rawRow": [
+        ".0",
+        "75010",
+        "LIM CHUI KIOW",
+        "F",
+        "MT",
+        "09:00",
+        "09:45",
+        "129728",
+        "$0.00",
+        "$374.09",
+        "AVIVA",
+        "$343.20",
+        "$30.89",
+        "$0.00"
+      ],
+      "rawRowIndex": 5
+    },
+    {
+      "nric": null,
+      "patientName": "LIM CHUI KIOW",
+      "patientNameClean": "LIM CHUI KIOW",
+      "qno": "129729",
+      "pcno": "75010",
+      "status": null,
+      "fee": "130.80",
+      "payType": null,
+      "sex": "F",
+      "spCode": "MT",
+      "timeIn": "09:42",
+      "timeOut": "09:46",
+      "invNo": "129729",
+      "source": "reports_queue_list_excel_extraction",
+      "rawRow": [
+        ".0",
+        "75010",
+        "LIM CHUI KIOW",
+        "F",
+        "MT",
+        "09:42",
+        "09:46",
+        "129729",
+        "$130.80",
+        "CREDIT CARD",
+        "$0.00",
+        "$120.00",
+        "$10.80",
+        "$0.00"
+      ],
+      "rawRowIndex": 16
+    }
+  ],
+  "sampleRows": [
+    {
+      "rawRowIndex": 4,
+      "invNo": "129732",
+      "patientName": "PANG YONG WEI REGINA",
+      "nric": null,
+      "payType": null,
+      "fee": "283.40",
+      "pcno": "77993",
+      "spCode": "KT"
+    },
+    {
+      "rawRowIndex": 5,
+      "invNo": "129728",
+      "patientName": "LIM CHUI KIOW",
+      "nric": null,
+      "payType": "AVIVA",
+      "fee": "0.00",
+      "pcno": "75010",
+      "spCode": "MT"
+    },
+    {
+      "rawRowIndex": 6,
+      "invNo": "129726",
+      "patientName": "LEE ROSE MAY BELTRAN",
+      "nric": null,
+      "payType": null,
+      "fee": "1360.30",
+      "pcno": "78188",
+      "spCode": "KT"
+    },
+    {
+      "rawRowIndex": 7,
+      "invNo": "129727",
+      "patientName": "TOH GUANG JUN GABRIEL",
+      "nric": null,
+      "payType": null,
+      "fee": "2008.85",
+      "pcno": "69924",
+      "spCode": "PAM"
+    },
+    {
+      "rawRowIndex": 8,
+      "invNo": "129731",
+      "patientName": "ZHANG FENGQUAN",
+      "nric": null,
+      "payType": "FULLERT",
+      "fee": "0.00",
+      "pcno": "78089",
+      "spCode": "KT"
+    },
+    {
+      "rawRowIndex": 9,
+      "invNo": "129730",
+      "patientName": "AARUSHI SANGANERIA",
+      "nric": null,
+      "payType": null,
+      "fee": "1469.30",
+      "pcno": "78189",
+      "spCode": "PAM"
+    },
+    {
+      "rawRowIndex": 10,
+      "invNo": "129734",
+      "patientName": "LIM EH HONG DERRICK",
+      "nric": null,
+      "payType": null,
+      "fee": "228.90",
+      "pcno": "65371",
+      "spCode": "MT"
+    },
+    {
+      "rawRowIndex": 11,
+      "invNo": "129733",
+      "patientName": "KIM MINWOO",
+      "nric": null,
+      "payType": null,
+      "fee": "305.20",
+      "pcno": "78190",
+      "spCode": "PAM"
+    },
+    {
+      "rawRowIndex": 12,
+      "invNo": "129735",
+      "patientName": "ZHU QIFEI",
+      "nric": null,
+      "payType": "ALL",
+      "fee": "0.00",
+      "pcno": "77797",
+      "spCode": "KT"
+    },
+    {
+      "rawRowIndex": 13,
+      "invNo": "129737",
+      "patientName": "SAURABH CHANDAN",
+      "nric": null,
+      "payType": "ALLIANZ",
+      "fee": "0.00",
+      "pcno": "45695",
+      "spCode": "PAM"
+    },
+    {
+      "rawRowIndex": 14,
+      "invNo": "129736",
+      "patientName": "CHENG KAI YUAN ALOYSIUS",
+      "nric": null,
+      "payType": null,
+      "fee": "1360.30",
+      "pcno": "78191",
+      "spCode": "KT"
+    },
+    {
+      "rawRowIndex": 15,
+      "invNo": "129738",
+      "patientName": "GOH ZHUO YING JUSTIN",
+      "nric": null,
+      "payType": null,
+      "fee": "283.40",
+      "pcno": "45080",
+      "spCode": "MT"
+    },
+    {
+      "rawRowIndex": 16,
+      "invNo": "129729",
+      "patientName": "LIM CHUI KIOW",
+      "nric": null,
+      "payType": null,
+      "fee": "130.80",
+      "pcno": "75010",
+      "spCode": "MT"
+    },
+    {
+      "rawRowIndex": 17,
+      "invNo": "129744",
+      "patientName": "CHENG, LIN-CHUCH",
+      "nric": null,
+      "payType": null,
+      "fee": "535.80",
+      "pcno": "75983",
+      "spCode": "PAM"
+    },
+    {
+      "rawRowIndex": 18,
+      "invNo": "129739",
+      "patientName": "KWEK MIN HUI",
+      "nric": null,
+      "payType": null,
+      "fee": "689.95",
+      "pcno": "78192",
+      "spCode": "PAM"
+    },
+    {
+      "rawRowIndex": 19,
+      "invNo": "129740",
+      "patientName": "XIAO YINGJIAO",
+      "nric": null,
+      "payType": null,
+      "fee": "163.50",
+      "pcno": "78139",
+      "spCode": "KT"
+    },
+    {
+      "rawRowIndex": 20,
+      "invNo": "129743",
+      "patientName": "LUCAS PROKOP",
+      "nric": null,
+      "payType": null,
+      "fee": "338.95",
+      "pcno": "77618",
+      "spCode": "PAM"
+    },
+    {
+      "rawRowIndex": 21,
+      "invNo": "129742",
+      "patientName": "SORIANO SHIR MAE ADIAN",
+      "nric": null,
+      "payType": null,
+      "fee": "228.90",
+      "pcno": "78096",
+      "spCode": "KT"
+    },
+    {
+      "rawRowIndex": 22,
+      "invNo": "129741",
+      "patientName": "KIARA SINGH",
+      "nric": null,
+      "payType": null,
+      "fee": "480.65",
+      "pcno": "77546",
+      "spCode": "PAM"
+    },
+    {
+      "rawRowIndex": 23,
+      "invNo": "129745",
+      "patientName": "ONG ENG CHUN",
+      "nric": null,
+      "payType": null,
+      "fee": "392.40",
+      "pcno": "69978",
+      "spCode": "PAM"
+    }
+  ]
+}

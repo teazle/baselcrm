@@ -1,0 +1,497 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-12T10:46:32.347Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-12T10:46:32.355Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-12T10:46:32.356Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-12T10:46:32.356Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-12T10:46:34.783Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-12T10:46:34.794Z"}
+[32minfo[39m: [MHC 01] Login start {"attempt":1,"maxAttempts":3,"service":"clinic-automation","timestamp":"2026-02-12T10:46:35.086Z"}
+[32minfo[39m: Logging into MHC Asia... {"service":"clinic-automation","timestamp":"2026-02-12T10:46:35.087Z"}
+[32minfo[39m: [MHC 02] Country selected (best-effort) {"label":"MHC SINGAPORE","service":"clinic-automation","timestamp":"2026-02-12T10:46:37.005Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-12T10:46:37.087Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-12T10:46:37.105Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-12T10:46:38.022Z"}
+[32minfo[39m: Successfully logged into MHC Asia {"service":"clinic-automation","timestamp":"2026-02-12T10:46:39.298Z"}
+[32minfo[39m: [MHC 03] Login ok {"service":"clinic-automation","timestamp":"2026-02-12T10:46:39.298Z"}
+[32minfo[39m: [MHC 04] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-12T10:46:39.299Z"}
+{
+  "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+  "title": "Employee Visit Draft List",
+  "keyVal": "patientNric",
+  "inputVal": "S8635560D",
+  "tables": [
+    {
+      "ti": 0,
+      "rowCount": 2,
+      "rows": [
+        {
+          "ri": 1,
+          "cells": [
+            "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out",
+            "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic",
+            "Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out"
+          ],
+          "links": [
+            {
+              "text": "Switch System ||",
+              "href": "#"
+            },
+            {
+              "text": "AIA Clinic",
+              "href": "SwitchSystem.ec?url=https://www.aiaclinic.com"
+            },
+            {
+              "text": "SinglifePcpcare",
+              "href": "SwitchSystem.ec?url=https://www.pcpcare.com"
+            },
+            {
+              "text": "Singlife Global 8",
+              "href": "SwitchSystem.ec?url=https://www.myglobalbenefit.com"
+            },
+            {
+              "text": "AXA Clinicare (HSBC)",
+              "href": "SwitchSystem.ec?url=https://www.clcare.com"
+            },
+            {
+              "text": "Better Health",
+              "href": "SwitchSystem.ec?url=https://betterhealth.mhcasia.net"
+            },
+            {
+              "text": "FWD Travel Insurance",
+              "href": "SwitchSystem.ec?url=https://www.fwdclinic.com"
+            },
+            {
+              "text": "Great Eastern",
+              "href": "SwitchSystem.ec?url=https://ge.mhcasia.net/ge"
+            },
+            {
+              "text": "INCOME iMedicare",
+              "href": "SwitchSystem.ec?url=https://www.mhc-imedicare.com"
+            },
+            {
+              "text": "PHI System",
+              "href": "SwitchSystem.ec?url=https://phi.mhcasia.net"
+            },
+            {
+              "text": "QBE Primary Care",
+              "href": "SwitchSystem.ec?url=https://www.qbeprimarycare.com"
+            },
+            {
+              "text": "Log Out",
+              "href": "Logout.ec?OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            }
+          ]
+        },
+        {
+          "ri": 2,
+          "cells": [
+            "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic",
+            "Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out"
+          ],
+          "links": [
+            {
+              "text": "Switch System ||",
+              "href": "#"
+            },
+            {
+              "text": "AIA Clinic",
+              "href": "SwitchSystem.ec?url=https://www.aiaclinic.com"
+            },
+            {
+              "text": "SinglifePcpcare",
+              "href": "SwitchSystem.ec?url=https://www.pcpcare.com"
+            },
+            {
+              "text": "Singlife Global 8",
+              "href": "SwitchSystem.ec?url=https://www.myglobalbenefit.com"
+            },
+            {
+              "text": "AXA Clinicare (HSBC)",
+              "href": "SwitchSystem.ec?url=https://www.clcare.com"
+            },
+            {
+              "text": "Better Health",
+              "href": "SwitchSystem.ec?url=https://betterhealth.mhcasia.net"
+            },
+            {
+              "text": "FWD Travel Insurance",
+              "href": "SwitchSystem.ec?url=https://www.fwdclinic.com"
+            },
+            {
+              "text": "Great Eastern",
+              "href": "SwitchSystem.ec?url=https://ge.mhcasia.net/ge"
+            },
+            {
+              "text": "INCOME iMedicare",
+              "href": "SwitchSystem.ec?url=https://www.mhc-imedicare.com"
+            },
+            {
+              "text": "PHI System",
+              "href": "SwitchSystem.ec?url=https://phi.mhcasia.net"
+            },
+            {
+              "text": "QBE Primary Care",
+              "href": "SwitchSystem.ec?url=https://www.qbeprimarycare.com"
+            },
+            {
+              "text": "Log Out",
+              "href": "Logout.ec?OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 1,
+      "rowCount": 1,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic",
+            "Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out"
+          ],
+          "links": [
+            {
+              "text": "Switch System ||",
+              "href": "#"
+            },
+            {
+              "text": "AIA Clinic",
+              "href": "SwitchSystem.ec?url=https://www.aiaclinic.com"
+            },
+            {
+              "text": "SinglifePcpcare",
+              "href": "SwitchSystem.ec?url=https://www.pcpcare.com"
+            },
+            {
+              "text": "Singlife Global 8",
+              "href": "SwitchSystem.ec?url=https://www.myglobalbenefit.com"
+            },
+            {
+              "text": "AXA Clinicare (HSBC)",
+              "href": "SwitchSystem.ec?url=https://www.clcare.com"
+            },
+            {
+              "text": "Better Health",
+              "href": "SwitchSystem.ec?url=https://betterhealth.mhcasia.net"
+            },
+            {
+              "text": "FWD Travel Insurance",
+              "href": "SwitchSystem.ec?url=https://www.fwdclinic.com"
+            },
+            {
+              "text": "Great Eastern",
+              "href": "SwitchSystem.ec?url=https://ge.mhcasia.net/ge"
+            },
+            {
+              "text": "INCOME iMedicare",
+              "href": "SwitchSystem.ec?url=https://www.mhc-imedicare.com"
+            },
+            {
+              "text": "PHI System",
+              "href": "SwitchSystem.ec?url=https://phi.mhcasia.net"
+            },
+            {
+              "text": "QBE Primary Care",
+              "href": "SwitchSystem.ec?url=https://www.qbeprimarycare.com"
+            },
+            {
+              "text": "Log Out",
+              "href": "Logout.ec?OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 2,
+      "rowCount": 8,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "Employee Visit Draft List - Click To Edit"
+          ],
+          "links": []
+        },
+        {
+          "ri": 1,
+          "cells": [
+            "Visit No NRIC that contains starts with equals to",
+            "Visit No NRIC",
+            "that",
+            "contains starts with equals to",
+            "",
+            ""
+          ],
+          "links": []
+        },
+        {
+          "ri": 2,
+          "cells": [
+            "Visit No NRIC",
+            "that",
+            "contains starts with equals to",
+            "",
+            ""
+          ],
+          "links": []
+        },
+        {
+          "ri": 3,
+          "cells": [
+            "1 - 1 of 1",
+            "",
+            "1 - 1 of 1",
+            ""
+          ],
+          "links": []
+        },
+        {
+          "ri": 4,
+          "cells": [
+            "",
+            "1 - 1 of 1",
+            ""
+          ],
+          "links": []
+        },
+        {
+          "ri": 5,
+          "cells": [
+            "Visit Date Visit No Type Patient NRIC Patient Name Total Fee Total Claim MC Days Remarks 02/02/2026 EV16089253 Employee Visit S8635560D CHEW SIEW LING $87.20 $82.20 0.0",
+            "Visit Date",
+            "Visit No",
+            "Type",
+            "Patient NRIC",
+            "Patient Name",
+            "Total Fee",
+            "Total Claim",
+            "MC Days",
+            "Remarks",
+            "02/02/2026",
+            "EV16089253",
+            "Employee Visit",
+            "S8635560D",
+            "CHEW SIEW LING",
+            "$87.20",
+            "$82.20",
+            "0.0",
+            ""
+          ],
+          "links": [
+            {
+              "text": "02/02/2026",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "EV16089253",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "Employee Visit",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "S8635560D",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "CHEW SIEW LING",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "$87.20",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "$82.20",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "0.0",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            }
+          ]
+        },
+        {
+          "ri": 6,
+          "cells": [
+            "Visit Date",
+            "Visit No",
+            "Type",
+            "Patient NRIC",
+            "Patient Name",
+            "Total Fee",
+            "Total Claim",
+            "MC Days",
+            "Remarks"
+          ],
+          "links": []
+        },
+        {
+          "ri": 7,
+          "cells": [
+            "02/02/2026",
+            "EV16089253",
+            "Employee Visit",
+            "S8635560D",
+            "CHEW SIEW LING",
+            "$87.20",
+            "$82.20",
+            "0.0",
+            ""
+          ],
+          "links": [
+            {
+              "text": "02/02/2026",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "EV16089253",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "Employee Visit",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "S8635560D",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "CHEW SIEW LING",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "$87.20",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "$82.20",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "0.0",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 3,
+      "rowCount": 1,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "Visit No NRIC",
+            "that",
+            "contains starts with equals to",
+            "",
+            ""
+          ],
+          "links": []
+        }
+      ]
+    },
+    {
+      "ti": 4,
+      "rowCount": 1,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "",
+            "1 - 1 of 1",
+            ""
+          ],
+          "links": []
+        }
+      ]
+    },
+    {
+      "ti": 5,
+      "rowCount": 2,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "Visit Date",
+            "Visit No",
+            "Type",
+            "Patient NRIC",
+            "Patient Name",
+            "Total Fee",
+            "Total Claim",
+            "MC Days",
+            "Remarks"
+          ],
+          "links": []
+        },
+        {
+          "ri": 1,
+          "cells": [
+            "02/02/2026",
+            "EV16089253",
+            "Employee Visit",
+            "S8635560D",
+            "CHEW SIEW LING",
+            "$87.20",
+            "$82.20",
+            "0.0",
+            ""
+          ],
+          "links": [
+            {
+              "text": "02/02/2026",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "EV16089253",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "Employee Visit",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "S8635560D",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "CHEW SIEW LING",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "$87.20",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "$82.20",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "0.0",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            },
+            {
+              "text": "",
+              "href": "ClinicEmpVisitEdit.ec?id=19c5132d7770&isDraft=NORMAL&OWASP_CSRFTOKEN=RQLE-X9L2-O46X-5B78-L80G-4C1D-80R9-PMT6"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-12T10:46:42.652Z"}

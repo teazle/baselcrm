@@ -1,0 +1,366 @@
+- table [ref=e4]:
+  - rowgroup [ref=e5]:
+    - row "Welcome [ASP1120-SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD] Sign Out Change Password" [ref=e6]:
+      - cell [ref=e7]
+      - cell "Welcome [ASP1120-SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD] Sign Out Change Password" [ref=e8]:
+        - table [ref=e9]:
+          - rowgroup [ref=e10]:
+            - row "Welcome [ASP1120-SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD] Sign Out Change Password" [ref=e11]:
+              - cell "Welcome [ASP1120-SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD] Sign Out Change Password" [ref=e12]:
+                - generic [ref=e15]:
+                  - text: Welcome [ASP1120-SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD]
+                  - link "Sign Out" [ref=e16] [cursor=pointer]:
+                    - /url: javascript:__doPostBack('ctl00$uc_LoggedInUser$lnkSignOut','')
+                  - link "Change Password" [ref=e17] [cursor=pointer]:
+                    - /url: javascript:__doPostBack('ctl00$uc_LoggedInUser$btnChangePassword','')
+      - cell [ref=e18]
+    - 'row "HOME CLAIM MANAGEMENT CLAIMS Add Claim List Claims REPORTS Payment Advice DOWNLOADS PUAF for SupremeCare Alliance Doctor LOG Request Form Alliance Healthcare Programme Guide - SP (as of 31 Jan 2026) Great Eastern Member LOG Request Form PROGRAMME TEMPLATE GEL Card Template SP clinic - SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD Visit Date 13-02-2026 MC Start Date MC Days --Select-- Patient Name Dylan Chern See Woo Show Benefit NRIC/FIN Txxxx699I Company Pacific Refreshments Pte Ltd Type Dependent Referring GP Clinic Has Referring GP Clinic Yes No Referring GP Clinic MC/Visit Reasons & Diagnosis MC/Visit Reasons --Select-- + Acute Diagnosis Code Description Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4 Chronic Diagnosis Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4 Fee and Charges: [Scheme - Restricted Scheme ] Select Fee Type --Select-- Consult Fee Claim Remarks Cancel" [ref=e19]':
+      - cell [ref=e20]
+      - 'cell "HOME CLAIM MANAGEMENT CLAIMS Add Claim List Claims REPORTS Payment Advice DOWNLOADS PUAF for SupremeCare Alliance Doctor LOG Request Form Alliance Healthcare Programme Guide - SP (as of 31 Jan 2026) Great Eastern Member LOG Request Form PROGRAMME TEMPLATE GEL Card Template SP clinic - SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD Visit Date 13-02-2026 MC Start Date MC Days --Select-- Patient Name Dylan Chern See Woo Show Benefit NRIC/FIN Txxxx699I Company Pacific Refreshments Pte Ltd Type Dependent Referring GP Clinic Has Referring GP Clinic Yes No Referring GP Clinic MC/Visit Reasons & Diagnosis MC/Visit Reasons --Select-- + Acute Diagnosis Code Description Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4 Chronic Diagnosis Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4 Fee and Charges: [Scheme - Restricted Scheme ] Select Fee Type --Select-- Consult Fee Claim Remarks Cancel" [ref=e21]':
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "HOME" [ref=e26] [cursor=pointer]:
+              - /url: javascript:__doPostBack('ctl00$TopMenuContent$uc_TopMenu$lnkHome','')
+          - listitem
+          - listitem
+          - listitem [ref=e27]:
+            - link "CLAIM MANAGEMENT" [ref=e28] [cursor=pointer]:
+              - /url: javascript:__doPostBack('ctl00$TopMenuContent$uc_TopMenu$lnkCLAIMMANAGEMENT','')
+              - text: CLAIM
+              - text: MANAGEMENT
+        - table [ref=e29]:
+          - rowgroup [ref=e30]:
+            - 'row "CLAIMS Add Claim List Claims REPORTS Payment Advice DOWNLOADS PUAF for SupremeCare Alliance Doctor LOG Request Form Alliance Healthcare Programme Guide - SP (as of 31 Jan 2026) Great Eastern Member LOG Request Form PROGRAMME TEMPLATE GEL Card Template SP clinic - SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD Visit Date 13-02-2026 MC Start Date MC Days --Select-- Patient Name Dylan Chern See Woo Show Benefit NRIC/FIN Txxxx699I Company Pacific Refreshments Pte Ltd Type Dependent Referring GP Clinic Has Referring GP Clinic Yes No Referring GP Clinic MC/Visit Reasons & Diagnosis MC/Visit Reasons --Select-- + Acute Diagnosis Code Description Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4 Chronic Diagnosis Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4 Fee and Charges: [Scheme - Restricted Scheme ] Select Fee Type --Select-- Consult Fee Claim Remarks Cancel" [ref=e31]':
+              - cell "CLAIMS Add Claim List Claims REPORTS Payment Advice DOWNLOADS PUAF for SupremeCare Alliance Doctor LOG Request Form Alliance Healthcare Programme Guide - SP (as of 31 Jan 2026) Great Eastern Member LOG Request Form PROGRAMME TEMPLATE GEL Card Template" [ref=e32]:
+                - generic [ref=e33]:
+                  - table [ref=e35]:
+                    - rowgroup [ref=e36]:
+                      - row "CLAIMS" [ref=e37]:
+                        - cell "CLAIMS" [ref=e38]
+                        - cell [ref=e39]:
+                          - link [ref=e40] [cursor=pointer]:
+                            - /url: Home.aspx?v=claimmanagement
+                            - img [ref=e41]
+                  - list [ref=e43]:
+                    - listitem [ref=e44]:
+                      - link "Add Claim" [ref=e45] [cursor=pointer]:
+                        - /url: javascript:__doPostBack('ctl00$LeftMenuContent$uc_LeftMenu1$lnkAddClaim','')
+                    - listitem [ref=e46]:
+                      - link "List Claims" [ref=e47] [cursor=pointer]:
+                        - /url: javascript:__doPostBack('ctl00$LeftMenuContent$uc_LeftMenu1$lnkListClaim','')
+                    - listitem [ref=e48]
+                    - listitem
+                - generic [ref=e51]:
+                  - generic [ref=e52]: REPORTS
+                  - list [ref=e54]:
+                    - listitem [ref=e55]:
+                      - link "Payment Advice" [ref=e56] [cursor=pointer]:
+                        - /url: javascript:__doPostBack('ctl00$LeftMenuContent$uc_LeftMenu1$lnkPaymentAdvice','')
+                - generic [ref=e58]:
+                  - generic [ref=e59]: DOWNLOADS
+                  - list [ref=e61]:
+                    - listitem [ref=e62]:
+                      - link "PUAF for SupremeCare" [ref=e63] [cursor=pointer]:
+                        - /url: ../../DownLoadFiles/GEL SupremeCare  PUAF.pdf
+                    - listitem [ref=e64]:
+                      - link "Alliance Doctor LOG Request Form" [ref=e65] [cursor=pointer]:
+                        - /url: /DownLoadFiles/Alliance%20Doctor%20LOG%20Request%20Form.pdf
+                    - listitem [ref=e66]:
+                      - link "Alliance Healthcare Programme Guide - SP (as of 31 Jan 2026)" [ref=e67] [cursor=pointer]:
+                        - /url: /DownLoadFiles/Annex%201%20%20Alliance%20Healthcare%20Programme%20Guide%20%20SP%20(as%20of%2030%20January%202026).pdf
+                    - listitem [ref=e68]:
+                      - link "Great Eastern Member LOG Request Form" [ref=e69] [cursor=pointer]:
+                        - /url: /DownLoadFiles/Great%20Eastern%20Member%20LOG%20Request%20Form.pdf
+                - generic [ref=e71]:
+                  - generic [ref=e72]: PROGRAMME TEMPLATE
+                  - list [ref=e74]:
+                    - listitem [ref=e75]:
+                      - link "GEL Card Template" [ref=e76] [cursor=pointer]:
+                        - /url: ../../DownLoadFiles/GEL Supremecare Card Template.pdf
+              - 'cell "SP clinic - SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD Visit Date 13-02-2026 MC Start Date MC Days --Select-- Patient Name Dylan Chern See Woo Show Benefit NRIC/FIN Txxxx699I Company Pacific Refreshments Pte Ltd Type Dependent Referring GP Clinic Has Referring GP Clinic Yes No Referring GP Clinic MC/Visit Reasons & Diagnosis MC/Visit Reasons --Select-- + Acute Diagnosis Code Description Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4 Chronic Diagnosis Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4 Fee and Charges: [Scheme - Restricted Scheme ] Select Fee Type --Select-- Consult Fee Claim Remarks Cancel" [ref=e77]':
+                - table [ref=e79]:
+                  - rowgroup [ref=e80]:
+                    - row "SP clinic - SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD" [ref=e81]:
+                      - cell "SP clinic - SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD" [ref=e82]
+                      - cell [ref=e83]
+                - table [ref=e85]:
+                  - rowgroup [ref=e86]:
+                    - row "Visit Date 13-02-2026 MC Start Date MC Days --Select-- Patient Name Dylan Chern See Woo Show Benefit NRIC/FIN Txxxx699I Company Pacific Refreshments Pte Ltd Type Dependent" [ref=e87]:
+                      - cell "Visit Date 13-02-2026 MC Start Date MC Days --Select--" [ref=e88]:
+                        - table [ref=e89]:
+                          - rowgroup [ref=e90]:
+                            - row "Visit Date 13-02-2026" [ref=e91]:
+                              - cell "Visit Date" [ref=e92]
+                              - cell "13-02-2026" [ref=e93]:
+                                - textbox [ref=e94]: 13-02-2026
+                            - row "MC Start Date" [ref=e95]:
+                              - cell "MC Start Date" [ref=e96]
+                              - cell [ref=e97]:
+                                - textbox [ref=e98]
+                            - row "MC Days --Select--" [ref=e99]:
+                              - cell "MC Days" [ref=e100]
+                              - cell "--Select--" [ref=e101]:
+                                - combobox [ref=e102]:
+                                  - option "--Select--" [selected]
+                                  - option "0"
+                                  - option "0.5"
+                                  - option "1"
+                                  - option "1.5"
+                                  - option "2"
+                                  - option "2.5"
+                                  - option "3"
+                                  - option "3.5"
+                                  - option "4"
+                                  - option "4.5"
+                                  - option "5"
+                                  - option "5.5"
+                                  - option "6"
+                                  - option "6.5"
+                                  - option "7"
+                                - textbox [ref=e103]
+                      - cell "Patient Name Dylan Chern See Woo Show Benefit NRIC/FIN Txxxx699I Company Pacific Refreshments Pte Ltd Type Dependent" [ref=e104]:
+                        - table [ref=e105]:
+                          - rowgroup [ref=e106]:
+                            - row "Patient Name Dylan Chern See Woo Show Benefit" [ref=e107]:
+                              - cell "Patient Name" [ref=e108]
+                              - cell "Dylan Chern See Woo Show Benefit" [ref=e109]:
+                                - generic:
+                                  - generic [ref=e110]: Dylan Chern See Woo
+                                  - link "Show Benefit" [ref=e112] [cursor=pointer]:
+                                    - /url: /Views/CompanyHR/MemberBenefit.aspx?comeFrom=provider&mcmapid=493259a4-b775-42c9-b2be-b62ac9c4e739&option=panel&keepThis=true&TB_iframe=true&height=400&width=800
+                                    - button "Show Benefit" [ref=e113]
+                            - row "NRIC/FIN Txxxx699I" [ref=e114]:
+                              - cell "NRIC/FIN" [ref=e115]
+                              - cell "Txxxx699I" [ref=e116]
+                            - row "Company Pacific Refreshments Pte Ltd" [ref=e117]:
+                              - cell "Company" [ref=e118]
+                              - cell "Pacific Refreshments Pte Ltd" [ref=e119]
+                            - row "Type Dependent" [ref=e120]:
+                              - cell "Type" [ref=e121]
+                              - cell "Dependent" [ref=e122]
+                    - row "Referring GP Clinic Has Referring GP Clinic Yes No Referring GP Clinic" [ref=e123]:
+                      - cell "Referring GP Clinic Has Referring GP Clinic Yes No Referring GP Clinic" [ref=e124]:
+                        - table [ref=e125]:
+                          - rowgroup [ref=e126]:
+                            - row "Referring GP Clinic" [ref=e127]:
+                              - cell "Referring GP Clinic" [ref=e128]
+                            - row "Has Referring GP Clinic Yes No" [ref=e129]:
+                              - cell "Has Referring GP Clinic" [ref=e130]
+                              - cell "Yes No" [ref=e131]:
+                                - text: "Yes"
+                                - checkbox [checked] [disabled] [ref=e133]
+                                - text: "No"
+                                - checkbox [disabled] [ref=e135]
+                            - row "Referring GP Clinic" [ref=e136]:
+                              - cell "Referring GP Clinic" [ref=e137]
+                              - cell [ref=e138]:
+                                - textbox [ref=e139]
+                    - row "MC/Visit Reasons & Diagnosis MC/Visit Reasons --Select-- + Acute Diagnosis Code Description Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4 Chronic Diagnosis Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4" [ref=e140]:
+                      - cell "MC/Visit Reasons & Diagnosis MC/Visit Reasons --Select-- + Acute Diagnosis Code Description Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4 Chronic Diagnosis Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4" [ref=e141]:
+                        - table [ref=e142]:
+                          - rowgroup [ref=e143]:
+                            - row "MC/Visit Reasons & Diagnosis" [ref=e144]:
+                              - cell "MC/Visit Reasons & Diagnosis" [ref=e145]
+                            - row "MC/Visit Reasons --Select-- +" [ref=e146]:
+                              - cell "MC/Visit Reasons --Select-- +" [ref=e147]:
+                                - table [ref=e148]:
+                                  - rowgroup [ref=e149]:
+                                    - row "MC/Visit Reasons --Select-- +" [ref=e150]:
+                                      - cell "MC/Visit Reasons" [ref=e151]
+                                      - cell "--Select-- +" [ref=e152]:
+                                        - combobox [ref=e153]:
+                                          - option "--Select--" [selected]
+                                          - option "Abdominal pain"
+                                          - option "Abnormal ECG"
+                                          - option "Abnormal finding of blood chemistry, unspecified"
+                                          - option "Abnormal vaginal bleeding"
+                                          - option "Ache - Bodily"
+                                          - option "Anxiety"
+                                          - option "Back Lump"
+                                          - option "Backache"
+                                          - option "Bleeding PR"
+                                          - option "Blurring of vision"
+                                          - option "Breast Lumps"
+                                          - option "Breathlessness"
+                                          - option "Cardiac murmur"
+                                          - option "Cervicitis / Recurrent Vaginal Discharge"
+                                          - option "Change in bowel habit"
+                                          - option "Chest Pain"
+                                          - option "Chicken pox"
+                                          - option "Chronic cough"
+                                          - option "Conjunctivities"
+                                          - option "Conjunctivitis"
+                                          - option "Cough"
+                                          - option "Cramps"
+                                          - option "Diarrhoea - Severe"
+                                          - option "Dysmenorrhea"
+                                          - option "Dyspepsia"
+                                          - option "Dysuria"
+                                          - option "Eyelid twitching likely secondary to corneal irritation"
+                                          - option "Faints"
+                                          - option "Fatigue"
+                                          - option "Fever"
+                                          - option "Fits"
+                                          - option "Flu"
+                                          - option "Follow up of colon polyp"
+                                          - option "Gastric"
+                                          - option "Giddiness"
+                                          - option "Haematuria"
+                                          - option "Hametemesis"
+                                          - option "Headache"
+                                          - option "Hearing - Impaired"
+                                          - option "Hemoptysis"
+                                          - option "HFMD"
+                                          - option "Hypercalcemia"
+                                          - option "Incontinence"
+                                          - option "Injury"
+                                          - option "Itchiness"
+                                          - option "Jaundice"
+                                          - option "Joint pains"
+                                          - option "Joints swellings"
+                                          - option "Leg pain"
+                                          - option "Loss of consciousness"
+                                          - option "Lumps unspecified"
+                                          - option "Movement - Impaired"
+                                          - option "Neck lumps"
+                                          - option "Numbness"
+                                          - option "Ocular Hypertension"
+                                          - option "Pain - Severe"
+                                          - option "Pain-unspecified"
+                                          - option "Palpitations"
+                                          - option "Paralysis"
+                                          - option "Post Surgery"
+                                          - option "Raised Creatinine"
+                                          - option "Rash"
+                                          - option "Reflux"
+                                          - option "Sore Throat"
+                                          - option "Speech - Impaired"
+                                          - option "Stool Occult Blood - Positive"
+                                          - option "Swollen legs"
+                                          - option "Thyroid nodule"
+                                          - option "Traumatic Punctate Epithelial Erosions, left eye"
+                                          - option "Uveitis"
+                                          - option "Vision - Impaired"
+                                          - option "Vitreous floaters"
+                                          - option "Vomiting - Severe"
+                                          - option "Weakness"
+                                          - option "Wheeze"
+                                          - option "Wounds"
+                                          - option "X-ray abnormality"
+                                        - textbox [ref=e154]
+                                        - link "+" [ref=e155] [cursor=pointer]:
+                                          - /url: /Views/Provider/SearchMCReasons.aspx?callback=reloadPageOnItemSelected&keepThis=true&TB_iframe=true&height=400&width=500
+                                          - button "+" [ref=e156]
+                            - row "Acute Diagnosis Code Description Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4" [ref=e157]:
+                              - cell "Acute Diagnosis Code Description Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4" [ref=e158]:
+                                - table [ref=e159]:
+                                  - rowgroup [ref=e160]:
+                                    - row "Acute Diagnosis" [ref=e161]:
+                                      - cell "Acute Diagnosis" [ref=e162]
+                                    - row "Code Description" [ref=e163]:
+                                      - cell [ref=e164]
+                                      - cell "Code Description" [ref=e165]
+                                    - row "Diagnosis 1 ?" [ref=e166]:
+                                      - cell "Diagnosis 1" [ref=e167]
+                                      - cell "?" [ref=e168]:
+                                        - textbox [ref=e169]
+                                        - textbox [ref=e170]
+                                        - generic [ref=e171]: "?"
+                                        - link "Primary Diagnosis":
+                                          - /url: /Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&TB_iframe=true&height=400&width=700
+                                    - row "Diagnosis 2" [ref=e172]:
+                                      - cell "Diagnosis 2" [ref=e173]
+                                      - cell [ref=e174]:
+                                        - textbox [ref=e175]
+                                        - textbox [ref=e176]
+                                        - link "Secondary Diagnosis":
+                                          - /url: /Views/Provider/SearchDiagnosis.aspx?dtype=secondarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&TB_iframe=true&height=400&width=700
+                                    - row "Diagnosis 3" [ref=e177]:
+                                      - cell "Diagnosis 3" [ref=e178]
+                                      - cell [ref=e179]:
+                                        - textbox [ref=e180]
+                                        - textbox [ref=e181]
+                                        - link "Acute Diagnosis 3":
+                                          - /url: /Views/Provider/SearchDiagnosis.aspx?dtype=acutediagnosis3&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&TB_iframe=true&height=400&width=700
+                                    - row "Diagnosis 4" [ref=e182]:
+                                      - cell "Diagnosis 4" [ref=e183]
+                                      - cell [ref=e184]:
+                                        - textbox [ref=e185]
+                                        - textbox [ref=e186]
+                                        - link "Acute Diagnosis 4":
+                                          - /url: /Views/Provider/SearchDiagnosis.aspx?dtype=acutediagnosis4&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&TB_iframe=true&height=400&width=700
+                            - row "Chronic Diagnosis Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4" [ref=e187]:
+                              - cell "Chronic Diagnosis Diagnosis 1 ? Diagnosis 2 Diagnosis 3 Diagnosis 4" [ref=e188]:
+                                - table [ref=e189]:
+                                  - rowgroup [ref=e190]:
+                                    - row "Chronic Diagnosis" [ref=e191]:
+                                      - cell "Chronic Diagnosis" [ref=e192]
+                                    - row "Diagnosis 1 ?" [ref=e193]:
+                                      - cell "Diagnosis 1" [ref=e194]
+                                      - cell "?" [ref=e195]:
+                                        - textbox [ref=e196]
+                                        - textbox [ref=e197]
+                                        - generic [ref=e198]: "?"
+                                        - link "Chronic Diagnosis 1":
+                                          - /url: /Views/Provider/SearchDiagnosis.aspx?dtype=chronicdiagnosis1&dgroup=chronic&callback=reloadPageOnItemSelected&keepThis=true&TB_iframe=true&height=400&width=500
+                                    - row "Diagnosis 2" [ref=e199]:
+                                      - cell "Diagnosis 2" [ref=e200]
+                                      - cell [ref=e201]:
+                                        - textbox [ref=e202]
+                                        - textbox [ref=e203]
+                                        - link "Chronic Diagnosis 2":
+                                          - /url: /Views/Provider/SearchDiagnosis.aspx?dtype=chronicdiagnosis2&dgroup=chronic&callback=reloadPageOnItemSelected&keepThis=true&TB_iframe=true&height=400&width=500
+                                    - row "Diagnosis 3" [ref=e204]:
+                                      - cell "Diagnosis 3" [ref=e205]
+                                      - cell [ref=e206]:
+                                        - textbox [ref=e207]
+                                        - textbox [ref=e208]
+                                        - link "Chronic Diagnosis 3":
+                                          - /url: /Views/Provider/SearchDiagnosis.aspx?dtype=chronicdiagnosis3&dgroup=chronic&callback=reloadPageOnItemSelected&keepThis=true&TB_iframe=true&height=400&width=500
+                                    - row "Diagnosis 4" [ref=e209]:
+                                      - cell "Diagnosis 4" [ref=e210]
+                                      - cell [ref=e211]:
+                                        - textbox [ref=e212]
+                                        - textbox [ref=e213]
+                                        - link "Chronic Diagnosis 4":
+                                          - /url: /Views/Provider/SearchDiagnosis.aspx?dtype=chronicdiagnosis4&dgroup=chronic&callback=reloadPageOnItemSelected&keepThis=true&TB_iframe=true&height=400&width=500
+                    - 'row "Fee and Charges: [Scheme - Restricted Scheme ] Select Fee Type --Select-- Consult Fee" [ref=e214]':
+                      - 'cell "Fee and Charges: [Scheme - Restricted Scheme ] Select Fee Type --Select-- Consult Fee" [ref=e215]':
+                        - table [ref=e216]:
+                          - rowgroup [ref=e217]:
+                            - 'row "Fee and Charges: [Scheme - Restricted Scheme ]" [ref=e218]':
+                              - 'cell "Fee and Charges: [Scheme - Restricted Scheme ]" [ref=e219]'
+                            - row "Select Fee Type --Select-- Consult Fee" [ref=e220]:
+                              - cell "Select Fee Type" [ref=e221]
+                              - cell "--Select--" [ref=e222]:
+                                - combobox [ref=e223]:
+                                  - option "--Select--" [selected]
+                                  - option "First Consultation Fee"
+                                  - option "Follow-up Consultation"
+                                  - option "No Consultation Fee"
+                              - cell "Consult Fee" [ref=e224]:
+                                - text: Consult Fee
+                                - textbox [ref=e225]
+                    - row "Claim Remarks" [ref=e226]:
+                      - cell "Claim Remarks" [ref=e227]:
+                        - table [ref=e228]:
+                          - rowgroup [ref=e229]:
+                            - row "Claim Remarks" [ref=e230]:
+                              - cell "Claim Remarks" [ref=e231]
+                              - cell [ref=e232]:
+                                - textbox [ref=e233]
+                    - row "Cancel" [ref=e234]:
+                      - cell "Cancel" [ref=e235]:
+                        - button "Cancel" [ref=e236]
+      - cell [ref=e237]
+    - row "© Alliance Healthcare Terms of Use | Privacy" [ref=e238]:
+      - cell [ref=e239]
+      - cell "© Alliance Healthcare" [ref=e240]
+      - cell "Terms of Use | Privacy" [ref=e241]:
+        - generic [ref=e242]:
+          - link "Terms of Use" [ref=e243] [cursor=pointer]:
+            - /url: /pages/TermsAndConditions.aspx?keepThis=true&TB_iframe=true&height=500&width=760
+          - text: "|"
+          - link "Privacy" [ref=e244] [cursor=pointer]:
+            - /url: /pages/Privacy1.aspx?keepThis=true&TB_iframe=true&height=500&width=760
+      - cell [ref=e245]

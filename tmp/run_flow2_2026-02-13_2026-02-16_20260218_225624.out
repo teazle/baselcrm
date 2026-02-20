@@ -1,0 +1,633 @@
+[32minfo[39m: === Visit Details Extraction Batch === {"service":"clinic-automation","timestamp":"2026-02-18T15:56:25.706Z"}
+[32minfo[39m: Mode: Force re-extract (includes completed visits) {"service":"clinic-automation","timestamp":"2026-02-18T15:56:25.709Z"}
+[32minfo[39m: Querying database for visits needing enhancement... {"service":"clinic-automation","timestamp":"2026-02-18T15:56:25.723Z"}
+[32minfo[39m: Filtering from date: 2026-02-13 {"service":"clinic-automation","timestamp":"2026-02-18T15:56:25.724Z"}
+[32minfo[39m: Filtering to date: 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-18T15:56:25.724Z"}
+[32minfo[39m: Filtering to portal scope: MHC, MHCAXA, AIA, AIACLIENT, AVIVA, SINGLIFE, FULLERT, IHP, PARKWAY, ALL, ALLIMED, ALLIANZ, ALLIANCE, GE, NTUC_IM, TOKIOM, ALLIANC, ALLSING, AXAMED, PRUDEN + Allianz tags in patient name {"service":"clinic-automation","timestamp":"2026-02-18T15:56:25.724Z"}
+(node:83799) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vincent/Baselrpacrm/apps/crm/src/lib/rpa/portals.shared.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vincent/Baselrpacrm/apps/crm/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[32minfo[39m: Found 21 candidate visit(s) {"service":"clinic-automation","timestamp":"2026-02-18T15:56:26.895Z"}
+[32minfo[39m: Processing 21 visits (0 skipped) {"service":"clinic-automation","timestamp":"2026-02-18T15:56:26.895Z"}
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-18T15:56:26.896Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-18T15:56:26.897Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-18T15:56:26.898Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-18T15:56:26.898Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-18T15:56:28.789Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-18T15:56:28.790Z"}
+[32minfo[39m: Initializing browser and logging in to Clinic Assist... {"service":"clinic-automation","timestamp":"2026-02-18T15:56:28.954Z"}
+[32minfo[39m: [CA 01] Login start {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-18T15:56:28.955Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: Logging into Clinic Assist... {"service":"clinic-automation","timestamp":"2026-02-18T15:56:28.955Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-18T15:56:32.975Z"}
+[32minfo[39m: [CA 02] Username filled {"service":"clinic-automation","timestamp":"2026-02-18T15:56:32.976Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-18T15:56:33.518Z"}
+[32minfo[39m: [CA 03] Password filled {"service":"clinic-automation","timestamp":"2026-02-18T15:56:33.519Z"}
+[32minfo[39m: Clinic Group filled: ssoc {"service":"clinic-automation","timestamp":"2026-02-18T15:56:34.056Z"}
+[32minfo[39m: [CA 04] Clinic Group filled {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-18T15:56:34.057Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-18T15:56:35.146Z"}
+[32minfo[39m: [CA 05] Login submitted {"service":"clinic-automation","timestamp":"2026-02-18T15:56:35.146Z"}
+[32minfo[39m: Clinic Assist 2FA not required (verification inputs disabled) {"service":"clinic-automation","timestamp":"2026-02-18T15:56:38.164Z"}
+[32minfo[39m: Successfully logged into Clinic Assist {"service":"clinic-automation","timestamp":"2026-02-18T15:56:38.415Z"}
+[32minfo[39m: [CA 06] Login ok {"service":"clinic-automation","timestamp":"2026-02-18T15:56:38.415Z"}
+[32minfo[39m: 
+Starting batch extraction for 21 visits... {"service":"clinic-automation","timestamp":"2026-02-18T15:56:38.415Z"}
+[32minfo[39m: Max retries: 3, Batch size: 100 {"service":"clinic-automation","timestamp":"2026-02-18T15:56:38.415Z"}
+[32minfo[39m: [VisitDetails] Starting batch extraction for 21 visits {"service":"clinic-automation","timestamp":"2026-02-18T15:56:38.995Z"}
+[32minfo[39m: [VisitDetails] Processing visit 1/21: HAN SUIANG-SHIUH (2026-02-16) {"service":"clinic-automation","timestamp":"2026-02-18T15:56:38.996Z"}
+[32minfo[39m: [VisitDetails] Navigating to Patient Page for visit ad17c70e-ee17-4cc8-a29b-dfb95bea4844 (HAN SUIANG-SHIUH) {"service":"clinic-automation","timestamp":"2026-02-18T15:56:39.618Z"}
+[32minfo[39m: [CA 07] Navigate to Patient Page - START {"service":"clinic-automation","timestamp":"2026-02-18T15:56:39.621Z"}
+[32minfo[39m: [CA 08] Current URL before navigation {"service":"clinic-automation","timestamp":"2026-02-18T15:56:39.621Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: [CA 09] Need to select Reception/room first before accessing Patient Page {"service":"clinic-automation","timestamp":"2026-02-18T15:56:39.636Z"}
+[32minfo[39m: [CA 10] Clicking Reception/room to access system {"selector":"button:has-text(\"Reception\")","service":"clinic-automation","timestamp":"2026-02-18T15:56:40.234Z"}
+[32minfo[39m: [CA 11] Reception clicked, checking URL {"newUrl":"https://clinicassist.sg:1080/Home/Reception","service":"clinic-automation","timeTaken":1710,"timestamp":"2026-02-18T15:56:41.346Z"}
+[32minfo[39m: [CA 12] Successfully entered Reception room {"newUrl":"https://clinicassist.sg:1080/Home/Reception","service":"clinic-automation","timeTaken":1819,"timestamp":"2026-02-18T15:56:41.455Z"}
+[32minfo[39m: [CA 13] Looking for sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-18T15:56:41.455Z"}
+[32minfo[39m: [CA 14] Found menu toggle, clicking {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-18T15:56:41.457Z"}
+[32minfo[39m: [CA 15] Looking for Patient sidebar link {"service":"clinic-automation","timestamp":"2026-02-18T15:56:42.172Z"}
+[32minfo[39m: [CA 16] Patient link status {"count":1,"isVisible":true,"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T15:56:42.273Z"}
+[32minfo[39m: [CA 17] Clicking Patient sidebar link via UI {"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T15:56:42.273Z"}
+[32minfo[39m: [CA 18] Patient link clicked via Playwright {"service":"clinic-automation","timeTaken":592,"timestamp":"2026-02-18T15:56:42.862Z"}
+[32minfo[39m: [CA 19] After Patient click, checking URL {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T15:56:44.100Z","totalTime":2645}
+[32minfo[39m: [CA 20] Successfully navigated to Patient Page via UI click {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T15:56:44.101Z","totalTime":4480}
+[32minfo[39m: [CA 21] Navigate to Patient Page - COMPLETE {"service":"clinic-automation","timestamp":"2026-02-18T15:56:44.101Z","totalTime":4480}
+[32minfo[39m: [VisitDetails] Searching for patient by number: 56675 (HAN SUIANG-SHIUH) {"service":"clinic-automation","timestamp":"2026-02-18T15:56:44.101Z"}
+[32minfo[39m: [CA 22] Search patient by number {"patientNumber":"56675","service":"clinic-automation","timestamp":"2026-02-18T15:56:44.102Z"}
+[32minfo[39m: [CA 23] Pressing Enter to execute search (may need to dismiss dialog first) {"service":"clinic-automation","timestamp":"2026-02-18T15:56:45.932Z"}
+[32minfo[39m: [CA 24] Patient search executed by number (Enter key x2) {"patientNumber":"56675","service":"clinic-automation","timestamp":"2026-02-18T15:56:48.051Z"}
+[32minfo[39m: [VisitDetails] Opening patient record by number: 56675 {"service":"clinic-automation","timestamp":"2026-02-18T15:56:50.054Z"}
+[32minfo[39m: [CA 25] Open patient from search results by number {"patientNumber":"56675","service":"clinic-automation","timestamp":"2026-02-18T15:56:50.055Z"}
+[32minfo[39m: [CA 26] Found patient row by number {"hasLink":true,"rowIndex":1,"service":"clinic-automation","timestamp":"2026-02-18T15:56:52.066Z"}
+[32minfo[39m: [CA 27] Clicked patient link via filter method {"service":"clinic-automation","timestamp":"2026-02-18T15:56:52.616Z"}
+[32minfo[39m: [CA 28] Patient opened from search results by number {"service":"clinic-automation","timestamp":"2026-02-18T15:56:56.736Z"}
+[32minfo[39m: [VisitDetails] Extracting NRIC from biodata page for: HAN SUIANG-SHIUH {"service":"clinic-automation","timestamp":"2026-02-18T15:56:58.741Z"}
+[32minfo[39m: [CA 29] Get patient NRIC {"service":"clinic-automation","timestamp":"2026-02-18T15:56:58.742Z"}
+[32minfo[39m: [CA 30] Extract NRIC from patient biodata/info page {"service":"clinic-automation","timestamp":"2026-02-18T15:56:58.743Z"}
+[32minfo[39m: [CA 31] NRIC found in input field {"nric":"G3263266T","selector":"input[name*=\"nric\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:56:59.947Z"}
+[32minfo[39m: [VisitDetails] Found NRIC: G3263266T for patient: HAN SUIANG-SHIUH {"service":"clinic-automation","timestamp":"2026-02-18T15:56:59.947Z"}
+[32minfo[39m: [VisitDetails] Updated visit ad17c70e-ee17-4cc8-a29b-dfb95bea4844 with NRIC: G3263266T {"service":"clinic-automation","timestamp":"2026-02-18T15:57:00.260Z"}
+[32minfo[39m: [VisitDetails] Extracting charge type, diagnosis, and MC data for visit ad17c70e-ee17-4cc8-a29b-dfb95bea4844 on 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-18T15:57:00.260Z"}
+[32minfo[39m: [CA 32] Get charge type, diagnosis, and MC data for visit date {"service":"clinic-automation","timestamp":"2026-02-18T15:57:00.262Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 33] Check for First Consult on visit date {"service":"clinic-automation","timestamp":"2026-02-18T15:57:00.263Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 34] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T15:57:00.263Z"}
+[32minfo[39m: [CA 35] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T15:57:03.852Z"}
+[32minfo[39m: [CA 36] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-18T15:57:03.857Z"}
+[32minfo[39m: [CA 37] All Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T15:57:36.759Z"}
+[32minfo[39m: [CA 38] First Consult check result {"found":false,"service":"clinic-automation","timestamp":"2026-02-18T15:57:38.843Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 39] Charge type determined {"chargeType":"follow","hasFirstConsult":false,"service":"clinic-automation","timestamp":"2026-02-18T15:57:38.844Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 40] MC extraction from TX History disabled; using defaults {"mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T15:57:38.844Z"}
+[32minfo[39m: [CA 41] Open Diagnosis Tab {"service":"clinic-automation","timestamp":"2026-02-18T15:57:38.844Z"}
+[32minfo[39m: [CA 42] Diagnosis Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T15:57:42.466Z"}
+[32minfo[39m: [CA 43] Extract diagnosis for visit date {"service":"clinic-automation","timestamp":"2026-02-18T15:57:42.467Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 44] No exact diagnosis date match; using most recent on/before visit date {"code":"S63.7","date":"17/08/2021","description":"Sprain & strain of oth & unsp parts hand","service":"clinic-automation","timestamp":"2026-02-18T15:57:43.483Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 45] Diagnosis requires broadened source search {"currentDate":"17/08/2021","currentDiagnosis":"Sprain & strain of oth & unsp parts hand","currentSource":"diagnosis_tab","service":"clinic-automation","timestamp":"2026-02-18T15:57:43.490Z"}
+[32minfo[39m: [CA 46] Checking All tab for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T15:57:43.491Z"}
+[32minfo[39m: [CA 47] Extract diagnosis from All tab {"service":"clinic-automation","timestamp":"2026-02-18T15:57:43.491Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 48] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T15:57:43.492Z"}
+[32minfo[39m: [CA 49] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T15:57:47.046Z"}
+[32minfo[39m: [CA 50] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-18T15:57:47.046Z"}
+[32minfo[39m: [CA 51] All Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T15:58:19.972Z"}
+[32minfo[39m: [CA 52] No diagnosis found in All tab {"service":"clinic-automation","timestamp":"2026-02-18T15:58:21.486Z"}
+[32minfo[39m: [CA 53] Checking Visit tab for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T15:58:21.487Z"}
+[32minfo[39m: [CA 54] Extract diagnosis from Visit Tab {"service":"clinic-automation","timestamp":"2026-02-18T15:58:21.488Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 55] Open Visit Tab {"service":"clinic-automation","timestamp":"2026-02-18T15:58:21.488Z"}
+[32minfo[39m: [CA 56] Visit Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T15:58:23.689Z"}
+[32minfo[39m: [CA 57] No diagnosis found in Visit tab {"service":"clinic-automation","timestamp":"2026-02-18T15:58:24.500Z"}
+[32minfo[39m: [CA 58] Checking Past Notes for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T15:58:24.500Z"}
+[32minfo[39m: [CA 59] Extract diagnosis from Past Notes {"service":"clinic-automation","timestamp":"2026-02-18T15:58:24.501Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 60] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T15:58:24.502Z"}
+[32minfo[39m: [CA 61] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T15:58:28.073Z"}
+[32minfo[39m: [CA 62] Open Past Notes Tab {"service":"clinic-automation","timestamp":"2026-02-18T15:58:28.073Z"}
+[32minfo[39m: [CA 63] Past Notes Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T15:58:33.854Z"}
+[32minfo[39m: [CA 64] Past Notes entries expanded {"service":"clinic-automation","timestamp":"2026-02-18T15:58:33.905Z","totalClicked":1,"visitDate":"2026-02-16"}
+[32minfo[39m: [CA 65] No diagnosis found in Past Notes for visit date {"service":"clinic-automation","timestamp":"2026-02-18T15:58:36.319Z"}
+[32minfo[39m: [CA 66] Extract diagnosis intent from Past Notes {"service":"clinic-automation","timestamp":"2026-02-18T15:58:36.321Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 67] Open Past Notes Tab {"service":"clinic-automation","timestamp":"2026-02-18T15:58:36.321Z"}
+[32minfo[39m: [CA 68] Past Notes context already open {"service":"clinic-automation","timestamp":"2026-02-18T15:58:44.011Z"}
+[32minfo[39m: [CA 69] Past Notes entries expanded {"service":"clinic-automation","timestamp":"2026-02-18T15:58:44.063Z","totalClicked":1,"visitDate":"2026-02-16"}
+[32minfo[39m: [CA 70] Past Notes intent debug (no match) {"baseBodyPart":"hand","evidence":["16/02/2026pcr specialist consultation1","00ssoc04/02/2026pcr specialist consultation1","00ssoc24/01/2026pcr specialist consultation1","00ssoc08/01/2024pcr specialist consultation1","00ssoc29/12/2023pcr specialist consultation1","20ssoc27/12/2023pcr specialist consultation1","00ssoc24/08/2021pcr consultation 1","00ssoc17/08/2021pcr first consultation 1","specialist consultation - qty(1","specialist consultation - qty(1"],"poolSize":2,"service":"clinic-automation","targetDateStr":"16/02/2026","targetDateStrAlt":"02/16/2026","timestamp":"2026-02-18T15:58:46.488Z","title":"Patient Biodata","url":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=mb78S1NVMcPkcOoItvL/Vlb2MrdMenwurFPTeq9RPo4EmPXEIk2IjV0IWt7aTl52k0/o1jiBk0gcFW9mnl3REeZCN3H162y5"}
+[32minfo[39m: [CA 71] No diagnosis intent found in Past Notes {"service":"clinic-automation","timestamp":"2026-02-18T15:58:46.488Z"}
+[32minfo[39m: [CA 72] Extracting medicines for visit date {"service":"clinic-automation","timestamp":"2026-02-18T15:58:46.496Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 73] Open Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-18T15:58:46.496Z"}
+[32minfo[39m: [CA 74] Medicine Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T15:58:49.653Z"}
+[32minfo[39m: [CA 75] Extract medicines from Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-18T15:58:49.654Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 76] Medicines extracted from Medicine Tab {"chosenDateIso":"2026-02-16","count":1,"medicines":[{"amount":80,"name":"SPECIALIST CONSULTATION","quantity":1,"unitPrice":1}],"service":"clinic-automation","timestamp":"2026-02-18T15:58:50.671Z","totalRecords":34,"visitDate":"2026-02-16"}
+[32minfo[39m: [CA 77] TX History: extracted medicines summary {"count":1,"filteredOut":0,"sample":[{"amount":80,"name":"SPECIALIST CONSULTATION","quantity":1,"unitPrice":1}],"service":"clinic-automation","timestamp":"2026-02-18T15:58:50.673Z"}
+[32minfo[39m: [VisitDetails] Extracted data for visit ad17c70e-ee17-4cc8-a29b-dfb95bea4844: {"chargeType":"follow","diagnosis":"Sprain & strain of oth & unsp parts hand","mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T15:58:50.673Z"}
+[32minfo[39m: [VisitDetails] Updated visit ad17c70e-ee17-4cc8-a29b-dfb95bea4844 with extracted details {"service":"clinic-automation","timestamp":"2026-02-18T15:58:51.763Z"}
+[32minfo[39m: [VisitDetails] Successfully extracted details for visit ad17c70e-ee17-4cc8-a29b-dfb95bea4844 {"chargeType":"follow","diagnosis":"Sprain & strain of oth & unsp parts hand","mcDays":0,"service":"clinic-automation","timestamp":"2026-02-18T15:58:51.764Z"}
+[32minfo[39m: [VisitDetails] Processing visit 2/21: WANG YIXIN (2026-02-16) {"service":"clinic-automation","timestamp":"2026-02-18T15:58:53.073Z"}
+[32minfo[39m: [VisitDetails] Navigating to Patient Page for visit 7eafcb82-5406-4de9-abbd-3e5f6f803218 (WANG YIXIN) {"service":"clinic-automation","timestamp":"2026-02-18T15:58:53.539Z"}
+[32minfo[39m: [CA 78] Navigate to Patient Page - START {"service":"clinic-automation","timestamp":"2026-02-18T15:58:53.539Z"}
+[32minfo[39m: [CA 79] Current URL before navigation {"service":"clinic-automation","timestamp":"2026-02-18T15:58:53.539Z","url":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=mb78S1NVMcPkcOoItvL/Vlb2MrdMenwurFPTeq9RPo4EmPXEIk2IjV0IWt7aTl52k0/o1jiBk0gcFW9mnl3REeZCN3H162y5"}
+[32minfo[39m: [CA 80] Force-cleared blocking history overlay {"changedNodes":2,"service":"clinic-automation","timestamp":"2026-02-18T15:58:53.542Z"}
+[32minfo[39m: [CA 81] QueueLog: navigated Home before Patient search {"currentUrl":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=mb78S1NVMcPkcOoItvL/Vlb2MrdMenwurFPTeq9RPo4EmPXEIk2IjV0IWt7aTl52k0/o1jiBk0gcFW9mnl3REeZCN3H162y5","service":"clinic-automation","timestamp":"2026-02-18T15:58:58.093Z"}
+[32minfo[39m: [CA 82] Already in Reception or Patient page, proceeding {"currentUrl":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=mb78S1NVMcPkcOoItvL/Vlb2MrdMenwurFPTeq9RPo4EmPXEIk2IjV0IWt7aTl52k0/o1jiBk0gcFW9mnl3REeZCN3H162y5","service":"clinic-automation","timestamp":"2026-02-18T15:58:58.132Z"}
+[32minfo[39m: [CA 83] Looking for sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-18T15:58:58.136Z"}
+[32minfo[39m: [CA 84] Found menu toggle, clicking {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-18T15:58:58.147Z"}
+[32minfo[39m: [CA 85] Looking for Patient sidebar link {"service":"clinic-automation","timestamp":"2026-02-18T15:58:58.860Z"}
+[32minfo[39m: [CA 86] Force-cleared blocking history overlay {"changedNodes":1,"service":"clinic-automation","timestamp":"2026-02-18T15:58:58.867Z"}
+[32minfo[39m: [CA 87] Force-cleared blocking history overlay {"changedNodes":1,"service":"clinic-automation","timestamp":"2026-02-18T15:58:59.082Z"}
+[32minfo[39m: [CA 88] Patient link status {"count":1,"isVisible":true,"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T15:58:59.292Z"}
+[32minfo[39m: [CA 89] Clicking Patient sidebar link via UI {"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T15:58:59.292Z"}
+[32minfo[39m: [CA 90] Playwright click failed, trying JavaScript click {"error":"locator.click: Timeout 3000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a.SideMenuList[cat=\"Patient\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <a href=\"\" cat=\"Patient\" title=\"Patient\" class=\"SideMenuList\" data-placement=\"right\">…</a>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    5 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n","service":"clinic-automation","timestamp":"2026-02-18T15:59:02.799Z"}
+[32minfo[39m: [CA 91] Patient link clicked via JavaScript {"service":"clinic-automation","timeTaken":3758,"timestamp":"2026-02-18T15:59:02.828Z"}
+[32minfo[39m: [CA 92] After Patient click, checking URL {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T15:59:04.135Z","totalTime":5999}
+[32minfo[39m: [CA 93] Successfully navigated to Patient Page via UI click {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T15:59:04.136Z","totalTime":10597}
+[32minfo[39m: [CA 94] Navigate to Patient Page - COMPLETE {"service":"clinic-automation","timestamp":"2026-02-18T15:59:04.136Z","totalTime":10597}
+[32minfo[39m: [VisitDetails] Searching for patient by number: 78239 (WANG YIXIN) {"service":"clinic-automation","timestamp":"2026-02-18T15:59:04.136Z"}
+[32minfo[39m: [CA 95] Search patient by number {"patientNumber":"78239","service":"clinic-automation","timestamp":"2026-02-18T15:59:04.136Z"}
+[32minfo[39m: [CA 96] Pressing Enter to execute search (may need to dismiss dialog first) {"service":"clinic-automation","timestamp":"2026-02-18T15:59:05.991Z"}
+[32minfo[39m: [CA 97] Patient search executed by number (Enter key x2) {"patientNumber":"78239","service":"clinic-automation","timestamp":"2026-02-18T15:59:08.112Z"}
+[32minfo[39m: [VisitDetails] Opening patient record by number: 78239 {"service":"clinic-automation","timestamp":"2026-02-18T15:59:10.115Z"}
+[32minfo[39m: [CA 98] Open patient from search results by number {"patientNumber":"78239","service":"clinic-automation","timestamp":"2026-02-18T15:59:10.116Z"}
+[32minfo[39m: [CA 99] Found patient row by number {"hasLink":true,"rowIndex":1,"service":"clinic-automation","timestamp":"2026-02-18T15:59:12.125Z"}
+[32minfo[39m: [CA 100] Clicked patient link via filter method {"service":"clinic-automation","timestamp":"2026-02-18T15:59:12.693Z"}
+[32minfo[39m: [CA 101] Patient opened from search results by number {"service":"clinic-automation","timestamp":"2026-02-18T15:59:14.909Z"}
+[32minfo[39m: [VisitDetails] Extracting NRIC from biodata page for: WANG YIXIN {"service":"clinic-automation","timestamp":"2026-02-18T15:59:16.914Z"}
+[32minfo[39m: [CA 102] Get patient NRIC {"service":"clinic-automation","timestamp":"2026-02-18T15:59:16.915Z"}
+[32minfo[39m: [CA 103] Extract NRIC from patient biodata/info page {"service":"clinic-automation","timestamp":"2026-02-18T15:59:16.915Z"}
+[32minfo[39m: [CA 104] NRIC found in input field {"nric":"M4355390Q","selector":"input[name*=\"nric\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:59:18.997Z"}
+[32minfo[39m: [VisitDetails] Found NRIC: M4355390Q for patient: WANG YIXIN {"service":"clinic-automation","timestamp":"2026-02-18T15:59:18.997Z"}
+[32minfo[39m: [VisitDetails] Updated visit 7eafcb82-5406-4de9-abbd-3e5f6f803218 with NRIC: M4355390Q {"service":"clinic-automation","timestamp":"2026-02-18T15:59:19.278Z"}
+[32minfo[39m: [VisitDetails] Extracting charge type, diagnosis, and MC data for visit 7eafcb82-5406-4de9-abbd-3e5f6f803218 on 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-18T15:59:19.279Z"}
+[32minfo[39m: [CA 105] Get charge type, diagnosis, and MC data for visit date {"service":"clinic-automation","timestamp":"2026-02-18T15:59:19.279Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 106] Check for First Consult on visit date {"service":"clinic-automation","timestamp":"2026-02-18T15:59:19.279Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 107] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T15:59:19.279Z"}
+[32minfo[39m: [CA 108] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T15:59:22.856Z"}
+[32minfo[39m: [CA 109] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-18T15:59:22.857Z"}
+[32minfo[39m: [CA 110] All Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T15:59:55.774Z"}
+[32minfo[39m: [CA 111] First Consult check result {"found":true,"service":"clinic-automation","timestamp":"2026-02-18T15:59:57.785Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 112] Charge type determined {"chargeType":"first","hasFirstConsult":true,"service":"clinic-automation","timestamp":"2026-02-18T15:59:57.786Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 113] MC extraction from TX History disabled; using defaults {"mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T15:59:57.786Z"}
+[32minfo[39m: [CA 114] Open Diagnosis Tab {"service":"clinic-automation","timestamp":"2026-02-18T15:59:57.787Z"}
+[32minfo[39m: [CA 115] Diagnosis Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:00:01.402Z"}
+[32minfo[39m: [CA 116] Extract diagnosis for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:00:01.402Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 117] Found diagnosis for visit date {"code":"M50.9","date":"16/02/2026","description":"Cervical disc disorder unspecified","service":"clinic-automation","timestamp":"2026-02-18T16:00:02.416Z"}
+[32minfo[39m: [CA 118] Diagnosis requires broadened source search {"currentDate":"16/02/2026","currentDiagnosis":"Cervical disc disorder unspecified","currentSource":"diagnosis_tab","service":"clinic-automation","timestamp":"2026-02-18T16:00:02.420Z"}
+[32minfo[39m: [CA 119] Checking All tab for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T16:00:02.420Z"}
+[32minfo[39m: [CA 120] Extract diagnosis from All tab {"service":"clinic-automation","timestamp":"2026-02-18T16:00:02.420Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 121] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:00:02.420Z"}
+[32minfo[39m: [CA 122] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:00:05.983Z"}
+[32minfo[39m: [CA 123] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:00:05.984Z"}
+[32minfo[39m: [CA 124] All Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:00:38.896Z"}
+[32minfo[39m: [CA 125] No diagnosis found in All tab {"service":"clinic-automation","timestamp":"2026-02-18T16:00:40.413Z"}
+[32minfo[39m: [CA 126] Checking Visit tab for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T16:00:40.413Z"}
+[32minfo[39m: [CA 127] Extract diagnosis from Visit Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:00:40.413Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 128] Open Visit Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:00:40.413Z"}
+[32minfo[39m: [CA 129] Visit Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:00:42.618Z"}
+[32minfo[39m: [CA 130] No diagnosis found in Visit tab {"service":"clinic-automation","timestamp":"2026-02-18T16:00:43.431Z"}
+[32minfo[39m: [CA 131] Checking Past Notes for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T16:00:43.432Z"}
+[32minfo[39m: [CA 132] Extract diagnosis from Past Notes {"service":"clinic-automation","timestamp":"2026-02-18T16:00:43.432Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 133] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:00:43.432Z"}
+[32minfo[39m: [CA 134] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:00:46.999Z"}
+[32minfo[39m: [CA 135] Open Past Notes Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:00:47.000Z"}
+[32minfo[39m: [CA 136] Past Notes Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:00:52.840Z"}
+[32minfo[39m: [CA 137] Past Notes entries expanded {"service":"clinic-automation","timestamp":"2026-02-18T16:00:52.889Z","totalClicked":1,"visitDate":"2026-02-16"}
+[32minfo[39m: [CA 138] No diagnosis found in Past Notes for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:00:55.306Z"}
+[32minfo[39m: [CA 139] Extract diagnosis intent from Past Notes {"service":"clinic-automation","timestamp":"2026-02-18T16:00:55.309Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 140] Open Past Notes Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:00:55.309Z"}
+[32minfo[39m: [CA 141] Past Notes context already open {"service":"clinic-automation","timestamp":"2026-02-18T16:01:02.992Z"}
+[32minfo[39m: [CA 142] Past Notes entries expanded {"service":"clinic-automation","timestamp":"2026-02-18T16:01:03.047Z","totalClicked":1,"visitDate":"2026-02-16"}
+[32minfo[39m: [CA 143] Diagnosis intent extracted from Past Notes {"bodyPart":"spine","condition":"degenerative","description":"degenerative of spine","score":12,"service":"clinic-automation","side":null,"sourceDate":"2026-02-16","timestamp":"2026-02-18T16:01:05.483Z"}
+[32minfo[39m: [CA 144] Past Notes enrichment suppressed {"baseDescription":"Cervical disc disorder unspecified","baseIsExact":true,"bodyAligned":false,"intentDescription":"degenerative of spine","intentScore":12,"reason":"past_notes_intent_weak_or_misaligned","service":"clinic-automation","timestamp":"2026-02-18T16:01:05.488Z"}
+[32minfo[39m: [CA 145] Extracting medicines for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:01:05.490Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 146] Open Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:01:05.490Z"}
+[32minfo[39m: [CA 147] Medicine Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:01:08.647Z"}
+[32minfo[39m: [CA 148] Extract medicines from Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:01:08.647Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 149] Medicines extracted from Medicine Tab {"chosenDateIso":"2026-02-16","count":8,"medicines":[{"amount":1,"name":"MRI (GLENEAGLES)","quantity":1,"unitPrice":0},{"amount":1,"name":"LAB TEST (VIT D)","quantity":1,"unitPrice":0},{"amount":1,"name":"LAB TEST (CRP)","quantity":1,"unitPrice":0},{"amount":1,"name":"LAB TEST (GFU)","quantity":1,"unitPrice":0},{"amount":150,"name":"Panadeine (Panaco)","quantity":60,"unitPrice":2.5}],"service":"clinic-automation","timestamp":"2026-02-18T16:01:09.668Z","totalRecords":8,"visitDate":"2026-02-16"}
+[32minfo[39m: [CA 150] TX History: extracted medicines summary {"count":8,"filteredOut":0,"sample":[{"amount":1,"name":"MRI (GLENEAGLES)","quantity":1,"unitPrice":0},{"amount":1,"name":"LAB TEST (VIT D)","quantity":1,"unitPrice":0},{"amount":1,"name":"LAB TEST (CRP)","quantity":1,"unitPrice":0},{"amount":1,"name":"LAB TEST (GFU)","quantity":1,"unitPrice":0},{"amount":150,"name":"Panadeine (Panaco)","quantity":60,"unitPrice":2.5}],"service":"clinic-automation","timestamp":"2026-02-18T16:01:09.669Z"}
+[32minfo[39m: [VisitDetails] Extracted data for visit 7eafcb82-5406-4de9-abbd-3e5f6f803218: {"chargeType":"first","diagnosis":"Cervical disc disorder unspecified","mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T16:01:09.669Z"}
+[32minfo[39m: [VisitDetails] Updated visit 7eafcb82-5406-4de9-abbd-3e5f6f803218 with extracted details {"service":"clinic-automation","timestamp":"2026-02-18T16:01:11.058Z"}
+[32minfo[39m: [VisitDetails] Successfully extracted details for visit 7eafcb82-5406-4de9-abbd-3e5f6f803218 {"chargeType":"first","diagnosis":"Cervical disc disorder unspecified","mcDays":0,"service":"clinic-automation","timestamp":"2026-02-18T16:01:11.058Z"}
+[32minfo[39m: [VisitDetails] Processing visit 3/21: DYLAN AUSTIN TARIN (2026-02-16) {"service":"clinic-automation","timestamp":"2026-02-18T16:01:12.332Z"}
+[32minfo[39m: [VisitDetails] Navigating to Patient Page for visit 8eb44ca6-5331-4b98-be7a-c5ae9e011782 (DYLAN AUSTIN TARIN) {"service":"clinic-automation","timestamp":"2026-02-18T16:01:13.072Z"}
+[32minfo[39m: [CA 151] Navigate to Patient Page - START {"service":"clinic-automation","timestamp":"2026-02-18T16:01:13.072Z"}
+[32minfo[39m: [CA 152] Current URL before navigation {"service":"clinic-automation","timestamp":"2026-02-18T16:01:13.072Z","url":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=wtFzl3Y4I6l80cgG+djoBYHGisoWW3UlT1H6ZgT58ePggI8aMm01H+yTIQUSF/KDIbXerx/i3YePKAn1cXOxLKYbiuW0H1oL"}
+[32minfo[39m: [CA 153] Force-cleared blocking history overlay {"changedNodes":2,"service":"clinic-automation","timestamp":"2026-02-18T16:01:13.080Z"}
+[32minfo[39m: [CA 154] QueueLog: navigated Home before Patient search {"currentUrl":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=wtFzl3Y4I6l80cgG+djoBYHGisoWW3UlT1H6ZgT58ePggI8aMm01H+yTIQUSF/KDIbXerx/i3YePKAn1cXOxLKYbiuW0H1oL","service":"clinic-automation","timestamp":"2026-02-18T16:01:17.647Z"}
+[32minfo[39m: [CA 155] Already in Reception or Patient page, proceeding {"currentUrl":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=wtFzl3Y4I6l80cgG+djoBYHGisoWW3UlT1H6ZgT58ePggI8aMm01H+yTIQUSF/KDIbXerx/i3YePKAn1cXOxLKYbiuW0H1oL","service":"clinic-automation","timestamp":"2026-02-18T16:01:17.681Z"}
+[32minfo[39m: [CA 156] Looking for sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-18T16:01:17.681Z"}
+[32minfo[39m: [CA 157] Found menu toggle, clicking {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-18T16:01:17.688Z"}
+[32minfo[39m: [CA 158] Looking for Patient sidebar link {"service":"clinic-automation","timestamp":"2026-02-18T16:01:18.399Z"}
+[32minfo[39m: [CA 159] Force-cleared blocking history overlay {"changedNodes":1,"service":"clinic-automation","timestamp":"2026-02-18T16:01:18.401Z"}
+[32minfo[39m: [CA 160] Force-cleared blocking history overlay {"changedNodes":1,"service":"clinic-automation","timestamp":"2026-02-18T16:01:18.630Z"}
+[32minfo[39m: [CA 161] Patient link status {"count":1,"isVisible":true,"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T16:01:18.840Z"}
+[32minfo[39m: [CA 162] Clicking Patient sidebar link via UI {"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T16:01:18.840Z"}
+[32minfo[39m: [CA 163] Playwright click failed, trying JavaScript click {"error":"locator.click: Timeout 3000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a.SideMenuList[cat=\"Patient\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <a href=\"\" cat=\"Patient\" title=\"Patient\" class=\"SideMenuList\" data-placement=\"right\">…</a>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    6 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n","service":"clinic-automation","timestamp":"2026-02-18T16:01:22.346Z"}
+[32minfo[39m: [CA 164] Patient link clicked via JavaScript {"service":"clinic-automation","timeTaken":3764,"timestamp":"2026-02-18T16:01:22.368Z"}
+[32minfo[39m: [CA 165] After Patient click, checking URL {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T16:01:23.500Z","totalTime":5819}
+[32minfo[39m: [CA 166] Successfully navigated to Patient Page via UI click {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T16:01:23.501Z","totalTime":10429}
+[32minfo[39m: [CA 167] Navigate to Patient Page - COMPLETE {"service":"clinic-automation","timestamp":"2026-02-18T16:01:23.501Z","totalTime":10429}
+[32minfo[39m: [VisitDetails] Searching for patient by number: 78240 (DYLAN AUSTIN TARIN) {"service":"clinic-automation","timestamp":"2026-02-18T16:01:23.501Z"}
+[32minfo[39m: [CA 168] Search patient by number {"patientNumber":"78240","service":"clinic-automation","timestamp":"2026-02-18T16:01:23.501Z"}
+[32minfo[39m: [CA 169] Pressing Enter to execute search (may need to dismiss dialog first) {"service":"clinic-automation","timestamp":"2026-02-18T16:01:25.307Z"}
+[32minfo[39m: [CA 170] Patient search executed by number (Enter key x2) {"patientNumber":"78240","service":"clinic-automation","timestamp":"2026-02-18T16:01:27.425Z"}
+[32minfo[39m: [VisitDetails] Opening patient record by number: 78240 {"service":"clinic-automation","timestamp":"2026-02-18T16:01:29.434Z"}
+[32minfo[39m: [CA 171] Open patient from search results by number {"patientNumber":"78240","service":"clinic-automation","timestamp":"2026-02-18T16:01:29.435Z"}
+[32minfo[39m: [CA 172] Found patient row by number {"hasLink":true,"rowIndex":1,"service":"clinic-automation","timestamp":"2026-02-18T16:01:31.457Z"}
+[32minfo[39m: [CA 173] Clicked patient link via filter method {"service":"clinic-automation","timestamp":"2026-02-18T16:01:32.032Z"}
+[32minfo[39m: [CA 174] Patient opened from search results by number {"service":"clinic-automation","timestamp":"2026-02-18T16:01:34.668Z"}
+[32minfo[39m: [VisitDetails] Extracting NRIC from biodata page for: DYLAN AUSTIN TARIN {"service":"clinic-automation","timestamp":"2026-02-18T16:01:36.675Z"}
+[32minfo[39m: [CA 175] Get patient NRIC {"service":"clinic-automation","timestamp":"2026-02-18T16:01:36.676Z"}
+[32minfo[39m: [CA 176] Extract NRIC from patient biodata/info page {"service":"clinic-automation","timestamp":"2026-02-18T16:01:36.676Z"}
+[32minfo[39m: [CA 177] NRIC found in input field {"nric":"T0837603J","selector":"input[name*=\"nric\" i]","service":"clinic-automation","timestamp":"2026-02-18T16:01:37.904Z"}
+[32minfo[39m: [VisitDetails] Found NRIC: T0837603J for patient: DYLAN AUSTIN TARIN {"service":"clinic-automation","timestamp":"2026-02-18T16:01:37.904Z"}
+[32minfo[39m: [VisitDetails] Updated visit 8eb44ca6-5331-4b98-be7a-c5ae9e011782 with NRIC: T0837603J {"service":"clinic-automation","timestamp":"2026-02-18T16:01:38.214Z"}
+[32minfo[39m: [VisitDetails] Extracting charge type, diagnosis, and MC data for visit 8eb44ca6-5331-4b98-be7a-c5ae9e011782 on 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-18T16:01:38.214Z"}
+[32minfo[39m: [CA 178] Get charge type, diagnosis, and MC data for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:01:38.214Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 179] Check for First Consult on visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:01:38.215Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 180] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:01:38.215Z"}
+[32minfo[39m: [CA 181] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:01:41.800Z"}
+[32minfo[39m: [CA 182] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:01:41.801Z"}
+[32minfo[39m: [CA 183] All Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:02:14.721Z"}
+[32minfo[39m: [CA 184] First Consult check result {"found":true,"service":"clinic-automation","timestamp":"2026-02-18T16:02:16.732Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 185] Charge type determined {"chargeType":"first","hasFirstConsult":true,"service":"clinic-automation","timestamp":"2026-02-18T16:02:16.732Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 186] MC extraction from TX History disabled; using defaults {"mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T16:02:16.733Z"}
+[32minfo[39m: [CA 187] Open Diagnosis Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:02:16.733Z"}
+[32minfo[39m: [CA 188] Diagnosis Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:02:20.346Z"}
+[32minfo[39m: [CA 189] Extract diagnosis for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:02:20.347Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 190] Found diagnosis for visit date {"code":"S63.50","date":"16/02/2026","description":"Sprain & strain wrist part unspecified","service":"clinic-automation","timestamp":"2026-02-18T16:02:21.353Z"}
+[32minfo[39m: [CA 191] Extracting medicines for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:02:21.354Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 192] Open Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:02:21.355Z"}
+[32minfo[39m: [CA 193] Medicine Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:02:24.476Z"}
+[32minfo[39m: [CA 194] Extract medicines from Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:02:24.477Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 195] Medicines extracted from Medicine Tab {"chosenDateIso":"2026-02-16","count":5,"medicines":[{"amount":80,"name":"Wrist Brace (DR)","quantity":1,"unitPrice":80},{"amount":1068,"name":"MRI (RADLINK)","quantity":1,"unitPrice":1},{"amount":150,"name":"Panadeine (Panaco)","quantity":60,"unitPrice":2.5},{"amount":120,"name":"SPECIALIST FIRST CONSULTATION","quantity":1,"unitPrice":1},{"amount":63.5,"name":"Sprain & strain wrist part unspecified","quantity":63.5,"unitPrice":1}],"service":"clinic-automation","timestamp":"2026-02-18T16:02:25.485Z","totalRecords":7,"visitDate":"2026-02-16"}
+[32minfo[39m: [CA 196] TX History: extracted medicines summary {"count":5,"filteredOut":0,"sample":[{"amount":80,"name":"Wrist Brace (DR)","quantity":1,"unitPrice":80},{"amount":1068,"name":"MRI (RADLINK)","quantity":1,"unitPrice":1},{"amount":150,"name":"Panadeine (Panaco)","quantity":60,"unitPrice":2.5},{"amount":120,"name":"SPECIALIST FIRST CONSULTATION","quantity":1,"unitPrice":1},{"amount":63.5,"name":"Sprain & strain wrist part unspecified","quantity":63.5,"unitPrice":1}],"service":"clinic-automation","timestamp":"2026-02-18T16:02:25.486Z"}
+[32minfo[39m: [VisitDetails] Extracted data for visit 8eb44ca6-5331-4b98-be7a-c5ae9e011782: {"chargeType":"first","diagnosis":"Sprain & strain wrist part unspecified","mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T16:02:25.486Z"}
+[32minfo[39m: [VisitDetails] Updated visit 8eb44ca6-5331-4b98-be7a-c5ae9e011782 with extracted details {"service":"clinic-automation","timestamp":"2026-02-18T16:02:26.408Z"}
+[32minfo[39m: [VisitDetails] Successfully extracted details for visit 8eb44ca6-5331-4b98-be7a-c5ae9e011782 {"chargeType":"first","diagnosis":"Sprain & strain wrist part unspecified","mcDays":0,"service":"clinic-automation","timestamp":"2026-02-18T16:02:26.408Z"}
+[32minfo[39m: [VisitDetails] Processing visit 4/21: HASLINA BINTE HASSAN BASRI (2026-02-16) {"service":"clinic-automation","timestamp":"2026-02-18T16:02:27.665Z"}
+[32minfo[39m: [VisitDetails] Navigating to Patient Page for visit 65ff1924-e660-4ffd-9f91-ab8deccd6175 (HASLINA BINTE HASSAN BASRI) {"service":"clinic-automation","timestamp":"2026-02-18T16:02:28.243Z"}
+[32minfo[39m: [CA 197] Navigate to Patient Page - START {"service":"clinic-automation","timestamp":"2026-02-18T16:02:28.244Z"}
+[32minfo[39m: [CA 198] Current URL before navigation {"service":"clinic-automation","timestamp":"2026-02-18T16:02:28.244Z","url":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=KyQTUQoh/+rc/ZUFol+PVewmFEkwA8Kzbprk4d/m6yvPkZ0cyfoqrG1HDnlqM0b0yFjcm7nhmFqCEyGPR3/ypa3Q0OBqo95tHctGKm435EA="}
+[32minfo[39m: [CA 199] Force-cleared blocking history overlay {"changedNodes":1,"service":"clinic-automation","timestamp":"2026-02-18T16:02:28.251Z"}
+[32minfo[39m: [CA 200] QueueLog: navigated Home before Patient search {"currentUrl":"https://clinicassist.sg:1080/Home/Reception#","service":"clinic-automation","timestamp":"2026-02-18T16:02:30.106Z"}
+[32minfo[39m: [CA 201] Already in Reception or Patient page, proceeding {"currentUrl":"https://clinicassist.sg:1080/Home/Reception#","service":"clinic-automation","timestamp":"2026-02-18T16:02:30.118Z"}
+[32minfo[39m: [CA 202] Looking for sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-18T16:02:30.119Z"}
+[32minfo[39m: [CA 203] Found menu toggle, clicking {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-18T16:02:30.122Z"}
+[32minfo[39m: [CA 204] Looking for Patient sidebar link {"service":"clinic-automation","timestamp":"2026-02-18T16:02:30.831Z"}
+[32minfo[39m: [CA 205] Patient link status {"count":1,"isVisible":true,"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T16:02:30.849Z"}
+[32minfo[39m: [CA 206] Clicking Patient sidebar link via UI {"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T16:02:30.850Z"}
+[32minfo[39m: [CA 207] Patient link clicked via Playwright {"service":"clinic-automation","timeTaken":617,"timestamp":"2026-02-18T16:02:31.455Z"}
+[32minfo[39m: [CA 208] After Patient click, checking URL {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T16:02:32.657Z","totalTime":2538}
+[32minfo[39m: [CA 209] Successfully navigated to Patient Page via UI click {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T16:02:32.658Z","totalTime":4414}
+[32minfo[39m: [CA 210] Navigate to Patient Page - COMPLETE {"service":"clinic-automation","timestamp":"2026-02-18T16:02:32.658Z","totalTime":4414}
+[32minfo[39m: [VisitDetails] Searching for patient by number: 72087 (HASLINA BINTE HASSAN BASRI) {"service":"clinic-automation","timestamp":"2026-02-18T16:02:32.659Z"}
+[32minfo[39m: [CA 211] Search patient by number {"patientNumber":"72087","service":"clinic-automation","timestamp":"2026-02-18T16:02:32.659Z"}
+[32minfo[39m: [CA 212] Pressing Enter to execute search (may need to dismiss dialog first) {"service":"clinic-automation","timestamp":"2026-02-18T16:02:34.467Z"}
+[32minfo[39m: [CA 213] Patient search executed by number (Enter key x2) {"patientNumber":"72087","service":"clinic-automation","timestamp":"2026-02-18T16:02:36.588Z"}
+[32minfo[39m: [VisitDetails] Opening patient record by number: 72087 {"service":"clinic-automation","timestamp":"2026-02-18T16:02:38.591Z"}
+[32minfo[39m: [CA 214] Open patient from search results by number {"patientNumber":"72087","service":"clinic-automation","timestamp":"2026-02-18T16:02:38.591Z"}
+[32minfo[39m: [CA 215] Found patient row by number {"hasLink":true,"rowIndex":1,"service":"clinic-automation","timestamp":"2026-02-18T16:02:40.601Z"}
+[32minfo[39m: [CA 216] Clicked patient link via filter method {"service":"clinic-automation","timestamp":"2026-02-18T16:02:41.169Z"}
+[32minfo[39m: [CA 217] Patient opened from search results by number {"service":"clinic-automation","timestamp":"2026-02-18T16:02:43.299Z"}
+[32minfo[39m: [VisitDetails] Extracting NRIC from biodata page for: HASLINA BINTE HASSAN BASRI {"service":"clinic-automation","timestamp":"2026-02-18T16:02:45.302Z"}
+[32minfo[39m: [CA 218] Get patient NRIC {"service":"clinic-automation","timestamp":"2026-02-18T16:02:45.302Z"}
+[32minfo[39m: [CA 219] Extract NRIC from patient biodata/info page {"service":"clinic-automation","timestamp":"2026-02-18T16:02:45.302Z"}
+[32minfo[39m: [CA 220] NRIC found in input field {"nric":"S7349449D","selector":"input[name*=\"nric\" i]","service":"clinic-automation","timestamp":"2026-02-18T16:02:46.522Z"}
+[32minfo[39m: [VisitDetails] Found NRIC: S7349449D for patient: HASLINA BINTE HASSAN BASRI {"service":"clinic-automation","timestamp":"2026-02-18T16:02:46.522Z"}
+[32minfo[39m: [VisitDetails] Updated visit 65ff1924-e660-4ffd-9f91-ab8deccd6175 with NRIC: S7349449D {"service":"clinic-automation","timestamp":"2026-02-18T16:02:47.225Z"}
+[32minfo[39m: [VisitDetails] Extracting charge type, diagnosis, and MC data for visit 65ff1924-e660-4ffd-9f91-ab8deccd6175 on 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-18T16:02:47.226Z"}
+[32minfo[39m: [CA 221] Get charge type, diagnosis, and MC data for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:02:47.226Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 222] Check for First Consult on visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:02:47.226Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 223] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:02:47.226Z"}
+[32minfo[39m: [CA 224] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:02:50.821Z"}
+[32minfo[39m: [CA 225] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:02:50.822Z"}
+[32minfo[39m: [CA 226] All Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:03:23.733Z"}
+[32minfo[39m: [CA 227] First Consult check result {"found":false,"service":"clinic-automation","timestamp":"2026-02-18T16:03:25.746Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 228] Charge type determined {"chargeType":"follow","hasFirstConsult":false,"service":"clinic-automation","timestamp":"2026-02-18T16:03:25.747Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 229] MC extraction from TX History disabled; using defaults {"mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T16:03:25.747Z"}
+[32minfo[39m: [CA 230] Open Diagnosis Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:03:25.747Z"}
+[32minfo[39m: [CA 231] Diagnosis Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:03:29.351Z"}
+[32minfo[39m: [CA 232] Extract diagnosis for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:03:29.352Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 233] No diagnosis rows found in Diagnosis tab tables {"service":"clinic-automation","timestamp":"2026-02-18T16:03:30.364Z"}
+[32minfo[39m: [CA 234] Extract latest diagnosis from Diagnosis tab {"service":"clinic-automation","timestamp":"2026-02-18T16:03:30.365Z"}
+[32minfo[39m: [CA 235] No diagnosis found in Diagnosis tab {"service":"clinic-automation","timestamp":"2026-02-18T16:03:31.370Z"}
+[32minfo[39m: [CA 236] Diagnosis not found in Diagnosis tab, trying raw Diagnosis extraction {"service":"clinic-automation","timestamp":"2026-02-18T16:03:31.370Z"}
+[32minfo[39m: [CA 237] Extract diagnosis from TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:03:31.371Z"}
+[32minfo[39m: [CA 238] No diagnosis found in TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:03:32.410Z"}
+[32minfo[39m: [CA 239] Diagnosis requires broadened source search {"currentDate":null,"currentDiagnosis":"","currentSource":null,"service":"clinic-automation","timestamp":"2026-02-18T16:03:32.410Z"}
+[32minfo[39m: [CA 240] Checking All tab for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T16:03:32.410Z"}
+[32minfo[39m: [CA 241] Extract diagnosis from All tab {"service":"clinic-automation","timestamp":"2026-02-18T16:03:32.411Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 242] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:03:32.411Z"}
+[32minfo[39m: [CA 243] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:03:35.986Z"}
+[32minfo[39m: [CA 244] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:03:35.988Z"}
+[32minfo[39m: [CA 245] All Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:04:08.892Z"}
+[32minfo[39m: [CA 246] No diagnosis found in All tab {"service":"clinic-automation","timestamp":"2026-02-18T16:04:10.409Z"}
+[32minfo[39m: [CA 247] Checking Visit tab for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T16:04:10.410Z"}
+[32minfo[39m: [CA 248] Extract diagnosis from Visit Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:04:10.410Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 249] Open Visit Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:04:10.410Z"}
+[32minfo[39m: [CA 250] Visit Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:04:12.613Z"}
+[32minfo[39m: [CA 251] No diagnosis found in Visit tab {"service":"clinic-automation","timestamp":"2026-02-18T16:04:13.429Z"}
+[32minfo[39m: [CA 252] Checking Past Notes for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T16:04:13.430Z"}
+[32minfo[39m: [CA 253] Extract diagnosis from Past Notes {"service":"clinic-automation","timestamp":"2026-02-18T16:04:13.430Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 254] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:04:13.430Z"}
+[32minfo[39m: [CA 255] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:04:16.999Z"}
+[32minfo[39m: [CA 256] Open Past Notes Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:04:17.001Z"}
+[32minfo[39m: [CA 257] Past Notes Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:04:22.823Z"}
+[32minfo[39m: [CA 258] Past Notes entries expanded {"service":"clinic-automation","timestamp":"2026-02-18T16:04:22.889Z","totalClicked":1,"visitDate":"2026-02-16"}
+[32minfo[39m: [CA 259] Diagnosis extracted from Past Notes {"code":null,"date":"2026-02-16","description":"Pain in right knee","service":"clinic-automation","timestamp":"2026-02-18T16:04:25.304Z"}
+[32minfo[39m: [CA 260] Extracting medicines for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:04:25.311Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 261] Open Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:04:25.311Z"}
+[32minfo[39m: [CA 262] Medicine Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:04:28.457Z"}
+[32minfo[39m: [CA 263] Extract medicines from Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:04:28.457Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 264] Medicines extracted from Medicine Tab {"chosenDateIso":"2026-02-16","count":2,"medicines":[{"amount":210,"name":"PHYSIOTHERAPY - RK","quantity":1,"unitPrice":1},{"amount":80,"name":"SPECIALIST CONSULTATION","quantity":1,"unitPrice":1}],"service":"clinic-automation","timestamp":"2026-02-18T16:04:29.474Z","totalRecords":54,"visitDate":"2026-02-16"}
+[32minfo[39m: [CA 265] TX History: extracted medicines summary {"count":2,"filteredOut":0,"sample":[{"amount":210,"name":"PHYSIOTHERAPY - RK","quantity":1,"unitPrice":1},{"amount":80,"name":"SPECIALIST CONSULTATION","quantity":1,"unitPrice":1}],"service":"clinic-automation","timestamp":"2026-02-18T16:04:29.474Z"}
+[32minfo[39m: [VisitDetails] Extracted data for visit 65ff1924-e660-4ffd-9f91-ab8deccd6175: {"chargeType":"follow","diagnosis":"Pain in right knee","mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T16:04:29.474Z"}
+[32minfo[39m: [VisitDetails] Updated visit 65ff1924-e660-4ffd-9f91-ab8deccd6175 with extracted details {"service":"clinic-automation","timestamp":"2026-02-18T16:04:30.837Z"}
+[32minfo[39m: [VisitDetails] Successfully extracted details for visit 65ff1924-e660-4ffd-9f91-ab8deccd6175 {"chargeType":"follow","diagnosis":"Pain in right knee","mcDays":0,"service":"clinic-automation","timestamp":"2026-02-18T16:04:30.837Z"}
+[32minfo[39m: [VisitDetails] Processing visit 5/21: SION HUI CHIN (2026-02-16) {"service":"clinic-automation","timestamp":"2026-02-18T16:04:32.396Z"}
+[32minfo[39m: [VisitDetails] Navigating to Patient Page for visit 485f285f-b8c6-4b2b-a6b8-d836e436c01f (SION HUI CHIN) {"service":"clinic-automation","timestamp":"2026-02-18T16:04:33.002Z"}
+[32minfo[39m: [CA 266] Navigate to Patient Page - START {"service":"clinic-automation","timestamp":"2026-02-18T16:04:33.003Z"}
+[32minfo[39m: [CA 267] Current URL before navigation {"service":"clinic-automation","timestamp":"2026-02-18T16:04:33.003Z","url":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=BkaYHkmq7GVmP3fmXihJsCQyorhg4oOqmhBGVVcNGg2P4SCmRhSSCCEaImkJQR6a0eeFopFBUm17ONcqXQuj2EKseExLfC+I8/njcKLWEs8aLFEmq6eBhg=="}
+[32minfo[39m: [CA 268] Force-cleared blocking history overlay {"changedNodes":2,"service":"clinic-automation","timestamp":"2026-02-18T16:04:33.008Z"}
+[32minfo[39m: [CA 269] QueueLog: navigated Home before Patient search {"currentUrl":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=BkaYHkmq7GVmP3fmXihJsCQyorhg4oOqmhBGVVcNGg2P4SCmRhSSCCEaImkJQR6a0eeFopFBUm17ONcqXQuj2EKseExLfC+I8/njcKLWEs8aLFEmq6eBhg==","service":"clinic-automation","timestamp":"2026-02-18T16:04:37.575Z"}
+[32minfo[39m: [CA 270] Already in Reception or Patient page, proceeding {"currentUrl":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=BkaYHkmq7GVmP3fmXihJsCQyorhg4oOqmhBGVVcNGg2P4SCmRhSSCCEaImkJQR6a0eeFopFBUm17ONcqXQuj2EKseExLfC+I8/njcKLWEs8aLFEmq6eBhg==","service":"clinic-automation","timestamp":"2026-02-18T16:04:37.632Z"}
+[32minfo[39m: [CA 271] Looking for sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-18T16:04:37.632Z"}
+[32minfo[39m: [CA 272] Found menu toggle, clicking {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-18T16:04:37.643Z"}
+[32minfo[39m: [CA 273] Looking for Patient sidebar link {"service":"clinic-automation","timestamp":"2026-02-18T16:04:38.353Z"}
+[32minfo[39m: [CA 274] Force-cleared blocking history overlay {"changedNodes":1,"service":"clinic-automation","timestamp":"2026-02-18T16:04:38.358Z"}
+[32minfo[39m: [CA 275] Force-cleared blocking history overlay {"changedNodes":1,"service":"clinic-automation","timestamp":"2026-02-18T16:04:38.564Z"}
+[32minfo[39m: [CA 276] Patient link status {"count":1,"isVisible":true,"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T16:04:38.776Z"}
+[32minfo[39m: [CA 277] Clicking Patient sidebar link via UI {"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T16:04:38.776Z"}
+[32minfo[39m: [CA 278] Playwright click failed, trying JavaScript click {"error":"locator.click: Timeout 3000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a.SideMenuList[cat=\"Patient\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <a href=\"\" cat=\"Patient\" title=\"Patient\" class=\"SideMenuList\" data-placement=\"right\">…</a>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    5 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n","service":"clinic-automation","timestamp":"2026-02-18T16:04:42.283Z"}
+[32minfo[39m: [CA 279] Patient link clicked via JavaScript {"service":"clinic-automation","timeTaken":3734,"timestamp":"2026-02-18T16:04:42.295Z"}
+[32minfo[39m: [CA 280] After Patient click, checking URL {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T16:04:43.828Z","totalTime":6196}
+[32minfo[39m: [CA 281] Successfully navigated to Patient Page via UI click {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T16:04:43.829Z","totalTime":10826}
+[32minfo[39m: [CA 282] Navigate to Patient Page - COMPLETE {"service":"clinic-automation","timestamp":"2026-02-18T16:04:43.829Z","totalTime":10826}
+[32minfo[39m: [VisitDetails] Searching for patient by number: 78070 (SION HUI CHIN) {"service":"clinic-automation","timestamp":"2026-02-18T16:04:43.829Z"}
+[32minfo[39m: [CA 283] Search patient by number {"patientNumber":"78070","service":"clinic-automation","timestamp":"2026-02-18T16:04:43.830Z"}
+[32minfo[39m: [CA 284] Pressing Enter to execute search (may need to dismiss dialog first) {"service":"clinic-automation","timestamp":"2026-02-18T16:04:45.640Z"}
+[32minfo[39m: [CA 285] Patient search executed by number (Enter key x2) {"patientNumber":"78070","service":"clinic-automation","timestamp":"2026-02-18T16:04:47.758Z"}
+[32minfo[39m: [VisitDetails] Opening patient record by number: 78070 {"service":"clinic-automation","timestamp":"2026-02-18T16:04:49.762Z"}
+[32minfo[39m: [CA 286] Open patient from search results by number {"patientNumber":"78070","service":"clinic-automation","timestamp":"2026-02-18T16:04:49.762Z"}
+[32minfo[39m: [CA 287] Found patient row by number {"hasLink":true,"rowIndex":1,"service":"clinic-automation","timestamp":"2026-02-18T16:04:51.771Z"}
+[32minfo[39m: [CA 288] Clicked patient link via filter method {"service":"clinic-automation","timestamp":"2026-02-18T16:04:52.402Z"}
+[32minfo[39m: [CA 289] Patient opened from search results by number {"service":"clinic-automation","timestamp":"2026-02-18T16:04:54.564Z"}
+[32minfo[39m: [VisitDetails] Extracting NRIC from biodata page for: SION HUI CHIN {"service":"clinic-automation","timestamp":"2026-02-18T16:04:56.568Z"}
+[32minfo[39m: [CA 290] Get patient NRIC {"service":"clinic-automation","timestamp":"2026-02-18T16:04:56.568Z"}
+[32minfo[39m: [CA 291] Extract NRIC from patient biodata/info page {"service":"clinic-automation","timestamp":"2026-02-18T16:04:56.569Z"}
+[32minfo[39m: [CA 292] NRIC found in input field {"nric":"S7802733I","selector":"input[name*=\"nric\" i]","service":"clinic-automation","timestamp":"2026-02-18T16:04:57.787Z"}
+[32minfo[39m: [VisitDetails] Found NRIC: S7802733I for patient: SION HUI CHIN {"service":"clinic-automation","timestamp":"2026-02-18T16:04:57.787Z"}
+[32minfo[39m: [VisitDetails] Updated visit 485f285f-b8c6-4b2b-a6b8-d836e436c01f with NRIC: S7802733I {"service":"clinic-automation","timestamp":"2026-02-18T16:04:58.061Z"}
+[32minfo[39m: [VisitDetails] Extracting charge type, diagnosis, and MC data for visit 485f285f-b8c6-4b2b-a6b8-d836e436c01f on 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-18T16:04:58.062Z"}
+[32minfo[39m: [CA 293] Get charge type, diagnosis, and MC data for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:04:58.062Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 294] Check for First Consult on visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:04:58.062Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 295] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:04:58.062Z"}
+[32minfo[39m: [CA 296] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:05:01.647Z"}
+[32minfo[39m: [CA 297] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:05:01.648Z"}
+[32minfo[39m: [CA 298] All Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:05:34.556Z"}
+[32minfo[39m: [CA 299] First Consult check result {"found":false,"service":"clinic-automation","timestamp":"2026-02-18T16:05:36.571Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 300] Charge type determined {"chargeType":"follow","hasFirstConsult":false,"service":"clinic-automation","timestamp":"2026-02-18T16:05:36.571Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 301] MC extraction from TX History disabled; using defaults {"mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T16:05:36.571Z"}
+[32minfo[39m: [CA 302] Open Diagnosis Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:05:36.572Z"}
+[32minfo[39m: [CA 303] Diagnosis Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:05:40.198Z"}
+[32minfo[39m: [CA 304] Extract diagnosis for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:05:40.198Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 305] No exact diagnosis date match; using most recent on/before visit date {"code":"M25.51","date":"21/01/2026","description":"Pain in a joint shoulder region","service":"clinic-automation","timestamp":"2026-02-18T16:05:41.212Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 306] Diagnosis requires broadened source search {"currentDate":"21/01/2026","currentDiagnosis":"Pain in a joint shoulder region","currentSource":"diagnosis_tab","service":"clinic-automation","timestamp":"2026-02-18T16:05:41.214Z"}
+[32minfo[39m: [CA 307] Checking All tab for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T16:05:41.215Z"}
+[32minfo[39m: [CA 308] Extract diagnosis from All tab {"service":"clinic-automation","timestamp":"2026-02-18T16:05:41.215Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 309] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:05:41.215Z"}
+[32minfo[39m: [CA 310] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:05:44.785Z"}
+[32minfo[39m: [CA 311] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:05:44.785Z"}
+[32minfo[39m: [CA 312] All Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:06:17.706Z"}
+[32minfo[39m: [CA 313] No diagnosis found in All tab {"service":"clinic-automation","timestamp":"2026-02-18T16:06:19.219Z"}
+[32minfo[39m: [CA 314] Checking Visit tab for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T16:06:19.219Z"}
+[32minfo[39m: [CA 315] Extract diagnosis from Visit Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:06:19.220Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 316] Open Visit Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:06:19.220Z"}
+[32minfo[39m: [CA 317] Visit Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:06:21.426Z"}
+[32minfo[39m: [CA 318] No diagnosis found in Visit tab {"service":"clinic-automation","timestamp":"2026-02-18T16:06:22.238Z"}
+[32minfo[39m: [CA 319] Checking Past Notes for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T16:06:22.238Z"}
+[32minfo[39m: [CA 320] Extract diagnosis from Past Notes {"service":"clinic-automation","timestamp":"2026-02-18T16:06:22.238Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 321] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:06:22.238Z"}
+[32minfo[39m: [CA 322] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:06:25.801Z"}
+[32minfo[39m: [CA 323] Open Past Notes Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:06:25.802Z"}
+[32minfo[39m: [CA 324] Past Notes Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:06:31.677Z"}
+[32minfo[39m: [CA 325] Past Notes entries expanded {"service":"clinic-automation","timestamp":"2026-02-18T16:06:31.731Z","totalClicked":1,"visitDate":"2026-02-16"}
+[32minfo[39m: [CA 326] No diagnosis found in Past Notes for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:06:34.147Z"}
+[32minfo[39m: [CA 327] Extract diagnosis intent from Past Notes {"service":"clinic-automation","timestamp":"2026-02-18T16:06:34.150Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 328] Open Past Notes Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:06:34.150Z"}
+[32minfo[39m: [CA 329] Past Notes context already open {"service":"clinic-automation","timestamp":"2026-02-18T16:06:41.831Z"}
+[32minfo[39m: [CA 330] Past Notes entries expanded {"service":"clinic-automation","timestamp":"2026-02-18T16:06:41.884Z","totalClicked":1,"visitDate":"2026-02-16"}
+[32minfo[39m: [CA 331] Past Notes intent debug (no match) {"baseBodyPart":"shoulder","evidence":["20ssoc16/02/2026pcr specialist consultation1","20ssoc02/02/2026pcr specialist consultation1","00ssoc21/01/2026pcr specialist first consultation1","specialist consultation - qty(1","specialist consultation - qty(1","specialist first consultation - qty(1"],"poolSize":2,"service":"clinic-automation","targetDateStr":"16/02/2026","targetDateStrAlt":"02/16/2026","timestamp":"2026-02-18T16:06:44.310Z","title":"Patient Biodata","url":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=QxcLr4yNYHOXS3kjBD0FxxTENQUAqHOupQ2y+C6SXfdqiMRXT7/DF2/CY3zRC+Y4EIiTU8W7kNhOCUSzak/0g+fjerVdf6XT"}
+[32minfo[39m: [CA 332] No diagnosis intent found in Past Notes {"service":"clinic-automation","timestamp":"2026-02-18T16:06:44.310Z"}
+[32minfo[39m: [CA 333] Extracting medicines for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:06:44.314Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 334] Open Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:06:44.315Z"}
+[32minfo[39m: [CA 335] Medicine Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:06:47.464Z"}
+[32minfo[39m: [CA 336] Extract medicines from Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:06:47.465Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 337] Medicines extracted from Medicine Tab {"chosenDateIso":"2026-02-16","count":3,"medicines":[{"amount":80,"name":"Wrist Brace (DR)","quantity":1,"unitPrice":80},{"amount":263.2,"name":"Lyrica (75 mg)","quantity":56,"unitPrice":4.7},{"amount":75,"name":"SPECIALIST CONSULTATION","quantity":1,"unitPrice":1}],"service":"clinic-automation","timestamp":"2026-02-18T16:06:48.482Z","totalRecords":11,"visitDate":"2026-02-16"}
+[32minfo[39m: [CA 338] TX History: extracted medicines summary {"count":3,"filteredOut":0,"sample":[{"amount":80,"name":"Wrist Brace (DR)","quantity":1,"unitPrice":80},{"amount":263.2,"name":"Lyrica (75 mg)","quantity":56,"unitPrice":4.7},{"amount":75,"name":"SPECIALIST CONSULTATION","quantity":1,"unitPrice":1}],"service":"clinic-automation","timestamp":"2026-02-18T16:06:48.482Z"}
+[32minfo[39m: [VisitDetails] Extracted data for visit 485f285f-b8c6-4b2b-a6b8-d836e436c01f: {"chargeType":"follow","diagnosis":"Pain in a joint shoulder region","mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T16:06:48.483Z"}
+[32minfo[39m: [VisitDetails] Updated visit 485f285f-b8c6-4b2b-a6b8-d836e436c01f with extracted details {"service":"clinic-automation","timestamp":"2026-02-18T16:06:49.441Z"}
+[32minfo[39m: [VisitDetails] Successfully extracted details for visit 485f285f-b8c6-4b2b-a6b8-d836e436c01f {"chargeType":"follow","diagnosis":"Pain in a joint shoulder region","mcDays":0,"service":"clinic-automation","timestamp":"2026-02-18T16:06:49.441Z"}
+[32minfo[39m: [VisitDetails] Processing visit 6/21: WANG WEI TING SARAH (2026-02-16) {"service":"clinic-automation","timestamp":"2026-02-18T16:06:50.929Z"}
+[32minfo[39m: [VisitDetails] Navigating to Patient Page for visit abc41d6e-c387-46bd-867b-2e5e7698761c (WANG WEI TING SARAH) {"service":"clinic-automation","timestamp":"2026-02-18T16:06:51.507Z"}
+[32minfo[39m: [CA 339] Navigate to Patient Page - START {"service":"clinic-automation","timestamp":"2026-02-18T16:06:51.507Z"}
+[32minfo[39m: [CA 340] Current URL before navigation {"service":"clinic-automation","timestamp":"2026-02-18T16:06:51.508Z","url":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=QxcLr4yNYHOXS3kjBD0FxxTENQUAqHOupQ2y+C6SXfdqiMRXT7/DF2/CY3zRC+Y4EIiTU8W7kNhOCUSzak/0g+fjerVdf6XT"}
+[32minfo[39m: [CA 341] Force-cleared blocking history overlay {"changedNodes":2,"service":"clinic-automation","timestamp":"2026-02-18T16:06:51.515Z"}
+[32minfo[39m: [CA 342] QueueLog: navigated Home before Patient search {"currentUrl":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=QxcLr4yNYHOXS3kjBD0FxxTENQUAqHOupQ2y+C6SXfdqiMRXT7/DF2/CY3zRC+Y4EIiTU8W7kNhOCUSzak/0g+fjerVdf6XT","service":"clinic-automation","timestamp":"2026-02-18T16:06:56.083Z"}
+[32minfo[39m: [CA 343] Already in Reception or Patient page, proceeding {"currentUrl":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=QxcLr4yNYHOXS3kjBD0FxxTENQUAqHOupQ2y+C6SXfdqiMRXT7/DF2/CY3zRC+Y4EIiTU8W7kNhOCUSzak/0g+fjerVdf6XT","service":"clinic-automation","timestamp":"2026-02-18T16:06:56.116Z"}
+[32minfo[39m: [CA 344] Looking for sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-18T16:06:56.117Z"}
+[32minfo[39m: [CA 345] Found menu toggle, clicking {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-18T16:06:56.136Z"}
+[32minfo[39m: [CA 346] Looking for Patient sidebar link {"service":"clinic-automation","timestamp":"2026-02-18T16:06:56.847Z"}
+[32minfo[39m: [CA 347] Force-cleared blocking history overlay {"changedNodes":1,"service":"clinic-automation","timestamp":"2026-02-18T16:06:56.854Z"}
+[32minfo[39m: [CA 348] Force-cleared blocking history overlay {"changedNodes":1,"service":"clinic-automation","timestamp":"2026-02-18T16:06:57.069Z"}
+[32minfo[39m: [CA 349] Patient link status {"count":1,"isVisible":true,"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T16:06:57.281Z"}
+[32minfo[39m: [CA 350] Clicking Patient sidebar link via UI {"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T16:06:57.282Z"}
+[32minfo[39m: [CA 351] Playwright click failed, trying JavaScript click {"error":"locator.click: Timeout 3000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a.SideMenuList[cat=\"Patient\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <a href=\"\" cat=\"Patient\" title=\"Patient\" class=\"SideMenuList\" data-placement=\"right\">…</a>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    5 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is visible, enabled and stable\u001b[22m\n\u001b[2m    - scrolling into view if needed\u001b[22m\n","service":"clinic-automation","timestamp":"2026-02-18T16:07:00.787Z"}
+[32minfo[39m: [CA 352] Patient link clicked via JavaScript {"service":"clinic-automation","timeTaken":3740,"timestamp":"2026-02-18T16:07:00.796Z"}
+[32minfo[39m: [CA 353] After Patient click, checking URL {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T16:07:01.953Z","totalTime":5836}
+[32minfo[39m: [CA 354] Successfully navigated to Patient Page via UI click {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T16:07:01.953Z","totalTime":10446}
+[32minfo[39m: [CA 355] Navigate to Patient Page - COMPLETE {"service":"clinic-automation","timestamp":"2026-02-18T16:07:01.953Z","totalTime":10446}
+[32minfo[39m: [VisitDetails] Searching for patient by number: 67815 (WANG WEI TING SARAH) {"service":"clinic-automation","timestamp":"2026-02-18T16:07:01.954Z"}
+[32minfo[39m: [CA 356] Search patient by number {"patientNumber":"67815","service":"clinic-automation","timestamp":"2026-02-18T16:07:01.954Z"}
+[32minfo[39m: [CA 357] Pressing Enter to execute search (may need to dismiss dialog first) {"service":"clinic-automation","timestamp":"2026-02-18T16:07:03.758Z"}
+[32minfo[39m: [CA 358] Patient search executed by number (Enter key x2) {"patientNumber":"67815","service":"clinic-automation","timestamp":"2026-02-18T16:07:05.878Z"}
+[32minfo[39m: [VisitDetails] Opening patient record by number: 67815 {"service":"clinic-automation","timestamp":"2026-02-18T16:07:07.882Z"}
+[32minfo[39m: [CA 359] Open patient from search results by number {"patientNumber":"67815","service":"clinic-automation","timestamp":"2026-02-18T16:07:07.884Z"}
+[32minfo[39m: [CA 360] Found patient row by number {"hasLink":true,"rowIndex":1,"service":"clinic-automation","timestamp":"2026-02-18T16:07:09.892Z"}
+[32minfo[39m: [CA 361] Clicked patient link via filter method {"service":"clinic-automation","timestamp":"2026-02-18T16:07:10.456Z"}
+[32minfo[39m: [CA 362] Patient opened from search results by number {"service":"clinic-automation","timestamp":"2026-02-18T16:07:12.664Z"}
+[32minfo[39m: [VisitDetails] Extracting NRIC from biodata page for: WANG WEI TING SARAH {"service":"clinic-automation","timestamp":"2026-02-18T16:07:14.671Z"}
+[32minfo[39m: [CA 363] Get patient NRIC {"service":"clinic-automation","timestamp":"2026-02-18T16:07:14.672Z"}
+[32minfo[39m: [CA 364] Extract NRIC from patient biodata/info page {"service":"clinic-automation","timestamp":"2026-02-18T16:07:14.672Z"}
+[32minfo[39m: [CA 365] NRIC found in input field {"nric":"T0835030I","selector":"input[name*=\"nric\" i]","service":"clinic-automation","timestamp":"2026-02-18T16:07:15.907Z"}
+[32minfo[39m: [VisitDetails] Found NRIC: T0835030I for patient: WANG WEI TING SARAH {"service":"clinic-automation","timestamp":"2026-02-18T16:07:15.908Z"}
+[32minfo[39m: [VisitDetails] Updated visit abc41d6e-c387-46bd-867b-2e5e7698761c with NRIC: T0835030I {"service":"clinic-automation","timestamp":"2026-02-18T16:07:16.233Z"}
+[32minfo[39m: [VisitDetails] Extracting charge type, diagnosis, and MC data for visit abc41d6e-c387-46bd-867b-2e5e7698761c on 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-18T16:07:16.234Z"}
+[32minfo[39m: [CA 366] Get charge type, diagnosis, and MC data for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:07:16.234Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 367] Check for First Consult on visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:07:16.234Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 368] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:07:16.234Z"}
+[32minfo[39m: [CA 369] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:07:19.821Z"}
+[32minfo[39m: [CA 370] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:07:19.821Z"}
+[32minfo[39m: [CA 371] All Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:07:52.746Z"}
+[32minfo[39m: [CA 372] First Consult check result {"found":false,"service":"clinic-automation","timestamp":"2026-02-18T16:07:54.770Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 373] Charge type determined {"chargeType":"follow","hasFirstConsult":false,"service":"clinic-automation","timestamp":"2026-02-18T16:07:54.771Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 374] MC extraction from TX History disabled; using defaults {"mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T16:07:54.772Z"}
+[32minfo[39m: [CA 375] Open Diagnosis Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:07:54.772Z"}
+[32minfo[39m: [CA 376] Diagnosis Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:07:58.396Z"}
+[32minfo[39m: [CA 377] Extract diagnosis for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:07:58.397Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 378] No exact diagnosis date match; using most recent on/before visit date {"code":"M25.57","date":"01/11/2022","description":"Pain in a joint ankle and foot","service":"clinic-automation","timestamp":"2026-02-18T16:07:59.409Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 379] Diagnosis requires broadened source search {"currentDate":"01/11/2022","currentDiagnosis":"Pain in a joint ankle and foot","currentSource":"diagnosis_tab","service":"clinic-automation","timestamp":"2026-02-18T16:07:59.414Z"}
+[32minfo[39m: [CA 380] Checking All tab for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T16:07:59.414Z"}
+[32minfo[39m: [CA 381] Extract diagnosis from All tab {"service":"clinic-automation","timestamp":"2026-02-18T16:07:59.414Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 382] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:07:59.414Z"}
+[32minfo[39m: [CA 383] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:08:02.991Z"}
+[32minfo[39m: [CA 384] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:08:02.992Z"}
+[32minfo[39m: [CA 385] All Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:08:35.920Z"}
+[32minfo[39m: [CA 386] No diagnosis found in All tab {"service":"clinic-automation","timestamp":"2026-02-18T16:08:37.436Z"}
+[32minfo[39m: [CA 387] Checking Visit tab for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T16:08:37.436Z"}
+[32minfo[39m: [CA 388] Extract diagnosis from Visit Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:08:37.437Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 389] Open Visit Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:08:37.437Z"}
+[32minfo[39m: [CA 390] Visit Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:08:39.647Z"}
+[32minfo[39m: [CA 391] No diagnosis found in Visit tab {"service":"clinic-automation","timestamp":"2026-02-18T16:08:40.457Z"}
+[32minfo[39m: [CA 392] Checking Past Notes for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T16:08:40.458Z"}
+[32minfo[39m: [CA 393] Extract diagnosis from Past Notes {"service":"clinic-automation","timestamp":"2026-02-18T16:08:40.458Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 394] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:08:40.458Z"}
+[32minfo[39m: [CA 395] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:08:44.018Z"}
+[32minfo[39m: [CA 396] Open Past Notes Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:08:44.018Z"}
+[32minfo[39m: [CA 397] Past Notes Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:08:49.884Z"}
+[32minfo[39m: [CA 398] Past Notes entries expanded {"service":"clinic-automation","timestamp":"2026-02-18T16:08:49.940Z","totalClicked":1,"visitDate":"2026-02-16"}
+[32minfo[39m: [CA 399] No diagnosis found in Past Notes for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:08:52.356Z"}
+[32minfo[39m: [CA 400] Extract diagnosis intent from Past Notes {"service":"clinic-automation","timestamp":"2026-02-18T16:08:52.359Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 401] Open Past Notes Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:08:52.359Z"}
+[32minfo[39m: [CA 402] Past Notes context already open {"service":"clinic-automation","timestamp":"2026-02-18T16:09:00.049Z"}
+[32minfo[39m: [CA 403] Past Notes entries expanded {"service":"clinic-automation","timestamp":"2026-02-18T16:09:00.107Z","totalClicked":1,"visitDate":"2026-02-16"}
+[32minfo[39m: [CA 404] Past Notes intent debug (no match) {"baseBodyPart":"ankle","evidence":["00ssoc16/02/2026pcr specialist consultation1","00ssoc02/02/2026pcr specialist consultation1","00ssoc21/01/2026pcr specialist consultation1","00ssoc06/10/2025pcr specialist consultation1","00ssoc22/09/2025pcr specialist consultation1","00ssoc18/05/2024pcr consultation 1","00ssoc20/04/2024pcr consultation 1","00ssoc30/03/2024pcr consultation 1","00ssoc07/03/2024pcr consultation 1","00ssoc01/03/2024pcr consultation 1"],"poolSize":2,"service":"clinic-automation","targetDateStr":"16/02/2026","targetDateStrAlt":"02/16/2026","timestamp":"2026-02-18T16:09:02.532Z","title":"Patient Biodata","url":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=JxQaL8IloABhBrxA4ysUW33a7iE/mZqb5ibbpJE+a0kH9pXkHUPQ27VOGiI3/lW2Ksjnt2zbNtnhRNdfCHva4n2rgriQxDWXd9oH73K6UGU="}
+[32minfo[39m: [CA 405] No diagnosis intent found in Past Notes {"service":"clinic-automation","timestamp":"2026-02-18T16:09:02.532Z"}
+[32minfo[39m: [CA 406] Extracting medicines for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:09:02.537Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 407] Open Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:09:02.537Z"}
+[32minfo[39m: [CA 408] Medicine Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:09:05.710Z"}
+[32minfo[39m: [CA 409] Extract medicines from Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:09:05.710Z","visitDate":"2026-02-16"}
+[32minfo[39m: [CA 410] Medicines extracted from Medicine Tab {"chosenDateIso":"2026-02-16","count":2,"medicines":[{"amount":80,"name":"Wrist Brace (DR)","quantity":1,"unitPrice":80},{"amount":75,"name":"SPECIALIST CONSULTATION","quantity":1,"unitPrice":1}],"service":"clinic-automation","timestamp":"2026-02-18T16:09:06.729Z","totalRecords":33,"visitDate":"2026-02-16"}
+[32minfo[39m: [CA 411] TX History: extracted medicines summary {"count":2,"filteredOut":0,"sample":[{"amount":80,"name":"Wrist Brace (DR)","quantity":1,"unitPrice":80},{"amount":75,"name":"SPECIALIST CONSULTATION","quantity":1,"unitPrice":1}],"service":"clinic-automation","timestamp":"2026-02-18T16:09:06.730Z"}
+[32minfo[39m: [VisitDetails] Extracted data for visit abc41d6e-c387-46bd-867b-2e5e7698761c: {"chargeType":"follow","diagnosis":"Pain in a joint ankle and foot","mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T16:09:06.730Z"}
+[32minfo[39m: [VisitDetails] Updated visit abc41d6e-c387-46bd-867b-2e5e7698761c with extracted details {"service":"clinic-automation","timestamp":"2026-02-18T16:09:07.697Z"}
+[32minfo[39m: [VisitDetails] Successfully extracted details for visit abc41d6e-c387-46bd-867b-2e5e7698761c {"chargeType":"follow","diagnosis":"Pain in a joint ankle and foot","mcDays":0,"service":"clinic-automation","timestamp":"2026-02-18T16:09:07.698Z"}
+[32minfo[39m: [VisitDetails] Processing visit 7/21: TJIA NATHANAEL THOMAS (2026-02-14) {"service":"clinic-automation","timestamp":"2026-02-18T16:09:09.006Z"}
+[32minfo[39m: [VisitDetails] Navigating to Patient Page for visit 202e367f-d318-43b7-9fb6-02828976ea61 (TJIA NATHANAEL THOMAS) {"service":"clinic-automation","timestamp":"2026-02-18T16:09:09.672Z"}
+[32minfo[39m: [CA 412] Navigate to Patient Page - START {"service":"clinic-automation","timestamp":"2026-02-18T16:09:09.672Z"}
+[32minfo[39m: [CA 413] Current URL before navigation {"service":"clinic-automation","timestamp":"2026-02-18T16:09:09.673Z","url":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=JxQaL8IloABhBrxA4ysUW33a7iE/mZqb5ibbpJE+a0kH9pXkHUPQ27VOGiI3/lW2Ksjnt2zbNtnhRNdfCHva4n2rgriQxDWXd9oH73K6UGU="}
+[32minfo[39m: [CA 414] Force-cleared blocking history overlay {"changedNodes":2,"service":"clinic-automation","timestamp":"2026-02-18T16:09:09.684Z"}
+[32minfo[39m: [CA 415] QueueLog: navigated Home before Patient search {"currentUrl":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=JxQaL8IloABhBrxA4ysUW33a7iE/mZqb5ibbpJE+a0kH9pXkHUPQ27VOGiI3/lW2Ksjnt2zbNtnhRNdfCHva4n2rgriQxDWXd9oH73K6UGU=","service":"clinic-automation","timestamp":"2026-02-18T16:09:14.259Z"}
+[32minfo[39m: [CA 416] Already in Reception or Patient page, proceeding {"currentUrl":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=JxQaL8IloABhBrxA4ysUW33a7iE/mZqb5ibbpJE+a0kH9pXkHUPQ27VOGiI3/lW2Ksjnt2zbNtnhRNdfCHva4n2rgriQxDWXd9oH73K6UGU=","service":"clinic-automation","timestamp":"2026-02-18T16:09:14.305Z"}
+[32minfo[39m: [CA 417] Looking for sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-18T16:09:14.306Z"}
+[32minfo[39m: [CA 418] Found menu toggle, clicking {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-18T16:09:14.321Z"}
+[32minfo[39m: [CA 419] Looking for Patient sidebar link {"service":"clinic-automation","timestamp":"2026-02-18T16:09:15.031Z"}
+[32minfo[39m: [CA 420] Force-cleared blocking history overlay {"changedNodes":1,"service":"clinic-automation","timestamp":"2026-02-18T16:09:15.036Z"}
+[32minfo[39m: [CA 421] Force-cleared blocking history overlay {"changedNodes":1,"service":"clinic-automation","timestamp":"2026-02-18T16:09:15.253Z"}
+[32minfo[39m: [CA 422] Patient link status {"count":1,"isVisible":true,"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T16:09:15.465Z"}
+[32minfo[39m: [CA 423] Clicking Patient sidebar link via UI {"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T16:09:15.465Z"}
+[32minfo[39m: [CA 424] Playwright click failed, trying JavaScript click {"error":"locator.click: Timeout 3000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a.SideMenuList[cat=\"Patient\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <a href=\"\" cat=\"Patient\" title=\"Patient\" class=\"SideMenuList\" data-placement=\"right\">…</a>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    5 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n","service":"clinic-automation","timestamp":"2026-02-18T16:09:18.972Z"}
+[32minfo[39m: [CA 425] Patient link clicked via JavaScript {"service":"clinic-automation","timeTaken":3757,"timestamp":"2026-02-18T16:09:18.996Z"}
+[32minfo[39m: [CA 426] After Patient click, checking URL {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T16:09:20.646Z","totalTime":6340}
+[32minfo[39m: [CA 427] Successfully navigated to Patient Page via UI click {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T16:09:20.648Z","totalTime":10976}
+[32minfo[39m: [CA 428] Navigate to Patient Page - COMPLETE {"service":"clinic-automation","timestamp":"2026-02-18T16:09:20.648Z","totalTime":10976}
+[32minfo[39m: [VisitDetails] Searching for patient by number: 78180 (TJIA NATHANAEL THOMAS) {"service":"clinic-automation","timestamp":"2026-02-18T16:09:20.648Z"}
+[32minfo[39m: [CA 429] Search patient by number {"patientNumber":"78180","service":"clinic-automation","timestamp":"2026-02-18T16:09:20.648Z"}
+[32minfo[39m: [CA 430] Pressing Enter to execute search (may need to dismiss dialog first) {"service":"clinic-automation","timestamp":"2026-02-18T16:09:22.450Z"}
+[32minfo[39m: [CA 431] Patient search executed by number (Enter key x2) {"patientNumber":"78180","service":"clinic-automation","timestamp":"2026-02-18T16:09:24.566Z"}
+[32minfo[39m: [VisitDetails] Opening patient record by number: 78180 {"service":"clinic-automation","timestamp":"2026-02-18T16:09:26.569Z"}
+[32minfo[39m: [CA 432] Open patient from search results by number {"patientNumber":"78180","service":"clinic-automation","timestamp":"2026-02-18T16:09:26.570Z"}
+[32minfo[39m: [CA 433] Found patient row by number {"hasLink":true,"rowIndex":1,"service":"clinic-automation","timestamp":"2026-02-18T16:09:28.579Z"}
+[32minfo[39m: [CA 434] Clicked patient link via filter method {"service":"clinic-automation","timestamp":"2026-02-18T16:09:29.140Z"}
+[32minfo[39m: [CA 435] Patient opened from search results by number {"service":"clinic-automation","timestamp":"2026-02-18T16:09:31.449Z"}
+[32minfo[39m: [VisitDetails] Extracting NRIC from biodata page for: TJIA NATHANAEL THOMAS {"service":"clinic-automation","timestamp":"2026-02-18T16:09:33.455Z"}
+[32minfo[39m: [CA 436] Get patient NRIC {"service":"clinic-automation","timestamp":"2026-02-18T16:09:33.455Z"}
+[32minfo[39m: [CA 437] Extract NRIC from patient biodata/info page {"service":"clinic-automation","timestamp":"2026-02-18T16:09:33.455Z"}
+[32minfo[39m: [CA 438] NRIC found in input field {"nric":"T1208937B","selector":"input[name*=\"nric\" i]","service":"clinic-automation","timestamp":"2026-02-18T16:09:35.348Z"}
+[32minfo[39m: [VisitDetails] Found NRIC: T1208937B for patient: TJIA NATHANAEL THOMAS {"service":"clinic-automation","timestamp":"2026-02-18T16:09:35.348Z"}
+[32minfo[39m: [VisitDetails] Updated visit 202e367f-d318-43b7-9fb6-02828976ea61 with NRIC: T1208937B {"service":"clinic-automation","timestamp":"2026-02-18T16:09:35.798Z"}
+[32minfo[39m: [VisitDetails] Extracting charge type, diagnosis, and MC data for visit 202e367f-d318-43b7-9fb6-02828976ea61 on 2026-02-14 {"service":"clinic-automation","timestamp":"2026-02-18T16:09:35.798Z"}
+[32minfo[39m: [CA 439] Get charge type, diagnosis, and MC data for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:09:35.798Z","visitDate":"2026-02-14"}
+[32minfo[39m: [CA 440] Check for First Consult on visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:09:35.799Z","visitDate":"2026-02-14"}
+[32minfo[39m: [CA 441] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:09:35.799Z"}
+[32minfo[39m: [CA 442] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:09:39.374Z"}
+[32minfo[39m: [CA 443] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:09:39.375Z"}
+[32minfo[39m: [CA 444] All Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:10:12.290Z"}
+[32minfo[39m: [CA 445] First Consult check result {"found":false,"service":"clinic-automation","timestamp":"2026-02-18T16:10:14.306Z","visitDate":"2026-02-14"}
+[32minfo[39m: [CA 446] Charge type determined {"chargeType":"follow","hasFirstConsult":false,"service":"clinic-automation","timestamp":"2026-02-18T16:10:14.306Z","visitDate":"2026-02-14"}
+[32minfo[39m: [CA 447] MC extraction from TX History disabled; using defaults {"mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T16:10:14.307Z"}
+[32minfo[39m: [CA 448] Open Diagnosis Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:10:14.307Z"}
+[32minfo[39m: [CA 449] Diagnosis Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:10:17.905Z"}
+[32minfo[39m: [CA 450] Extract diagnosis for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:10:17.906Z","visitDate":"2026-02-14"}
+[32minfo[39m: [CA 451] No exact diagnosis date match; using most recent on/before visit date {"code":"S63.50","date":"06/02/2026","description":"Sprain & strain wrist part unspecified","service":"clinic-automation","timestamp":"2026-02-18T16:10:18.919Z","visitDate":"2026-02-14"}
+[32minfo[39m: [CA 452] Diagnosis requires broadened source search {"currentDate":"06/02/2026","currentDiagnosis":"Sprain & strain wrist part unspecified","currentSource":"diagnosis_tab","service":"clinic-automation","timestamp":"2026-02-18T16:10:18.921Z"}
+[32minfo[39m: [CA 453] Checking All tab for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T16:10:18.921Z"}
+[32minfo[39m: [CA 454] Extract diagnosis from All tab {"service":"clinic-automation","timestamp":"2026-02-18T16:10:18.921Z","visitDate":"2026-02-14"}
+[32minfo[39m: [CA 455] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:10:18.921Z"}
+[32minfo[39m: [CA 456] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:10:22.482Z"}
+[32minfo[39m: [CA 457] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:10:22.482Z"}
+[32minfo[39m: [CA 458] All Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:10:55.381Z"}
+[32minfo[39m: [CA 459] No diagnosis found in All tab {"service":"clinic-automation","timestamp":"2026-02-18T16:10:56.893Z"}
+[32minfo[39m: [CA 460] Checking Visit tab for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T16:10:56.893Z"}
+[32minfo[39m: [CA 461] Extract diagnosis from Visit Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:10:56.893Z","visitDate":"2026-02-14"}
+[32minfo[39m: [CA 462] Open Visit Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:10:56.893Z"}
+[32minfo[39m: [CA 463] Visit Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:10:59.108Z"}
+[32minfo[39m: [CA 464] No diagnosis found in Visit tab {"service":"clinic-automation","timestamp":"2026-02-18T16:10:59.917Z"}
+[32minfo[39m: [CA 465] Checking Past Notes for better diagnosis candidate {"service":"clinic-automation","timestamp":"2026-02-18T16:10:59.918Z"}
+[32minfo[39m: [CA 466] Extract diagnosis from Past Notes {"service":"clinic-automation","timestamp":"2026-02-18T16:10:59.918Z","visitDate":"2026-02-14"}
+[32minfo[39m: [CA 467] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:10:59.918Z"}
+[32minfo[39m: [CA 468] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:11:03.488Z"}
+[32minfo[39m: [CA 469] Open Past Notes Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:11:03.489Z"}
+[32minfo[39m: [CA 470] Past Notes Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:11:09.697Z"}
+[32minfo[39m: [CA 471] Past Notes entries expanded {"service":"clinic-automation","timestamp":"2026-02-18T16:11:09.749Z","totalClicked":1,"visitDate":"2026-02-14"}
+[32minfo[39m: [CA 472] No diagnosis found in Past Notes for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:11:12.162Z"}
+[32minfo[39m: [CA 473] Extracting medicines for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:11:12.167Z","visitDate":"2026-02-14"}
+[32minfo[39m: [CA 474] Open Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:11:12.168Z"}
+[32minfo[39m: [CA 475] Medicine Tab opened {"service":"clinic-automation","timestamp":"2026-02-18T16:11:15.319Z"}
+[32minfo[39m: [CA 476] Extract medicines from Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:11:15.319Z","visitDate":"2026-02-14"}
+[32minfo[39m: [CA 477] Medicines extracted from Medicine Tab {"chosenDateIso":"2026-02-14","count":2,"medicines":[{"amount":109,"name":"X-RAY (OTHERS)","quantity":1,"unitPrice":1},{"amount":80,"name":"SPECIALIST CONSULTATION","quantity":1,"unitPrice":1}],"service":"clinic-automation","timestamp":"2026-02-18T16:11:16.336Z","totalRecords":7,"visitDate":"2026-02-14"}
+[32minfo[39m: [CA 478] TX History: extracted medicines summary {"count":2,"filteredOut":0,"sample":[{"amount":109,"name":"X-RAY (OTHERS)","quantity":1,"unitPrice":1},{"amount":80,"name":"SPECIALIST CONSULTATION","quantity":1,"unitPrice":1}],"service":"clinic-automation","timestamp":"2026-02-18T16:11:16.336Z"}
+[32minfo[39m: [VisitDetails] Extracted data for visit 202e367f-d318-43b7-9fb6-02828976ea61: {"chargeType":"follow","diagnosis":"Sprain & strain wrist part unspecified","mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T16:11:16.337Z"}
+[32minfo[39m: [VisitDetails] Updated visit 202e367f-d318-43b7-9fb6-02828976ea61 with extracted details {"service":"clinic-automation","timestamp":"2026-02-18T16:11:17.234Z"}
+[32minfo[39m: [VisitDetails] Successfully extracted details for visit 202e367f-d318-43b7-9fb6-02828976ea61 {"chargeType":"follow","diagnosis":"Sprain & strain wrist part unspecified","mcDays":0,"service":"clinic-automation","timestamp":"2026-02-18T16:11:17.234Z"}
+[32minfo[39m: [VisitDetails] Processing visit 8/21: KIARA SINGH (2026-02-14) {"service":"clinic-automation","timestamp":"2026-02-18T16:11:18.746Z"}
+[32minfo[39m: [VisitDetails] Navigating to Patient Page for visit d3a164b7-1b4f-490d-afbf-f9ef6dc1bd14 (KIARA SINGH) {"service":"clinic-automation","timestamp":"2026-02-18T16:11:19.178Z"}
+[32minfo[39m: [CA 479] Navigate to Patient Page - START {"service":"clinic-automation","timestamp":"2026-02-18T16:11:19.178Z"}
+[32minfo[39m: [CA 480] Current URL before navigation {"service":"clinic-automation","timestamp":"2026-02-18T16:11:19.178Z","url":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=CYMsZMkwblB6io6mB76V3y+ty6R76+qplY95T5qDWVNG6iCBJ7ZvB9Nh6LZeW0TU3CK7llbzX222vphVi4/psaLcIwvUhSBztCqwjkeG9is="}
+[32minfo[39m: [CA 481] Force-cleared blocking history overlay {"changedNodes":2,"service":"clinic-automation","timestamp":"2026-02-18T16:11:19.186Z"}
+[32minfo[39m: [CA 482] QueueLog: navigated Home before Patient search {"currentUrl":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=CYMsZMkwblB6io6mB76V3y+ty6R76+qplY95T5qDWVNG6iCBJ7ZvB9Nh6LZeW0TU3CK7llbzX222vphVi4/psaLcIwvUhSBztCqwjkeG9is=","service":"clinic-automation","timestamp":"2026-02-18T16:11:23.754Z"}
+[32minfo[39m: [CA 483] Already in Reception or Patient page, proceeding {"currentUrl":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=CYMsZMkwblB6io6mB76V3y+ty6R76+qplY95T5qDWVNG6iCBJ7ZvB9Nh6LZeW0TU3CK7llbzX222vphVi4/psaLcIwvUhSBztCqwjkeG9is=","service":"clinic-automation","timestamp":"2026-02-18T16:11:23.787Z"}
+[32minfo[39m: [CA 484] Looking for sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-18T16:11:23.787Z"}
+[32minfo[39m: [CA 485] Found menu toggle, clicking {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-18T16:11:23.803Z"}
+[32minfo[39m: [CA 486] Looking for Patient sidebar link {"service":"clinic-automation","timestamp":"2026-02-18T16:11:24.514Z"}
+[32minfo[39m: [CA 487] Force-cleared blocking history overlay {"changedNodes":1,"service":"clinic-automation","timestamp":"2026-02-18T16:11:24.520Z"}
+[32minfo[39m: [CA 488] Force-cleared blocking history overlay {"changedNodes":1,"service":"clinic-automation","timestamp":"2026-02-18T16:11:24.737Z"}
+[32minfo[39m: [CA 489] Patient link status {"count":1,"isVisible":true,"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T16:11:24.949Z"}
+[32minfo[39m: [CA 490] Clicking Patient sidebar link via UI {"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-18T16:11:24.949Z"}
+[32minfo[39m: [CA 491] Playwright click failed, trying JavaScript click {"error":"locator.click: Timeout 3000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a.SideMenuList[cat=\"Patient\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to <a href=\"\" cat=\"Patient\" title=\"Patient\" class=\"SideMenuList\" data-placement=\"right\">…</a>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    5 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div dra=\"\" tabindex=\"-1\" role=\"dialog\" class=\"modal in\" aria-hidden=\"false\" data-keyboard=\"false\" id=\"alertDetailsModal\" data-backdrop=\"static\" aria-labelledby=\"myModalLabel\">…</div> intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 500ms\u001b[22m\n","service":"clinic-automation","timestamp":"2026-02-18T16:11:28.454Z"}
+[32minfo[39m: [CA 492] Patient link clicked via JavaScript {"service":"clinic-automation","timeTaken":3741,"timestamp":"2026-02-18T16:11:28.464Z"}
+[32minfo[39m: [CA 493] After Patient click, checking URL {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T16:11:29.930Z","totalTime":6143}
+[32minfo[39m: [CA 494] Successfully navigated to Patient Page via UI click {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-18T16:11:29.931Z","totalTime":10753}
+[32minfo[39m: [CA 495] Navigate to Patient Page - COMPLETE {"service":"clinic-automation","timestamp":"2026-02-18T16:11:29.932Z","totalTime":10754}
+[32minfo[39m: [VisitDetails] Searching for patient by number: 77546 (KIARA SINGH) {"service":"clinic-automation","timestamp":"2026-02-18T16:11:29.933Z"}
+[32minfo[39m: [CA 496] Search patient by number {"patientNumber":"77546","service":"clinic-automation","timestamp":"2026-02-18T16:11:29.934Z"}
+[32minfo[39m: [CA 497] Pressing Enter to execute search (may need to dismiss dialog first) {"service":"clinic-automation","timestamp":"2026-02-18T16:11:31.724Z"}
+[32minfo[39m: [CA 498] Patient search executed by number (Enter key x2) {"patientNumber":"77546","service":"clinic-automation","timestamp":"2026-02-18T16:11:33.844Z"}
+[32minfo[39m: [VisitDetails] Opening patient record by number: 77546 {"service":"clinic-automation","timestamp":"2026-02-18T16:11:35.848Z"}
+[32minfo[39m: [CA 499] Open patient from search results by number {"patientNumber":"77546","service":"clinic-automation","timestamp":"2026-02-18T16:11:35.848Z"}
+[32minfo[39m: [CA 500] Found patient row by number {"hasLink":true,"rowIndex":1,"service":"clinic-automation","timestamp":"2026-02-18T16:11:37.857Z"}
+[32minfo[39m: [CA 501] Clicked patient link via filter method {"service":"clinic-automation","timestamp":"2026-02-18T16:11:38.426Z"}
+[32minfo[39m: [CA 502] Patient opened from search results by number {"service":"clinic-automation","timestamp":"2026-02-18T16:11:40.928Z"}
+[32minfo[39m: [VisitDetails] Extracting NRIC from biodata page for: KIARA SINGH {"service":"clinic-automation","timestamp":"2026-02-18T16:11:42.931Z"}
+[32minfo[39m: [CA 503] Get patient NRIC {"service":"clinic-automation","timestamp":"2026-02-18T16:11:42.932Z"}
+[32minfo[39m: [CA 504] Extract NRIC from patient biodata/info page {"service":"clinic-automation","timestamp":"2026-02-18T16:11:42.932Z"}
+[32minfo[39m: [CA 505] NRIC found in input field {"nric":"T1722895H","selector":"input[name*=\"nric\" i]","service":"clinic-automation","timestamp":"2026-02-18T16:11:44.468Z"}
+[32minfo[39m: [VisitDetails] Found NRIC: T1722895H for patient: KIARA SINGH {"service":"clinic-automation","timestamp":"2026-02-18T16:11:44.471Z"}
+[32minfo[39m: [VisitDetails] Updated visit d3a164b7-1b4f-490d-afbf-f9ef6dc1bd14 with NRIC: T1722895H {"service":"clinic-automation","timestamp":"2026-02-18T16:11:44.755Z"}
+[32minfo[39m: [VisitDetails] Extracting charge type, diagnosis, and MC data for visit d3a164b7-1b4f-490d-afbf-f9ef6dc1bd14 on 2026-02-14 {"service":"clinic-automation","timestamp":"2026-02-18T16:11:44.755Z"}
+[32minfo[39m: [CA 506] Get charge type, diagnosis, and MC data for visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:11:44.755Z","visitDate":"2026-02-14"}
+[32minfo[39m: [CA 507] Check for First Consult on visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:11:44.756Z","visitDate":"2026-02-14"}
+[32minfo[39m: [CA 508] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:11:44.756Z"}
+[32minfo[39m: [CA 509] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:11:48.329Z"}
+[32minfo[39m: [CA 510] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-18T16:11:48.330Z"}
+[31merror[39m: Failed to open All Tab: page.waitForTimeout: Target page, context or browser has been closed {"service":"clinic-automation","stack":"page.waitForTimeout: Target page, context or browser has been closed\n    at ClinicAssistAutomation.openAllTab (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:8923:23)\n    at async ClinicAssistAutomation.hasFirstConsultOnDate (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:9179:7)\n    at async ClinicAssistAutomation.getChargeTypeAndDiagnosis (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:10702:31)\n    at async VisitDetailsExtractor.extractForVisit (/Users/vincent/Baselrpacrm/src/core/visit-details-extractor.js:127:22)\n    at async VisitDetailsExtractor.extractBatch (/Users/vincent/Baselrpacrm/src/core/visit-details-extractor.js:283:24)\n    at async extractVisitDetailsBatch (/Users/vincent/Baselrpacrm/src/examples/extract-visit-details-batch.js:192:21)","timestamp":"2026-02-18T16:11:53.629Z"}
+[31merror[39m: Failed to check First Consult: page.waitForTimeout: Target page, context or browser has been closed {"service":"clinic-automation","stack":"page.waitForTimeout: Target page, context or browser has been closed\n    at ClinicAssistAutomation.hasFirstConsultOnDate (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:9180:23)\n    at async ClinicAssistAutomation.getChargeTypeAndDiagnosis (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:10702:31)\n    at async VisitDetailsExtractor.extractForVisit (/Users/vincent/Baselrpacrm/src/core/visit-details-extractor.js:127:22)\n    at async VisitDetailsExtractor.extractBatch (/Users/vincent/Baselrpacrm/src/core/visit-details-extractor.js:283:24)\n    at async extractVisitDetailsBatch (/Users/vincent/Baselrpacrm/src/examples/extract-visit-details-batch.js:192:21)","timestamp":"2026-02-18T16:11:53.630Z"}
+[32minfo[39m: [CA 511] Charge type determined {"chargeType":"follow","hasFirstConsult":false,"service":"clinic-automation","timestamp":"2026-02-18T16:11:53.630Z","visitDate":"2026-02-14"}
+[32minfo[39m: [CA 512] MC extraction from TX History disabled; using defaults {"mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T16:11:53.630Z"}
+[32minfo[39m: [CA 513] Open Diagnosis Tab {"service":"clinic-automation","timestamp":"2026-02-18T16:11:53.630Z"}
+[31merror[39m: Failed to open Diagnosis Tab: page.waitForTimeout: Target page, context or browser has been closed {"service":"clinic-automation","stack":"page.waitForTimeout: Target page, context or browser has been closed\n    at ClinicAssistAutomation.openDiagnosisTab (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:7719:23)\n    at ClinicAssistAutomation.getChargeTypeAndDiagnosis (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:10921:18)\n    at async VisitDetailsExtractor.extractForVisit (/Users/vincent/Baselrpacrm/src/core/visit-details-extractor.js:127:22)\n    at async VisitDetailsExtractor.extractBatch (/Users/vincent/Baselrpacrm/src/core/visit-details-extractor.js:283:24)\n    at async extractVisitDetailsBatch (/Users/vincent/Baselrpacrm/src/examples/extract-visit-details-batch.js:192:21)","timestamp":"2026-02-18T16:11:53.630Z"}
+[31merror[39m: Failed to get charge type and diagnosis: page.waitForTimeout: Target page, context or browser has been closed {"service":"clinic-automation","stack":"page.waitForTimeout: Target page, context or browser has been closed\n    at ClinicAssistAutomation.openDiagnosisTab (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:7719:23)\n    at ClinicAssistAutomation.getChargeTypeAndDiagnosis (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:10921:18)\n    at async VisitDetailsExtractor.extractForVisit (/Users/vincent/Baselrpacrm/src/core/visit-details-extractor.js:127:22)\n    at async VisitDetailsExtractor.extractBatch (/Users/vincent/Baselrpacrm/src/core/visit-details-extractor.js:283:24)\n    at async extractVisitDetailsBatch (/Users/vincent/Baselrpacrm/src/examples/extract-visit-details-batch.js:192:21)","timestamp":"2026-02-18T16:11:53.630Z"}
+[32minfo[39m: [VisitDetails] Extracted data for visit d3a164b7-1b4f-490d-afbf-f9ef6dc1bd14: {"chargeType":"follow","diagnosis":"Missing diagnosis","mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-18T16:11:53.630Z"}

@@ -1,0 +1,157 @@
+[32minfo[39m: === Batch Claim Submission === {"service":"clinic-automation","timestamp":"2026-02-18T16:27:20.160Z"}
+[32minfo[39m: Visit IDs: Scoped query {"service":"clinic-automation","timestamp":"2026-02-18T16:27:20.163Z"}
+[32minfo[39m: Pay Type: All {"service":"clinic-automation","timestamp":"2026-02-18T16:27:20.163Z"}
+[32minfo[39m: Portal Targets: MHC, ALLIANCE_MEDINET {"service":"clinic-automation","timestamp":"2026-02-18T16:27:20.163Z"}
+[32minfo[39m: Date Range: 2026-02-13 to 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-18T16:27:20.163Z"}
+[32minfo[39m: Portal Only: true {"service":"clinic-automation","timestamp":"2026-02-18T16:27:20.163Z"}
+[32minfo[39m: Save as Draft: true {"service":"clinic-automation","timestamp":"2026-02-18T16:27:20.163Z"}
+[32minfo[39m: Leave Browser Open: false {"service":"clinic-automation","timestamp":"2026-02-18T16:27:20.163Z"}
+(node:93853) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vincent/Baselrpacrm/apps/crm/src/lib/rpa/portals.shared.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vincent/Baselrpacrm/apps/crm/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-18T16:27:20.458Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-18T16:27:20.462Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-18T16:27:20.463Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-18T16:27:20.463Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-18T16:27:22.630Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-18T16:27:22.635Z"}
+[32minfo[39m: Found 3 visit(s) to process {"service":"clinic-automation","timestamp":"2026-02-18T16:27:23.387Z"}
+[32minfo[39m: [1/3] Processing: CHEAM XI-QING JACQUELINE (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-18T16:27:23.591Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for CHEAM XI-QING JACQUELINE {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-18T16:27:23.594Z","visitId":"588d28b0-d736-49d7-b121-b7b72c8a3e6e"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Alliance Medinet {"service":"clinic-automation","timestamp":"2026-02-18T16:27:23.905Z"}
+[32minfo[39m: [SUBMIT] Alliance form data: {"doctorName":"Palanisamy Arul Murugan","matchedTag":"ALLIANC","nric":"T1204303H","service":"clinic-automation","spCode":"PAM","timestamp":"2026-02-18T16:27:23.907Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-18T16:27:26.029Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T16:27:26.977Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-18T16:27:28.886Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T16:27:31.448Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T16:27:32.998Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-18T16:27:34.567Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-18T16:27:36.081Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-18T16:27:37.197Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-18T16:27:37.792Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-14/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-18T16:27:40.535Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-14/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-18T16:27:42.366Z"}
+[33mwarn[39m: [SUBMIT] Alliance visit attempt failed {"attempt":1,"canRetry":true,"error":"Add closed Search Member but claim form did not render (portal runtime state: ERROR TypeError: Cannot read properties of undefined (reading 'res')\n    at <computed> (https://connect.alliancemedinet.com/463.2a90d0d779c4b349.js:1:5176555)\n    at Object.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:2944987)\n    at _0x33c12b.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3046069)\n    at _0x321261._next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3045302)\n    at _0x321261.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3044527)\n    at https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:1371207\n    at _0x5b0c12 (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3055691)\n    at _0x49c078.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:1370878)\n    at _0x32f59f.close (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3357186)\n    at _0x183d2f._finishDialogClose (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3394070))","lastAction":"select-member.clicked-add","maxAttempts":2,"retryable":true,"service":"clinic-automation","timestamp":"2026-02-18T16:28:04.559Z","traceId":null}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-18T16:28:07.978Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T16:28:09.884Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-18T16:28:11.100Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-18T16:28:12.613Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-18T16:28:13.731Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-18T16:28:14.306Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-14/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-18T16:28:17.011Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-14/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-18T16:28:18.860Z"}
+[33mwarn[39m: [SUBMIT] Alliance visit attempt failed {"attempt":2,"canRetry":false,"error":"Add closed Search Member but claim form did not render (portal runtime state: ERROR TypeError: Cannot read properties of undefined (reading 'res')\n    at <computed> (https://connect.alliancemedinet.com/463.2a90d0d779c4b349.js:1:5176555)\n    at Object.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:2944987)\n    at _0x33c12b.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3046069)\n    at _0x321261._next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3045302)\n    at _0x321261.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3044527)\n    at https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:1371207\n    at _0x5b0c12 (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3055691)\n    at _0x49c078.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:1370878)\n    at _0x32f59f.close (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3357186)\n    at _0x183d2f._finishDialogClose (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3394070))","lastAction":"select-member.clicked-add","maxAttempts":2,"retryable":true,"service":"clinic-automation","timestamp":"2026-02-18T16:28:41.343Z","traceId":null}
+[33mwarn[39m: [SUBMIT] Alliance Medinet indicates GE-network route; rerouting to GE/NTUC service {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-18T16:28:41.346Z","visitId":"588d28b0-d736-49d7-b121-b7b72c8a3e6e"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to GE / NTUC IM portal service {"service":"clinic-automation","timestamp":"2026-02-18T16:28:42.034Z"}
+[33mwarn[39m: [SUBMIT] GE / NTUC IM portal automation not yet implemented {"allianceNetwork":"GE","payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-18T16:28:42.035Z","visitId":"588d28b0-d736-49d7-b121-b7b72c8a3e6e"}
+[33mwarn[39m: Portal service not implemented: GE_NTUC (pay type: ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-18T16:28:42.035Z"}
+[32minfo[39m: [2/3] Processing: WOO CHERN SEE (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-18T16:28:44.626Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for WOO CHERN SEE {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-18T16:28:44.627Z","visitId":"2c78d589-8d45-4788-99d9-6c619bec31e7"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Alliance Medinet {"service":"clinic-automation","timestamp":"2026-02-18T16:28:44.628Z"}
+[32minfo[39m: [SUBMIT] Alliance form data: {"doctorName":"Tung Yu Yee Mathew","matchedTag":"ALLIANC","nric":"T0801699I","service":"clinic-automation","spCode":"MT","timestamp":"2026-02-18T16:28:44.631Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-18T16:28:46.633Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T16:28:49.084Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-18T16:28:50.304Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-18T16:28:51.816Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-18T16:28:52.916Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-18T16:28:53.488Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-18T16:28:56.169Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-18T16:28:57.996Z"}
+[33mwarn[39m: [SUBMIT] Alliance visit attempt failed {"attempt":1,"canRetry":false,"error":"Alliance Medinet redirected this member to GE portal popup","lastAction":"select-member.clicked-add","maxAttempts":2,"retryable":false,"service":"clinic-automation","timestamp":"2026-02-18T16:29:02.628Z","traceId":null}
+[33mwarn[39m: [SUBMIT] Alliance Medinet indicates GE-network route; rerouting to GE/NTUC service {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-18T16:29:02.629Z","visitId":"2c78d589-8d45-4788-99d9-6c619bec31e7"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to GE / NTUC IM portal service {"service":"clinic-automation","timestamp":"2026-02-18T16:29:03.717Z"}
+[33mwarn[39m: [SUBMIT] GE / NTUC IM portal automation not yet implemented {"allianceNetwork":"GE","payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-18T16:29:03.718Z","visitId":"2c78d589-8d45-4788-99d9-6c619bec31e7"}
+[33mwarn[39m: Portal service not implemented: GE_NTUC (pay type: ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-18T16:29:03.718Z"}
+[32minfo[39m: [3/3] Processing: ONG XUE ZHE KENNETH (MHC) {"service":"clinic-automation","timestamp":"2026-02-18T16:29:06.157Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for ONG XUE ZHE KENNETH {"payType":"MHC","service":"clinic-automation","timestamp":"2026-02-18T16:29:06.157Z","visitId":"ff1bf9d8-c55a-43e0-90a6-d761e98dd4ee"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to MHC Asia {"service":"clinic-automation","timestamp":"2026-02-18T16:29:06.162Z"}
+[32minfo[39m: [SUBMIT] MHC form data: {"allowMissingDiagnosisDraftFallback":true,"chargeType":"follow","diagnosis":"Low back pain","diagnosisCanonical":"Low back pain","diagnosisResolutionStatus":"ambiguous","forceSinglife":false,"mcDays":0,"mcStartDate":null,"nric":"T0403755Z","patientName":"ONG XUE ZHE KENNETH","service":"clinic-automation","timestamp":"2026-02-18T16:29:06.164Z"}
+[32minfo[39m: [MHC 01] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-18T16:29:06.165Z"}
+[32minfo[39m: Login form visible after ensureAtMhcHome; re-logging in {"service":"clinic-automation","timestamp":"2026-02-18T16:29:08.116Z"}
+[32minfo[39m: [MHC 02] Login start {"attempt":1,"maxAttempts":3,"service":"clinic-automation","timestamp":"2026-02-18T16:29:08.118Z"}
+[32minfo[39m: Logging into MHC Asia... {"service":"clinic-automation","timestamp":"2026-02-18T16:29:08.119Z"}
+[32minfo[39m: [MHC 03] Country selected (best-effort) {"label":"MHC SINGAPORE","service":"clinic-automation","timestamp":"2026-02-18T16:29:10.481Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-18T16:29:11.040Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-18T16:29:11.621Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-18T16:29:13.039Z"}
+[32minfo[39m: Successfully logged into MHC Asia {"service":"clinic-automation","timestamp":"2026-02-18T16:29:14.355Z"}
+[32minfo[39m: [MHC 04] Login ok {"service":"clinic-automation","timestamp":"2026-02-18T16:29:14.355Z"}
+[32minfo[39m: [MHC 05] Dialog handler set up {"service":"clinic-automation","timestamp":"2026-02-18T16:29:14.355Z"}
+[32minfo[39m: Clicked: Edit/Draft Visits {"service":"clinic-automation","timestamp":"2026-02-18T16:29:15.596Z"}
+[32minfo[39m: Clicked: Search Draft Visits {"service":"clinic-automation","timestamp":"2026-02-18T16:29:17.548Z"}
+[32minfo[39m: [MHC 06] Search patient {"service":"clinic-automation","term":"T0403755Z","timestamp":"2026-02-18T16:29:18.264Z"}
+[32minfo[39m: Searching patient: T0403755Z {"service":"clinic-automation","timestamp":"2026-02-18T16:29:18.265Z"}
+[32minfo[39m: [MHC 07] Navigate: Normal Visit {"service":"clinic-automation","timestamp":"2026-02-18T16:29:18.289Z"}
+[32minfo[39m: Navigating to Normal Visit > Search Other Programs... {"service":"clinic-automation","timestamp":"2026-02-18T16:29:18.289Z"}
+[32minfo[39m: [MHC 08] Found Normal Visit link {"selector":"a:has-text(\"Normal Visit\")","service":"clinic-automation","timestamp":"2026-02-18T16:29:19.304Z"}
+[32minfo[39m: Clicked: Normal Visit {"service":"clinic-automation","timestamp":"2026-02-18T16:29:20.722Z"}
+[32minfo[39m: [MHC 09] At program selection page (Normal Visit clicked) {"service":"clinic-automation","timestamp":"2026-02-18T16:29:20.723Z"}
+[32minfo[39m: Clicked: Search under other programs (tile) {"service":"clinic-automation","timestamp":"2026-02-18T16:29:22.358Z"}
+[32minfo[39m: [MHC 10] Fill visit date {"date":"14/02/2026","service":"clinic-automation","timestamp":"2026-02-18T16:29:23.000Z"}
+[32minfo[39m: [MHC 11] Visit date filled (fast path) {"date":"14/02/2026","service":"clinic-automation","timestamp":"2026-02-18T16:29:23.010Z"}
+[32minfo[39m: [MHC 12] NRIC search field set {"programKind":"other","service":"clinic-automation","timestamp":"2026-02-18T16:29:25.255Z","value":"T0403755Z"}
+[32minfo[39m: [MHC 13] Search attempt result {"found":true,"hasField":true,"memberNotFound":false,"programKind":"other","service":"clinic-automation","timestamp":"2026-02-18T16:29:25.691Z"}
+[32minfo[39m: Portal determined: null {"service":"clinic-automation","timestamp":"2026-02-18T16:29:25.692Z"}
+[32minfo[39m: [MHC 14] Search result parsed {"found":true,"memberNotFound":false,"portal":null,"service":"clinic-automation","timestamp":"2026-02-18T16:29:25.692Z"}
+[32minfo[39m: [MHC 15] Open patient from results {"nric":"T0403755Z","preferredContext":"mhc","service":"clinic-automation","timestamp":"2026-02-18T16:29:25.692Z"}
+[32minfo[39m: Opening patient from search results... {"service":"clinic-automation","timestamp":"2026-02-18T16:29:25.692Z"}
+[32minfo[39m: Dialog appeared: alert - Please submit this claim under www.aiaclinic.com website! {"service":"clinic-automation","timestamp":"2026-02-18T16:29:25.732Z"}
+[32minfo[39m: Dialog accepted {"service":"clinic-automation","timestamp":"2026-02-18T16:29:25.765Z"}
+[32minfo[39m: AIA Clinic switch will be needed after dialog dismissal {"service":"clinic-automation","timestamp":"2026-02-18T16:29:25.765Z"}
+[33mwarn[39m: AIA Clinic switch required; aborting MHC open {"service":"clinic-automation","timestamp":"2026-02-18T16:29:26.505Z"}
+[32minfo[39m: [SUBMIT] Routing override: AIA Clinic required by portal dialog (after patient click) {"msg":"Please submit this claim under www.aiaclinic.com website!","nric":"T0403755Z","service":"clinic-automation","timestamp":"2026-02-18T16:29:26.508Z"}
+[32minfo[39m: [MHC 16] Check if AIA Clinic switch needed {"service":"clinic-automation","timestamp":"2026-02-18T16:29:26.511Z"}
+[32minfo[39m: AIA Clinic switch needed (flagged by dialog handler) {"service":"clinic-automation","timestamp":"2026-02-18T16:29:26.511Z"}
+[32minfo[39m: AIA Clinic switch detected - switching system... {"service":"clinic-automation","timestamp":"2026-02-18T16:29:26.511Z"}
+[32minfo[39m: [MHC 17] Switching to AIA Clinic system {"service":"clinic-automation","timestamp":"2026-02-18T16:29:26.511Z"}
+[32minfo[39m: Clicked: Switch System {"service":"clinic-automation","timestamp":"2026-02-18T16:29:27.328Z"}
+[32minfo[39m: [MHC 18] No visible AIA switch options; trying hidden switch links {"service":"clinic-automation","timestamp":"2026-02-18T16:29:28.593Z"}
+[32minfo[39m: [MHC 19] AIA switch debug targets {"count":0,"sample":[],"service":"clinic-automation","timestamp":"2026-02-18T16:29:28.594Z"}
+[32minfo[39m: [MHC 20] AIA switch href fallback candidates {"count":0,"sample":[],"service":"clinic-automation","timestamp":"2026-02-18T16:29:28.595Z"}
+[32minfo[39m: [MHC 21] AIA switch deterministic default fallback {"nextUrl":"https://www.mhcasia.net/mhc/SwitchSystem.ec?url=https://www.aiaclinic.com","service":"clinic-automation","timestamp":"2026-02-18T16:29:28.597Z"}
+[32minfo[39m: [MHC 22] Dialog handler set up {"service":"clinic-automation","timestamp":"2026-02-18T16:29:30.127Z"}
+[32minfo[39m: [MHC 23] AIA switch verification via default fallback {"hasAddAiaVisit":true,"hasPolicyNoHeader":false,"hasSearchAiaMember":false,"hasSwitchSystem":false,"isAiaDomain":true,"isMhcDomain":false,"isSinglifeDomain":false,"looksLikeAiaFlow":true,"nextUrl":"https://www.mhcasia.net/mhc/SwitchSystem.ec?url=https://www.aiaclinic.com","service":"clinic-automation","timestamp":"2026-02-18T16:29:30.190Z","url":"https://www.aiaclinic.com/aia/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=57WT-90RT-VUXB-GI3Q-QPZE-FAYB-U6C1-MEYQ"}
+[32minfo[39m: Clicked: Edit/Draft Visits {"service":"clinic-automation","timestamp":"2026-02-18T16:29:31.206Z"}
+[32minfo[39m: Clicked: Search Draft Visits {"service":"clinic-automation","timestamp":"2026-02-18T16:29:32.834Z"}
+[32minfo[39m: [MHC 24] Navigate to AIA Visit {"nric":"T0403755Z","service":"clinic-automation","timestamp":"2026-02-18T16:29:33.550Z","visitDate":"14/02/2026"}
+[32minfo[39m: Clicked: Add AIA Visit {"service":"clinic-automation","timestamp":"2026-02-18T16:29:34.446Z"}
+[32minfo[39m: [MHC 25] Member card selection detected {"service":"clinic-automation","timestamp":"2026-02-18T16:29:35.478Z"}
+[32minfo[39m: Clicked: Member card: AIA red card {"service":"clinic-automation","timestamp":"2026-02-18T16:29:36.221Z"}
+[32minfo[39m: [MHC 26] Click search icon for NRIC lookup {"service":"clinic-automation","timestamp":"2026-02-18T16:29:37.034Z"}
+[32minfo[39m: Clicked: Search icon {"service":"clinic-automation","timestamp":"2026-02-18T16:29:37.973Z"}
+[32minfo[39m: [MHC 27] Set AIA search visit date {"service":"clinic-automation","timestamp":"2026-02-18T16:29:38.477Z","visitDate":"14/02/2026"}
+[32minfo[39m: [MHC 28] AIA search visit date set {"selector":"tr:has-text(\"Visit Date\") input[type=\"text\"]","service":"clinic-automation","timestamp":"2026-02-18T16:30:09.060Z","valueNow":"14/02/2026"}
+[32minfo[39m: [MHC 29] Enter NRIC in AIA search {"nric":"T0403755Z","service":"clinic-automation","timestamp":"2026-02-18T16:30:09.061Z"}
+[32minfo[39m: NRIC entered in AIA search {"service":"clinic-automation","timestamp":"2026-02-18T16:30:10.388Z"}
+[32minfo[39m: Clicked: Search button {"service":"clinic-automation","timestamp":"2026-02-18T16:30:12.181Z"}
+[32minfo[39m: [MHC 30] Click patient from AIA search results {"service":"clinic-automation","timestamp":"2026-02-18T16:30:12.697Z"}
+[32minfo[39m: [MHC 31] AIA patient link patched with visit date {"originalHref":"ClinicIECAIAEmpVisitAdd.ec?memberId=4988839702&visitDateAsString=14/02/2026&tranId=EDT457405394&OWASP_CSRFTOKEN=57WT-90RT-VUXB-GI3Q-QPZE-FAYB-U6C1-MEYQ","patchedHref":"https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAdd.ec?memberId=4988839702&visitDateAsString=14%2F02%2F2026&tranId=EDT457405394&OWASP_CSRFTOKEN=57WT-90RT-VUXB-GI3Q-QPZE-FAYB-U6C1-MEYQ","service":"clinic-automation","timestamp":"2026-02-18T16:30:12.717Z","visitDate":"14/02/2026"}
+[32minfo[39m: Selected patient from AIA search results {"service":"clinic-automation","timestamp":"2026-02-18T16:30:14.065Z"}
+[32minfo[39m: [MHC 32] Patient selected from AIA results {"from":"https://www.aiaclinic.com/aia/ClinicIECAIAPatientSearchSubmit.ec","service":"clinic-automation","timestamp":"2026-02-18T16:30:14.065Z","to":"https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAdd.ec?memberId=4988839702&visitDateAsString=14%2F02%2F2026&tranId=EDT457405394&OWASP_CSRFTOKEN=57WT-90RT-VUXB-GI3Q-QPZE-FAYB-U6C1-MEYQ"}
+[32minfo[39m: [MHC 33] Visit form ready {"service":"clinic-automation","timestamp":"2026-02-18T16:30:14.193Z"}
+[32minfo[39m: [MHC 34] Fill visit date {"date":"14/02/2026","service":"clinic-automation","timestamp":"2026-02-18T16:30:14.193Z"}
+[32minfo[39m: [MHC 35] Visit date filled (fast path) {"date":"14/02/2026","service":"clinic-automation","timestamp":"2026-02-18T16:30:14.194Z"}
+[32minfo[39m: [MHC 36] Fill charge type {"service":"clinic-automation","timestamp":"2026-02-18T16:30:14.194Z","visitType":"follow up"}
+[32minfo[39m: [MHC 37] Visit form ready {"service":"clinic-automation","timestamp":"2026-02-18T16:30:14.194Z"}
+[32minfo[39m: [MHC 38] Charge type filled {"mhcType":"Follow Up","service":"clinic-automation","timestamp":"2026-02-18T16:30:16.032Z","visitType":"follow up"}
+[32minfo[39m: [MHC 39] Fill consultation fee {"fee":99999,"service":"clinic-automation","timestamp":"2026-02-18T16:30:16.236Z"}
+[32minfo[39m: Dialog appeared: alert - Consult fee cannot be be more than 80.0! {"service":"clinic-automation","timestamp":"2026-02-18T16:30:16.266Z"}
+[32minfo[39m: Dialog accepted {"service":"clinic-automation","timestamp":"2026-02-18T16:30:16.332Z"}
+[32minfo[39m: [MHC 40] Consultation fee set to 99999 (strict row scan) {"id":"","name":"consultFee","ok":true,"service":"clinic-automation","timestamp":"2026-02-18T16:30:16.333Z","value":"80.0"}
+[32minfo[39m: [MHC 41] Consultation fee filled (max amount accepted) {"service":"clinic-automation","timestamp":"2026-02-18T16:30:17.162Z"}
+[32minfo[39m: [MHC 42] Fill MC days {"mcDays":0,"service":"clinic-automation","timestamp":"2026-02-18T16:30:17.666Z"}
+[32minfo[39m: [MHC 43] MC days filled (DOM scan) {"kind":"input","mcDays":0,"ok":true,"service":"clinic-automation","timestamp":"2026-02-18T16:30:17.685Z","value":"0"}
+[32minfo[39m: [MHC 44] MC days filled {"mcDays":0,"selector":"input[name*=\"mc\" i][name*=\"day\" i]","service":"clinic-automation","timestamp":"2026-02-18T16:30:18.222Z"}
+[31merror[39m: [SUBMIT] Flow 2 diagnosis gate failed before fill {"canonicalDiagnosis":{"body_part":"back","code_normalized":"M54.5","code_raw":"M54.5","condition":"pain","description_canonical":"Low back pain","description_raw":"Low back pain","side":null,"source_age_days":1968,"source_date":"2020-09-25","source_date_match_type":"on_before"},"fallbackAgeDays":1968,"fallbackAgeLimitDays":30,"flow2DateGatePassed":false,"flow2DateOk":false,"flow2DatePolicy":"on_or_before_30_days","flow2DiagnosisResolution":{"confidence":0.69,"date_ok":false,"date_policy":"on_or_before_30_days","fallback_age_days":1968,"reason_if_unresolved":"diagnosis_source_too_old_for_on_before_policy","source_chain":[{"found":true,"source":"diagnosis_tab","source_age_days":1968,"source_date":"2020-09-25"},{"found":true,"source":"all_tab","source_age_days":1092,"source_date":"2023-02-18"},{"found":false,"source":"visit_tab","source_age_days":null,"source_date":null},{"found":false,"source":"past_notes","source_age_days":null,"source_date":null}],"source_date_match_type":"on_before","status":"ambiguous"},"flow2FallbackLowConfidence":false,"nric":"T0403755Z","payType":"MHC","rawDiagnosis":{"code":"M54.5","description":"Low back pain"},"reason":"diagnosis_mapping_failed","service":"clinic-automation","stage":"pre_fill","timestamp":"2026-02-18T16:30:18.274Z","visitId":"ff1bf9d8-c55a-43e0-90a6-d761e98dd4ee"}
+[31merror[39m: [SUBMIT] Error submitting claim for ONG XUE ZHE KENNETH {"error":"diagnosis_mapping_failed: unresolved Flow 2 diagnosis before form fill (visitId=ff1bf9d8-c55a-43e0-90a6-d761e98dd4ee, nric=T0403755Z)","service":"clinic-automation","timestamp":"2026-02-18T16:30:18.275Z"}
+[31merror[39m: Failed to submit: diagnosis_mapping_failed: unresolved Flow 2 diagnosis before form fill (visitId=ff1bf9d8-c55a-43e0-90a6-d761e98dd4ee, nric=T0403755Z) {"service":"clinic-automation","timestamp":"2026-02-18T16:30:18.807Z"}
+[32minfo[39m: 
+=== Submission Summary === {"service":"clinic-automation","timestamp":"2026-02-18T16:30:21.262Z"}
+[32minfo[39m: Total: 3 {"service":"clinic-automation","timestamp":"2026-02-18T16:30:21.262Z"}
+[32minfo[39m: Submitted: 0 {"service":"clinic-automation","timestamp":"2026-02-18T16:30:21.262Z"}
+[32minfo[39m: Drafts: 0 {"service":"clinic-automation","timestamp":"2026-02-18T16:30:21.262Z"}
+[32minfo[39m: Filled only (no DB update): 0 {"service":"clinic-automation","timestamp":"2026-02-18T16:30:21.263Z"}
+[32minfo[39m: Errors: 1 {"service":"clinic-automation","timestamp":"2026-02-18T16:30:21.263Z"}
+[32minfo[39m: Not Started (unsupported): 2 {"service":"clinic-automation","timestamp":"2026-02-18T16:30:21.263Z"}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-18T16:30:21.694Z"}

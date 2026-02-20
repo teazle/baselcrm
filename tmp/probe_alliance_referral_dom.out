@@ -1,0 +1,225 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-18T15:14:15.559Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-18T15:14:15.566Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-18T15:14:15.566Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-18T15:14:15.566Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-18T15:14:17.853Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-18T15:14:17.856Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-18T15:14:20.290Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:14:21.255Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-18T15:14:23.184Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:14:25.774Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-18T15:14:27.291Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-18T15:14:28.811Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-18T15:14:30.324Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:14:31.411Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-18T15:14:31.978Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-14/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:14:34.701Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-14/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-18T15:14:36.523Z"}
+[32minfo[39m: [ALLIANCE] Selected member and opened claim form {"service":"clinic-automation","timestamp":"2026-02-18T15:14:45.578Z"}
+[32minfo[39m: [ALLIANCE] Set MC Days {"selector":"input[placeholder*=\"MC Days\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:14:48.975Z"}
+[32minfo[39m: [ALLIANCE] Clicked Add Diagnosis {"selector":"button:has-text(\"Add Diagnosis\")","service":"clinic-automation","timestamp":"2026-02-18T15:14:49.617Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Code (S10) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Code\" i]","service":"clinic-automation","timestamp":"2026-02-18T15:14:50.764Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (S10) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-18T15:14:51.403Z"}
+{
+  "referralInputs": [],
+  "referralCombos": [
+    {
+      "tag": "MAT-SELECT",
+      "cls": "mat-mdc-select mat-mdc-select-required ng-touched ng-dirty ng-valid",
+      "id": "mat-select-6",
+      "name": null,
+      "formcontrolname": "providerId",
+      "placeholder": "Provider",
+      "ariaLabel": null,
+      "text": "Palanisamy Arul Murugan",
+      "required": true,
+      "value": null
+    },
+    {
+      "tag": "MAT-SELECT",
+      "cls": "mat-mdc-select mat-mdc-select-required mat-mdc-select-empty ng-untouched ng-pristine ng-invalid",
+      "id": "mat-select-5",
+      "name": null,
+      "formcontrolname": "referringProviderEntityType",
+      "placeholder": "Provider Entity Type",
+      "ariaLabel": null,
+      "text": "Provider Entity Type",
+      "required": true,
+      "value": null
+    }
+  ],
+  "consultCombos": [],
+  "requireds": [
+    {
+      "tag": "MAT-SELECT",
+      "cls": "mat-mdc-select mat-mdc-select-required ng-untouched ng-pristine ng-valid",
+      "id": "mat-select-4",
+      "name": null,
+      "formcontrolname": "programBenefitType",
+      "placeholder": "Purpose of Visit",
+      "ariaLabel": null,
+      "text": "SP (Panel)",
+      "required": true,
+      "value": null
+    },
+    {
+      "tag": "MAT-SELECT",
+      "cls": "mat-mdc-select mat-mdc-select-required mat-mdc-select-multiple ng-untouched ng-pristine ng-valid",
+      "id": "mat-select-7",
+      "name": null,
+      "formcontrolname": "programBenefitSubTypes",
+      "placeholder": "Benefit Sub-type",
+      "ariaLabel": null,
+      "text": "SP",
+      "required": true,
+      "value": null
+    },
+    {
+      "tag": "MAT-SELECT",
+      "cls": "mat-mdc-select mat-mdc-select-required ng-touched ng-dirty ng-valid",
+      "id": "mat-select-6",
+      "name": null,
+      "formcontrolname": "providerId",
+      "placeholder": "Provider",
+      "ariaLabel": null,
+      "text": "Palanisamy Arul Murugan",
+      "required": true,
+      "value": null
+    },
+    {
+      "tag": "INPUT",
+      "cls": "mat-mdc-input-element mat-datepicker-input ng-untouched ng-pristine ng-valid mat-mdc-form-field-input-control mdc-text-field__input cdk-text-field-autofill-monitored",
+      "id": "mat-input-24",
+      "name": null,
+      "formcontrolname": "visitDate",
+      "placeholder": "Visit Date",
+      "ariaLabel": null,
+      "text": "",
+      "required": true,
+      "value": "14/2/2026"
+    },
+    {
+      "tag": "INPUT",
+      "cls": "mat-mdc-input-element mat-mdc-form-field-input-control mdc-text-field__input cdk-text-field-autofill-monitored ng-dirty ng-valid ng-touched",
+      "id": "mat-input-5",
+      "name": null,
+      "formcontrolname": "mcDays",
+      "placeholder": "MC Days",
+      "ariaLabel": null,
+      "text": "",
+      "required": true,
+      "value": "0"
+    },
+    {
+      "tag": "INPUT",
+      "cls": "mat-mdc-autocomplete-trigger mat-mdc-input-element ng-untouched ng-pristine ng-invalid mat-mdc-form-field-input-control mdc-text-field__input cdk-text-field-autofill-monitored",
+      "id": "referringProviderEntity",
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": "Type To Search",
+      "ariaLabel": null,
+      "text": "",
+      "required": true,
+      "value": ""
+    },
+    {
+      "tag": "MAT-SELECT",
+      "cls": "mat-mdc-select mat-mdc-select-required mat-mdc-select-empty ng-untouched ng-pristine ng-invalid",
+      "id": "mat-select-5",
+      "name": null,
+      "formcontrolname": "referringProviderEntityType",
+      "placeholder": "Provider Entity Type",
+      "ariaLabel": null,
+      "text": "Provider Entity Type",
+      "required": true,
+      "value": null
+    }
+  ],
+  "allComboboxes": [
+    {
+      "tag": "MAT-SELECT",
+      "cls": "mat-mdc-select ng-untouched ng-pristine ng-valid",
+      "id": "mat-select-0",
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "text": "Provider",
+      "required": false,
+      "value": null
+    },
+    {
+      "tag": "MAT-SELECT",
+      "cls": "mat-mdc-select ng-untouched ng-pristine ng-valid",
+      "id": "mat-select-1",
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": null,
+      "ariaLabel": null,
+      "text": "SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD",
+      "required": false,
+      "value": null
+    },
+    {
+      "tag": "MAT-SELECT",
+      "cls": "mat-mdc-select mat-mdc-select-required ng-untouched ng-pristine ng-valid",
+      "id": "mat-select-4",
+      "name": null,
+      "formcontrolname": "programBenefitType",
+      "placeholder": "Purpose of Visit",
+      "ariaLabel": null,
+      "text": "SP (Panel)",
+      "required": true,
+      "value": null
+    },
+    {
+      "tag": "MAT-SELECT",
+      "cls": "mat-mdc-select mat-mdc-select-required mat-mdc-select-multiple ng-untouched ng-pristine ng-valid",
+      "id": "mat-select-7",
+      "name": null,
+      "formcontrolname": "programBenefitSubTypes",
+      "placeholder": "Benefit Sub-type",
+      "ariaLabel": null,
+      "text": "SP",
+      "required": true,
+      "value": null
+    },
+    {
+      "tag": "MAT-SELECT",
+      "cls": "mat-mdc-select mat-mdc-select-required ng-touched ng-dirty ng-valid",
+      "id": "mat-select-6",
+      "name": null,
+      "formcontrolname": "providerId",
+      "placeholder": "Provider",
+      "ariaLabel": null,
+      "text": "Palanisamy Arul Murugan",
+      "required": true,
+      "value": null
+    },
+    {
+      "tag": "INPUT",
+      "cls": "mat-mdc-autocomplete-trigger mat-mdc-input-element ng-untouched ng-pristine ng-invalid mat-mdc-form-field-input-control mdc-text-field__input cdk-text-field-autofill-monitored",
+      "id": "referringProviderEntity",
+      "name": null,
+      "formcontrolname": null,
+      "placeholder": "Type To Search",
+      "ariaLabel": null,
+      "text": "",
+      "required": true,
+      "value": ""
+    },
+    {
+      "tag": "MAT-SELECT",
+      "cls": "mat-mdc-select mat-mdc-select-required mat-mdc-select-empty ng-untouched ng-pristine ng-invalid",
+      "id": "mat-select-5",
+      "name": null,
+      "formcontrolname": "referringProviderEntityType",
+      "placeholder": "Provider Entity Type",
+      "ariaLabel": null,
+      "text": "Provider Entity Type",
+      "required": true,
+      "value": null
+    }
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-18T15:14:53.429Z"}

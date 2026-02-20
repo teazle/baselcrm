@@ -1,51 +1,90 @@
 {
-  "generated_at": "2026-02-11T16:58:49.206Z",
+  "generated_at": "2026-02-13T03:02:27.027Z",
+  "source_logs": [
+    "/Users/vincent/Baselrpacrm/logs/phasec_save_draft_mhc_2026-02-02_2026-02-07_20260213_093208.log",
+    "/Users/vincent/Baselrpacrm/logs/phasec_save_draft_aviva_2026-02-02_2026-02-07_20260213_093950.log"
+  ],
   "attempted_ids": [
-    "6eb5aa60-ee97-472b-a904-c4ccf2855b18",
-    "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
-    "6af6ea13-14d9-43c6-917e-d0ca5da4ab0f",
-    "60e0c382-d6cb-4d35-a5b9-e17ce5b20c73",
-    "0a1695ab-8ea3-4fba-b5a5-ec47ea933e40",
-    "a50239f6-9cd2-44a8-9bbf-4784e1dc51e1",
-    "b19f4854-6445-4965-a695-befdc5f1c531",
-    "416a02fb-3feb-435b-b3f8-3f3197a60e0f",
     "31b5a688-9104-4507-bd7a-347a9f9ce866",
-    "1e48b9cf-fe14-4c33-bbb3-f25c2b8e3bb7",
+    "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
+    "0a1695ab-8ea3-4fba-b5a5-ec47ea933e40",
+    "416a02fb-3feb-435b-b3f8-3f3197a60e0f",
+    "60e0c382-d6cb-4d35-a5b9-e17ce5b20c73",
+    "78f0430c-6d4f-4043-a54f-d529e7ef57fb",
+    "6eb5aa60-ee97-472b-a904-c4ccf2855b18",
+    "6af6ea13-14d9-43c6-917e-d0ca5da4ab0f",
+    "b19f4854-6445-4965-a695-befdc5f1c531",
     "c3c483d2-83d4-46be-936e-77767dd568b3",
-    "78f0430c-6d4f-4043-a54f-d529e7ef57fb"
+    "a50239f6-9cd2-44a8-9bbf-4784e1dc51e1",
+    "1e48b9cf-fe14-4c33-bbb3-f25c2b8e3bb7"
   ],
   "counts": {
     "total": 12,
-    "draft": 8,
-    "error": 3,
-    "null": 1
+    "draft": 2,
+    "error": 8,
+    "null": 2,
+    "other": 0
   },
   "errors": [
     {
       "id": "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
       "patient_name": "CAROLINE ADRIANA ARCHER",
+      "nric": "S7288611I",
       "error": "Failed to open AIA visit form for NRIC S7288611I (see screenshots/mhc-asia-aia-*.png)"
     },
     {
       "id": "60e0c382-d6cb-4d35-a5b9-e17ce5b20c73",
       "patient_name": "ENG CHAI PIN ELYNE XANDRIA",
-      "error": "Failed to save as draft (see screenshots/mhc-asia-save-draft-not-found.png and screenshots/mhc-asia-before-save-draft.png)"
+      "nric": "S8570522I",
+      "error": "diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=60e0c382-d6cb-4d35-a5b9-e17ce5b20c73, nric=S8570522I)"
+    },
+    {
+      "id": "78f0430c-6d4f-4043-a54f-d529e7ef57fb",
+      "patient_name": "YIP CHOI YEAN",
+      "nric": "S0121655D",
+      "error": "diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=78f0430c-6d4f-4043-a54f-d529e7ef57fb, nric=S0121655D)"
+    },
+    {
+      "id": "6eb5aa60-ee97-472b-a904-c4ccf2855b18",
+      "patient_name": "FAN HONGYI",
+      "nric": "S8481103C",
+      "error": "diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=6eb5aa60-ee97-472b-a904-c4ccf2855b18, nric=S8481103C)"
+    },
+    {
+      "id": "6af6ea13-14d9-43c6-917e-d0ca5da4ab0f",
+      "patient_name": "HASLINA BINTE HASSAN BASRI",
+      "nric": "S7349449D",
+      "error": "diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=6af6ea13-14d9-43c6-917e-d0ca5da4ab0f, nric=S7349449D)"
+    },
+    {
+      "id": "c3c483d2-83d4-46be-936e-77767dd568b3",
+      "patient_name": "FAN HONGYI",
+      "nric": "S8481103C",
+      "error": "diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=c3c483d2-83d4-46be-936e-77767dd568b3, nric=S8481103C)"
+    },
+    {
+      "id": "a50239f6-9cd2-44a8-9bbf-4784e1dc51e1",
+      "patient_name": "LIM CHUI KIOW",
+      "nric": "S7030442B",
+      "error": "Draft not found in Edit/Draft after save click (nric=S7030442B, context=singlife)"
     },
     {
       "id": "1e48b9cf-fe14-4c33-bbb3-f25c2b8e3bb7",
       "patient_name": "YEONG MEI-YI",
+      "nric": "S7839254A",
       "error": "Failed to save as draft (see screenshots/mhc-asia-save-draft-not-found.png and screenshots/mhc-asia-before-save-draft.png)"
     }
   ],
   "rows": [
     {
-      "id": "6eb5aa60-ee97-472b-a904-c4ccf2855b18",
-      "patient_name": "FAN HONGYI",
-      "nric": "S8481103C",
+      "order": 1,
+      "visit_id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+      "patient_name": "MITTAL SACHIN KUMAR",
+      "nric": "M4539893L",
       "visit_date": "2026-02-02",
       "pay_type": "MHC",
       "submission_status": "draft",
-      "submitted_at": "2026-02-11T16:47:55.473+00:00",
+      "submitted_at": "2026-02-13T02:32:53.243+00:00",
       "submission_error": null,
       "submission_metadata": {
         "mcDays": 0,
@@ -55,11 +94,63 @@
         "chargeType": "first",
         "hasDiagnosis": true,
         "savedAsDraft": true,
-        "routingOverride": "AIA_CLINIC_DIALOG"
+        "draftReference": "EV16090142",
+        "routingOverride": null,
+        "draftVerification": {
+          "row": {
+            "type": "Employee Visit",
+            "mcDays": "0.0",
+            "remarks": "",
+            "visitNo": "EV16090142",
+            "totalFee": "$283.40",
+            "visitDate": "02/02/2026",
+            "totalClaim": "$283.40",
+            "patientName": "SACHIN MITTAL",
+            "patientNric": "M4539893L"
+          },
+          "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+          "found": true,
+          "context": "mhc",
+          "attempts": [
+            {
+              "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+              "match": {
+                "type": "Employee Visit",
+                "mcDays": "0.0",
+                "remarks": "",
+                "visitNo": "EV16090142",
+                "totalFee": "$283.40",
+                "visitDate": "02/02/2026",
+                "totalClaim": "$283.40",
+                "patientName": "SACHIN MITTAL",
+                "patientNric": "M4539893L"
+              },
+              "opened": true,
+              "context": "mhc",
+              "matched": true,
+              "rowsSeen": 1,
+              "attemptNo": 1,
+              "expectedVisitNo": null
+            }
+          ],
+          "rowsSeen": 1
+        },
+        "diagnosisResolution": {
+          "status": "resolved",
+          "confidence": 1,
+          "source_chain": [
+            {
+              "found": true,
+              "source": "diagnosis_tab"
+            }
+          ],
+          "reason_if_unresolved": null
+        }
       }
     },
     {
-      "id": "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
+      "order": 2,
+      "visit_id": "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
       "patient_name": "CAROLINE ADRIANA ARCHER",
       "nric": "S7288611I",
       "visit_date": "2026-02-04",
@@ -67,16 +158,109 @@
       "submission_status": "error",
       "submitted_at": null,
       "submission_error": "Failed to open AIA visit form for NRIC S7288611I (see screenshots/mhc-asia-aia-*.png)",
+      "submission_metadata": {
+        "nric": "S7288611I",
+        "stage": "post_diagnosis",
+        "portal": "MHC Asia",
+        "reason": "diagnosis_mapping_failed",
+        "payType": "MHC",
+        "success": false,
+        "visitId": "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
+        "rawDiagnosis": {
+          "code": "S83.6",
+          "description": "sprain of left hip"
+        },
+        "savedAsDraft": false,
+        "domDiagnosisState": {
+          "url": "https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAddSubmit.ec",
+          "reasons": [
+            "missing_diagnosis_pri_id",
+            "missing_or_invalid_diagnosis_pri_desc",
+            "diagnosis_dropdown_still_na"
+          ],
+          "resolved": false,
+          "checkedAt": "2026-02-13T02:33:34.306Z",
+          "diagnosisPriId": "",
+          "diagnosisPriDesc": "",
+          "diagnosisPriIdTemp": "NA",
+          "hasPrimaryRequiredError": false
+        },
+        "attemptedSelectors": [
+          "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+          "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+          "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+          "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+          "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+          "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+        ],
+        "canonicalDiagnosis": {
+          "side": "left",
+          "code_raw": "S83.6",
+          "body_part": "hip",
+          "condition": "sprain",
+          "code_normalized": "S83.6",
+          "description_raw": "sprain of left hip",
+          "description_canonical": "sprain of left hip"
+        },
+        "diagnosisSelection": {
+          "ok": false,
+          "method": "modal",
+          "reason": "diagnosis_mapping_failed",
+          "checkedAt": "2026-02-13T02:33:34.001Z",
+          "diagnosis": {
+            "code": "S83.6",
+            "description": "sprain of left hip"
+          },
+          "attemptedSelectors": [
+            "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+            "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+            "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+            "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+            "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+            "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+          ]
+        },
+        "lastPortalDialogMessage": "Consult fee cannot be be more than 80.0!",
+        "flow2DiagnosisResolution": {
+          "status": "resolved",
+          "confidence": 1,
+          "source_chain": [
+            {
+              "found": true,
+              "source": "diagnosis_tab"
+            }
+          ],
+          "reason_if_unresolved": null
+        }
+      }
+    },
+    {
+      "order": 3,
+      "visit_id": "0a1695ab-8ea3-4fba-b5a5-ec47ea933e40",
+      "patient_name": "CHEW SIEW LING",
+      "nric": "S8635560D",
+      "visit_date": "2026-02-03",
+      "pay_type": "MHC",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_error": null,
       "submission_metadata": null
     },
     {
-      "id": "416a02fb-3feb-435b-b3f8-3f3197a60e0f",
+      "order": 4,
+      "visit_id": "416a02fb-3feb-435b-b3f8-3f3197a60e0f",
       "patient_name": "TJIA NATHANAEL THOMAS",
       "nric": "T1208937B",
       "visit_date": "2026-02-06",
       "pay_type": "MHC",
       "submission_status": "draft",
-      "submitted_at": "2026-02-11T16:53:53.46+00:00",
+      "submitted_at": "2026-02-13T02:35:13.794+00:00",
       "submission_error": null,
       "submission_metadata": {
         "mcDays": 0,
@@ -86,82 +270,533 @@
         "chargeType": "first",
         "hasDiagnosis": true,
         "savedAsDraft": true,
-        "routingOverride": "AIA_CLINIC_DIALOG"
+        "draftReference": "EV59953056",
+        "routingOverride": "AIA_CLINIC_DIALOG",
+        "draftVerification": {
+          "row": {
+            "type": "Employee Visit",
+            "mcDays": "0.0",
+            "remarks": "",
+            "visitNo": "EV59953056",
+            "totalFee": "$130.80",
+            "visitDate": "13/02/2026",
+            "totalClaim": "$130.80",
+            "patientName": "TJIA NATHANAEL THOMAS",
+            "patientNric": "T1208937B"
+          },
+          "url": "https://www.aiaclinic.com/aia/ClinicEmpVisitDraftListSubmit.ec",
+          "found": true,
+          "context": "aia",
+          "attempts": [
+            {
+              "url": "https://www.aiaclinic.com/aia/ClinicEmpVisitDraftListSubmit.ec",
+              "match": {
+                "type": "Employee Visit",
+                "mcDays": "0.0",
+                "remarks": "",
+                "visitNo": "EV59953056",
+                "totalFee": "$130.80",
+                "visitDate": "13/02/2026",
+                "totalClaim": "$130.80",
+                "patientName": "TJIA NATHANAEL THOMAS",
+                "patientNric": "T1208937B"
+              },
+              "opened": true,
+              "context": "aia",
+              "matched": true,
+              "rowsSeen": 1,
+              "attemptNo": 1,
+              "expectedVisitNo": null
+            }
+          ],
+          "rowsSeen": 1
+        },
+        "diagnosisResolution": {
+          "status": "resolved",
+          "confidence": 0.95,
+          "source_chain": [
+            {
+              "found": true,
+              "source": "diagnosis_tab"
+            }
+          ],
+          "reason_if_unresolved": null
+        }
       }
     },
     {
-      "id": "6af6ea13-14d9-43c6-917e-d0ca5da4ab0f",
-      "patient_name": "HASLINA BINTE HASSAN BASRI",
-      "nric": "S7349449D",
-      "visit_date": "2026-02-02",
-      "pay_type": "MHC",
-      "submission_status": "draft",
-      "submitted_at": "2026-02-11T16:50:26.368+00:00",
-      "submission_error": null,
-      "submission_metadata": {
-        "mcDays": 0,
-        "portal": "MHC Asia",
-        "success": true,
-        "persisted": true,
-        "chargeType": "follow",
-        "hasDiagnosis": false,
-        "savedAsDraft": true,
-        "routingOverride": "AIA_CLINIC_DIALOG"
-      }
-    },
-    {
-      "id": "60e0c382-d6cb-4d35-a5b9-e17ce5b20c73",
+      "order": 5,
+      "visit_id": "60e0c382-d6cb-4d35-a5b9-e17ce5b20c73",
       "patient_name": "ENG CHAI PIN ELYNE XANDRIA",
       "nric": "S8570522I",
       "visit_date": "2026-02-03",
       "pay_type": "MHC",
       "submission_status": "error",
       "submitted_at": null,
-      "submission_error": "Failed to save as draft (see screenshots/mhc-asia-save-draft-not-found.png and screenshots/mhc-asia-before-save-draft.png)",
-      "submission_metadata": null
+      "submission_error": "diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=60e0c382-d6cb-4d35-a5b9-e17ce5b20c73, nric=S8570522I)",
+      "submission_metadata": {
+        "nric": "S8570522I",
+        "stage": "post_diagnosis",
+        "portal": "MHC Asia",
+        "reason": "diagnosis_mapping_failed",
+        "payType": "MHC",
+        "success": false,
+        "visitId": "60e0c382-d6cb-4d35-a5b9-e17ce5b20c73",
+        "rawDiagnosis": {
+          "code": null,
+          "description": "Missing diagnosis"
+        },
+        "savedAsDraft": false,
+        "domDiagnosisState": {
+          "url": "https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAddSubmit.ec",
+          "reasons": [
+            "missing_diagnosis_pri_id",
+            "missing_or_invalid_diagnosis_pri_desc",
+            "diagnosis_dropdown_still_na"
+          ],
+          "resolved": false,
+          "checkedAt": "2026-02-13T02:35:58.066Z",
+          "diagnosisPriId": "",
+          "diagnosisPriDesc": "",
+          "diagnosisPriIdTemp": "NA",
+          "hasPrimaryRequiredError": false
+        },
+        "attemptedSelectors": [
+          "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+          "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+          "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+          "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+          "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+          "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+        ],
+        "canonicalDiagnosis": {
+          "side": null,
+          "code_raw": null,
+          "body_part": null,
+          "condition": null,
+          "code_normalized": null,
+          "description_raw": null,
+          "description_canonical": null
+        },
+        "diagnosisSelection": {
+          "ok": true,
+          "mode": "anchor_match",
+          "method": "modal",
+          "reason": null,
+          "checkedAt": "2026-02-13T02:34:45.989Z",
+          "diagnosis": {
+            "code": "S63.50",
+            "description": "Sprain & strain wrist part unspecified"
+          },
+          "selection": {
+            "ok": true,
+            "row": "S635 Sprain and strain of wrist",
+            "text": "S635",
+            "score": 740,
+            "optionCode": "S635"
+          },
+          "resolution": {
+            "url": "https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAddSubmit.ec",
+            "reasons": [
+              "diagnosis_dropdown_still_na"
+            ],
+            "resolved": true,
+            "checkedAt": "2026-02-13T02:34:45.989Z",
+            "diagnosisPriId": "S635",
+            "diagnosisPriDesc": "Sprain and strain of wrist",
+            "diagnosisPriIdTemp": "NA",
+            "hasPrimaryRequiredError": false
+          },
+          "searchText": "wrist",
+          "attemptedSelectors": [
+            "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+            "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+            "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+            "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+            "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+            "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+          ]
+        },
+        "lastPortalDialogMessage": "Consult fee cannot be be more than 120.0!",
+        "flow2DiagnosisResolution": {
+          "status": "missing",
+          "confidence": 0,
+          "source_chain": [
+            {
+              "found": false,
+              "source": "diagnosis_tab"
+            },
+            {
+              "found": false,
+              "source": "diagnosis_tab_latest"
+            },
+            {
+              "found": false,
+              "source": "diagnosis_tab_raw"
+            },
+            {
+              "found": false,
+              "source": "all_tab"
+            },
+            {
+              "found": false,
+              "source": "visit_tab"
+            },
+            {
+              "found": false,
+              "source": "past_notes"
+            }
+          ],
+          "reason_if_unresolved": "not_found_in_diagnosis_all_visit_pastnotes"
+        }
+      }
     },
     {
-      "id": "0a1695ab-8ea3-4fba-b5a5-ec47ea933e40",
-      "patient_name": "CHEW SIEW LING",
-      "nric": "S8635560D",
-      "visit_date": "2026-02-03",
+      "order": 6,
+      "visit_id": "78f0430c-6d4f-4043-a54f-d529e7ef57fb",
+      "patient_name": "YIP CHOI YEAN",
+      "nric": "S0121655D",
+      "visit_date": "2026-02-05",
       "pay_type": "MHC",
-      "submission_status": "draft",
-      "submitted_at": "2026-02-11T16:51:48.985+00:00",
-      "submission_error": null,
+      "submission_status": "error",
+      "submitted_at": null,
+      "submission_error": "diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=78f0430c-6d4f-4043-a54f-d529e7ef57fb, nric=S0121655D)",
       "submission_metadata": {
-        "mcDays": 1,
+        "nric": "S0121655D",
+        "stage": "post_diagnosis",
         "portal": "MHC Asia",
-        "success": true,
-        "persisted": true,
-        "chargeType": "follow",
-        "hasDiagnosis": true,
-        "savedAsDraft": true,
-        "routingOverride": null
+        "reason": "diagnosis_mapping_failed",
+        "payType": "MHC",
+        "success": false,
+        "visitId": "78f0430c-6d4f-4043-a54f-d529e7ef57fb",
+        "rawDiagnosis": {
+          "code": null,
+          "description": "Missing diagnosis"
+        },
+        "savedAsDraft": false,
+        "domDiagnosisState": {
+          "url": "https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAddSubmit.ec",
+          "reasons": [
+            "missing_diagnosis_pri_id",
+            "missing_or_invalid_diagnosis_pri_desc",
+            "diagnosis_dropdown_still_na"
+          ],
+          "resolved": false,
+          "checkedAt": "2026-02-13T02:36:41.720Z",
+          "diagnosisPriId": "",
+          "diagnosisPriDesc": "",
+          "diagnosisPriIdTemp": "NA",
+          "hasPrimaryRequiredError": false
+        },
+        "attemptedSelectors": [
+          "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+          "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+          "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+          "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+          "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+          "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+        ],
+        "canonicalDiagnosis": {
+          "side": null,
+          "code_raw": null,
+          "body_part": null,
+          "condition": null,
+          "code_normalized": null,
+          "description_raw": null,
+          "description_canonical": null
+        },
+        "diagnosisSelection": {
+          "ok": true,
+          "mode": "anchor_match",
+          "method": "modal",
+          "reason": null,
+          "checkedAt": "2026-02-13T02:34:45.989Z",
+          "diagnosis": {
+            "code": "S63.50",
+            "description": "Sprain & strain wrist part unspecified"
+          },
+          "selection": {
+            "ok": true,
+            "row": "S635 Sprain and strain of wrist",
+            "text": "S635",
+            "score": 740,
+            "optionCode": "S635"
+          },
+          "resolution": {
+            "url": "https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAddSubmit.ec",
+            "reasons": [
+              "diagnosis_dropdown_still_na"
+            ],
+            "resolved": true,
+            "checkedAt": "2026-02-13T02:34:45.989Z",
+            "diagnosisPriId": "S635",
+            "diagnosisPriDesc": "Sprain and strain of wrist",
+            "diagnosisPriIdTemp": "NA",
+            "hasPrimaryRequiredError": false
+          },
+          "searchText": "wrist",
+          "attemptedSelectors": [
+            "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+            "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+            "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+            "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+            "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+            "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+          ]
+        },
+        "lastPortalDialogMessage": "Consult fee cannot be be more than 80.0!",
+        "flow2DiagnosisResolution": {
+          "status": "missing",
+          "confidence": 0,
+          "source_chain": [
+            {
+              "found": false,
+              "source": "diagnosis_tab"
+            },
+            {
+              "found": false,
+              "source": "diagnosis_tab_latest"
+            },
+            {
+              "found": false,
+              "source": "diagnosis_tab_raw"
+            },
+            {
+              "found": false,
+              "source": "all_tab"
+            },
+            {
+              "found": false,
+              "source": "visit_tab"
+            },
+            {
+              "found": false,
+              "source": "past_notes"
+            }
+          ],
+          "reason_if_unresolved": "not_found_in_diagnosis_all_visit_pastnotes"
+        }
       }
     },
     {
-      "id": "a50239f6-9cd2-44a8-9bbf-4784e1dc51e1",
-      "patient_name": "LIM CHUI KIOW",
-      "nric": "S7030442B",
-      "visit_date": "2026-02-07",
-      "pay_type": "AVIVA",
-      "submission_status": "draft",
-      "submitted_at": "2026-02-11T16:52:54.153+00:00",
-      "submission_error": null,
+      "order": 7,
+      "visit_id": "6eb5aa60-ee97-472b-a904-c4ccf2855b18",
+      "patient_name": "FAN HONGYI",
+      "nric": "S8481103C",
+      "visit_date": "2026-02-02",
+      "pay_type": "MHC",
+      "submission_status": "error",
+      "submitted_at": null,
+      "submission_error": "diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=6eb5aa60-ee97-472b-a904-c4ccf2855b18, nric=S8481103C)",
       "submission_metadata": {
-        "mcDays": 0,
+        "nric": "S8481103C",
+        "stage": "post_diagnosis",
         "portal": "MHC Asia",
-        "success": true,
-        "persisted": true,
-        "chargeType": "follow",
-        "hasDiagnosis": true,
-        "savedAsDraft": true,
-        "routingOverride": null
+        "reason": "diagnosis_mapping_failed",
+        "payType": "MHC",
+        "success": false,
+        "visitId": "6eb5aa60-ee97-472b-a904-c4ccf2855b18",
+        "rawDiagnosis": {
+          "code": "S83.6",
+          "description": "sprain of left knee"
+        },
+        "savedAsDraft": false,
+        "domDiagnosisState": {
+          "url": "https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAddSubmit.ec",
+          "reasons": [
+            "missing_diagnosis_pri_id",
+            "missing_or_invalid_diagnosis_pri_desc",
+            "diagnosis_dropdown_still_na"
+          ],
+          "resolved": false,
+          "checkedAt": "2026-02-13T02:37:30.454Z",
+          "diagnosisPriId": "",
+          "diagnosisPriDesc": "",
+          "diagnosisPriIdTemp": "NA",
+          "hasPrimaryRequiredError": false
+        },
+        "attemptedSelectors": [
+          "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+          "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+          "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+          "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+          "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+          "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+        ],
+        "canonicalDiagnosis": {
+          "side": "left",
+          "code_raw": "S83.6",
+          "body_part": "knee",
+          "condition": "sprain",
+          "code_normalized": "S83.6",
+          "description_raw": "sprain of left knee",
+          "description_canonical": "sprain of left knee"
+        },
+        "diagnosisSelection": {
+          "ok": false,
+          "method": "modal",
+          "reason": "diagnosis_mapping_failed",
+          "checkedAt": "2026-02-13T02:37:30.141Z",
+          "diagnosis": {
+            "code": "S83.6",
+            "description": "sprain of left knee"
+          },
+          "attemptedSelectors": [
+            "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+            "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+            "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+            "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+            "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+            "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+          ]
+        },
+        "lastPortalDialogMessage": "Consult fee cannot be be more than 120.0!",
+        "flow2DiagnosisResolution": {
+          "status": "resolved",
+          "confidence": 1,
+          "source_chain": [
+            {
+              "found": true,
+              "source": "diagnosis_tab"
+            }
+          ],
+          "reason_if_unresolved": null
+        }
       }
     },
     {
-      "id": "b19f4854-6445-4965-a695-befdc5f1c531",
+      "order": 8,
+      "visit_id": "6af6ea13-14d9-43c6-917e-d0ca5da4ab0f",
+      "patient_name": "HASLINA BINTE HASSAN BASRI",
+      "nric": "S7349449D",
+      "visit_date": "2026-02-02",
+      "pay_type": "MHC",
+      "submission_status": "error",
+      "submitted_at": null,
+      "submission_error": "diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=6af6ea13-14d9-43c6-917e-d0ca5da4ab0f, nric=S7349449D)",
+      "submission_metadata": {
+        "nric": "S7349449D",
+        "stage": "post_diagnosis",
+        "portal": "MHC Asia",
+        "reason": "diagnosis_mapping_failed",
+        "payType": "MHC",
+        "success": false,
+        "visitId": "6af6ea13-14d9-43c6-917e-d0ca5da4ab0f",
+        "rawDiagnosis": {
+          "code": null,
+          "description": "Missing diagnosis"
+        },
+        "savedAsDraft": false,
+        "domDiagnosisState": {
+          "url": "https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAddSubmit.ec",
+          "reasons": [
+            "missing_diagnosis_pri_id",
+            "missing_or_invalid_diagnosis_pri_desc",
+            "diagnosis_dropdown_still_na"
+          ],
+          "resolved": false,
+          "checkedAt": "2026-02-13T02:38:13.397Z",
+          "diagnosisPriId": "",
+          "diagnosisPriDesc": "",
+          "diagnosisPriIdTemp": "NA",
+          "hasPrimaryRequiredError": false
+        },
+        "attemptedSelectors": [
+          "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+          "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+          "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+          "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+          "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+          "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+        ],
+        "canonicalDiagnosis": {
+          "side": null,
+          "code_raw": null,
+          "body_part": null,
+          "condition": null,
+          "code_normalized": null,
+          "description_raw": null,
+          "description_canonical": null
+        },
+        "diagnosisSelection": {
+          "ok": false,
+          "method": "modal",
+          "reason": "diagnosis_mapping_failed",
+          "checkedAt": "2026-02-13T02:37:30.141Z",
+          "diagnosis": {
+            "code": "S83.6",
+            "description": "sprain of left knee"
+          },
+          "attemptedSelectors": [
+            "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+            "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+            "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+            "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+            "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+            "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+          ]
+        },
+        "lastPortalDialogMessage": "Consult fee cannot be be more than 80.0!",
+        "flow2DiagnosisResolution": {
+          "status": "missing",
+          "confidence": 0,
+          "source_chain": [
+            {
+              "found": false,
+              "source": "diagnosis_tab"
+            },
+            {
+              "found": false,
+              "source": "diagnosis_tab_latest"
+            },
+            {
+              "found": false,
+              "source": "diagnosis_tab_raw"
+            },
+            {
+              "found": false,
+              "source": "all_tab"
+            },
+            {
+              "found": false,
+              "source": "visit_tab"
+            },
+            {
+              "found": false,
+              "source": "past_notes"
+            }
+          ],
+          "reason_if_unresolved": "not_found_in_diagnosis_all_visit_pastnotes"
+        }
+      }
+    },
+    {
+      "order": 9,
+      "visit_id": "b19f4854-6445-4965-a695-befdc5f1c531",
       "patient_name": "SZENTIRMAY IBOLYA MARGARET",
       "nric": "M4427511W",
       "visit_date": "2026-02-02",
@@ -172,27 +807,112 @@
       "submission_metadata": null
     },
     {
-      "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
-      "patient_name": "MITTAL SACHIN KUMAR",
-      "nric": "M4539893L",
-      "visit_date": "2026-02-02",
+      "order": 10,
+      "visit_id": "c3c483d2-83d4-46be-936e-77767dd568b3",
+      "patient_name": "FAN HONGYI",
+      "nric": "S8481103C",
+      "visit_date": "2026-02-03",
       "pay_type": "MHC",
-      "submission_status": "draft",
-      "submitted_at": "2026-02-11T16:54:28.261+00:00",
-      "submission_error": null,
+      "submission_status": "error",
+      "submitted_at": null,
+      "submission_error": "diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=c3c483d2-83d4-46be-936e-77767dd568b3, nric=S8481103C)",
       "submission_metadata": {
-        "mcDays": 0,
+        "nric": "S8481103C",
+        "stage": "post_diagnosis",
         "portal": "MHC Asia",
-        "success": true,
-        "persisted": true,
-        "chargeType": "first",
-        "hasDiagnosis": true,
-        "savedAsDraft": true,
-        "routingOverride": null
+        "reason": "diagnosis_mapping_failed",
+        "payType": "MHC",
+        "success": false,
+        "visitId": "c3c483d2-83d4-46be-936e-77767dd568b3",
+        "rawDiagnosis": {
+          "code": null,
+          "description": "Pain in left knee"
+        },
+        "savedAsDraft": false,
+        "domDiagnosisState": {
+          "url": "https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAddSubmit.ec",
+          "reasons": [
+            "missing_diagnosis_pri_id",
+            "missing_or_invalid_diagnosis_pri_desc",
+            "diagnosis_dropdown_still_na"
+          ],
+          "resolved": false,
+          "checkedAt": "2026-02-13T02:39:16.172Z",
+          "diagnosisPriId": "",
+          "diagnosisPriDesc": "",
+          "diagnosisPriIdTemp": "NA",
+          "hasPrimaryRequiredError": false
+        },
+        "attemptedSelectors": [
+          "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+          "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+          "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+          "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+          "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+          "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+          "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+        ],
+        "canonicalDiagnosis": {
+          "side": "left",
+          "code_raw": null,
+          "body_part": "knee",
+          "condition": "pain",
+          "code_normalized": null,
+          "description_raw": "Pain in left knee",
+          "description_canonical": "Pain in left knee"
+        },
+        "diagnosisSelection": {
+          "ok": false,
+          "method": "modal",
+          "reason": "diagnosis_mapping_failed",
+          "checkedAt": "2026-02-13T02:39:15.857Z",
+          "diagnosis": {
+            "code": null,
+            "description": "Pain in left knee"
+          },
+          "attemptedSelectors": [
+            "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+            "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+            "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+            "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+            "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+            "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+            "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+          ]
+        },
+        "lastPortalDialogMessage": "Consult fee cannot be be more than 80.0!",
+        "flow2DiagnosisResolution": {
+          "status": "resolved",
+          "confidence": 0.8,
+          "source_chain": [
+            {
+              "found": true,
+              "source": "diagnosis_tab"
+            }
+          ],
+          "reason_if_unresolved": null
+        }
       }
     },
     {
-      "id": "1e48b9cf-fe14-4c33-bbb3-f25c2b8e3bb7",
+      "order": 11,
+      "visit_id": "a50239f6-9cd2-44a8-9bbf-4784e1dc51e1",
+      "patient_name": "LIM CHUI KIOW",
+      "nric": "S7030442B",
+      "visit_date": "2026-02-07",
+      "pay_type": "AVIVA",
+      "submission_status": "error",
+      "submitted_at": null,
+      "submission_error": "Draft not found in Edit/Draft after save click (nric=S7030442B, context=singlife)",
+      "submission_metadata": null
+    },
+    {
+      "order": 12,
+      "visit_id": "1e48b9cf-fe14-4c33-bbb3-f25c2b8e3bb7",
       "patient_name": "YEONG MEI-YI",
       "nric": "S7839254A",
       "visit_date": "2026-02-06",
@@ -201,46 +921,6 @@
       "submitted_at": null,
       "submission_error": "Failed to save as draft (see screenshots/mhc-asia-save-draft-not-found.png and screenshots/mhc-asia-before-save-draft.png)",
       "submission_metadata": null
-    },
-    {
-      "id": "c3c483d2-83d4-46be-936e-77767dd568b3",
-      "patient_name": "FAN HONGYI",
-      "nric": "S8481103C",
-      "visit_date": "2026-02-03",
-      "pay_type": "MHC",
-      "submission_status": "draft",
-      "submitted_at": "2026-02-11T16:56:24.611+00:00",
-      "submission_error": null,
-      "submission_metadata": {
-        "mcDays": 2,
-        "portal": "MHC Asia",
-        "success": true,
-        "persisted": true,
-        "chargeType": "follow",
-        "hasDiagnosis": true,
-        "savedAsDraft": true,
-        "routingOverride": "AIA_CLINIC_DIALOG"
-      }
-    },
-    {
-      "id": "78f0430c-6d4f-4043-a54f-d529e7ef57fb",
-      "patient_name": "YIP CHOI YEAN",
-      "nric": "S0121655D",
-      "visit_date": "2026-02-05",
-      "pay_type": "MHC",
-      "submission_status": "draft",
-      "submitted_at": "2026-02-11T16:57:07.091+00:00",
-      "submission_error": null,
-      "submission_metadata": {
-        "mcDays": 0,
-        "portal": "MHC Asia",
-        "success": true,
-        "persisted": true,
-        "chargeType": "follow",
-        "hasDiagnosis": false,
-        "savedAsDraft": true,
-        "routingOverride": "AIA_CLINIC_DIALOG"
-      }
     }
   ]
 }

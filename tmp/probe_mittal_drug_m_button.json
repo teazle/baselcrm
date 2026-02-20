@@ -1,0 +1,71 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-13T00:32:36.864Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-13T00:32:36.869Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-13T00:32:36.869Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-13T00:32:36.869Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-13T00:32:38.807Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-13T00:32:38.808Z"}
+[32minfo[39m: [MHC 01] Login start {"attempt":1,"maxAttempts":3,"service":"clinic-automation","timestamp":"2026-02-13T00:32:38.988Z"}
+[32minfo[39m: Logging into MHC Asia... {"service":"clinic-automation","timestamp":"2026-02-13T00:32:38.989Z"}
+[32minfo[39m: [MHC 02] Country selected (best-effort) {"label":"MHC SINGAPORE","service":"clinic-automation","timestamp":"2026-02-13T00:32:41.660Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-13T00:32:42.225Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-13T00:32:42.761Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-13T00:32:44.203Z"}
+[32minfo[39m: Successfully logged into MHC Asia {"service":"clinic-automation","timestamp":"2026-02-13T00:32:45.090Z"}
+[32minfo[39m: [MHC 03] Login ok {"service":"clinic-automation","timestamp":"2026-02-13T00:32:45.090Z"}
+[32minfo[39m: [MHC 04] Search patient {"service":"clinic-automation","term":"M4539893L","timestamp":"2026-02-13T00:32:45.092Z"}
+[32minfo[39m: Searching patient: M4539893L {"service":"clinic-automation","timestamp":"2026-02-13T00:32:45.092Z"}
+[32minfo[39m: [MHC 05] Navigate: Normal Visit {"service":"clinic-automation","timestamp":"2026-02-13T00:32:45.118Z"}
+[32minfo[39m: Navigating to Normal Visit > Search Other Programs... {"service":"clinic-automation","timestamp":"2026-02-13T00:32:45.118Z"}
+[32minfo[39m: [MHC 06] Found Normal Visit link {"selector":"a:has-text(\"Normal Visit\")","service":"clinic-automation","timestamp":"2026-02-13T00:32:46.145Z"}
+[32minfo[39m: Clicked: Normal Visit {"service":"clinic-automation","timestamp":"2026-02-13T00:32:47.353Z"}
+[32minfo[39m: [MHC 07] At program selection page (Normal Visit clicked) {"service":"clinic-automation","timestamp":"2026-02-13T00:32:47.354Z"}
+[32minfo[39m: Clicked: Search under other programs (tile) {"service":"clinic-automation","timestamp":"2026-02-13T00:32:48.842Z"}
+[32minfo[39m: [MHC 08] Fill visit date {"date":"02/02/2026","service":"clinic-automation","timestamp":"2026-02-13T00:32:49.491Z"}
+[32minfo[39m: [MHC 09] Visit date filled (fast path) {"date":"02/02/2026","service":"clinic-automation","timestamp":"2026-02-13T00:32:49.501Z"}
+[32minfo[39m: [MHC 10] NRIC search field set {"programKind":"other","service":"clinic-automation","timestamp":"2026-02-13T00:32:50.766Z","value":"M4539893L"}
+[32minfo[39m: [MHC 11] Search attempt result {"found":true,"hasField":true,"memberNotFound":false,"programKind":"other","service":"clinic-automation","timestamp":"2026-02-13T00:32:51.213Z"}
+[32minfo[39m: Portal determined: null {"service":"clinic-automation","timestamp":"2026-02-13T00:32:51.213Z"}
+[32minfo[39m: [MHC 12] Search result parsed {"found":true,"memberNotFound":false,"portal":null,"service":"clinic-automation","timestamp":"2026-02-13T00:32:51.213Z"}
+[32minfo[39m: [MHC 13] Open patient from results {"nric":"M4539893L","service":"clinic-automation","timestamp":"2026-02-13T00:32:51.213Z"}
+[32minfo[39m: Opening patient from search results... {"service":"clinic-automation","timestamp":"2026-02-13T00:32:51.213Z"}
+[32minfo[39m: [MHC 14] Patient opened from results {"service":"clinic-automation","timestamp":"2026-02-13T00:32:53.192Z"}
+[32minfo[39m: [MHC 15] Visit form ready {"service":"clinic-automation","timestamp":"2026-02-13T00:32:53.193Z"}
+{
+  "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitAdd.ec?patientId=196a5aff90ca&visitDateAsString=02/02/2026&OWASP_CSRFTOKEN=E9JM-5DA3-SHYG-SZHV-G5LT-3UOZ-ED4C-V2QY",
+  "title": "Employee Visit Add",
+  "mCount": 1,
+  "allM": [
+    {
+      "i": 0,
+      "name": "patientGender",
+      "id": "",
+      "type": "hidden",
+      "rowText": "",
+      "tableHint": "Employee Visit - Add (* = Required Fields)"
+    }
+  ],
+  "drugTables": [
+    {
+      "ti": 7,
+      "header": "Drug Name Unit Unit Price (SGD) Qty Amount (SGD)",
+      "rows": [
+        {
+          "ri": 0,
+          "text": "Drug Name Unit Unit Price (SGD) Qty Amount (SGD)",
+          "mButtons": 0
+        },
+        {
+          "ri": 1,
+          "text": "1.",
+          "mButtons": 0
+        },
+        {
+          "ri": 2,
+          "text": "",
+          "mButtons": 0
+        }
+      ]
+    }
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-13T00:32:53.317Z"}

@@ -16,6 +16,7 @@ import {
 import { cn } from '@/lib/cn';
 import { extractAllianceMedinetTag, getPortalScopeOrFilter } from '@/lib/rpa/portals';
 import FlowHeader from './FlowHeader';
+import RunSummaryPanel from './RunSummaryPanel';
 
 type VisitRow = {
   id: string;
@@ -239,6 +240,8 @@ export default function Flow2EnhanceData() {
         statusLabel={flowStatus.label}
         statusTone={flowStatus.tone}
       />
+
+      <RunSummaryPanel flowPrefix="flow2" />
 
       <Card className="p-5">
         <div className="text-xs font-medium text-muted-foreground">Scope</div>

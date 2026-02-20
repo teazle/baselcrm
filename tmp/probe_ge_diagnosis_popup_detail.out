@@ -1,0 +1,168 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T06:59:53.333Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T06:59:53.338Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T06:59:53.338Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T06:59:53.338Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T06:59:55.198Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T06:59:55.199Z"}
+[32minfo[39m: [ALLIANCE] Filled username {"selector":"input[placeholder*=\"login id\" i]","service":"clinic-automation","timestamp":"2026-02-19T06:59:58.798Z"}
+[32minfo[39m: [ALLIANCE] Filled password {"selector":"input[placeholder*=\"pass\" i]","service":"clinic-automation","timestamp":"2026-02-19T06:59:59.912Z"}
+[32minfo[39m: [ALLIANCE] Clicked login {"selector":"button:has-text(\"Login\")","service":"clinic-automation","timestamp":"2026-02-19T07:00:00.547Z"}
+[32minfo[39m: [ALLIANCE] Login successful {"service":"clinic-automation","timestamp":"2026-02-19T07:00:02.575Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:00:03.519Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T07:00:05.464Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:00:08.014Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:00:09.544Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:00:13.025Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T07:00:14.561Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T07:00:16.070Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:00:17.192Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T07:00:17.773Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:00:20.542Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T07:00:22.395Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":10000,"service":"clinic-automation","timestamp":"2026-02-19T07:00:32.979Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":20000,"service":"clinic-automation","timestamp":"2026-02-19T07:00:43.533Z"}
+[probe] search { found: true, rowCount: 1, memberNotFound: false }
+[probe] add redirect msg Alliance Medinet redirected this member to GE portal popup
+[probe] before links {
+  "count": 119,
+  "rows": [
+    {
+      "i": 0,
+      "text": "Abdominal and pelvic pain",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl02$lbtnPrimaryDiagnosis','')",
+      "onclick": null
+    },
+    {
+      "i": 1,
+      "text": "Abnormal blood-pressure reading, without diagnosis",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl03$lbtnPrimaryDiagnosis','')",
+      "onclick": null
+    },
+    {
+      "i": 2,
+      "text": "Abnormal findings in cerebrospinal fluid",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl04$lbtnPrimaryDiagnosis','')",
+      "onclick": null
+    },
+    {
+      "i": 3,
+      "text": "Abnormal findings in specimens from digestive organs and abdominal cavity",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl05$lbtnPrimaryDiagnosis','')",
+      "onclick": null
+    },
+    {
+      "i": 4,
+      "text": "Abnormal findings in specimens from female genital organs",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl06$lbtnPrimaryDiagnosis','')",
+      "onclick": null
+    },
+    {
+      "i": 5,
+      "text": "Abnormal findings in specimens from male genital organs",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl07$lbtnPrimaryDiagnosis','')",
+      "onclick": null
+    },
+    {
+      "i": 6,
+      "text": "Abnormal findings in specimens from other organs, systems and tissues",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl08$lbtnPrimaryDiagnosis','')",
+      "onclick": null
+    },
+    {
+      "i": 7,
+      "text": "Abnormal findings in specimens from respiratory organs and thorax",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl09$lbtnPrimaryDiagnosis','')",
+      "onclick": null
+    },
+    {
+      "i": 8,
+      "text": "Abnormal findings on diagnostic imaging of breast",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl10$lbtnPrimaryDiagnosis','')",
+      "onclick": null
+    },
+    {
+      "i": 9,
+      "text": "Abnormal findings on diagnostic imaging of central nervous system",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl11$lbtnPrimaryDiagnosis','')",
+      "onclick": null
+    },
+    {
+      "i": 10,
+      "text": "Abnormal findings on diagnostic imaging of lung",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl12$lbtnPrimaryDiagnosis','')",
+      "onclick": null
+    },
+    {
+      "i": 11,
+      "text": "Abnormal findings on diagnostic imaging of other body structures",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl13$lbtnPrimaryDiagnosis','')",
+      "onclick": null
+    }
+  ]
+}
+[probe] after search links {
+  "count": 5,
+  "rows": [
+    {
+      "i": 0,
+      "text": "Crushing injury and traumatic amputation of part of abdomen, lower back and pelvis",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl02$lbtnPrimaryDiagnosis','')"
+    },
+    {
+      "i": 1,
+      "text": "Injury of blood vessels at abdomen, lower back and pelvis level",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl03$lbtnPrimaryDiagnosis','')"
+    },
+    {
+      "i": 2,
+      "text": "Open wound of abdomen, lower back and pelvis",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl04$lbtnPrimaryDiagnosis','')"
+    },
+    {
+      "i": 3,
+      "text": "Other and unspecified injuries of abdomen, lower back and pelvis",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl05$lbtnPrimaryDiagnosis','')"
+    },
+    {
+      "i": 4,
+      "text": "Superficial injury of abdomen, lower back and pelvis",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl06$lbtnPrimaryDiagnosis','')"
+    }
+  ]
+}
+[probe] clicked Crushing injury and traumatic amputation of part of abdomen, lower back and pelvis
+[probe] final state {
+  "msg": null,
+  "primaryCode": "",
+  "primaryText": "Crushing injury and traumatic amputation of part of abdomen, lower back and pelvis",
+  "primaryId": "f512a95a-a7af-4608-8bc5-ca7a4aff4592",
+  "feeType": "",
+  "mcReason": "Backache",
+  "buttons": [
+    {
+      "id": null,
+      "value": "Show Benefit",
+      "text": null,
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+      "value": "+",
+      "text": null,
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnCancel",
+      "value": "Cancel",
+      "text": null,
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnReloadData",
+      "value": null,
+      "text": null,
+      "visible": true
+    }
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T07:01:08.675Z"}

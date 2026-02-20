@@ -1,0 +1,107 @@
+{
+  "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+  "visit_date": "2026-02-02",
+  "diagnosis_description": "Pain in right shoulder",
+  "treatment_detail": "EXTENDED PHYSIOTHERAPY - WY x1\nCelebrex (200 mg) x40\nSPECIALIST FIRST CONSULTATION x1",
+  "medicines": [
+    {
+      "name": "EXTENDED PHYSIOTHERAPY - WY",
+      "unit": null,
+      "amount": 260,
+      "quantity": 1,
+      "unitPrice": 1
+    },
+    {
+      "name": "Celebrex (200 mg)",
+      "unit": "TAB",
+      "amount": 140,
+      "quantity": 40,
+      "unitPrice": 3.5
+    },
+    {
+      "name": "SPECIALIST FIRST CONSULTATION",
+      "unit": null,
+      "amount": 120,
+      "quantity": 1,
+      "unitPrice": 1
+    }
+  ],
+  "detailsExtractionSources": {
+    "mcDays": 0,
+    "source": "tx_history_combined",
+    "medicines": [
+      {
+        "name": "EXTENDED PHYSIOTHERAPY - WY",
+        "unit": null,
+        "amount": 260,
+        "quantity": 1,
+        "unitPrice": 1
+      },
+      {
+        "name": "Celebrex (200 mg)",
+        "unit": "TAB",
+        "amount": 140,
+        "quantity": 40,
+        "unitPrice": 3.5
+      },
+      {
+        "name": "SPECIALIST FIRST CONSULTATION",
+        "unit": null,
+        "amount": 120,
+        "quantity": 1,
+        "unitPrice": 1
+      }
+    ],
+    "chargeType": "first",
+    "mcStartDate": null,
+    "diagnosisSource": "diagnosis_tab",
+    "extractionMethod": "getChargeTypeAndDiagnosis",
+    "diagnosisAttempts": [
+      {
+        "found": true,
+        "source": "diagnosis_tab"
+      }
+    ],
+    "diagnosisCanonical": {
+      "side": "right",
+      "code_raw": "M25.51",
+      "body_part": "shoulder",
+      "condition": "pain",
+      "code_normalized": "M25.51",
+      "description_raw": "Pain in right shoulder",
+      "description_canonical": "Pain in right shoulder"
+    },
+    "diagnosisCandidates": [
+      {
+        "rank": 1,
+        "side": "right",
+        "source": "diagnosis_tab",
+        "code_raw": "M25.51",
+        "body_part": "shoulder",
+        "condition": "pain",
+        "confidence": 1,
+        "code_normalized": "M25.51",
+        "description_raw": "Pain in right shoulder",
+        "description_canonical": "Pain in right shoulder"
+      }
+    ],
+    "diagnosisResolution": {
+      "status": "resolved",
+      "confidence": 1,
+      "source_chain": [
+        {
+          "found": true,
+          "source": "diagnosis_tab"
+        }
+      ],
+      "reason_if_unresolved": null
+    },
+    "medicineFilterStats": {
+      "after": 3,
+      "before": 3,
+      "filteredOut": 0
+    },
+    "nricExtractionStatus": "found",
+    "diagnosisMissingReason": null
+  }
+}

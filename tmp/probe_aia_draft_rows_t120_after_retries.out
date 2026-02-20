@@ -1,0 +1,137 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-13T05:57:29.924Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-13T05:57:29.931Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-13T05:57:29.931Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-13T05:57:29.931Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-13T05:57:31.442Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-13T05:57:31.443Z"}
+[32minfo[39m: [MHC 01] Login start {"attempt":1,"maxAttempts":3,"service":"clinic-automation","timestamp":"2026-02-13T05:57:31.735Z"}
+[32minfo[39m: Logging into MHC Asia... {"service":"clinic-automation","timestamp":"2026-02-13T05:57:31.735Z"}
+[32minfo[39m: [MHC 02] Country selected (best-effort) {"label":"MHC SINGAPORE","service":"clinic-automation","timestamp":"2026-02-13T05:57:34.311Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-13T05:57:34.870Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-13T05:57:35.400Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-13T05:57:36.739Z"}
+[32minfo[39m: Successfully logged into MHC Asia {"service":"clinic-automation","timestamp":"2026-02-13T05:57:37.640Z"}
+[32minfo[39m: [MHC 03] Login ok {"service":"clinic-automation","timestamp":"2026-02-13T05:57:37.641Z"}
+[32minfo[39m: [MHC 04] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-13T05:57:37.641Z"}
+[32minfo[39m: [MHC 05] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-13T05:57:37.671Z"}
+[32minfo[39m: Clicked: Switch System {"service":"clinic-automation","timestamp":"2026-02-13T05:57:38.482Z"}
+[32minfo[39m: [MHC 06] No visible switch options; trying hidden switch links {"labelForLog":"AIA Clinic","service":"clinic-automation","timestamp":"2026-02-13T05:57:39.743Z"}
+[32minfo[39m: [MHC 07] Switch system debug targets {"count":0,"labelForLog":"AIA Clinic","sample":[],"service":"clinic-automation","timestamp":"2026-02-13T05:57:39.744Z"}
+[32minfo[39m: [MHC 08] Switch system href fallback candidates {"count":0,"labelForLog":"AIA Clinic","sample":[],"service":"clinic-automation","timestamp":"2026-02-13T05:57:39.744Z"}
+[32minfo[39m: [MHC 09] Dialog handler set up {"service":"clinic-automation","timestamp":"2026-02-13T05:57:41.069Z"}
+[32minfo[39m: [MHC 10] Switch system verification via default fallback {"hasAddAiaVisit":true,"hasPolicyNoHeader":false,"hasSearchAiaMember":false,"hasSwitchSystem":false,"isAiaDomain":true,"isMhcDomain":false,"isSinglifeDomain":false,"labelForLog":"AIA Clinic","looksLikeAiaFlow":true,"nextUrl":"https://www.mhcasia.net/mhc/SwitchSystem.ec?url=https://www.aiaclinic.com","service":"clinic-automation","timestamp":"2026-02-13T05:57:41.109Z","url":"https://www.aiaclinic.com/aia/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=QN3W-ZE24-991K-GM92-4G1P-1YOC-P1U4-R9RS"}
+[32minfo[39m: Clicked: Edit/Draft Visits {"service":"clinic-automation","timestamp":"2026-02-13T05:57:41.958Z"}
+[32minfo[39m: Clicked: Search Draft Visits {"service":"clinic-automation","timestamp":"2026-02-13T05:57:43.554Z"}
+{
+  "switched": true,
+  "opened": true,
+  "searched": true,
+  "extracted": {
+    "rows": [
+      {
+        "visitDate": "13/02/2026",
+        "visitNo": "EV59953056",
+        "type": "Employee Visit",
+        "patientNric": "T1208937B",
+        "patientName": "TJIA NATHANAEL THOMAS",
+        "totalFee": "$130.80",
+        "totalClaim": "$130.80",
+        "mcDays": "0.0",
+        "remarks": ""
+      }
+    ],
+    "url": "https://www.aiaclinic.com/aia/ClinicEmpVisitDraftListSubmit.ec",
+    "title": "Employee Visit Draft List"
+  },
+  "raw": {
+    "url": "https://www.aiaclinic.com/aia/ClinicEmpVisitDraftListSubmit.ec",
+    "title": "Employee Visit Draft List",
+    "key": "patientNric",
+    "keyType": "E",
+    "keyValue": "T1208937B",
+    "rows": [
+      [
+        "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic Switch System || Singlife Pcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern MHC Medical Network INCOME iMedicare PHI System QBE Primary Care Log Out",
+        "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic",
+        "Switch System || Singlife Pcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern MHC Medical Network INCOME iMedicare PHI System QBE Primary Care Log Out"
+      ],
+      [
+        "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic",
+        "Switch System || Singlife Pcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern MHC Medical Network INCOME iMedicare PHI System QBE Primary Care Log Out"
+      ],
+      [
+        "Employee Visit Draft List - Click To Edit"
+      ],
+      [
+        "Visit No NRIC that contains starts with equals to",
+        "Visit No NRIC",
+        "that",
+        "contains starts with equals to",
+        "",
+        ""
+      ],
+      [
+        "Visit No NRIC",
+        "that",
+        "contains starts with equals to",
+        "",
+        ""
+      ],
+      [
+        "1 - 1 of 1",
+        "",
+        "1 - 1 of 1",
+        ""
+      ],
+      [
+        "",
+        "1 - 1 of 1",
+        ""
+      ],
+      [
+        "Visit Date Visit No Type Patient NRIC Patient Name Total Fee Total Claim MC Days Remarks 13/02/2026 EV59953056 Employee Visit T1208937B TJIA NATHANAEL THOMAS $130.80 $130.80 0.0",
+        "Visit Date",
+        "Visit No",
+        "Type",
+        "Patient NRIC",
+        "Patient Name",
+        "Total Fee",
+        "Total Claim",
+        "MC Days",
+        "Remarks",
+        "13/02/2026",
+        "EV59953056",
+        "Employee Visit",
+        "T1208937B",
+        "TJIA NATHANAEL THOMAS",
+        "$130.80",
+        "$130.80",
+        "0.0",
+        ""
+      ],
+      [
+        "Visit Date",
+        "Visit No",
+        "Type",
+        "Patient NRIC",
+        "Patient Name",
+        "Total Fee",
+        "Total Claim",
+        "MC Days",
+        "Remarks"
+      ],
+      [
+        "13/02/2026",
+        "EV59953056",
+        "Employee Visit",
+        "T1208937B",
+        "TJIA NATHANAEL THOMAS",
+        "$130.80",
+        "$130.80",
+        "0.0",
+        ""
+      ]
+    ]
+  }
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-13T05:57:44.380Z"}

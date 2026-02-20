@@ -1,0 +1,107 @@
+(node:83644) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vincent/Baselrpacrm/apps/crm/src/lib/rpa/portals.shared.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vincent/Baselrpacrm/apps/crm/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-14T10:02:11.036Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-14T10:02:11.043Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-14T10:02:11.043Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-14T10:02:11.043Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-14T10:02:14.141Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-14T10:02:14.154Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for LI MEIQIN {"payType":"MHC","service":"clinic-automation","timestamp":"2026-02-14T10:02:14.379Z","visitId":"8ef0c2a7-c099-4a47-9501-d99a26491f5c"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to MHC Asia {"service":"clinic-automation","timestamp":"2026-02-14T10:02:14.395Z"}
+[32minfo[39m: [SUBMIT] MHC form data: {"chargeType":"follow","diagnosis":"Illness, unspecified","diagnosisCanonical":"Illness, unspecified","diagnosisResolutionStatus":"fallback_low_confidence","forceSinglife":false,"mcDays":0,"mcStartDate":null,"nric":"S8176620G","patientName":"LI MEIQIN","service":"clinic-automation","timestamp":"2026-02-14T10:02:14.412Z"}
+[32minfo[39m: [MHC 01] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-14T10:02:14.414Z"}
+[32minfo[39m: Login form visible after ensureAtMhcHome; re-logging in {"service":"clinic-automation","timestamp":"2026-02-14T10:02:17.636Z"}
+[32minfo[39m: [MHC 02] Login start {"attempt":1,"maxAttempts":3,"service":"clinic-automation","timestamp":"2026-02-14T10:02:17.639Z"}
+[32minfo[39m: Logging into MHC Asia... {"service":"clinic-automation","timestamp":"2026-02-14T10:02:17.640Z"}
+[32minfo[39m: [MHC 03] Country selected (best-effort) {"label":"MHC SINGAPORE","service":"clinic-automation","timestamp":"2026-02-14T10:02:19.988Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-14T10:02:20.569Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-14T10:02:21.097Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-14T10:02:22.442Z"}
+[32minfo[39m: Successfully logged into MHC Asia {"service":"clinic-automation","timestamp":"2026-02-14T10:02:23.478Z"}
+[32minfo[39m: [MHC 04] Login ok {"service":"clinic-automation","timestamp":"2026-02-14T10:02:23.478Z"}
+[32minfo[39m: [MHC 05] Dialog handler set up {"service":"clinic-automation","timestamp":"2026-02-14T10:02:23.478Z"}
+[32minfo[39m: Clicked: Edit/Draft Visits {"service":"clinic-automation","timestamp":"2026-02-14T10:02:24.746Z"}
+[32minfo[39m: [MHC 06] Search patient {"service":"clinic-automation","term":"S8176620G","timestamp":"2026-02-14T10:02:26.677Z"}
+[32minfo[39m: Searching patient: S8176620G {"service":"clinic-automation","timestamp":"2026-02-14T10:02:26.678Z"}
+[32minfo[39m: [MHC 07] Navigate: Normal Visit {"service":"clinic-automation","timestamp":"2026-02-14T10:02:26.688Z"}
+[32minfo[39m: Navigating to Normal Visit > Search Other Programs... {"service":"clinic-automation","timestamp":"2026-02-14T10:02:26.688Z"}
+[32minfo[39m: Login form visible after reset; re-logging in {"service":"clinic-automation","timestamp":"2026-02-14T10:02:29.580Z"}
+[32minfo[39m: [MHC 08] Login start {"attempt":1,"maxAttempts":3,"service":"clinic-automation","timestamp":"2026-02-14T10:02:29.582Z"}
+[32minfo[39m: Logging into MHC Asia... {"service":"clinic-automation","timestamp":"2026-02-14T10:02:29.582Z"}
+[32minfo[39m: [MHC 09] Country selected (best-effort) {"label":"MHC SINGAPORE","service":"clinic-automation","timestamp":"2026-02-14T10:02:31.991Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-14T10:02:32.554Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-14T10:02:33.078Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-14T10:02:34.539Z"}
+[32minfo[39m: Successfully logged into MHC Asia {"service":"clinic-automation","timestamp":"2026-02-14T10:02:43.749Z"}
+[32minfo[39m: [MHC 10] Login ok {"service":"clinic-automation","timestamp":"2026-02-14T10:02:43.750Z"}
+[32minfo[39m: [MHC 11] Found Normal Visit link after reset {"selector":"a:has-text(\"Normal Visit\")","service":"clinic-automation","timestamp":"2026-02-14T10:02:43.753Z"}
+[32minfo[39m: Clicked: Normal Visit {"service":"clinic-automation","timestamp":"2026-02-14T10:02:45.150Z"}
+[32minfo[39m: [MHC 12] At program selection page (Normal Visit clicked) {"service":"clinic-automation","timestamp":"2026-02-14T10:02:45.151Z"}
+[32minfo[39m: Clicked: Search under other programs (tile) {"service":"clinic-automation","timestamp":"2026-02-14T10:02:46.669Z"}
+[32minfo[39m: [MHC 13] Fill visit date {"date":"23/01/2026","service":"clinic-automation","timestamp":"2026-02-14T10:02:47.301Z"}
+[32minfo[39m: [MHC 14] Visit date filled (fast path) {"date":"23/01/2026","service":"clinic-automation","timestamp":"2026-02-14T10:02:47.310Z"}
+[32minfo[39m: [MHC 15] NRIC search field set {"programKind":"other","service":"clinic-automation","timestamp":"2026-02-14T10:03:11.923Z","value":"S8176620G"}
+[32minfo[39m: [MHC 16] Search attempt result {"found":true,"hasField":true,"memberNotFound":false,"programKind":"other","service":"clinic-automation","timestamp":"2026-02-14T10:03:12.714Z"}
+[32minfo[39m: Portal determined: null {"service":"clinic-automation","timestamp":"2026-02-14T10:03:12.715Z"}
+[32minfo[39m: [MHC 17] Search result parsed {"found":true,"memberNotFound":false,"portal":null,"service":"clinic-automation","timestamp":"2026-02-14T10:03:12.715Z"}
+[32minfo[39m: [MHC 18] Open patient from results {"nric":"S8176620G","preferredContext":"mhc","service":"clinic-automation","timestamp":"2026-02-14T10:03:12.715Z"}
+[32minfo[39m: Opening patient from search results... {"service":"clinic-automation","timestamp":"2026-02-14T10:03:12.715Z"}
+[32minfo[39m: Dialog appeared: alert - Please submit this claim under www.aiaclinic.com website! {"service":"clinic-automation","timestamp":"2026-02-14T10:03:12.806Z"}
+[32minfo[39m: Dialog accepted {"service":"clinic-automation","timestamp":"2026-02-14T10:03:13.009Z"}
+[32minfo[39m: AIA Clinic switch will be needed after dialog dismissal {"service":"clinic-automation","timestamp":"2026-02-14T10:03:13.010Z"}
+[33mwarn[39m: AIA Clinic switch required; aborting MHC open {"service":"clinic-automation","timestamp":"2026-02-14T10:03:13.774Z"}
+[32minfo[39m: [SUBMIT] Routing override: AIA Clinic required by portal dialog (after patient click) {"msg":"Please submit this claim under www.aiaclinic.com website!","nric":"S8176620G","service":"clinic-automation","timestamp":"2026-02-14T10:03:13.861Z"}
+[32minfo[39m: [MHC 19] Check if AIA Clinic switch needed {"service":"clinic-automation","timestamp":"2026-02-14T10:03:13.865Z"}
+[32minfo[39m: AIA Clinic switch needed (flagged by dialog handler) {"service":"clinic-automation","timestamp":"2026-02-14T10:03:13.865Z"}
+[32minfo[39m: AIA Clinic switch detected - switching system... {"service":"clinic-automation","timestamp":"2026-02-14T10:03:13.866Z"}
+[32minfo[39m: [MHC 20] Switching to AIA Clinic system {"service":"clinic-automation","timestamp":"2026-02-14T10:03:13.866Z"}
+[32minfo[39m: Clicked: Switch System {"service":"clinic-automation","timestamp":"2026-02-14T10:03:15.339Z"}
+[32minfo[39m: [MHC 21] No visible AIA switch options; trying hidden switch links {"service":"clinic-automation","timestamp":"2026-02-14T10:03:16.613Z"}
+[32minfo[39m: [MHC 22] AIA switch debug targets {"count":0,"sample":[],"service":"clinic-automation","timestamp":"2026-02-14T10:03:16.618Z"}
+[32minfo[39m: [MHC 23] AIA switch href fallback candidates {"count":0,"sample":[],"service":"clinic-automation","timestamp":"2026-02-14T10:03:16.619Z"}
+[32minfo[39m: [MHC 24] AIA switch deterministic default fallback {"nextUrl":"https://www.mhcasia.net/mhc/SwitchSystem.ec?url=https://www.aiaclinic.com","service":"clinic-automation","timestamp":"2026-02-14T10:03:16.620Z"}
+[32minfo[39m: [MHC 25] Dialog handler set up {"service":"clinic-automation","timestamp":"2026-02-14T10:03:20.271Z"}
+[32minfo[39m: [MHC 26] AIA switch verification via default fallback {"hasAddAiaVisit":true,"hasPolicyNoHeader":false,"hasSearchAiaMember":false,"hasSwitchSystem":false,"isAiaDomain":true,"isMhcDomain":false,"isSinglifeDomain":false,"looksLikeAiaFlow":true,"nextUrl":"https://www.mhcasia.net/mhc/SwitchSystem.ec?url=https://www.aiaclinic.com","service":"clinic-automation","timestamp":"2026-02-14T10:03:20.366Z","url":"https://www.aiaclinic.com/aia/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=RWXO-2SKO-TW6F-4YYY-E2BB-BXU1-CEAM-F1OM"}
+[32minfo[39m: Clicked: Edit/Draft Visits {"service":"clinic-automation","timestamp":"2026-02-14T10:03:21.408Z"}
+[32minfo[39m: Clicked: Search Draft Visits {"service":"clinic-automation","timestamp":"2026-02-14T10:03:23.404Z"}
+[32minfo[39m: [MHC 27] Navigate to AIA Visit {"nric":"S8176620G","service":"clinic-automation","timestamp":"2026-02-14T10:03:24.115Z","visitDate":"23/01/2026"}
+[32minfo[39m: Clicked: Add AIA Visit {"service":"clinic-automation","timestamp":"2026-02-14T10:03:25.081Z"}
+[32minfo[39m: [MHC 28] Member card selection detected {"service":"clinic-automation","timestamp":"2026-02-14T10:03:26.109Z"}
+[32minfo[39m: Clicked: Member card: AIA red card {"service":"clinic-automation","timestamp":"2026-02-14T10:03:26.840Z"}
+[32minfo[39m: [MHC 29] Click search icon for NRIC lookup {"service":"clinic-automation","timestamp":"2026-02-14T10:03:27.650Z"}
+[32minfo[39m: Clicked: Search icon {"service":"clinic-automation","timestamp":"2026-02-14T10:03:28.538Z"}
+[32minfo[39m: [MHC 30] Set AIA search visit date {"service":"clinic-automation","timestamp":"2026-02-14T10:03:29.040Z","visitDate":"23/01/2026"}
+[32minfo[39m: [MHC 31] AIA search visit date set {"selector":"tr:has-text(\"Visit Date\") input[type=\"text\"]","service":"clinic-automation","timestamp":"2026-02-14T10:03:59.601Z","valueNow":"23/01/2026"}
+[32minfo[39m: [MHC 32] Enter NRIC in AIA search {"nric":"S8176620G","service":"clinic-automation","timestamp":"2026-02-14T10:03:59.603Z"}
+[32minfo[39m: NRIC entered in AIA search {"service":"clinic-automation","timestamp":"2026-02-14T10:04:00.922Z"}
+[32minfo[39m: Clicked: Search button {"service":"clinic-automation","timestamp":"2026-02-14T10:04:03.117Z"}
+[32minfo[39m: [MHC 33] Click patient from AIA search results {"service":"clinic-automation","timestamp":"2026-02-14T10:04:03.597Z"}
+[32minfo[39m: [MHC 34] AIA patient link patched with visit date {"originalHref":"ClinicIECAIAEmpVisitAdd.ec?memberId=5427918101&visitDateAsString=23/01/2026&tranId=EDT457265087&OWASP_CSRFTOKEN=RWXO-2SKO-TW6F-4YYY-E2BB-BXU1-CEAM-F1OM","patchedHref":"https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAdd.ec?memberId=5427918101&visitDateAsString=23%2F01%2F2026&tranId=EDT457265087&OWASP_CSRFTOKEN=RWXO-2SKO-TW6F-4YYY-E2BB-BXU1-CEAM-F1OM","service":"clinic-automation","timestamp":"2026-02-14T10:04:03.608Z","visitDate":"23/01/2026"}
+[32minfo[39m: Selected patient from AIA search results {"service":"clinic-automation","timestamp":"2026-02-14T10:04:05.254Z"}
+[32minfo[39m: [MHC 35] Patient selected from AIA results {"from":"https://www.aiaclinic.com/aia/ClinicIECAIAPatientSearchSubmit.ec","service":"clinic-automation","timestamp":"2026-02-14T10:04:05.255Z","to":"https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAdd.ec?memberId=5427918101&visitDateAsString=23%2F01%2F2026&tranId=EDT457265087&OWASP_CSRFTOKEN=RWXO-2SKO-TW6F-4YYY-E2BB-BXU1-CEAM-F1OM"}
+[32minfo[39m: [MHC 36] Visit form ready {"service":"clinic-automation","timestamp":"2026-02-14T10:04:05.398Z"}
+[32minfo[39m: [MHC 37] Fill visit date {"date":"23/01/2026","service":"clinic-automation","timestamp":"2026-02-14T10:04:05.398Z"}
+[32minfo[39m: [MHC 38] Visit date filled (fast path) {"date":"23/01/2026","service":"clinic-automation","timestamp":"2026-02-14T10:04:05.403Z"}
+[32minfo[39m: [MHC 39] Fill charge type {"service":"clinic-automation","timestamp":"2026-02-14T10:04:05.404Z","visitType":"follow up"}
+[32minfo[39m: [MHC 40] Visit form ready {"service":"clinic-automation","timestamp":"2026-02-14T10:04:05.404Z"}
+[32minfo[39m: [MHC 41] Charge type filled {"mhcType":"Follow Up","service":"clinic-automation","timestamp":"2026-02-14T10:04:07.232Z","visitType":"follow up"}
+[32minfo[39m: [MHC 42] Fill consultation fee {"fee":99999,"service":"clinic-automation","timestamp":"2026-02-14T10:04:07.442Z"}
+[32minfo[39m: Dialog appeared: alert - Consult fee cannot be be more than 80.0! {"service":"clinic-automation","timestamp":"2026-02-14T10:04:07.500Z"}
+[32minfo[39m: Dialog accepted {"service":"clinic-automation","timestamp":"2026-02-14T10:04:07.655Z"}
+[32minfo[39m: [MHC 43] Consultation fee set to 99999 (strict row scan) {"id":"","name":"consultFee","ok":true,"service":"clinic-automation","timestamp":"2026-02-14T10:04:07.656Z","value":"80.0"}
+[32minfo[39m: [MHC 44] Consultation fee filled (max amount accepted) {"service":"clinic-automation","timestamp":"2026-02-14T10:04:08.491Z"}
+[32minfo[39m: [MHC 45] Fill MC days {"mcDays":0,"service":"clinic-automation","timestamp":"2026-02-14T10:04:09.000Z"}
+[32minfo[39m: [MHC 46] MC days filled (DOM scan) {"kind":"input","mcDays":0,"ok":true,"service":"clinic-automation","timestamp":"2026-02-14T10:04:09.022Z","value":"0"}
+[32minfo[39m: [MHC 47] MC days filled {"mcDays":0,"selector":"input[name*=\"mc\" i][name*=\"day\" i]","service":"clinic-automation","timestamp":"2026-02-14T10:04:09.591Z"}
+[32minfo[39m: [MHC 48] Prefetched portal diagnosis options {"context":"aia","searchTerms":["illness","illness unspecified","R69"],"service":"clinic-automation","timestamp":"2026-02-14T10:04:17.399Z","total":47}
+[31merror[39m: [SUBMIT] Error submitting claim for LI MEIQIN {"error":"diagnosis_mapping_failed: no safe portal diagnosis option match (visitId=8ef0c2a7-c099-4a47-9501-d99a26491f5c, nric=S8176620G)","service":"clinic-automation","timestamp":"2026-02-14T10:04:18.075Z"}
+{
+  "visitId": "8ef0c2a7-c099-4a47-9501-d99a26491f5c",
+  "result": {
+    "success": false,
+    "error": "diagnosis_mapping_failed: no safe portal diagnosis option match (visitId=8ef0c2a7-c099-4a47-9501-d99a26491f5c, nric=S8176620G)"
+  }
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-14T10:04:18.601Z"}

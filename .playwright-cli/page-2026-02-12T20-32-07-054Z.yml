@@ -1,0 +1,160 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e49]:
+    - generic [ref=e51]:
+      - generic [ref=e52]:
+        - img [ref=e737] [cursor=pointer]
+        - button [ref=e56] [cursor=pointer]:
+          - img [ref=e57]: keyboard_double_arrow_left
+      - list [ref=e61]:
+        - listitem [ref=e62]:
+          - generic [ref=e63] [cursor=pointer]:
+            - img [ref=e64]:
+              - img [ref=e65]
+            - paragraph [ref=e67]: Panel Services
+            - img [ref=e68]: expand_more
+        - listitem [ref=e69]:
+          - generic [ref=e70] [cursor=pointer]:
+            - img [ref=e71]:
+              - img [ref=e72]
+            - paragraph [ref=e74]: Pre-Authorisation
+            - img [ref=e75]: expand_more
+        - listitem [ref=e76]:
+          - generic [ref=e77] [cursor=pointer]:
+            - img [ref=e78]:
+              - img [ref=e79]
+            - paragraph [ref=e81]: Finance
+            - img [ref=e82]: expand_more
+    - generic [ref=e83]:
+      - generic [ref=e86]:
+        - heading [level=1] [ref=e738]: Create Panel Claim
+        - button [ref=e92] [cursor=pointer]:
+          - img [ref=e93]: more_vert
+      - generic [ref=e331]:
+        - button [ref=e739] [cursor=pointer]: Calculate Claim
+        - generic [ref=e334]:
+          - generic [ref=e336]:
+            - heading [level=4] [ref=e740]: Member Details
+            - generic [ref=e510]:
+              - button [ref=e741] [cursor=pointer]: View Benefit Plan
+              - generic [ref=e512]:
+                - generic [ref=e515]:
+                  - generic [ref=e516]: Member Name
+                  - textbox [ref=e742]:
+                    - /placeholder: Member Name
+                    - text: Tan Wee Hiong Kevin
+                - generic [ref=e522]:
+                  - generic [ref=e523]: Member Code
+                  - textbox [ref=e743]:
+                    - /placeholder: Member Code
+                    - text: BGDC211000068-S7137124G
+                - generic [ref=e529]:
+                  - generic [ref=e530]: Member UIN
+                  - textbox [ref=e744]:
+                    - /placeholder: Member UIN
+                    - text: S****124G
+                - generic [ref=e536]:
+                  - generic [ref=e537]: Member DOB
+                  - textbox [ref=e745]:
+                    - /placeholder: Member DOB
+                    - text: 18/10/1971
+                - generic [ref=e543]:
+                  - generic [ref=e544]: Member Gender
+                  - textbox [ref=e746]:
+                    - /placeholder: Member Gender
+                    - text: Male
+                - generic [ref=e550]:
+                  - generic [ref=e551]: Medinet Start Date
+                  - textbox [ref=e747]:
+                    - /placeholder: Medinet Start Date
+                    - text: 01/09/2016
+                - generic [ref=e557]:
+                  - generic [ref=e558]: Group Policy Number
+                  - textbox [ref=e748]:
+                    - /placeholder: Group Policy Number
+                    - text: BGDC211000068
+                - generic [ref=e564]:
+                  - generic [ref=e565]: Company Name
+                  - textbox [ref=e749]:
+                    - /placeholder: Company Name
+                    - text: Straits Financial Group Pte. Ltd
+                - generic [ref=e571]:
+                  - generic [ref=e572]: Coverage Start Date
+                  - textbox [ref=e750]:
+                    - /placeholder: Coverage Start Date
+                    - text: 01/09/2016
+                - generic [ref=e578]:
+                  - generic [ref=e579]: Coverage End Date
+                  - textbox [ref=e751]:
+                    - /placeholder: Coverage End Date
+                    - text: 31/12/2026
+          - generic [ref=e584]:
+            - heading [level=4] [ref=e752]: Claim Information
+            - generic [ref=e588]:
+              - generic [ref=e589]: Claim Code
+              - textbox [ref=e753]:
+                - /placeholder: AUTO GENERATE<Claim Code>
+            - separator [ref=e594]
+            - heading [level=6] [ref=e754]: Visit Details
+            - generic [ref=e598] [cursor=pointer]:
+              - generic [ref=e599]:
+                - text: Purpose of Visit
+                - generic [ref=e600]: "*"
+              - combobox [ref=e755]:
+                - generic [ref=e603]:
+                  - generic [ref=e605]: SP (Panel)
+                  - img [ref=e608]
+            - text: "*"
+            - generic [ref=e613] [cursor=pointer]:
+              - generic [ref=e614]:
+                - text: Doctor
+                - generic [ref=e615]: "*"
+              - combobox [ref=e756]:
+                - generic [ref=e618]:
+                  - generic [ref=e708]: Yip Man Hing Kevin
+                  - img [ref=e623]
+            - generic [ref=e628]:
+              - generic [ref=e629]:
+                - text: Visit Date
+                - generic [ref=e630]: "*"
+              - textbox [ref=e757]:
+                - /placeholder: Visit Date
+                - text: 13/2/2026
+              - button [ref=e758] [cursor=pointer]:
+                - img [ref=e636]
+          - generic [ref=e642]:
+            - heading [level=6] [ref=e759]: MC Details
+            - generic [ref=e646]:
+              - generic [ref=e647]:
+                - text: MC Days
+                - generic [ref=e648]: "*"
+              - spinbutton [ref=e760]: "0"
+            - generic [ref=e652]:
+              - generic:
+                - generic:
+                  - generic [ref=e655]: MC Start Date
+                  - textbox [disabled] [ref=e761]:
+                    - /placeholder: MC Start Date
+                  - generic [ref=e659]:
+                    - button [disabled]:
+                      - img
+          - generic [ref=e667]:
+            - heading [level=4] [ref=e762]: Diagnoses
+            - button [ref=e763] [cursor=pointer]: Add Diagnosis
+            - generic [ref=e671]:
+              - img [ref=e673]: close
+              - generic [ref=e674]: Diagnosis not added
+          - generic [ref=e677]:
+            - heading [level=4] [ref=e764]: Remarks
+            - generic [ref=e679]:
+              - generic [ref=e681]:
+                - generic [ref=e682]: External Remarks
+                - textbox [ref=e765]:
+                  - /placeholder: External Remarks
+              - generic [ref=e688]: 0/1000
+  - dialog "Unsaved changes" [ref=e769]:
+    - generic [ref=e772]:
+      - generic [ref=e774]: Unsaved changes
+      - generic [ref=e775]: You have unsaved changes. Are you sure you want to leave?
+      - generic [ref=e778]:
+        - button "Stay" [ref=e779] [cursor=pointer]
+        - button "Leave" [ref=e780] [cursor=pointer]

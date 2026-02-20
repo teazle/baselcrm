@@ -505,7 +505,7 @@ export class VisitDetailsExtractor {
           side: null,
           code_raw: genericFallback.code,
           body_part: null,
-          condition: genericFallback.reason === 'pain_symptom_hint' ? 'pain' : null,
+          condition: null,
           source_date: null,
           code_normalized: genericFallback.code,
           description_raw: genericFallback.description,
@@ -582,36 +582,10 @@ export class VisitDetailsExtractor {
     const enabled = process.env.FLOW2_ENABLE_GENERIC_DIAG_FALLBACK === '1';
     if (!enabled) return null;
 
-    const combined = [
-      diagnosisText,
-      diagnosisCode,
-      treatmentDetail,
-      sources?.existingSymptoms,
-      sources?.existingTreatmentDetail,
-      ...(Array.isArray(sources?.diagnosisAttempts)
-        ? sources.diagnosisAttempts.map(a => a?.description).filter(Boolean)
-        : []),
-    ]
-      .filter(Boolean)
-      .map(v => String(v))
-      .join(' ')
-      .toLowerCase();
-
-    const painLike = /\b(pain|ache|aching|sore|soreness|tender|sprain|strain|injury)\b/i.test(
-      combined
-    );
-    if (painLike) {
-      return {
-        code: 'R52',
-        description: 'Pain, unspecified',
-        reason: 'pain_symptom_hint',
-      };
-    }
-
     return {
       code: 'R69',
       description: 'Illness, unspecified',
-      reason: 'no_reliable_source_data',
+      reason: 'generic_fallback_r69',
     };
   }
 

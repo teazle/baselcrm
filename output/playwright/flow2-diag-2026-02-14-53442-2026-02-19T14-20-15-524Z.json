@@ -1,0 +1,90 @@
+{
+  "visit": {
+    "id": "ff1bf9d8-c55a-43e0-90a6-d761e98dd4ee",
+    "patient_name": "ONG XUE ZHE KENNETH",
+    "visit_date": "2026-02-14",
+    "nric": "T0403755Z",
+    "pay_type": "MHC",
+    "pcno": "53442"
+  },
+  "flow2_saved": {
+    "diagnosis_description": "Low back pain",
+    "diagnosis_code": "M54.5",
+    "diagnosis_resolution": {
+      "status": "ambiguous",
+      "date_ok": false,
+      "confidence": 0.69,
+      "date_policy": "on_or_before_30_days",
+      "source_chain": [
+        {
+          "found": true,
+          "source": "diagnosis_tab",
+          "source_date": "2020-09-25",
+          "source_age_days": 1968
+        },
+        {
+          "found": true,
+          "source": "all_tab",
+          "source_date": "2023-02-18",
+          "source_age_days": 1092
+        },
+        {
+          "found": false,
+          "source": "visit_tab",
+          "source_date": null,
+          "source_age_days": null
+        },
+        {
+          "found": false,
+          "source": "past_notes",
+          "source_date": null,
+          "source_age_days": null
+        }
+      ],
+      "fallback_age_days": 1968,
+      "reason_if_unresolved": "diagnosis_source_too_old_for_on_before_policy",
+      "source_date_match_type": "on_before"
+    },
+    "diagnosis_canonical": {
+      "side": null,
+      "code_raw": "M54.5",
+      "body_part": "back",
+      "condition": "pain",
+      "source_date": "2020-09-25",
+      "code_normalized": "M54.5",
+      "description_raw": "Low back pain",
+      "source_age_days": 1968,
+      "description_canonical": "Low back pain",
+      "source_date_match_type": "on_before"
+    }
+  },
+  "browser_extract": {
+    "diagnosisForDate": {
+      "code": "M54.5",
+      "description": "Low back pain",
+      "date": "25/09/2020"
+    },
+    "latestDiagnosis": {
+      "code": "M54.5",
+      "description": "Low back pain",
+      "date": "25/09/2020"
+    },
+    "rawDiagnosis": {
+      "code": "M54.5",
+      "description": "Low back pain Low back pain Low back pain"
+    },
+    "allTabDiagnosis": {
+      "code": "D31.00",
+      "description": "MedOMEGA + D Bott",
+      "date": "18/02/2023"
+    },
+    "visitTabDiagnosis": null,
+    "pastNotesDiagnosis": null,
+    "pastNotesIntent": null
+  },
+  "artifacts": {
+    "patientBiodata": "/Users/vincent/Baselrpacrm/output/playwright/flow2-diag-2026-02-14-53442-2026-02-19T14-20-15-524Z-patient-biodata.png",
+    "diagnosisTab": "/Users/vincent/Baselrpacrm/output/playwright/flow2-diag-2026-02-14-53442-2026-02-19T14-20-15-524Z-tx-diagnosis-tab.png",
+    "pastNotes": "/Users/vincent/Baselrpacrm/output/playwright/flow2-diag-2026-02-14-53442-2026-02-19T14-20-15-524Z-tx-past-notes.png"
+  }
+}

@@ -1,0 +1,67 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T07:58:25.994Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T07:58:25.997Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T07:58:25.997Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T07:58:25.997Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T07:58:28.041Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T07:58:28.043Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T07:58:30.416Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:58:31.688Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T07:58:33.643Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:58:34.231Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:58:35.756Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T07:58:37.277Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T07:58:38.792Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:58:39.946Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T07:58:40.523Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:58:43.253Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T07:58:45.094Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":10000,"searchKind":"search_others","service":"clinic-automation","timestamp":"2026-02-19T07:58:55.786Z"}
+[probe] diagnosisResult {
+  "success": true,
+  "portalMatch": {
+    "portal": "GE_NTUC",
+    "match_text": "Pain, not elsewhere classified",
+    "match_score": 0,
+    "match_method": "generic_fallback",
+    "matched_by": "generic_draft_fallback"
+  },
+  "diagnosisState": {
+    "primaryCode": "R52",
+    "primaryText": "Pain, not elsewhere classified",
+    "primaryId": "",
+    "primaryCodeHidden": "R52",
+    "acuteArray": "[{\"label\":\"Pain, not elsewhere classified\",\"val\":\"R52\"}]"
+  }
+}
+[probe] state after diagnosis {
+  "mcDay": "",
+  "mcDays": "",
+  "mcReason": "",
+  "feeType": "",
+  "feeAmount": "",
+  "diagnosisCode": "R52",
+  "diagnosisText": "Pain, not elsewhere classified",
+  "diagnosisId": "",
+  "acuteArray": "[{\"label\":\"Pain, not elsewhere classified\",\"val\":\"R52\"}]"
+}
+[probe] setter results {
+  ok1: true,
+  ok2: false,
+  ok3: false,
+  ok4: false,
+  ok5: false,
+  ok6: false,
+  ok7: false
+}
+[probe] state after field fills {
+  "mcDay": "",
+  "mcDays": "",
+  "mcReason": "",
+  "feeType": "",
+  "feeAmount": "",
+  "diagnosisCode": "",
+  "diagnosisText": "",
+  "diagnosisId": "",
+  "acuteArray": ""
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T08:00:31.588Z"}

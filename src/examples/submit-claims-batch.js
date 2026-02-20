@@ -7,7 +7,9 @@ import { registerRunExitHandler, markRunFinalized } from '../utils/run-exit-hand
 import {
   getFlow3PortalTargets,
   normalizeFlow3PortalTarget,
+  resolveFlow3PortalTarget,
 } from '../../apps/crm/src/lib/rpa/portals.shared.js';
+import { portalTargetToLabel, writeRunSummaryReport } from '../utils/run-summary-report.js';
 
 function printUsage() {
   console.log(`
@@ -252,6 +254,51 @@ async function submitClaimsBatch() {
   let filledOnlyCount = 0;
   let errorCount = 0;
   let notStartedCount = 0;
+  const reportRows = [];
+  const reportScope = {
+    from: from || null,
+    to: to || null,
+    date: null,
+    payType: payType || 'All',
+    portalTargets: normalizedPortalTargets?.join(',') || (portalOnly ? 'Portal scope' : 'All routes'),
+    visitIds: visitIds?.join(',') || null,
+  };
+
+  const buildDiagnosisStatus = (visit, result = null) => {
+    const flow2Status = String(visit?.extraction_metadata?.diagnosisResolution?.status || '').trim();
+    const portalMatch = result?.diagnosisPortalMatch || null;
+    const fallbackMode = String(result?.diagnosisFallbackMode?.mode || '').trim();
+    if (fallbackMode) {
+      return flow2Status ? `${flow2Status}; portal_fallback:${fallbackMode}` : `portal_fallback:${fallbackMode}`;
+    }
+    if (portalMatch?.blocked === false) {
+      return flow2Status ? `${flow2Status}; portal_matched` : 'portal_matched';
+    }
+    if (portalMatch?.blocked === true) {
+      return flow2Status ? `${flow2Status}; portal_blocked` : 'portal_blocked';
+    }
+    if (flow2Status) return flow2Status;
+    const reason = String(result?.reason || '').toLowerCase();
+    if (reason.includes('diagnosis')) return reason;
+    return '-';
+  };
+
+  const buildPortalLabel = (visit, result = null) => {
+    const route = resolveFlow3PortalTarget(
+      visit?.pay_type || null,
+      visit?.patient_name || null,
+      visit?.extraction_metadata || null
+    );
+    const hinted =
+      normalizeFlow3PortalTarget(result?.portalService || result?.portal || null) ||
+      normalizeFlow3PortalTarget(route || null) ||
+      route ||
+      result?.portalService ||
+      result?.portal ||
+      visit?.pay_type ||
+      'Unknown';
+    return portalTargetToLabel(hinted);
+  };
 
   try {
     // Get visits to submit (either specific IDs or all pending)
@@ -273,23 +320,37 @@ async function submitClaimsBatch() {
         `[${i + 1}/${visits.length}] Processing: ${visit.patient_name} (${visit.pay_type})`
       );
 
+      let rowStatus = 'error';
+      let rowNotes = '';
+      let rowResult = null;
       try {
         const result = await submitter.submitClaim(visit);
+        rowResult = result;
 
         if (result.success) {
           if (result.savedAsDraft) {
             draftCount++;
+            rowStatus = 'draft_saved';
+            rowNotes = 'Draft saved in portal';
           } else if (result.submitted) {
             submittedCount++;
+            rowStatus = 'submitted';
+            rowNotes = 'Submitted in portal';
           } else {
             // Fill-only verification run (no draft/submission).
             filledOnlyCount++;
+            rowStatus = 'filled_only';
+            rowNotes = 'Fill-only mode (no save/submission)';
           }
         } else if (result.reason === 'not_found') {
           notStartedCount++;
           logger.warn(`Member not found in portal: ${visit.patient_name} (${visit.pay_type})`);
+          rowStatus = 'not_found';
+          rowNotes = result.error || result.reason || 'Member not found in portal';
         } else if (result.reason === 'not_implemented' || result.reason === 'unknown_pay_type') {
           notStartedCount++;
+          rowStatus = 'not_started';
+          rowNotes = result.error || result.reason || 'Portal flow not implemented';
           if (result.reason === 'unknown_pay_type') {
             logger.warn(`Unsupported/unknown pay type: ${visit.pay_type}`);
           } else {
@@ -303,11 +364,26 @@ async function submitClaimsBatch() {
         } else {
           errorCount++;
           logger.error(`Failed to submit: ${result.error || result.reason}`);
+          rowStatus = 'error';
+          rowNotes = result.error || result.reason || 'Submission failed';
         }
       } catch (error) {
         errorCount++;
         logger.error(`Error submitting claim: ${error.message}`);
+        rowStatus = 'error';
+        rowNotes = error.message;
       }
+
+      reportRows.push({
+        date: visit.visit_date || '-',
+        patientName: visit.patient_name || '-',
+        nric: visit.nric || '-',
+        payType: visit.pay_type || '-',
+        portal: buildPortalLabel(visit, rowResult),
+        status: rowStatus,
+        diagnosisStatus: buildDiagnosisStatus(visit, rowResult),
+        notes: rowNotes,
+      });
 
       await updateRun(supabase, runId, {
         completed_count: submittedCount + draftCount,
@@ -325,6 +401,35 @@ async function submitClaimsBatch() {
     logger.info(`Filled only (no DB update): ${filledOnlyCount}`);
     logger.info(`Errors: ${errorCount}`);
     logger.info(`Not Started (unsupported): ${notStartedCount}`);
+
+    const report = await writeRunSummaryReport({
+      flowName: 'Flow 3 Claim Submission',
+      filePrefix: 'flow3',
+      scope: reportScope,
+      totals: {
+        total: totalRecords,
+        submitted: submittedCount,
+        drafts: draftCount,
+        filled_only: filledOnlyCount,
+        errors: errorCount,
+        not_started: notStartedCount,
+      },
+      rows: reportRows.length
+        ? reportRows
+        : [
+            {
+              date: `${from || '-'}..${to || '-'}`,
+              patientName: '-',
+              nric: '-',
+              payType: payType || '-',
+              portal: '-',
+              status: 'no_records',
+              diagnosisStatus: '-',
+              notes: 'No visits matched run scope',
+            },
+          ],
+    });
+    logger.info(`Flow 3 summary report: ${report.mdPath}`);
 
     await updateRun(supabase, runId, {
       status: 'completed',
@@ -344,6 +449,31 @@ async function submitClaimsBatch() {
     markRunFinalized();
   } catch (error) {
     logger.error('Fatal error during submission:', error);
+    reportRows.push({
+      date: `${from || '-'}..${to || '-'}`,
+      patientName: '-',
+      nric: '-',
+      payType: payType || '-',
+      portal: '-',
+      status: 'fatal_error',
+      diagnosisStatus: '-',
+      notes: error?.message || String(error),
+    });
+    const report = await writeRunSummaryReport({
+      flowName: 'Flow 3 Claim Submission',
+      filePrefix: 'flow3',
+      scope: reportScope,
+      totals: {
+        total: totalRecords,
+        submitted: submittedCount,
+        drafts: draftCount,
+        filled_only: filledOnlyCount,
+        errors: errorCount,
+        not_started: notStartedCount,
+      },
+      rows: reportRows,
+    });
+    logger.info(`Flow 3 summary report: ${report.mdPath}`);
     await updateRun(supabase, runId, {
       status: 'failed',
       finished_at: new Date().toISOString(),

@@ -1,0 +1,85 @@
+{
+  "generatedAt": "2026-02-13T01:20:07.531Z",
+  "visitId": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+  "logPath": "/Users/vincent/Baselrpacrm/logs/one_more_mittal_after_diag_buttonselectorfix_20260213_081635.log",
+  "summary": {
+    "total": 1,
+    "submitted": 0,
+    "drafts": 1,
+    "filledOnly": 0,
+    "errors": 0,
+    "notStarted": 0
+  },
+  "db": {
+    "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "patient_name": "MITTAL SACHIN KUMAR",
+    "nric": "M4539893L",
+    "visit_date": "2026-02-02",
+    "pay_type": "MHC",
+    "submission_status": "draft",
+    "submitted_at": "2026-02-13T01:17:20.641+00:00",
+    "submission_error": null,
+    "submission_metadata": {
+      "mcDays": 0,
+      "portal": "MHC Asia",
+      "success": true,
+      "persisted": true,
+      "chargeType": "first",
+      "hasDiagnosis": true,
+      "savedAsDraft": true,
+      "draftReference": "EV16090142",
+      "routingOverride": null,
+      "draftVerification": {
+        "row": {
+          "type": "Employee Visit",
+          "mcDays": "0.0",
+          "remarks": "",
+          "visitNo": "EV16090142",
+          "totalFee": "$283.40",
+          "visitDate": "02/02/2026",
+          "totalClaim": "$283.40",
+          "patientName": "SACHIN MITTAL",
+          "patientNric": "M4539893L"
+        },
+        "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+        "found": true,
+        "context": "mhc",
+        "attempts": [
+          {
+            "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+            "match": {
+              "type": "Employee Visit",
+              "mcDays": "0.0",
+              "remarks": "",
+              "visitNo": "EV16090142",
+              "totalFee": "$283.40",
+              "visitDate": "02/02/2026",
+              "totalClaim": "$283.40",
+              "patientName": "SACHIN MITTAL",
+              "patientNric": "M4539893L"
+            },
+            "opened": true,
+            "context": "mhc",
+            "matched": true,
+            "rowsSeen": 1,
+            "attemptNo": 1,
+            "expectedVisitNo": null
+          }
+        ],
+        "rowsSeen": 1
+      },
+      "diagnosisResolution": {
+        "status": "resolved",
+        "confidence": 1,
+        "source_chain": [
+          {
+            "found": true,
+            "source": "diagnosis_tab"
+          }
+        ],
+        "reason_if_unresolved": null
+      }
+    }
+  },
+  "runOutcome": "success"
+}

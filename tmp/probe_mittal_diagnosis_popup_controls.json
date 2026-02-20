@@ -1,0 +1,583 @@
+{
+  "url": "https://www.mhcasia.net/mhc/SelectDiagnosis.ec?clinicId=1296d6336a11&sourceType=M&formName=visit_form&idField=diagnosisPriId&useBSInpanel=Y&diagnosisSetId=&descField=diagnosisPriDesc",
+  "title": "Select Diagnosis",
+  "forms": [
+    {
+      "idx": 0,
+      "id": "dataForm",
+      "name": "",
+      "action": "SelectDiagnosisSubmit.ec",
+      "method": "post"
+    }
+  ],
+  "textInputs": [
+    {
+      "idx": 0,
+      "tag": "input",
+      "type": "text",
+      "name": "keyValue",
+      "id": "",
+      "value": "",
+      "placeholder": "",
+      "className": "text",
+      "visible": true,
+      "disabled": false,
+      "readOnly": false,
+      "rowText": "Description Code that contains starts with equals to",
+      "formId": "dataForm",
+      "formAction": "SelectDiagnosisSubmit.ec"
+    }
+  ],
+  "radios": [
+    {
+      "idx": 0,
+      "type": "radio",
+      "name": "sort",
+      "id": "",
+      "value": "1",
+      "checked": true,
+      "visible": true,
+      "rowText": "Sort Code Description"
+    },
+    {
+      "idx": 1,
+      "type": "radio",
+      "name": "sort",
+      "id": "",
+      "value": "2",
+      "checked": false,
+      "visible": true,
+      "rowText": "Sort Code Description"
+    }
+  ],
+  "actions": [
+    {
+      "idx": 0,
+      "tag": "input",
+      "type": "submit",
+      "name": "SearchAction",
+      "id": "",
+      "value": "Search",
+      "text": "",
+      "href": "",
+      "onclick": "",
+      "visible": true,
+      "rowText": "Description Code that contains starts with equals to"
+    },
+    {
+      "idx": 1,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Next",
+      "href": "SelectDiagnosis.ec?clinicId=1296d6336a11&groupId=null&sourceType=M&sort=1&formName=visit_form&idField=diagnosisPriId&descField=diagnosisPriDesc&diagnosisSetId=&useBSInpanel=Y&start=15",
+      "onclick": "",
+      "visible": true,
+      "rowText": "1 - 15 of 913 Next"
+    },
+    {
+      "idx": 2,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "1119302008",
+      "href": "#",
+      "onclick": "doSelect(\"9612c2794c54\", dataForm.data9612c2794c54.value)",
+      "visible": true,
+      "rowText": "1119302008 Acute COVID-19"
+    },
+    {
+      "idx": 3,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Acute COVID-19",
+      "href": "#",
+      "onclick": "doSelect('9612c2794c54', 'Acute COVID-19')",
+      "visible": true,
+      "rowText": "1119302008 Acute COVID-19"
+    },
+    {
+      "idx": 4,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "26889001",
+      "href": "#",
+      "onclick": "doSelect(\"8d7480936226\", dataForm.data8d7480936226.value)",
+      "visible": true,
+      "rowText": "26889001 Myositis"
+    },
+    {
+      "idx": 5,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Myositis",
+      "href": "#",
+      "onclick": "doSelect('8d7480936226', 'Myositis')",
+      "visible": true,
+      "rowText": "26889001 Myositis"
+    },
+    {
+      "idx": 6,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "802.0",
+      "href": "#",
+      "onclick": "doSelect(\"1852dbd9ff8d\", dataForm.data1852dbd9ff8d.value)",
+      "visible": true,
+      "rowText": "802.0 Closed fracture of nasal bones"
+    },
+    {
+      "idx": 7,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Closed fracture of nasal bones",
+      "href": "#",
+      "onclick": "doSelect('1852dbd9ff8d', 'Closed fracture of nasal bones')",
+      "visible": true,
+      "rowText": "802.0 Closed fracture of nasal bones"
+    },
+    {
+      "idx": 8,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "A049",
+      "href": "#",
+      "onclick": "doSelect(\"169713d3e4cf\", dataForm.data169713d3e4cf.value)",
+      "visible": true,
+      "rowText": "A049 Bacterial intestinal infection / enteritis, unspecified"
+    },
+    {
+      "idx": 9,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Bacterial intestinal infection / enteritis, unspecified",
+      "href": "#",
+      "onclick": "doSelect('169713d3e4cf', 'Bacterial intestinal infection / enteritis, unspecified')",
+      "visible": true,
+      "rowText": "A049 Bacterial intestinal infection / enteritis, unspecified"
+    },
+    {
+      "idx": 10,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "A05",
+      "href": "#",
+      "onclick": "doSelect(\"135a33686d5f\", dataForm.data135a33686d5f.value)",
+      "visible": true,
+      "rowText": "A05 Other bacterial foodborne intoxications, not elsewhere classified"
+    },
+    {
+      "idx": 11,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Other bacterial foodborne intoxications, not elsewhere classified",
+      "href": "#",
+      "onclick": "doSelect('135a33686d5f', 'Other bacterial foodborne intoxications, not elsewhere classified')",
+      "visible": true,
+      "rowText": "A05 Other bacterial foodborne intoxications, not elsewhere classified"
+    },
+    {
+      "idx": 12,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "A079",
+      "href": "#",
+      "onclick": "doSelect(\"A079\", dataForm.dataA079.value)",
+      "visible": true,
+      "rowText": "A079 Worms (protozoa intestinal disease)"
+    },
+    {
+      "idx": 13,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Worms (protozoa intestinal disease)",
+      "href": "#",
+      "onclick": "doSelect('A079', 'Worms (protozoa intestinal disease) ')",
+      "visible": true,
+      "rowText": "A079 Worms (protozoa intestinal disease)"
+    },
+    {
+      "idx": 14,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "A09",
+      "href": "#",
+      "onclick": "doSelect(\"A09\", dataForm.dataA09.value)",
+      "visible": true,
+      "rowText": "A09 Gastroenteritis"
+    },
+    {
+      "idx": 15,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Gastroenteritis",
+      "href": "#",
+      "onclick": "doSelect('A09', 'Gastroenteritis')",
+      "visible": true,
+      "rowText": "A09 Gastroenteritis"
+    },
+    {
+      "idx": 16,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "A090",
+      "href": "#",
+      "onclick": "doSelect(\"13d8594f1bea\", dataForm.data13d8594f1bea.value)",
+      "visible": true,
+      "rowText": "A090 Gastroenteritis and colitis of infectious origin-NOS"
+    },
+    {
+      "idx": 17,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Gastroenteritis and colitis of infectious origin-NOS",
+      "href": "#",
+      "onclick": "doSelect('13d8594f1bea', 'Gastroenteritis and colitis of infectious origin-NOS')",
+      "visible": true,
+      "rowText": "A090 Gastroenteritis and colitis of infectious origin-NOS"
+    },
+    {
+      "idx": 18,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "A15",
+      "href": "#",
+      "onclick": "doSelect(\"13203f6b2f10\", dataForm.data13203f6b2f10.value)",
+      "visible": true,
+      "rowText": "A15 Respiratory tuberculosis, bacteriologically and histologically confirmed"
+    },
+    {
+      "idx": 19,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Respiratory tuberculosis, bacteriologically and histologically confirmed",
+      "href": "#",
+      "onclick": "doSelect('13203f6b2f10', 'Respiratory tuberculosis, bacteriologically and histologically confirmed')",
+      "visible": true,
+      "rowText": "A15 Respiratory tuberculosis, bacteriologically and histologically confirmed"
+    },
+    {
+      "idx": 20,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "A156",
+      "href": "#",
+      "onclick": "doSelect(\"13203f711f20\", dataForm.data13203f711f20.value)",
+      "visible": true,
+      "rowText": "A156 Tuberculous pleurisy, confirmed bacteriologically and histologically"
+    },
+    {
+      "idx": 21,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Tuberculous pleurisy, confirmed bacteriologically and histologically",
+      "href": "#",
+      "onclick": "doSelect('13203f711f20', 'Tuberculous pleurisy, confirmed bacteriologically and histologically')",
+      "visible": true,
+      "rowText": "A156 Tuberculous pleurisy, confirmed bacteriologically and histologically"
+    },
+    {
+      "idx": 22,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "A16",
+      "href": "#",
+      "onclick": "doSelect(\"13203f867f41\", dataForm.data13203f867f41.value)",
+      "visible": true,
+      "rowText": "A16 Respiratory tuberculosis, not confirmed bacteriologically or histologically"
+    },
+    {
+      "idx": 23,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Respiratory tuberculosis, not confirmed bacteriologically or histologically",
+      "href": "#",
+      "onclick": "doSelect('13203f867f41', 'Respiratory tuberculosis, not confirmed bacteriologically or histologically')",
+      "visible": true,
+      "rowText": "A16 Respiratory tuberculosis, not confirmed bacteriologically or histologically"
+    },
+    {
+      "idx": 24,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "A165",
+      "href": "#",
+      "onclick": "doSelect(\"13203f8cef47\", dataForm.data13203f8cef47.value)",
+      "visible": true,
+      "rowText": "A165 Tuberculous pleurisy,w/o mention of bacteriological or histological confirm"
+    },
+    {
+      "idx": 25,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Tuberculous pleurisy,w/o mention of bacteriological or histological confirm",
+      "href": "#",
+      "onclick": "doSelect('13203f8cef47', 'Tuberculous pleurisy,w/o mention of bacteriological or histological confirm')",
+      "visible": true,
+      "rowText": "A165 Tuberculous pleurisy,w/o mention of bacteriological or histological confirm"
+    },
+    {
+      "idx": 26,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "A182",
+      "href": "#",
+      "onclick": "doSelect(\"16afc23dd335\", dataForm.data16afc23dd335.value)",
+      "visible": true,
+      "rowText": "A182 Tuberculous peripheral lymphadenopathy"
+    },
+    {
+      "idx": 27,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Tuberculous peripheral lymphadenopathy",
+      "href": "#",
+      "onclick": "doSelect('16afc23dd335', 'Tuberculous peripheral lymphadenopathy')",
+      "visible": true,
+      "rowText": "A182 Tuberculous peripheral lymphadenopathy"
+    },
+    {
+      "idx": 28,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "A30",
+      "href": "#",
+      "onclick": "doSelect(\"128d3e2a8c75\", dataForm.data128d3e2a8c75.value)",
+      "visible": true,
+      "rowText": "A30 Leprosy [Hansens disease]"
+    },
+    {
+      "idx": 29,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Leprosy [Hansens disease]",
+      "href": "#",
+      "onclick": "doSelect('128d3e2a8c75', 'Leprosy [Hansens disease]')",
+      "visible": true,
+      "rowText": "A30 Leprosy [Hansens disease]"
+    },
+    {
+      "idx": 30,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "A310",
+      "href": "#",
+      "onclick": "doSelect(\"164c05d46012\", dataForm.data164c05d46012.value)",
+      "visible": true,
+      "rowText": "A310 Pulmonary mycobacterial infection"
+    },
+    {
+      "idx": 31,
+      "tag": "a",
+      "type": "",
+      "name": "",
+      "id": "",
+      "value": "",
+      "text": "Pulmonary mycobacterial infection",
+      "href": "#",
+      "onclick": "doSelect('164c05d46012', 'Pulmonary mycobacterial infection')",
+      "visible": true,
+      "rowText": "A310 Pulmonary mycobacterial infection"
+    },
+    {
+      "idx": 32,
+      "tag": "input",
+      "type": "button",
+      "name": "Button",
+      "id": "",
+      "value": "Cancel",
+      "text": "",
+      "href": "",
+      "onclick": "doClose()",
+      "visible": true,
+      "rowText": ""
+    }
+  ],
+  "rows": [
+    {
+      "idx": 0,
+      "text": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 1 - 15 of 913 Next Code Description 1119302008 Acute COVID-19 26889001 Myositis 802.0 Closed fracture of nasa"
+    },
+    {
+      "idx": 1,
+      "text": "Click on the diagnosis to select it"
+    },
+    {
+      "idx": 2,
+      "text": "Description Code that contains starts with equals to Sort Code Description"
+    },
+    {
+      "idx": 3,
+      "text": "Description Code that contains starts with equals to"
+    },
+    {
+      "idx": 4,
+      "text": "Sort Code Description"
+    },
+    {
+      "idx": 5,
+      "text": "1 - 15 of 913 Next"
+    },
+    {
+      "idx": 6,
+      "text": "1 - 15 of 913 Next"
+    },
+    {
+      "idx": 7,
+      "text": "Code Description 1119302008 Acute COVID-19 26889001 Myositis 802.0 Closed fracture of nasal bones A049 Bacterial intestinal infection / enteritis, unspecified A05 Other bacterial foodborne intoxications, not elsewhere cl"
+    },
+    {
+      "idx": 8,
+      "text": "Code Description"
+    },
+    {
+      "idx": 9,
+      "text": "1119302008 Acute COVID-19"
+    },
+    {
+      "idx": 10,
+      "text": "26889001 Myositis"
+    },
+    {
+      "idx": 11,
+      "text": "802.0 Closed fracture of nasal bones"
+    },
+    {
+      "idx": 12,
+      "text": "A049 Bacterial intestinal infection / enteritis, unspecified"
+    },
+    {
+      "idx": 13,
+      "text": "A05 Other bacterial foodborne intoxications, not elsewhere classified"
+    },
+    {
+      "idx": 14,
+      "text": "A079 Worms (protozoa intestinal disease)"
+    },
+    {
+      "idx": 15,
+      "text": "A09 Gastroenteritis"
+    },
+    {
+      "idx": 16,
+      "text": "A090 Gastroenteritis and colitis of infectious origin-NOS"
+    },
+    {
+      "idx": 17,
+      "text": "A15 Respiratory tuberculosis, bacteriologically and histologically confirmed"
+    },
+    {
+      "idx": 18,
+      "text": "A156 Tuberculous pleurisy, confirmed bacteriologically and histologically"
+    },
+    {
+      "idx": 19,
+      "text": "A16 Respiratory tuberculosis, not confirmed bacteriologically or histologically"
+    },
+    {
+      "idx": 20,
+      "text": "A165 Tuberculous pleurisy,w/o mention of bacteriological or histological confirm"
+    },
+    {
+      "idx": 21,
+      "text": "A182 Tuberculous peripheral lymphadenopathy"
+    },
+    {
+      "idx": 22,
+      "text": "A30 Leprosy [Hansens disease]"
+    },
+    {
+      "idx": 23,
+      "text": "A310 Pulmonary mycobacterial infection"
+    }
+  ],
+  "bodySample": "Click on the diagnosis to select it Description Code that contains starts with equals to Sort Code Description 1 - 15 of 913 Next Code Description 1119302008 Acute COVID-19 26889001 Myositis 802.0 Closed fracture of nasal bones A049 Bacterial intestinal infection / enteritis, unspecified A05 Other bacterial foodborne intoxications, not elsewhere classified A079 Worms (protozoa intestinal disease) A09 Gastroenteritis A090 Gastroenteritis and colitis of infectious origin-NOS A15 Respiratory tuberculosis, bacteriologically and histologically confirmed A156 Tuberculous pleurisy, confirmed bacteriologically and histologically A16 Respiratory tuberculosis, not confirmed bacteriologically or histologically A165 Tuberculous pleurisy,w/o mention of bacteriological or histological confirm A182 Tuberculous peripheral lymphadenopathy A30 Leprosy [Hansens disease] A310 Pulmonary mycobacterial infection"
+}

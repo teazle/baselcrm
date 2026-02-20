@@ -6,7 +6,9 @@ import { logger } from '../utils/logger.js';
 import {
   getPortalPayTypes,
   getPortalScopeOrFilter,
+  resolveFlow3PortalTarget,
 } from '../../apps/crm/src/lib/rpa/portals.shared.js';
+import { portalTargetToLabel, writeRunSummaryReport } from '../utils/run-summary-report.js';
 
 dotenv.config();
 
@@ -75,9 +77,45 @@ async function extractVisitDetailsBatch() {
   const toDate = getArgValue('--to');
   const targetPayType = getArgValue('--pay-type')?.toUpperCase() || null;
   const allPayTypes = args.includes('--all-pay-types');
+  const reportRows = [];
+  let reportTotals = {
+    total_candidates: 0,
+    to_process: 0,
+    completed: 0,
+    failed: 0,
+    skipped: 0,
+    skipped_precheck: 0,
+  };
+
+  const buildPortalLabel = visit => {
+    const target = resolveFlow3PortalTarget(
+      visit?.pay_type || null,
+      visit?.patient_name || null,
+      visit?.extraction_metadata || null
+    );
+    return portalTargetToLabel(target || visit?.pay_type || 'Unknown');
+  };
+
+  const buildDiagnosisStatus = (visit, result = null) => {
+    const resultStatus = String(result?.diagnosisResolution?.status || '').trim();
+    const metaStatus = String(visit?.extraction_metadata?.diagnosisResolution?.status || '').trim();
+    const status = resultStatus || metaStatus;
+    if (status) return status;
+    const diagnosis = String(result?.diagnosis || visit?.diagnosis_description || '').trim();
+    if (!diagnosis || /^missing diagnosis$/i.test(diagnosis)) return 'missing';
+    return '-';
+  };
 
   // Known portal pay types that require form submission.
   const portalPayTypes = getPortalPayTypes();
+  const reportScope = {
+    from: fromDate || null,
+    to: toDate || null,
+    date: targetDate || null,
+    payType: targetPayType || (allPayTypes ? 'All' : 'Portal scope'),
+    portalTargets: allPayTypes ? 'All' : portalPayTypes.join(','),
+    visitIds: visitIds?.join(',') || null,
+  };
 
   let query = supabase
     .from('visits')
@@ -123,11 +161,48 @@ async function extractVisitDetailsBatch() {
 
   if (queryError) {
     logger.error('Failed to query visits:', queryError.message);
+    reportRows.push({
+      date: targetDate || `${fromDate || '-'}..${toDate || '-'}`,
+      patientName: '-',
+      nric: '-',
+      payType: targetPayType || '-',
+      portal: '-',
+      status: 'query_error',
+      diagnosisStatus: '-',
+      notes: queryError.message,
+    });
+    const report = await writeRunSummaryReport({
+      flowName: 'Flow 2 Visit Details Extraction',
+      filePrefix: 'flow2',
+      scope: reportScope,
+      totals: reportTotals,
+      rows: reportRows,
+    });
+    logger.info(`Flow 2 summary report: ${report.mdPath}`);
     process.exit(1);
   }
 
   if (!allVisits || allVisits.length === 0) {
     logger.info('No visits found that need enhancement.');
+    const report = await writeRunSummaryReport({
+      flowName: 'Flow 2 Visit Details Extraction',
+      filePrefix: 'flow2',
+      scope: reportScope,
+      totals: reportTotals,
+      rows: [
+        {
+          date: targetDate || `${fromDate || '-'}..${toDate || '-'}`,
+          patientName: '-',
+          nric: '-',
+          payType: '-',
+          portal: '-',
+          status: 'no_records',
+          diagnosisStatus: '-',
+          notes: 'No visits found for selected scope',
+        },
+      ],
+    });
+    logger.info(`Flow 2 summary report: ${report.mdPath}`);
     process.exit(0);
   }
 
@@ -155,9 +230,43 @@ async function extractVisitDetailsBatch() {
     // Process: null, pending, in_progress (treat as pending for resume), or failed (with retries left)
     return true;
   });
+  const visitsToProcessIds = new Set(visitsToProcess.map(v => v.id));
+  const precheckSkippedVisits = allVisits.filter(v => !visitsToProcessIds.has(v.id));
+  reportTotals.total_candidates = allVisits.length;
+  reportTotals.to_process = visitsToProcess.length;
+  reportTotals.skipped_precheck = precheckSkippedVisits.length;
+  for (const visit of precheckSkippedVisits) {
+    const metadata = visit.extraction_metadata || {};
+    const detailsStatus = String(metadata.detailsExtractionStatus || '').trim();
+    const attempts = Number(metadata.detailsExtractionAttempts || 0);
+    let reason = 'precheck_skip';
+    if (!force && detailsStatus === 'completed') {
+      reason = 'already_completed';
+    } else if (!force && detailsStatus === 'failed' && attempts >= maxRetries) {
+      reason = 'retry_limit_exceeded';
+    }
+    reportRows.push({
+      date: visit.visit_date || '-',
+      patientName: visit.patient_name || '-',
+      nric: visit.nric || '-',
+      payType: visit.pay_type || '-',
+      portal: buildPortalLabel(visit),
+      status: 'skipped',
+      diagnosisStatus: buildDiagnosisStatus(visit),
+      notes: `${reason}${attempts ? ` (attempts=${attempts})` : ''}`,
+    });
+  }
 
   if (visitsToProcess.length === 0) {
     logger.info('No visits to process. All visits are either completed or exceeded retry limit.');
+    const report = await writeRunSummaryReport({
+      flowName: 'Flow 2 Visit Details Extraction',
+      filePrefix: 'flow2',
+      scope: reportScope,
+      totals: reportTotals,
+      rows: reportRows,
+    });
+    logger.info(`Flow 2 summary report: ${report.mdPath}`);
     process.exit(0);
   }
 
@@ -228,6 +337,49 @@ async function extractVisitDetailsBatch() {
       }
     }
 
+    const resultByVisitId = new Map(
+      (results.details || []).map(item => [item.visitId, item])
+    );
+    for (const visit of visitsToProcess) {
+      const item = resultByVisitId.get(visit.id);
+      if (!item) {
+        reportRows.push({
+          date: visit.visit_date || '-',
+          patientName: visit.patient_name || '-',
+          nric: visit.nric || '-',
+          payType: visit.pay_type || '-',
+          portal: buildPortalLabel(visit),
+          status: 'skipped',
+          diagnosisStatus: buildDiagnosisStatus(visit),
+          notes: 'Extractor skipped this visit',
+        });
+        continue;
+      }
+      reportRows.push({
+        date: visit.visit_date || '-',
+        patientName: visit.patient_name || '-',
+        nric: visit.nric || '-',
+        payType: visit.pay_type || '-',
+        portal: buildPortalLabel(visit),
+        status: item.success ? 'completed' : 'error',
+        diagnosisStatus: buildDiagnosisStatus(visit, item),
+        notes: item.success
+          ? `chargeType=${item.chargeType || '-'}; mcDays=${item.mcDays ?? '-'}`
+          : item.error || 'Unknown extraction error',
+      });
+    }
+    reportTotals.completed = progress.completed;
+    reportTotals.failed = progress.failed;
+    reportTotals.skipped = progress.skipped;
+    const report = await writeRunSummaryReport({
+      flowName: 'Flow 2 Visit Details Extraction',
+      filePrefix: 'flow2',
+      scope: reportScope,
+      totals: reportTotals,
+      rows: reportRows,
+    });
+    logger.info(`Flow 2 summary report: ${report.mdPath}`);
+
     // Exit with appropriate code
     if (progress.failed > 0 && progress.completed === 0) {
       // All failed
@@ -238,6 +390,24 @@ async function extractVisitDetailsBatch() {
     }
   } catch (error) {
     logger.error('Fatal error during batch extraction:', error);
+    reportRows.push({
+      date: targetDate || `${fromDate || '-'}..${toDate || '-'}`,
+      patientName: '-',
+      nric: '-',
+      payType: targetPayType || '-',
+      portal: '-',
+      status: 'fatal_error',
+      diagnosisStatus: '-',
+      notes: error?.message || String(error),
+    });
+    const report = await writeRunSummaryReport({
+      flowName: 'Flow 2 Visit Details Extraction',
+      filePrefix: 'flow2',
+      scope: reportScope,
+      totals: reportTotals,
+      rows: reportRows,
+    });
+    logger.info(`Flow 2 summary report: ${report.mdPath}`);
     process.exit(1);
   } finally {
     await browserManager.close();

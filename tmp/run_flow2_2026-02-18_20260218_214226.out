@@ -1,0 +1,10 @@
+[32minfo[39m: === Visit Details Extraction Batch === {"service":"clinic-automation","timestamp":"2026-02-18T14:42:27.243Z"}
+[32minfo[39m: Querying database for visits needing enhancement... {"service":"clinic-automation","timestamp":"2026-02-18T14:42:27.261Z"}
+[32minfo[39m: Filtering from date: 2026-02-18 {"service":"clinic-automation","timestamp":"2026-02-18T14:42:27.261Z"}
+[32minfo[39m: Filtering to date: 2026-02-18 {"service":"clinic-automation","timestamp":"2026-02-18T14:42:27.261Z"}
+[32minfo[39m: Filtering to portal scope: MHC, MHCAXA, AIA, AIACLIENT, AVIVA, SINGLIFE, FULLERT, IHP, PARKWAY, ALL, ALLIMED, ALLIANZ, ALLIANCE, GE, NTUC_IM, TOKIOM, ALLIANC, ALLSING, AXAMED, PRUDEN + Allianz tags in patient name {"service":"clinic-automation","timestamp":"2026-02-18T14:42:27.261Z"}
+(node:56538) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vincent/Baselrpacrm/apps/crm/src/lib/rpa/portals.shared.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vincent/Baselrpacrm/apps/crm/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[32minfo[39m: No visits found that need enhancement. {"service":"clinic-automation","timestamp":"2026-02-18T14:42:28.093Z"}

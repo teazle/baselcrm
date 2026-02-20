@@ -1,0 +1,118 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-12T06:36:27.441Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-12T06:36:27.448Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-12T06:36:27.449Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-12T06:36:27.449Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-12T06:36:29.718Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-12T06:36:29.719Z"}
+[32minfo[39m: [MHC 01] Login start {"attempt":1,"maxAttempts":3,"service":"clinic-automation","timestamp":"2026-02-12T06:36:30.114Z"}
+[32minfo[39m: Logging into MHC Asia... {"service":"clinic-automation","timestamp":"2026-02-12T06:36:30.114Z"}
+[32minfo[39m: [MHC 02] Country selected (best-effort) {"label":"MHC SINGAPORE","service":"clinic-automation","timestamp":"2026-02-12T06:36:33.049Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-12T06:36:33.613Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-12T06:36:34.143Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-12T06:36:35.666Z"}
+[32minfo[39m: Successfully logged into MHC Asia {"service":"clinic-automation","timestamp":"2026-02-12T06:36:36.742Z"}
+[32minfo[39m: [MHC 03] Login ok {"service":"clinic-automation","timestamp":"2026-02-12T06:36:36.742Z"}
+[32minfo[39m: [MHC 04] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-12T06:36:36.743Z"}
+{
+  "label": "mhc-home",
+  "url": "https://www.mhcasia.net/mhc/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=KPED-B37Y-ZZ11-XA0B-3PCD-A31K-QZUQ-A2QT",
+  "title": "Clinic announcement",
+  "draftish": [
+    {
+      "text": "Add QR Visit",
+      "href": "ClinicEmpOpenVisitNewList.ec?OWASP_CSRFTOKEN=KPED-B37Y-ZZ11-XA0B-3PCD-A31K-QZUQ-A2QT"
+    },
+    {
+      "text": "Add Normal Visit",
+      "href": "ClinicEmpVisitSelectPatient.ec?OWASP_CSRFTOKEN=KPED-B37Y-ZZ11-XA0B-3PCD-A31K-QZUQ-A2QT"
+    },
+    {
+      "text": "View Submitted Visits",
+      "href": "ClinicEmpVisitPlusAList.ec?OWASP_CSRFTOKEN=KPED-B37Y-ZZ11-XA0B-3PCD-A31K-QZUQ-A2QT"
+    },
+    {
+      "text": "Edit/Draft Visits",
+      "href": "ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=KPED-B37Y-ZZ11-XA0B-3PCD-A31K-QZUQ-A2QT"
+    },
+    {
+      "text": "Add Imaging Visit",
+      "href": "ClinicXRayVisitSelectPatient.ec?OWASP_CSRFTOKEN=KPED-B37Y-ZZ11-XA0B-3PCD-A31K-QZUQ-A2QT"
+    },
+    {
+      "text": "Add Lab Visit",
+      "href": "ClinicLabVisitSelectPatient.ec?OWASP_CSRFTOKEN=KPED-B37Y-ZZ11-XA0B-3PCD-A31K-QZUQ-A2QT"
+    },
+    {
+      "text": "Add Checkup (Name Search)",
+      "href": "ClinicCheckupVisitSelectPatient.ec?OWASP_CSRFTOKEN=KPED-B37Y-ZZ11-XA0B-3PCD-A31K-QZUQ-A2QT"
+    }
+  ]
+}
+[32minfo[39m: [MHC 05] Check if Singlife switch needed {"force":true,"service":"clinic-automation","timestamp":"2026-02-12T06:36:36.781Z"}
+[32minfo[39m: [MHC 06] Switching to Singlife system {"service":"clinic-automation","timestamp":"2026-02-12T06:36:36.782Z"}
+[32minfo[39m: Clicked: Switch System {"service":"clinic-automation","timestamp":"2026-02-12T06:36:37.582Z"}
+[32minfo[39m: Clicked: Singlife PCP {"service":"clinic-automation","timestamp":"2026-02-12T06:36:40.924Z"}
+[32minfo[39m: [MHC 07] Switch system verification {"hasAddAiaVisit":false,"hasPolicyNoHeader":false,"hasSearchAiaMember":false,"hasSwitchSystem":false,"isAiaDomain":false,"isMhcDomain":false,"isSinglifeDomain":true,"labelForLog":"Singlife PCP","looksLikeAiaFlow":false,"service":"clinic-automation","timestamp":"2026-02-12T06:36:44.152Z","url":"https://www.pcpcare.com/pcpcare/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=1R60-FCSS-V64J-B2RQ-5KK3-JOK1-V0Q3-C15U"}
+[32minfo[39m: Switched system to: Singlife PCP {"service":"clinic-automation","timestamp":"2026-02-12T06:36:44.153Z"}
+{
+  "label": "singlife-home",
+  "url": "https://www.pcpcare.com/pcpcare/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=1R60-FCSS-V64J-B2RQ-5KK3-JOK1-V0Q3-C15U",
+  "title": "Clinic announcement",
+  "draftish": [
+    {
+      "text": "Add Normal Visit",
+      "href": "ClinicIECAvivaPatientSearch.ec?OWASP_CSRFTOKEN=1R60-FCSS-V64J-B2RQ-5KK3-JOK1-V0Q3-C15U"
+    },
+    {
+      "text": "View Submitted Visits",
+      "href": "ClinicIECAvivaEmpVisitList.ec?OWASP_CSRFTOKEN=1R60-FCSS-V64J-B2RQ-5KK3-JOK1-V0Q3-C15U"
+    },
+    {
+      "text": "Edit/Draft Visits",
+      "href": "ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=1R60-FCSS-V64J-B2RQ-5KK3-JOK1-V0Q3-C15U"
+    }
+  ]
+}
+[32minfo[39m: [MHC 08] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-12T06:36:45.510Z"}
+[32minfo[39m: Login form visible after ensureAtMhcHome; re-logging in {"service":"clinic-automation","timestamp":"2026-02-12T06:36:47.516Z"}
+[32minfo[39m: [MHC 09] Login start {"attempt":1,"maxAttempts":3,"service":"clinic-automation","timestamp":"2026-02-12T06:36:47.518Z"}
+[32minfo[39m: Logging into MHC Asia... {"service":"clinic-automation","timestamp":"2026-02-12T06:36:47.518Z"}
+[32minfo[39m: [MHC 10] Country selected (best-effort) {"label":"MHC SINGAPORE","service":"clinic-automation","timestamp":"2026-02-12T06:36:49.821Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-12T06:36:50.370Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-12T06:36:50.897Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-12T06:36:52.673Z"}
+[32minfo[39m: Successfully logged into MHC Asia {"service":"clinic-automation","timestamp":"2026-02-12T06:36:54.392Z"}
+[32minfo[39m: [MHC 11] Login ok {"service":"clinic-automation","timestamp":"2026-02-12T06:36:54.392Z"}
+[32minfo[39m: Clicked: Switch System {"service":"clinic-automation","timestamp":"2026-02-12T06:36:55.165Z"}
+[32minfo[39m: Clicked: AIA Clinic {"service":"clinic-automation","timestamp":"2026-02-12T06:36:57.224Z"}
+[32minfo[39m: [MHC 12] Dialog handler set up {"service":"clinic-automation","timestamp":"2026-02-12T06:37:01.688Z"}
+[32minfo[39m: [MHC 13] Switch system verification {"hasAddAiaVisit":true,"hasPolicyNoHeader":false,"hasSearchAiaMember":false,"hasSwitchSystem":false,"isAiaDomain":true,"isMhcDomain":false,"isSinglifeDomain":false,"labelForLog":"AIA Clinic","looksLikeAiaFlow":true,"service":"clinic-automation","timestamp":"2026-02-12T06:37:01.707Z","url":"https://www.aiaclinic.com/aia/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2"}
+[32minfo[39m: Switched system to: AIA Clinic {"service":"clinic-automation","timestamp":"2026-02-12T06:37:01.707Z"}
+{
+  "label": "aia-home",
+  "url": "https://www.aiaclinic.com/aia/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2",
+  "title": "Clinic announcement",
+  "draftish": [
+    {
+      "text": "Add AIA Visit",
+      "href": "ClinicAddIECCardImage.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2"
+    },
+    {
+      "text": "View Submitted Visits",
+      "href": "ClinicIECAIAEmpVisitList.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2"
+    },
+    {
+      "text": "Edit/Draft Visits",
+      "href": "ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2"
+    },
+    {
+      "text": "Add Imaging AIA Visit",
+      "href": "ClinicIECXrayVisitSelectPatient.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2"
+    },
+    {
+      "text": "Add Lab AIA Visit",
+      "href": "ClinicIECLabVisitSelectPatient.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2"
+    }
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-12T06:37:03.150Z"}

@@ -1,0 +1,64 @@
+{
+  "url": "https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=YS7n8P1u4p7BTiHTj+y5NC/JwgZb6AMYI18LK0CFo2OeM8080/FtFjs7tWF1Yj3eXsXTMtcIAEKQAkJUtouiguzTPlh+p6Tn1PO7e7DUAgA=",
+  "title": "Patient Biodata",
+  "base": "pain in a joint shoulder region",
+  "baseBodyPart": "shoulder",
+  "baseCondition": "pain",
+  "top": [
+    {
+      "score": 16,
+      "bp": "shoulder",
+      "cond": "pain",
+      "side": "right",
+      "sentence": "relieving factor rest evening no morning no general health good job deskjob interest gym, rom horizontal abduction - pain at end range tenderness on right acj, right upperback myofascial , right teres minor and biceps tendon right mid trap inactivation",
+      "norm": "relieving factor rest evening no morning no general health good job deskjob interest gym, rom horizontal abduction - pain at end range tenderness on right acj, right upperback myofascial , right teres minor and biceps tendon right mid trap inactivation",
+      "source": "container_11"
+    },
+    {
+      "score": 16,
+      "bp": "shoulder",
+      "cond": "pain",
+      "side": "right",
+      "sentence": "rx)us on right acj, 5 minutes ifc on right shoulder, 10 minutes str on right upperback myofascial , right teres minor and biceps tendon gentle right acj mobilization acute care injury education <02-feb-2026 10:59 am (weeyong)>review shoulder pain",
+      "norm": "rx)us on right acj, 5 minutes ifc on right shoulder, 10 minutes str on right upperback myofascial , right teres minor and biceps tendon gentle right acj mobilization acute care injury education <02-feb-2026 10:59 am (weeyong)>review shoulder pain",
+      "source": "container_11"
+    },
+    {
+      "score": 16,
+      "bp": "shoulder",
+      "cond": "pain",
+      "side": "right",
+      "sentence": "relieving factor rest evening no morning no general health good job deskjob interest gym, rom horizontal abduction - pain at end range tenderness on right acj, right upperback myofascial , right teres minor and biceps tendon right mid trap inactivation rx) us on right acj, 5 minutes ifc on right shoulder, 10 minutes str on right upperback myofascial , right teres minor and biceps tendon gentle right acj mobilization acute care injury education",
+      "norm": "relieving factor rest evening no morning no general health good job deskjob interest gym, rom horizontal abduction - pain at end range tenderness on right acj, right upperback myofascial , right teres minor and biceps tendon right mid trap inactivation rx) us on right acj, 5 minutes ifc on right shoulder, 10 minutes str on right upperback myofascial , right teres minor and biceps tendon gentle right acj mobilization acute care injury education",
+      "source": "full_body"
+    },
+    {
+      "score": 15,
+      "bp": "shoulder",
+      "cond": "degeneration",
+      "side": "right",
+      "sentence": "diagnosis rt acj degeneration",
+      "norm": "diagnosis rt acj degeneration",
+      "source": "container_11"
+    },
+    {
+      "score": 15,
+      "bp": "shoulder",
+      "cond": "degeneration",
+      "side": "right",
+      "sentence": "diagnosis rt acj degeneration",
+      "norm": "diagnosis rt acj degeneration",
+      "source": "full_body"
+    },
+    {
+      "score": 14,
+      "bp": "shoulder",
+      "cond": "pain",
+      "side": null,
+      "sentence": "mplan review shoulder pain 02-feb-2026 10:15 am - wee y ( ssoc ) append ▼ 02-feb-2026 09:19 am - pam ( ssoc ) append ▼",
+      "norm": "mplan review shoulder pain 02-feb-2026 10:15 am - wee y ( ssoc ) append ▼ 02-feb-2026 09:19 am - pam ( ssoc ) append ▼",
+      "source": "full_body"
+    }
+  ],
+  "bodySample": "ssoc patient: 78145 / mittal sachin kumar (m4539893l) m : 38 y reception vincent home appointment queue patient submission communication inventory finance reports hospital learning management setup support/training clock in/out patient info biodata med alert pop up family history financial tx history past notes e doc lab / vital sign appt referral comm delivery visit notes past 02-feb-2026 10:59 am - wee y ( ssoc ) append ▼ casenote diagnosis rt acj degeneration history pain lasted for 10 days. gym, had supplement and pain meds and got better . did bench press and experienced pain. aggravating factor bench press relieving factor rest evening no morning no general health good job deskjob interest gym, rom horizontal abduction - pain at end range tenderness on right acj, right upperback myofascial , right teres minor and biceps tendon right mid trap inactivation rx) us on right acj, 5 minutes ifc on right shoulder, 10 minutes str on right upperback myofascial , right teres minor and biceps tendon gentle right acj mobilization acute care injury education mplan review shoulder pain 02-feb-2026 10:15 am - wee y ( ssoc ) append ▼ 02-feb-2026 09:19 am - pam ( ssoc ) append ▼"
+}

@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-02-13T00:13:59.235Z",
+  "before": {
+    "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "submission_status": "draft",
+    "submitted_at": "2026-02-13T00:13:18.559+00:00",
+    "submission_error": null
+  },
+  "after": {
+    "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "submission_status": null,
+    "submitted_at": null,
+    "submission_error": null
+  }
+}

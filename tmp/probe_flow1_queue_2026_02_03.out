@@ -1,0 +1,66 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-13T16:24:31.961Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-13T16:24:31.966Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-13T16:24:31.966Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-13T16:24:31.966Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-13T16:24:33.902Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-13T16:24:33.903Z"}
+[32minfo[39m: [CA 01] Login start {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-13T16:24:34.371Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: Logging into Clinic Assist... {"service":"clinic-automation","timestamp":"2026-02-13T16:24:34.371Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-13T16:24:37.187Z"}
+[32minfo[39m: [CA 02] Username filled {"service":"clinic-automation","timestamp":"2026-02-13T16:24:37.187Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-13T16:24:37.217Z"}
+[32minfo[39m: [CA 03] Password filled {"service":"clinic-automation","timestamp":"2026-02-13T16:24:37.217Z"}
+[32minfo[39m: Clinic Group filled: ssoc {"service":"clinic-automation","timestamp":"2026-02-13T16:24:37.222Z"}
+[32minfo[39m: [CA 04] Clinic Group filled {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-13T16:24:37.222Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-13T16:24:37.297Z"}
+[32minfo[39m: [CA 05] Login submitted {"service":"clinic-automation","timestamp":"2026-02-13T16:24:37.298Z"}
+[32minfo[39m: Clinic Assist 2FA not required (verification inputs disabled) {"service":"clinic-automation","timestamp":"2026-02-13T16:24:40.314Z"}
+[32minfo[39m: Successfully logged into Clinic Assist {"service":"clinic-automation","timestamp":"2026-02-13T16:24:40.549Z"}
+[32minfo[39m: [CA 06] Login ok {"service":"clinic-automation","timestamp":"2026-02-13T16:24:40.549Z"}
+[32minfo[39m: [BATCH STEP 03/10] Reports → Queue List (date-based extraction) {"service":"clinic-automation","timestamp":"2026-02-13T16:24:40.968Z"}
+[32minfo[39m: [REPORTS] Navigating to Queue List report for date: 2026-02-03 {"service":"clinic-automation","timestamp":"2026-02-13T16:24:40.968Z"}
+[32minfo[39m: [CA 07] Navigating to Reports section {"service":"clinic-automation","timestamp":"2026-02-13T16:24:40.969Z"}
+[32minfo[39m: [CA 08] Need to select Reception/room first before accessing Reports {"service":"clinic-automation","timestamp":"2026-02-13T16:24:41.990Z"}
+[32minfo[39m: [CA 09] Clicking Reception/room to access system {"selector":"button:has-text(\"Reception\")","service":"clinic-automation","timestamp":"2026-02-13T16:24:41.995Z"}
+[32minfo[39m: [CA 10] Trying to open sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-13T16:24:45.035Z"}
+[32minfo[39m: [CA 11] Found menu toggle, clicking to open sidebar {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-13T16:24:45.062Z"}
+[32minfo[39m: [CA 12] Looking for Reports link in sidebar {"service":"clinic-automation","timestamp":"2026-02-13T16:24:46.075Z"}
+[32minfo[39m: [CA 13] Found SidebarmenuReports, trying to trigger click via JavaScript {"service":"clinic-automation","timestamp":"2026-02-13T16:24:46.706Z"}
+[32minfo[39m: [CA 14] After JS click on SidebarmenuReports {"service":"clinic-automation","timestamp":"2026-02-13T16:24:49.727Z","url":"https://clinicassist.sg:1080/ReportsMenu/ReportsMenu"}
+[32minfo[39m: [CA 15] Successfully navigated via SidebarmenuReports click {"service":"clinic-automation","timestamp":"2026-02-13T16:24:49.729Z"}
+[32minfo[39m: [CA 16] Navigating to Queue List report {"service":"clinic-automation","timestamp":"2026-02-13T16:24:51.802Z"}
+[32minfo[39m: [CA 17] Queue List navigation context {"frameUrl":null,"kind":"page","pageUrl":"https://clinicassist.sg:1080/ReportsMenu/ReportsMenu","service":"clinic-automation","timestamp":"2026-02-13T16:24:59.957Z"}
+[32minfo[39m: [CA 18] Trying to click Queue Report link by ID 60017 {"service":"clinic-automation","timestamp":"2026-02-13T16:25:01.123Z"}
+[32minfo[39m: [CA 19] JS click result for Queue Report {"found":true,"method":"class","service":"clinic-automation","text":"Queue Report","timestamp":"2026-02-13T16:25:01.148Z"}
+[32minfo[39m: [CA 20] URL after JS click on Queue Report {"frameUrl":null,"pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-13T16:25:05.152Z"}
+[32minfo[39m: [CA 21] Successfully navigated to QueueReport page via JS click {"frameUrl":null,"pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-13T16:25:05.154Z"}
+[32minfo[39m: [CA 22] Searching Queue List by date {"date":"2026-02-03","service":"clinic-automation","timestamp":"2026-02-13T16:25:07.264Z"}
+[32minfo[39m: [CA 23] QueueReport search context {"frameUrl":null,"kind":"page","pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-13T16:25:15.435Z"}
+[32minfo[39m: [CA 24] QueueReport date field candidates {"count":1,"fields":[{"id":"txtOtherDateFrom","name":"DateFrom","placeholder":"","readOnly":false,"value":"13/2/2026"}],"service":"clinic-automation","timestamp":"2026-02-13T16:25:15.439Z"}
+[32minfo[39m: [CA 25] QueueReport date filled {"selector":"input[id=\"txtOtherDateFrom\"]","service":"clinic-automation","timestamp":"2026-02-13T16:25:15.504Z","value":"03/02/2026"}
+[32minfo[39m: [CA 26] QueueReport generate clicked via JS {"found":true,"service":"clinic-automation","timestamp":"2026-02-13T16:25:15.602Z","via":"btnOK"}
+[32minfo[39m: [CA 27] Extracting queue list results (root-aware) {"service":"clinic-automation","timestamp":"2026-02-13T16:25:26.783Z"}
+[32minfo[39m: [CA 28] QueueReport extract context {"frameUrl":null,"kind":"page","pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-13T16:25:35.007Z"}
+[32minfo[39m: [CA 29] Queue report Excel downloaded {"excelPath":"/Users/vincent/Baselrpacrm/downloads/queueListing.xls","label":"nested","service":"clinic-automation","timestamp":"2026-02-13T16:25:44.465Z","why":"click #Button4"}
+[32minfo[39m: [CA 30] Found header row {"headers":["QNO","PCNO","NAME","SEX","SP\nCODE","TIME IN","TIMEOUT","INV NO","CASH TRANS","CONTRACT","TOTAL","GST","ADJ"],"rowIndex":2,"service":"clinic-automation","timestamp":"2026-02-13T16:25:44.512Z"}
+[32minfo[39m: [CA 31] Column positions detected {"cashTransCol":8,"contractCol":-1,"invNoCol":7,"nameCol":2,"pcnoCol":1,"qnoCol":0,"service":"clinic-automation","sexCol":3,"spCodeCol":4,"timeInCol":5,"timeOutCol":6,"timestamp":"2026-02-13T16:25:44.512Z"}
+[32minfo[39m: [CA 32] Parsing Excel file {"headerCount":13,"headerRowIndex":2,"service":"clinic-automation","timestamp":"2026-02-13T16:25:44.512Z","worksheetName":"Sheet1"}
+[32minfo[39m: [CA 33] Stopping Queue Listing parse at non-visit section {"rowIndex":44,"rowText":"PATIENT ACCOUNT PAYMENT AMOUNT INV.NO INV.DATE","service":"clinic-automation","timestamp":"2026-02-13T16:25:44.516Z"}
+[32minfo[39m: [CA 34] Excel parsing complete {"itemsFound":37,"service":"clinic-automation","timestamp":"2026-02-13T16:25:44.517Z"}
+[32minfo[39m: [CA 35] Queue report Excel parsed {"count":37,"label":"nested","service":"clinic-automation","timestamp":"2026-02-13T16:25:44.517Z"}
+[32minfo[39m: [REPORTS] Extracted 37 items from queue list for 2026-02-03 {"service":"clinic-automation","timestamp":"2026-02-13T16:25:44.517Z"}
+{
+  "total": 37,
+  "matched": 1,
+  "items": [
+    {
+      "patientName": "ENG CHAI PIN ELYNE XANDRIA",
+      "nric": null,
+      "payType": "MHC",
+      "spCode": "PAM",
+      "rawDiagnosis": null,
+      "rawNotes": null
+    }
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-13T16:25:45.309Z"}

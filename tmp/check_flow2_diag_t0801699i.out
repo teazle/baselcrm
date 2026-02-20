@@ -1,0 +1,82 @@
+[32minfo[39m: [CA 01] Login start {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-19T12:23:22.184Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: Logging into Clinic Assist... {"service":"clinic-automation","timestamp":"2026-02-19T12:23:22.185Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-19T12:23:25.855Z"}
+[32minfo[39m: [CA 02] Username filled {"service":"clinic-automation","timestamp":"2026-02-19T12:23:25.855Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-19T12:23:25.902Z"}
+[32minfo[39m: [CA 03] Password filled {"service":"clinic-automation","timestamp":"2026-02-19T12:23:25.902Z"}
+[32minfo[39m: Clinic Group filled: ssoc {"service":"clinic-automation","timestamp":"2026-02-19T12:23:25.910Z"}
+[32minfo[39m: [CA 04] Clinic Group filled {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-19T12:23:25.910Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-19T12:23:25.979Z"}
+[32minfo[39m: [CA 05] Login submitted {"service":"clinic-automation","timestamp":"2026-02-19T12:23:25.979Z"}
+[32minfo[39m: Clinic Assist 2FA not required (verification inputs disabled) {"service":"clinic-automation","timestamp":"2026-02-19T12:23:28.995Z"}
+[32minfo[39m: Successfully logged into Clinic Assist {"service":"clinic-automation","timestamp":"2026-02-19T12:23:29.216Z"}
+[32minfo[39m: [CA 06] Login ok {"service":"clinic-automation","timestamp":"2026-02-19T12:23:29.216Z"}
+[32minfo[39m: [CA 07] Navigate to Patient Page - START {"service":"clinic-automation","timestamp":"2026-02-19T12:23:29.217Z"}
+[32minfo[39m: [CA 08] Current URL before navigation {"service":"clinic-automation","timestamp":"2026-02-19T12:23:29.217Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: [CA 09] Need to select Reception/room first before accessing Patient Page {"service":"clinic-automation","timestamp":"2026-02-19T12:23:29.219Z"}
+[32minfo[39m: [CA 10] Clicking Reception/room to access system {"selector":"button:has-text(\"Reception\")","service":"clinic-automation","timestamp":"2026-02-19T12:23:29.802Z"}
+[32minfo[39m: [CA 11] Reception clicked, checking URL {"newUrl":"https://clinicassist.sg:1080/","service":"clinic-automation","timeTaken":1169,"timestamp":"2026-02-19T12:23:30.391Z"}
+[32minfo[39m: [CA 12] Could not click Reception/room, continuing anyway {"service":"clinic-automation","timeTaken":1646,"timestamp":"2026-02-19T12:23:30.865Z"}
+[32minfo[39m: [CA 13] Looking for sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-19T12:23:30.865Z"}
+[32minfo[39m: [CA 14] Looking for Patient sidebar link {"service":"clinic-automation","timestamp":"2026-02-19T12:23:30.868Z"}
+[32minfo[39m: [CA 15] Could not click Patient link via UI; trying Home -> Patient fallback {"service":"clinic-automation","timestamp":"2026-02-19T12:23:30.886Z","totalTime":1669}
+[32minfo[39m: [CA 16] Home->Patient retry URL {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-19T12:23:41.634Z"}
+[32minfo[39m: [CA 17] Navigate to Patient Page - COMPLETE {"service":"clinic-automation","timestamp":"2026-02-19T12:23:41.636Z","totalTime":12419}
+[32minfo[39m: [CA 18] Search patient by number {"patientNumber":"78227","service":"clinic-automation","timestamp":"2026-02-19T12:23:41.636Z"}
+[32minfo[39m: [CA 19] Pressing Enter to execute search (may need to dismiss dialog first) {"service":"clinic-automation","timestamp":"2026-02-19T12:23:42.412Z"}
+[32minfo[39m: [CA 20] Patient search executed by number (Enter key x2) {"patientNumber":"78227","service":"clinic-automation","timestamp":"2026-02-19T12:23:43.532Z"}
+[32minfo[39m: [CA 21] Open patient from search results by number {"patientNumber":"78227","service":"clinic-automation","timestamp":"2026-02-19T12:23:43.533Z"}
+[32minfo[39m: [CA 22] Found patient row by number {"hasLink":true,"rowIndex":1,"service":"clinic-automation","timestamp":"2026-02-19T12:23:45.542Z"}
+[32minfo[39m: [CA 23] Clicked patient link via filter method {"service":"clinic-automation","timestamp":"2026-02-19T12:23:45.582Z"}
+[32minfo[39m: [CA 24] Patient opened from search results by number {"service":"clinic-automation","timestamp":"2026-02-19T12:23:47.585Z"}
+[32minfo[39m: [CA 25] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-19T12:23:48.894Z"}
+[32minfo[39m: [CA 26] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-19T12:23:54.348Z"}
+[32minfo[39m: [CA 27] Open Diagnosis Tab {"service":"clinic-automation","timestamp":"2026-02-19T12:23:54.349Z"}
+[32minfo[39m: [CA 28] Diagnosis Tab opened {"service":"clinic-automation","timestamp":"2026-02-19T12:23:57.465Z"}
+[32minfo[39m: [CA 29] Extract diagnosis for visit date {"service":"clinic-automation","timestamp":"2026-02-19T12:23:58.558Z","visitDate":"2026-02-13"}
+[32minfo[39m: [CA 30] Found diagnosis for visit date {"code":"M54.5","date":"13/02/2026","description":"Low back pain","service":"clinic-automation","timestamp":"2026-02-19T12:23:59.571Z"}
+[32minfo[39m: [CA 31] Extract latest diagnosis from Diagnosis tab {"service":"clinic-automation","timestamp":"2026-02-19T12:23:59.571Z"}
+[32minfo[39m: [CA 32] Found latest diagnosis {"code":"M54.5","date":"13/02/2026","description":"Low back pain","service":"clinic-automation","timestamp":"2026-02-19T12:24:00.582Z"}
+[32minfo[39m: [CA 33] Extract diagnosis from TX History {"service":"clinic-automation","timestamp":"2026-02-19T12:24:00.583Z"}
+[32minfo[39m: [CA 34] Diagnosis extracted from TX History {"code":"M54.5","description":"Low back pain","rawText":"Loading... Date State Code Description Branch13/02/2026FinalM54.5Low back painSSOC","service":"clinic-automation","timestamp":"2026-02-19T12:24:01.624Z"}
+[32minfo[39m: [CA 35] Extract diagnosis from All tab {"service":"clinic-automation","timestamp":"2026-02-19T12:24:01.625Z","visitDate":"2026-02-13"}
+[32minfo[39m: [CA 36] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-19T12:24:01.625Z"}
+[32minfo[39m: [CA 37] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-19T12:24:04.691Z"}
+[32minfo[39m: [CA 38] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-19T12:24:04.692Z"}
+[32minfo[39m: [CA 39] All Tab opened {"service":"clinic-automation","timestamp":"2026-02-19T12:24:37.116Z"}
+[32minfo[39m: [CA 40] No diagnosis found in All tab {"service":"clinic-automation","timestamp":"2026-02-19T12:24:38.627Z"}
+[32minfo[39m: [CA 41] Extract diagnosis from Visit Tab {"service":"clinic-automation","timestamp":"2026-02-19T12:24:38.629Z","visitDate":"2026-02-13"}
+[32minfo[39m: [CA 42] Open Visit Tab {"service":"clinic-automation","timestamp":"2026-02-19T12:24:38.630Z"}
+[32minfo[39m: [CA 43] Visit Tab opened {"service":"clinic-automation","timestamp":"2026-02-19T12:24:40.325Z"}
+[32minfo[39m: [CA 44] No diagnosis found in Visit tab {"service":"clinic-automation","timestamp":"2026-02-19T12:24:41.135Z"}
+[32minfo[39m: [CA 45] Extract diagnosis from Past Notes {"service":"clinic-automation","timestamp":"2026-02-19T12:24:41.137Z","visitDate":"2026-02-13"}
+[32minfo[39m: [CA 46] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-19T12:24:41.137Z"}
+[32minfo[39m: [CA 47] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-19T12:24:44.195Z"}
+[32minfo[39m: [CA 48] Open Past Notes Tab {"service":"clinic-automation","timestamp":"2026-02-19T12:24:44.198Z"}
+[32minfo[39m: [CA 49] Past Notes Tab opened {"service":"clinic-automation","timestamp":"2026-02-19T12:24:47.943Z"}
+[32minfo[39m: [CA 50] Past Notes entries expanded {"service":"clinic-automation","timestamp":"2026-02-19T12:24:48.029Z","totalClicked":1,"visitDate":"2026-02-13"}
+[32minfo[39m: [CA 51] Diagnosis extracted from Past Notes {"code":null,"date":"2026-02-13","description":"and advice. - Denies current pain while lying down","service":"clinic-automation","timestamp":"2026-02-19T12:24:50.442Z"}
+[32minfo[39m: [CA 52] Extract diagnosis intent from Past Notes {"service":"clinic-automation","timestamp":"2026-02-19T12:24:50.447Z","visitDate":"2026-02-13"}
+[32minfo[39m: [CA 53] Open Past Notes Tab {"service":"clinic-automation","timestamp":"2026-02-19T12:24:50.448Z"}
+[32minfo[39m: [CA 54] Past Notes context already open {"service":"clinic-automation","timestamp":"2026-02-19T12:24:56.620Z"}
+[32minfo[39m: [CA 55] Past Notes entries expanded {"service":"clinic-automation","timestamp":"2026-02-19T12:24:56.685Z","totalClicked":1,"visitDate":"2026-02-13"}
+[32minfo[39m: [CA 56] Past Notes intent debug (no match) {"baseBodyPart":"back","evidence":["13/02/2026pcr specialist first consultation1"],"poolSize":1,"service":"clinic-automation","targetDateStr":"13/02/2026","targetDateStrAlt":"02/13/2026","timestamp":"2026-02-19T12:24:59.104Z","title":"Patient Biodata","url":"https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=MYRzROSozH/+U5qRmD6haYqqlvRLwiiPP5lRdid/rLv4X/oWqV/JxliMoV73cdZTW1B8khz6M13GQvK4R40VEvoT/TiCO7EH"}
+[32minfo[39m: [CA 57] No diagnosis intent found in Past Notes {"service":"clinic-automation","timestamp":"2026-02-19T12:24:59.104Z"}
+[32minfo[39m: [CA 58] Get charge type, diagnosis, and MC data for visit date {"service":"clinic-automation","timestamp":"2026-02-19T12:24:59.107Z","visitDate":"2026-02-13"}
+[32minfo[39m: [CA 59] Check for First Consult on visit date {"service":"clinic-automation","timestamp":"2026-02-19T12:24:59.107Z","visitDate":"2026-02-13"}
+[32minfo[39m: [CA 60] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-19T12:24:59.108Z"}
+[31merror[39m: Failed to navigate to TX History: Could not find TX History link/tab {"service":"clinic-automation","stack":"Error: Could not find TX History link/tab\n    at ClinicAssistAutomation.navigateToTXHistory (file:///Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:7733:13)\n    at runNextTicks (node:internal/process/task_queues:65:5)\n    at process.processImmediate (node:internal/timers:473:9)\n    at async ClinicAssistAutomation.hasFirstConsultOnDate (file:///Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:9206:7)\n    at async ClinicAssistAutomation.getChargeTypeAndDiagnosis (file:///Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:10730:31)\n    at async file:///Users/vincent/Baselrpacrm/tmp/check_flow2_diag_with_playwright.mjs:78:20","timestamp":"2026-02-19T12:26:30.243Z"}
+[32minfo[39m: [CA 61] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-19T12:26:30.244Z"}
+[32minfo[39m: [CA 62] All Tab not found/clickable; assuming default view {"service":"clinic-automation","timestamp":"2026-02-19T12:26:31.500Z"}
+[31merror[39m: Failed to check First Consult: page.waitForTimeout: Target page, context or browser has been closed {"service":"clinic-automation","stack":"page.waitForTimeout: Target page, context or browser has been closed\n    at ClinicAssistAutomation.hasFirstConsultOnDate (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:9208:23)\n    at async ClinicAssistAutomation.getChargeTypeAndDiagnosis (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:10730:31)\n    at async file:///Users/vincent/Baselrpacrm/tmp/check_flow2_diag_with_playwright.mjs:78:20","timestamp":"2026-02-19T12:26:33.500Z"}
+[32minfo[39m: [CA 63] Charge type determined {"chargeType":"follow","hasFirstConsult":false,"service":"clinic-automation","timestamp":"2026-02-19T12:26:33.501Z","visitDate":"2026-02-13"}
+[32minfo[39m: [CA 64] MC extraction from TX History disabled; using defaults {"mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-19T12:26:33.501Z"}
+[32minfo[39m: [CA 65] Open Diagnosis Tab {"service":"clinic-automation","timestamp":"2026-02-19T12:26:33.501Z"}
+[31merror[39m: Failed to open Diagnosis Tab: page.waitForTimeout: Target page, context or browser has been closed {"service":"clinic-automation","stack":"page.waitForTimeout: Target page, context or browser has been closed\n    at ClinicAssistAutomation.openDiagnosisTab (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:7747:23)\n    at ClinicAssistAutomation.getChargeTypeAndDiagnosis (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:10949:18)\n    at async file:///Users/vincent/Baselrpacrm/tmp/check_flow2_diag_with_playwright.mjs:78:20","timestamp":"2026-02-19T12:26:33.503Z"}
+[31merror[39m: Failed to get charge type and diagnosis: page.waitForTimeout: Target page, context or browser has been closed {"service":"clinic-automation","stack":"page.waitForTimeout: Target page, context or browser has been closed\n    at ClinicAssistAutomation.openDiagnosisTab (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:7747:23)\n    at ClinicAssistAutomation.getChargeTypeAndDiagnosis (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:10949:18)\n    at async file:///Users/vincent/Baselrpacrm/tmp/check_flow2_diag_with_playwright.mjs:78:20","timestamp":"2026-02-19T12:26:33.503Z"}
+[32minfo[39m: [CA 66] Open Past Notes Tab {"service":"clinic-automation","timestamp":"2026-02-19T12:26:33.503Z"}
+[31merror[39m: Failed to open Past Notes Tab: page.waitForTimeout: Target page, context or browser has been closed {"service":"clinic-automation","stack":"page.waitForTimeout: Target page, context or browser has been closed\n    at ClinicAssistAutomation.openPastNotesTab (/Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:9274:23)\n    at /Users/vincent/Baselrpacrm/tmp/check_flow2_diag_with_playwright.mjs:82:12","timestamp":"2026-02-19T12:26:33.503Z"}
+{
+  "ok": false,
+  "error": "page.waitForTimeout: Target page, context or browser has been closed"
+}

@@ -1,0 +1,15 @@
+{
+  "generatedAt": "2026-02-12T23:59:20.313Z",
+  "before": {
+    "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "submission_status": "error",
+    "submitted_at": null,
+    "submission_error": "diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=31b5a688-9104-4507-bd7a-347a9f9ce866, nric=M4539893L)"
+  },
+  "after": {
+    "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "submission_status": null,
+    "submitted_at": null,
+    "submission_error": null
+  }
+}

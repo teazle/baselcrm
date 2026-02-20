@@ -1,0 +1,16 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T11:48:05.108Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T11:48:05.114Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T11:48:05.114Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T11:48:05.115Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T11:48:07.125Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T11:48:07.126Z"}
+{
+  "rowText": "",
+  "cbVisible": false,
+  "addEnabled": false,
+  "claimInfo": false,
+  "searchStill": true,
+  "banner": 0,
+  "url": "https://connect.alliancemedinet.com/claim/panel-create"
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T11:49:03.549Z"}

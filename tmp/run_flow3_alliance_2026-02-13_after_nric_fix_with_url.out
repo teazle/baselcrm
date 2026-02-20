@@ -1,0 +1,49 @@
+[32minfo[39m: === Batch Claim Submission === {"service":"clinic-automation","timestamp":"2026-02-17T09:01:54.047Z"}
+[32minfo[39m: Visit IDs: Scoped query {"service":"clinic-automation","timestamp":"2026-02-17T09:01:54.050Z"}
+[32minfo[39m: Pay Type: All {"service":"clinic-automation","timestamp":"2026-02-17T09:01:54.050Z"}
+[32minfo[39m: Portal Targets: ALLIANCE_MEDINET {"service":"clinic-automation","timestamp":"2026-02-17T09:01:54.050Z"}
+[32minfo[39m: Date Range: 2026-02-13 to 2026-02-13 {"service":"clinic-automation","timestamp":"2026-02-17T09:01:54.050Z"}
+[32minfo[39m: Portal Only: true {"service":"clinic-automation","timestamp":"2026-02-17T09:01:54.051Z"}
+[32minfo[39m: Save as Draft: false {"service":"clinic-automation","timestamp":"2026-02-17T09:01:54.051Z"}
+[32minfo[39m: Leave Browser Open: false {"service":"clinic-automation","timestamp":"2026-02-17T09:01:54.051Z"}
+(node:78478) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vincent/Baselrpacrm/apps/crm/src/lib/rpa/portals.shared.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vincent/Baselrpacrm/apps/crm/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-17T09:01:54.712Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-17T09:01:54.713Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-17T09:01:54.714Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-17T09:01:54.714Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-17T09:01:56.226Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-17T09:01:56.226Z"}
+[32minfo[39m: Found 1 visit(s) to process {"service":"clinic-automation","timestamp":"2026-02-17T09:01:56.796Z"}
+[32minfo[39m: [1/1] Processing: WOO CHERN SEE (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-17T09:01:57.156Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for WOO CHERN SEE {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-17T09:01:57.158Z","visitId":"2c78d589-8d45-4788-99d9-6c619bec31e7"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Alliance Medinet {"service":"clinic-automation","timestamp":"2026-02-17T09:01:57.159Z"}
+[32minfo[39m: [SUBMIT] Alliance form data: {"doctorName":"Tung Yu Yee Mathew","matchedTag":"ALLIANC","nric":"T0801699I","service":"clinic-automation","spCode":"MT","timestamp":"2026-02-17T09:01:57.160Z"}
+[32minfo[39m: [ALLIANCE] Filled username {"selector":"input[placeholder*=\"login id\" i]","service":"clinic-automation","timestamp":"2026-02-17T09:01:59.402Z"}
+[32minfo[39m: [ALLIANCE] Filled password {"selector":"input[placeholder*=\"pass\" i]","service":"clinic-automation","timestamp":"2026-02-17T09:01:59.456Z"}
+[32minfo[39m: [ALLIANCE] Clicked login {"selector":"button:has-text(\"Login\")","service":"clinic-automation","timestamp":"2026-02-17T09:01:59.504Z"}
+[32minfo[39m: [ALLIANCE] Login successful {"service":"clinic-automation","timestamp":"2026-02-17T09:02:01.515Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Panel Service {"selector":"div.sidebar a.nav-link:has-text(\"Panel Service\")","service":"clinic-automation","timestamp":"2026-02-17T09:02:02.469Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-17T09:02:03.114Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-17T09:02:03.776Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-17T09:02:05.278Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-17T09:02:05.354Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-17T09:02:05.411Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-17T09:02:05.521Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-17T09:02:05.809Z"}
+[32minfo[39m: [ALLIANCE] Selected member and opened claim form {"service":"clinic-automation","timestamp":"2026-02-17T09:02:10.037Z"}
+[33mwarn[39m: [SUBMIT] Alliance visit attempt failed {"attempt":1,"canRetry":false,"error":"Could not select doctor \"Tung Yu Yee Mathew\" in Allianz Medinet form","lastAction":"select-member.added","maxAttempts":2,"retryable":false,"service":"clinic-automation","timestamp":"2026-02-17T09:02:10.131Z","traceId":null}
+[31merror[39m: [SUBMIT] Error submitting claim for WOO CHERN SEE {"error":"Could not select doctor \"Tung Yu Yee Mathew\" in Allianz Medinet form","service":"clinic-automation","timestamp":"2026-02-17T09:02:10.131Z"}
+[32minfo[39m: [SUBMIT] Verification run: not persisting submission_status=error {"error":"Could not select doctor \"Tung Yu Yee Mathew\" in Allianz Medinet form","payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-17T09:02:10.131Z","visitId":"2c78d589-8d45-4788-99d9-6c619bec31e7"}
+[31merror[39m: Failed to submit: Could not select doctor "Tung Yu Yee Mathew" in Allianz Medinet form {"service":"clinic-automation","timestamp":"2026-02-17T09:02:10.132Z"}
+[32minfo[39m: 
+=== Submission Summary === {"service":"clinic-automation","timestamp":"2026-02-17T09:02:12.578Z"}
+[32minfo[39m: Total: 1 {"service":"clinic-automation","timestamp":"2026-02-17T09:02:12.579Z"}
+[32minfo[39m: Submitted: 0 {"service":"clinic-automation","timestamp":"2026-02-17T09:02:12.579Z"}
+[32minfo[39m: Drafts: 0 {"service":"clinic-automation","timestamp":"2026-02-17T09:02:12.579Z"}
+[32minfo[39m: Filled only (no DB update): 0 {"service":"clinic-automation","timestamp":"2026-02-17T09:02:12.579Z"}
+[32minfo[39m: Errors: 1 {"service":"clinic-automation","timestamp":"2026-02-17T09:02:12.579Z"}
+[32minfo[39m: Not Started (unsupported): 0 {"service":"clinic-automation","timestamp":"2026-02-17T09:02:12.580Z"}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-17T09:02:13.104Z"}

@@ -1,0 +1,1088 @@
+{
+  "generatedAt": "2026-02-12T05:57:49.277Z",
+  "contexts": {
+    "mhc": {
+      "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=9TUC-JBUR-1OV8-B8LO-84HL-IFF8-617V-MN8K",
+      "title": "Employee Visit Draft List",
+      "inputs": [
+        {
+          "i": 0,
+          "tag": "select",
+          "type": null,
+          "name": "key",
+          "id": null,
+          "value": ""
+        },
+        {
+          "i": 1,
+          "tag": "select",
+          "type": null,
+          "name": "keyType",
+          "id": null,
+          "value": ""
+        },
+        {
+          "i": 2,
+          "tag": "input",
+          "type": "text",
+          "name": "keyValue",
+          "id": null,
+          "value": ""
+        },
+        {
+          "i": 3,
+          "tag": "input",
+          "type": "submit",
+          "name": "SearchAction",
+          "id": null,
+          "value": "Search"
+        },
+        {
+          "i": 4,
+          "tag": "input",
+          "type": "submit",
+          "name": "RefreshAction",
+          "id": null,
+          "value": "Refresh"
+        },
+        {
+          "i": 5,
+          "tag": "input",
+          "type": "hidden",
+          "name": "OWASP_CSRFTOKEN",
+          "id": null,
+          "value": "9TUC-JBUR-1OV8-B8LO-84HL-IFF8-617V-MN8K"
+        }
+      ],
+      "links": [
+        {
+          "i": 0,
+          "text": "Switch System ||",
+          "href": "#"
+        },
+        {
+          "i": 1,
+          "text": "AIA Clinic",
+          "href": "SwitchSystem.ec?url=https://www.aiaclinic.com"
+        },
+        {
+          "i": 2,
+          "text": "SinglifePcpcare",
+          "href": "SwitchSystem.ec?url=https://www.pcpcare.com"
+        },
+        {
+          "i": 3,
+          "text": "Singlife Global 8",
+          "href": "SwitchSystem.ec?url=https://www.myglobalbenefit.com"
+        },
+        {
+          "i": 4,
+          "text": "AXA Clinicare (HSBC)",
+          "href": "SwitchSystem.ec?url=https://www.clcare.com"
+        },
+        {
+          "i": 5,
+          "text": "Better Health",
+          "href": "SwitchSystem.ec?url=https://betterhealth.mhcasia.net"
+        },
+        {
+          "i": 6,
+          "text": "FWD Travel Insurance",
+          "href": "SwitchSystem.ec?url=https://www.fwdclinic.com"
+        },
+        {
+          "i": 7,
+          "text": "Great Eastern",
+          "href": "SwitchSystem.ec?url=https://ge.mhcasia.net/ge"
+        },
+        {
+          "i": 8,
+          "text": "INCOME iMedicare",
+          "href": "SwitchSystem.ec?url=https://www.mhc-imedicare.com"
+        },
+        {
+          "i": 9,
+          "text": "PHI System",
+          "href": "SwitchSystem.ec?url=https://phi.mhcasia.net"
+        },
+        {
+          "i": 10,
+          "text": "QBE Primary Care",
+          "href": "SwitchSystem.ec?url=https://www.qbeprimarycare.com"
+        },
+        {
+          "i": 11,
+          "text": "Log Out",
+          "href": "Logout.ec?OWASP_CSRFTOKEN=9TUC-JBUR-1OV8-B8LO-84HL-IFF8-617V-MN8K"
+        },
+        {
+          "i": 12,
+          "text": "Announcement (19)",
+          "href": "ClinicAnnouncement.ec?OWASP_CSRFTOKEN=9TUC-JBUR-1OV8-B8LO-84HL-IFF8-617V-MN8K"
+        },
+        {
+          "i": 13,
+          "text": "Add QR Visit",
+          "href": "ClinicEmpOpenVisitNewList.ec?OWASP_CSRFTOKEN=9TUC-JBUR-1OV8-B8LO-84HL-IFF8-617V-MN8K"
+        },
+        {
+          "i": 14,
+          "text": "Add Normal Visit",
+          "href": "ClinicEmpVisitSelectPatient.ec?OWASP_CSRFTOKEN=9TUC-JBUR-1OV8-B8LO-84HL-IFF8-617V-MN8K"
+        },
+        {
+          "i": 15,
+          "text": "View Submitted Visits",
+          "href": "ClinicEmpVisitPlusAList.ec?OWASP_CSRFTOKEN=9TUC-JBUR-1OV8-B8LO-84HL-IFF8-617V-MN8K"
+        },
+        {
+          "i": 16,
+          "text": "Edit/Draft Visits",
+          "href": "ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=9TUC-JBUR-1OV8-B8LO-84HL-IFF8-617V-MN8K"
+        },
+        {
+          "i": 17,
+          "text": "Add Imaging Visit",
+          "href": "ClinicXRayVisitSelectPatient.ec?OWASP_CSRFTOKEN=9TUC-JBUR-1OV8-B8LO-84HL-IFF8-617V-MN8K"
+        },
+        {
+          "i": 18,
+          "text": "Add Lab Visit",
+          "href": "ClinicLabVisitSelectPatient.ec?OWASP_CSRFTOKEN=9TUC-JBUR-1OV8-B8LO-84HL-IFF8-617V-MN8K"
+        },
+        {
+          "i": 19,
+          "text": "Add Checkup (Name Search)",
+          "href": "ClinicCheckupVisitSelectPatient.ec?OWASP_CSRFTOKEN=9TUC-JBUR-1OV8-B8LO-84HL-IFF8-617V-MN8K"
+        },
+        {
+          "i": 20,
+          "text": "Add Checkup (Company Search)",
+          "href": "ClinicSelectCompany.ec?OWASP_CSRFTOKEN=9TUC-JBUR-1OV8-B8LO-84HL-IFF8-617V-MN8K"
+        },
+        {
+          "i": 21,
+          "text": "Invoice",
+          "href": "ClinicPaymentAdviceAllSystemList.ec?OWASP_CSRFTOKEN=9TUC-JBUR-1OV8-B8LO-84HL-IFF8-617V-MN8K"
+        },
+        {
+          "i": 22,
+          "text": "Client List",
+          "href": "http://b6.caspio.com/dp.asp?AppKey=e7923000e9496b289e8c441da427"
+        },
+        {
+          "i": 23,
+          "text": "QR Code Download",
+          "href": "ClinicUtilizationReviewFormAndQRCode.ec?OWASP_CSRFTOKEN=9TUC-JBUR-1OV8-B8LO-84HL-IFF8-617V-MN8K"
+        },
+        {
+          "i": 24,
+          "text": "Utilization Review Form",
+          "href": "http://b6.caspio.com/dp.asp?AppKey=e7923000398df35e6a66458295c4"
+        },
+        {
+          "i": 25,
+          "text": "Drug Price Review Form",
+          "href": "http://b6.caspio.com/dp.asp?AppKey=e792300020dbe860ed9248b79292"
+        },
+        {
+          "i": 26,
+          "text": "Procedure Request Form",
+          "href": "http://b6.caspio.com/dp.asp?AppKey=e792300090be4f97b8be4a4fae71"
+        },
+        {
+          "i": 27,
+          "text": "Order Drugs via MHC",
+          "href": "https://product.mhcasia.net/?storeRedirect=mhchealthcare"
+        },
+        {
+          "i": 28,
+          "text": "MEMO for clinics",
+          "href": "http://b6.caspio.com/dp.asp?AppKey=e79230005064fa49c7de4b599fc9"
+        },
+        {
+          "i": 29,
+          "text": "Change Password",
+          "href": "ClinicChangePassword.ec?OWASP_CSRFTOKEN=9TUC-JBUR-1OV8-B8LO-84HL-IFF8-617V-MN8K"
+        }
+      ],
+      "tables": [
+        {
+          "idx": 0,
+          "rowCount": 3,
+          "rows": [
+            [
+              "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out",
+              "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic",
+              "Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out"
+            ],
+            [
+              "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic",
+              "Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out"
+            ]
+          ]
+        },
+        {
+          "idx": 1,
+          "rowCount": 1,
+          "rows": [
+            [
+              "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic",
+              "Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out"
+            ]
+          ]
+        },
+        {
+          "idx": 2,
+          "rowCount": 8,
+          "rows": [
+            [
+              "Employee Visit Draft List - Click To Edit"
+            ],
+            [
+              "Visit No NRIC that contains starts with equals to",
+              "Visit No NRIC",
+              "that",
+              "contains starts with equals to"
+            ],
+            [
+              "Visit No NRIC",
+              "that",
+              "contains starts with equals to"
+            ],
+            [
+              "0 - 0 of 0",
+              "0 - 0 of 0"
+            ],
+            [
+              "0 - 0 of 0"
+            ],
+            [
+              "Visit Date Visit No Type Patient NRIC Patient Name Total Fee Total Claim MC Days Remarks",
+              "Visit Date",
+              "Visit No",
+              "Type",
+              "Patient NRIC",
+              "Patient Name",
+              "Total Fee",
+              "Total Claim",
+              "MC Days",
+              "Remarks"
+            ],
+            [
+              "Visit Date",
+              "Visit No",
+              "Type",
+              "Patient NRIC",
+              "Patient Name",
+              "Total Fee",
+              "Total Claim",
+              "MC Days",
+              "Remarks"
+            ]
+          ]
+        },
+        {
+          "idx": 3,
+          "rowCount": 1,
+          "rows": [
+            [
+              "Visit No NRIC",
+              "that",
+              "contains starts with equals to"
+            ]
+          ]
+        },
+        {
+          "idx": 4,
+          "rowCount": 1,
+          "rows": [
+            [
+              "0 - 0 of 0"
+            ]
+          ]
+        },
+        {
+          "idx": 5,
+          "rowCount": 1,
+          "rows": [
+            [
+              "Visit Date",
+              "Visit No",
+              "Type",
+              "Patient NRIC",
+              "Patient Name",
+              "Total Fee",
+              "Total Claim",
+              "MC Days",
+              "Remarks"
+            ]
+          ]
+        }
+      ],
+      "body": "#banner { text-align: center; } .table-bg { background-color: #eeeeee; } .style1 { background-image: url('singaporeImage/Blue_Bar.png'); } .style2 { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; } .style5 { font-family: Arial, Helvetica, sans-serif; font-size: 9pt; } .useful-link { float: right; } .useful-link a { color: #FFFFFF; font-family: Arial, Helvetica, sans-serif; font-weight: bold; text-decoration: none; } .dropdown-link { color: #FFFFFF; background-image: url('singaporeImage/Blue_Bar.png'); font-family: Arial, Helvetica, sans-serif; } Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic Switch System || AIA Clinic SinglifePcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern INCOME iMedicare PHI System QBE Primary Care Log Out /* Base styles */ .menu-item { text-decoration: none; } ul.menu-list { list-style: none; padding: 0; margin: 0; } ul.separator { background-image: none; } .separator-line { height: 5px; width: 75%; } .empty-line { height: 5px; } /* Dynamic styles rendered server-side */ #menu .menu-color-4b100340b918 { color: #000000; } #menu .menu-color-18636bd3af2e { color: #000000; } #menu .menu-color-106f26247000 { color: #000000; } #menu .menu-color-106f2629f001 { color: #000000; } #menu .menu-color-764b01bf0488 { color: #000000; } #menu .menu-color-10feaccad04e { color: #000000; } #menu .menu-color-10feacc0b04d { color: #000000; } #menu .menu-color-10feacb5604c { color: #000000; } #menu .menu-color-10feaca35045 { color: #000000; } #menu .menu-color-15e2f0f6c6ae { color: #000000; } #menu .menu-color-1443ec8433b6 { color: #663300; } #menu .menu-color-11937e91d772 { color: #000000; } #menu .menu-color-18648798a53d { color: #FF0000; } #menu .menu-color-127aca4b63fb { color: #009900; } #menu .menu-color-13c3ddc96dbc { color: #009900; } #menu .menu-color-1192da0ead1c { color: #009900; } #menu .menu-color-154e098114f5 { color: #000000; } #menu .menu-color-10b631304006 { color: #000000; } function openNewWindow(url) { var load = window.open( url, '', 'scrollbars=yes,menubar=yes,height=600,width=800,resizable=yes,toolbar=yes,location=yes,status=yes' ); return false; // Prevent default link behavior } Announcement (19) Add QR Visit Add Normal Visit View Submitted Visits Edit/Draft Visits Add Imaging Visit Add Lab Visit Add Checkup (Name Search) Add Checkup (Company Search) Invoice Client List QR Code Download Utilization Review Form Drug Price Rev"
+    },
+    "singlife": {
+      "url": "https://www.pcpcare.com/pcpcare/ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5",
+      "title": "Employee Visit Draft List",
+      "inputs": [
+        {
+          "i": 0,
+          "tag": "select",
+          "type": null,
+          "name": "key",
+          "id": null,
+          "value": ""
+        },
+        {
+          "i": 1,
+          "tag": "select",
+          "type": null,
+          "name": "keyType",
+          "id": null,
+          "value": ""
+        },
+        {
+          "i": 2,
+          "tag": "input",
+          "type": "text",
+          "name": "keyValue",
+          "id": null,
+          "value": ""
+        },
+        {
+          "i": 3,
+          "tag": "input",
+          "type": "submit",
+          "name": "SearchAction",
+          "id": null,
+          "value": "Search"
+        },
+        {
+          "i": 4,
+          "tag": "input",
+          "type": "submit",
+          "name": "RefreshAction",
+          "id": null,
+          "value": "Refresh"
+        },
+        {
+          "i": 5,
+          "tag": "input",
+          "type": "hidden",
+          "name": "OWASP_CSRFTOKEN",
+          "id": null,
+          "value": "I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        }
+      ],
+      "links": [
+        {
+          "i": 0,
+          "text": "Singlife",
+          "href": "https://singlife.com/"
+        },
+        {
+          "i": 1,
+          "text": "MHC Asia",
+          "href": "https://www.mhcasia.com"
+        },
+        {
+          "i": 2,
+          "text": "Contact us",
+          "href": "#"
+        },
+        {
+          "i": 3,
+          "text": "Switch System",
+          "href": "#"
+        },
+        {
+          "i": 4,
+          "text": "AIA Clinic",
+          "href": "SwitchSystem.ec?url=https://www.aiaclinic.com"
+        },
+        {
+          "i": 5,
+          "text": "Singlife Global 8",
+          "href": "SwitchSystem.ec?url=https://www.myglobalbenefit.com"
+        },
+        {
+          "i": 6,
+          "text": "AXA Clinicare (HSBC)",
+          "href": "SwitchSystem.ec?url=https://www.clcare.com"
+        },
+        {
+          "i": 7,
+          "text": "Better Health",
+          "href": "SwitchSystem.ec?url=https://betterhealth.mhcasia.net"
+        },
+        {
+          "i": 8,
+          "text": "FWD Travel Insurance",
+          "href": "SwitchSystem.ec?url=https://www.fwdclinic.com"
+        },
+        {
+          "i": 9,
+          "text": "Great Eastern",
+          "href": "SwitchSystem.ec?url=https://ge.mhcasia.net/ge"
+        },
+        {
+          "i": 10,
+          "text": "MHC Medical Network",
+          "href": "SwitchSystem.ec?url=https://www.mhcasia.net/mhc"
+        },
+        {
+          "i": 11,
+          "text": "INCOME iMedicare",
+          "href": "SwitchSystem.ec?url=https://www.mhc-imedicare.com"
+        },
+        {
+          "i": 12,
+          "text": "PHI System",
+          "href": "SwitchSystem.ec?url=https://phi.mhcasia.net"
+        },
+        {
+          "i": 13,
+          "text": "QBE Primary Care",
+          "href": "SwitchSystem.ec?url=https://www.qbeprimarycare.com"
+        },
+        {
+          "i": 14,
+          "text": "Log Off",
+          "href": "Logout.ec?OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        },
+        {
+          "i": 15,
+          "text": "Announcement",
+          "href": "ClinicAnnouncement.ec?OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        },
+        {
+          "i": 16,
+          "text": "Add Normal Visit",
+          "href": "ClinicIECAvivaPatientSearch.ec?OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        },
+        {
+          "i": 17,
+          "text": "View Submitted Visits",
+          "href": "ClinicIECAvivaEmpVisitList.ec?OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        },
+        {
+          "i": 18,
+          "text": "Edit/Draft Visits",
+          "href": "ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        },
+        {
+          "i": 19,
+          "text": "Invoice",
+          "href": "ClinicPaymentAdviceAllSystemList.ec?OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        },
+        {
+          "i": 20,
+          "text": "Diagnostic Centres",
+          "href": "http://b6.caspio.com/dp.asp?AppKey=e7923000639af9b4f2d9460da934"
+        },
+        {
+          "i": 21,
+          "text": "Utilization Review Form",
+          "href": "http://b6.caspio.com/dp.asp?AppKey=e7923000faec4d7662784dd79e9e"
+        },
+        {
+          "i": 22,
+          "text": "Drug Price Review Form",
+          "href": "http://b6.caspio.com/dp.asp?AppKey=e792300020dbe860ed9248b79292"
+        },
+        {
+          "i": 23,
+          "text": "Procedure Request Form",
+          "href": "http://b6.caspio.com/dp.asp?AppKey=e792300090be4f97b8be4a4fae71"
+        },
+        {
+          "i": 24,
+          "text": "Order Drugs via MHC",
+          "href": "https://product.mhcasia.net/?storeRedirect=mhchealthcare"
+        },
+        {
+          "i": 25,
+          "text": "MEMO for clinics",
+          "href": "http://b6.caspio.com/dp.asp?AppKey=e79230005064fa49c7de4b599fc9"
+        },
+        {
+          "i": 26,
+          "text": "Singlife PCP SP Listing",
+          "href": "https://b6.caspio.com/dp.asp?AppKey=e79230003cda8b078ffc4e158323"
+        },
+        {
+          "i": 27,
+          "text": "Change Password",
+          "href": "ClinicChangePassword.ec?OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        },
+        {
+          "i": 28,
+          "text": "07/02/2026",
+          "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4d9eb51f6&isDraft=AVIVA&OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        },
+        {
+          "i": 29,
+          "text": "EV7116404",
+          "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4d9eb51f6&isDraft=AVIVA&OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        },
+        {
+          "i": 30,
+          "text": "Employee Visit",
+          "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4d9eb51f6&isDraft=AVIVA&OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        },
+        {
+          "i": 31,
+          "text": "S7030442B",
+          "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4d9eb51f6&isDraft=AVIVA&OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        },
+        {
+          "i": 32,
+          "text": "LIM CHUI KIOW DEBBY",
+          "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4d9eb51f6&isDraft=AVIVA&OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        },
+        {
+          "i": 33,
+          "text": "$87.20",
+          "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4d9eb51f6&isDraft=AVIVA&OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        },
+        {
+          "i": 34,
+          "text": "$87.20",
+          "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4d9eb51f6&isDraft=AVIVA&OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        },
+        {
+          "i": 35,
+          "text": "0.0",
+          "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4d9eb51f6&isDraft=AVIVA&OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        },
+        {
+          "i": 36,
+          "text": "",
+          "href": "ClinicIECAvivaEmpVisitEdit.ec?id=19c4d9eb51f6&isDraft=AVIVA&OWASP_CSRFTOKEN=I36F-38FR-3SWK-H0YQ-L412-BU14-0Z2T-H5F5"
+        }
+      ],
+      "tables": [
+        {
+          "idx": 0,
+          "rowCount": 26,
+          "rows": [
+            [
+              "/* Top menu styles */ .menu-top { margin-top: 5px; margin-right: 3px; } .system-menu { font-family: Arial; color: #808080; font-size: 10px; /* equivalent to size=\"1\" */ } #header_Useful_link { background-color: #ffffff; } /* Log off link style */ .log-off-link { color: #808080; } /* Divider style */ .menu-divider { display: inline-block; margin: 0 8px; } Singlife MHC Asia Contact us Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Switch System AIA Clinic Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern MHC Medical Network INCOME iMedicare PHI System QBE Primary Care || Log Off"
+            ],
+            [
+              "/* Base table styles */ .menu-table { width: 100%; border: 0; background-color: #F4F4F4; padding: 0; border-spacing: 0; } /* Menu link base style */ .menu { text-decoration: none; } /* Separator styles */ .separator { height: 5px; width: 75%; } .empty-cell { height: 5px; } /* Dynamically generated color classes */ #menu .menu-color-4f61682abe2a { color: #000000; } #menu .menu-color-106f26247000 { color: #000000; } #menu .menu-color-106f2629f001 { color: #000000; } #menu .menu-color-2ce9f3d4fdbd { color: #000000; } #menu .menu-color-15e489b7700f { color: #000000; } #menu .menu-color-12408a2720d6 { color: #000000; } #menu .menu-color-1211e45be186 { color: #FF0000; } #menu .menu-color-127acc1c9454 { color: #009900; } #menu .menu-color-13c3dea10eca { color: #009900; } #menu .menu-color-126876d27ff8 { color: #009900; } #menu .menu-color-154e0a700841 { color: #000000; } #menu .menu-color-1888ae1feb92 { color: #000000; } #menu .menu-color-10b631304006 { color: #000000; } function openNewWindow(url) { var load = window.open( url, '', 'scrollbars=yes,menubar=yes,height=600,width=800,resizable=yes,toolbar=yes,location=yes,status=yes' ); return false; // Prevent default link behavior } Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password Employee Visit Draft List - Click To Edit Visit No NRIC that contains starts with equals to 1 - 1 of 1 Visit Date Visit No Type Patient NRIC Patient Name Total Fee Total Claim MC Days Remarks 07/02/2026 EV7116404 Employee Visit S7030442B LIM CHUI KIOW DEBBY $87.20 $87.20 0.0",
+              "/* Base table styles */ .menu-table { width: 100%; border: 0; background-color: #F4F4F4; padding: 0; border-spacing: 0; } /* Menu link base style */ .menu { text-decoration: none; } /* Separator styles */ .separator { height: 5px; width: 75%; } .empty-cell { height: 5px; } /* Dynamically generated color classes */ #menu .menu-color-4f61682abe2a { color: #000000; } #menu .menu-color-106f26247000 { color: #000000; } #menu .menu-color-106f2629f001 { color: #000000; } #menu .menu-color-2ce9f3d4fdbd { color: #000000; } #menu .menu-color-15e489b7700f { color: #000000; } #menu .menu-color-12408a2720d6 { color: #000000; } #menu .menu-color-1211e45be186 { color: #FF0000; } #menu .menu-color-127acc1c9454 { color: #009900; } #menu .menu-color-13c3dea10eca { color: #009900; } #menu .menu-color-126876d27ff8 { color: #009900; } #menu .menu-color-154e0a700841 { color: #000000; } #menu .menu-color-1888ae1feb92 { color: #000000; } #menu .menu-color-10b631304006 { color: #000000; } function openNewWindow(url) { var load = window.open( url, '', 'scrollbars=yes,menubar=yes,height=600,width=800,resizable=yes,toolbar=yes,location=yes,status=yes' ); return false; // Prevent default link behavior } Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+              "Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+              "Announcement",
+              "Add Normal Visit",
+              "View Submitted Visits",
+              "Edit/Draft Visits",
+              "Invoice",
+              "Diagnostic Centres",
+              "Utilization Review Form",
+              "Drug Price Review Form",
+              "Procedure Request Form",
+              "Order Drugs via MHC",
+              "MEMO for clinics",
+              "Singlife PCP SP Listing",
+              "Change Password",
+              "Employee Visit Draft List - Click To Edit Visit No NRIC that contains starts with equals to 1 - 1 of 1 Visit Date Visit No Type Patient NRIC Patient Name Total Fee Total Claim MC Days Remarks 07/02/2026 EV7116404 Employee Visit S7030442B LIM CHUI KIOW DEBBY $87.20 $87.20 0.0",
+              "Employee Visit Draft List - Click To Edit",
+              "Visit No NRIC that contains starts with equals to",
+              "Visit No NRIC",
+              "that",
+              "contains starts with equals to",
+              "1 - 1 of 1",
+              "1 - 1 of 1",
+              "Visit Date Visit No Type Patient NRIC Patient Name Total Fee Total Claim MC Days Remarks 07/02/2026 EV7116404 Employee Visit S7030442B LIM CHUI KIOW DEBBY $87.20 $87.20 0.0",
+              "Visit Date",
+              "Visit No",
+              "Type",
+              "Patient NRIC",
+              "Patient Name",
+              "Total Fee",
+              "Total Claim",
+              "MC Days",
+              "Remarks",
+              "07/02/2026",
+              "EV7116404",
+              "Employee Visit",
+              "S7030442B",
+              "LIM CHUI KIOW DEBBY",
+              "$87.20",
+              "$87.20",
+              "0.0"
+            ],
+            [
+              "/* Base table styles */ .menu-table { width: 100%; border: 0; background-color: #F4F4F4; padding: 0; border-spacing: 0; } /* Menu link base style */ .menu { text-decoration: none; } /* Separator styles */ .separator { height: 5px; width: 75%; } .empty-cell { height: 5px; } /* Dynamically generated color classes */ #menu .menu-color-4f61682abe2a { color: #000000; } #menu .menu-color-106f26247000 { color: #000000; } #menu .menu-color-106f2629f001 { color: #000000; } #menu .menu-color-2ce9f3d4fdbd { color: #000000; } #menu .menu-color-15e489b7700f { color: #000000; } #menu .menu-color-12408a2720d6 { color: #000000; } #menu .menu-color-1211e45be186 { color: #FF0000; } #menu .menu-color-127acc1c9454 { color: #009900; } #menu .menu-color-13c3dea10eca { color: #009900; } #menu .menu-color-126876d27ff8 { color: #009900; } #menu .menu-color-154e0a700841 { color: #000000; } #menu .menu-color-1888ae1feb92 { color: #000000; } #menu .menu-color-10b631304006 { color: #000000; } function openNewWindow(url) { var load = window.open( url, '', 'scrollbars=yes,menubar=yes,height=600,width=800,resizable=yes,toolbar=yes,location=yes,status=yes' ); return false; // Prevent default link behavior } Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+              "Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+              "Announcement",
+              "Add Normal Visit",
+              "View Submitted Visits",
+              "Edit/Draft Visits",
+              "Invoice",
+              "Diagnostic Centres",
+              "Utilization Review Form",
+              "Drug Price Review Form",
+              "Procedure Request Form",
+              "Order Drugs via MHC",
+              "MEMO for clinics",
+              "Singlife PCP SP Listing",
+              "Change Password",
+              "Employee Visit Draft List - Click To Edit Visit No NRIC that contains starts with equals to 1 - 1 of 1 Visit Date Visit No Type Patient NRIC Patient Name Total Fee Total Claim MC Days Remarks 07/02/2026 EV7116404 Employee Visit S7030442B LIM CHUI KIOW DEBBY $87.20 $87.20 0.0",
+              "Employee Visit Draft List - Click To Edit",
+              "Visit No NRIC that contains starts with equals to",
+              "Visit No NRIC",
+              "that",
+              "contains starts with equals to",
+              "1 - 1 of 1",
+              "1 - 1 of 1",
+              "Visit Date Visit No Type Patient NRIC Patient Name Total Fee Total Claim MC Days Remarks 07/02/2026 EV7116404 Employee Visit S7030442B LIM CHUI KIOW DEBBY $87.20 $87.20 0.0",
+              "Visit Date",
+              "Visit No",
+              "Type",
+              "Patient NRIC",
+              "Patient Name",
+              "Total Fee",
+              "Total Claim",
+              "MC Days",
+              "Remarks",
+              "07/02/2026",
+              "EV7116404",
+              "Employee Visit",
+              "S7030442B",
+              "LIM CHUI KIOW DEBBY",
+              "$87.20",
+              "$87.20",
+              "0.0"
+            ],
+            [
+              "Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+              "Announcement",
+              "Add Normal Visit",
+              "View Submitted Visits",
+              "Edit/Draft Visits",
+              "Invoice",
+              "Diagnostic Centres",
+              "Utilization Review Form",
+              "Drug Price Review Form",
+              "Procedure Request Form",
+              "Order Drugs via MHC",
+              "MEMO for clinics",
+              "Singlife PCP SP Listing",
+              "Change Password"
+            ],
+            [
+              "Announcement"
+            ],
+            [
+              "Add Normal Visit"
+            ],
+            [
+              "View Submitted Visits"
+            ],
+            [
+              "Edit/Draft Visits"
+            ],
+            [
+              "Invoice"
+            ],
+            [
+              "Diagnostic Centres"
+            ],
+            [
+              "Utilization Review Form"
+            ],
+            [
+              "Drug Price Review Form"
+            ]
+          ]
+        },
+        {
+          "idx": 1,
+          "rowCount": 24,
+          "rows": [
+            [
+              "/* Base table styles */ .menu-table { width: 100%; border: 0; background-color: #F4F4F4; padding: 0; border-spacing: 0; } /* Menu link base style */ .menu { text-decoration: none; } /* Separator styles */ .separator { height: 5px; width: 75%; } .empty-cell { height: 5px; } /* Dynamically generated color classes */ #menu .menu-color-4f61682abe2a { color: #000000; } #menu .menu-color-106f26247000 { color: #000000; } #menu .menu-color-106f2629f001 { color: #000000; } #menu .menu-color-2ce9f3d4fdbd { color: #000000; } #menu .menu-color-15e489b7700f { color: #000000; } #menu .menu-color-12408a2720d6 { color: #000000; } #menu .menu-color-1211e45be186 { color: #FF0000; } #menu .menu-color-127acc1c9454 { color: #009900; } #menu .menu-color-13c3dea10eca { color: #009900; } #menu .menu-color-126876d27ff8 { color: #009900; } #menu .menu-color-154e0a700841 { color: #000000; } #menu .menu-color-1888ae1feb92 { color: #000000; } #menu .menu-color-10b631304006 { color: #000000; } function openNewWindow(url) { var load = window.open( url, '', 'scrollbars=yes,menubar=yes,height=600,width=800,resizable=yes,toolbar=yes,location=yes,status=yes' ); return false; // Prevent default link behavior } Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+              "Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+              "Announcement",
+              "Add Normal Visit",
+              "View Submitted Visits",
+              "Edit/Draft Visits",
+              "Invoice",
+              "Diagnostic Centres",
+              "Utilization Review Form",
+              "Drug Price Review Form",
+              "Procedure Request Form",
+              "Order Drugs via MHC",
+              "MEMO for clinics",
+              "Singlife PCP SP Listing",
+              "Change Password",
+              "Employee Visit Draft List - Click To Edit Visit No NRIC that contains starts with equals to 1 - 1 of 1 Visit Date Visit No Type Patient NRIC Patient Name Total Fee Total Claim MC Days Remarks 07/02/2026 EV7116404 Employee Visit S7030442B LIM CHUI KIOW DEBBY $87.20 $87.20 0.0",
+              "Employee Visit Draft List - Click To Edit",
+              "Visit No NRIC that contains starts with equals to",
+              "Visit No NRIC",
+              "that",
+              "contains starts with equals to",
+              "1 - 1 of 1",
+              "1 - 1 of 1",
+              "Visit Date Visit No Type Patient NRIC Patient Name Total Fee Total Claim MC Days Remarks 07/02/2026 EV7116404 Employee Visit S7030442B LIM CHUI KIOW DEBBY $87.20 $87.20 0.0",
+              "Visit Date",
+              "Visit No",
+              "Type",
+              "Patient NRIC",
+              "Patient Name",
+              "Total Fee",
+              "Total Claim",
+              "MC Days",
+              "Remarks",
+              "07/02/2026",
+              "EV7116404",
+              "Employee Visit",
+              "S7030442B",
+              "LIM CHUI KIOW DEBBY",
+              "$87.20",
+              "$87.20",
+              "0.0"
+            ],
+            [
+              "Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+              "Announcement",
+              "Add Normal Visit",
+              "View Submitted Visits",
+              "Edit/Draft Visits",
+              "Invoice",
+              "Diagnostic Centres",
+              "Utilization Review Form",
+              "Drug Price Review Form",
+              "Procedure Request Form",
+              "Order Drugs via MHC",
+              "MEMO for clinics",
+              "Singlife PCP SP Listing",
+              "Change Password"
+            ],
+            [
+              "Announcement"
+            ],
+            [
+              "Add Normal Visit"
+            ],
+            [
+              "View Submitted Visits"
+            ],
+            [
+              "Edit/Draft Visits"
+            ],
+            [
+              "Invoice"
+            ],
+            [
+              "Diagnostic Centres"
+            ],
+            [
+              "Utilization Review Form"
+            ],
+            [
+              "Drug Price Review Form"
+            ],
+            [
+              "Procedure Request Form"
+            ],
+            [
+              "Order Drugs via MHC"
+            ]
+          ]
+        },
+        {
+          "idx": 2,
+          "rowCount": 14,
+          "rows": [
+            [
+              "Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password",
+              "Announcement",
+              "Add Normal Visit",
+              "View Submitted Visits",
+              "Edit/Draft Visits",
+              "Invoice",
+              "Diagnostic Centres",
+              "Utilization Review Form",
+              "Drug Price Review Form",
+              "Procedure Request Form",
+              "Order Drugs via MHC",
+              "MEMO for clinics",
+              "Singlife PCP SP Listing",
+              "Change Password"
+            ],
+            [
+              "Announcement"
+            ],
+            [
+              "Add Normal Visit"
+            ],
+            [
+              "View Submitted Visits"
+            ],
+            [
+              "Edit/Draft Visits"
+            ],
+            [
+              "Invoice"
+            ],
+            [
+              "Diagnostic Centres"
+            ],
+            [
+              "Utilization Review Form"
+            ],
+            [
+              "Drug Price Review Form"
+            ],
+            [
+              "Procedure Request Form"
+            ],
+            [
+              "Order Drugs via MHC"
+            ],
+            [
+              "MEMO for clinics"
+            ]
+          ]
+        },
+        {
+          "idx": 3,
+          "rowCount": 1,
+          "rows": [
+            [
+              "Announcement"
+            ]
+          ]
+        },
+        {
+          "idx": 4,
+          "rowCount": 1,
+          "rows": [
+            [
+              "Add Normal Visit"
+            ]
+          ]
+        },
+        {
+          "idx": 5,
+          "rowCount": 1,
+          "rows": [
+            [
+              "View Submitted Visits"
+            ]
+          ]
+        },
+        {
+          "idx": 6,
+          "rowCount": 1,
+          "rows": [
+            [
+              "Edit/Draft Visits"
+            ]
+          ]
+        },
+        {
+          "idx": 7,
+          "rowCount": 1,
+          "rows": [
+            [
+              "Invoice"
+            ]
+          ]
+        },
+        {
+          "idx": 8,
+          "rowCount": 1,
+          "rows": [
+            [
+              "Diagnostic Centres"
+            ]
+          ]
+        },
+        {
+          "idx": 9,
+          "rowCount": 1,
+          "rows": [
+            [
+              "Utilization Review Form"
+            ]
+          ]
+        },
+        {
+          "idx": 10,
+          "rowCount": 1,
+          "rows": [
+            [
+              "Drug Price Review Form"
+            ]
+          ]
+        },
+        {
+          "idx": 11,
+          "rowCount": 1,
+          "rows": [
+            [
+              "Procedure Request Form"
+            ]
+          ]
+        },
+        {
+          "idx": 12,
+          "rowCount": 1,
+          "rows": [
+            [
+              "Order Drugs via MHC"
+            ]
+          ]
+        },
+        {
+          "idx": 13,
+          "rowCount": 1,
+          "rows": [
+            [
+              "MEMO for clinics"
+            ]
+          ]
+        },
+        {
+          "idx": 14,
+          "rowCount": 1,
+          "rows": [
+            [
+              "Singlife PCP SP Listing"
+            ]
+          ]
+        },
+        {
+          "idx": 15,
+          "rowCount": 1,
+          "rows": [
+            [
+              "Change Password"
+            ]
+          ]
+        },
+        {
+          "idx": 16,
+          "rowCount": 9,
+          "rows": [
+            [
+              "Employee Visit Draft List - Click To Edit"
+            ],
+            [
+              "Visit No NRIC that contains starts with equals to",
+              "Visit No NRIC",
+              "that",
+              "contains starts with equals to"
+            ],
+            [
+              "Visit No NRIC",
+              "that",
+              "contains starts with equals to"
+            ],
+            [
+              "1 - 1 of 1",
+              "1 - 1 of 1"
+            ],
+            [
+              "1 - 1 of 1"
+            ],
+            [
+              "Visit Date Visit No Type Patient NRIC Patient Name Total Fee Total Claim MC Days Remarks 07/02/2026 EV7116404 Employee Visit S7030442B LIM CHUI KIOW DEBBY $87.20 $87.20 0.0",
+              "Visit Date",
+              "Visit No",
+              "Type",
+              "Patient NRIC",
+              "Patient Name",
+              "Total Fee",
+              "Total Claim",
+              "MC Days",
+              "Remarks",
+              "07/02/2026",
+              "EV7116404",
+              "Employee Visit",
+              "S7030442B",
+              "LIM CHUI KIOW DEBBY",
+              "$87.20",
+              "$87.20",
+              "0.0"
+            ],
+            [
+              "Visit Date",
+              "Visit No",
+              "Type",
+              "Patient NRIC",
+              "Patient Name",
+              "Total Fee",
+              "Total Claim",
+              "MC Days",
+              "Remarks"
+            ],
+            [
+              "07/02/2026",
+              "EV7116404",
+              "Employee Visit",
+              "S7030442B",
+              "LIM CHUI KIOW DEBBY",
+              "$87.20",
+              "$87.20",
+              "0.0"
+            ]
+          ]
+        },
+        {
+          "idx": 17,
+          "rowCount": 1,
+          "rows": [
+            [
+              "Visit No NRIC",
+              "that",
+              "contains starts with equals to"
+            ]
+          ]
+        },
+        {
+          "idx": 18,
+          "rowCount": 1,
+          "rows": [
+            [
+              "1 - 1 of 1"
+            ]
+          ]
+        },
+        {
+          "idx": 19,
+          "rowCount": 2,
+          "rows": [
+            [
+              "Visit Date",
+              "Visit No",
+              "Type",
+              "Patient NRIC",
+              "Patient Name",
+              "Total Fee",
+              "Total Claim",
+              "MC Days",
+              "Remarks"
+            ],
+            [
+              "07/02/2026",
+              "EV7116404",
+              "Employee Visit",
+              "S7030442B",
+              "LIM CHUI KIOW DEBBY",
+              "$87.20",
+              "$87.20",
+              "0.0"
+            ]
+          ]
+        }
+      ],
+      "body": "/* Top menu styles */ .menu-top { margin-top: 5px; margin-right: 3px; } .system-menu { font-family: Arial; color: #808080; font-size: 10px; /* equivalent to size=\"1\" */ } #header_Useful_link { background-color: #ffffff; } /* Log off link style */ .log-off-link { color: #808080; } /* Divider style */ .menu-divider { display: inline-block; margin: 0 8px; } Singlife MHC Asia Contact us Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Switch System AIA Clinic Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern MHC Medical Network INCOME iMedicare PHI System QBE Primary Care || Log Off /* Base table styles */ .menu-table { width: 100%; border: 0; background-color: #F4F4F4; padding: 0; border-spacing: 0; } /* Menu link base style */ .menu { text-decoration: none; } /* Separator styles */ .separator { height: 5px; width: 75%; } .empty-cell { height: 5px; } /* Dynamically generated color classes */ #menu .menu-color-4f61682abe2a { color: #000000; } #menu .menu-color-106f26247000 { color: #000000; } #menu .menu-color-106f2629f001 { color: #000000; } #menu .menu-color-2ce9f3d4fdbd { color: #000000; } #menu .menu-color-15e489b7700f { color: #000000; } #menu .menu-color-12408a2720d6 { color: #000000; } #menu .menu-color-1211e45be186 { color: #FF0000; } #menu .menu-color-127acc1c9454 { color: #009900; } #menu .menu-color-13c3dea10eca { color: #009900; } #menu .menu-color-126876d27ff8 { color: #009900; } #menu .menu-color-154e0a700841 { color: #000000; } #menu .menu-color-1888ae1feb92 { color: #000000; } #menu .menu-color-10b631304006 { color: #000000; } function openNewWindow(url) { var load = window.open( url, '', 'scrollbars=yes,menubar=yes,height=600,width=800,resizable=yes,toolbar=yes,location=yes,status=yes' ); return false; // Prevent default link behavior } Announcement Add Normal Visit View Submitted Visits Edit/Draft Visits Invoice Diagnostic Centres Utilization Review Form Drug Price Review Form Procedure Request Form Order Drugs via MHC MEMO for clinics Singlife PCP SP Listing Change Password Employee Visit Draft List - Click To Edit Visit No NRIC that contains starts with equals to 1 - 1 of 1 Visit Date Visit No Type Patient NRIC Patient Name Total Fee Total Claim MC Days Remarks 07/02/2026 EV7116404 Employee Visit S7030442B LIM CHUI KIOW DEBBY $87.20 $87.20 0.0"
+    }
+  }
+}

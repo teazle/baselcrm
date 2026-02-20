@@ -1,0 +1,400 @@
+{
+  "id": "60e0c382-d6cb-4d35-a5b9-e17ce5b20c73",
+  "user_id": "c80a40d9-18f5-4364-8987-e9dd0178d00c",
+  "visit_record_no": "129584",
+  "case_id": null,
+  "visit_date": "2026-02-03",
+  "patient_name": "ENG CHAI PIN ELYNE XANDRIA",
+  "time_arrived": null,
+  "time_left": null,
+  "symptoms": null,
+  "examination_detail": null,
+  "investigation_detail": null,
+  "diagnosis_description": "Missing diagnosis",
+  "treatment_detail": "SPECIALIST FIRST CONSULTATION x1\nCephalexin x1\nCiprofloxacin x1",
+  "instruction_to_patient": null,
+  "mc_required": false,
+  "mc_start_date": null,
+  "mc_end_date": null,
+  "light_duty_required": false,
+  "light_duty_start_date": null,
+  "light_duty_end_date": null,
+  "total_amount": 130.8,
+  "amount_outstanding": 130.8,
+  "created_at": "2026-02-09T13:31:53.755236+00:00",
+  "updated_at": "2026-02-13T15:49:57.288284+00:00",
+  "source": "Clinic Assist",
+  "pay_type": "MHC",
+  "visit_type": null,
+  "nric": "S8570522I",
+  "extraction_metadata": {
+    "pcno": "78160",
+    "mcDays": 0,
+    "spCode": "PAM",
+    "sources": {},
+    "medicines": [
+      {
+        "name": "SPECIALIST FIRST CONSULTATION",
+        "unit": null,
+        "amount": 120,
+        "quantity": 1,
+        "unitPrice": 1
+      },
+      {
+        "name": "Cephalexin",
+        "unit": null,
+        "amount": null,
+        "quantity": 1,
+        "unitPrice": null
+      },
+      {
+        "name": "Ciprofloxacin",
+        "unit": null,
+        "amount": null,
+        "quantity": 1,
+        "unitPrice": null
+      }
+    ],
+    "chargeType": "first",
+    "extractedAt": "2026-02-13T13:55:24.083Z",
+    "mcStartDate": null,
+    "diagnosisCode": null,
+    "detailsExtractedAt": "2026-02-13T15:49:57.191Z",
+    "diagnosisCanonical": {
+      "side": null,
+      "code_raw": null,
+      "body_part": null,
+      "condition": null,
+      "source_date": null,
+      "code_normalized": null,
+      "description_raw": null,
+      "source_age_days": null,
+      "description_canonical": null,
+      "source_date_match_type": "latest"
+    },
+    "diagnosisCandidates": [],
+    "diagnosisResolution": {
+      "status": "missing",
+      "date_ok": false,
+      "confidence": 0,
+      "date_policy": "on_or_before_30_days",
+      "source_chain": [
+        {
+          "found": false,
+          "source": "diagnosis_tab",
+          "source_date": null,
+          "source_age_days": null
+        },
+        {
+          "found": false,
+          "source": "diagnosis_tab_latest",
+          "source_date": null,
+          "source_age_days": null
+        },
+        {
+          "found": false,
+          "source": "diagnosis_tab_raw",
+          "source_date": null,
+          "source_age_days": null
+        },
+        {
+          "found": false,
+          "source": "all_tab",
+          "source_date": null,
+          "source_age_days": null
+        },
+        {
+          "found": false,
+          "source": "visit_tab",
+          "source_date": null,
+          "source_age_days": null
+        },
+        {
+          "found": false,
+          "source": "past_notes",
+          "source_date": null,
+          "source_age_days": null
+        }
+      ],
+      "fallback_age_days": null,
+      "reason_if_unresolved": "not_found_in_diagnosis_all_visit_pastnotes",
+      "source_date_match_type": "latest"
+    },
+    "detailsExtractionStatus": "completed",
+    "detailsExtractionSources": {
+      "mcDays": 0,
+      "source": "tx_history_combined",
+      "medicines": [
+        {
+          "name": "SPECIALIST FIRST CONSULTATION",
+          "unit": null,
+          "amount": 120,
+          "quantity": 1,
+          "unitPrice": 1
+        },
+        {
+          "name": "Cephalexin",
+          "unit": null,
+          "amount": null,
+          "quantity": 1,
+          "unitPrice": null
+        },
+        {
+          "name": "Ciprofloxacin",
+          "unit": null,
+          "amount": null,
+          "quantity": 1,
+          "unitPrice": null
+        }
+      ],
+      "chargeType": "first",
+      "mcStartDate": null,
+      "diagnosisSource": "missing",
+      "extractionMethod": "getChargeTypeAndDiagnosis",
+      "diagnosisAttempts": [
+        {
+          "code": null,
+          "found": false,
+          "source": "diagnosis_tab",
+          "description": null,
+          "source_date": null,
+          "source_age_days": null
+        },
+        {
+          "code": null,
+          "found": false,
+          "source": "diagnosis_tab_latest",
+          "description": null,
+          "source_date": null,
+          "source_age_days": null
+        },
+        {
+          "code": null,
+          "found": false,
+          "source": "diagnosis_tab_raw",
+          "description": null,
+          "source_date": null,
+          "source_age_days": null
+        },
+        {
+          "code": null,
+          "found": false,
+          "source": "all_tab",
+          "description": null,
+          "source_date": null,
+          "source_age_days": null
+        },
+        {
+          "code": null,
+          "found": false,
+          "source": "visit_tab",
+          "description": null,
+          "source_date": null,
+          "source_age_days": null
+        },
+        {
+          "code": null,
+          "found": false,
+          "source": "past_notes",
+          "description": null,
+          "source_date": null,
+          "source_age_days": null
+        }
+      ],
+      "diagnosisCanonical": {
+        "side": null,
+        "code_raw": null,
+        "body_part": null,
+        "condition": null,
+        "source_date": null,
+        "code_normalized": null,
+        "description_raw": null,
+        "source_age_days": null,
+        "description_canonical": null,
+        "source_date_match_type": "latest"
+      },
+      "diagnosisCandidates": [],
+      "diagnosisResolution": {
+        "status": "missing",
+        "date_ok": false,
+        "confidence": 0,
+        "date_policy": "on_or_before_30_days",
+        "source_chain": [
+          {
+            "found": false,
+            "source": "diagnosis_tab",
+            "source_date": null,
+            "source_age_days": null
+          },
+          {
+            "found": false,
+            "source": "diagnosis_tab_latest",
+            "source_date": null,
+            "source_age_days": null
+          },
+          {
+            "found": false,
+            "source": "diagnosis_tab_raw",
+            "source_date": null,
+            "source_age_days": null
+          },
+          {
+            "found": false,
+            "source": "all_tab",
+            "source_date": null,
+            "source_age_days": null
+          },
+          {
+            "found": false,
+            "source": "visit_tab",
+            "source_date": null,
+            "source_age_days": null
+          },
+          {
+            "found": false,
+            "source": "past_notes",
+            "source_date": null,
+            "source_age_days": null
+          }
+        ],
+        "fallback_age_days": null,
+        "reason_if_unresolved": "not_found_in_diagnosis_all_visit_pastnotes",
+        "source_date_match_type": "latest"
+      },
+      "medicineFilterStats": {
+        "after": 3,
+        "before": 3,
+        "filteredOut": 0
+      },
+      "nricExtractionStatus": "found",
+      "diagnosisMissingReason": "not_found_in_diagnosis_all_visit_pastnotes"
+    },
+    "detailsExtractionLastAttempt": "2026-02-13T15:47:37.654Z"
+  },
+  "submitted_at": null,
+  "submission_status": "error",
+  "submission_portal": "MHC",
+  "submission_error": "diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=60e0c382-d6cb-4d35-a5b9-e17ce5b20c73, nric=S8570522I)",
+  "submission_metadata": {
+    "nric": "S8570522I",
+    "stage": "post_diagnosis",
+    "portal": "MHC Asia",
+    "reason": "diagnosis_mapping_failed",
+    "payType": "MHC",
+    "success": false,
+    "visitId": "60e0c382-d6cb-4d35-a5b9-e17ce5b20c73",
+    "rawDiagnosis": {
+      "code": null,
+      "description": "Missing diagnosis"
+    },
+    "savedAsDraft": false,
+    "domDiagnosisState": {
+      "url": "https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAddSubmit.ec",
+      "reasons": [
+        "missing_diagnosis_pri_id",
+        "missing_or_invalid_diagnosis_pri_desc",
+        "diagnosis_dropdown_still_na"
+      ],
+      "resolved": false,
+      "checkedAt": "2026-02-13T02:35:58.066Z",
+      "diagnosisPriId": "",
+      "diagnosisPriDesc": "",
+      "diagnosisPriIdTemp": "NA",
+      "hasPrimaryRequiredError": false
+    },
+    "attemptedSelectors": [
+      "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+      "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+      "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+      "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+      "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+      "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+      "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+      "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+      "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+    ],
+    "canonicalDiagnosis": {
+      "side": null,
+      "code_raw": null,
+      "body_part": null,
+      "condition": null,
+      "code_normalized": null,
+      "description_raw": null,
+      "description_canonical": null
+    },
+    "diagnosisSelection": {
+      "ok": true,
+      "mode": "anchor_match",
+      "method": "modal",
+      "reason": null,
+      "checkedAt": "2026-02-13T02:34:45.989Z",
+      "diagnosis": {
+        "code": "S63.50",
+        "description": "Sprain & strain wrist part unspecified"
+      },
+      "selection": {
+        "ok": true,
+        "row": "S635 Sprain and strain of wrist",
+        "text": "S635",
+        "score": 740,
+        "optionCode": "S635"
+      },
+      "resolution": {
+        "url": "https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAddSubmit.ec",
+        "reasons": [
+          "diagnosis_dropdown_still_na"
+        ],
+        "resolved": true,
+        "checkedAt": "2026-02-13T02:34:45.989Z",
+        "diagnosisPriId": "S635",
+        "diagnosisPriDesc": "Sprain and strain of wrist",
+        "diagnosisPriIdTemp": "NA",
+        "hasPrimaryRequiredError": false
+      },
+      "searchText": "wrist",
+      "attemptedSelectors": [
+        "input[name=\"SelectDiagnosisFromMaster\"][onclick*=\"diagnosisPriId\"]",
+        "input[onclick*=\"doSelectMasterDiagnosis\"][onclick*=\"diagnosisPriId\"]",
+        "tr:has-text(\"Diagnosis Pri\") input[name=\"SelectDiagnosisFromMaster\"]",
+        "#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input",
+        "tr:has-text(\"Diagnosis Pri\") input[value*=\"M\"]",
+        "tr:has-text(\"Diagnosis Pri\") input[type=\"button\"][value*=\"M\"]",
+        "tr:has-text(\"Diagnosis Pri\") input[type=\"submit\"][value*=\"M\"]",
+        "input[name=\"SelectDiagnosisFromMaster\"][value*=\"M\"]",
+        "input[value*=\"M\"]:near(text=\"Diagnosis Pri\", 200)"
+      ]
+    },
+    "lastPortalDialogMessage": "Consult fee cannot be be more than 120.0!",
+    "flow2DiagnosisResolution": {
+      "status": "missing",
+      "confidence": 0,
+      "source_chain": [
+        {
+          "found": false,
+          "source": "diagnosis_tab"
+        },
+        {
+          "found": false,
+          "source": "diagnosis_tab_latest"
+        },
+        {
+          "found": false,
+          "source": "diagnosis_tab_raw"
+        },
+        {
+          "found": false,
+          "source": "all_tab"
+        },
+        {
+          "found": false,
+          "source": "visit_tab"
+        },
+        {
+          "found": false,
+          "source": "past_notes"
+        }
+      ],
+      "reason_if_unresolved": "not_found_in_diagnosis_all_visit_pastnotes"
+    }
+  }
+}

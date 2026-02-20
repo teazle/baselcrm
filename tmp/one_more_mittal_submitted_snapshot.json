@@ -1,0 +1,5926 @@
+{
+  "generatedAt": "2026-02-12T09:58:38.230Z",
+  "visit_id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+  "submitted_reference": "EV16085124",
+  "opened": true,
+  "evidence_path": "/Users/vincent/Baselrpacrm/screenshots/one-more-mittal/submitted/31b5a688-9104-4507-bd7a-347a9f9ce866.png",
+  "snapshot": {
+    "pageUrl": "https://www.mhcasia.net/mhc/ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=QXSB-S3E5-8IUV-E6PR-UUUW-47PL-NB0C-5X85",
+    "title": "Employee Visit Edit",
+    "frameCount": 1,
+    "main": {
+      "frameUrl": "https://www.mhcasia.net/mhc/ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=QXSB-S3E5-8IUV-E6PR-UUUW-47PL-NB0C-5X85",
+      "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=QXSB-S3E5-8IUV-E6PR-UUUW-47PL-NB0C-5X85",
+      "title": "Employee Visit Edit",
+      "headings": [
+        "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic ",
+        "Employee Visit - Edit",
+        "Policy Details:",
+        "Special Remarks:"
+      ],
+      "fields": [
+        {
+          "key": "",
+          "label": "",
+          "name": "",
+          "id": "",
+          "tag": "textarea",
+          "type": "",
+          "value": "TCM:1 VISIT PER DAY SP:WAIVER OF REFERRAL LETTER PRESCRIBED BIRTH CONTROL PILLS IS COVERED. PLEASE SEND REQUEST TO MHC TO SUBMIT CLAIM."
+        },
+        {
+          "key": "yearlyBal",
+          "label": "",
+          "name": "yearlyBal",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "5,542.31"
+        },
+        {
+          "key": "isOk",
+          "label": "",
+          "name": "isOk",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "pCoPayType",
+          "label": "",
+          "name": "pCoPayType",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "$"
+        },
+        {
+          "key": "pCoPayment",
+          "label": "",
+          "name": "pCoPayment",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "showClaimRemarks",
+          "label": "",
+          "name": "showClaimRemarks",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "str",
+          "label": "",
+          "name": "str",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "no cap no copay"
+        },
+        {
+          "key": "specialRemarks",
+          "label": "",
+          "name": "specialRemarks",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "TCM:1 VISIT PER DAY SP:WAIVER OF REFERRAL LETTER PRESCRIBED BIRTH CONTROL PILLS IS COVERED. PLEASE SEND REQUEST TO MHC TO SUBMIT CLAIM."
+        },
+        {
+          "key": "checkLimitLifeTime",
+          "label": "",
+          "name": "checkLimitLifeTime",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Please contact MHC"
+        },
+        {
+          "key": "showLifetimeLimitBalance",
+          "label": "",
+          "name": "showLifetimeLimitBalance",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "patientName",
+          "label": "Patient Name",
+          "name": "patientName",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "SACHIN MITTAL"
+        },
+        {
+          "key": "patientNric",
+          "label": "Patient ID",
+          "name": "patientNric",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "M4539893L"
+        },
+        {
+          "key": "benefitSchemeId",
+          "label": "",
+          "name": "benefitSchemeId",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "197b087ae1eb"
+        },
+        {
+          "key": "benefitSchemeCode",
+          "label": "",
+          "name": "benefitSchemeCode",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "A00357L0C0A6000SPDTTCMEHSEMP (2025)"
+        },
+        {
+          "key": "visitDateAsString",
+          "label": "Visit Date*",
+          "name": "visitDateAsString",
+          "id": "visitDateAsString",
+          "tag": "input",
+          "type": "text",
+          "value": "02/02/2026"
+        },
+        {
+          "key": "SelectDate",
+          "label": "Visit Date*",
+          "name": "SelectDate",
+          "id": "",
+          "tag": "input",
+          "type": "button",
+          "value": "Select"
+        },
+        {
+          "key": "visitDateDay",
+          "label": "Visit Date*",
+          "name": "visitDateDay",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "02"
+        },
+        {
+          "key": "visitDateMonth",
+          "label": "Visit Date*",
+          "name": "visitDateMonth",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "02"
+        },
+        {
+          "key": "visitDateYear",
+          "label": "Visit Date*",
+          "name": "visitDateYear",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "2026"
+        },
+        {
+          "key": "workmenComp",
+          "label": "",
+          "name": "workmenComp",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "claimStatus",
+          "label": "",
+          "name": "claimStatus",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "A"
+        },
+        {
+          "key": "subType",
+          "label": "Charge Type",
+          "name": "subType",
+          "id": "",
+          "tag": "select",
+          "type": "",
+          "value": "2|First Consult"
+        },
+        {
+          "key": "mcDay",
+          "label": "MC Day*",
+          "name": "mcDay",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "0.0"
+        },
+        {
+          "key": "mcStartDateAsString",
+          "label": "MC Start Date",
+          "name": "mcStartDateAsString",
+          "id": "mcStartDateAsString",
+          "tag": "input",
+          "type": "text",
+          "value": ""
+        },
+        {
+          "key": "mcSelectDate",
+          "label": "MC Start Date",
+          "name": "mcSelectDate",
+          "id": "mcSelectDate",
+          "tag": "input",
+          "type": "button",
+          "value": "Select"
+        },
+        {
+          "key": "mcReasonIdTemp",
+          "label": "MC Reason",
+          "name": "mcReasonIdTemp",
+          "id": "",
+          "tag": "select",
+          "type": "",
+          "value": "|NA"
+        },
+        {
+          "key": "mcReasonOther",
+          "label": "MC Reason Other",
+          "name": "mcReasonOther",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": ""
+        },
+        {
+          "key": "mcReasonId",
+          "label": "MC Reason Other",
+          "name": "mcReasonId",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "10"
+        },
+        {
+          "key": "diagnosisPriIdTemp",
+          "label": "Diagnosis Pri*",
+          "name": "diagnosisPriIdTemp",
+          "id": "diagnosisPriIdTempId",
+          "tag": "select",
+          "type": "",
+          "value": "|NA"
+        },
+        {
+          "key": "SelectDiagnosisFromMaster",
+          "label": "Diagnosis Pri*",
+          "name": "SelectDiagnosisFromMaster",
+          "id": "",
+          "tag": "input",
+          "type": "button",
+          "value": "M "
+        },
+        {
+          "key": "diagnosisPriDesc",
+          "label": "Diagnosis Pri*",
+          "name": "diagnosisPriDesc",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "M25.511 - Pain in the right shoulder"
+        },
+        {
+          "key": "diagnosisPriId",
+          "label": "Diagnosis Pri*",
+          "name": "diagnosisPriId",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1971ee360aa4"
+        },
+        {
+          "key": "diagnosisSecIdTemp",
+          "label": "Diagnosis Sec",
+          "name": "diagnosisSecIdTemp",
+          "id": "diagnosisSecIdTempId",
+          "tag": "select",
+          "type": "",
+          "value": "|NA"
+        },
+        {
+          "key": "SelectDiagnosisFromMaster",
+          "label": "Diagnosis Sec",
+          "name": "SelectDiagnosisFromMaster",
+          "id": "",
+          "tag": "input",
+          "type": "button",
+          "value": "M "
+        },
+        {
+          "key": "Clear",
+          "label": "Diagnosis Sec",
+          "name": "Clear",
+          "id": "",
+          "tag": "input",
+          "type": "button",
+          "value": "C "
+        },
+        {
+          "key": "diagnosisSecDesc",
+          "label": "Diagnosis Sec",
+          "name": "diagnosisSecDesc",
+          "id": "diagnosisSecDescId",
+          "tag": "input",
+          "type": "text",
+          "value": ""
+        },
+        {
+          "key": "diagnosis3IdTemp",
+          "label": "Diagnosis 3",
+          "name": "diagnosis3IdTemp",
+          "id": "diagnosis3IdTempId",
+          "tag": "select",
+          "type": "",
+          "value": "|NA"
+        },
+        {
+          "key": "SelectDiagnosisFromMaster",
+          "label": "Diagnosis 3",
+          "name": "SelectDiagnosisFromMaster",
+          "id": "",
+          "tag": "input",
+          "type": "button",
+          "value": "M "
+        },
+        {
+          "key": "Clear",
+          "label": "Diagnosis 3",
+          "name": "Clear",
+          "id": "",
+          "tag": "input",
+          "type": "button",
+          "value": "C "
+        },
+        {
+          "key": "diagnosis3Desc",
+          "label": "Diagnosis 3",
+          "name": "diagnosis3Desc",
+          "id": "diagnosis3DescId",
+          "tag": "input",
+          "type": "text",
+          "value": ""
+        },
+        {
+          "key": "diagnosis4IdTemp",
+          "label": "Diagnosis 4",
+          "name": "diagnosis4IdTemp",
+          "id": "diagnosis4IdTempId",
+          "tag": "select",
+          "type": "",
+          "value": "|NA"
+        },
+        {
+          "key": "SelectDiagnosisFromMaster",
+          "label": "Diagnosis 4",
+          "name": "SelectDiagnosisFromMaster",
+          "id": "",
+          "tag": "input",
+          "type": "button",
+          "value": "M "
+        },
+        {
+          "key": "Clear",
+          "label": "Diagnosis 4",
+          "name": "Clear",
+          "id": "",
+          "tag": "input",
+          "type": "button",
+          "value": "C "
+        },
+        {
+          "key": "diagnosis4Desc",
+          "label": "Diagnosis 4",
+          "name": "diagnosis4Desc",
+          "id": "diagnosis4DescId",
+          "tag": "input",
+          "type": "text",
+          "value": ""
+        },
+        {
+          "key": "addmore",
+          "label": "",
+          "name": "addmore",
+          "id": "addMoreId",
+          "tag": "input",
+          "type": "button",
+          "value": "More Diagnosis"
+        },
+        {
+          "key": "clearMore",
+          "label": "",
+          "name": "clearMore",
+          "id": "clearMoreId",
+          "tag": "input",
+          "type": "button",
+          "value": "Clear Diagnosis"
+        },
+        {
+          "key": "consultFee",
+          "label": "Consultation Fee (SGD)",
+          "name": "consultFee",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "120.00"
+        },
+        {
+          "key": "referralVisitNo",
+          "label": "Referring Visit",
+          "name": "referralVisitNo",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": ""
+        },
+        {
+          "key": "SelectVisitRef",
+          "label": "Referring Visit",
+          "name": "SelectVisitRef",
+          "id": "visitRefId",
+          "tag": "input",
+          "type": "button",
+          "value": "Select Referring Visits"
+        },
+        {
+          "key": "ClearReferralMaster",
+          "label": "Referring Visit",
+          "name": "ClearReferralMaster",
+          "id": "",
+          "tag": "input",
+          "type": "button",
+          "value": "Clear Referring Visits"
+        },
+        {
+          "key": "waiverOfReferral",
+          "label": "Waiver Of Referral",
+          "name": "waiverOfReferral",
+          "id": "",
+          "tag": "input",
+          "type": "checkbox",
+          "value": "Y"
+        },
+        {
+          "key": "noOfRefMasterRows",
+          "label": "",
+          "name": "noOfRefMasterRows",
+          "id": "noOfRefMasterRows",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "referralFee",
+          "label": "",
+          "name": "referralFee",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "referral",
+          "label": "",
+          "name": "referral",
+          "id": "referral",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "checkupFee",
+          "label": "",
+          "name": "checkupFee",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "checkupUnitFee",
+          "label": "",
+          "name": "checkupUnitFee",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "prescriptionFee",
+          "label": "",
+          "name": "prescriptionFee",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "drug_drugName",
+          "label": "1.",
+          "name": "drug_drugName",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "CELEBREX CAP 200MG (CELECOXIB)"
+        },
+        {
+          "key": "drug_drugCode",
+          "label": "1.",
+          "name": "drug_drugCode",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "CAPCELEB2940"
+        },
+        {
+          "key": "SelectMasterDrug",
+          "label": "1.",
+          "name": "SelectMasterDrug",
+          "id": "",
+          "tag": "input",
+          "type": "button",
+          "value": "M "
+        },
+        {
+          "key": "drug_version",
+          "label": "1.",
+          "name": "drug_version",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "drug_pos",
+          "label": "1.",
+          "name": "drug_pos",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-1"
+        },
+        {
+          "key": "drug_maxUnitPrice",
+          "label": "1.",
+          "name": "drug_maxUnitPrice",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "2.8"
+        },
+        {
+          "key": "drug_maxQty",
+          "label": "1.",
+          "name": "drug_maxQty",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "60"
+        },
+        {
+          "key": "drug_multiplier",
+          "label": "1.",
+          "name": "drug_multiplier",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-1.0"
+        },
+        {
+          "key": "drug_oldMultiplier",
+          "label": "1.",
+          "name": "drug_oldMultiplier",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-1.0"
+        },
+        {
+          "key": "drug_eligibleForAdjusted",
+          "label": "1.",
+          "name": "drug_eligibleForAdjusted",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "drug_eligibleForAdjusted2",
+          "label": "1.",
+          "name": "drug_eligibleForAdjusted2",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "drug_defaultUnitPrice",
+          "label": "1.",
+          "name": "drug_defaultUnitPrice",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "drug_unit",
+          "label": "1.",
+          "name": "drug_unit",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "CAP"
+        },
+        {
+          "key": "drug_unitPrice",
+          "label": "1.",
+          "name": "drug_unitPrice",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "3.5"
+        },
+        {
+          "key": "drug_quantity",
+          "label": "1.",
+          "name": "drug_quantity",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "40.0"
+        },
+        {
+          "key": "drug_amount",
+          "label": "1.",
+          "name": "drug_amount",
+          "id": "drug_amount",
+          "tag": "input",
+          "type": "text",
+          "value": "140.0"
+        },
+        {
+          "key": "drug_checkStr",
+          "label": "1.",
+          "name": "drug_checkStr",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-1,0.0"
+        },
+        {
+          "key": "ClearDrug",
+          "label": "1.",
+          "name": "ClearDrug",
+          "id": "",
+          "tag": "input",
+          "type": "button",
+          "value": "C "
+        },
+        {
+          "key": "add",
+          "label": "",
+          "name": "add",
+          "id": "addMoreDrug",
+          "tag": "input",
+          "type": "button",
+          "value": "More Drug"
+        },
+        {
+          "key": "noOfDrugRows",
+          "label": "",
+          "name": "noOfDrugRows",
+          "id": "noOfDrugRows",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "drugFee",
+          "label": "Total Drug Fee",
+          "name": "drugFee",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "140.00"
+        },
+        {
+          "key": "procedure_procedureName",
+          "label": "1.",
+          "name": "procedure_procedureName",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": ""
+        },
+        {
+          "key": "SelectMasterProcedure",
+          "label": "1.",
+          "name": "SelectMasterProcedure",
+          "id": "",
+          "tag": "input",
+          "type": "button",
+          "value": "M "
+        },
+        {
+          "key": "procedure_version",
+          "label": "1.",
+          "name": "procedure_version",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "procedure_pos",
+          "label": "1.",
+          "name": "procedure_pos",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-1"
+        },
+        {
+          "key": "procedure_amountB4Copay",
+          "label": "1.",
+          "name": "procedure_amountB4Copay",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "0.00"
+        },
+        {
+          "key": "procedure_copay",
+          "label": "1.",
+          "name": "procedure_copay",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "procedure_amount",
+          "label": "1.",
+          "name": "procedure_amount",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "ClearProcedure",
+          "label": "1.",
+          "name": "ClearProcedure",
+          "id": "",
+          "tag": "input",
+          "type": "button",
+          "value": "C "
+        },
+        {
+          "key": "add",
+          "label": "",
+          "name": "add",
+          "id": "addMoreProcedureId",
+          "tag": "input",
+          "type": "button",
+          "value": "More Procedure"
+        },
+        {
+          "key": "noOfProcedureRows",
+          "label": "",
+          "name": "noOfProcedureRows",
+          "id": "noOfProcedureRows",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "procedureFee",
+          "label": "Total Proc Fee",
+          "name": "procedureFee",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "0.00"
+        },
+        {
+          "key": "procedureCopay",
+          "label": "Total Proc Fee",
+          "name": "procedureCopay",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "procedureFeeClaim",
+          "label": "Total Proc Fee",
+          "name": "procedureFeeClaim",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "totalB4Gst",
+          "label": "Total Before GST",
+          "name": "totalB4Gst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "260.00"
+        },
+        {
+          "key": "totalUnitB4Gst",
+          "label": "Total Before GST",
+          "name": "totalUnitB4Gst",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "260.00"
+        },
+        {
+          "key": "gst",
+          "label": "GST",
+          "name": "gst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "23.40"
+        },
+        {
+          "key": "gstUnit",
+          "label": "GST",
+          "name": "gstUnit",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "23.40"
+        },
+        {
+          "key": "totalFee",
+          "label": "Total Fee (SGD)",
+          "name": "totalFee",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "283.40"
+        },
+        {
+          "key": "totalUnitFee",
+          "label": "Total Fee (SGD)",
+          "name": "totalUnitFee",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "283.40"
+        },
+        {
+          "key": "ComputeAction",
+          "label": "Total Fee (SGD)",
+          "name": "ComputeAction",
+          "id": "ComputeAction",
+          "tag": "input",
+          "type": "submit",
+          "value": "Compute claim"
+        },
+        {
+          "key": "totalClaim",
+          "label": "Total Claim (SGD)",
+          "name": "totalClaim",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "283.40"
+        },
+        {
+          "key": "totalUnitClaim",
+          "label": "Total Claim (SGD)",
+          "name": "totalUnitClaim",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "283.40"
+        },
+        {
+          "key": "copayment",
+          "label": "Copayment",
+          "name": "copayment",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "unitCopayment",
+          "label": "Copayment",
+          "name": "unitCopayment",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "0.00"
+        },
+        {
+          "key": "copaymentDeductible",
+          "label": "",
+          "name": "copaymentDeductible",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "totalCopayment",
+          "label": "",
+          "name": "totalCopayment",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "unitCopaymentDeductible",
+          "label": "",
+          "name": "unitCopaymentDeductible",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "totalUnitCopayment",
+          "label": "",
+          "name": "totalUnitCopayment",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "cashCollected",
+          "label": "Cash Collected (SGD)",
+          "name": "cashCollected",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "unitCashCollected",
+          "label": "Cash Collected (SGD)",
+          "name": "unitCashCollected",
+          "id": "",
+          "tag": "input",
+          "type": "text",
+          "value": "0.00"
+        },
+        {
+          "key": "totalAdjusted",
+          "label": "",
+          "name": "totalAdjusted",
+          "id": "totalAdjusted",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "totalClaimInitial",
+          "label": "",
+          "name": "totalClaimInitial",
+          "id": "totalClaimInitial",
+          "tag": "input",
+          "type": "hidden",
+          "value": "283.4"
+        },
+        {
+          "key": "totalClaimRevised",
+          "label": "",
+          "name": "totalClaimRevised",
+          "id": "totalClaimRevisedId",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "tempAuditStatus",
+          "label": "",
+          "name": "tempAuditStatus",
+          "id": "tempAuditStatusId",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Approved"
+        },
+        {
+          "key": "totalFeeRevised",
+          "label": "",
+          "name": "totalFeeRevised",
+          "id": "totalFeeRevisedId",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "voidRemarks",
+          "label": "Void Remarks*",
+          "name": "voidRemarks",
+          "id": "voidRemarksId",
+          "tag": "textarea",
+          "type": "",
+          "value": ""
+        },
+        {
+          "key": "noOfEmpVisitDetailRows",
+          "label": "",
+          "name": "noOfEmpVisitDetailRows",
+          "id": "noOfEmpVisitDetailRows",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "empVisitDetail_providerTypeId",
+          "label": "",
+          "name": "empVisitDetail_providerTypeId",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "2"
+        },
+        {
+          "key": "empVisitDetail_version",
+          "label": "",
+          "name": "empVisitDetail_version",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "empVisitDetail_totalUnitClaim",
+          "label": "",
+          "name": "empVisitDetail_totalUnitClaim",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "283.4"
+        },
+        {
+          "key": "empVisitDetail_totalFee",
+          "label": "",
+          "name": "empVisitDetail_totalFee",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "283.4"
+        },
+        {
+          "key": "empVisitDetail_totalUnitFee",
+          "label": "",
+          "name": "empVisitDetail_totalUnitFee",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "283.4"
+        },
+        {
+          "key": "empVisitDetail_totalClaim",
+          "label": "",
+          "name": "empVisitDetail_totalClaim",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "283.4"
+        },
+        {
+          "key": "empVisitDetail_copayment",
+          "label": "",
+          "name": "empVisitDetail_copayment",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "empVisitDetail_cashCollected",
+          "label": "",
+          "name": "empVisitDetail_cashCollected",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "empVisitDetail_unitCopayment",
+          "label": "",
+          "name": "empVisitDetail_unitCopayment",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "empVisitDetail_unitCashCollected",
+          "label": "",
+          "name": "empVisitDetail_unitCashCollected",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "noOfDaysDrugPrescribed",
+          "label": "",
+          "name": "noOfDaysDrugPrescribed",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "lab_version",
+          "label": "",
+          "name": "lab_version",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "lab_pos",
+          "label": "",
+          "name": "lab_pos",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-1"
+        },
+        {
+          "key": "labFee",
+          "label": "",
+          "name": "labFee",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "lab_code",
+          "label": "",
+          "name": "lab_code",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "noOfLabRows",
+          "label": "",
+          "name": "noOfLabRows",
+          "id": "noOfLabRows",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "lab_amount",
+          "label": "",
+          "name": "lab_amount",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "labUnitFee",
+          "label": "",
+          "name": "labUnitFee",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "lab_unitAmount",
+          "label": "",
+          "name": "lab_unitAmount",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "xRay_version",
+          "label": "",
+          "name": "xRay_version",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "xRay_pos",
+          "label": "",
+          "name": "xRay_pos",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-1"
+        },
+        {
+          "key": "xRayFee",
+          "label": "",
+          "name": "xRayFee",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "xRay_code",
+          "label": "",
+          "name": "xRay_code",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "noOfXRayRows",
+          "label": "",
+          "name": "noOfXRayRows",
+          "id": "noOfXRayRows",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "xRay_amount",
+          "label": "",
+          "name": "xRay_amount",
+          "id": "xRay_amount",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "xRayUnitFee",
+          "label": "",
+          "name": "xRayUnitFee",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "xRay_unitAmount",
+          "label": "",
+          "name": "xRay_unitAmount",
+          "id": "xRay_unitAmount",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "checkup_version",
+          "label": "",
+          "name": "checkup_version",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "checkup_payClinic",
+          "label": "",
+          "name": "checkup_payClinic",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "checkup_amount",
+          "label": "",
+          "name": "checkup_amount",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "noOfCheckupRows",
+          "label": "",
+          "name": "noOfCheckupRows",
+          "id": "noOfCheckupRows",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "serviceFee",
+          "label": "",
+          "name": "serviceFee",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "serviceFeeClaim",
+          "label": "",
+          "name": "serviceFeeClaim",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "taxableServiceFeeClaim",
+          "label": "",
+          "name": "taxableServiceFeeClaim",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "noOfServiceRows",
+          "label": "",
+          "name": "noOfServiceRows",
+          "id": "noOfServiceRows",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "service_amount",
+          "label": "",
+          "name": "service_amount",
+          "id": "service_amount",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "service_claimAmount",
+          "label": "",
+          "name": "service_claimAmount",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "service_taxable",
+          "label": "",
+          "name": "service_taxable",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "service_version",
+          "label": "",
+          "name": "service_version",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "service_pF",
+          "label": "",
+          "name": "service_pF",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "service_pF_cb",
+          "label": "",
+          "name": "service_pF_cb",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "service_ineligible",
+          "label": "",
+          "name": "service_ineligible",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "service_philhealth",
+          "label": "",
+          "name": "service_philhealth",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "service_eligible",
+          "label": "",
+          "name": "service_eligible",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "service_basic",
+          "label": "",
+          "name": "service_basic",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "service_major",
+          "label": "",
+          "name": "service_major",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "service_excess",
+          "label": "",
+          "name": "service_excess",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "serviceNonPFCharges",
+          "label": "",
+          "name": "serviceNonPFCharges",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "servicePFCharges",
+          "label": "",
+          "name": "servicePFCharges",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "id",
+          "label": "",
+          "name": "id",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "19c4bbeff2e5"
+        },
+        {
+          "key": "costCentre",
+          "label": "",
+          "name": "costCentre",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "AMAZON ASIA-PACIFIC HOLDINGS PRIVATE LIMITED"
+        },
+        {
+          "key": "version",
+          "label": "",
+          "name": "version",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1"
+        },
+        {
+          "key": "visitNo",
+          "label": "",
+          "name": "visitNo",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "EV16085124"
+        },
+        {
+          "key": "reservedAmount",
+          "label": "",
+          "name": "reservedAmount",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "clinicId",
+          "label": "",
+          "name": "clinicId",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1296d6336a11"
+        },
+        {
+          "key": "isGst",
+          "label": "",
+          "name": "isGst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "adjustForCopaymentGst",
+          "label": "",
+          "name": "adjustForCopaymentGst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "totalClaimB4Gst",
+          "label": "",
+          "name": "totalClaimB4Gst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "260.0"
+        },
+        {
+          "key": "cashCollectedB4Gst",
+          "label": "",
+          "name": "cashCollectedB4Gst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "patientId",
+          "label": "",
+          "name": "patientId",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "196a5aff90ca"
+        },
+        {
+          "key": "providerTypeId",
+          "label": "",
+          "name": "providerTypeId",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "2"
+        },
+        {
+          "key": "companyId",
+          "label": "",
+          "name": "companyId",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1626f1ca158d"
+        },
+        {
+          "key": "groupId",
+          "label": "",
+          "name": "groupId",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "106f7a402000"
+        },
+        {
+          "key": "employeeId",
+          "label": "",
+          "name": "employeeId",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "196a5aff90ca"
+        },
+        {
+          "key": "gstRate",
+          "label": "",
+          "name": "gstRate",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "9"
+        },
+        {
+          "key": "creationDateAsString",
+          "label": "",
+          "name": "creationDateAsString",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "11/02/2026 16:08:54"
+        },
+        {
+          "key": "visitType",
+          "label": "",
+          "name": "visitType",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "doctorTrack",
+          "label": "",
+          "name": "doctorTrack",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "format_DateTime",
+          "label": "",
+          "name": "format_DateTime",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "DD/MM/YYYY"
+        },
+        {
+          "key": "display_LabXray",
+          "label": "",
+          "name": "display_LabXray",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "bSInPanelId",
+          "label": "",
+          "name": "bSInPanelId",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "197b091984cd"
+        },
+        {
+          "key": "bSInPanel_copayCutOff",
+          "label": "",
+          "name": "bSInPanel_copayCutOff",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-1.0"
+        },
+        {
+          "key": "bSInPanel_coPayType",
+          "label": "",
+          "name": "bSInPanel_coPayType",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "$"
+        },
+        {
+          "key": "bSInPanel_coPayment",
+          "label": "",
+          "name": "bSInPanel_coPayment",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "bSInPanel_adjustForGst",
+          "label": "",
+          "name": "bSInPanel_adjustForGst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "bsCoPayType",
+          "label": "",
+          "name": "bsCoPayType",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "$"
+        },
+        {
+          "key": "bsCoPayment",
+          "label": "",
+          "name": "bsCoPayment",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "bSInPanel_coPayType2",
+          "label": "",
+          "name": "bSInPanel_coPayType2",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "$"
+        },
+        {
+          "key": "bSInPanel_useCopay2",
+          "label": "",
+          "name": "bSInPanel_useCopay2",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "bSInPanel_coPayment2",
+          "label": "",
+          "name": "bSInPanel_coPayment2",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "bSInPanel_startCopaymentAmount",
+          "label": "",
+          "name": "bSInPanel_startCopaymentAmount",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-1.0"
+        },
+        {
+          "key": "bSInPanel_limitPerVisit",
+          "label": "",
+          "name": "bSInPanel_limitPerVisit",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-1.0"
+        },
+        {
+          "key": "bsInPanel_copayDeductible",
+          "label": "",
+          "name": "bsInPanel_copayDeductible",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "bsInPanel_adjustForCopayDeductibleGst",
+          "label": "",
+          "name": "bsInPanel_adjustForCopayDeductibleGst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "isDarwinGroup",
+          "label": "",
+          "name": "isDarwinGroup",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "darwinBalance",
+          "label": "",
+          "name": "darwinBalance",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "useBnsBalance",
+          "label": "",
+          "name": "useBnsBalance",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "drugFormulary",
+          "label": "",
+          "name": "drugFormulary",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "4"
+        },
+        {
+          "key": "bsInPanel_drugMaxPriceCheck",
+          "label": "",
+          "name": "bsInPanel_drugMaxPriceCheck",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "freeTextDrug",
+          "label": "",
+          "name": "freeTextDrug",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "maxUnitPrice",
+          "label": "",
+          "name": "maxUnitPrice",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "100.0"
+        },
+        {
+          "key": "taxableTotalB4Gst",
+          "label": "",
+          "name": "taxableTotalB4Gst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "260.00"
+        },
+        {
+          "key": "showTrackFlu",
+          "label": "",
+          "name": "showTrackFlu",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "maxProcPriceChk",
+          "label": "",
+          "name": "maxProcPriceChk",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "showDisability",
+          "label": "",
+          "name": "showDisability",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "showMCReason",
+          "label": "",
+          "name": "showMCReason",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "visitGroup",
+          "label": "",
+          "name": "visitGroup",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "showCaseNo",
+          "label": "",
+          "name": "showCaseNo",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "showProcedureCopay",
+          "label": "",
+          "name": "showProcedureCopay",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "groupCode",
+          "label": "",
+          "name": "groupCode",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "MA"
+        },
+        {
+          "key": "clinicName",
+          "label": "",
+          "name": "clinicName",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "SINGAPORE SPORTS & ORTHOPAEDIC CLINIC"
+        },
+        {
+          "key": "claimHospital",
+          "label": "",
+          "name": "claimHospital",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "1296d6336a11"
+        },
+        {
+          "key": "startDate2",
+          "label": "",
+          "name": "startDate2",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "05/05/2025"
+        },
+        {
+          "key": "admDischDate",
+          "label": "",
+          "name": "admDischDate",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "gpur",
+          "label": "",
+          "name": "gpur",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "A000000"
+        },
+        {
+          "key": "mhcGst",
+          "label": "",
+          "name": "mhcGst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "mhcTotalClaim",
+          "label": "",
+          "name": "mhcTotalClaim",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "283.40"
+        },
+        {
+          "key": "applyMhcGst",
+          "label": "",
+          "name": "applyMhcGst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "compApplyMhcGst",
+          "label": "",
+          "name": "compApplyMhcGst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "showReferral",
+          "label": "",
+          "name": "showReferral",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "enforceReferral",
+          "label": "",
+          "name": "enforceReferral",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "oldRefNo",
+          "label": "",
+          "name": "oldRefNo",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Auto"
+        },
+        {
+          "key": "showDiagnosis",
+          "label": "",
+          "name": "showDiagnosis",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "oldVisitDateAsString",
+          "label": "",
+          "name": "oldVisitDateAsString",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "02/02/2026"
+        },
+        {
+          "key": "accredited",
+          "label": "",
+          "name": "accredited",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "copaymentTotal",
+          "label": "",
+          "name": "copaymentTotal",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "clinicCode",
+          "label": "",
+          "name": "clinicCode",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "SSP000170"
+        },
+        {
+          "key": "companyTag",
+          "label": "",
+          "name": "companyTag",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "SHELL"
+        },
+        {
+          "key": "companyCode",
+          "label": "",
+          "name": "companyCode",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "A00357Z"
+        },
+        {
+          "key": "pathConsentForm",
+          "label": "",
+          "name": "pathConsentForm",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "C:\\Download\\MA\\consent.pdf"
+        },
+        {
+          "key": "showConsentForm",
+          "label": "",
+          "name": "showConsentForm",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "chekAdjustForCopaymentGst",
+          "label": "",
+          "name": "chekAdjustForCopaymentGst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "showEMR",
+          "label": "",
+          "name": "showEMR",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "visitDisplayDetailId",
+          "label": "",
+          "name": "visitDisplayDetailId",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "107f94baa114"
+        },
+        {
+          "key": "visitDisplayId",
+          "label": "",
+          "name": "visitDisplayId",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "147a1a2720e8"
+        },
+        {
+          "key": "enforceWorkmenComp",
+          "label": "",
+          "name": "enforceWorkmenComp",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "spixValue",
+          "label": "",
+          "name": "spixValue",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "allowBookAppt",
+          "label": "",
+          "name": "allowBookAppt",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "checkDrugDiagnosis",
+          "label": "",
+          "name": "checkDrugDiagnosis",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "gpClinicPhone",
+          "label": "",
+          "name": "gpClinicPhone",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "64712696"
+        },
+        {
+          "key": "empClinicName",
+          "label": "",
+          "name": "empClinicName",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "SINGAPORE SPORTS & ORTHOPAEDIC CLINIC"
+        },
+        {
+          "key": "bookAppointmentUrl",
+          "label": "",
+          "name": "bookAppointmentUrl",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "https://www.appmydoctor.net/ApptBooking.aspx"
+        },
+        {
+          "key": "gpDoctorName",
+          "label": "",
+          "name": "gpDoctorName",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "YIP MAN HING KEVIN"
+        },
+        {
+          "key": "gpMobile",
+          "label": "",
+          "name": "gpMobile",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "6471269"
+        },
+        {
+          "key": "gpEmail",
+          "label": "",
+          "name": "gpEmail",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-@test.com"
+        },
+        {
+          "key": "gpMcr",
+          "label": "",
+          "name": "gpMcr",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "M18659G"
+        },
+        {
+          "key": "systemCode",
+          "label": "",
+          "name": "systemCode",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "MHC"
+        },
+        {
+          "key": "patientDOB",
+          "label": "",
+          "name": "patientDOB",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "18/06/1987"
+        },
+        {
+          "key": "patientGender",
+          "label": "",
+          "name": "patientGender",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "M"
+        },
+        {
+          "key": "show4Diagnosis",
+          "label": "",
+          "name": "show4Diagnosis",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "bsStartDateAsString",
+          "label": "",
+          "name": "bsStartDateAsString",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "01/07/2025"
+        },
+        {
+          "key": "memberNo",
+          "label": "",
+          "name": "memberNo",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "100206037"
+        },
+        {
+          "key": "benefitCode",
+          "label": "",
+          "name": "benefitCode",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "A00357L0C0A6000SPDTTCMEHSEMP (2025)"
+        },
+        {
+          "key": "changeForm",
+          "label": "",
+          "name": "changeForm",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "basicDrugNoOfDays",
+          "label": "",
+          "name": "basicDrugNoOfDays",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-1"
+        },
+        {
+          "key": "extraDrugCostPerDay",
+          "label": "",
+          "name": "extraDrugCostPerDay",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-1"
+        },
+        {
+          "key": "maxDrugNoOfDays",
+          "label": "",
+          "name": "maxDrugNoOfDays",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-1"
+        },
+        {
+          "key": "maxCopay",
+          "label": "",
+          "name": "maxCopay",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "showPA",
+          "label": "",
+          "name": "showPA",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "enforcePA",
+          "label": "",
+          "name": "enforcePA",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "drugSetForWorkmenCompOnly",
+          "label": "",
+          "name": "drugSetForWorkmenCompOnly",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "totalAdminFee2",
+          "label": "",
+          "name": "totalAdminFee2",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "totalAdminFee",
+          "label": "",
+          "name": "totalAdminFee",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "stripeChargeAmount",
+          "label": "",
+          "name": "stripeChargeAmount",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "freeConsult",
+          "label": "",
+          "name": "freeConsult",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "waitPeriodFromStartDate",
+          "label": "",
+          "name": "waitPeriodFromStartDate",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-1"
+        },
+        {
+          "key": "waitPeriodFromJoinDate",
+          "label": "",
+          "name": "waitPeriodFromJoinDate",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "-1"
+        },
+        {
+          "key": "isClinicS",
+          "label": "",
+          "name": "isClinicS",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "networkId",
+          "label": "",
+          "name": "networkId",
+          "id": "networkId",
+          "tag": "input",
+          "type": "hidden",
+          "value": "13cd7916a127"
+        },
+        {
+          "key": "chkErrStripe",
+          "label": "",
+          "name": "chkErrStripe",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "checkStripe",
+          "label": "",
+          "name": "checkStripe",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "isSGPClinic",
+          "label": "",
+          "name": "isSGPClinic",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "priceCategory",
+          "label": "",
+          "name": "priceCategory",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Very High"
+        },
+        {
+          "key": "showPopUp",
+          "label": "",
+          "name": "showPopUp",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "freeConsultCount",
+          "label": "",
+          "name": "freeConsultCount",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "isCopaymentTiering",
+          "label": "",
+          "name": "isCopaymentTiering",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "exceptionReason",
+          "label": "",
+          "name": "exceptionReason",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "{#Diagnosis Secondary#:#NA#,#Client Type#:#Direct#,#Provider Type#:#SP_P#,#Diagnosis Primary#:#Acute#,#Bill Size#:#260.0#}"
+        },
+        {
+          "key": "exceptionDatetime",
+          "label": "",
+          "name": "exceptionDatetime",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "2026-02-11 16:08:54.52"
+        },
+        {
+          "key": "auditStatus",
+          "label": "",
+          "name": "auditStatus",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Approved"
+        },
+        {
+          "key": "oldAuditStatus",
+          "label": "",
+          "name": "oldAuditStatus",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Approved"
+        },
+        {
+          "key": "showPanelAudit",
+          "label": "",
+          "name": "showPanelAudit",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "tempReferral",
+          "label": "",
+          "name": "tempReferral",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "enablePanelAuditSetting",
+          "label": "",
+          "name": "enablePanelAuditSetting",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "excludeClinicCode",
+          "label": "",
+          "name": "excludeClinicCode",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "referralNo",
+          "label": "",
+          "name": "referralNo",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Auto"
+        },
+        {
+          "key": "taxableTotalUnitB4Gst",
+          "label": "",
+          "name": "taxableTotalUnitB4Gst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "260.00"
+        },
+        {
+          "key": "unitMhcGst",
+          "label": "",
+          "name": "unitMhcGst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "unitMhcTotalClaim",
+          "label": "",
+          "name": "unitMhcTotalClaim",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "283.40"
+        },
+        {
+          "key": "totalUnitClaimB4Gst",
+          "label": "",
+          "name": "totalUnitClaimB4Gst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "260.0"
+        },
+        {
+          "key": "unitCashCollectedB4Gst",
+          "label": "",
+          "name": "unitCashCollectedB4Gst",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "tieringClainAmt",
+          "label": "",
+          "name": "tieringClainAmt",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "unitTieringClainAmt",
+          "label": "",
+          "name": "unitTieringClainAmt",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "cumulativeUtilisation",
+          "label": "",
+          "name": "cumulativeUtilisation",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "unitCumulativeUtilisation",
+          "label": "",
+          "name": "unitCumulativeUtilisation",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.0"
+        },
+        {
+          "key": "costCenter",
+          "label": "",
+          "name": "costCenter",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "AMAZON ASIA-PACIFIC HOLDINGS PRIVATE LIMITED"
+        },
+        {
+          "key": "staffCode",
+          "label": "",
+          "name": "staffCode",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "100206037"
+        },
+        {
+          "key": "allowModify",
+          "label": "",
+          "name": "allowModify",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "oldEmpVisitId",
+          "label": "",
+          "name": "oldEmpVisitId",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "19c4bbeff2e5"
+        },
+        {
+          "key": "showButtonVoid",
+          "label": "",
+          "name": "showButtonVoid",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "enforceNric",
+          "label": "",
+          "name": "enforceNric",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "allowRefundIDVisit",
+          "label": "",
+          "name": "allowRefundIDVisit",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "subType",
+          "label": "",
+          "name": "subType",
+          "id": "subTypeId",
+          "tag": "input",
+          "type": "hidden",
+          "value": "2"
+        },
+        {
+          "key": "exclConsultFee",
+          "label": "",
+          "name": "exclConsultFee",
+          "id": "exclConsultFee",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "limitExclConsult",
+          "label": "",
+          "name": "limitExclConsult",
+          "id": "limitExclConsult",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "lowestBal",
+          "label": "",
+          "name": "lowestBal",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "5,825.71"
+        },
+        {
+          "key": "noMoreBalance",
+          "label": "",
+          "name": "noMoreBalance",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "countPageLoad",
+          "label": "",
+          "name": "countPageLoad",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "8"
+        },
+        {
+          "key": "subTypeChange",
+          "label": "",
+          "name": "subTypeChange",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "isTier2Consult",
+          "label": "",
+          "name": "isTier2Consult",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "tier2Consult",
+          "label": "",
+          "name": "tier2Consult",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "N"
+        },
+        {
+          "key": "copaymentTiering",
+          "label": "",
+          "name": "copaymentTiering",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "unitCopaymentTiering",
+          "label": "",
+          "name": "unitCopaymentTiering",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0.00"
+        },
+        {
+          "key": "isPageLoad",
+          "label": "",
+          "name": "isPageLoad",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "clientType",
+          "label": "",
+          "name": "clientType",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Direct"
+        },
+        {
+          "key": "externalReferenceNumber",
+          "label": "",
+          "name": "externalReferenceNumber",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "0"
+        },
+        {
+          "key": "myClinicCodes",
+          "label": "",
+          "name": "myClinicCodes",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "MGP,MSP,MHP"
+        },
+        {
+          "key": "VoidAction",
+          "label": "",
+          "name": "VoidAction",
+          "id": "",
+          "tag": "input",
+          "type": "submit",
+          "value": "Void"
+        },
+        {
+          "key": "CancelAction",
+          "label": "",
+          "name": "CancelAction",
+          "id": "",
+          "tag": "input",
+          "type": "submit",
+          "value": "Cancel"
+        },
+        {
+          "key": "RefreshAction",
+          "label": "",
+          "name": "RefreshAction",
+          "id": "",
+          "tag": "input",
+          "type": "submit",
+          "value": "Refresh"
+        },
+        {
+          "key": "showDelete",
+          "label": "",
+          "name": "showDelete",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "isComputed",
+          "label": "",
+          "name": "isComputed",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "Y"
+        },
+        {
+          "key": "OWASP_CSRFTOKEN",
+          "label": "",
+          "name": "OWASP_CSRFTOKEN",
+          "id": "",
+          "tag": "input",
+          "type": "hidden",
+          "value": "QXSB-S3E5-8IUV-E6PR-UUUW-47PL-NB0C-5X85"
+        }
+      ]
+    },
+    "allFrames": [
+      {
+        "frameUrl": "https://www.mhcasia.net/mhc/ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=QXSB-S3E5-8IUV-E6PR-UUUW-47PL-NB0C-5X85",
+        "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitEdit.ec?id=19c4bbeff2e5&OWASP_CSRFTOKEN=QXSB-S3E5-8IUV-E6PR-UUUW-47PL-NB0C-5X85",
+        "title": "Employee Visit Edit",
+        "headings": [
+          "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic ",
+          "Employee Visit - Edit",
+          "Policy Details:",
+          "Special Remarks:"
+        ],
+        "fields": [
+          {
+            "key": "",
+            "label": "",
+            "name": "",
+            "id": "",
+            "tag": "textarea",
+            "type": "",
+            "value": "TCM:1 VISIT PER DAY SP:WAIVER OF REFERRAL LETTER PRESCRIBED BIRTH CONTROL PILLS IS COVERED. PLEASE SEND REQUEST TO MHC TO SUBMIT CLAIM."
+          },
+          {
+            "key": "yearlyBal",
+            "label": "",
+            "name": "yearlyBal",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "5,542.31"
+          },
+          {
+            "key": "isOk",
+            "label": "",
+            "name": "isOk",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "pCoPayType",
+            "label": "",
+            "name": "pCoPayType",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "$"
+          },
+          {
+            "key": "pCoPayment",
+            "label": "",
+            "name": "pCoPayment",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "showClaimRemarks",
+            "label": "",
+            "name": "showClaimRemarks",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "str",
+            "label": "",
+            "name": "str",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "no cap no copay"
+          },
+          {
+            "key": "specialRemarks",
+            "label": "",
+            "name": "specialRemarks",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "TCM:1 VISIT PER DAY SP:WAIVER OF REFERRAL LETTER PRESCRIBED BIRTH CONTROL PILLS IS COVERED. PLEASE SEND REQUEST TO MHC TO SUBMIT CLAIM."
+          },
+          {
+            "key": "checkLimitLifeTime",
+            "label": "",
+            "name": "checkLimitLifeTime",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Please contact MHC"
+          },
+          {
+            "key": "showLifetimeLimitBalance",
+            "label": "",
+            "name": "showLifetimeLimitBalance",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "patientName",
+            "label": "Patient Name",
+            "name": "patientName",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "SACHIN MITTAL"
+          },
+          {
+            "key": "patientNric",
+            "label": "Patient ID",
+            "name": "patientNric",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "M4539893L"
+          },
+          {
+            "key": "benefitSchemeId",
+            "label": "",
+            "name": "benefitSchemeId",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "197b087ae1eb"
+          },
+          {
+            "key": "benefitSchemeCode",
+            "label": "",
+            "name": "benefitSchemeCode",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "A00357L0C0A6000SPDTTCMEHSEMP (2025)"
+          },
+          {
+            "key": "visitDateAsString",
+            "label": "Visit Date*",
+            "name": "visitDateAsString",
+            "id": "visitDateAsString",
+            "tag": "input",
+            "type": "text",
+            "value": "02/02/2026"
+          },
+          {
+            "key": "SelectDate",
+            "label": "Visit Date*",
+            "name": "SelectDate",
+            "id": "",
+            "tag": "input",
+            "type": "button",
+            "value": "Select"
+          },
+          {
+            "key": "visitDateDay",
+            "label": "Visit Date*",
+            "name": "visitDateDay",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "02"
+          },
+          {
+            "key": "visitDateMonth",
+            "label": "Visit Date*",
+            "name": "visitDateMonth",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "02"
+          },
+          {
+            "key": "visitDateYear",
+            "label": "Visit Date*",
+            "name": "visitDateYear",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "2026"
+          },
+          {
+            "key": "workmenComp",
+            "label": "",
+            "name": "workmenComp",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "claimStatus",
+            "label": "",
+            "name": "claimStatus",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "A"
+          },
+          {
+            "key": "subType",
+            "label": "Charge Type",
+            "name": "subType",
+            "id": "",
+            "tag": "select",
+            "type": "",
+            "value": "2|First Consult"
+          },
+          {
+            "key": "mcDay",
+            "label": "MC Day*",
+            "name": "mcDay",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "0.0"
+          },
+          {
+            "key": "mcStartDateAsString",
+            "label": "MC Start Date",
+            "name": "mcStartDateAsString",
+            "id": "mcStartDateAsString",
+            "tag": "input",
+            "type": "text",
+            "value": ""
+          },
+          {
+            "key": "mcSelectDate",
+            "label": "MC Start Date",
+            "name": "mcSelectDate",
+            "id": "mcSelectDate",
+            "tag": "input",
+            "type": "button",
+            "value": "Select"
+          },
+          {
+            "key": "mcReasonIdTemp",
+            "label": "MC Reason",
+            "name": "mcReasonIdTemp",
+            "id": "",
+            "tag": "select",
+            "type": "",
+            "value": "|NA"
+          },
+          {
+            "key": "mcReasonOther",
+            "label": "MC Reason Other",
+            "name": "mcReasonOther",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": ""
+          },
+          {
+            "key": "mcReasonId",
+            "label": "MC Reason Other",
+            "name": "mcReasonId",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "10"
+          },
+          {
+            "key": "diagnosisPriIdTemp",
+            "label": "Diagnosis Pri*",
+            "name": "diagnosisPriIdTemp",
+            "id": "diagnosisPriIdTempId",
+            "tag": "select",
+            "type": "",
+            "value": "|NA"
+          },
+          {
+            "key": "SelectDiagnosisFromMaster",
+            "label": "Diagnosis Pri*",
+            "name": "SelectDiagnosisFromMaster",
+            "id": "",
+            "tag": "input",
+            "type": "button",
+            "value": "M "
+          },
+          {
+            "key": "diagnosisPriDesc",
+            "label": "Diagnosis Pri*",
+            "name": "diagnosisPriDesc",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "M25.511 - Pain in the right shoulder"
+          },
+          {
+            "key": "diagnosisPriId",
+            "label": "Diagnosis Pri*",
+            "name": "diagnosisPriId",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1971ee360aa4"
+          },
+          {
+            "key": "diagnosisSecIdTemp",
+            "label": "Diagnosis Sec",
+            "name": "diagnosisSecIdTemp",
+            "id": "diagnosisSecIdTempId",
+            "tag": "select",
+            "type": "",
+            "value": "|NA"
+          },
+          {
+            "key": "SelectDiagnosisFromMaster",
+            "label": "Diagnosis Sec",
+            "name": "SelectDiagnosisFromMaster",
+            "id": "",
+            "tag": "input",
+            "type": "button",
+            "value": "M "
+          },
+          {
+            "key": "Clear",
+            "label": "Diagnosis Sec",
+            "name": "Clear",
+            "id": "",
+            "tag": "input",
+            "type": "button",
+            "value": "C "
+          },
+          {
+            "key": "diagnosisSecDesc",
+            "label": "Diagnosis Sec",
+            "name": "diagnosisSecDesc",
+            "id": "diagnosisSecDescId",
+            "tag": "input",
+            "type": "text",
+            "value": ""
+          },
+          {
+            "key": "diagnosis3IdTemp",
+            "label": "Diagnosis 3",
+            "name": "diagnosis3IdTemp",
+            "id": "diagnosis3IdTempId",
+            "tag": "select",
+            "type": "",
+            "value": "|NA"
+          },
+          {
+            "key": "SelectDiagnosisFromMaster",
+            "label": "Diagnosis 3",
+            "name": "SelectDiagnosisFromMaster",
+            "id": "",
+            "tag": "input",
+            "type": "button",
+            "value": "M "
+          },
+          {
+            "key": "Clear",
+            "label": "Diagnosis 3",
+            "name": "Clear",
+            "id": "",
+            "tag": "input",
+            "type": "button",
+            "value": "C "
+          },
+          {
+            "key": "diagnosis3Desc",
+            "label": "Diagnosis 3",
+            "name": "diagnosis3Desc",
+            "id": "diagnosis3DescId",
+            "tag": "input",
+            "type": "text",
+            "value": ""
+          },
+          {
+            "key": "diagnosis4IdTemp",
+            "label": "Diagnosis 4",
+            "name": "diagnosis4IdTemp",
+            "id": "diagnosis4IdTempId",
+            "tag": "select",
+            "type": "",
+            "value": "|NA"
+          },
+          {
+            "key": "SelectDiagnosisFromMaster",
+            "label": "Diagnosis 4",
+            "name": "SelectDiagnosisFromMaster",
+            "id": "",
+            "tag": "input",
+            "type": "button",
+            "value": "M "
+          },
+          {
+            "key": "Clear",
+            "label": "Diagnosis 4",
+            "name": "Clear",
+            "id": "",
+            "tag": "input",
+            "type": "button",
+            "value": "C "
+          },
+          {
+            "key": "diagnosis4Desc",
+            "label": "Diagnosis 4",
+            "name": "diagnosis4Desc",
+            "id": "diagnosis4DescId",
+            "tag": "input",
+            "type": "text",
+            "value": ""
+          },
+          {
+            "key": "addmore",
+            "label": "",
+            "name": "addmore",
+            "id": "addMoreId",
+            "tag": "input",
+            "type": "button",
+            "value": "More Diagnosis"
+          },
+          {
+            "key": "clearMore",
+            "label": "",
+            "name": "clearMore",
+            "id": "clearMoreId",
+            "tag": "input",
+            "type": "button",
+            "value": "Clear Diagnosis"
+          },
+          {
+            "key": "consultFee",
+            "label": "Consultation Fee (SGD)",
+            "name": "consultFee",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "120.00"
+          },
+          {
+            "key": "referralVisitNo",
+            "label": "Referring Visit",
+            "name": "referralVisitNo",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": ""
+          },
+          {
+            "key": "SelectVisitRef",
+            "label": "Referring Visit",
+            "name": "SelectVisitRef",
+            "id": "visitRefId",
+            "tag": "input",
+            "type": "button",
+            "value": "Select Referring Visits"
+          },
+          {
+            "key": "ClearReferralMaster",
+            "label": "Referring Visit",
+            "name": "ClearReferralMaster",
+            "id": "",
+            "tag": "input",
+            "type": "button",
+            "value": "Clear Referring Visits"
+          },
+          {
+            "key": "waiverOfReferral",
+            "label": "Waiver Of Referral",
+            "name": "waiverOfReferral",
+            "id": "",
+            "tag": "input",
+            "type": "checkbox",
+            "value": "Y"
+          },
+          {
+            "key": "noOfRefMasterRows",
+            "label": "",
+            "name": "noOfRefMasterRows",
+            "id": "noOfRefMasterRows",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "referralFee",
+            "label": "",
+            "name": "referralFee",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "referral",
+            "label": "",
+            "name": "referral",
+            "id": "referral",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "checkupFee",
+            "label": "",
+            "name": "checkupFee",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "checkupUnitFee",
+            "label": "",
+            "name": "checkupUnitFee",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "prescriptionFee",
+            "label": "",
+            "name": "prescriptionFee",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "drug_drugName",
+            "label": "1.",
+            "name": "drug_drugName",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "CELEBREX CAP 200MG (CELECOXIB)"
+          },
+          {
+            "key": "drug_drugCode",
+            "label": "1.",
+            "name": "drug_drugCode",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "CAPCELEB2940"
+          },
+          {
+            "key": "SelectMasterDrug",
+            "label": "1.",
+            "name": "SelectMasterDrug",
+            "id": "",
+            "tag": "input",
+            "type": "button",
+            "value": "M "
+          },
+          {
+            "key": "drug_version",
+            "label": "1.",
+            "name": "drug_version",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "drug_pos",
+            "label": "1.",
+            "name": "drug_pos",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-1"
+          },
+          {
+            "key": "drug_maxUnitPrice",
+            "label": "1.",
+            "name": "drug_maxUnitPrice",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "2.8"
+          },
+          {
+            "key": "drug_maxQty",
+            "label": "1.",
+            "name": "drug_maxQty",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "60"
+          },
+          {
+            "key": "drug_multiplier",
+            "label": "1.",
+            "name": "drug_multiplier",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-1.0"
+          },
+          {
+            "key": "drug_oldMultiplier",
+            "label": "1.",
+            "name": "drug_oldMultiplier",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-1.0"
+          },
+          {
+            "key": "drug_eligibleForAdjusted",
+            "label": "1.",
+            "name": "drug_eligibleForAdjusted",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "drug_eligibleForAdjusted2",
+            "label": "1.",
+            "name": "drug_eligibleForAdjusted2",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "drug_defaultUnitPrice",
+            "label": "1.",
+            "name": "drug_defaultUnitPrice",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "drug_unit",
+            "label": "1.",
+            "name": "drug_unit",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "CAP"
+          },
+          {
+            "key": "drug_unitPrice",
+            "label": "1.",
+            "name": "drug_unitPrice",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "3.5"
+          },
+          {
+            "key": "drug_quantity",
+            "label": "1.",
+            "name": "drug_quantity",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "40.0"
+          },
+          {
+            "key": "drug_amount",
+            "label": "1.",
+            "name": "drug_amount",
+            "id": "drug_amount",
+            "tag": "input",
+            "type": "text",
+            "value": "140.0"
+          },
+          {
+            "key": "drug_checkStr",
+            "label": "1.",
+            "name": "drug_checkStr",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-1,0.0"
+          },
+          {
+            "key": "ClearDrug",
+            "label": "1.",
+            "name": "ClearDrug",
+            "id": "",
+            "tag": "input",
+            "type": "button",
+            "value": "C "
+          },
+          {
+            "key": "add",
+            "label": "",
+            "name": "add",
+            "id": "addMoreDrug",
+            "tag": "input",
+            "type": "button",
+            "value": "More Drug"
+          },
+          {
+            "key": "noOfDrugRows",
+            "label": "",
+            "name": "noOfDrugRows",
+            "id": "noOfDrugRows",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "drugFee",
+            "label": "Total Drug Fee",
+            "name": "drugFee",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "140.00"
+          },
+          {
+            "key": "procedure_procedureName",
+            "label": "1.",
+            "name": "procedure_procedureName",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": ""
+          },
+          {
+            "key": "SelectMasterProcedure",
+            "label": "1.",
+            "name": "SelectMasterProcedure",
+            "id": "",
+            "tag": "input",
+            "type": "button",
+            "value": "M "
+          },
+          {
+            "key": "procedure_version",
+            "label": "1.",
+            "name": "procedure_version",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "procedure_pos",
+            "label": "1.",
+            "name": "procedure_pos",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-1"
+          },
+          {
+            "key": "procedure_amountB4Copay",
+            "label": "1.",
+            "name": "procedure_amountB4Copay",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "0.00"
+          },
+          {
+            "key": "procedure_copay",
+            "label": "1.",
+            "name": "procedure_copay",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "procedure_amount",
+            "label": "1.",
+            "name": "procedure_amount",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "ClearProcedure",
+            "label": "1.",
+            "name": "ClearProcedure",
+            "id": "",
+            "tag": "input",
+            "type": "button",
+            "value": "C "
+          },
+          {
+            "key": "add",
+            "label": "",
+            "name": "add",
+            "id": "addMoreProcedureId",
+            "tag": "input",
+            "type": "button",
+            "value": "More Procedure"
+          },
+          {
+            "key": "noOfProcedureRows",
+            "label": "",
+            "name": "noOfProcedureRows",
+            "id": "noOfProcedureRows",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "procedureFee",
+            "label": "Total Proc Fee",
+            "name": "procedureFee",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "0.00"
+          },
+          {
+            "key": "procedureCopay",
+            "label": "Total Proc Fee",
+            "name": "procedureCopay",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "procedureFeeClaim",
+            "label": "Total Proc Fee",
+            "name": "procedureFeeClaim",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "totalB4Gst",
+            "label": "Total Before GST",
+            "name": "totalB4Gst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "260.00"
+          },
+          {
+            "key": "totalUnitB4Gst",
+            "label": "Total Before GST",
+            "name": "totalUnitB4Gst",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "260.00"
+          },
+          {
+            "key": "gst",
+            "label": "GST",
+            "name": "gst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "23.40"
+          },
+          {
+            "key": "gstUnit",
+            "label": "GST",
+            "name": "gstUnit",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "23.40"
+          },
+          {
+            "key": "totalFee",
+            "label": "Total Fee (SGD)",
+            "name": "totalFee",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "283.40"
+          },
+          {
+            "key": "totalUnitFee",
+            "label": "Total Fee (SGD)",
+            "name": "totalUnitFee",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "283.40"
+          },
+          {
+            "key": "ComputeAction",
+            "label": "Total Fee (SGD)",
+            "name": "ComputeAction",
+            "id": "ComputeAction",
+            "tag": "input",
+            "type": "submit",
+            "value": "Compute claim"
+          },
+          {
+            "key": "totalClaim",
+            "label": "Total Claim (SGD)",
+            "name": "totalClaim",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "283.40"
+          },
+          {
+            "key": "totalUnitClaim",
+            "label": "Total Claim (SGD)",
+            "name": "totalUnitClaim",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "283.40"
+          },
+          {
+            "key": "copayment",
+            "label": "Copayment",
+            "name": "copayment",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "unitCopayment",
+            "label": "Copayment",
+            "name": "unitCopayment",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "0.00"
+          },
+          {
+            "key": "copaymentDeductible",
+            "label": "",
+            "name": "copaymentDeductible",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "totalCopayment",
+            "label": "",
+            "name": "totalCopayment",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "unitCopaymentDeductible",
+            "label": "",
+            "name": "unitCopaymentDeductible",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "totalUnitCopayment",
+            "label": "",
+            "name": "totalUnitCopayment",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "cashCollected",
+            "label": "Cash Collected (SGD)",
+            "name": "cashCollected",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "unitCashCollected",
+            "label": "Cash Collected (SGD)",
+            "name": "unitCashCollected",
+            "id": "",
+            "tag": "input",
+            "type": "text",
+            "value": "0.00"
+          },
+          {
+            "key": "totalAdjusted",
+            "label": "",
+            "name": "totalAdjusted",
+            "id": "totalAdjusted",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "totalClaimInitial",
+            "label": "",
+            "name": "totalClaimInitial",
+            "id": "totalClaimInitial",
+            "tag": "input",
+            "type": "hidden",
+            "value": "283.4"
+          },
+          {
+            "key": "totalClaimRevised",
+            "label": "",
+            "name": "totalClaimRevised",
+            "id": "totalClaimRevisedId",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "tempAuditStatus",
+            "label": "",
+            "name": "tempAuditStatus",
+            "id": "tempAuditStatusId",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Approved"
+          },
+          {
+            "key": "totalFeeRevised",
+            "label": "",
+            "name": "totalFeeRevised",
+            "id": "totalFeeRevisedId",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "voidRemarks",
+            "label": "Void Remarks*",
+            "name": "voidRemarks",
+            "id": "voidRemarksId",
+            "tag": "textarea",
+            "type": "",
+            "value": ""
+          },
+          {
+            "key": "noOfEmpVisitDetailRows",
+            "label": "",
+            "name": "noOfEmpVisitDetailRows",
+            "id": "noOfEmpVisitDetailRows",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "empVisitDetail_providerTypeId",
+            "label": "",
+            "name": "empVisitDetail_providerTypeId",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "2"
+          },
+          {
+            "key": "empVisitDetail_version",
+            "label": "",
+            "name": "empVisitDetail_version",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "empVisitDetail_totalUnitClaim",
+            "label": "",
+            "name": "empVisitDetail_totalUnitClaim",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "283.4"
+          },
+          {
+            "key": "empVisitDetail_totalFee",
+            "label": "",
+            "name": "empVisitDetail_totalFee",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "283.4"
+          },
+          {
+            "key": "empVisitDetail_totalUnitFee",
+            "label": "",
+            "name": "empVisitDetail_totalUnitFee",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "283.4"
+          },
+          {
+            "key": "empVisitDetail_totalClaim",
+            "label": "",
+            "name": "empVisitDetail_totalClaim",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "283.4"
+          },
+          {
+            "key": "empVisitDetail_copayment",
+            "label": "",
+            "name": "empVisitDetail_copayment",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "empVisitDetail_cashCollected",
+            "label": "",
+            "name": "empVisitDetail_cashCollected",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "empVisitDetail_unitCopayment",
+            "label": "",
+            "name": "empVisitDetail_unitCopayment",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "empVisitDetail_unitCashCollected",
+            "label": "",
+            "name": "empVisitDetail_unitCashCollected",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "noOfDaysDrugPrescribed",
+            "label": "",
+            "name": "noOfDaysDrugPrescribed",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "lab_version",
+            "label": "",
+            "name": "lab_version",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "lab_pos",
+            "label": "",
+            "name": "lab_pos",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-1"
+          },
+          {
+            "key": "labFee",
+            "label": "",
+            "name": "labFee",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "lab_code",
+            "label": "",
+            "name": "lab_code",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "noOfLabRows",
+            "label": "",
+            "name": "noOfLabRows",
+            "id": "noOfLabRows",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "lab_amount",
+            "label": "",
+            "name": "lab_amount",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "labUnitFee",
+            "label": "",
+            "name": "labUnitFee",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "lab_unitAmount",
+            "label": "",
+            "name": "lab_unitAmount",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "xRay_version",
+            "label": "",
+            "name": "xRay_version",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "xRay_pos",
+            "label": "",
+            "name": "xRay_pos",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-1"
+          },
+          {
+            "key": "xRayFee",
+            "label": "",
+            "name": "xRayFee",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "xRay_code",
+            "label": "",
+            "name": "xRay_code",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "noOfXRayRows",
+            "label": "",
+            "name": "noOfXRayRows",
+            "id": "noOfXRayRows",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "xRay_amount",
+            "label": "",
+            "name": "xRay_amount",
+            "id": "xRay_amount",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "xRayUnitFee",
+            "label": "",
+            "name": "xRayUnitFee",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "xRay_unitAmount",
+            "label": "",
+            "name": "xRay_unitAmount",
+            "id": "xRay_unitAmount",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "checkup_version",
+            "label": "",
+            "name": "checkup_version",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "checkup_payClinic",
+            "label": "",
+            "name": "checkup_payClinic",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "checkup_amount",
+            "label": "",
+            "name": "checkup_amount",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "noOfCheckupRows",
+            "label": "",
+            "name": "noOfCheckupRows",
+            "id": "noOfCheckupRows",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "serviceFee",
+            "label": "",
+            "name": "serviceFee",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "serviceFeeClaim",
+            "label": "",
+            "name": "serviceFeeClaim",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "taxableServiceFeeClaim",
+            "label": "",
+            "name": "taxableServiceFeeClaim",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "noOfServiceRows",
+            "label": "",
+            "name": "noOfServiceRows",
+            "id": "noOfServiceRows",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "service_amount",
+            "label": "",
+            "name": "service_amount",
+            "id": "service_amount",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "service_claimAmount",
+            "label": "",
+            "name": "service_claimAmount",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "service_taxable",
+            "label": "",
+            "name": "service_taxable",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "service_version",
+            "label": "",
+            "name": "service_version",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "service_pF",
+            "label": "",
+            "name": "service_pF",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "service_pF_cb",
+            "label": "",
+            "name": "service_pF_cb",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "service_ineligible",
+            "label": "",
+            "name": "service_ineligible",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "service_philhealth",
+            "label": "",
+            "name": "service_philhealth",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "service_eligible",
+            "label": "",
+            "name": "service_eligible",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "service_basic",
+            "label": "",
+            "name": "service_basic",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "service_major",
+            "label": "",
+            "name": "service_major",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "service_excess",
+            "label": "",
+            "name": "service_excess",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "serviceNonPFCharges",
+            "label": "",
+            "name": "serviceNonPFCharges",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "servicePFCharges",
+            "label": "",
+            "name": "servicePFCharges",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "id",
+            "label": "",
+            "name": "id",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "19c4bbeff2e5"
+          },
+          {
+            "key": "costCentre",
+            "label": "",
+            "name": "costCentre",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "AMAZON ASIA-PACIFIC HOLDINGS PRIVATE LIMITED"
+          },
+          {
+            "key": "version",
+            "label": "",
+            "name": "version",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1"
+          },
+          {
+            "key": "visitNo",
+            "label": "",
+            "name": "visitNo",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "EV16085124"
+          },
+          {
+            "key": "reservedAmount",
+            "label": "",
+            "name": "reservedAmount",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "clinicId",
+            "label": "",
+            "name": "clinicId",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1296d6336a11"
+          },
+          {
+            "key": "isGst",
+            "label": "",
+            "name": "isGst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "adjustForCopaymentGst",
+            "label": "",
+            "name": "adjustForCopaymentGst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "totalClaimB4Gst",
+            "label": "",
+            "name": "totalClaimB4Gst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "260.0"
+          },
+          {
+            "key": "cashCollectedB4Gst",
+            "label": "",
+            "name": "cashCollectedB4Gst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "patientId",
+            "label": "",
+            "name": "patientId",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "196a5aff90ca"
+          },
+          {
+            "key": "providerTypeId",
+            "label": "",
+            "name": "providerTypeId",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "2"
+          },
+          {
+            "key": "companyId",
+            "label": "",
+            "name": "companyId",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1626f1ca158d"
+          },
+          {
+            "key": "groupId",
+            "label": "",
+            "name": "groupId",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "106f7a402000"
+          },
+          {
+            "key": "employeeId",
+            "label": "",
+            "name": "employeeId",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "196a5aff90ca"
+          },
+          {
+            "key": "gstRate",
+            "label": "",
+            "name": "gstRate",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "9"
+          },
+          {
+            "key": "creationDateAsString",
+            "label": "",
+            "name": "creationDateAsString",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "11/02/2026 16:08:54"
+          },
+          {
+            "key": "visitType",
+            "label": "",
+            "name": "visitType",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "doctorTrack",
+            "label": "",
+            "name": "doctorTrack",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "format_DateTime",
+            "label": "",
+            "name": "format_DateTime",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "DD/MM/YYYY"
+          },
+          {
+            "key": "display_LabXray",
+            "label": "",
+            "name": "display_LabXray",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "bSInPanelId",
+            "label": "",
+            "name": "bSInPanelId",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "197b091984cd"
+          },
+          {
+            "key": "bSInPanel_copayCutOff",
+            "label": "",
+            "name": "bSInPanel_copayCutOff",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-1.0"
+          },
+          {
+            "key": "bSInPanel_coPayType",
+            "label": "",
+            "name": "bSInPanel_coPayType",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "$"
+          },
+          {
+            "key": "bSInPanel_coPayment",
+            "label": "",
+            "name": "bSInPanel_coPayment",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "bSInPanel_adjustForGst",
+            "label": "",
+            "name": "bSInPanel_adjustForGst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "bsCoPayType",
+            "label": "",
+            "name": "bsCoPayType",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "$"
+          },
+          {
+            "key": "bsCoPayment",
+            "label": "",
+            "name": "bsCoPayment",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "bSInPanel_coPayType2",
+            "label": "",
+            "name": "bSInPanel_coPayType2",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "$"
+          },
+          {
+            "key": "bSInPanel_useCopay2",
+            "label": "",
+            "name": "bSInPanel_useCopay2",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "bSInPanel_coPayment2",
+            "label": "",
+            "name": "bSInPanel_coPayment2",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "bSInPanel_startCopaymentAmount",
+            "label": "",
+            "name": "bSInPanel_startCopaymentAmount",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-1.0"
+          },
+          {
+            "key": "bSInPanel_limitPerVisit",
+            "label": "",
+            "name": "bSInPanel_limitPerVisit",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-1.0"
+          },
+          {
+            "key": "bsInPanel_copayDeductible",
+            "label": "",
+            "name": "bsInPanel_copayDeductible",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "bsInPanel_adjustForCopayDeductibleGst",
+            "label": "",
+            "name": "bsInPanel_adjustForCopayDeductibleGst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "isDarwinGroup",
+            "label": "",
+            "name": "isDarwinGroup",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "darwinBalance",
+            "label": "",
+            "name": "darwinBalance",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "useBnsBalance",
+            "label": "",
+            "name": "useBnsBalance",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "drugFormulary",
+            "label": "",
+            "name": "drugFormulary",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "4"
+          },
+          {
+            "key": "bsInPanel_drugMaxPriceCheck",
+            "label": "",
+            "name": "bsInPanel_drugMaxPriceCheck",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "freeTextDrug",
+            "label": "",
+            "name": "freeTextDrug",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "maxUnitPrice",
+            "label": "",
+            "name": "maxUnitPrice",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "100.0"
+          },
+          {
+            "key": "taxableTotalB4Gst",
+            "label": "",
+            "name": "taxableTotalB4Gst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "260.00"
+          },
+          {
+            "key": "showTrackFlu",
+            "label": "",
+            "name": "showTrackFlu",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "maxProcPriceChk",
+            "label": "",
+            "name": "maxProcPriceChk",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "showDisability",
+            "label": "",
+            "name": "showDisability",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "showMCReason",
+            "label": "",
+            "name": "showMCReason",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "visitGroup",
+            "label": "",
+            "name": "visitGroup",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "showCaseNo",
+            "label": "",
+            "name": "showCaseNo",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "showProcedureCopay",
+            "label": "",
+            "name": "showProcedureCopay",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "groupCode",
+            "label": "",
+            "name": "groupCode",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "MA"
+          },
+          {
+            "key": "clinicName",
+            "label": "",
+            "name": "clinicName",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "SINGAPORE SPORTS & ORTHOPAEDIC CLINIC"
+          },
+          {
+            "key": "claimHospital",
+            "label": "",
+            "name": "claimHospital",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "1296d6336a11"
+          },
+          {
+            "key": "startDate2",
+            "label": "",
+            "name": "startDate2",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "05/05/2025"
+          },
+          {
+            "key": "admDischDate",
+            "label": "",
+            "name": "admDischDate",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "gpur",
+            "label": "",
+            "name": "gpur",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "A000000"
+          },
+          {
+            "key": "mhcGst",
+            "label": "",
+            "name": "mhcGst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "mhcTotalClaim",
+            "label": "",
+            "name": "mhcTotalClaim",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "283.40"
+          },
+          {
+            "key": "applyMhcGst",
+            "label": "",
+            "name": "applyMhcGst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "compApplyMhcGst",
+            "label": "",
+            "name": "compApplyMhcGst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "showReferral",
+            "label": "",
+            "name": "showReferral",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "enforceReferral",
+            "label": "",
+            "name": "enforceReferral",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "oldRefNo",
+            "label": "",
+            "name": "oldRefNo",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Auto"
+          },
+          {
+            "key": "showDiagnosis",
+            "label": "",
+            "name": "showDiagnosis",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "oldVisitDateAsString",
+            "label": "",
+            "name": "oldVisitDateAsString",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "02/02/2026"
+          },
+          {
+            "key": "accredited",
+            "label": "",
+            "name": "accredited",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "copaymentTotal",
+            "label": "",
+            "name": "copaymentTotal",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "clinicCode",
+            "label": "",
+            "name": "clinicCode",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "SSP000170"
+          },
+          {
+            "key": "companyTag",
+            "label": "",
+            "name": "companyTag",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "SHELL"
+          },
+          {
+            "key": "companyCode",
+            "label": "",
+            "name": "companyCode",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "A00357Z"
+          },
+          {
+            "key": "pathConsentForm",
+            "label": "",
+            "name": "pathConsentForm",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "C:\\Download\\MA\\consent.pdf"
+          },
+          {
+            "key": "showConsentForm",
+            "label": "",
+            "name": "showConsentForm",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "chekAdjustForCopaymentGst",
+            "label": "",
+            "name": "chekAdjustForCopaymentGst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "showEMR",
+            "label": "",
+            "name": "showEMR",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "visitDisplayDetailId",
+            "label": "",
+            "name": "visitDisplayDetailId",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "107f94baa114"
+          },
+          {
+            "key": "visitDisplayId",
+            "label": "",
+            "name": "visitDisplayId",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "147a1a2720e8"
+          },
+          {
+            "key": "enforceWorkmenComp",
+            "label": "",
+            "name": "enforceWorkmenComp",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "spixValue",
+            "label": "",
+            "name": "spixValue",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "allowBookAppt",
+            "label": "",
+            "name": "allowBookAppt",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "checkDrugDiagnosis",
+            "label": "",
+            "name": "checkDrugDiagnosis",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "gpClinicPhone",
+            "label": "",
+            "name": "gpClinicPhone",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "64712696"
+          },
+          {
+            "key": "empClinicName",
+            "label": "",
+            "name": "empClinicName",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "SINGAPORE SPORTS & ORTHOPAEDIC CLINIC"
+          },
+          {
+            "key": "bookAppointmentUrl",
+            "label": "",
+            "name": "bookAppointmentUrl",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "https://www.appmydoctor.net/ApptBooking.aspx"
+          },
+          {
+            "key": "gpDoctorName",
+            "label": "",
+            "name": "gpDoctorName",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "YIP MAN HING KEVIN"
+          },
+          {
+            "key": "gpMobile",
+            "label": "",
+            "name": "gpMobile",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "6471269"
+          },
+          {
+            "key": "gpEmail",
+            "label": "",
+            "name": "gpEmail",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-@test.com"
+          },
+          {
+            "key": "gpMcr",
+            "label": "",
+            "name": "gpMcr",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "M18659G"
+          },
+          {
+            "key": "systemCode",
+            "label": "",
+            "name": "systemCode",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "MHC"
+          },
+          {
+            "key": "patientDOB",
+            "label": "",
+            "name": "patientDOB",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "18/06/1987"
+          },
+          {
+            "key": "patientGender",
+            "label": "",
+            "name": "patientGender",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "M"
+          },
+          {
+            "key": "show4Diagnosis",
+            "label": "",
+            "name": "show4Diagnosis",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "bsStartDateAsString",
+            "label": "",
+            "name": "bsStartDateAsString",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "01/07/2025"
+          },
+          {
+            "key": "memberNo",
+            "label": "",
+            "name": "memberNo",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "100206037"
+          },
+          {
+            "key": "benefitCode",
+            "label": "",
+            "name": "benefitCode",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "A00357L0C0A6000SPDTTCMEHSEMP (2025)"
+          },
+          {
+            "key": "changeForm",
+            "label": "",
+            "name": "changeForm",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "basicDrugNoOfDays",
+            "label": "",
+            "name": "basicDrugNoOfDays",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-1"
+          },
+          {
+            "key": "extraDrugCostPerDay",
+            "label": "",
+            "name": "extraDrugCostPerDay",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-1"
+          },
+          {
+            "key": "maxDrugNoOfDays",
+            "label": "",
+            "name": "maxDrugNoOfDays",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-1"
+          },
+          {
+            "key": "maxCopay",
+            "label": "",
+            "name": "maxCopay",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "showPA",
+            "label": "",
+            "name": "showPA",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "enforcePA",
+            "label": "",
+            "name": "enforcePA",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "drugSetForWorkmenCompOnly",
+            "label": "",
+            "name": "drugSetForWorkmenCompOnly",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "totalAdminFee2",
+            "label": "",
+            "name": "totalAdminFee2",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "totalAdminFee",
+            "label": "",
+            "name": "totalAdminFee",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "stripeChargeAmount",
+            "label": "",
+            "name": "stripeChargeAmount",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "freeConsult",
+            "label": "",
+            "name": "freeConsult",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "waitPeriodFromStartDate",
+            "label": "",
+            "name": "waitPeriodFromStartDate",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-1"
+          },
+          {
+            "key": "waitPeriodFromJoinDate",
+            "label": "",
+            "name": "waitPeriodFromJoinDate",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "-1"
+          },
+          {
+            "key": "isClinicS",
+            "label": "",
+            "name": "isClinicS",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "networkId",
+            "label": "",
+            "name": "networkId",
+            "id": "networkId",
+            "tag": "input",
+            "type": "hidden",
+            "value": "13cd7916a127"
+          },
+          {
+            "key": "chkErrStripe",
+            "label": "",
+            "name": "chkErrStripe",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "checkStripe",
+            "label": "",
+            "name": "checkStripe",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "isSGPClinic",
+            "label": "",
+            "name": "isSGPClinic",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "priceCategory",
+            "label": "",
+            "name": "priceCategory",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Very High"
+          },
+          {
+            "key": "showPopUp",
+            "label": "",
+            "name": "showPopUp",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "freeConsultCount",
+            "label": "",
+            "name": "freeConsultCount",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "isCopaymentTiering",
+            "label": "",
+            "name": "isCopaymentTiering",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "exceptionReason",
+            "label": "",
+            "name": "exceptionReason",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "{#Diagnosis Secondary#:#NA#,#Client Type#:#Direct#,#Provider Type#:#SP_P#,#Diagnosis Primary#:#Acute#,#Bill Size#:#260.0#}"
+          },
+          {
+            "key": "exceptionDatetime",
+            "label": "",
+            "name": "exceptionDatetime",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "2026-02-11 16:08:54.52"
+          },
+          {
+            "key": "auditStatus",
+            "label": "",
+            "name": "auditStatus",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Approved"
+          },
+          {
+            "key": "oldAuditStatus",
+            "label": "",
+            "name": "oldAuditStatus",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Approved"
+          },
+          {
+            "key": "showPanelAudit",
+            "label": "",
+            "name": "showPanelAudit",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "tempReferral",
+            "label": "",
+            "name": "tempReferral",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "enablePanelAuditSetting",
+            "label": "",
+            "name": "enablePanelAuditSetting",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "excludeClinicCode",
+            "label": "",
+            "name": "excludeClinicCode",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "referralNo",
+            "label": "",
+            "name": "referralNo",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Auto"
+          },
+          {
+            "key": "taxableTotalUnitB4Gst",
+            "label": "",
+            "name": "taxableTotalUnitB4Gst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "260.00"
+          },
+          {
+            "key": "unitMhcGst",
+            "label": "",
+            "name": "unitMhcGst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "unitMhcTotalClaim",
+            "label": "",
+            "name": "unitMhcTotalClaim",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "283.40"
+          },
+          {
+            "key": "totalUnitClaimB4Gst",
+            "label": "",
+            "name": "totalUnitClaimB4Gst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "260.0"
+          },
+          {
+            "key": "unitCashCollectedB4Gst",
+            "label": "",
+            "name": "unitCashCollectedB4Gst",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "tieringClainAmt",
+            "label": "",
+            "name": "tieringClainAmt",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "unitTieringClainAmt",
+            "label": "",
+            "name": "unitTieringClainAmt",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "cumulativeUtilisation",
+            "label": "",
+            "name": "cumulativeUtilisation",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "unitCumulativeUtilisation",
+            "label": "",
+            "name": "unitCumulativeUtilisation",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.0"
+          },
+          {
+            "key": "costCenter",
+            "label": "",
+            "name": "costCenter",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "AMAZON ASIA-PACIFIC HOLDINGS PRIVATE LIMITED"
+          },
+          {
+            "key": "staffCode",
+            "label": "",
+            "name": "staffCode",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "100206037"
+          },
+          {
+            "key": "allowModify",
+            "label": "",
+            "name": "allowModify",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "oldEmpVisitId",
+            "label": "",
+            "name": "oldEmpVisitId",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "19c4bbeff2e5"
+          },
+          {
+            "key": "showButtonVoid",
+            "label": "",
+            "name": "showButtonVoid",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "enforceNric",
+            "label": "",
+            "name": "enforceNric",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "allowRefundIDVisit",
+            "label": "",
+            "name": "allowRefundIDVisit",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "subType",
+            "label": "",
+            "name": "subType",
+            "id": "subTypeId",
+            "tag": "input",
+            "type": "hidden",
+            "value": "2"
+          },
+          {
+            "key": "exclConsultFee",
+            "label": "",
+            "name": "exclConsultFee",
+            "id": "exclConsultFee",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "limitExclConsult",
+            "label": "",
+            "name": "limitExclConsult",
+            "id": "limitExclConsult",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "lowestBal",
+            "label": "",
+            "name": "lowestBal",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "5,825.71"
+          },
+          {
+            "key": "noMoreBalance",
+            "label": "",
+            "name": "noMoreBalance",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "countPageLoad",
+            "label": "",
+            "name": "countPageLoad",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "8"
+          },
+          {
+            "key": "subTypeChange",
+            "label": "",
+            "name": "subTypeChange",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "isTier2Consult",
+            "label": "",
+            "name": "isTier2Consult",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "tier2Consult",
+            "label": "",
+            "name": "tier2Consult",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "N"
+          },
+          {
+            "key": "copaymentTiering",
+            "label": "",
+            "name": "copaymentTiering",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "unitCopaymentTiering",
+            "label": "",
+            "name": "unitCopaymentTiering",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0.00"
+          },
+          {
+            "key": "isPageLoad",
+            "label": "",
+            "name": "isPageLoad",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "clientType",
+            "label": "",
+            "name": "clientType",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Direct"
+          },
+          {
+            "key": "externalReferenceNumber",
+            "label": "",
+            "name": "externalReferenceNumber",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "0"
+          },
+          {
+            "key": "myClinicCodes",
+            "label": "",
+            "name": "myClinicCodes",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "MGP,MSP,MHP"
+          },
+          {
+            "key": "VoidAction",
+            "label": "",
+            "name": "VoidAction",
+            "id": "",
+            "tag": "input",
+            "type": "submit",
+            "value": "Void"
+          },
+          {
+            "key": "CancelAction",
+            "label": "",
+            "name": "CancelAction",
+            "id": "",
+            "tag": "input",
+            "type": "submit",
+            "value": "Cancel"
+          },
+          {
+            "key": "RefreshAction",
+            "label": "",
+            "name": "RefreshAction",
+            "id": "",
+            "tag": "input",
+            "type": "submit",
+            "value": "Refresh"
+          },
+          {
+            "key": "showDelete",
+            "label": "",
+            "name": "showDelete",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "isComputed",
+            "label": "",
+            "name": "isComputed",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "Y"
+          },
+          {
+            "key": "OWASP_CSRFTOKEN",
+            "label": "",
+            "name": "OWASP_CSRFTOKEN",
+            "id": "",
+            "tag": "input",
+            "type": "hidden",
+            "value": "QXSB-S3E5-8IUV-E6PR-UUUW-47PL-NB0C-5X85"
+          }
+        ]
+      }
+    ]
+  }
+}

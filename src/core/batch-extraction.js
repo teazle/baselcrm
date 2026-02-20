@@ -575,9 +575,13 @@ export class BatchExtraction {
    * Save extracted items to CRM (Supabase)
    * @param {Array} items - Array of extracted visit items
    * @param {string} visitDate - Optional visit date in YYYY-MM-DD format. Defaults to today if not provided.
+   * @param {Object} options - Optional behavior flags
+   * @param {boolean} options.withDetails - Return per-item save details
    */
-  async saveToCRM(items, visitDate = null) {
+  async saveToCRM(items, visitDate = null, options = {}) {
     const itemsToSave = this._normalizeQueueListingRows(items);
+    const withDetails = !!options?.withDetails;
+    const saveDetails = [];
 
     if (!this.supabase) {
       logger.warn('[BATCH] Supabase not configured; saving to JSON file instead');
@@ -599,6 +603,22 @@ export class BatchExtraction {
       );
 
       logger.info(`[BATCH] Saved ${itemsToSave.length} items to ${filepath}`);
+      if (withDetails) {
+        return {
+          savedCount: itemsToSave.length,
+          total: itemsToSave.length,
+          details: itemsToSave.map(item => ({
+            status: 'saved_to_json',
+            visitId: null,
+            message: null,
+            patientName: item?.patientName || null,
+            nric: item?.nric || null,
+            payType: item?.payType || null,
+            visitDate: visitDate || null,
+            visitRecordNo: item?.invNo || item?.qno || null,
+          })),
+        };
+      }
       return itemsToSave.length;
     }
 
@@ -750,16 +770,61 @@ export class BatchExtraction {
           logger.error(`[BATCH] Failed to save visit for ${item.patientName}`, {
             error: error.message,
           });
+          if (withDetails) {
+            saveDetails.push({
+              status: 'error',
+              visitId: null,
+              message: error.message,
+              patientName: item?.patientName || null,
+              nric: item?.nric || null,
+              payType: item?.payType || null,
+              visitDate: targetDate,
+              visitRecordNo: visitRecordNo || null,
+            });
+          }
         } else {
           savedCount++;
-          logger.info(`[BATCH] Saved visit for ${item.patientName}`, { visitId: data?.[0]?.id });
+          const savedVisitId = data?.[0]?.id || null;
+          logger.info(`[BATCH] Saved visit for ${item.patientName}`, { visitId: savedVisitId });
+          if (withDetails) {
+            saveDetails.push({
+              status: 'saved',
+              visitId: savedVisitId,
+              message: null,
+              patientName: item?.patientName || null,
+              nric: item?.nric || null,
+              payType: item?.payType || null,
+              visitDate: targetDate,
+              visitRecordNo: visitRecordNo || null,
+            });
+          }
         }
       } catch (error) {
         logger.error(`[BATCH] Error saving ${item.patientName}`, { error: error.message });
+        if (withDetails) {
+          const visitRecordNo = item?.invNo || item?.qno || null;
+          saveDetails.push({
+            status: 'error',
+            visitId: null,
+            message: error.message,
+            patientName: item?.patientName || null,
+            nric: item?.nric || null,
+            payType: item?.payType || null,
+            visitDate: targetDate,
+            visitRecordNo,
+          });
+        }
       }
     }
 
     this.steps.step(6, `Saved ${savedCount}/${itemsToSave.length} items to CRM`);
+    if (withDetails) {
+      return {
+        savedCount,
+        total: itemsToSave.length,
+        details: saveDetails,
+      };
+    }
     return savedCount;
   }
 

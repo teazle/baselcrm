@@ -1,0 +1,145 @@
+{
+  "before": {
+    "title": "Alliance Managed Healthcare",
+    "calcRowHtml": "<tr id=\"ctl00_MainContent_uc_MakeClaim_trCalculateButton\">\n\t<td>\n                \n                &nbsp;<input type=\"submit\" name=\"ctl00$MainContent$uc_MakeClaim$btnCancel\" value=\"Cancel\" id=\"ctl00_MainContent_uc_MakeClaim_btnCancel\" style=\"\">\n            </td>\n</tr>",
+    "formAction": "./MakePanelClaim.aspx?v=ADDSCLAIM",
+    "formMethod": "post",
+    "buttonCount": 4,
+    "buttons": [
+      {
+        "tag": "INPUT",
+        "id": null,
+        "name": null,
+        "type": "button",
+        "value": "Show Benefit",
+        "text": null,
+        "visible": true,
+        "style": null,
+        "cls": null
+      },
+      {
+        "tag": "INPUT",
+        "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+        "name": "ctl00$MainContent$uc_MakeClaim$btnmcreasons",
+        "type": "button",
+        "value": "+",
+        "text": null,
+        "visible": true,
+        "style": null,
+        "cls": "h20"
+      },
+      {
+        "tag": "INPUT",
+        "id": "ctl00_MainContent_uc_MakeClaim_btnCancel",
+        "name": "ctl00$MainContent$uc_MakeClaim$btnCancel",
+        "type": "submit",
+        "value": "Cancel",
+        "text": null,
+        "visible": true,
+        "style": null,
+        "cls": null
+      },
+      {
+        "tag": "INPUT",
+        "id": "ctl00_MainContent_uc_MakeClaim_btnReloadData",
+        "name": "ctl00$MainContent$uc_MakeClaim$btnReloadData",
+        "type": "submit",
+        "value": null,
+        "text": null,
+        "visible": true,
+        "style": null,
+        "cls": null
+      }
+    ]
+  },
+  "afterFill": {
+    "values": {
+      "visitDate": "13-02-2026",
+      "mcDay": "0",
+      "mcReason": "Fever",
+      "diagnosisCode": "R50.9",
+      "diagnosisDesc": "Fever",
+      "feeType": "",
+      "fee": "38.00"
+    },
+    "buttons": [
+      {
+        "tag": "INPUT",
+        "id": null,
+        "name": null,
+        "type": "button",
+        "value": "Show Benefit",
+        "text": null,
+        "visible": true,
+        "disabled": false,
+        "title": null,
+        "onclick": null
+      },
+      {
+        "tag": "INPUT",
+        "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+        "name": "ctl00$MainContent$uc_MakeClaim$btnmcreasons",
+        "type": "button",
+        "value": "+",
+        "text": null,
+        "visible": true,
+        "disabled": false,
+        "title": null,
+        "onclick": null
+      },
+      {
+        "tag": "INPUT",
+        "id": "ctl00_MainContent_uc_MakeClaim_btnCancel",
+        "name": "ctl00$MainContent$uc_MakeClaim$btnCancel",
+        "type": "submit",
+        "value": "Cancel",
+        "text": null,
+        "visible": true,
+        "disabled": false,
+        "title": null,
+        "onclick": null
+      },
+      {
+        "tag": "INPUT",
+        "id": "ctl00_MainContent_uc_MakeClaim_btnReloadData",
+        "name": "ctl00$MainContent$uc_MakeClaim$btnReloadData",
+        "type": "submit",
+        "value": null,
+        "text": null,
+        "visible": true,
+        "disabled": false,
+        "title": null,
+        "onclick": null
+      }
+    ],
+    "alerts": [],
+    "calcRowHtml": "<tr id=\"ctl00_MainContent_uc_MakeClaim_trCalculateButton\">\n\t<td>\n                \n                &nbsp;<input type=\"submit\" name=\"ctl00$MainContent$uc_MakeClaim$btnCancel\" value=\"Cancel\" id=\"ctl00_MainContent_uc_MakeClaim_btnCancel\">\n            </td>\n</tr>",
+    "formText": " \t\nWelcome [ASP1120-SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD] Sign Out\n\nChange Password\n\t \n \t\nHOME\nCLAIM\nMANAGEMENT\nCLAIMS\t\nAdd Claim\nList Claims\nREPORTS\nPayment Advice\nDOWNLOADS\nPUAF for SupremeCare\nPROGRAMME TEMPLATE\nGEL Card Template\n\t\nSP CLINIC - SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD\t \nPlease select a valid diagnosis.\n\nVisit Date\t\nMC Start Date\t\nMC Days\t\n--Select--\n0\n0.5\n1\n1.5\n2\n2.5\n3\n3.5\n4\n4.5\n5\n5.5\n6\n6.5\n7\n \n\t\nPatient Name\t\nDylan Chern See Woo\n\nNRIC/FIN\tTxxxx699I\nCompany\tPacific Refreshments Pte Ltd\nType\tDependent\n\n\nREFERRING GP CLINIC\nHas Referring GP Clinic\tYes    No       \nReferring GP Clinic\t\n\n\nMC/VISIT REASONS & DIAGNOSIS\n\nMC/Visit Reasons\t\n--Select--\nAbdominal pain\nAbnormal ECG\nAbnormal finding of blood chemistry, unspecified\nAbnormal vaginal bleeding\nAche - Bodily\nAnxiety\nBack Lump\nBackache\nBleeding PR\nBlurring of vision\nBreast Lumps\nBreathlessness\nCardiac murmur\nCervicitis / Recurrent Vaginal Discharge\nChange in bowel habit\nChest Pain\nChicken pox\nChronic cough\nConjunctivities\nConjunctivitis\nCough\nCramps\nDiarrhoea - Severe\nDysmenorrhea\nDyspepsia\nDysuria\nEyelid twitching likely secondary to corneal irritation\nFaints\nFatigue\nFever\nFits\nFlu\nFollow up of colon polyp\nGastric\nGiddiness\nHaematuria\nHametemesis\nHeadache\nHearing - Impaired\nHemoptysis\nHFMD\nHypercalcemia\nIncontinence\nInjury\nItchiness\nJaundice\nJoint pains\nJoints swellings\nLeg pain\nLoss of consciousness\nLumps unspecified\nMovement - Impaired\nNeck lumps\nNumbness\nOcular Hypertension\nPain - Severe\nPain-unspecified\nPalpitations\nParalysis\nPost Surgery\nRaised Creatinine\nRash\nReflux\nSore Throat\nSpeech - Impaired\nStool Occult Blood - Positive\nSwollen legs\nThyroid nodule\nTraumatic Punctate Epithelial Erosions, left eye\nUveitis\nVision - Impaired\nVitreous floaters\nVomiting - Severe\nWeakness\nWheeze\nWounds\nX-ray abnormality\n  \n\n\nACUTE DIAGNOSIS\n\tCode         Description\nDiagnosis 1\t  ?\nDiagnosis 2\t \nDiagnosis 3\t \nDiagnosis 4\t \n\n\nCHRONIC DIAGNOSIS\nDiagnosis 1\t  ?\nDiagnosis 2\t \nDiagnosis 3\t \nDiagnosis 4\t \n\n\nFEE AND CHARGES: [SCHEME - RESTRICTED SCHEME ]\nSelect Fee Type\t\n--Select--\nFirst Consultation Fee\nFollow-up Consultation\nNo Consultation Fee\n\tConsult Fee \n\n\nClaim Remarks\t\n\n \n\t \n \t© Alliance Healthcare\t\nTerms of Use | Privacy\n\t "
+  },
+  "buttonCandidates": [
+    {
+      "tag": "INPUT",
+      "id": null,
+      "name": null,
+      "type": "button",
+      "value": "Show Benefit",
+      "text": null,
+      "visible": true,
+      "disabled": false,
+      "title": null,
+      "onclick": null
+    },
+    {
+      "tag": "INPUT",
+      "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+      "name": "ctl00$MainContent$uc_MakeClaim$btnmcreasons",
+      "type": "button",
+      "value": "+",
+      "text": null,
+      "visible": true,
+      "disabled": false,
+      "title": null,
+      "onclick": null
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-02-12T09:54:48.317Z",
+  "visit": {
+    "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "patient_name": "MITTAL SACHIN KUMAR",
+    "nric": "M4539893L",
+    "visit_date": "2026-02-02",
+    "pay_type": "MHC",
+    "submission_status": "error",
+    "submitted_at": null,
+    "submission_error": "Draft not found in Edit/Draft after save click (nric=M4539893L, context=aia)",
+    "submission_metadata": null
+  }
+}

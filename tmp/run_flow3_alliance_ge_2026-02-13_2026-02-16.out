@@ -1,0 +1,67 @@
+[32minfo[39m: === Batch Claim Submission === {"service":"clinic-automation","timestamp":"2026-02-17T13:17:42.694Z"}
+[32minfo[39m: Visit IDs: Scoped query {"service":"clinic-automation","timestamp":"2026-02-17T13:17:42.697Z"}
+[32minfo[39m: Pay Type: All {"service":"clinic-automation","timestamp":"2026-02-17T13:17:42.697Z"}
+[32minfo[39m: Portal Targets: ALLIANCE_MEDINET, GE {"service":"clinic-automation","timestamp":"2026-02-17T13:17:42.697Z"}
+[32minfo[39m: Date Range: 2026-02-13 to 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-17T13:17:42.700Z"}
+[32minfo[39m: Portal Only: true {"service":"clinic-automation","timestamp":"2026-02-17T13:17:42.700Z"}
+[32minfo[39m: Save as Draft: false {"service":"clinic-automation","timestamp":"2026-02-17T13:17:42.700Z"}
+[32minfo[39m: Leave Browser Open: false {"service":"clinic-automation","timestamp":"2026-02-17T13:17:42.700Z"}
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-17T13:17:43.012Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-17T13:17:43.013Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-17T13:17:43.013Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-17T13:17:43.013Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-17T13:17:44.465Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-17T13:17:44.465Z"}
+[32minfo[39m: Found 4 visit(s) to process {"service":"clinic-automation","timestamp":"2026-02-17T13:17:45.200Z"}
+[32minfo[39m: [1/4] Processing: CHEAM XI-QING JACQUELINE (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-17T13:17:45.426Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for CHEAM XI-QING JACQUELINE {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-17T13:17:45.428Z","visitId":"588d28b0-d736-49d7-b121-b7b72c8a3e6e"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Alliance Medinet {"service":"clinic-automation","timestamp":"2026-02-17T13:17:45.429Z"}
+[32minfo[39m: [SUBMIT] Alliance form data: {"doctorName":"Palanisamy Arul Murugan","matchedTag":"ALLIANC","nric":"T1204303H","service":"clinic-automation","spCode":"PAM","timestamp":"2026-02-17T13:17:45.430Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-17T13:17:47.228Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Panel Service {"selector":"div.sidebar a.nav-link:has-text(\"Panel Service\")","service":"clinic-automation","timestamp":"2026-02-17T13:17:50.178Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-17T13:17:50.845Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-17T13:17:51.540Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-17T13:17:53.042Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-17T13:17:53.124Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-17T13:17:53.179Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-14/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-17T13:17:53.268Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-14/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-17T13:17:53.565Z"}
+[33mwarn[39m: [SUBMIT] Alliance visit attempt failed {"attempt":1,"canRetry":false,"error":"Add closed Search Member but claim form did not render (portal runtime state: ERROR TypeError: Cannot read properties of undefined (reading 'res')\n    at <computed> (https://connect.alliancemedinet.com/463.2a90d0d779c4b349.js:1:5176555)\n    at Object.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:2944987)\n    at _0x33c12b.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3046069)\n    at _0x321261._next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3045302)\n    at _0x321261.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3044527)\n    at https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:1371207\n    at _0x5b0c12 (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3055691)\n    at _0x49c078.next (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:1370878)\n    at _0x32f59f.close (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3357186)\n    at _0x183d2f._finishDialogClose (https://connect.alliancemedinet.com/main.5d9f631e169b8e13.js:1:3394070))","lastAction":"select-member.clicked-add","maxAttempts":2,"retryable":false,"service":"clinic-automation","timestamp":"2026-02-17T13:18:12.862Z","traceId":null}
+[33mwarn[39m: [SUBMIT] Alliance Medinet indicates GE-network route; rerouting to GE service {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-17T13:18:12.862Z","visitId":"588d28b0-d736-49d7-b121-b7b72c8a3e6e"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to GE portal service {"service":"clinic-automation","timestamp":"2026-02-17T13:18:13.588Z"}
+[33mwarn[39m: [SUBMIT] GE portal automation not yet implemented {"allianceNetwork":"GE","payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-17T13:18:13.588Z","visitId":"588d28b0-d736-49d7-b121-b7b72c8a3e6e"}
+[33mwarn[39m: Portal service not implemented: GE (pay type: ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-17T13:18:13.589Z"}
+[32minfo[39m: [2/4] Processing: WOO CHERN SEE (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-17T13:18:15.827Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for WOO CHERN SEE {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-17T13:18:15.828Z","visitId":"2c78d589-8d45-4788-99d9-6c619bec31e7"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to GE portal service {"service":"clinic-automation","timestamp":"2026-02-17T13:18:15.829Z"}
+[33mwarn[39m: [SUBMIT] GE portal automation not yet implemented {"allianceNetwork":"GE","payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-17T13:18:15.829Z","visitId":"2c78d589-8d45-4788-99d9-6c619bec31e7"}
+[33mwarn[39m: Portal service not implemented: GE (pay type: ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-17T13:18:15.829Z"}
+[32minfo[39m: [3/4] Processing: TAN WEE HIONG KEVIN (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-17T13:18:18.151Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for TAN WEE HIONG KEVIN {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-17T13:18:18.151Z","visitId":"6c890353-6baf-4b3b-ac77-3fc99e96c79b"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Alliance Medinet {"service":"clinic-automation","timestamp":"2026-02-17T13:18:18.152Z"}
+[32minfo[39m: [SUBMIT] Alliance form data: {"doctorName":"Tan Guoping Kelvin","matchedTag":"ALLIANC","nric":"S7137124G","service":"clinic-automation","spCode":"KT","timestamp":"2026-02-17T13:18:18.153Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-17T13:18:19.530Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Panel Service {"selector":"div.sidebar a.nav-link:has-text(\"Panel Service\")","service":"clinic-automation","timestamp":"2026-02-17T13:18:22.061Z"}
+[33mwarn[39m: [SUBMIT] Alliance visit attempt failed {"attempt":1,"canRetry":false,"error":"Could not find Create Panel Claim menu","lastAction":"nav.create-panel-claim","maxAttempts":2,"retryable":false,"service":"clinic-automation","timestamp":"2026-02-17T13:18:22.784Z","traceId":null}
+[31merror[39m: [SUBMIT] Error submitting claim for TAN WEE HIONG KEVIN {"error":"Could not find Create Panel Claim menu","service":"clinic-automation","timestamp":"2026-02-17T13:18:22.784Z"}
+[32minfo[39m: [SUBMIT] Verification run: not persisting submission_status=error {"error":"Could not find Create Panel Claim menu","payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-17T13:18:22.784Z","visitId":"6c890353-6baf-4b3b-ac77-3fc99e96c79b"}
+[31merror[39m: Failed to submit: Could not find Create Panel Claim menu {"service":"clinic-automation","timestamp":"2026-02-17T13:18:22.784Z"}
+[32minfo[39m: [4/4] Processing: KIARA SINGH (ALLIANC) {"service":"clinic-automation","timestamp":"2026-02-17T13:18:25.336Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for KIARA SINGH {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-17T13:18:25.337Z","visitId":"d3a164b7-1b4f-490d-afbf-f9ef6dc1bd14"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Alliance Medinet {"service":"clinic-automation","timestamp":"2026-02-17T13:18:25.337Z"}
+[32minfo[39m: [SUBMIT] Alliance form data: {"doctorName":"Palanisamy Arul Murugan","matchedTag":"ALLIANC","nric":"T1722895H","service":"clinic-automation","spCode":"PAM","timestamp":"2026-02-17T13:18:25.338Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-17T13:18:26.603Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Panel Service {"selector":"div.sidebar a.nav-link:has-text(\"Panel Service\")","service":"clinic-automation","timestamp":"2026-02-17T13:18:31.095Z"}
+[33mwarn[39m: [SUBMIT] Alliance visit attempt failed {"attempt":1,"canRetry":false,"error":"Could not find Create Panel Claim menu","lastAction":"nav.create-panel-claim","maxAttempts":2,"retryable":false,"service":"clinic-automation","timestamp":"2026-02-17T13:18:31.815Z","traceId":null}
+[31merror[39m: [SUBMIT] Error submitting claim for KIARA SINGH {"error":"Could not find Create Panel Claim menu","service":"clinic-automation","timestamp":"2026-02-17T13:18:31.815Z"}
+[32minfo[39m: [SUBMIT] Verification run: not persisting submission_status=error {"error":"Could not find Create Panel Claim menu","payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-17T13:18:31.815Z","visitId":"d3a164b7-1b4f-490d-afbf-f9ef6dc1bd14"}
+[31merror[39m: Failed to submit: Could not find Create Panel Claim menu {"service":"clinic-automation","timestamp":"2026-02-17T13:18:31.815Z"}
+[32minfo[39m: 
+=== Submission Summary === {"service":"clinic-automation","timestamp":"2026-02-17T13:18:34.068Z"}
+[32minfo[39m: Total: 4 {"service":"clinic-automation","timestamp":"2026-02-17T13:18:34.068Z"}
+[32minfo[39m: Submitted: 0 {"service":"clinic-automation","timestamp":"2026-02-17T13:18:34.069Z"}
+[32minfo[39m: Drafts: 0 {"service":"clinic-automation","timestamp":"2026-02-17T13:18:34.069Z"}
+[32minfo[39m: Filled only (no DB update): 0 {"service":"clinic-automation","timestamp":"2026-02-17T13:18:34.069Z"}
+[32minfo[39m: Errors: 2 {"service":"clinic-automation","timestamp":"2026-02-17T13:18:34.069Z"}
+[32minfo[39m: Not Started (unsupported): 2 {"service":"clinic-automation","timestamp":"2026-02-17T13:18:34.069Z"}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-17T13:18:34.436Z"}

@@ -1,0 +1,97 @@
+[32minfo[39m: === Visit Details Extraction Batch === {"service":"clinic-automation","timestamp":"2026-02-17T08:59:32.070Z"}
+[32minfo[39m: Mode: Force re-extract (includes completed visits) {"service":"clinic-automation","timestamp":"2026-02-17T08:59:32.073Z"}
+[32minfo[39m: Querying database for visits needing enhancement... {"service":"clinic-automation","timestamp":"2026-02-17T08:59:32.088Z"}
+[32minfo[39m: Filtering to visit IDs: 2c78d589-8d45-4788-99d9-6c619bec31e7 {"service":"clinic-automation","timestamp":"2026-02-17T08:59:32.088Z"}
+[32minfo[39m: Filtering to portal scope: MHC, FULLERT, IHP, ALL, ALLIANZ, ALLIANCE, AIA, GE, AIACLIENT, AVIVA, SINGLIFE + Allianz tags in patient name {"service":"clinic-automation","timestamp":"2026-02-17T08:59:32.089Z"}
+(node:75258) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vincent/Baselrpacrm/apps/crm/src/lib/rpa/portals.shared.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vincent/Baselrpacrm/apps/crm/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[32minfo[39m: Found 1 candidate visit(s) {"service":"clinic-automation","timestamp":"2026-02-17T08:59:32.792Z"}
+[32minfo[39m: Processing 1 visits (0 skipped) {"service":"clinic-automation","timestamp":"2026-02-17T08:59:32.793Z"}
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-17T08:59:32.794Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-17T08:59:32.795Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-17T08:59:32.796Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-17T08:59:32.796Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-17T08:59:35.362Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-17T08:59:35.370Z"}
+[32minfo[39m: Initializing browser and logging in to Clinic Assist... {"service":"clinic-automation","timestamp":"2026-02-17T08:59:35.711Z"}
+[32minfo[39m: [CA 01] Login start {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-17T08:59:35.722Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: Logging into Clinic Assist... {"service":"clinic-automation","timestamp":"2026-02-17T08:59:35.724Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-17T08:59:38.781Z"}
+[32minfo[39m: [CA 02] Username filled {"service":"clinic-automation","timestamp":"2026-02-17T08:59:38.781Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-17T08:59:38.814Z"}
+[32minfo[39m: [CA 03] Password filled {"service":"clinic-automation","timestamp":"2026-02-17T08:59:38.814Z"}
+[32minfo[39m: Clinic Group filled: ssoc {"service":"clinic-automation","timestamp":"2026-02-17T08:59:38.822Z"}
+[32minfo[39m: [CA 04] Clinic Group filled {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-17T08:59:38.823Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-17T08:59:38.903Z"}
+[32minfo[39m: [CA 05] Login submitted {"service":"clinic-automation","timestamp":"2026-02-17T08:59:38.904Z"}
+[32minfo[39m: Clinic Assist 2FA not required (verification inputs disabled) {"service":"clinic-automation","timestamp":"2026-02-17T08:59:41.923Z"}
+[32minfo[39m: Successfully logged into Clinic Assist {"service":"clinic-automation","timestamp":"2026-02-17T08:59:42.158Z"}
+[32minfo[39m: [CA 06] Login ok {"service":"clinic-automation","timestamp":"2026-02-17T08:59:42.158Z"}
+[32minfo[39m: 
+Starting batch extraction for 1 visits... {"service":"clinic-automation","timestamp":"2026-02-17T08:59:42.158Z"}
+[32minfo[39m: Max retries: 3, Batch size: 100 {"service":"clinic-automation","timestamp":"2026-02-17T08:59:42.158Z"}
+[32minfo[39m: [VisitDetails] Starting batch extraction for 1 visits {"service":"clinic-automation","timestamp":"2026-02-17T08:59:43.079Z"}
+[32minfo[39m: [VisitDetails] Processing visit 1/1: WOO CHERN SEE (2026-02-13) {"service":"clinic-automation","timestamp":"2026-02-17T08:59:43.079Z"}
+[32minfo[39m: [VisitDetails] Navigating to Patient Page for visit 2c78d589-8d45-4788-99d9-6c619bec31e7 (WOO CHERN SEE) {"service":"clinic-automation","timestamp":"2026-02-17T08:59:43.696Z"}
+[32minfo[39m: [CA 07] Navigate to Patient Page - START {"service":"clinic-automation","timestamp":"2026-02-17T08:59:43.698Z"}
+[32minfo[39m: [CA 08] Current URL before navigation {"service":"clinic-automation","timestamp":"2026-02-17T08:59:43.698Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: [CA 09] Need to select Reception/room first before accessing Patient Page {"service":"clinic-automation","timestamp":"2026-02-17T08:59:43.707Z"}
+[32minfo[39m: [CA 10] Clicking Reception/room to access system {"selector":"button:has-text(\"Reception\")","service":"clinic-automation","timestamp":"2026-02-17T08:59:44.295Z"}
+[32minfo[39m: [CA 11] Reception clicked, checking URL {"newUrl":"https://clinicassist.sg:1080/Home/Reception","service":"clinic-automation","timeTaken":1192,"timestamp":"2026-02-17T08:59:44.899Z"}
+[32minfo[39m: [CA 12] Successfully entered Reception room {"newUrl":"https://clinicassist.sg:1080/Home/Reception","service":"clinic-automation","timeTaken":1390,"timestamp":"2026-02-17T08:59:45.097Z"}
+[32minfo[39m: [CA 13] Looking for sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-17T08:59:45.097Z"}
+[32minfo[39m: [CA 14] Looking for Patient sidebar link {"service":"clinic-automation","timestamp":"2026-02-17T08:59:45.101Z"}
+[32minfo[39m: [CA 15] Could not click Patient link via UI; trying Home -> Patient fallback {"service":"clinic-automation","timestamp":"2026-02-17T08:59:45.109Z","totalTime":1411}
+[32minfo[39m: [CA 16] Home->Patient retry URL {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-17T08:59:52.577Z"}
+[32minfo[39m: [CA 17] Navigate to Patient Page - COMPLETE {"service":"clinic-automation","timestamp":"2026-02-17T08:59:52.579Z","totalTime":8881}
+[32minfo[39m: [VisitDetails] Searching for patient by number: 78227 (WOO CHERN SEE) {"service":"clinic-automation","timestamp":"2026-02-17T08:59:52.579Z"}
+[32minfo[39m: [CA 18] Search patient by number {"patientNumber":"78227","service":"clinic-automation","timestamp":"2026-02-17T08:59:52.580Z"}
+[32minfo[39m: [CA 19] Pressing Enter to execute search (may need to dismiss dialog first) {"service":"clinic-automation","timestamp":"2026-02-17T08:59:53.349Z"}
+[32minfo[39m: [CA 20] Patient search executed by number (Enter key x2) {"patientNumber":"78227","service":"clinic-automation","timestamp":"2026-02-17T08:59:54.466Z"}
+[32minfo[39m: [VisitDetails] Opening patient record by number: 78227 {"service":"clinic-automation","timestamp":"2026-02-17T08:59:56.469Z"}
+[32minfo[39m: [CA 21] Open patient from search results by number {"patientNumber":"78227","service":"clinic-automation","timestamp":"2026-02-17T08:59:56.471Z"}
+[32minfo[39m: [CA 22] Found patient row by number {"hasLink":true,"rowIndex":1,"service":"clinic-automation","timestamp":"2026-02-17T08:59:58.483Z"}
+[32minfo[39m: [CA 23] Clicked patient link via filter method {"service":"clinic-automation","timestamp":"2026-02-17T08:59:58.546Z"}
+[32minfo[39m: [CA 24] Patient opened from search results by number {"service":"clinic-automation","timestamp":"2026-02-17T09:00:00.548Z"}
+[32minfo[39m: [VisitDetails] Extracting NRIC from biodata page for: WOO CHERN SEE {"service":"clinic-automation","timestamp":"2026-02-17T09:00:02.551Z"}
+[32minfo[39m: [CA 25] Get patient NRIC {"service":"clinic-automation","timestamp":"2026-02-17T09:00:02.552Z"}
+[32minfo[39m: [CA 26] Extract NRIC from patient biodata/info page {"service":"clinic-automation","timestamp":"2026-02-17T09:00:02.552Z"}
+[32minfo[39m: [CA 27] NRIC found in input field {"nric":"T0801699I","selector":"input[name*=\"nric\" i]","service":"clinic-automation","timestamp":"2026-02-17T09:00:04.435Z"}
+[32minfo[39m: [VisitDetails] Found NRIC: T0801699I for patient: WOO CHERN SEE {"service":"clinic-automation","timestamp":"2026-02-17T09:00:04.435Z"}
+[32minfo[39m: [VisitDetails] Updated visit 2c78d589-8d45-4788-99d9-6c619bec31e7 with NRIC: T0801699I {"service":"clinic-automation","timestamp":"2026-02-17T09:00:04.679Z"}
+[32minfo[39m: [VisitDetails] Extracting charge type, diagnosis, and MC data for visit 2c78d589-8d45-4788-99d9-6c619bec31e7 on 2026-02-13 {"service":"clinic-automation","timestamp":"2026-02-17T09:00:04.680Z"}
+[32minfo[39m: [CA 28] Get charge type, diagnosis, and MC data for visit date {"service":"clinic-automation","timestamp":"2026-02-17T09:00:04.683Z","visitDate":"2026-02-13"}
+[32minfo[39m: [CA 29] Check for First Consult on visit date {"service":"clinic-automation","timestamp":"2026-02-17T09:00:04.684Z","visitDate":"2026-02-13"}
+[32minfo[39m: [CA 30] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-17T09:00:04.684Z"}
+[32minfo[39m: [CA 31] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-17T09:00:07.747Z"}
+[32minfo[39m: [CA 32] Open All Tab in TX History {"service":"clinic-automation","timestamp":"2026-02-17T09:00:07.750Z"}
+[32minfo[39m: [CA 33] All Tab opened {"service":"clinic-automation","timestamp":"2026-02-17T09:00:40.135Z"}
+[32minfo[39m: [CA 34] First Consult check result {"found":true,"service":"clinic-automation","timestamp":"2026-02-17T09:00:42.178Z","visitDate":"2026-02-13"}
+[32minfo[39m: [CA 35] Charge type determined {"chargeType":"first","hasFirstConsult":true,"service":"clinic-automation","timestamp":"2026-02-17T09:00:42.178Z","visitDate":"2026-02-13"}
+[32minfo[39m: [CA 36] MC extraction from TX History disabled; using defaults {"mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-17T09:00:42.178Z"}
+[32minfo[39m: [CA 37] Open Diagnosis Tab {"service":"clinic-automation","timestamp":"2026-02-17T09:00:42.179Z"}
+[32minfo[39m: [CA 38] Diagnosis Tab opened {"service":"clinic-automation","timestamp":"2026-02-17T09:00:45.268Z"}
+[32minfo[39m: [CA 39] Extract diagnosis for visit date {"service":"clinic-automation","timestamp":"2026-02-17T09:00:45.270Z","visitDate":"2026-02-13"}
+[32minfo[39m: [CA 40] Found diagnosis for visit date {"code":"M54.5","date":"13/02/2026","description":"Low back pain","service":"clinic-automation","timestamp":"2026-02-17T09:00:46.284Z"}
+[32minfo[39m: [CA 41] Extracting medicines for visit date {"service":"clinic-automation","timestamp":"2026-02-17T09:00:46.293Z","visitDate":"2026-02-13"}
+[32minfo[39m: [CA 42] Open Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-17T09:00:46.293Z"}
+[32minfo[39m: [CA 43] Medicine Tab opened {"service":"clinic-automation","timestamp":"2026-02-17T09:00:48.882Z"}
+[32minfo[39m: [CA 44] Extract medicines from Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-17T09:00:48.883Z","visitDate":"2026-02-13"}
+[32minfo[39m: [CA 45] Medicines extracted from Medicine Tab {"chosenDateIso":"2026-02-13","count":2,"medicines":[{"amount":120,"name":"SPECIALIST FIRST CONSULTATION","quantity":1,"unitPrice":1},{"amount":54.5,"name":"Low back pain","quantity":54.5,"unitPrice":1}],"service":"clinic-automation","timestamp":"2026-02-17T09:00:49.895Z","totalRecords":2,"visitDate":"2026-02-13"}
+[32minfo[39m: [CA 46] TX History: extracted medicines summary {"count":2,"filteredOut":0,"sample":[{"amount":120,"name":"SPECIALIST FIRST CONSULTATION","quantity":1,"unitPrice":1},{"amount":54.5,"name":"Low back pain","quantity":54.5,"unitPrice":1}],"service":"clinic-automation","timestamp":"2026-02-17T09:00:49.896Z"}
+[32minfo[39m: [VisitDetails] Extracted data for visit 2c78d589-8d45-4788-99d9-6c619bec31e7: {"chargeType":"first","diagnosis":"Low back pain","mcDays":0,"mcStartDate":null,"service":"clinic-automation","timestamp":"2026-02-17T09:00:49.896Z"}
+[32minfo[39m: [VisitDetails] Updated visit 2c78d589-8d45-4788-99d9-6c619bec31e7 with extracted details {"service":"clinic-automation","timestamp":"2026-02-17T09:00:51.211Z"}
+[32minfo[39m: [VisitDetails] Successfully extracted details for visit 2c78d589-8d45-4788-99d9-6c619bec31e7 {"chargeType":"first","diagnosis":"Low back pain","mcDays":0,"service":"clinic-automation","timestamp":"2026-02-17T09:00:51.211Z"}
+[32minfo[39m: [VisitDetails] Batch extraction complete: 1 completed, 0 failed, 0 skipped {"service":"clinic-automation","timestamp":"2026-02-17T09:00:52.494Z"}
+[32minfo[39m: 
+=== Extraction Summary === {"service":"clinic-automation","timestamp":"2026-02-17T09:00:52.850Z"}
+[32minfo[39m: Total visits processed: 1 {"service":"clinic-automation","timestamp":"2026-02-17T09:00:52.850Z"}
+[32minfo[39m: ✅ Completed: 1 {"service":"clinic-automation","timestamp":"2026-02-17T09:00:52.850Z"}
+[32minfo[39m: ❌ Failed: 0 {"service":"clinic-automation","timestamp":"2026-02-17T09:00:52.851Z"}
+[32minfo[39m: ⏭️  Skipped: 0 {"service":"clinic-automation","timestamp":"2026-02-17T09:00:52.851Z"}
+[32minfo[39m: Success rate: 100.0% {"service":"clinic-automation","timestamp":"2026-02-17T09:00:52.851Z"}
+[32minfo[39m: Time elapsed: 70.7s {"service":"clinic-automation","timestamp":"2026-02-17T09:00:52.851Z"}
+[32minfo[39m: Average time per visit: 70.7s {"service":"clinic-automation","timestamp":"2026-02-17T09:00:52.851Z"}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-17T09:00:53.093Z"}

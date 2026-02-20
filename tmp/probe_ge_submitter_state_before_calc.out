@@ -1,0 +1,160 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T09:27:14.767Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T09:27:14.769Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T09:27:14.770Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T09:27:14.770Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T09:27:17.489Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T09:27:17.492Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T09:27:20.633Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:27:22.480Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T09:27:24.429Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:27:25.880Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:27:27.404Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T09:27:28.912Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T09:27:30.419Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T09:27:31.652Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T09:27:32.246Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T09:27:34.959Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T09:27:36.777Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"Lower back pain","timestamp":"2026-02-19T09:27:53.124Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":5,"service":"clinic-automation","term":"Lower back","timestamp":"2026-02-19T09:27:55.005Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":5,"service":"clinic-automation","term":"pain","timestamp":"2026-02-19T09:27:56.572Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"lower back pain","timestamp":"2026-02-19T09:28:04.371Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"back pain","timestamp":"2026-02-19T09:28:12.283Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"backache","timestamp":"2026-02-19T09:28:20.041Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"L","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:28:26.811Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"B","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:28:33.564Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"P","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:28:40.510Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"F","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:28:47.109Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"H","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:28:53.954Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"A","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:29:00.696Z"}
+[32minfo[39m: [GE DX] soft fallback click {"clicked":true,"fallbackTerm":"pain","score":0.25,"selectedCode":"R52","selectedText":"Pain, not elsewhere classified","service":"clinic-automation","timestamp":"2026-02-19T09:29:03.037Z"}
+[probe] feeTypeState {
+  "selected": true,
+  "value": "followup_consultationfee",
+  "by": "preferred"
+}
+[probe] referralOk true
+[probe] before-calc {
+  "msg": "",
+  "mcDay": "0",
+  "mcDays": "0",
+  "mcReason": "Backache",
+  "mcReasonText": "Backache",
+  "refValue": "SINGAPORE SPORTS",
+  "refType": "Clinic",
+  "oldRefType": "Clinic",
+  "clinicId": "7b820cae-c206-4537-a164-ef28dc2641f9",
+  "parentClinicId": "",
+  "dxCode": "R52",
+  "dxText": "Pain, not elsewhere classified",
+  "dxCodeHidden": "R52",
+  "dxId": "88cf96b2-e915-4b47-ab23-3f4fcb00be90",
+  "acuteArray": "[{\"label\":\"Pain, not elsewhere classified\",\"val\":\"R52\"}]",
+  "feeType": "followup_consultationfee",
+  "feeAmount": "38",
+  "buttons": [
+    {
+      "id": "",
+      "value": "Show Benefit",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+      "value": "+",
+      "visible": true
+    },
+    {
+      "id": "",
+      "value": "Add Drug",
+      "visible": true
+    },
+    {
+      "id": "btnSearchProcedure",
+      "value": "Select",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnsaveprocedure",
+      "value": "Add Item",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btncalculateclaim",
+      "value": "Calculate Claim",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnCancel",
+      "value": "Cancel",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnReloadData",
+      "value": "",
+      "visible": true
+    }
+  ]
+}
+[32minfo[39m: [SUBMIT] GE calculate triggered {"attemptLabel":"probe-state","service":"clinic-automation","timestamp":"2026-02-19T09:29:10.477Z"}
+[probe] after-calc {
+  "msg": "Please select a valid referral clinic",
+  "mcDay": "0",
+  "mcDays": "0",
+  "mcReason": "Backache",
+  "mcReasonText": "Backache",
+  "refValue": "SINGAPORE SPORTS",
+  "refType": "Clinic",
+  "oldRefType": "Clinic",
+  "clinicId": "7b820cae-c206-4537-a164-ef28dc2641f9",
+  "parentClinicId": "",
+  "dxCode": "R52",
+  "dxText": "Pain, not elsewhere classified",
+  "dxCodeHidden": "R52",
+  "dxId": "88cf96b2-e915-4b47-ab23-3f4fcb00be90",
+  "acuteArray": "[{\"label\":\"Pain, not elsewhere classified\",\"val\":\"R52\"}]",
+  "feeType": "followup_consultationfee",
+  "feeAmount": "38",
+  "buttons": [
+    {
+      "id": "",
+      "value": "Show Benefit",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+      "value": "+",
+      "visible": true
+    },
+    {
+      "id": "",
+      "value": "Add Drug",
+      "visible": true
+    },
+    {
+      "id": "btnSearchProcedure",
+      "value": "Select",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnsaveprocedure",
+      "value": "Add Item",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btncalculateclaim",
+      "value": "Calculate Claim",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnCancel",
+      "value": "Cancel",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnReloadData",
+      "value": "",
+      "visible": true
+    }
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T09:29:10.850Z"}

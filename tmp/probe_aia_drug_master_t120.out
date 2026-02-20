@@ -1,0 +1,2689 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-13T06:00:30.145Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-13T06:00:30.152Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-13T06:00:30.152Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-13T06:00:30.152Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-13T06:00:32.009Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-13T06:00:32.009Z"}
+[32minfo[39m: [MHC 01] Login start {"attempt":1,"maxAttempts":3,"service":"clinic-automation","timestamp":"2026-02-13T06:00:32.556Z"}
+[32minfo[39m: Logging into MHC Asia... {"service":"clinic-automation","timestamp":"2026-02-13T06:00:32.556Z"}
+[32minfo[39m: [MHC 02] Country selected (best-effort) {"label":"MHC SINGAPORE","service":"clinic-automation","timestamp":"2026-02-13T06:00:35.293Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-13T06:00:35.851Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-13T06:00:36.374Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-13T06:00:37.694Z"}
+[32minfo[39m: Successfully logged into MHC Asia {"service":"clinic-automation","timestamp":"2026-02-13T06:00:38.555Z"}
+[32minfo[39m: [MHC 03] Login ok {"service":"clinic-automation","timestamp":"2026-02-13T06:00:38.555Z"}
+[32minfo[39m: [MHC 04] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-13T06:00:38.555Z"}
+[32minfo[39m: [MHC 05] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-13T06:00:38.586Z"}
+[32minfo[39m: Clicked: Switch System {"service":"clinic-automation","timestamp":"2026-02-13T06:00:39.396Z"}
+[32minfo[39m: [MHC 06] No visible switch options; trying hidden switch links {"labelForLog":"AIA Clinic","service":"clinic-automation","timestamp":"2026-02-13T06:00:40.659Z"}
+[32minfo[39m: [MHC 07] Switch system debug targets {"count":0,"labelForLog":"AIA Clinic","sample":[],"service":"clinic-automation","timestamp":"2026-02-13T06:00:40.660Z"}
+[32minfo[39m: [MHC 08] Switch system href fallback candidates {"count":0,"labelForLog":"AIA Clinic","sample":[],"service":"clinic-automation","timestamp":"2026-02-13T06:00:40.661Z"}
+[32minfo[39m: [MHC 09] Dialog handler set up {"service":"clinic-automation","timestamp":"2026-02-13T06:00:41.934Z"}
+[32minfo[39m: [MHC 10] Switch system verification via default fallback {"hasAddAiaVisit":true,"hasPolicyNoHeader":false,"hasSearchAiaMember":false,"hasSwitchSystem":false,"isAiaDomain":true,"isMhcDomain":false,"isSinglifeDomain":false,"labelForLog":"AIA Clinic","looksLikeAiaFlow":true,"nextUrl":"https://www.mhcasia.net/mhc/SwitchSystem.ec?url=https://www.aiaclinic.com","service":"clinic-automation","timestamp":"2026-02-13T06:00:41.966Z","url":"https://www.aiaclinic.com/aia/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=80PE-P316-9HF4-L7CM-T8BX-5RXK-MUX1-Z4Q0"}
+[32minfo[39m: [MHC 11] Navigate to AIA Visit {"nric":"T1208937B","service":"clinic-automation","timestamp":"2026-02-13T06:00:41.967Z","visitDate":"06/02/2026"}
+[32minfo[39m: Clicked: Add AIA Visit {"service":"clinic-automation","timestamp":"2026-02-13T06:00:42.808Z"}
+[32minfo[39m: [MHC 12] Member card selection detected {"service":"clinic-automation","timestamp":"2026-02-13T06:00:43.842Z"}
+[32minfo[39m: Clicked: Member card: AIA red card {"service":"clinic-automation","timestamp":"2026-02-13T06:00:44.587Z"}
+[32minfo[39m: [MHC 13] Click search icon for NRIC lookup {"service":"clinic-automation","timestamp":"2026-02-13T06:00:45.401Z"}
+[32minfo[39m: Clicked: Search icon {"service":"clinic-automation","timestamp":"2026-02-13T06:00:46.326Z"}
+[32minfo[39m: [MHC 14] Set AIA search visit date {"service":"clinic-automation","timestamp":"2026-02-13T06:00:46.828Z","visitDate":"06/02/2026"}
+[32minfo[39m: [MHC 15] AIA search visit date set {"selector":"tr:has-text(\"Visit Date\") input[type=\"text\"]","service":"clinic-automation","timestamp":"2026-02-13T06:01:17.386Z","valueNow":"06/02/2026"}
+[32minfo[39m: [MHC 16] Enter NRIC in AIA search {"nric":"T1208937B","service":"clinic-automation","timestamp":"2026-02-13T06:01:17.386Z"}
+[32minfo[39m: NRIC entered in AIA search {"service":"clinic-automation","timestamp":"2026-02-13T06:01:18.689Z"}
+[32minfo[39m: Clicked: Search button {"service":"clinic-automation","timestamp":"2026-02-13T06:01:20.186Z"}
+[32minfo[39m: [MHC 17] Click patient from AIA search results {"service":"clinic-automation","timestamp":"2026-02-13T06:01:20.695Z"}
+[32minfo[39m: [MHC 18] AIA patient link patched with visit date {"originalHref":"ClinicIECAIAEmpVisitAdd.ec?memberId=4967027104&visitDateAsString=06/02/2026&tranId=EDT457213725&OWASP_CSRFTOKEN=80PE-P316-9HF4-L7CM-T8BX-5RXK-MUX1-Z4Q0","patchedHref":"https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAdd.ec?memberId=4967027104&visitDateAsString=06%2F02%2F2026&tranId=EDT457213725&OWASP_CSRFTOKEN=80PE-P316-9HF4-L7CM-T8BX-5RXK-MUX1-Z4Q0","service":"clinic-automation","timestamp":"2026-02-13T06:01:20.704Z","visitDate":"06/02/2026"}
+[32minfo[39m: Selected patient from AIA search results {"service":"clinic-automation","timestamp":"2026-02-13T06:01:21.937Z"}
+[32minfo[39m: [MHC 19] Patient selected from AIA results {"from":"https://www.aiaclinic.com/aia/ClinicIECAIAPatientSearchSubmit.ec","service":"clinic-automation","timestamp":"2026-02-13T06:01:21.937Z","to":"https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAdd.ec?memberId=4967027104&visitDateAsString=06%2F02%2F2026&tranId=EDT457213725&OWASP_CSRFTOKEN=80PE-P316-9HF4-L7CM-T8BX-5RXK-MUX1-Z4Q0"}
+[32minfo[39m: [MHC 20] Fill visit date {"date":"06/02/2026","service":"clinic-automation","timestamp":"2026-02-13T06:01:22.044Z"}
+[32minfo[39m: [MHC 21] Visit date filled (fast path) {"date":"06/02/2026","service":"clinic-automation","timestamp":"2026-02-13T06:01:22.046Z"}
+[32minfo[39m: [MHC 22] Fill charge type {"service":"clinic-automation","timestamp":"2026-02-13T06:01:22.047Z","visitType":"new"}
+[32minfo[39m: [MHC 23] Visit form ready {"service":"clinic-automation","timestamp":"2026-02-13T06:01:22.047Z"}
+[32minfo[39m: [MHC 24] Charge type filled {"mhcType":"First Consult","service":"clinic-automation","timestamp":"2026-02-13T06:01:23.881Z","visitType":"new"}
+{
+  "switched": true,
+  "navigated": true,
+  "clicked": true,
+  "popupOpened": true,
+  "current": {
+    "url": "https://www.aiaclinic.com/aia/ClinicIECAIAEmpVisitAddSubmit.ec",
+    "title": "IEC Employee Visit Add",
+    "bodySnippet": "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic Switch System || Log Out Announcement (12) Add AIA Visit View Submitted Visits Edit/Draft Visits Add Imaging AIA Visit Add Lab AIA Visit Utilization Review Form Download Drug Price Review Form Procedure Request Form Order Drugs via MHC Change Password Employee Visit - Add (* = Required Fields) Group/Company AMERICAN INTERNATIONAL ASSURANCE COMPANY, LIMITED/NORTHSTANDARD SERVICES ASIA PTE. LIMITED Policy Details: No Cap Special Remarks: Patient Name TJIA NATHANAEL THOMAS Patient ID T1208937B AIA Visit Date* (dd/mm/yyyy) Charge Type First Consult Follow Up Repeat Medicine MC Day* MC Start Date (dd/mm/yyyy) MC Reason NA Bleeding Breathlessness / Wheezing Burns / Poisoning Contagious Illness Depressive / Anxiety States / Mood Chan Difficulties in eating / swallowing Disfigurements Drowsiness/Giddiness Fatique/Weakness/Malaise Fever Impaired Balance / Coordination Impaired Judgments / Concentration Impaired Movement Impaired Speech/Vision/Hearing Injury / Accident Numbness / Abnormal Sensation Palpitations Post Surgery/Injection Severe Coughing Severe Itchiness / Allergy Severe Pain/Ache/Colic Severe swelling Severe Vomiting/Diarrhoea MC Reason Other Diagnosis Pri* NA J20 - Acute bronchitis J02 - Acute pharyngitis J01 - Acute sinusitis J03 - Acute tonsillitis J069 - Acute upper respiratory infection J304 - Allergic rhinitis T784 - Allergy I726 - Aneurysm and dissection of vertebral artery K120 - Apthous mouth ulcers J45 - Asthma L20 - Atopic dermatitis G510 - Bells palsy L03.9 - Cellulitis H001 - Chalazion R074 - Chest pain, unspecified B01 - Chicken pox infections M224 - Chondromalacia patellae A90 - Dengue fever (classical dengue) E10 - Diabetes Mellitus (insulin dep.) E11 - Dia",
+    "anchors": [
+      {
+        "text": "Switch System || ",
+        "href": "#",
+        "onclick": ""
+      },
+      {
+        "text": "Singlife Pcpcare",
+        "href": "SwitchSystem.ec?url=https://www.pcpcare.com",
+        "onclick": ""
+      },
+      {
+        "text": "Singlife Global 8",
+        "href": "SwitchSystem.ec?url=https://www.myglobalbenefit.com",
+        "onclick": ""
+      },
+      {
+        "text": "AXA Clinicare (HSBC)",
+        "href": "SwitchSystem.ec?url=https://www.clcare.com",
+        "onclick": ""
+      },
+      {
+        "text": "Better Health",
+        "href": "SwitchSystem.ec?url=https://betterhealth.mhcasia.net",
+        "onclick": ""
+      },
+      {
+        "text": "FWD Travel Insurance",
+        "href": "SwitchSystem.ec?url=https://www.fwdclinic.com",
+        "onclick": ""
+      },
+      {
+        "text": "Great Eastern",
+        "href": "SwitchSystem.ec?url=https://ge.mhcasia.net/ge",
+        "onclick": ""
+      },
+      {
+        "text": "MHC Medical Network",
+        "href": "SwitchSystem.ec?url=https://www.mhcasia.net/mhc",
+        "onclick": ""
+      },
+      {
+        "text": "INCOME iMedicare",
+        "href": "SwitchSystem.ec?url=https://www.mhc-imedicare.com",
+        "onclick": ""
+      },
+      {
+        "text": "PHI System",
+        "href": "SwitchSystem.ec?url=https://phi.mhcasia.net",
+        "onclick": ""
+      },
+      {
+        "text": "QBE Primary Care",
+        "href": "SwitchSystem.ec?url=https://www.qbeprimarycare.com",
+        "onclick": ""
+      },
+      {
+        "text": "Log Out",
+        "href": "Logout.ec?OWASP_CSRFTOKEN=80PE-P316-9HF4-L7CM-T8BX-5RXK-MUX1-Z4Q0",
+        "onclick": ""
+      },
+      {
+        "text": "Announcement (12) ",
+        "href": "ClinicAnnouncement.ec?OWASP_CSRFTOKEN=80PE-P316-9HF4-L7CM-T8BX-5RXK-MUX1-Z4Q0",
+        "onclick": ""
+      },
+      {
+        "text": "Add AIA Visit ",
+        "href": "ClinicAddIECCardImage.ec?OWASP_CSRFTOKEN=80PE-P316-9HF4-L7CM-T8BX-5RXK-MUX1-Z4Q0",
+        "onclick": ""
+      },
+      {
+        "text": "View Submitted Visits ",
+        "href": "ClinicIECAIAEmpVisitList.ec?OWASP_CSRFTOKEN=80PE-P316-9HF4-L7CM-T8BX-5RXK-MUX1-Z4Q0",
+        "onclick": ""
+      },
+      {
+        "text": "Edit/Draft Visits ",
+        "href": "ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=80PE-P316-9HF4-L7CM-T8BX-5RXK-MUX1-Z4Q0",
+        "onclick": ""
+      },
+      {
+        "text": "Add Imaging AIA Visit ",
+        "href": "ClinicIECXrayVisitSelectPatient.ec?OWASP_CSRFTOKEN=80PE-P316-9HF4-L7CM-T8BX-5RXK-MUX1-Z4Q0",
+        "onclick": ""
+      },
+      {
+        "text": "Add Lab AIA Visit ",
+        "href": "ClinicIECLabVisitSelectPatient.ec?OWASP_CSRFTOKEN=80PE-P316-9HF4-L7CM-T8BX-5RXK-MUX1-Z4Q0",
+        "onclick": ""
+      },
+      {
+        "text": "Utilization Review Form Download ",
+        "href": "javascript:openNewWindow('http://b6.caspio.com/dp.asp?AppKey=e7923000398df35e6a66458295c4')",
+        "onclick": ""
+      },
+      {
+        "text": "Drug Price Review Form ",
+        "href": "javascript:openNewWindow('http://b6.caspio.com/dp.asp?AppKey=e792300020dbe860ed9248b79292')",
+        "onclick": ""
+      },
+      {
+        "text": "Procedure Request Form ",
+        "href": "javascript:openNewWindow('http://b6.caspio.com/dp.asp?AppKey=e792300090be4f97b8be4a4fae71')",
+        "onclick": ""
+      },
+      {
+        "text": "Order Drugs via MHC ",
+        "href": "javascript:openNewWindow('https://product.mhcasia.net/?storeRedirect=mhchealthcare')",
+        "onclick": ""
+      },
+      {
+        "text": "Change Password ",
+        "href": "ClinicChangePassword.ec?OWASP_CSRFTOKEN=80PE-P316-9HF4-L7CM-T8BX-5RXK-MUX1-Z4Q0",
+        "onclick": ""
+      }
+    ],
+    "inputs": [
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "dailyBal",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "monthlyBal",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "yearlyBal",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "noOfVisitPerYear",
+        "id": "",
+        "value": "-1",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "pLimitPerVisit",
+        "id": "",
+        "value": "9,999,999.00",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "pCoPayType",
+        "id": "",
+        "value": "$",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "pCoPayment",
+        "id": "",
+        "value": "0.00",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "specialRemarks",
+        "id": "",
+        "value": "Effective from 1st Jan 2025 - Waiver of GP Referral for Pediatricians Visit for Child up to end of 12 years old. Once patient turns 13 years old, referral letter is required.",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "checkBenefit",
+        "id": "",
+        "value": "Y",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "str",
+        "id": "",
+        "value": "No Cap",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "showCopayment",
+        "id": "",
+        "value": "Y",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "benefitSchemeId",
+        "id": "",
+        "value": "AIA",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "benefitSchemeCode",
+        "id": "",
+        "value": "AIA",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "visitDateAsString",
+        "id": "visitDateAsString",
+        "value": "06/02/2026",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "button",
+        "name": "SelectDate",
+        "id": "",
+        "value": "Select",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "visitDateDay",
+        "id": "",
+        "value": "6",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "visitDateMonth",
+        "id": "",
+        "value": "02",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "visitDateYear",
+        "id": "",
+        "value": "2026",
+        "text": ""
+      },
+      {
+        "tag": "select",
+        "type": "",
+        "name": "subType",
+        "id": "",
+        "value": "",
+        "text": "First Consult Follow Up Repeat Medicine "
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "mcDay",
+        "id": "",
+        "value": "?",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "mcStartDateAsString",
+        "id": "mcStartDateAsString",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "button",
+        "name": "mcSelectDate",
+        "id": "mcSelectDate",
+        "value": "Select",
+        "text": ""
+      },
+      {
+        "tag": "select",
+        "type": "",
+        "name": "mcReasonIdTemp",
+        "id": "",
+        "value": "",
+        "text": "NA Bleeding Breathlessness / Wheezing Burns / Poisoning Contagious Illness Depressive / Anxiety States / Mood Chan Difficulties in eating / swallowing Disfigurements Drowsiness/Giddiness Fatique/Weakness/Malaise Fever Impaired Balance / Coordination Impaired Judgments / Concentration Impaired Movement Impaired Speech/Vision/Hearing Injury / Accident Numbness / Abnormal Sensation Palpitations Post Surgery/Injection Severe Coughing Severe Itchiness / Allergy Severe Pain/Ache/Colic Severe swelling Severe Vomiting/Diarrhoea "
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "mcReasonOther",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "mcReasonId",
+        "id": "",
+        "value": "10",
+        "text": ""
+      },
+      {
+        "tag": "select",
+        "type": "",
+        "name": "diagnosisPriIdTemp",
+        "id": "",
+        "value": "",
+        "text": "NA J20 - Acute bronchitis J02 - Acute pharyngitis J01 - Acute sinusitis J03 - Acute tonsillitis J069 - Acute upper respiratory infection J304 - Allergic rhinitis T784 - Allergy I726 - Aneurysm and dissection of vertebral artery K120 - Apthous mouth ulcers J45 - Asthma L20 - Atopic dermatitis G510 - Bells palsy L03.9 - Cellulitis H001 - Chalazion R074 - Chest pain, unspecified B01 - Chicken pox infections M224 - Chondromalacia patellae A90 - Dengue fever (classical dengue) E10 - Diabetes Mellitus (insulin dep.) E11 - Diabetes Mellitus (non-insul. dep.) R42 - Dizziness and giddiness I10 - Essential (primary) hypertension Z013 - Examination of blood pressure R50 - Fever of unknown origin K29 - Gastritis and duodenitis K297 - Gastritis, unspecified K21 - Gastro-oesophageal reflux disease A09 - Gastroenteritis M10 - Gout R51 - Headache G442 - Headache (tension type) E785 - Hyperlipidaemia E790 - Hyperuricaemia J11 - Influenza, virus not identified M54.5 - Low back pain (Loin pain; Low back strain; Lumbago NOS) G43 - Migraine H60 - Otitis externa R101 - Pain localized to upper abdomen (Epigastric pain) N944 - Primary dysmenorrhoea R21 - Rash & other nonspec. skin erupt. J12.81 - SARS associated coronavisurs (wuhan) S934 - Sprain and strain of ankle S731 - Sprain and strain of hip N390 - Urinary tract infection L50 - Urticaria I861 - VARICOCELE SCROTUM B30 - Viral conjunctivitis "
+      },
+      {
+        "tag": "input",
+        "type": "button",
+        "name": "SelectDiagnosisFromMaster",
+        "id": "",
+        "value": " M ",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "diagnosisPriDesc",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "diagnosisPriId",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "select",
+        "type": "",
+        "name": "diagnosisSecIdTemp",
+        "id": "",
+        "value": "",
+        "text": "NA J20 - Acute bronchitis J02 - Acute pharyngitis J01 - Acute sinusitis J03 - Acute tonsillitis J069 - Acute upper respiratory infection J304 - Allergic rhinitis T784 - Allergy I726 - Aneurysm and dissection of vertebral artery K120 - Apthous mouth ulcers J45 - Asthma L20 - Atopic dermatitis G510 - Bells palsy L03.9 - Cellulitis H001 - Chalazion R074 - Chest pain, unspecified B01 - Chicken pox infections M224 - Chondromalacia patellae A90 - Dengue fever (classical dengue) E10 - Diabetes Mellitus (insulin dep.) E11 - Diabetes Mellitus (non-insul. dep.) R42 - Dizziness and giddiness I10 - Essential (primary) hypertension Z013 - Examination of blood pressure R50 - Fever of unknown origin K29 - Gastritis and duodenitis K297 - Gastritis, unspecified K21 - Gastro-oesophageal reflux disease A09 - Gastroenteritis M10 - Gout R51 - Headache G442 - Headache (tension type) E785 - Hyperlipidaemia E790 - Hyperuricaemia J11 - Influenza, virus not identified M54.5 - Low back pain (Loin pain; Low back strain; Lumbago NOS) G43 - Migraine H60 - Otitis externa R101 - Pain localized to upper abdomen (Epigastric pain) N944 - Primary dysmenorrhoea R21 - Rash & other nonspec. skin erupt. J12.81 - SARS associated coronavisurs (wuhan) S934 - Sprain and strain of ankle S731 - Sprain and strain of hip N390 - Urinary tract infection L50 - Urticaria I861 - VARICOCELE SCROTUM B30 - Viral conjunctivitis "
+      },
+      {
+        "tag": "input",
+        "type": "button",
+        "name": "SelectDiagnosisFromMaster",
+        "id": "",
+        "value": " M ",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "button",
+        "name": "Clear",
+        "id": "",
+        "value": " C ",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "diagnosisSecDesc",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "diagnosisSecId",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "referralVisitNo",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "referralMasterId",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "button",
+        "name": "SelectVisitRef",
+        "id": "visitRefId",
+        "value": "Select Referring Visits",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "button",
+        "name": "ClearReferralMaster",
+        "id": "",
+        "value": "Clear Referring Visits",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "checkbox",
+        "name": "waiverOfReferral",
+        "id": "",
+        "value": "N",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "noOfRefMasterRows",
+        "id": "noOfRefMasterRows",
+        "value": "1",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "referralFee",
+        "id": "",
+        "value": "0.0",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "referral",
+        "id": "referral",
+        "value": "N",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "consultFee",
+        "id": "",
+        "value": "80.00",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "prescriptionFee",
+        "id": "",
+        "value": "0.0",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "disabilityId",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "drug_drugName",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "drug_drugCode",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "button",
+        "name": "SelectMasterDrug",
+        "id": "",
+        "value": " M ",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "drug_id",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "drug_version",
+        "id": "",
+        "value": "1",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "drug_pos",
+        "id": "",
+        "value": "-1",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "drug_maxUnitPrice",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "drug_maxQty",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "drug_multiplier",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "drug_oldMultiplier",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "drug_eligibleForAdjusted",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "drug_eligibleForAdjusted2",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "drug_defaultUnitPrice",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "drug_unit",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "drug_unitPrice",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "drug_quantity",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "drug_amount",
+        "id": "drug_amount",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "drug_checkStr",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "button",
+        "name": "ClearDrug",
+        "id": "",
+        "value": " C ",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "button",
+        "name": "add",
+        "id": "",
+        "value": "More Drug",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "noOfDrugRows",
+        "id": "noOfDrugRows",
+        "value": "1",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "drugFee",
+        "id": "",
+        "value": "0.00",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "procedure_procedureName",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "procedure_procedureCode",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "button",
+        "name": "SelectMasterProcedure",
+        "id": "",
+        "value": " M ",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "procedure_id",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "procedure_version",
+        "id": "",
+        "value": "1",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "procedure_pos",
+        "id": "",
+        "value": "-1",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "procedure_isProcedure",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "procedure_maxUnitPrice",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "procedure_isDelivery",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "procedure_amountB4Copay",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "procedure_procLimitCopayment",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "procedure_procLimitCopaymentType",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "procedure_copay",
+        "id": "",
+        "value": "0.00",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "procedure_amount",
+        "id": "",
+        "value": "0.00",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "button",
+        "name": "ClearProcedure",
+        "id": "",
+        "value": " C ",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "button",
+        "name": "add",
+        "id": "",
+        "value": "More Procedure",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "noOfProcedureRows",
+        "id": "noOfProcedureRows",
+        "value": "1",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "procedureFee",
+        "id": "",
+        "value": "0.00",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "procedureCopay",
+        "id": "",
+        "value": "0.00",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "procedureFeeClaim",
+        "id": "",
+        "value": "0.00",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "totalB4Gst",
+        "id": "",
+        "value": "45.00",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "gst",
+        "id": "",
+        "value": "4.05",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "totalFee",
+        "id": "",
+        "value": "49.05",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "totalClaim",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "copayment",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "cashCollected",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "remarks",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "noOfDaysDrugPrescribed",
+        "id": "",
+        "value": "0",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "referralMaster_id",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "referralMaster_version",
+        "id": "",
+        "value": "1",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "noOfRefMasterRows",
+        "id": "noOfRefMasterRows",
+        "value": "1",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "referralFee",
+        "id": "",
+        "value": "0.0",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "labFee",
+        "id": "",
+        "value": "0",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "xRayFee",
+        "id": "",
+        "value": "0",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "costCentre",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "id",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "version",
+        "id": "",
+        "value": "1",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "clinicId",
+        "id": "",
+        "value": "1296d6336a11",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "isGst",
+        "id": "",
+        "value": "Y",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "adjustForCopaymentGst",
+        "id": "",
+        "value": "Y",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "adjustForGst",
+        "id": "",
+        "value": "Y",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "memberId",
+        "id": "",
+        "value": "4967027104",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "patientName",
+        "id": "",
+        "value": "TJIA NATHANAEL THOMAS",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "patientNric",
+        "id": "",
+        "value": "T1208937B",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "providerTypeId",
+        "id": "",
+        "value": "2",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "groupId",
+        "id": "",
+        "value": "AIA",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "empMemberId",
+        "id": "",
+        "value": "4967027101",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "empNric",
+        "id": "",
+        "value": "S8284655G",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "empName",
+        "id": "",
+        "value": "PRAJOGO ASTRINI PRIMADYASTI NISWARI",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "polNo",
+        "id": "",
+        "value": "0000079848",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "iecTransId",
+        "id": "",
+        "value": "EDT457213725",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "dobAsString",
+        "id": "",
+        "value": "28/03/2012",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "gender",
+        "id": "",
+        "value": "M",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "memCertNo",
+        "id": "",
+        "value": "S8284655G",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "productCode",
+        "id": "",
+        "value": "31217",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "benCode",
+        "id": "",
+        "value": "C31",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "unqPlnCode",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "benPlnCode",
+        "id": "",
+        "value": "002",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "depCode",
+        "id": "",
+        "value": "4",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "relationship",
+        "id": "",
+        "value": "C",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "bankCode",
+        "id": "",
+        "value": "7339",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "bankAc",
+        "id": "",
+        "value": "564718112001",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "subOffCode",
+        "id": "",
+        "value": "100",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "subOffName",
+        "id": "",
+        "value": "NORTHSTANDARD SERVICES ASIA PTE. LIMITED",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "shortfall",
+        "id": "",
+        "value": "Y",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "polDtFrAsString",
+        "id": "",
+        "value": "01/01/2026",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "polDtToAsString",
+        "id": "",
+        "value": "31/12/2026",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "amtUnit",
+        "id": "",
+        "value": "C",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "maxamt",
+        "id": "",
+        "value": "9999999",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "claimBalance",
+        "id": "",
+        "value": "-1.00",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "maxServiceCount",
+        "id": "",
+        "value": "999",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "countUnit",
+        "id": "",
+        "value": "P",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "reimbursementPercentage",
+        "id": "",
+        "value": "100",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "bsCoPayType",
+        "id": "",
+        "value": "$",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "bsCoPayment",
+        "id": "",
+        "value": "0.0",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "creationDateAsString",
+        "id": "",
+        "value": "13/02/2026",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "gstRate",
+        "id": "",
+        "value": "9",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "memEmailAddr",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "drugFormulary",
+        "id": "",
+        "value": "4",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "bsInPanel_drugMaxPriceCheck",
+        "id": "",
+        "value": "N",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "limitExclCopay",
+        "id": "",
+        "value": "Y",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "freeTextDrug",
+        "id": "",
+        "value": "N",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "maxUnitPrice",
+        "id": "",
+        "value": "100.0",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "taxableTotalB4Gst",
+        "id": "",
+        "value": "80.00",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "visitType",
+        "id": "",
+        "value": "0",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "maxProcPriceChk",
+        "id": "",
+        "value": "Y",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "showMCReason",
+        "id": "",
+        "value": "Y",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "visitGroup",
+        "id": "",
+        "value": "N",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "showProcedureCopay",
+        "id": "",
+        "value": "N",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "transactionNo",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "showMC",
+        "id": "",
+        "value": "Y",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "format_DateTime",
+        "id": "",
+        "value": "DD/MM/YYYY",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "groupCode",
+        "id": "",
+        "value": "AR",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "clinicName",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "checkDrugDiagnosis",
+        "id": "",
+        "value": "N",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "memAddress1",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "memAddress2",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "memAddress3",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "memState",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "oldVisitDateAsString",
+        "id": "",
+        "value": "06/02/2026",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "clinicCode",
+        "id": "",
+        "value": "SSP000170",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "copaymentTotal",
+        "id": "",
+        "value": "0",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "visitDisplayDetailId",
+        "id": "",
+        "value": "159f8d68081e",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "showDiagnosis",
+        "id": "",
+        "value": "Y",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "visitNo",
+        "id": "",
+        "value": "EV59954112",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "allowBookAppt",
+        "id": "",
+        "value": "N",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "gpClinicPhone",
+        "id": "",
+        "value": "64712696",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "empClinicName",
+        "id": "",
+        "value": "SINGAPORE SPORTS & ORTHOPAEDIC CLINIC",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "bookAppointmentUrl",
+        "id": "",
+        "value": "https://www.appmydoctor.net/ApptBooking.aspx",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "gpDoctorName",
+        "id": "",
+        "value": "YIP MAN HING KEVIN",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "gpMobile",
+        "id": "",
+        "value": "6471269",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "gpEmail",
+        "id": "",
+        "value": "-@test.com",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "gpMcr",
+        "id": "",
+        "value": "M18659G",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "systemCode",
+        "id": "",
+        "value": "AIACLINIC",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "showConsentForm",
+        "id": "",
+        "value": "N",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "checkRestrHosp",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "pathConsentForm",
+        "id": "",
+        "value": "C:\\Download\\null\\consent.pdf",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "listRrefNo",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "showReferral",
+        "id": "",
+        "value": "N",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "enforceReferral",
+        "id": "",
+        "value": "Y",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "patientDOB",
+        "id": "",
+        "value": "28/03/2012",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "patientGender",
+        "id": "",
+        "value": "M",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "procedureSetId",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "aon",
+        "id": "",
+        "value": "N",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "showWaiverOfReferral",
+        "id": "",
+        "value": "Y",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "referralNo",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "priceCategory",
+        "id": "",
+        "value": "High",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "checkStr",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "totalAdminFee2",
+        "id": "",
+        "value": "0",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "totalAdminFee",
+        "id": "",
+        "value": "0",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "copayMGPChk",
+        "id": "",
+        "value": "N",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "coPayMGPValue",
+        "id": "",
+        "value": "0.0",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "copayMGP330Chk",
+        "id": "",
+        "value": "N",
+        "text": ""
+      }
+    ],
+    "rows": [
+      [
+        "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic Switch System || Singlife Pcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern MHC Medical Network INCOME iMedicare PHI System QBE Primary Care Log Out ",
+        "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic ",
+        "Switch System || Singlife Pcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern MHC Medical Network INCOME iMedicare PHI System QBE Primary Care Log Out "
+      ],
+      [
+        "Welcome SINGAPORE SPORTS & ORTHOPAEDIC CLINIC from SINGAPORE SPORTS & ORTHOPAEDIC CLINIC Clinic ",
+        "Switch System || Singlife Pcpcare Singlife Global 8 AXA Clinicare (HSBC) Better Health FWD Travel Insurance Great Eastern MHC Medical Network INCOME iMedicare PHI System QBE Primary Care Log Out "
+      ],
+      [
+        "Employee Visit - Add (* = Required Fields) ",
+        "Employee Visit - Add",
+        "(* = Required Fields)"
+      ],
+      [
+        "Employee Visit - Add",
+        "(* = Required Fields)"
+      ],
+      [
+        "Group/Company AMERICAN INTERNATIONAL ASSURANCE COMPANY, LIMITED/NORTHSTANDARD SERVICES ASIA PTE. LIMITED Policy Details: No Cap Special Remarks: Effective from 1st Jan 2025 - Waiver of GP Referral for Pediatricians Visit for Child up to end of 12 years old. Once patient turns 13 years old, referral letter is required. Patient Name TJIA NATHANAEL THOMAS Patient ID T1208937B AIA Visit Date* (dd/mm/yyyy) Charge Type First Consult Follow Up Repeat Medicine MC Day* MC Start Date (dd/mm/yyyy) MC Reason NA Bleeding Breathlessness / Wheezing Burns / Poisoning Contagious Illness Depressive / Anxiety States / Mood Chan Difficulties in eating / swallowing Disfigurements Drowsiness/Giddiness Fatique/Weakness/Malaise Fever Impaired Balance / Coordination Impaired Judgments / Concentration Impaired Movement Impaired Speech/Vision/Hearing Injury / Accident Numbness / Abnormal Sensation Palpitations Post Surgery/Injection Severe Coughing Severe Itchiness / Allergy Severe Pain/Ache/Colic Severe swelling Severe Vomiting/Diarrhoea MC Reason Other Diagnosis Pri* NA J20 - Acute bronchitis J02 - Acute pharyngitis J01 - Acute sinusitis J03 - Acute tonsillitis J069 - Acute upper respiratory infection J304 - Allergic rhinitis T784 - Allergy I726 - Aneurysm and dissection of vertebral artery K120 - Apthous mouth ulcers J45 - Asthma L20 - Atopic dermatitis G510 - Bells palsy L03.9 - Cellulitis H001 - Chalazion R074 - Chest pain, unspecified B01 - Chicken pox infections M224 - Chondromalacia patellae A90 - Dengue fever (classical dengue) E10 - Diabetes Mellitus (insulin dep.) E11 - Diabetes Mellitus (non-insul. dep.) R42 - Dizziness and giddiness I10 - Essential (primary) hypertension Z013 - Examination of blood pressure R50 - Fever of unknown origin K29 - Gastritis and duodenitis K297 - Gastritis, unspecified K21 - Gastro-oesophageal reflux disease A09 - Gastroenteritis M10 - Gout R51 - Headache G442 - Headache (tension type) E785 - Hyperlipidaemia E790 - Hyperuricaemia J11 - Influenza, virus not identified M54.5 - Low back pain (Loin pain; Low back strain; Lumbago NOS) G43 - Migraine H60 - Otitis externa R101 - Pain localized to upper abdomen (Epigastric pain) N944 - Primary dysmenorrhoea R21 - Rash & other nonspec. skin erupt. J12.81 - SARS associated coronavisurs (wuhan) S934 - Sprain and strain of ankle S731 - Sprain and strain of hip N390 - Urinary tract infection L50 - Urticaria I861 - VARICOCELE SCROTUM B30 - Viral conjunctivitis Diagnosis Sec NA J20 - Acute bronchitis J02 - Acute pharyngitis J01 - Acute sinusitis J03 - Acute tonsillitis J069 - Acute upper respiratory infection J304 - Allergic rhinitis T784 - Allergy I726 - Aneurysm and dissection of vertebral artery K120 - Apthous mouth ulcers J45 - Asthma L20 - Atopic dermatitis G510 - Bells palsy L03.9 - Cellulitis H001 - Chalazion R074 - Chest pain, unspecified B01 - Chicken pox infections M224 - Chondromalacia patellae A90 - Dengue fever (classical dengue) E10 - Diabetes Mellitus (insulin dep.) E11 - Diabetes Mellitus (non-insul. dep.) R42 - Dizziness and giddiness I10 - Essential (primary) hypertension Z013 - Examination of blood pressure R50 - Fever of unknown origin K29 - Gastritis and duodenitis K297 - Gastritis, unspecified K21 - Gastro-oesophageal reflux disease A09 - Gastroenteritis M10 - Gout R51 - Headache G442 - Headache (tension type) E785 - Hyperlipidaemia E790 - Hyperuricaemia J11 - Influenza, virus not identified M54.5 - Low back pain (Loin pain; Low back strain; Lumbago NOS) G43 - Migraine H60 - Otitis externa R101 - Pain localized to upper abdomen (Epigastric pain) N944 - Primary dysmenorrhoea R21 - Rash & other nonspec. skin erupt. J12.81 - SARS associated coronavisurs (wuhan) S934 - Sprain and strain of ankle S731 - Sprain and strain of hip N390 - Urinary tract infection L50 - Urticaria I861 - VARICOCELE SCROTUM B30 - Viral conjunctivitis Referring Visit Waiver Of Referral Consultation Fee (SGD) Drug Name Unit Unit Price (SGD) Qty Amount (SGD) 1. Total Drug Fee Procedure Name Claim (SGD) 1. Total Proc Fee Total Before GST GST Total Fee (SGD) Total Claim (SGD) Copayment Cash Collected (SGD) ",
+        "Group/Company",
+        "AMERICAN INTERNATIONAL ASSURANCE COMPANY, LIMITED/NORTHSTANDARD SERVICES ASIA PTE. LIMITED ",
+        "Policy Details: No Cap Special Remarks: Effective from 1st Jan 2025 - Waiver of GP Referral for Pediatricians Visit for Child up to end of 12 years old. Once patient turns 13 years old, referral letter is required. ",
+        "Policy Details:",
+        "",
+        "No Cap",
+        "Special Remarks:",
+        "",
+        "Effective from 1st Jan 2025 - Waiver of GP Referral for Pediatricians Visit for Child up to end of 12 years old. Once patient turns 13 years old, referral letter is required. ",
+        "",
+        "Patient Name",
+        "TJIA NATHANAEL THOMAS",
+        "Patient ID",
+        "T1208937B",
+        "",
+        "AIA ",
+        "Visit Date*",
+        "(dd/mm/yyyy) ",
+        "Charge Type",
+        "First Consult Follow Up Repeat Medicine ",
+        "MC Day*",
+        "",
+        "MC Start Date",
+        "(dd/mm/yyyy) ",
+        "MC Reason",
+        "NA Bleeding Breathlessness / Wheezing Burns / Poisoning Contagious Illness Depressive / Anxiety States / Mood Chan Difficulties in eating / swallowing Disfigurements Drowsiness/Giddiness Fatique/Weakness/Malaise Fever Impaired Balance / Coordination Impaired Judgments / Concentration Impaired Movement Impaired Speech/Vision/Hearing Injury / Accident Numbness / Abnormal Sensation Palpitations Post Surgery/Injection Severe Coughing Severe Itchiness / Allergy Severe Pain/Ache/Colic Severe swelling Severe Vomiting/Diarrhoea ",
+        "MC Reason Other ",
+        "MC Reason Other",
+        "",
+        "Diagnosis Pri*",
+        "NA J20 - Acute bronchitis J02 - Acute pharyngitis J01 - Acute sinusitis J03 - Acute tonsillitis J069 - Acute upper respiratory infection J304 - Allergic rhinitis T784 - Allergy I726 - Aneurysm and dissection of vertebral artery K120 - Apthous mouth ulcers J45 - Asthma L20 - Atopic dermatitis G510 - Bells palsy L03.9 - Cellulitis H001 - Chalazion R074 - Chest pain, unspecified B01 - Chicken pox infections M224 - Chondromalacia patellae A90 - Dengue fever (classical dengue) E10 - Diabetes Mellitus (insulin dep.) E11 - Diabetes Mellitus (non-insul. dep.) R42 - Dizziness and giddiness I10 - Essential (primary) hypertension Z013 - Examination of blood pressure R50 - Fever of unknown origin K29 - Gastritis and duodenitis K297 - Gastritis, unspecified K21 - Gastro-oesophageal reflux disease A09 - Gastroenteritis M10 - Gout R51 - Headache G442 - Headache (tension type) E785 - Hyperlipidaemia E790 - Hyperuricaemia J11 - Influenza, virus not identified M54.5 - Low back pain (Loin pain; Low back strain; Lumbago NOS) G43 - Migraine H60 - Otitis externa R101 - Pain localized to upper abdomen (Epigastric pain) N944 - Primary dysmenorrhoea R21 - Rash & other nonspec. skin erupt. J12.81 - SARS associated coronavisurs (wuhan) S934 - Sprain and strain of ankle S731 - Sprain and strain of hip N390 - Urinary tract infection L50 - Urticaria I861 - VARICOCELE SCROTUM B30 - Viral conjunctivitis ",
+        "",
+        "Diagnosis Sec",
+        "NA J20 - Acute bronchitis J02 - Acute pharyngitis J01 - Acute sinusitis J03 - Acute tonsillitis J069 - Acute upper respiratory infection J304 - Allergic rhinitis T784 - Allergy I726 - Aneurysm and dissection of vertebral artery K120 - Apthous mouth ulcers J45 - Asthma L20 - Atopic dermatitis G510 - Bells palsy L03.9 - Cellulitis H001 - Chalazion R074 - Chest pain, unspecified B01 - Chicken pox infections M224 - Chondromalacia patellae A90 - Dengue fever (classical dengue) E10 - Diabetes Mellitus (insulin dep.) E11 - Diabetes Mellitus (non-insul. dep.) R42 - Dizziness and giddiness I10 - Essential (primary) hypertension Z013 - Examination of blood pressure R50 - Fever of unknown origin K29 - Gastritis and duodenitis K297 - Gastritis, unspecified K21 - Gastro-oesophageal reflux disease A09 - Gastroenteritis M10 - Gout R51 - Headache G442 - Headache (tension type) E785 - Hyperlipidaemia E790 - Hyperuricaemia J11 - Influenza, virus not identified M54.5 - Low back pain (Loin pain; Low back strain; Lumbago NOS) G43 - Migraine H60 - Otitis externa R101 - Pain localized to upper abdomen (Epigastric pain) N944 - Primary dysmenorrhoea R21 - Rash & other nonspec. skin erupt. J12.81 - SARS associated coronavisurs (wuhan) S934 - Sprain and strain of ankle S731 - Sprain and strain of hip N390 - Urinary tract infection L50 - Urticaria I861 - VARICOCELE SCROTUM B30 - Viral conjunctivitis ",
+        "",
+        "Referring Visit",
+        "",
+        "Waiver Of Referral",
+        "",
+        "Consultation Fee (SGD)",
+        "",
+        "Drug Name Unit Unit Price (SGD) Qty Amount (SGD) 1. ",
+        "",
+        "Drug Name",
+        "Unit",
+        "Unit Price (SGD)",
+        "Qty",
+        "Amount (SGD)",
+        "1.",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "Total Drug Fee",
+        "",
+        "Procedure Name Claim (SGD) 1. ",
+        "",
+        "Procedure Name",
+        "Claim (SGD)",
+        "1.",
+        "",
+        "",
+        "",
+        "Total Proc Fee",
+        "",
+        "Total Before GST",
+        "",
+        "GST",
+        "",
+        "Total Fee (SGD)",
+        "",
+        "Total Claim (SGD)",
+        "",
+        "Copayment",
+        "",
+        "Cash Collected (SGD)",
+        ""
+      ],
+      [
+        "Group/Company",
+        "AMERICAN INTERNATIONAL ASSURANCE COMPANY, LIMITED/NORTHSTANDARD SERVICES ASIA PTE. LIMITED ",
+        "Policy Details: No Cap Special Remarks: Effective from 1st Jan 2025 - Waiver of GP Referral for Pediatricians Visit for Child up to end of 12 years old. Once patient turns 13 years old, referral letter is required. ",
+        "Policy Details:",
+        "",
+        "No Cap",
+        "Special Remarks:",
+        "",
+        "Effective from 1st Jan 2025 - Waiver of GP Referral for Pediatricians Visit for Child up to end of 12 years old. Once patient turns 13 years old, referral letter is required. ",
+        ""
+      ],
+      [
+        "Policy Details:"
+      ],
+      [
+        "",
+        "No Cap"
+      ],
+      [
+        "Special Remarks:",
+        ""
+      ],
+      [
+        "Effective from 1st Jan 2025 - Waiver of GP Referral for Pediatricians Visit for Child up to end of 12 years old. Once patient turns 13 years old, referral letter is required. "
+      ],
+      [
+        "Patient Name",
+        "TJIA NATHANAEL THOMAS"
+      ],
+      [
+        "Patient ID",
+        "T1208937B"
+      ],
+      [
+        "",
+        "AIA "
+      ],
+      [
+        "Visit Date*",
+        "(dd/mm/yyyy) "
+      ],
+      [
+        "Charge Type",
+        "First Consult Follow Up Repeat Medicine "
+      ],
+      [
+        "MC Day*",
+        ""
+      ],
+      [
+        "MC Start Date",
+        "(dd/mm/yyyy) "
+      ],
+      [
+        "MC Reason",
+        "NA Bleeding Breathlessness / Wheezing Burns / Poisoning Contagious Illness Depressive / Anxiety States / Mood Chan Difficulties in eating / swallowing Disfigurements Drowsiness/Giddiness Fatique/Weakness/Malaise Fever Impaired Balance / Coordination Impaired Judgments / Concentration Impaired Movement Impaired Speech/Vision/Hearing Injury / Accident Numbness / Abnormal Sensation Palpitations Post Surgery/Injection Severe Coughing Severe Itchiness / Allergy Severe Pain/Ache/Colic Severe swelling Severe Vomiting/Diarrhoea ",
+        "MC Reason Other ",
+        "MC Reason Other",
+        ""
+      ],
+      [
+        "MC Reason Other",
+        ""
+      ],
+      [
+        "Diagnosis Pri*",
+        "NA J20 - Acute bronchitis J02 - Acute pharyngitis J01 - Acute sinusitis J03 - Acute tonsillitis J069 - Acute upper respiratory infection J304 - Allergic rhinitis T784 - Allergy I726 - Aneurysm and dissection of vertebral artery K120 - Apthous mouth ulcers J45 - Asthma L20 - Atopic dermatitis G510 - Bells palsy L03.9 - Cellulitis H001 - Chalazion R074 - Chest pain, unspecified B01 - Chicken pox infections M224 - Chondromalacia patellae A90 - Dengue fever (classical dengue) E10 - Diabetes Mellitus (insulin dep.) E11 - Diabetes Mellitus (non-insul. dep.) R42 - Dizziness and giddiness I10 - Essential (primary) hypertension Z013 - Examination of blood pressure R50 - Fever of unknown origin K29 - Gastritis and duodenitis K297 - Gastritis, unspecified K21 - Gastro-oesophageal reflux disease A09 - Gastroenteritis M10 - Gout R51 - Headache G442 - Headache (tension type) E785 - Hyperlipidaemia E790 - Hyperuricaemia J11 - Influenza, virus not identified M54.5 - Low back pain (Loin pain; Low back strain; Lumbago NOS) G43 - Migraine H60 - Otitis externa R101 - Pain localized to upper abdomen (Epigastric pain) N944 - Primary dysmenorrhoea R21 - Rash & other nonspec. skin erupt. J12.81 - SARS associated coronavisurs (wuhan) S934 - Sprain and strain of ankle S731 - Sprain and strain of hip N390 - Urinary tract infection L50 - Urticaria I861 - VARICOCELE SCROTUM B30 - Viral conjunctivitis ",
+        ""
+      ],
+      [
+        "Diagnosis Sec",
+        "NA J20 - Acute bronchitis J02 - Acute pharyngitis J01 - Acute sinusitis J03 - Acute tonsillitis J069 - Acute upper respiratory infection J304 - Allergic rhinitis T784 - Allergy I726 - Aneurysm and dissection of vertebral artery K120 - Apthous mouth ulcers J45 - Asthma L20 - Atopic dermatitis G510 - Bells palsy L03.9 - Cellulitis H001 - Chalazion R074 - Chest pain, unspecified B01 - Chicken pox infections M224 - Chondromalacia patellae A90 - Dengue fever (classical dengue) E10 - Diabetes Mellitus (insulin dep.) E11 - Diabetes Mellitus (non-insul. dep.) R42 - Dizziness and giddiness I10 - Essential (primary) hypertension Z013 - Examination of blood pressure R50 - Fever of unknown origin K29 - Gastritis and duodenitis K297 - Gastritis, unspecified K21 - Gastro-oesophageal reflux disease A09 - Gastroenteritis M10 - Gout R51 - Headache G442 - Headache (tension type) E785 - Hyperlipidaemia E790 - Hyperuricaemia J11 - Influenza, virus not identified M54.5 - Low back pain (Loin pain; Low back strain; Lumbago NOS) G43 - Migraine H60 - Otitis externa R101 - Pain localized to upper abdomen (Epigastric pain) N944 - Primary dysmenorrhoea R21 - Rash & other nonspec. skin erupt. J12.81 - SARS associated coronavisurs (wuhan) S934 - Sprain and strain of ankle S731 - Sprain and strain of hip N390 - Urinary tract infection L50 - Urticaria I861 - VARICOCELE SCROTUM B30 - Viral conjunctivitis ",
+        ""
+      ],
+      [
+        "Referring Visit",
+        ""
+      ],
+      [
+        "Waiver Of Referral",
+        ""
+      ],
+      [
+        "Consultation Fee (SGD)",
+        ""
+      ],
+      [
+        "Drug Name Unit Unit Price (SGD) Qty Amount (SGD) 1. ",
+        "",
+        "Drug Name",
+        "Unit",
+        "Unit Price (SGD)",
+        "Qty",
+        "Amount (SGD)",
+        "1.",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Drug Name",
+        "Unit",
+        "Unit Price (SGD)",
+        "Qty",
+        "Amount (SGD)"
+      ],
+      [
+        "1.",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Total Drug Fee",
+        ""
+      ],
+      [
+        "Procedure Name Claim (SGD) 1. ",
+        "",
+        "Procedure Name",
+        "Claim (SGD)",
+        "1.",
+        "",
+        "",
+        ""
+      ],
+      [
+        "",
+        "Procedure Name",
+        "Claim (SGD)"
+      ],
+      [
+        "1.",
+        "",
+        ""
+      ],
+      [
+        "Total Proc Fee",
+        ""
+      ],
+      [
+        "Total Before GST",
+        ""
+      ],
+      [
+        "GST",
+        ""
+      ],
+      [
+        "Total Fee (SGD)",
+        ""
+      ],
+      [
+        "Total Claim (SGD)",
+        ""
+      ],
+      [
+        "Copayment",
+        ""
+      ],
+      [
+        "Cash Collected (SGD)",
+        ""
+      ]
+    ]
+  },
+  "popup": {
+    "url": "https://www.aiaclinic.com/aia/ClinicIECSelectDrug.ec?clinicId=1296d6336a11&sourceType=M&formName=visit_form&setPrice=N&idField=drug_drugCode&nameField=drug_drugName&unitField=drug_unit&maxUnitPriceField=drug_maxUnitPrice&unitPriceField=drug_unitPrice&maxQtyField=drug_maxQty&quantityField=drug_quantity&checkStrField=drug_checkStr&checkDrugDiagnosis=N&defaultUnitPriceField=drug_defaultUnitPrice&checkMultiplier=N&priceCategory=High",
+    "title": "Select Drug",
+    "bodySnippet": "Click on the drug to select it Name Code Primary Contents Secondary Contents Tertiary Contents Acute Chronics that contains starts with equals to 1 - 15 of 3202 Next Code Name Unit UNITCERUM6046 A CERUMEN UNIDOSE (2ML) UNIT TABACCOL2212 ACCOLATE TABLETS 20MG TAB TABAPOA2371 ACETAZOLAMIDE 250MG TAB (APOTEX) TAB TABACETY2216 ACETYL SPIRAMYCIN TAB KYOWA 200MG TAB TABACETY6303 ACETYLCYSTEINE SANDOZ 600MG EFF TAB TAB MLACOLI2218 ACOLIC SYRUP ML MLACRIF2219 ACRIFLAVINE 0.1% SOLUTION ML TABACTAP6289 ACTAPIN 10MG TAB (AMLODIPINE) TAB TABACTAP6486 ACTAPIN 5MG TABLET (AMLODIPINE) TAB TABACTEL6588 ACTELSAR (TELMISARTAN) TABLET 40MG TAB TABACTEL6399 ACTELSAR (TELMISARTAN) TABLET 80 MG TAB BOTACTIF6368 ACTIFED COMPOUND LINCTUS 100ML BOT MLACTIF2220 ACTIFED COMPOUND LINCTUS PER ML ML MLACTIF2222 ACTIFED DM COUGH LINCTUS ML MLACTIF2223 ACTIFED EXPECTORANT ML",
+    "anchors": [
+      {
+        "text": "Next",
+        "href": "ClinicIECSelectDrug.ec?clinicId=1296d6336a11&sourceType=M&formName=visit_form&setPrice=N&idField=drug_drugCode&nameField=drug_drugName&unitField=drug_unit&maxUnitPriceField=drug_maxUnitPrice&unitPriceField=drug_unitPrice&maxQtyField=drug_maxQty&quantityField=drug_quantity&checkStrField=drug_checkStr&checkDrugDiagnosis=N&checkMultiplier=N&defaultUnitPriceField=drug_defaultUnitPrice&start=15",
+        "onclick": ""
+      },
+      {
+        "text": "UNITCERUM6046",
+        "href": "#",
+        "onclick": "doSelect('UNITCERUM6046', 'A CERUMEN UNIDOSE (2ML)', 'UNIT', '1.28', '2.56', '-1', 'UNITCERUM6046', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "A CERUMEN UNIDOSE (2ML)",
+        "href": "#",
+        "onclick": "doSelect('UNITCERUM6046', 'A CERUMEN UNIDOSE (2ML)', 'UNIT', '1.28', '2.56', '-1', 'UNITCERUM6046', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "UNIT",
+        "href": "#",
+        "onclick": "doSelect('UNITCERUM6046', 'A CERUMEN UNIDOSE (2ML)', 'UNIT', '1.28', '2.56', '-1', 'UNITCERUM6046','-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "TABACCOL2212",
+        "href": "#",
+        "onclick": "doSelect('TABACCOL2212', 'ACCOLATE TABLETS 20MG', 'TAB', '1.21', '2.42', '-1', 'TABACCOL2212', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ACCOLATE TABLETS 20MG",
+        "href": "#",
+        "onclick": "doSelect('TABACCOL2212', 'ACCOLATE TABLETS 20MG', 'TAB', '1.21', '2.42', '-1', 'TABACCOL2212', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "TAB",
+        "href": "#",
+        "onclick": "doSelect('TABACCOL2212', 'ACCOLATE TABLETS 20MG', 'TAB', '1.21', '2.42', '-1', 'TABACCOL2212','-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "TABAPOA2371",
+        "href": "#",
+        "onclick": "doSelect('TABAPOA2371', 'ACETAZOLAMIDE 250MG TAB (APOTEX)', 'TAB', '0.22', '0.44', '-1', 'TABAPOA2371', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ACETAZOLAMIDE 250MG TAB (APOTEX)",
+        "href": "#",
+        "onclick": "doSelect('TABAPOA2371', 'ACETAZOLAMIDE 250MG TAB (APOTEX)', 'TAB', '0.22', '0.44', '-1', 'TABAPOA2371', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "TAB",
+        "href": "#",
+        "onclick": "doSelect('TABAPOA2371', 'ACETAZOLAMIDE 250MG TAB (APOTEX)', 'TAB', '0.22', '0.44', '-1', 'TABAPOA2371','-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "TABACETY2216",
+        "href": "#",
+        "onclick": "doSelect('TABACETY2216', 'ACETYL SPIRAMYCIN TAB KYOWA 200MG', 'TAB', '0.25', '0.5', '-1', 'TABACETY2216', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ACETYL SPIRAMYCIN TAB KYOWA 200MG",
+        "href": "#",
+        "onclick": "doSelect('TABACETY2216', 'ACETYL SPIRAMYCIN TAB KYOWA 200MG', 'TAB', '0.25', '0.5', '-1', 'TABACETY2216', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "TAB",
+        "href": "#",
+        "onclick": "doSelect('TABACETY2216', 'ACETYL SPIRAMYCIN TAB KYOWA 200MG', 'TAB', '0.25', '0.5', '-1', 'TABACETY2216','-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "TABACETY6303",
+        "href": "#",
+        "onclick": "doSelect('TABACETY6303', 'ACETYLCYSTEINE SANDOZ 600MG EFF TAB', 'TAB', '0.75', '1.5', '20', 'TABACETY6303', '-1', '0.0', 'N', 'Y')"
+      },
+      {
+        "text": "ACETYLCYSTEINE SANDOZ 600MG EFF TAB",
+        "href": "#",
+        "onclick": "doSelect('TABACETY6303', 'ACETYLCYSTEINE SANDOZ 600MG EFF TAB', 'TAB', '0.75', '1.5', '20', 'TABACETY6303', '-1', '0.0', 'N', 'Y')"
+      },
+      {
+        "text": "TAB",
+        "href": "#",
+        "onclick": "doSelect('TABACETY6303', 'ACETYLCYSTEINE SANDOZ 600MG EFF TAB', 'TAB', '0.75', '1.5', '20', 'TABACETY6303','-1', '0.0', 'N', 'Y')"
+      },
+      {
+        "text": "MLACOLI2218",
+        "href": "#",
+        "onclick": "doSelect('MLACOLI2218', 'ACOLIC SYRUP', 'ML', '0.026', '0.052', '-1', 'MLACOLI2218', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ACOLIC SYRUP",
+        "href": "#",
+        "onclick": "doSelect('MLACOLI2218', 'ACOLIC SYRUP', 'ML', '0.026', '0.052', '-1', 'MLACOLI2218', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ML",
+        "href": "#",
+        "onclick": "doSelect('MLACOLI2218', 'ACOLIC SYRUP', 'ML', '0.026', '0.052', '-1', 'MLACOLI2218','-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "MLACRIF2219",
+        "href": "#",
+        "onclick": "doSelect('MLACRIF2219', 'ACRIFLAVINE 0.1% SOLUTION', 'ML', '0.008', '0.016', '-1', 'MLACRIF2219', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ACRIFLAVINE 0.1% SOLUTION",
+        "href": "#",
+        "onclick": "doSelect('MLACRIF2219', 'ACRIFLAVINE 0.1% SOLUTION', 'ML', '0.008', '0.016', '-1', 'MLACRIF2219', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ML",
+        "href": "#",
+        "onclick": "doSelect('MLACRIF2219', 'ACRIFLAVINE 0.1% SOLUTION', 'ML', '0.008', '0.016', '-1', 'MLACRIF2219','-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "TABACTAP6289",
+        "href": "#",
+        "onclick": "doSelect('TABACTAP6289', 'ACTAPIN 10MG TAB (AMLODIPINE)', 'TAB', '0.25', '0.5', '-1', 'TABACTAP6289', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ACTAPIN 10MG TAB (AMLODIPINE)",
+        "href": "#",
+        "onclick": "doSelect('TABACTAP6289', 'ACTAPIN 10MG TAB (AMLODIPINE)', 'TAB', '0.25', '0.5', '-1', 'TABACTAP6289', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "TAB",
+        "href": "#",
+        "onclick": "doSelect('TABACTAP6289', 'ACTAPIN 10MG TAB (AMLODIPINE)', 'TAB', '0.25', '0.5', '-1', 'TABACTAP6289','-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "TABACTAP6486",
+        "href": "#",
+        "onclick": "doSelect('TABACTAP6486', 'ACTAPIN 5MG TABLET (AMLODIPINE)', 'TAB', '0.36', '0.72', '-1', 'TABACTAP6486', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ACTAPIN 5MG TABLET (AMLODIPINE)",
+        "href": "#",
+        "onclick": "doSelect('TABACTAP6486', 'ACTAPIN 5MG TABLET (AMLODIPINE)', 'TAB', '0.36', '0.72', '-1', 'TABACTAP6486', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "TAB",
+        "href": "#",
+        "onclick": "doSelect('TABACTAP6486', 'ACTAPIN 5MG TABLET (AMLODIPINE)', 'TAB', '0.36', '0.72', '-1', 'TABACTAP6486','-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "TABACTEL6588",
+        "href": "#",
+        "onclick": "doSelect('TABACTEL6588', 'ACTELSAR (TELMISARTAN) TABLET 40MG', 'TAB', '0.75', '1.5', '-1', 'TABACTEL6588', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ACTELSAR (TELMISARTAN) TABLET 40MG",
+        "href": "#",
+        "onclick": "doSelect('TABACTEL6588', 'ACTELSAR (TELMISARTAN) TABLET 40MG', 'TAB', '0.75', '1.5', '-1', 'TABACTEL6588', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "TAB",
+        "href": "#",
+        "onclick": "doSelect('TABACTEL6588', 'ACTELSAR (TELMISARTAN) TABLET 40MG', 'TAB', '0.75', '1.5', '-1', 'TABACTEL6588','-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "TABACTEL6399",
+        "href": "#",
+        "onclick": "doSelect('TABACTEL6399', 'ACTELSAR (TELMISARTAN) TABLET 80 MG', 'TAB', '0.85', '1.7', '58', 'TABACTEL6399', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ACTELSAR (TELMISARTAN) TABLET 80 MG",
+        "href": "#",
+        "onclick": "doSelect('TABACTEL6399', 'ACTELSAR (TELMISARTAN) TABLET 80 MG', 'TAB', '0.85', '1.7', '58', 'TABACTEL6399', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "TAB",
+        "href": "#",
+        "onclick": "doSelect('TABACTEL6399', 'ACTELSAR (TELMISARTAN) TABLET 80 MG', 'TAB', '0.85', '1.7', '58', 'TABACTEL6399','-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "BOTACTIF6368",
+        "href": "#",
+        "onclick": "doSelect('BOTACTIF6368', 'ACTIFED COMPOUND LINCTUS 100ML', 'BOT', '7.0', '14.0', '2', 'BOTACTIF6368', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ACTIFED COMPOUND LINCTUS 100ML",
+        "href": "#",
+        "onclick": "doSelect('BOTACTIF6368', 'ACTIFED COMPOUND LINCTUS 100ML', 'BOT', '7.0', '14.0', '2', 'BOTACTIF6368', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "BOT",
+        "href": "#",
+        "onclick": "doSelect('BOTACTIF6368', 'ACTIFED COMPOUND LINCTUS 100ML', 'BOT', '7.0', '14.0', '2', 'BOTACTIF6368','-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "MLACTIF2220",
+        "href": "#",
+        "onclick": "doSelect('MLACTIF2220', 'ACTIFED COMPOUND LINCTUS PER ML', 'ML', '0.07', '0.14', '200', 'MLACTIF2220', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ACTIFED COMPOUND LINCTUS PER ML",
+        "href": "#",
+        "onclick": "doSelect('MLACTIF2220', 'ACTIFED COMPOUND LINCTUS PER ML', 'ML', '0.07', '0.14', '200', 'MLACTIF2220', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ML",
+        "href": "#",
+        "onclick": "doSelect('MLACTIF2220', 'ACTIFED COMPOUND LINCTUS PER ML', 'ML', '0.07', '0.14', '200', 'MLACTIF2220','-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "MLACTIF2222",
+        "href": "#",
+        "onclick": "doSelect('MLACTIF2222', 'ACTIFED DM COUGH LINCTUS', 'ML', '0.07', '0.14', '-1', 'MLACTIF2222', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ACTIFED DM COUGH LINCTUS",
+        "href": "#",
+        "onclick": "doSelect('MLACTIF2222', 'ACTIFED DM COUGH LINCTUS', 'ML', '0.07', '0.14', '-1', 'MLACTIF2222', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ML",
+        "href": "#",
+        "onclick": "doSelect('MLACTIF2222', 'ACTIFED DM COUGH LINCTUS', 'ML', '0.07', '0.14', '-1', 'MLACTIF2222','-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "MLACTIF2223",
+        "href": "#",
+        "onclick": "doSelect('MLACTIF2223', 'ACTIFED EXPECTORANT', 'ML', '0.02', '0.04', '-1', 'MLACTIF2223', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ACTIFED EXPECTORANT",
+        "href": "#",
+        "onclick": "doSelect('MLACTIF2223', 'ACTIFED EXPECTORANT', 'ML', '0.02', '0.04', '-1', 'MLACTIF2223', '-1', '0.0', 'Y', 'N')"
+      },
+      {
+        "text": "ML",
+        "href": "#",
+        "onclick": "doSelect('MLACTIF2223', 'ACTIFED EXPECTORANT', 'ML', '0.02', '0.04', '-1', 'MLACTIF2223','-1', '0.0', 'Y', 'N')"
+      }
+    ],
+    "inputs": [
+      {
+        "tag": "select",
+        "type": "",
+        "name": "key",
+        "id": "",
+        "value": "",
+        "text": "Name Code Primary Contents Secondary Contents Tertiary Contents Acute Chronics"
+      },
+      {
+        "tag": "select",
+        "type": "",
+        "name": "keyType",
+        "id": "",
+        "value": "",
+        "text": "contains starts with equals to"
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "name": "keyValue",
+        "id": "",
+        "value": "",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "submit",
+        "name": "SearchAction",
+        "id": "",
+        "value": "Search",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "clinicId",
+        "id": "",
+        "value": "1296d6336a11",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "sourceType",
+        "id": "",
+        "value": "M",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "formName",
+        "id": "",
+        "value": "visit_form",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "setPrice",
+        "id": "",
+        "value": "N",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "idField",
+        "id": "",
+        "value": "drug_drugCode",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "nameField",
+        "id": "",
+        "value": "drug_drugName",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "unitField",
+        "id": "",
+        "value": "drug_unit",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "unitPriceField",
+        "id": "",
+        "value": "drug_unitPrice",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "maxUnitPriceField",
+        "id": "",
+        "value": "drug_maxUnitPrice",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "maxQtyField",
+        "id": "",
+        "value": "drug_maxQty",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "quantityField",
+        "id": "",
+        "value": "drug_quantity",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "checkStrField",
+        "id": "",
+        "value": "drug_checkStr",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "defaultUnitPriceField",
+        "id": "",
+        "value": "drug_defaultUnitPrice",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "checkDrugDiagnosis",
+        "id": "",
+        "value": "N",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "clinicCode",
+        "id": "",
+        "value": "SSP000170",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "checkMultiplier",
+        "id": "",
+        "value": "N",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "priceCategory",
+        "id": "",
+        "value": "High",
+        "text": ""
+      },
+      {
+        "tag": "input",
+        "type": "button",
+        "name": "Button",
+        "id": "",
+        "value": "Cancel",
+        "text": ""
+      }
+    ],
+    "rows": [
+      [
+        "",
+        "Click on the drug to select it Name Code Primary Contents Secondary Contents Tertiary Contents Acute Chronics that contains starts with equals to 1 - 15 of 3202 Next Code Name Unit UNITCERUM6046 A CERUMEN UNIDOSE (2ML) UNIT TABACCOL2212 ACCOLATE TABLETS 20MG TAB TABAPOA2371 ACETAZOLAMIDE 250MG TAB (APOTEX) TAB TABACETY2216 ACETYL SPIRAMYCIN TAB KYOWA 200MG TAB TABACETY6303 ACETYLCYSTEINE SANDOZ 600MG EFF TAB TAB MLACOLI2218 ACOLIC SYRUP ML MLACRIF2219 ACRIFLAVINE 0.1% SOLUTION ML TABACTAP6289 ACTAPIN 10MG TAB (AMLODIPINE) TAB TABACTAP6486 ACTAPIN 5MG TABLET (AMLODIPINE) TAB TABACTEL6588 ACTELSAR (TELMISARTAN) TABLET 40MG TAB TABACTEL6399 ACTELSAR (TELMISARTAN) TABLET 80 MG TAB BOTACTIF6368 ACTIFED COMPOUND LINCTUS 100ML BOT MLACTIF2220 ACTIFED COMPOUND LINCTUS PER ML ML MLACTIF2222 ACTIFED DM COUGH LINCTUS ML MLACTIF2223 ACTIFED EXPECTORANT ML",
+        "Click on the drug to select it",
+        "Name Code Primary Contents Secondary Contents Tertiary Contents Acute Chronics that contains starts with equals to",
+        "Name Code Primary Contents Secondary Contents Tertiary Contents Acute Chronics",
+        "that",
+        "contains starts with equals to",
+        "",
+        "",
+        "1 - 15 of 3202 Next",
+        "",
+        "1 - 15 of 3202",
+        "Next",
+        "Code Name Unit UNITCERUM6046 A CERUMEN UNIDOSE (2ML) UNIT TABACCOL2212 ACCOLATE TABLETS 20MG TAB TABAPOA2371 ACETAZOLAMIDE 250MG TAB (APOTEX) TAB TABACETY2216 ACETYL SPIRAMYCIN TAB KYOWA 200MG TAB TABACETY6303 ACETYLCYSTEINE SANDOZ 600MG EFF TAB TAB MLACOLI2218 ACOLIC SYRUP ML MLACRIF2219 ACRIFLAVINE 0.1% SOLUTION ML TABACTAP6289 ACTAPIN 10MG TAB (AMLODIPINE) TAB TABACTAP6486 ACTAPIN 5MG TABLET (AMLODIPINE) TAB TABACTEL6588 ACTELSAR (TELMISARTAN) TABLET 40MG TAB TABACTEL6399 ACTELSAR (TELMISARTAN) TABLET 80 MG TAB BOTACTIF6368 ACTIFED COMPOUND LINCTUS 100ML BOT MLACTIF2220 ACTIFED COMPOUND LINCTUS PER ML ML MLACTIF2222 ACTIFED DM COUGH LINCTUS ML MLACTIF2223 ACTIFED EXPECTORANT ML",
+        "Code",
+        "Name",
+        "Unit",
+        "UNITCERUM6046",
+        "A CERUMEN UNIDOSE (2ML)",
+        "UNIT",
+        "TABACCOL2212",
+        "ACCOLATE TABLETS 20MG",
+        "TAB",
+        "TABAPOA2371",
+        "ACETAZOLAMIDE 250MG TAB (APOTEX)",
+        "TAB",
+        "TABACETY2216",
+        "ACETYL SPIRAMYCIN TAB KYOWA 200MG",
+        "TAB",
+        "TABACETY6303",
+        "ACETYLCYSTEINE SANDOZ 600MG EFF TAB",
+        "TAB",
+        "MLACOLI2218",
+        "ACOLIC SYRUP",
+        "ML",
+        "MLACRIF2219",
+        "ACRIFLAVINE 0.1% SOLUTION",
+        "ML",
+        "TABACTAP6289",
+        "ACTAPIN 10MG TAB (AMLODIPINE)",
+        "TAB",
+        "TABACTAP6486",
+        "ACTAPIN 5MG TABLET (AMLODIPINE)",
+        "TAB",
+        "TABACTEL6588",
+        "ACTELSAR (TELMISARTAN) TABLET 40MG",
+        "TAB",
+        "TABACTEL6399",
+        "ACTELSAR (TELMISARTAN) TABLET 80 MG",
+        "TAB",
+        "BOTACTIF6368",
+        "ACTIFED COMPOUND LINCTUS 100ML",
+        "BOT",
+        "MLACTIF2220",
+        "ACTIFED COMPOUND LINCTUS PER ML",
+        "ML",
+        "MLACTIF2222",
+        "ACTIFED DM COUGH LINCTUS",
+        "ML",
+        "MLACTIF2223",
+        "ACTIFED EXPECTORANT",
+        "ML",
+        "",
+        ""
+      ],
+      [
+        "Click on the drug to select it"
+      ],
+      [
+        "Name Code Primary Contents Secondary Contents Tertiary Contents Acute Chronics that contains starts with equals to",
+        "Name Code Primary Contents Secondary Contents Tertiary Contents Acute Chronics",
+        "that",
+        "contains starts with equals to",
+        "",
+        ""
+      ],
+      [
+        "Name Code Primary Contents Secondary Contents Tertiary Contents Acute Chronics",
+        "that",
+        "contains starts with equals to",
+        "",
+        ""
+      ],
+      [
+        "1 - 15 of 3202 Next",
+        "",
+        "1 - 15 of 3202",
+        "Next"
+      ],
+      [
+        "",
+        "1 - 15 of 3202",
+        "Next"
+      ],
+      [
+        "Code Name Unit UNITCERUM6046 A CERUMEN UNIDOSE (2ML) UNIT TABACCOL2212 ACCOLATE TABLETS 20MG TAB TABAPOA2371 ACETAZOLAMIDE 250MG TAB (APOTEX) TAB TABACETY2216 ACETYL SPIRAMYCIN TAB KYOWA 200MG TAB TABACETY6303 ACETYLCYSTEINE SANDOZ 600MG EFF TAB TAB MLACOLI2218 ACOLIC SYRUP ML MLACRIF2219 ACRIFLAVINE 0.1% SOLUTION ML TABACTAP6289 ACTAPIN 10MG TAB (AMLODIPINE) TAB TABACTAP6486 ACTAPIN 5MG TABLET (AMLODIPINE) TAB TABACTEL6588 ACTELSAR (TELMISARTAN) TABLET 40MG TAB TABACTEL6399 ACTELSAR (TELMISARTAN) TABLET 80 MG TAB BOTACTIF6368 ACTIFED COMPOUND LINCTUS 100ML BOT MLACTIF2220 ACTIFED COMPOUND LINCTUS PER ML ML MLACTIF2222 ACTIFED DM COUGH LINCTUS ML MLACTIF2223 ACTIFED EXPECTORANT ML",
+        "Code",
+        "Name",
+        "Unit",
+        "UNITCERUM6046",
+        "A CERUMEN UNIDOSE (2ML)",
+        "UNIT",
+        "TABACCOL2212",
+        "ACCOLATE TABLETS 20MG",
+        "TAB",
+        "TABAPOA2371",
+        "ACETAZOLAMIDE 250MG TAB (APOTEX)",
+        "TAB",
+        "TABACETY2216",
+        "ACETYL SPIRAMYCIN TAB KYOWA 200MG",
+        "TAB",
+        "TABACETY6303",
+        "ACETYLCYSTEINE SANDOZ 600MG EFF TAB",
+        "TAB",
+        "MLACOLI2218",
+        "ACOLIC SYRUP",
+        "ML",
+        "MLACRIF2219",
+        "ACRIFLAVINE 0.1% SOLUTION",
+        "ML",
+        "TABACTAP6289",
+        "ACTAPIN 10MG TAB (AMLODIPINE)",
+        "TAB",
+        "TABACTAP6486",
+        "ACTAPIN 5MG TABLET (AMLODIPINE)",
+        "TAB",
+        "TABACTEL6588",
+        "ACTELSAR (TELMISARTAN) TABLET 40MG",
+        "TAB",
+        "TABACTEL6399",
+        "ACTELSAR (TELMISARTAN) TABLET 80 MG",
+        "TAB",
+        "BOTACTIF6368",
+        "ACTIFED COMPOUND LINCTUS 100ML",
+        "BOT",
+        "MLACTIF2220",
+        "ACTIFED COMPOUND LINCTUS PER ML",
+        "ML",
+        "MLACTIF2222",
+        "ACTIFED DM COUGH LINCTUS",
+        "ML",
+        "MLACTIF2223",
+        "ACTIFED EXPECTORANT",
+        "ML"
+      ],
+      [
+        "Code",
+        "Name",
+        "Unit"
+      ],
+      [
+        "UNITCERUM6046",
+        "A CERUMEN UNIDOSE (2ML)",
+        "UNIT"
+      ],
+      [
+        "TABACCOL2212",
+        "ACCOLATE TABLETS 20MG",
+        "TAB"
+      ],
+      [
+        "TABAPOA2371",
+        "ACETAZOLAMIDE 250MG TAB (APOTEX)",
+        "TAB"
+      ],
+      [
+        "TABACETY2216",
+        "ACETYL SPIRAMYCIN TAB KYOWA 200MG",
+        "TAB"
+      ],
+      [
+        "TABACETY6303",
+        "ACETYLCYSTEINE SANDOZ 600MG EFF TAB",
+        "TAB"
+      ],
+      [
+        "MLACOLI2218",
+        "ACOLIC SYRUP",
+        "ML"
+      ],
+      [
+        "MLACRIF2219",
+        "ACRIFLAVINE 0.1% SOLUTION",
+        "ML"
+      ],
+      [
+        "TABACTAP6289",
+        "ACTAPIN 10MG TAB (AMLODIPINE)",
+        "TAB"
+      ],
+      [
+        "TABACTAP6486",
+        "ACTAPIN 5MG TABLET (AMLODIPINE)",
+        "TAB"
+      ],
+      [
+        "TABACTEL6588",
+        "ACTELSAR (TELMISARTAN) TABLET 40MG",
+        "TAB"
+      ],
+      [
+        "TABACTEL6399",
+        "ACTELSAR (TELMISARTAN) TABLET 80 MG",
+        "TAB"
+      ],
+      [
+        "BOTACTIF6368",
+        "ACTIFED COMPOUND LINCTUS 100ML",
+        "BOT"
+      ],
+      [
+        "MLACTIF2220",
+        "ACTIFED COMPOUND LINCTUS PER ML",
+        "ML"
+      ],
+      [
+        "MLACTIF2222",
+        "ACTIFED DM COUGH LINCTUS",
+        "ML"
+      ],
+      [
+        "MLACTIF2223",
+        "ACTIFED EXPECTORANT",
+        "ML"
+      ]
+    ]
+  }
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-13T06:01:25.500Z"}

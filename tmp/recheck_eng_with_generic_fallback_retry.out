@@ -1,0 +1,78 @@
+[32minfo[39m: === Visit Details Extraction Batch === {"service":"clinic-automation","timestamp":"2026-02-14T08:51:04.394Z"}
+[32minfo[39m: Mode: Force re-extract (includes completed visits) {"service":"clinic-automation","timestamp":"2026-02-14T08:51:04.399Z"}
+[32minfo[39m: Querying database for visits needing enhancement... {"service":"clinic-automation","timestamp":"2026-02-14T08:51:04.412Z"}
+[32minfo[39m: Filtering to visit IDs: 60e0c382-d6cb-4d35-a5b9-e17ce5b20c73 {"service":"clinic-automation","timestamp":"2026-02-14T08:51:04.413Z"}
+[32minfo[39m: Filtering to portal scope: MHC, FULLERT, IHP, ALL, ALLIANZ, ALLIANCE, AIA, GE, AIACLIENT, AVIVA, SINGLIFE + Allianz tags in patient name {"service":"clinic-automation","timestamp":"2026-02-14T08:51:04.413Z"}
+(node:67375) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vincent/Baselrpacrm/apps/crm/src/lib/rpa/portals.shared.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vincent/Baselrpacrm/apps/crm/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[32minfo[39m: Found 1 candidate visit(s) {"service":"clinic-automation","timestamp":"2026-02-14T08:51:04.727Z"}
+[32minfo[39m: Processing 1 visits (0 skipped) {"service":"clinic-automation","timestamp":"2026-02-14T08:51:04.727Z"}
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-14T08:51:04.728Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-14T08:51:04.729Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-14T08:51:04.730Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-14T08:51:04.730Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-14T08:51:07.071Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-14T08:51:07.073Z"}
+[32minfo[39m: Initializing browser and logging in to Clinic Assist... {"service":"clinic-automation","timestamp":"2026-02-14T08:51:07.463Z"}
+[32minfo[39m: [CA 01] Login start {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-14T08:51:07.466Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: Logging into Clinic Assist... {"service":"clinic-automation","timestamp":"2026-02-14T08:51:07.467Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-14T08:51:10.629Z"}
+[32minfo[39m: [CA 02] Username filled {"service":"clinic-automation","timestamp":"2026-02-14T08:51:10.629Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-14T08:51:10.656Z"}
+[32minfo[39m: [CA 03] Password filled {"service":"clinic-automation","timestamp":"2026-02-14T08:51:10.656Z"}
+[32minfo[39m: Clinic Group filled: ssoc {"service":"clinic-automation","timestamp":"2026-02-14T08:51:10.671Z"}
+[32minfo[39m: [CA 04] Clinic Group filled {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-14T08:51:10.671Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-14T08:51:10.782Z"}
+[32minfo[39m: [CA 05] Login submitted {"service":"clinic-automation","timestamp":"2026-02-14T08:51:10.782Z"}
+[32minfo[39m: Clinic Assist 2FA not required (verification inputs disabled) {"service":"clinic-automation","timestamp":"2026-02-14T08:51:13.799Z"}
+[32minfo[39m: Successfully logged into Clinic Assist {"service":"clinic-automation","timestamp":"2026-02-14T08:51:14.020Z"}
+[32minfo[39m: [CA 06] Login ok {"service":"clinic-automation","timestamp":"2026-02-14T08:51:14.020Z"}
+[32minfo[39m: 
+Starting batch extraction for 1 visits... {"service":"clinic-automation","timestamp":"2026-02-14T08:51:14.020Z"}
+[32minfo[39m: Max retries: 3, Batch size: 100 {"service":"clinic-automation","timestamp":"2026-02-14T08:51:14.020Z"}
+[32minfo[39m: [VisitDetails] Starting batch extraction for 1 visits {"service":"clinic-automation","timestamp":"2026-02-14T08:51:14.671Z"}
+[32minfo[39m: [VisitDetails] Processing visit 1/1: ENG CHAI PIN ELYNE XANDRIA (2026-02-03) {"service":"clinic-automation","timestamp":"2026-02-14T08:51:14.672Z"}
+[32minfo[39m: [VisitDetails] Navigating to Patient Page for visit 60e0c382-d6cb-4d35-a5b9-e17ce5b20c73 (ENG CHAI PIN ELYNE XANDRIA) {"service":"clinic-automation","timestamp":"2026-02-14T08:51:15.130Z"}
+[32minfo[39m: [CA 07] Navigate to Patient Page - START {"service":"clinic-automation","timestamp":"2026-02-14T08:51:15.132Z"}
+[32minfo[39m: [CA 08] Current URL before navigation {"service":"clinic-automation","timestamp":"2026-02-14T08:51:15.132Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: [CA 09] Need to select Reception/room first before accessing Patient Page {"service":"clinic-automation","timestamp":"2026-02-14T08:51:15.144Z"}
+[32minfo[39m: [CA 10] Clicking Reception/room to access system {"selector":"button:has-text(\"Reception\")","service":"clinic-automation","timestamp":"2026-02-14T08:51:15.725Z"}
+[32minfo[39m: [CA 11] Reception clicked, checking URL {"newUrl":"https://clinicassist.sg:1080/","service":"clinic-automation","timeTaken":1169,"timestamp":"2026-02-14T08:51:16.312Z"}
+[32minfo[39m: [CA 12] Could not click Reception/room, continuing anyway {"service":"clinic-automation","timeTaken":1256,"timestamp":"2026-02-14T08:51:16.399Z"}
+[32minfo[39m: [CA 13] Looking for sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-14T08:51:16.400Z"}
+[32minfo[39m: [CA 14] Looking for Patient sidebar link {"service":"clinic-automation","timestamp":"2026-02-14T08:51:16.402Z"}
+[32minfo[39m: [CA 15] Could not click Patient link via UI; trying Home -> Patient fallback {"service":"clinic-automation","timestamp":"2026-02-14T08:51:16.410Z","totalTime":1278}
+[32minfo[39m: [CA 16] Location fallback patient URL {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-14T08:51:17.858Z"}
+[32minfo[39m: [CA 17] Navigate to Patient Page - COMPLETE {"service":"clinic-automation","timestamp":"2026-02-14T08:51:17.859Z","totalTime":2727}
+[32minfo[39m: [VisitDetails] Searching for patient by number: 78160 (ENG CHAI PIN ELYNE XANDRIA) {"service":"clinic-automation","timestamp":"2026-02-14T08:51:17.859Z"}
+[32minfo[39m: [CA 18] Search patient by number {"patientNumber":"78160","service":"clinic-automation","timestamp":"2026-02-14T08:51:17.859Z"}
+[32minfo[39m: [CA 19] Pressing Enter to execute search (may need to dismiss dialog first) {"service":"clinic-automation","timestamp":"2026-02-14T08:51:18.667Z"}
+[32minfo[39m: [CA 20] Patient search executed by number (Enter key x2) {"patientNumber":"78160","service":"clinic-automation","timestamp":"2026-02-14T08:51:19.786Z"}
+[32minfo[39m: [VisitDetails] Opening patient record by number: 78160 {"service":"clinic-automation","timestamp":"2026-02-14T08:51:21.788Z"}
+[32minfo[39m: [CA 21] Open patient from search results by number {"patientNumber":"78160","service":"clinic-automation","timestamp":"2026-02-14T08:51:21.791Z"}
+[31merror[39m: Failed to open patient from search results by number: 78160 Could not find patient with number "78160" in search results {"service":"clinic-automation","stack":"Error: Could not find patient with number \"78160\" in search results\n    at ClinicAssistAutomation.openPatientFromSearchResultsByNumber (file:///Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:7646:13)\n    at async VisitDetailsExtractor.extractForVisit (file:///Users/vincent/Baselrpacrm/src/core/visit-details-extractor.js:50:11)\n    at async VisitDetailsExtractor.extractBatch (file:///Users/vincent/Baselrpacrm/src/core/visit-details-extractor.js:253:24)\n    at async extractVisitDetailsBatch (file:///Users/vincent/Baselrpacrm/src/examples/extract-visit-details-batch.js:192:21)","timestamp":"2026-02-14T08:51:23.808Z"}
+[33mwarn[39m: [VisitDetails] PCNO search/open failed, falling back to patient name search {"error":"Could not find patient with number \"78160\" in search results","patientName":"ENG CHAI PIN ELYNE XANDRIA","pcno":"78160","service":"clinic-automation","timestamp":"2026-02-14T08:51:23.808Z","visitId":"60e0c382-d6cb-4d35-a5b9-e17ce5b20c73"}
+[32minfo[39m: [CA 22] Navigate to Patient Page - START {"service":"clinic-automation","timestamp":"2026-02-14T08:51:23.809Z"}
+[32minfo[39m: [CA 23] Current URL before navigation {"service":"clinic-automation","timestamp":"2026-02-14T08:51:23.809Z","url":"https://clinicassist.sg:1080/Patient/PatientSearch"}
+[32minfo[39m: [CA 24] Force-cleared blocking history overlay {"changedNodes":1,"service":"clinic-automation","timestamp":"2026-02-14T08:51:23.813Z"}
+[32minfo[39m: [CA 25] Already on PatientSearch {"currentUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-14T08:51:24.016Z"}
+[32minfo[39m: [CA 26] Navigate to Patient Page - COMPLETE {"service":"clinic-automation","timestamp":"2026-02-14T08:51:24.017Z","totalTime":209}
+[32minfo[39m: [CA 27] Search patient by name {"patientName":"ENG CHAI PIN ELYNE XANDRIA","service":"clinic-automation","timestamp":"2026-02-14T08:51:24.017Z"}
+[32minfo[39m: [CA 28] Patient search executed (Enter key) {"patientName":"ENG CHAI PIN ELYNE XANDRIA","service":"clinic-automation","timestamp":"2026-02-14T08:51:27.594Z"}
+[32minfo[39m: [CA 29] Open patient from search results {"patientName":"ENG CHAI PIN ELYNE XANDRIA","service":"clinic-automation","timestamp":"2026-02-14T08:51:29.598Z"}
+[31merror[39m: Failed to open patient from search results: ENG CHAI PIN ELYNE XANDRIA Could not find patient "ENG CHAI PIN ELYNE XANDRIA" in search results {"service":"clinic-automation","stack":"Error: Could not find patient \"ENG CHAI PIN ELYNE XANDRIA\" in search results\n    at ClinicAssistAutomation.openPatientFromSearchResults (file:///Users/vincent/Baselrpacrm/src/automations/clinic-assist.js:7456:13)\n    at async VisitDetailsExtractor.extractForVisit (file:///Users/vincent/Baselrpacrm/src/core/visit-details-extractor.js:61:11)\n    at async VisitDetailsExtractor.extractBatch (file:///Users/vincent/Baselrpacrm/src/core/visit-details-extractor.js:253:24)\n    at async extractVisitDetailsBatch (file:///Users/vincent/Baselrpacrm/src/examples/extract-visit-details-batch.js:192:21)","timestamp":"2026-02-14T08:51:29.928Z"}
+[31merror[39m: [VisitDetails] Failed to extract details for visit 60e0c382-d6cb-4d35-a5b9-e17ce5b20c73 {"error":"Could not find patient \"ENG CHAI PIN ELYNE XANDRIA\" in search results","patientName":"ENG CHAI PIN ELYNE XANDRIA","service":"clinic-automation","timestamp":"2026-02-14T08:51:29.928Z"}
+[32minfo[39m: [VisitDetails] Batch extraction complete: 0 completed, 1 failed, 0 skipped {"service":"clinic-automation","timestamp":"2026-02-14T08:51:32.113Z"}
+[32minfo[39m: 
+=== Extraction Summary === {"service":"clinic-automation","timestamp":"2026-02-14T08:51:32.362Z"}
+[32minfo[39m: Total visits processed: 1 {"service":"clinic-automation","timestamp":"2026-02-14T08:51:32.363Z"}
+[32minfo[39m: ✅ Completed: 0 {"service":"clinic-automation","timestamp":"2026-02-14T08:51:32.363Z"}
+[32minfo[39m: ❌ Failed: 1 {"service":"clinic-automation","timestamp":"2026-02-14T08:51:32.363Z"}
+[32minfo[39m: ⏭️  Skipped: 0 {"service":"clinic-automation","timestamp":"2026-02-14T08:51:32.363Z"}
+[32minfo[39m: Success rate: 0.0% {"service":"clinic-automation","timestamp":"2026-02-14T08:51:32.363Z"}
+[32minfo[39m: Time elapsed: 18.3s {"service":"clinic-automation","timestamp":"2026-02-14T08:51:32.364Z"}
+[32minfo[39m: 
+Failed visits (1): {"service":"clinic-automation","timestamp":"2026-02-14T08:51:32.364Z"}
+[32minfo[39m:   - Visit 60e0c382-d6cb-4d35-a5b9-e17ce5b20c73: ENG CHAI PIN ELYNE XANDRIA (2026-02-03) - Could not find patient "ENG CHAI PIN ELYNE XANDRIA" in search results {"service":"clinic-automation","timestamp":"2026-02-14T08:51:32.364Z"}

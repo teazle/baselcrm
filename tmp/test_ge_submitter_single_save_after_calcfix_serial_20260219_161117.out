@@ -1,0 +1,53 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T09:11:18.453Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T09:11:18.458Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T09:11:18.458Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T09:11:18.458Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T09:11:20.621Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T09:11:20.623Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T09:11:22.883Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:11:25.213Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T09:11:27.388Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:11:27.990Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:11:29.523Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T09:11:31.084Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T09:11:32.590Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T09:11:33.814Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T09:11:34.415Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T09:11:37.081Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T09:11:38.926Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"Lower back pain","timestamp":"2026-02-19T09:11:54.025Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":5,"service":"clinic-automation","term":"Lower back","timestamp":"2026-02-19T09:11:56.296Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":5,"service":"clinic-automation","term":"pain","timestamp":"2026-02-19T09:11:58.571Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"lower back pain","timestamp":"2026-02-19T09:12:06.556Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"back pain","timestamp":"2026-02-19T09:12:14.276Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"backache","timestamp":"2026-02-19T09:12:22.298Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"L","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:12:29.150Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"B","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:12:35.790Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"P","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:12:42.435Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"F","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:12:49.070Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"H","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:12:55.887Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"A","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:13:02.643Z"}
+[32minfo[39m: [GE DX] soft fallback click {"clicked":true,"fallbackTerm":"pain","score":0.25,"selectedCode":"R52","selectedText":"Pain, not elsewhere classified","service":"clinic-automation","timestamp":"2026-02-19T09:13:04.970Z"}
+[32minfo[39m: [GE DX] resolved diagnosis state {"portalMatch":{"fallback_search_term":"pain","match_method":"search","match_score":25,"match_text":"Pain, not elsewhere classified","matched_by":"fallback_soft_text","portal":"GE_NTUC"},"service":"clinic-automation","state":{"acuteArray":"","primaryCode":"","primaryCodeHidden":"","primaryId":"88cf96b2-e915-4b47-ab23-3f4fcb00be90","primaryText":"Pain, not elsewhere classified"},"timestamp":"2026-02-19T09:13:06.184Z"}
+[33mwarn[39m: [SUBMIT] GE calculate button missing {"attemptLabel":"attempt-1","service":"clinic-automation","timestamp":"2026-02-19T09:13:18.291Z"}
+{
+  "success": false,
+  "reason": "save_button_missing",
+  "error": "Calculate Claim button not available on GE form",
+  "portal": "GE_NTUC",
+  "portalService": "GE_NTUC",
+  "portalUrl": null,
+  "savedAsDraft": false,
+  "submitted": false,
+  "screenshot": "screenshots/ge-ntuc-after-calculate-probe-ge-t0801699i-1771492405457.png",
+  "screenshotBeforeCalculate": "screenshots/ge-ntuc-filled-before-calculate-probe-ge-t0801699i-1771492398200.png",
+  "diagnosisPortalMatch": {
+    "portal": "GE_NTUC",
+    "match_text": "Pain, not elsewhere classified",
+    "match_score": 25,
+    "match_method": "search",
+    "matched_by": "fallback_soft_text",
+    "fallback_search_term": "pain"
+  }
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T09:13:26.094Z"}

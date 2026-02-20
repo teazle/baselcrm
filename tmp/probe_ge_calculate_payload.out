@@ -1,0 +1,136 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T09:03:46.079Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T09:03:46.082Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T09:03:46.082Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T09:03:46.082Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T09:03:48.597Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T09:03:48.599Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T09:03:51.889Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:03:53.193Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T09:03:55.231Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:03:56.053Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:03:57.580Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T09:03:59.088Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T09:04:00.596Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T09:04:01.752Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T09:04:02.340Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T09:04:05.096Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T09:04:06.932Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":10000,"searchKind":"search_others","service":"clinic-automation","timestamp":"2026-02-19T09:04:17.535Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":20000,"searchKind":"search_others","service":"clinic-automation","timestamp":"2026-02-19T09:04:28.088Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"Lower back pain","timestamp":"2026-02-19T09:04:44.227Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":5,"service":"clinic-automation","term":"Lower back","timestamp":"2026-02-19T09:04:46.418Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":5,"service":"clinic-automation","term":"pain","timestamp":"2026-02-19T09:04:48.043Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"lower back pain","timestamp":"2026-02-19T09:04:55.982Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"back pain","timestamp":"2026-02-19T09:05:03.998Z"}
+[32minfo[39m: [GE DX] search term results {"optionCount":0,"service":"clinic-automation","term":"backache","timestamp":"2026-02-19T09:05:11.977Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"L","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:05:19.094Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"B","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:05:25.816Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"P","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:05:32.536Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"F","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:05:39.223Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"H","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:05:46.112Z"}
+[32minfo[39m: [GE DX] letter results {"letter":"A","optionCount":0,"service":"clinic-automation","timestamp":"2026-02-19T09:05:52.809Z"}
+[probe] POST payload fields {
+  "__EVENTTARGET": "",
+  "__EVENTARGUMENT": "",
+  "ctl00$MainContent$uc_MakeClaim$txtMcStartDate": "",
+  "ctl00$MainContent$uc_MakeClaim$ddlMcDay": "",
+  "ctl00$MainContent$uc_MakeClaim$txtMcDays": "",
+  "ctl00$MainContent$uc_MakeClaim$txtSPReferringGPClinic": "",
+  "ctl00$MainContent$uc_MakeClaim$ddlMcReasons": "",
+  "ctl00$MainContent$uc_MakeClaim$txtmcreasons": "",
+  "ctl00$MainContent$uc_MakeClaim$txtprimarydiagnosisCode": "",
+  "ctl00$MainContent$uc_MakeClaim$txtprimarydiagnosis": "",
+  "ctl00$MainContent$uc_MakeClaim$txtsecondarydiagnosisCode": "",
+  "ctl00$MainContent$uc_MakeClaim$txtsecondarydiagnosis": "",
+  "ctl00$MainContent$uc_MakeClaim$txtacutediagnosis3Code": "",
+  "ctl00$MainContent$uc_MakeClaim$txtacutediagnosis3": "",
+  "ctl00$MainContent$uc_MakeClaim$txtacutediagnosis4Code": "",
+  "ctl00$MainContent$uc_MakeClaim$txtacutediagnosis4": "",
+  "ctl00$MainContent$uc_MakeClaim$txtChronicDiagnosis1Code": "",
+  "ctl00$MainContent$uc_MakeClaim$txtChronicDiagnosis1": "",
+  "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis1": "",
+  "ctl00$MainContent$uc_MakeClaim$txtChronicDiagnosis2Code": "",
+  "ctl00$MainContent$uc_MakeClaim$txtChronicDiagnosis2": "",
+  "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis2": "",
+  "ctl00$MainContent$uc_MakeClaim$txtChronicDiagnosis3Code": "",
+  "ctl00$MainContent$uc_MakeClaim$txtChronicDiagnosis3": "",
+  "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis3": "",
+  "ctl00$MainContent$uc_MakeClaim$txtChronicDiagnosis4Code": "",
+  "ctl00$MainContent$uc_MakeClaim$txtChronicDiagnosis4": "",
+  "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis4": "",
+  "ctl00$MainContent$uc_MakeClaim$ddlFeeType": "",
+  "ctl00$MainContent$uc_MakeClaim$txtFeeAmount": "",
+  "ctl00$MainContent$uc_MakeClaim$hdFeeAmount": "0",
+  "ctl00$MainContent$uc_MakeClaim$hfClinicType": "SP",
+  "ctl00$MainContent$uc_MakeClaim$hfClinicID": "7b820cae-c206-4537-a164-ef28dc2641f9",
+  "ctl00$MainContent$uc_MakeClaim$hfAcuteDiagnosis": "True",
+  "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis": "True",
+  "ctl00$MainContent$uc_MakeClaim$hfNetworkClinicMapID": "D68CC82A-A06C-49F7-8E4B-CE4B17672F1A",
+  "ctl00$MainContent$uc_MakeClaim$hfAllowMCDays": "",
+  "ctl00$MainContent$uc_MakeClaim$hfTotalFeeGST": "",
+  "ctl00$MainContent$uc_MakeClaim$hfOldReferenceClinicType": "",
+  "ctl00$MainContent$uc_MakeClaim$hfReferenceClinicType": "",
+  "ctl00$MainContent$uc_MakeClaim$hfSurgeonFee": "0",
+  "ctl00$MainContent$uc_MakeClaim$hfOldRefBenefitType": "",
+  "ctl00$MainContent$uc_MakeClaim$hfIsConsultFeeZero": "",
+  "ctl00$MainContent$uc_MakeClaim$hfOldConsultFee": "",
+  "ctl00$MainContent$uc_MakeClaim$hfSpecializedProcedureFeeBeforeGST": "",
+  "ctl00$MainContent$uc_MakeClaim$hfSpecializedProcedureFeeAfterGST": "",
+  "ctl00$MainContent$uc_MakeClaim$hfPrimaryDiagnosisID": "",
+  "ctl00$MainContent$uc_MakeClaim$hfSecondaryDiagnosisID": "",
+  "ctl00$MainContent$uc_MakeClaim$hfDrugFee": "",
+  "ctl00$MainContent$uc_MakeClaim$hfDrugAdminFee": "",
+  "ctl00$MainContent$uc_MakeClaim$hfProcedureFee": "",
+  "ctl00$MainContent$uc_MakeClaim$hfDentalProcedureFee": "",
+  "ctl00$MainContent$uc_MakeClaim$hfAcuteDiagnosis3ID": "",
+  "ctl00$MainContent$uc_MakeClaim$hfAcuteDiagnosis4ID": "",
+  "ctl00$MainContent$uc_MakeClaim$hfClinicGroups": "SP",
+  "ctl00$MainContent$uc_MakeClaim$hfClinicCode": "ASP1120",
+  "ctl00$MainContent$uc_MakeClaim$hfPrimaryDiagnosisCode": "",
+  "ctl00$MainContent$uc_MakeClaim$hfSecondaryDiagnosisCode": "",
+  "ctl00$MainContent$uc_MakeClaim$hfAcuteDiagnosis3Code": "",
+  "ctl00$MainContent$uc_MakeClaim$hfAcuteDiagnosis4Code": "",
+  "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis1Code": "",
+  "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis2Code": "",
+  "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis3Code": "",
+  "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis4Code": ""
+}
+[32minfo[39m: [GE DX] soft fallback click {"clicked":true,"fallbackTerm":"pain","score":0.25,"selectedCode":"R52","selectedText":"Pain, not elsewhere classified","service":"clinic-automation","timestamp":"2026-02-19T09:05:55.313Z"}
+[probe] before calc {
+  "msg": "",
+  "refValue": "SINGAPORE SPORTS",
+  "mcDay": "0",
+  "mcReason": "Backache",
+  "feeType": "followup_consultationfee",
+  "feeAmount": "38.00",
+  "diagnosisCode": "",
+  "diagnosisText": "Pain, not elsewhere classified",
+  "refType": "",
+  "oldRefType": "",
+  "clinicId": "7b820cae-c206-4537-a164-ef28dc2641f9"
+}
+[probe] no calc button [
+  {
+    "id": "",
+    "name": "",
+    "value": "Show Benefit"
+  },
+  {
+    "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+    "name": "ctl00$MainContent$uc_MakeClaim$btnmcreasons",
+    "value": "+"
+  },
+  {
+    "id": "ctl00_MainContent_uc_MakeClaim_btnCancel",
+    "name": "ctl00$MainContent$uc_MakeClaim$btnCancel",
+    "value": "Cancel"
+  },
+  {
+    "id": "ctl00_MainContent_uc_MakeClaim_btnReloadData",
+    "name": "ctl00$MainContent$uc_MakeClaim$btnReloadData",
+    "value": ""
+  }
+]
+[probe] fatal Error: calc_button_missing
+    at file:///Users/vincent/Baselrpacrm/tmp/probe_ge_calculate_payload.mjs:106:11
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T09:05:56.832Z"}

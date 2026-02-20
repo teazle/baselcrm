@@ -1,0 +1,70 @@
+{
+  "chargeType": "first",
+  "diagnosis": {
+    "code": "M25.51",
+    "description": "Pain in a joint shoulder region",
+    "date": "02/02/2026"
+  },
+  "mcDays": 0,
+  "mcStartDate": null,
+  "medicines": [],
+  "diagnosisSource": "diagnosis_tab",
+  "diagnosisMissingReason": "generic_without_laterality",
+  "diagnosisAttempts": [
+    {
+      "source": "diagnosis_tab",
+      "found": true
+    }
+  ],
+  "diagnosisCanonical": {
+    "code_raw": "M25.51",
+    "code_normalized": "M25.51",
+    "description_raw": "Pain in a joint shoulder region",
+    "description_canonical": "Pain In The Shoulder",
+    "side": null,
+    "body_part": "shoulder",
+    "condition": "pain"
+  },
+  "diagnosisResolution": {
+    "status": "ambiguous",
+    "confidence": 0.74,
+    "source_chain": [
+      {
+        "source": "diagnosis_tab",
+        "found": true
+      }
+    ],
+    "reason_if_unresolved": "generic_without_laterality"
+  },
+  "diagnosisCandidates": [
+    {
+      "rank": 1,
+      "source": "diagnosis_tab",
+      "confidence": 0.74,
+      "code_raw": "M25.51",
+      "code_normalized": "M25.51",
+      "description_raw": "Pain in a joint shoulder region",
+      "description_canonical": "Pain In The Shoulder",
+      "side": null,
+      "body_part": "shoulder",
+      "condition": "pain"
+    },
+    {
+      "rank": 2,
+      "source": "canonicalization",
+      "confidence": 0.64,
+      "code_raw": "M25.51",
+      "code_normalized": "M25.51",
+      "description_raw": "Pain in a joint shoulder region",
+      "description_canonical": "Pain in a joint shoulder region",
+      "side": null,
+      "body_part": "shoulder",
+      "condition": "pain"
+    }
+  ],
+  "medicineFilterStats": {
+    "before": 0,
+    "after": 0,
+    "filteredOut": 0
+  }
+}

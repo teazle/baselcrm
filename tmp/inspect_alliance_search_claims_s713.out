@@ -1,0 +1,5 @@
+[31merror[39m: [ALLIANCE] Login failed {"error":"Could not locate Alliance Medinet login fields","service":"clinic-automation","timestamp":"2026-02-19T13:02:33.139Z"}
+{
+  "ok": false,
+  "error": "Could not locate Alliance Medinet login fields"
+}

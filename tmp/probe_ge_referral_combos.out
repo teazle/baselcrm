@@ -1,0 +1,112 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T09:24:57.359Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T09:24:57.366Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T09:24:57.367Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T09:24:57.367Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T09:25:01.158Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T09:25:01.161Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T09:25:03.828Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:25:05.183Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T09:25:07.190Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:25:07.879Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:25:09.419Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:25:13.986Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T09:25:15.524Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T09:25:17.033Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T09:25:18.281Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T09:25:18.896Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T09:25:21.636Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T09:25:23.503Z"}
+[probe] baseline {
+  "msg": "Please select either a chronic diagnosis or an acute diagnosis.Please select a valid diagnosis.",
+  "hasSave": false,
+  "refValue": "",
+  "refType": "",
+  "oldRefType": "",
+  "clinicId": "7b820cae-c206-4537-a164-ef28dc2641f9",
+  "parentClinicId": "",
+  "mcReason": "Backache",
+  "feeType": "",
+  "feeAmount": "38.00",
+  "dxCode": "",
+  "dxText": "Pain, not elsewhere classified",
+  "acute1Array": ""
+}
+[probe] scenario_results [
+  {
+    "name": "keep_as_is",
+    "clicked": false,
+    "after": {
+      "msg": "Please select either a chronic diagnosis or an acute diagnosis.Please select a valid diagnosis.",
+      "hasSave": false,
+      "refValue": "",
+      "refType": "",
+      "oldRefType": "",
+      "clinicId": "7b820cae-c206-4537-a164-ef28dc2641f9",
+      "parentClinicId": "",
+      "mcReason": "Backache",
+      "feeType": "",
+      "feeAmount": "38.00",
+      "dxCode": "",
+      "dxText": "Pain, not elsewhere classified",
+      "acute1Array": ""
+    }
+  },
+  {
+    "name": "set_ref_type_clinic",
+    "clicked": false,
+    "after": {
+      "msg": "Please select either a chronic diagnosis or an acute diagnosis.Please select a valid diagnosis.",
+      "hasSave": false,
+      "refValue": "",
+      "refType": "Clinic",
+      "oldRefType": "Clinic",
+      "clinicId": "7b820cae-c206-4537-a164-ef28dc2641f9",
+      "parentClinicId": "",
+      "mcReason": "Backache",
+      "feeType": "",
+      "feeAmount": "38.00",
+      "dxCode": "",
+      "dxText": "Pain, not elsewhere classified",
+      "acute1Array": ""
+    }
+  },
+  {
+    "name": "set_ref_type_and_parent",
+    "clicked": false,
+    "after": {
+      "msg": "Please select either a chronic diagnosis or an acute diagnosis.Please select a valid diagnosis.",
+      "hasSave": false,
+      "refValue": "",
+      "refType": "Clinic",
+      "oldRefType": "Clinic",
+      "clinicId": "7b820cae-c206-4537-a164-ef28dc2641f9",
+      "parentClinicId": "",
+      "mcReason": "Backache",
+      "feeType": "",
+      "feeAmount": "38.00",
+      "dxCode": "",
+      "dxText": "Pain, not elsewhere classified",
+      "acute1Array": ""
+    }
+  },
+  {
+    "name": "set_full_name_ref",
+    "clicked": false,
+    "after": {
+      "msg": "Please select either a chronic diagnosis or an acute diagnosis.Please select a valid diagnosis.",
+      "hasSave": false,
+      "refValue": "SINGAPORE SPORTS & ORTHOPAEDIC CLINIC PTE LTD",
+      "refType": "Clinic",
+      "oldRefType": "Clinic",
+      "clinicId": "7b820cae-c206-4537-a164-ef28dc2641f9",
+      "parentClinicId": "",
+      "mcReason": "Backache",
+      "feeType": "",
+      "feeAmount": "38.00",
+      "dxCode": "",
+      "dxText": "Pain, not elsewhere classified",
+      "acute1Array": ""
+    }
+  }
+]
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T09:25:42.094Z"}

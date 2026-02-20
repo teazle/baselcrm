@@ -1,0 +1,122 @@
+{
+  "generatedAt": "2026-02-12T06:39:35.947Z",
+  "targetCount": 7,
+  "updatedCount": 7,
+  "remainingDraftOrError": 0,
+  "pre": [
+    {
+      "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+      "patient_name": "MITTAL SACHIN KUMAR",
+      "nric": "M4539893L",
+      "visit_date": "2026-02-02",
+      "pay_type": "MHC",
+      "submission_status": "error",
+      "submitted_at": null,
+      "submission_error": "Failed to save as draft (see screenshots/mhc-asia-save-draft-not-found.png and screenshots/mhc-asia-before-save-draft.png)"
+    },
+    {
+      "id": "6af6ea13-14d9-43c6-917e-d0ca5da4ab0f",
+      "patient_name": "HASLINA BINTE HASSAN BASRI",
+      "nric": "S7349449D",
+      "visit_date": "2026-02-02",
+      "pay_type": "MHC",
+      "submission_status": "draft",
+      "submitted_at": "2026-02-12T06:25:51.734+00:00",
+      "submission_error": null
+    },
+    {
+      "id": "6eb5aa60-ee97-472b-a904-c4ccf2855b18",
+      "patient_name": "FAN HONGYI",
+      "nric": "S8481103C",
+      "visit_date": "2026-02-02",
+      "pay_type": "MHC",
+      "submission_status": "draft",
+      "submitted_at": "2026-02-12T06:24:46.875+00:00",
+      "submission_error": null
+    },
+    {
+      "id": "c3c483d2-83d4-46be-936e-77767dd568b3",
+      "patient_name": "FAN HONGYI",
+      "nric": "S8481103C",
+      "visit_date": "2026-02-03",
+      "pay_type": "MHC",
+      "submission_status": "draft",
+      "submitted_at": "2026-02-12T06:28:33.782+00:00",
+      "submission_error": null
+    },
+    {
+      "id": "0a1695ab-8ea3-4fba-b5a5-ec47ea933e40",
+      "patient_name": "CHEW SIEW LING",
+      "nric": "S8635560D",
+      "visit_date": "2026-02-03",
+      "pay_type": "MHC",
+      "submission_status": "draft",
+      "submitted_at": "2026-02-12T06:27:17.882+00:00",
+      "submission_error": null
+    },
+    {
+      "id": "78f0430c-6d4f-4043-a54f-d529e7ef57fb",
+      "patient_name": "YIP CHOI YEAN",
+      "nric": "S0121655D",
+      "visit_date": "2026-02-05",
+      "pay_type": "MHC",
+      "submission_status": "draft",
+      "submitted_at": "2026-02-12T06:26:37.611+00:00",
+      "submission_error": null
+    },
+    {
+      "id": "416a02fb-3feb-435b-b3f8-3f3197a60e0f",
+      "patient_name": "TJIA NATHANAEL THOMAS",
+      "nric": "T1208937B",
+      "visit_date": "2026-02-06",
+      "pay_type": "MHC",
+      "submission_status": "draft",
+      "submitted_at": "2026-02-12T06:23:35.579+00:00",
+      "submission_error": null
+    }
+  ],
+  "post": [
+    {
+      "id": "0a1695ab-8ea3-4fba-b5a5-ec47ea933e40",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_error": null
+    },
+    {
+      "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_error": null
+    },
+    {
+      "id": "416a02fb-3feb-435b-b3f8-3f3197a60e0f",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_error": null
+    },
+    {
+      "id": "6af6ea13-14d9-43c6-917e-d0ca5da4ab0f",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_error": null
+    },
+    {
+      "id": "6eb5aa60-ee97-472b-a904-c4ccf2855b18",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_error": null
+    },
+    {
+      "id": "78f0430c-6d4f-4043-a54f-d529e7ef57fb",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_error": null
+    },
+    {
+      "id": "c3c483d2-83d4-46be-936e-77767dd568b3",
+      "submission_status": null,
+      "submitted_at": null,
+      "submission_error": null
+    }
+  ]
+}

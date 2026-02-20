@@ -1,0 +1,37 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T07:05:45.817Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T07:05:45.819Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T07:05:45.820Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T07:05:45.820Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T07:05:48.685Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T07:05:48.686Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T07:05:51.749Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:05:52.728Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T07:05:54.677Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:05:55.265Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:05:56.784Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T07:05:58.295Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T07:05:59.807Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:06:00.974Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T07:06:01.601Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:06:04.310Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T07:06:06.116Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":10000,"service":"clinic-automation","timestamp":"2026-02-19T07:06:16.795Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":20000,"service":"clinic-automation","timestamp":"2026-02-19T07:06:27.287Z"}
+
+TERM= lower back pain COUNT= 0
+
+TERM= back pain COUNT= 0
+
+TERM= backache COUNT= 0
+
+TERM= low back pain COUNT= 0
+
+TERM= lumbago COUNT= 0
+
+TERM= pain COUNT= 5
+{"text":"Abdominal and pelvic pain","href":"javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl02$lbtnPrimaryDiagnosis','')","cols":["R10","Abdominal and pelvic pain"]}
+{"text":"Pain and other conditions associated with female genital organs and menstrual cycle","href":"javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl03$lbtnPrimaryDiagnosis','')","cols":["N94","Pain and other conditions associated with female genital organs and menstrual cycle"]}
+{"text":"Pain associated with micturition","href":"javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl04$lbtnPrimaryDiagnosis','')","cols":["R30","Pain associated with micturition"]}
+{"text":"Pain in throat and chest","href":"javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl05$lbtnPrimaryDiagnosis','')","cols":["R07","Pain in throat and chest"]}
+{"text":"Pain, not elsewhere classified","href":"javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl06$lbtnPrimaryDiagnosis','')","cols":["R52","Pain, not elsewhere classified"]}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T07:06:54.385Z"}

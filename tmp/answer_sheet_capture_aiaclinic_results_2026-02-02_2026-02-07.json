@@ -1,0 +1,65 @@
+{
+  "generatedAt": "2026-02-13T07:20:16.839Z",
+  "runDetails": [
+    {
+      "visit_id": "6af6ea13-14d9-43c6-917e-d0ca5da4ab0f",
+      "nric": "S7349449D",
+      "visit_date": "2026-02-02",
+      "found": true,
+      "opened": true,
+      "reference": "EV59948930",
+      "diagnosis": "S83.411A - Sprain of the knee",
+      "errors": []
+    },
+    {
+      "visit_id": "6eb5aa60-ee97-472b-a904-c4ccf2855b18",
+      "nric": "S8481103C",
+      "visit_date": "2026-02-02",
+      "found": true,
+      "opened": true,
+      "reference": "EV59949026",
+      "diagnosis": "S83.411A - Sprain of the knee",
+      "errors": []
+    },
+    {
+      "visit_id": "c3c483d2-83d4-46be-936e-77767dd568b3",
+      "nric": "S8481103C",
+      "visit_date": "2026-02-03",
+      "found": true,
+      "opened": true,
+      "reference": "EV59949094",
+      "diagnosis": "S83.411A - Sprain of the knee",
+      "errors": []
+    },
+    {
+      "visit_id": "60e0c382-d6cb-4d35-a5b9-e17ce5b20c73",
+      "nric": "S8570522I",
+      "visit_date": "2026-02-03",
+      "found": true,
+      "opened": true,
+      "reference": "EV59949107",
+      "diagnosis": "M79. 672 - Left foot/heel pain",
+      "errors": []
+    },
+    {
+      "visit_id": "dcbbe4e8-586c-45c4-905a-c76bacfcd860",
+      "nric": "S7288611I",
+      "visit_date": "2026-02-04",
+      "found": true,
+      "opened": true,
+      "reference": "EV59949116",
+      "diagnosis": "M54.5 - Low back pain (Loin pain; Low back strain; Lumbago NOS)",
+      "errors": []
+    },
+    {
+      "visit_id": "416a02fb-3feb-435b-b3f8-3f3197a60e0f",
+      "nric": "T1208937B",
+      "visit_date": "2026-02-06",
+      "found": true,
+      "opened": true,
+      "reference": "EV59949141",
+      "diagnosis": "S635 - Sprain and strain of wrist",
+      "errors": []
+    }
+  ]
+}

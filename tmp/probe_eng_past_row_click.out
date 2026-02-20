@@ -1,0 +1,74 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-13T16:41:45.171Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-13T16:41:45.173Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-13T16:41:45.173Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-13T16:41:45.174Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-13T16:41:46.447Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-13T16:41:46.447Z"}
+[32minfo[39m: [CA 01] Login start {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-13T16:41:46.569Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: Logging into Clinic Assist... {"service":"clinic-automation","timestamp":"2026-02-13T16:41:46.569Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-13T16:41:49.732Z"}
+[32minfo[39m: [CA 02] Username filled {"service":"clinic-automation","timestamp":"2026-02-13T16:41:49.735Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-13T16:41:49.761Z"}
+[32minfo[39m: [CA 03] Password filled {"service":"clinic-automation","timestamp":"2026-02-13T16:41:49.761Z"}
+[32minfo[39m: Clinic Group filled: ssoc {"service":"clinic-automation","timestamp":"2026-02-13T16:41:49.765Z"}
+[32minfo[39m: [CA 04] Clinic Group filled {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-13T16:41:49.766Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-13T16:41:49.843Z"}
+[32minfo[39m: [CA 05] Login submitted {"service":"clinic-automation","timestamp":"2026-02-13T16:41:49.843Z"}
+[32minfo[39m: Clinic Assist 2FA not required (verification inputs disabled) {"service":"clinic-automation","timestamp":"2026-02-13T16:41:52.859Z"}
+[32minfo[39m: Successfully logged into Clinic Assist {"service":"clinic-automation","timestamp":"2026-02-13T16:41:53.093Z"}
+[32minfo[39m: [CA 06] Login ok {"service":"clinic-automation","timestamp":"2026-02-13T16:41:53.093Z"}
+[32minfo[39m: [CA 07] Navigate to Patient Page - START {"service":"clinic-automation","timestamp":"2026-02-13T16:41:53.094Z"}
+[32minfo[39m: [CA 08] Current URL before navigation {"service":"clinic-automation","timestamp":"2026-02-13T16:41:53.094Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: [CA 09] Need to select Reception/room first before accessing Patient Page {"service":"clinic-automation","timestamp":"2026-02-13T16:41:53.097Z"}
+[32minfo[39m: [CA 10] Clicking Reception/room to access system {"selector":"button:has-text(\"Reception\")","service":"clinic-automation","timestamp":"2026-02-13T16:41:53.678Z"}
+[32minfo[39m: [CA 11] Reception clicked, checking URL {"newUrl":"https://clinicassist.sg:1080/Home/Reception","service":"clinic-automation","timeTaken":1180,"timestamp":"2026-02-13T16:41:54.277Z"}
+[32minfo[39m: [CA 12] Successfully entered Reception room {"newUrl":"https://clinicassist.sg:1080/Home/Reception","service":"clinic-automation","timeTaken":1237,"timestamp":"2026-02-13T16:41:54.334Z"}
+[32minfo[39m: [CA 13] Looking for sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-13T16:41:54.335Z"}
+[32minfo[39m: [CA 14] Found menu toggle, clicking {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-13T16:41:54.344Z"}
+[32minfo[39m: [CA 15] Looking for Patient sidebar link {"service":"clinic-automation","timestamp":"2026-02-13T16:41:54.571Z"}
+[32minfo[39m: [CA 16] Patient link status {"count":1,"isVisible":true,"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-13T16:41:54.708Z"}
+[32minfo[39m: [CA 17] Clicking Patient sidebar link via UI {"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-13T16:41:54.708Z"}
+[32minfo[39m: [CA 18] Patient link clicked via Playwright {"service":"clinic-automation","timeTaken":96,"timestamp":"2026-02-13T16:41:54.801Z"}
+[32minfo[39m: [CA 19] After Patient click, checking URL {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-13T16:41:56.515Z","totalTime":2180}
+[32minfo[39m: [CA 20] Successfully navigated to Patient Page via UI click {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-13T16:41:56.516Z","totalTime":3422}
+[32minfo[39m: [CA 21] Navigate to Patient Page - COMPLETE {"service":"clinic-automation","timestamp":"2026-02-13T16:41:56.517Z","totalTime":3423}
+[32minfo[39m: [CA 22] Search patient by number {"patientNumber":"78160","service":"clinic-automation","timestamp":"2026-02-13T16:41:56.517Z"}
+[32minfo[39m: [CA 23] Pressing Enter to execute search (may need to dismiss dialog first) {"service":"clinic-automation","timestamp":"2026-02-13T16:41:57.291Z"}
+[32minfo[39m: [CA 24] Patient search executed by number (Enter key x2) {"patientNumber":"78160","service":"clinic-automation","timestamp":"2026-02-13T16:41:58.412Z"}
+[32minfo[39m: [CA 25] Open patient from search results by number {"patientNumber":"78160","service":"clinic-automation","timestamp":"2026-02-13T16:41:58.414Z"}
+[32minfo[39m: [CA 26] Found patient row by number {"hasLink":true,"rowIndex":1,"service":"clinic-automation","timestamp":"2026-02-13T16:42:00.419Z"}
+[32minfo[39m: [CA 27] Clicked patient link via filter method {"service":"clinic-automation","timestamp":"2026-02-13T16:42:00.465Z"}
+[32minfo[39m: [CA 28] Patient opened from search results by number {"service":"clinic-automation","timestamp":"2026-02-13T16:42:02.467Z"}
+[32minfo[39m: [CA 29] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-13T16:42:03.670Z"}
+[32minfo[39m: [CA 30] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-13T16:42:08.231Z"}
+[32minfo[39m: [CA 31] Open Past Notes Tab {"service":"clinic-automation","timestamp":"2026-02-13T16:42:08.233Z"}
+[32minfo[39m: [CA 32] Past Notes Tab opened {"service":"clinic-automation","timestamp":"2026-02-13T16:42:12.070Z"}
+[32minfo[39m: [CA 33] Past Notes entries expanded {"service":"clinic-automation","timestamp":"2026-02-13T16:42:12.138Z","totalClicked":1,"visitDate":"2026-02-03"}
+{
+  "before": {
+    "len": 61
+  },
+  "after": {
+    "paneLen": 61,
+    "hasHiddenText": false
+  },
+  "snippets": {
+    "foot": null,
+    "heel": null,
+    "left": null,
+    "right": null,
+    "pain": null,
+    "diagnosis": null,
+    "m79": null,
+    "management": null,
+    "complaint": null
+  },
+  "modalTexts": [
+    "× Edit Patient NRIC NRIC/FIN/OTHERS New NRIC/FIN/OTHERS Note: Changing of NRIC will affect NEHR, CHAS, CDMP, NIR, IRIS and CIDC Submission",
+    "× Mobile Profile Uploaded Listing",
+    "× Edit Patient VIP Link",
+    "× Move To Other Folder To Other Patient Folder BiodataLabReportsRadiologyReport PCNO Name Folder BiodataLabReportsRadiologyReport",
+    "× Previous Voice Recordings"
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-13T16:42:16.285Z"}

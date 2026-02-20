@@ -1,0 +1,294 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-13T16:12:01.036Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-13T16:12:01.040Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-13T16:12:01.040Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-13T16:12:01.040Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-13T16:12:02.871Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-13T16:12:02.871Z"}
+[32minfo[39m: [CA 01] Login start {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-13T16:12:03.073Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: Logging into Clinic Assist... {"service":"clinic-automation","timestamp":"2026-02-13T16:12:03.074Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-13T16:12:06.535Z"}
+[32minfo[39m: [CA 02] Username filled {"service":"clinic-automation","timestamp":"2026-02-13T16:12:06.536Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-13T16:12:06.566Z"}
+[32minfo[39m: [CA 03] Password filled {"service":"clinic-automation","timestamp":"2026-02-13T16:12:06.566Z"}
+[32minfo[39m: Clinic Group filled: ssoc {"service":"clinic-automation","timestamp":"2026-02-13T16:12:06.570Z"}
+[32minfo[39m: [CA 04] Clinic Group filled {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-13T16:12:06.570Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-13T16:12:06.646Z"}
+[32minfo[39m: [CA 05] Login submitted {"service":"clinic-automation","timestamp":"2026-02-13T16:12:06.647Z"}
+[32minfo[39m: Clinic Assist 2FA not required (verification inputs disabled) {"service":"clinic-automation","timestamp":"2026-02-13T16:12:09.662Z"}
+[32minfo[39m: Successfully logged into Clinic Assist {"service":"clinic-automation","timestamp":"2026-02-13T16:12:09.900Z"}
+[32minfo[39m: [CA 06] Login ok {"service":"clinic-automation","timestamp":"2026-02-13T16:12:09.900Z"}
+[32minfo[39m: [CA 07] Navigate to Patient Page - START {"service":"clinic-automation","timestamp":"2026-02-13T16:12:09.901Z"}
+[32minfo[39m: [CA 08] Current URL before navigation {"service":"clinic-automation","timestamp":"2026-02-13T16:12:09.901Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: [CA 09] Need to select Reception/room first before accessing Patient Page {"service":"clinic-automation","timestamp":"2026-02-13T16:12:09.904Z"}
+[32minfo[39m: [CA 10] Clicking Reception/room to access system {"selector":"button:has-text(\"Reception\")","service":"clinic-automation","timestamp":"2026-02-13T16:12:10.471Z"}
+[32minfo[39m: [CA 11] Reception clicked, checking URL {"newUrl":"https://clinicassist.sg:1080/Home/Reception","service":"clinic-automation","timeTaken":1164,"timestamp":"2026-02-13T16:12:11.068Z"}
+[32minfo[39m: [CA 12] Successfully entered Reception room {"newUrl":"https://clinicassist.sg:1080/Home/Reception","service":"clinic-automation","timeTaken":1174,"timestamp":"2026-02-13T16:12:11.078Z"}
+[32minfo[39m: [CA 13] Looking for sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-13T16:12:11.078Z"}
+[32minfo[39m: [CA 14] Found menu toggle, clicking {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-13T16:12:11.079Z"}
+[32minfo[39m: [CA 15] Looking for Patient sidebar link {"service":"clinic-automation","timestamp":"2026-02-13T16:12:11.294Z"}
+[32minfo[39m: [CA 16] Patient link status {"count":1,"isVisible":false,"selector":"a.SideMenuList[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-13T16:12:11.301Z"}
+[32minfo[39m: [CA 17] Patient link status {"count":1,"isVisible":false,"selector":"a[cat=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-13T16:12:11.305Z"}
+[32minfo[39m: [CA 18] Patient link status {"count":1,"isVisible":false,"selector":"a[title=\"Patient\"]","service":"clinic-automation","timestamp":"2026-02-13T16:12:11.308Z"}
+[32minfo[39m: [CA 19] Patient link status {"count":1,"isVisible":false,"selector":"a:has-text(\"Patient\")","service":"clinic-automation","timestamp":"2026-02-13T16:12:11.318Z"}
+[32minfo[39m: [CA 20] Could not click Patient link via UI; trying Home -> Patient fallback {"service":"clinic-automation","timestamp":"2026-02-13T16:12:11.322Z","totalTime":1421}
+[32minfo[39m: [CA 21] Home->Patient retry URL {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-13T16:12:13.478Z"}
+[32minfo[39m: [CA 22] Navigate to Patient Page - COMPLETE {"service":"clinic-automation","timestamp":"2026-02-13T16:12:13.479Z","totalTime":3578}
+[32minfo[39m: [CA 23] Search patient by number {"patientNumber":"78160","service":"clinic-automation","timestamp":"2026-02-13T16:12:13.479Z"}
+[32minfo[39m: [CA 24] Pressing Enter to execute search (may need to dismiss dialog first) {"service":"clinic-automation","timestamp":"2026-02-13T16:12:14.258Z"}
+[32minfo[39m: [CA 25] Patient search executed by number (Enter key x2) {"patientNumber":"78160","service":"clinic-automation","timestamp":"2026-02-13T16:12:15.373Z"}
+[32minfo[39m: [CA 26] Open patient from search results by number {"patientNumber":"78160","service":"clinic-automation","timestamp":"2026-02-13T16:12:15.374Z"}
+[32minfo[39m: [CA 27] Found patient row by number {"hasLink":true,"rowIndex":1,"service":"clinic-automation","timestamp":"2026-02-13T16:12:17.386Z"}
+[32minfo[39m: [CA 28] Clicked patient link via filter method {"service":"clinic-automation","timestamp":"2026-02-13T16:12:17.445Z"}
+[32minfo[39m: [CA 29] Patient opened from search results by number {"service":"clinic-automation","timestamp":"2026-02-13T16:12:19.448Z"}
+[32minfo[39m: [CA 30] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-13T16:12:20.451Z"}
+[32minfo[39m: [CA 31] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-13T16:12:25.692Z"}
+{
+  "url": "https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=3Rv6/0utPL8a+RcrqeZFhSBx3zDdaP0iMT1Uh3xNYi4bDNIqKn/9ixmbwTOb1x1q9Uu3Sr54D8ZOlozM7nbvz7AP9pTZKR6+Xka0nsHAQdVNXnyryqT4Hg==",
+  "gridIds": [
+    "divShowPastNote",
+    "lblCaseNoteHeaderbell",
+    "Pat-tab-li-PastMeds",
+    "Pat-tab-li-PastNotes",
+    "txtPatientNotes",
+    "ehaPatientGrid",
+    "tabPastMeds",
+    "tabPastMeds_frame",
+    "Grid_PattabxAll",
+    "gbox_jqGrid_PattabxAll",
+    "lui_jqGrid_PattabxAll",
+    "load_jqGrid_PattabxAll",
+    "gview_jqGrid_PattabxAll",
+    "jqGrid_PattabxAll_Ddate",
+    "jqgh_jqGrid_PattabxAll_Ddate",
+    "jqGrid_PattabxAll_Type",
+    "jqgh_jqGrid_PattabxAll_Type",
+    "jqGrid_PattabxAll_Description",
+    "jqgh_jqGrid_PattabxAll_Description",
+    "jqGrid_PattabxAll_Amount",
+    "jqgh_jqGrid_PattabxAll_Amount",
+    "jqGrid_PattabxAll_Charge",
+    "jqgh_jqGrid_PattabxAll_Charge",
+    "jqGrid_PattabxAll_Clinic",
+    "jqgh_jqGrid_PattabxAll_Clinic",
+    "jqGrid_PattabxAll",
+    "jqg10",
+    "rs_mjqGrid_PattabxAll",
+    "Grid_PattabxMedicine",
+    "jqGrid_PattabxMedicine",
+    "Grid_tabxInvestigation",
+    "jqGrid_tabxInvestigation",
+    "Grid_PattabxProcedure",
+    "jqGrid_PattabxProcedure",
+    "Grid_PattabxDiagnosis",
+    "jqGrid_PattabxDiagnosis",
+    "Grid_PattabxMC",
+    "jqGrid_PattabxMC",
+    "Grid_PattabxVisit",
+    "jqGrid_PattabxVisit",
+    "jqGrid_tabxCurMed",
+    "tabPastMeds_frame_AD",
+    "tabPastNotes",
+    "tabPastNotes_frame",
+    "PastPatientDetailsPCNO",
+    "hfPastNoteDisplay",
+    "SearchPastPatientPCNO",
+    "pastNoteMainDiv",
+    "pastPatientDetailsBodyFlexRow",
+    "pastPatientDetailsBodyHeading",
+    "PatientPast_UL",
+    "pastNoteContent",
+    "tabPastCaseNote",
+    "SearchPastPatientDateFrom",
+    "SearchPastPatientDateTo",
+    "SearchPastPatientPCNO",
+    "SearchPastPatientDoctor",
+    "txtPastNoteSearch",
+    "casenote_custom_tab",
+    "casenote_custom_wrapchoice",
+    "casenote_custom_tabcontent",
+    "divVisitNoteList",
+    "gbox_pastCaseNoteGrid",
+    "lui_pastCaseNoteGrid",
+    "load_pastCaseNoteGrid",
+    "gview_pastCaseNoteGrid",
+    "pastCaseNoteGrid_VisitDate",
+    "jqgh_pastCaseNoteGrid_VisitDate",
+    "pastCaseNoteGrid_VisitNo",
+    "jqgh_pastCaseNoteGrid_VisitNo",
+    "pastCaseNoteGrid_Clinic",
+    "jqgh_pastCaseNoteGrid_Clinic",
+    "pastCaseNoteGrid_CaseNote",
+    "jqgh_pastCaseNoteGrid_CaseNote",
+    "pastCaseNoteGrid_Management",
+    "jqgh_pastCaseNoteGrid_Management",
+    "pastCaseNoteGrid_Description",
+    "jqgh_pastCaseNoteGrid_Description",
+    "pastCaseNoteGrid",
+    "jqg50",
+    "rs_mpastCaseNoteGrid",
+    "divNormalPastNote",
+    "dropdownCaseNoteMenuButton",
+    "printcasenote",
+    "moveCaseNoteOption",
+    "deleteCaseNoteOption",
+    "tabPastDialysis",
+    "PastDialysis_Render",
+    "tabPastDialysiscontent",
+    "pasteDocAddFileModal",
+    "pasteDocAddFileModalLabel",
+    "pasteDocAddFileModalBody",
+    "dzPastNoteForm",
+    "dzPastNote",
+    "btnPasteDocFileUpload",
+    "tabPastNotes_frame_AD",
+    "gbox_patientAllergyGrid",
+    "lui_patientAllergyGrid",
+    "load_patientAllergyGrid",
+    "gview_patientAllergyGrid",
+    "patientAllergyGrid_Delete",
+    "jqgh_patientAllergyGrid_Delete",
+    "patientAllergyGrid_Code",
+    "jqgh_patientAllergyGrid_Code",
+    "patientAllergyGrid_Description",
+    "jqgh_patientAllergyGrid_Description",
+    "patientAllergyGrid_MIMSType",
+    "jqgh_patientAllergyGrid_MIMSType",
+    "patientAllergyGrid",
+    "rs_mpatientAllergyGrid",
+    "gbox_patientAllergyOtherGrid",
+    "lui_patientAllergyOtherGrid",
+    "load_patientAllergyOtherGrid",
+    "gview_patientAllergyOtherGrid",
+    "patientAllergyOtherGrid_Delete",
+    "jqgh_patientAllergyOtherGrid_Delete",
+    "patientAllergyOtherGrid_AllergyType",
+    "jqgh_patientAllergyOtherGrid_AllergyType",
+    "patientAllergyOtherGrid_AllergyDesc",
+    "jqgh_patientAllergyOtherGrid_AllergyDesc",
+    "patientAllergyOtherGrid_DateID",
+    "jqgh_patientAllergyOtherGrid_DateID",
+    "patientAllergyOtherGrid_Severity",
+    "jqgh_patientAllergyOtherGrid_Severity",
+    "patientAllergyOtherGrid_Reaction",
+    "jqgh_patientAllergyOtherGrid_Reaction",
+    "patientAllergyOtherGrid_Remarks",
+    "jqgh_patientAllergyOtherGrid_Remarks",
+    "patientAllergyOtherGrid",
+    "rs_mpatientAllergyOtherGrid",
+    "mednotes",
+    "tabPatCaseNoteAccess",
+    "tabPatCaseNoteAccess_frame",
+    "queueHisCaseNoteModal",
+    "queueHisCaseNoteModalDialog",
+    "myqueueHisCaseNoteModalLabel",
+    "queueHisCaseNoteModalBody",
+    "queueHisCaseNoteModalDialog",
+    "ehaPatientGrid",
+    "mainTabVisitNotes_frame",
+    "btnPast",
+    "btnPastInvoice_pat_comp",
+    "caseNAddFileModal",
+    "caseNAddFileModalLabel",
+    "caseNAddFileModalBody",
+    "btnCaseNFileUpload",
+    "queueHisCaseNoteModal",
+    "queueHisCaseNoteModalDialog",
+    "myqueueHisCaseNoteModalLabel",
+    "queueHisCaseNoteModalBody",
+    "Setup_Casenote"
+  ],
+  "tableRows": [
+    [
+      "Visit Date",
+      "Visit NO",
+      "Clinic",
+      "Case Note",
+      "Management",
+      "MED / PROC / INV"
+    ],
+    [
+      "03 Feb 2026",
+      "127954",
+      "SSOC",
+      "<03-Feb-2026 11:11 AM PAM>",
+      "Procedure: SPECIALIST FIRST CONSULTATION - Qty(1.00 )"
+    ]
+  ],
+  "jq": [
+    {
+      "id": "jqGrid_PattabxAll",
+      "rowCount": 1,
+      "rows": [
+        {
+          "rid": "jqg10",
+          "data": {
+            "Ddate": "03/02/2026",
+            "Type": "Pcr",
+            "Description": "SPECIALIST FIRST CONSULTATION",
+            "Amount": "1.00 ",
+            "Charge": "120.00",
+            "Clinic": "SSOC"
+          }
+        }
+      ]
+    },
+    {
+      "id": "pastCaseNoteGrid",
+      "rowCount": 1,
+      "rows": [
+        {
+          "rid": "jqg50",
+          "data": {
+            "VisitDate": "03 Feb 2026",
+            "VisitNo": "127954",
+            "Clinic": "SSOC",
+            "CaseNote": " <br><br><03-Feb-2026 11:11 AM PAM><br>\n",
+            "Management": "\n\n",
+            "Description": "Procedure: \nSPECIALIST FIRST CONSULTATION - Qty(1.00 )\n"
+          }
+        }
+      ]
+    },
+    {
+      "id": "patientAllergyOtherGrid",
+      "rowCount": 2,
+      "rows": [
+        {
+          "rid": "1",
+          "data": {
+            "Delete": "<a onmouseover=\"\" style=\"cursor: pointer;\" onclick=\"RemovePatientAllergyOther.call(this, event)\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Remove Patient Non Drug Allergy\"><span class=\"glyphicon glyphicon-trash\"></span></a>",
+            "AllergyType": "D",
+            "AllergyDesc": "Cephalexin ",
+            "DateID": "03/02/2026",
+            "Severity": "I",
+            "Reaction": "",
+            "Remarks": ""
+          }
+        },
+        {
+          "rid": "2",
+          "data": {
+            "Delete": "<a onmouseover=\"\" style=\"cursor: pointer;\" onclick=\"RemovePatientAllergyOther.call(this, event)\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"Remove Patient Non Drug Allergy\"><span class=\"glyphicon glyphicon-trash\"></span></a>",
+            "AllergyType": "D",
+            "AllergyDesc": "Ciprofloxacin",
+            "DateID": "03/02/2026",
+            "Severity": "I",
+            "Reaction": "",
+            "Remarks": ""
+          }
+        }
+      ]
+    }
+  ],
+  "keywordHits": {
+    "foot": null,
+    "heel": null,
+    "pain": null,
+    "diagnosis": null,
+    "left": null,
+    "03/02/2026": null,
+    "M79": null,
+    "CaseNote": null
+  }
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-13T16:12:29.461Z"}

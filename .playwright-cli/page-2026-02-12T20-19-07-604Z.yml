@@ -1,0 +1,77 @@
+- generic [ref=e1]:
+  - generic [ref=e49]:
+    - generic [ref=e51]:
+      - generic [ref=e52]:
+        - img [ref=e342] [cursor=pointer]
+        - button [ref=e56] [cursor=pointer]:
+          - img [ref=e57]: keyboard_double_arrow_left
+      - list [ref=e61]:
+        - listitem [ref=e62]:
+          - generic [ref=e63] [cursor=pointer]:
+            - img [ref=e64]:
+              - img [ref=e65]
+            - paragraph [ref=e67]: Panel Services
+            - img [ref=e68]: expand_more
+          - list [ref=e318]:
+            - listitem [ref=e319]:
+              - generic [ref=e321] [cursor=pointer]: Create Panel Claim
+            - listitem [ref=e322]:
+              - generic [ref=e324] [cursor=pointer]: Search Panel Claims
+            - listitem [ref=e325]:
+              - generic [ref=e327] [cursor=pointer]: Download Resources
+        - listitem [ref=e69]:
+          - generic [ref=e70] [cursor=pointer]:
+            - img [ref=e71]:
+              - img [ref=e72]
+            - paragraph [ref=e74]: Pre-Authorisation
+            - img [ref=e75]: expand_more
+        - listitem [ref=e76]:
+          - generic [ref=e77] [cursor=pointer]:
+            - img [ref=e78]:
+              - img [ref=e79]
+            - paragraph [ref=e81]: Finance
+            - img [ref=e82]: expand_more
+    - generic [ref=e83]:
+      - generic [ref=e86]:
+        - heading [level=1] [ref=e343]: Create Panel Claim
+        - button [ref=e92] [cursor=pointer]:
+          - img [ref=e93]: more_vert
+      - generic [ref=e336]:
+        - heading [level=4] [ref=e344]: Member Details
+        - generic [ref=e338]:
+          - button [ref=e345] [cursor=pointer]: Medical Treatment
+          - button [ref=e346] [cursor=pointer]: Other Services
+          - img [ref=e341]: info
+  - dialog "Search Member Close" [ref=e350]:
+    - generic [ref=e353]:
+      - generic [ref=e354]:
+        - generic [ref=e355]: Search Member
+        - button "Close" [active] [ref=e356] [cursor=pointer]:
+          - img [ref=e357]: close
+      - generic [ref=e360]:
+        - generic [ref=e363] [cursor=pointer]:
+          - generic [ref=e364]: Claim Type
+          - combobox "Claim Type SP (Panel)" [ref=e366]:
+            - generic [ref=e367]:
+              - generic [ref=e369]: SP (Panel)
+              - img [ref=e372]
+        - generic [ref=e377]:
+          - generic [ref=e378]: Member Name
+          - textbox "Member Name" [ref=e380]
+        - generic [ref=e384]:
+          - generic [ref=e385]: Member UIN./Membership ID
+          - textbox "Member UIN./Membership ID" [ref=e387]
+        - generic [ref=e391]:
+          - generic [ref=e392]: Company Entity Name
+          - textbox "Company Entity Name" [ref=e394]
+        - generic [ref=e398]:
+          - generic [ref=e399]:
+            - text: Date of Visit
+            - generic [ref=e400]: "*"
+          - textbox "Date of Visit" [ref=e402]: 13/2/2026
+          - button "Open calendar" [ref=e405] [cursor=pointer]:
+            - img [ref=e406]
+        - generic [ref=e411]:
+          - button "Search Others" [ref=e412] [cursor=pointer]
+          - button "Search AIA Member" [ref=e413] [cursor=pointer]
+          - button "Clear Filters" [ref=e414] [cursor=pointer]

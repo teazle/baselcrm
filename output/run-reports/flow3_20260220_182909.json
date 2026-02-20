@@ -1,0 +1,32 @@
+{
+  "flowName": "Flow 3 Claim Submission",
+  "generatedAt": "2026-02-20T11:29:09.395Z",
+  "scope": {
+    "from": "1900-01-01",
+    "to": "1900-01-01",
+    "date": null,
+    "payType": "All",
+    "portalTargets": "Portal scope",
+    "visitIds": null
+  },
+  "totals": {
+    "total": 0,
+    "submitted": 0,
+    "drafts": 0,
+    "filled_only": 0,
+    "errors": 0,
+    "not_started": 0
+  },
+  "rows": [
+    {
+      "date": "1900-01-01..1900-01-01",
+      "patientName": "-",
+      "nric": "-",
+      "payType": "-",
+      "portal": "-",
+      "status": "no_records",
+      "diagnosisStatus": "-",
+      "notes": "No visits matched run scope"
+    }
+  ]
+}

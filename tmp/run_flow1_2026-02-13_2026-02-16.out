@@ -1,0 +1,205 @@
+[32minfo[39m: === Date Range Extraction === {"service":"clinic-automation","timestamp":"2026-02-17T12:26:16.789Z"}
+[32minfo[39m: Date range: 2026-02-13 to 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-17T12:26:16.790Z"}
+[32minfo[39m: Querying existing visit dates from database... {"service":"clinic-automation","timestamp":"2026-02-17T12:26:16.800Z"}
+[32minfo[39m: Found 1 dates with existing data in range {"service":"clinic-automation","timestamp":"2026-02-17T12:26:17.496Z"}
+[32minfo[39m: Processing 3 dates: 2026-02-14 to 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-17T12:26:17.497Z"}
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-17T12:26:17.497Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-17T12:26:17.499Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-17T12:26:17.500Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-17T12:26:17.500Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-17T12:26:18.852Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-17T12:26:18.853Z"}
+[32minfo[39m: Initializing browser and logging in... {"service":"clinic-automation","timestamp":"2026-02-17T12:26:19.022Z"}
+[32minfo[39m: [CA 01] Login start {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-17T12:26:19.022Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: Logging into Clinic Assist... {"service":"clinic-automation","timestamp":"2026-02-17T12:26:19.023Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-17T12:26:22.211Z"}
+[32minfo[39m: [CA 02] Username filled {"service":"clinic-automation","timestamp":"2026-02-17T12:26:22.212Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-17T12:26:22.244Z"}
+[32minfo[39m: [CA 03] Password filled {"service":"clinic-automation","timestamp":"2026-02-17T12:26:22.244Z"}
+[32minfo[39m: Clinic Group filled: ssoc {"service":"clinic-automation","timestamp":"2026-02-17T12:26:22.253Z"}
+[32minfo[39m: [CA 04] Clinic Group filled {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-17T12:26:22.254Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-17T12:26:22.341Z"}
+[32minfo[39m: [CA 05] Login submitted {"service":"clinic-automation","timestamp":"2026-02-17T12:26:22.341Z"}
+[32minfo[39m: Clinic Assist 2FA not required (verification inputs disabled) {"service":"clinic-automation","timestamp":"2026-02-17T12:26:25.359Z"}
+[32minfo[39m: Successfully logged into Clinic Assist {"service":"clinic-automation","timestamp":"2026-02-17T12:26:25.589Z"}
+[32minfo[39m: [CA 06] Login ok {"service":"clinic-automation","timestamp":"2026-02-17T12:26:25.589Z"}
+[32minfo[39m: 
+[1/3] Processing date: 2026-02-14 {"service":"clinic-automation","timestamp":"2026-02-17T12:26:25.589Z"}
+[32minfo[39m: [BATCH STEP 03/10] Reports → Queue List (date-based extraction) {"service":"clinic-automation","timestamp":"2026-02-17T12:26:26.344Z"}
+[32minfo[39m: [REPORTS] Navigating to Queue List report for date: 2026-02-14 {"service":"clinic-automation","timestamp":"2026-02-17T12:26:26.344Z"}
+[32minfo[39m: [CA 07] Navigating to Reports section {"service":"clinic-automation","timestamp":"2026-02-17T12:26:26.344Z"}
+[32minfo[39m: [CA 08] Need to select Reception/room first before accessing Reports {"service":"clinic-automation","timestamp":"2026-02-17T12:26:27.365Z"}
+[32minfo[39m: [CA 09] Clicking Reception/room to access system {"selector":"button:has-text(\"Reception\")","service":"clinic-automation","timestamp":"2026-02-17T12:26:27.370Z"}
+[32minfo[39m: [CA 10] Trying to open sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-17T12:26:30.432Z"}
+[32minfo[39m: [CA 11] Found menu toggle, clicking to open sidebar {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-17T12:26:30.458Z"}
+[32minfo[39m: [CA 12] Looking for Reports link in sidebar {"service":"clinic-automation","timestamp":"2026-02-17T12:26:31.472Z"}
+[32minfo[39m: [CA 13] Found SidebarmenuReports, trying to trigger click via JavaScript {"service":"clinic-automation","timestamp":"2026-02-17T12:26:32.070Z"}
+[32minfo[39m: [CA 14] After JS click on SidebarmenuReports {"service":"clinic-automation","timestamp":"2026-02-17T12:26:35.076Z","url":"https://clinicassist.sg:1080/ReportsMenu/ReportsMenu"}
+[32minfo[39m: [CA 15] Successfully navigated via SidebarmenuReports click {"service":"clinic-automation","timestamp":"2026-02-17T12:26:35.077Z"}
+[32minfo[39m: [CA 16] Navigating to Queue List report {"service":"clinic-automation","timestamp":"2026-02-17T12:26:37.128Z"}
+[32minfo[39m: [CA 17] Queue List navigation context {"frameUrl":null,"kind":"page","pageUrl":"https://clinicassist.sg:1080/ReportsMenu/ReportsMenu","service":"clinic-automation","timestamp":"2026-02-17T12:26:45.279Z"}
+[32minfo[39m: [CA 18] Trying to click Queue Report link by ID 60017 {"service":"clinic-automation","timestamp":"2026-02-17T12:26:46.414Z"}
+[32minfo[39m: [CA 19] JS click result for Queue Report {"found":true,"method":"class","service":"clinic-automation","text":"Queue Report","timestamp":"2026-02-17T12:26:46.439Z"}
+[32minfo[39m: [CA 20] URL after JS click on Queue Report {"frameUrl":null,"pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-17T12:26:50.458Z"}
+[32minfo[39m: [CA 21] Successfully navigated to QueueReport page via JS click {"frameUrl":null,"pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-17T12:26:50.458Z"}
+[32minfo[39m: [CA 22] Searching Queue List by date {"date":"2026-02-14","service":"clinic-automation","timestamp":"2026-02-17T12:26:52.565Z"}
+[32minfo[39m: [CA 23] QueueReport search context {"frameUrl":null,"kind":"page","pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-17T12:27:00.717Z"}
+[32minfo[39m: [CA 24] QueueReport date field candidates {"count":1,"fields":[{"id":"txtOtherDateFrom","name":"DateFrom","placeholder":"","readOnly":false,"value":"17/2/2026"}],"service":"clinic-automation","timestamp":"2026-02-17T12:27:00.722Z"}
+[32minfo[39m: [CA 25] QueueReport date filled {"selector":"input[id=\"txtOtherDateFrom\"]","service":"clinic-automation","timestamp":"2026-02-17T12:27:00.795Z","value":"14/02/2026"}
+[32minfo[39m: [CA 26] QueueReport generate clicked via JS {"found":true,"service":"clinic-automation","timestamp":"2026-02-17T12:27:00.886Z","via":"btnOK"}
+[32minfo[39m: [CA 27] Extracting queue list results (root-aware) {"service":"clinic-automation","timestamp":"2026-02-17T12:27:12.085Z"}
+[32minfo[39m: [CA 28] QueueReport extract context {"frameUrl":null,"kind":"page","pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-17T12:27:20.313Z"}
+[32minfo[39m: [CA 29] Queue report Excel downloaded {"excelPath":"/Users/vincent/Baselrpacrm/downloads/queueListing.xls","label":"nested","service":"clinic-automation","timestamp":"2026-02-17T12:27:29.890Z","why":"click #Button4"}
+[32minfo[39m: [CA 30] Found header row {"headers":["QNO","PCNO","NAME","SEX","SP\nCODE","TIME IN","TIMEOUT","INV NO","CASH TRANS","CONTRACT","TOTAL","GST","ADJ"],"rowIndex":2,"service":"clinic-automation","timestamp":"2026-02-17T12:27:29.927Z"}
+[32minfo[39m: [CA 31] Column positions detected {"cashTransCol":8,"contractCol":9,"invNoCol":7,"nameCol":2,"pcnoCol":1,"qnoCol":0,"service":"clinic-automation","sexCol":3,"spCodeCol":4,"timeInCol":5,"timeOutCol":6,"timestamp":"2026-02-17T12:27:29.927Z"}
+[32minfo[39m: [CA 32] Parsing Excel file {"headerCount":13,"headerRowIndex":2,"service":"clinic-automation","timestamp":"2026-02-17T12:27:29.928Z","worksheetName":"Sheet1"}
+[32minfo[39m: [CA 33] Excel parsing complete {"itemsFound":34,"service":"clinic-automation","timestamp":"2026-02-17T12:27:29.932Z"}
+[32minfo[39m: [CA 34] Queue report Excel parsed {"count":34,"label":"nested","service":"clinic-automation","timestamp":"2026-02-17T12:27:29.932Z"}
+[32minfo[39m: [REPORTS] Extracted 34 items from queue list for 2026-02-14 {"service":"clinic-automation","timestamp":"2026-02-17T12:27:29.932Z"}
+[32minfo[39m: Extracted 34 items for 2026-02-14 {"service":"clinic-automation","timestamp":"2026-02-17T12:27:30.253Z"}
+[32minfo[39m: [BATCH] Saved visit for KEK BOON YONG {"service":"clinic-automation","timestamp":"2026-02-17T12:27:30.904Z","visitId":"4c33cd19-9a53-4f4b-8d35-eafa68c56682"}
+[32minfo[39m: [BATCH] Saved visit for ABDUL HAFIEZ BIN ABDUL RASHID {"service":"clinic-automation","timestamp":"2026-02-17T12:27:31.445Z","visitId":"3bc3552f-e979-453a-a07c-38048db5d9d1"}
+[32minfo[39m: [BATCH] Saved visit for SEKAR DHARMARAJ {"service":"clinic-automation","timestamp":"2026-02-17T12:27:31.909Z","visitId":"79f30910-dbca-493f-ad83-3ab23e55bd95"}
+[32minfo[39m: [BATCH] Saved visit for CHEAM XI-QING JACQUELINE {"service":"clinic-automation","timestamp":"2026-02-17T12:27:32.401Z","visitId":"588d28b0-d736-49d7-b121-b7b72c8a3e6e"}
+[32minfo[39m: [BATCH] Saved visit for CHENG, LIN-CHUCH {"service":"clinic-automation","timestamp":"2026-02-17T12:27:32.915Z","visitId":"e3408387-a48d-4a5b-b511-1fc9e3f5968e"}
+[32minfo[39m: [BATCH] Saved visit for LIM SOON YEN ADAM {"service":"clinic-automation","timestamp":"2026-02-17T12:27:33.659Z","visitId":"fe444361-71e5-431e-9536-e0b1b2de3fcd"}
+[32minfo[39m: [BATCH] Saved visit for ONG ENG CHUN {"service":"clinic-automation","timestamp":"2026-02-17T12:27:34.155Z","visitId":"a41d9246-de0b-4716-9be9-003f364aaa4c"}
+[32minfo[39m: [BATCH] Saved visit for EMMA TAY LE XUAN {"service":"clinic-automation","timestamp":"2026-02-17T12:27:34.757Z","visitId":"65d739e3-0ba4-4654-81ef-fde99ce2cd5f"}
+[32minfo[39m: [BATCH] Saved visit for SAURABH CHANDAN {"service":"clinic-automation","timestamp":"2026-02-17T12:27:35.378Z","visitId":"96b158ba-8d89-4f84-ba02-a544190e867f"}
+[32minfo[39m: [BATCH] Saved visit for ZHU YURUI {"service":"clinic-automation","timestamp":"2026-02-17T12:27:36.046Z","visitId":"d79d65d2-312d-40d6-9329-bf2d5bd687f9"}
+[32minfo[39m: [BATCH] Saved visit for Alex Lewis Heppell {"service":"clinic-automation","timestamp":"2026-02-17T12:27:36.533Z","visitId":"3e4db580-e91d-44c5-8a89-27f71749573b"}
+[32minfo[39m: [BATCH] Saved visit for HEO YOONJAE {"service":"clinic-automation","timestamp":"2026-02-17T12:27:37.023Z","visitId":"bdbf4aef-fc03-42e8-a904-40c4ad2f58a0"}
+[32minfo[39m: [BATCH] Saved visit for TJIA NATHANAEL THOMAS {"service":"clinic-automation","timestamp":"2026-02-17T12:27:37.532Z","visitId":"202e367f-d318-43b7-9fb6-02828976ea61"}
+[32minfo[39m: [BATCH] Saved visit for HUANG LEHUI, ANN {"service":"clinic-automation","timestamp":"2026-02-17T12:27:37.996Z","visitId":"af015a3f-888e-4f1e-b04a-2fc27438c533"}
+[32minfo[39m: [BATCH] Saved visit for TAN SEE PEI {"service":"clinic-automation","timestamp":"2026-02-17T12:27:38.494Z","visitId":"c823efb4-90fd-4078-8962-4a2fac3cdb7e"}
+[32minfo[39m: [BATCH] Saved visit for LEE ROSE MAY BELTRAN {"service":"clinic-automation","timestamp":"2026-02-17T12:27:39.018Z","visitId":"2a4f5de5-edba-4733-8435-9a3ba0afd6d1"}
+[32minfo[39m: [BATCH] Saved visit for ONG XUE ZHE KENNETH {"service":"clinic-automation","timestamp":"2026-02-17T12:27:39.700Z","visitId":"ff1bf9d8-c55a-43e0-90a6-d761e98dd4ee"}
+[32minfo[39m: [BATCH] Saved visit for ONG XUE ZHE KENNETH {"service":"clinic-automation","timestamp":"2026-02-17T12:27:40.295Z","visitId":"6b0565f8-3f37-45fc-9dbd-e5f5371d6c1a"}
+[32minfo[39m: [BATCH] Saved visit for TJIA NATHANAEL THOMAS {"service":"clinic-automation","timestamp":"2026-02-17T12:27:41.023Z","visitId":"6bb35d1e-11d5-4a34-9c7e-d1c04eb781ed"}
+[32minfo[39m: [BATCH] Saved visit for TOH GUANG JUN GABRIEL {"service":"clinic-automation","timestamp":"2026-02-17T12:27:41.637Z","visitId":"07482b9b-b3b0-40bb-b6c0-1200f34f7e49"}
+[32minfo[39m: [BATCH] Saved visit for KWEK MIN HUI {"service":"clinic-automation","timestamp":"2026-02-17T12:27:42.177Z","visitId":"7168a287-fbb0-4570-abd0-0df04eaa9778"}
+[32minfo[39m: [BATCH] Saved visit for KIARA SINGH {"service":"clinic-automation","timestamp":"2026-02-17T12:27:42.661Z","visitId":"d3a164b7-1b4f-490d-afbf-f9ef6dc1bd14"}
+[32minfo[39m: [BATCH] Saved visit for GOH ZHUO YING JUSTIN {"service":"clinic-automation","timestamp":"2026-02-17T12:27:43.204Z","visitId":"dbc9cf55-0c6f-4ff2-95bd-e27e4dd1a9f2"}
+[32minfo[39m: [BATCH] Saved visit for OSHIMA YOSHIHITO {"service":"clinic-automation","timestamp":"2026-02-17T12:27:43.695Z","visitId":"746650d8-4703-4daf-8197-435ba71d16e4"}
+[32minfo[39m: [BATCH] Saved visit for LIM YIN RU {"service":"clinic-automation","timestamp":"2026-02-17T12:27:44.302Z","visitId":"c6683ffc-16d7-42ba-8492-b654c3301c78"}
+[32minfo[39m: [BATCH] Saved visit for TAN WEE HIONG KEVIN {"service":"clinic-automation","timestamp":"2026-02-17T12:27:44.909Z","visitId":"6c890353-6baf-4b3b-ac77-3fc99e96c79b"}
+[32minfo[39m: [BATCH] Saved visit for E V S RAVISHANKAR {"service":"clinic-automation","timestamp":"2026-02-17T12:27:45.438Z","visitId":"62095edc-6d25-456f-a525-554c7d0e6c16"}
+[32minfo[39m: [BATCH] Saved visit for TAN WEE HIONG KEVIN {"service":"clinic-automation","timestamp":"2026-02-17T12:27:45.923Z","visitId":"704e875e-c5bb-42ea-a244-ed001bcf2a1f"}
+[32minfo[39m: [BATCH] Saved visit for ANBUMATHI DINESHBALAJI {"service":"clinic-automation","timestamp":"2026-02-17T12:27:46.531Z","visitId":"38bd10d0-cec4-48fb-9060-9dcb3ee5e628"}
+[32minfo[39m: [BATCH] Saved visit for NG YAN LI {"service":"clinic-automation","timestamp":"2026-02-17T12:27:47.182Z","visitId":"8e294311-8280-4896-8d10-b487536d7ae1"}
+[32minfo[39m: [BATCH] Saved visit for Kim Jisoo {"service":"clinic-automation","timestamp":"2026-02-17T12:27:47.677Z","visitId":"844b5a8c-2d74-41aa-af69-b92b505b1332"}
+[32minfo[39m: [BATCH] Saved visit for LI XIAOLING {"service":"clinic-automation","timestamp":"2026-02-17T12:27:48.172Z","visitId":"482ee37e-4509-4909-89fa-cb1cf4d8eada"}
+[32minfo[39m: [BATCH] Saved visit for PANG YONG WEI REGINA {"service":"clinic-automation","timestamp":"2026-02-17T12:27:48.657Z","visitId":"4222e5b2-756b-4feb-a2d8-2667c8ab4d0d"}
+[32minfo[39m: [BATCH] Saved visit for FRYKSTEN MAJA MARIA {"service":"clinic-automation","timestamp":"2026-02-17T12:27:49.219Z","visitId":"8e529888-58ff-4e8e-9d02-d1bd989cefa3"}
+[32minfo[39m: [BATCH STEP 06/10] Saved 34/34 items to CRM {"service":"clinic-automation","timestamp":"2026-02-17T12:27:49.220Z"}
+[32minfo[39m: ✅ Successfully saved 34/34 items for 2026-02-14 {"service":"clinic-automation","timestamp":"2026-02-17T12:27:49.220Z"}
+[32minfo[39m: 
+[2/3] Processing date: 2026-02-15 {"service":"clinic-automation","timestamp":"2026-02-17T12:27:51.224Z"}
+[32minfo[39m: [BATCH STEP 03/10] Reports → Queue List (date-based extraction) {"service":"clinic-automation","timestamp":"2026-02-17T12:27:51.470Z"}
+[32minfo[39m: [REPORTS] Navigating to Queue List report for date: 2026-02-15 {"service":"clinic-automation","timestamp":"2026-02-17T12:27:51.470Z"}
+[32minfo[39m: [CA 35] Navigating to Reports section {"service":"clinic-automation","timestamp":"2026-02-17T12:27:51.471Z"}
+[32minfo[39m: [CA 36] Need to select Reception/room first before accessing Reports {"service":"clinic-automation","timestamp":"2026-02-17T12:27:52.687Z"}
+[32minfo[39m: [CA 37] Clicking Reception/room to access system {"selector":"div:has-text(\"Reception\")","service":"clinic-automation","timestamp":"2026-02-17T12:27:52.701Z"}
+[32minfo[39m: [CA 38] Trying to open sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-17T12:28:05.781Z"}
+[32minfo[39m: [CA 39] Found menu toggle, clicking to open sidebar {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-17T12:28:05.796Z"}
+[32minfo[39m: [CA 40] Looking for Reports link in sidebar {"service":"clinic-automation","timestamp":"2026-02-17T12:28:06.810Z"}
+[32minfo[39m: [CA 41] Found SidebarmenuReports, trying to trigger click via JavaScript {"service":"clinic-automation","timestamp":"2026-02-17T12:28:07.450Z"}
+[32minfo[39m: [CA 42] After JS click on SidebarmenuReports {"service":"clinic-automation","timestamp":"2026-02-17T12:28:10.469Z","url":"https://clinicassist.sg:1080/ReportsMenu/ReportsMenu"}
+[32minfo[39m: [CA 43] Successfully navigated via SidebarmenuReports click {"service":"clinic-automation","timestamp":"2026-02-17T12:28:10.469Z"}
+[32minfo[39m: [CA 44] Navigating to Queue List report {"service":"clinic-automation","timestamp":"2026-02-17T12:28:12.501Z"}
+[32minfo[39m: [CA 45] Queue List navigation context {"frameUrl":null,"kind":"page","pageUrl":"https://clinicassist.sg:1080/ReportsMenu/ReportsMenu","service":"clinic-automation","timestamp":"2026-02-17T12:28:20.600Z"}
+[32minfo[39m: [CA 46] Trying to click Queue Report link by ID 60017 {"service":"clinic-automation","timestamp":"2026-02-17T12:28:21.719Z"}
+[32minfo[39m: [CA 47] JS click result for Queue Report {"found":true,"method":"class","service":"clinic-automation","text":"Queue Report","timestamp":"2026-02-17T12:28:21.729Z"}
+[32minfo[39m: [CA 48] URL after JS click on Queue Report {"frameUrl":null,"pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-17T12:28:25.732Z"}
+[32minfo[39m: [CA 49] Successfully navigated to QueueReport page via JS click {"frameUrl":null,"pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-17T12:28:25.733Z"}
+[32minfo[39m: [CA 50] Searching Queue List by date {"date":"2026-02-15","service":"clinic-automation","timestamp":"2026-02-17T12:28:27.817Z"}
+[32minfo[39m: [CA 51] QueueReport search context {"frameUrl":null,"kind":"page","pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-17T12:28:35.952Z"}
+[32minfo[39m: [CA 52] QueueReport date field candidates {"count":1,"fields":[{"id":"txtOtherDateFrom","name":"DateFrom","placeholder":"","readOnly":false,"value":"17/2/2026"}],"service":"clinic-automation","timestamp":"2026-02-17T12:28:35.955Z"}
+[32minfo[39m: [CA 53] QueueReport date filled {"selector":"input[id=\"txtOtherDateFrom\"]","service":"clinic-automation","timestamp":"2026-02-17T12:28:36.081Z","value":"15/02/2026"}
+[32minfo[39m: [CA 54] QueueReport generate clicked via JS {"found":true,"service":"clinic-automation","timestamp":"2026-02-17T12:28:36.156Z","via":"btnOK"}
+[32minfo[39m: [CA 55] Extracting queue list results (root-aware) {"service":"clinic-automation","timestamp":"2026-02-17T12:28:47.352Z"}
+[32minfo[39m: [CA 56] QueueReport extract context {"frameUrl":null,"kind":"page","pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-17T12:28:55.638Z"}
+[32minfo[39m: [CA 57] Queue report Excel downloaded {"excelPath":"/Users/vincent/Baselrpacrm/downloads/queueListing.xls","label":"nested","service":"clinic-automation","timestamp":"2026-02-17T12:29:05.124Z","why":"click #Button4"}
+[32minfo[39m: [CA 58] Found header row {"headers":["QNO","PCNO","NAME","SEX","SP\nCODE","TIME IN","TIMEOUT","INV NO","CASH TRANS","CONTRACT","TOTAL","GST","ADJ"],"rowIndex":2,"service":"clinic-automation","timestamp":"2026-02-17T12:29:05.139Z"}
+[32minfo[39m: [CA 59] Column positions detected {"cashTransCol":8,"contractCol":9,"invNoCol":7,"nameCol":2,"pcnoCol":1,"qnoCol":0,"service":"clinic-automation","sexCol":3,"spCodeCol":4,"timeInCol":5,"timeOutCol":6,"timestamp":"2026-02-17T12:29:05.140Z"}
+[32minfo[39m: [CA 60] Parsing Excel file {"headerCount":13,"headerRowIndex":2,"service":"clinic-automation","timestamp":"2026-02-17T12:29:05.140Z","worksheetName":"Sheet1"}
+[32minfo[39m: [CA 61] Excel parsing complete {"itemsFound":0,"service":"clinic-automation","timestamp":"2026-02-17T12:29:05.140Z"}
+[32minfo[39m: [CA 62] Queue report Excel downloaded {"excelPath":"/Users/vincent/Baselrpacrm/downloads/queueListing.xls","label":"nested","service":"clinic-automation","timestamp":"2026-02-17T12:29:07.718Z","why":"click #Button2"}
+[32minfo[39m: [CA 63] Found header row {"headers":["QNO","PCNO","NAME","SEX","SP\nCODE","TIME IN","TIMEOUT","INV NO","CASH TRANS"],"rowIndex":8,"service":"clinic-automation","timestamp":"2026-02-17T12:29:07.743Z"}
+[32minfo[39m: [CA 64] Column positions detected {"cashTransCol":24,"contractCol":27,"invNoCol":22,"nameCol":3,"pcnoCol":2,"qnoCol":1,"service":"clinic-automation","sexCol":15,"spCodeCol":17,"timeInCol":18,"timeOutCol":20,"timestamp":"2026-02-17T12:29:07.743Z"}
+[32minfo[39m: [CA 65] Parsing Excel file {"headerCount":9,"headerRowIndex":8,"service":"clinic-automation","timestamp":"2026-02-17T12:29:07.743Z","worksheetName":"Sheet1"}
+[32minfo[39m: [CA 66] Excel parsing complete {"itemsFound":0,"service":"clinic-automation","timestamp":"2026-02-17T12:29:07.744Z"}
+[32minfo[39m: [CA 67] Queue report Excel downloaded {"excelPath":"/Users/vincent/Baselrpacrm/downloads/queueListing.xls","label":"nested","service":"clinic-automation","timestamp":"2026-02-17T12:29:10.357Z","why":"click excel-like control"}
+[32minfo[39m: [CA 68] Found header row {"headers":["QNO","PCNO","NAME","SEX","SP\nCODE","TIME IN","TIMEOUT","INV NO","CASH TRANS"],"rowIndex":8,"service":"clinic-automation","timestamp":"2026-02-17T12:29:10.361Z"}
+[32minfo[39m: [CA 69] Column positions detected {"cashTransCol":24,"contractCol":27,"invNoCol":22,"nameCol":3,"pcnoCol":2,"qnoCol":1,"service":"clinic-automation","sexCol":15,"spCodeCol":17,"timeInCol":18,"timeOutCol":20,"timestamp":"2026-02-17T12:29:10.362Z"}
+[32minfo[39m: [CA 70] Parsing Excel file {"headerCount":9,"headerRowIndex":8,"service":"clinic-automation","timestamp":"2026-02-17T12:29:10.362Z","worksheetName":"Sheet1"}
+[32minfo[39m: [CA 71] Excel parsing complete {"itemsFound":0,"service":"clinic-automation","timestamp":"2026-02-17T12:29:10.362Z"}
+[32minfo[39m: [CA 72] Excel export not available or produced no items; falling back to DOM table parsing {"service":"clinic-automation","timestamp":"2026-02-17T12:29:11.177Z"}
+[32minfo[39m: [CA 73] Fallback DOM extraction result {"count":0,"service":"clinic-automation","timestamp":"2026-02-17T12:29:11.179Z"}
+[32minfo[39m: [REPORTS] Queue list report returned 0 items for 2026-02-15 (report may be empty for this date) {"service":"clinic-automation","timestamp":"2026-02-17T12:29:11.179Z"}
+[33mwarn[39m: No items extracted for 2026-02-15 {"service":"clinic-automation","timestamp":"2026-02-17T12:29:11.847Z"}
+[32minfo[39m: 
+[3/3] Processing date: 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-17T12:29:11.850Z"}
+[32minfo[39m: [BATCH STEP 03/10] Reports → Queue List (date-based extraction) {"service":"clinic-automation","timestamp":"2026-02-17T12:29:12.254Z"}
+[32minfo[39m: [REPORTS] Navigating to Queue List report for date: 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-17T12:29:12.254Z"}
+[32minfo[39m: [CA 74] Navigating to Reports section {"service":"clinic-automation","timestamp":"2026-02-17T12:29:12.254Z"}
+[32minfo[39m: [CA 75] Need to select Reception/room first before accessing Reports {"service":"clinic-automation","timestamp":"2026-02-17T12:29:13.270Z"}
+[32minfo[39m: [CA 76] Clicking Reception/room to access system {"selector":"div:has-text(\"Reception\")","service":"clinic-automation","timestamp":"2026-02-17T12:29:13.278Z"}
+[32minfo[39m: [CA 77] Trying to open sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-17T12:29:26.310Z"}
+[32minfo[39m: [CA 78] Found menu toggle, clicking to open sidebar {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-17T12:29:26.319Z"}
+[32minfo[39m: [CA 79] Looking for Reports link in sidebar {"service":"clinic-automation","timestamp":"2026-02-17T12:29:27.331Z"}
+[32minfo[39m: [CA 80] Found SidebarmenuReports, trying to trigger click via JavaScript {"service":"clinic-automation","timestamp":"2026-02-17T12:29:27.985Z"}
+[32minfo[39m: [CA 81] After JS click on SidebarmenuReports {"service":"clinic-automation","timestamp":"2026-02-17T12:29:31.036Z","url":"https://clinicassist.sg:1080/ReportsMenu/ReportsMenu"}
+[32minfo[39m: [CA 82] Successfully navigated via SidebarmenuReports click {"service":"clinic-automation","timestamp":"2026-02-17T12:29:31.037Z"}
+[32minfo[39m: [CA 83] Navigating to Queue List report {"service":"clinic-automation","timestamp":"2026-02-17T12:29:33.095Z"}
+[32minfo[39m: [CA 84] Queue List navigation context {"frameUrl":null,"kind":"page","pageUrl":"https://clinicassist.sg:1080/ReportsMenu/ReportsMenu","service":"clinic-automation","timestamp":"2026-02-17T12:29:41.260Z"}
+[32minfo[39m: [CA 85] Trying to click Queue Report link by ID 60017 {"service":"clinic-automation","timestamp":"2026-02-17T12:29:42.389Z"}
+[32minfo[39m: [CA 86] JS click result for Queue Report {"found":true,"method":"class","service":"clinic-automation","text":"Queue Report","timestamp":"2026-02-17T12:29:42.405Z"}
+[32minfo[39m: [CA 87] URL after JS click on Queue Report {"frameUrl":null,"pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-17T12:29:46.409Z"}
+[32minfo[39m: [CA 88] Successfully navigated to QueueReport page via JS click {"frameUrl":null,"pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-17T12:29:46.410Z"}
+[32minfo[39m: [CA 89] Searching Queue List by date {"date":"2026-02-16","service":"clinic-automation","timestamp":"2026-02-17T12:29:48.481Z"}
+[32minfo[39m: [CA 90] QueueReport search context {"frameUrl":null,"kind":"page","pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-17T12:29:56.624Z"}
+[32minfo[39m: [CA 91] QueueReport date field candidates {"count":1,"fields":[{"id":"txtOtherDateFrom","name":"DateFrom","placeholder":"","readOnly":false,"value":"17/2/2026"}],"service":"clinic-automation","timestamp":"2026-02-17T12:29:56.627Z"}
+[32minfo[39m: [CA 92] QueueReport date filled {"selector":"input[id=\"txtOtherDateFrom\"]","service":"clinic-automation","timestamp":"2026-02-17T12:29:56.721Z","value":"16/02/2026"}
+[32minfo[39m: [CA 93] QueueReport generate clicked via JS {"found":true,"service":"clinic-automation","timestamp":"2026-02-17T12:29:56.799Z","via":"btnOK"}
+[32minfo[39m: [CA 94] Extracting queue list results (root-aware) {"service":"clinic-automation","timestamp":"2026-02-17T12:30:07.909Z"}
+[32minfo[39m: [CA 95] QueueReport extract context {"frameUrl":null,"kind":"page","pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-17T12:30:16.130Z"}
+[32minfo[39m: [CA 96] Queue report Excel downloaded {"excelPath":"/Users/vincent/Baselrpacrm/downloads/queueListing.xls","label":"nested","service":"clinic-automation","timestamp":"2026-02-17T12:30:25.540Z","why":"click #Button4"}
+[32minfo[39m: [CA 97] Found header row {"headers":["QNO","PCNO","NAME","SEX","SP\nCODE","TIME IN","TIMEOUT","INV NO","CASH TRANS","CONTRACT","TOTAL","GST","ADJ"],"rowIndex":2,"service":"clinic-automation","timestamp":"2026-02-17T12:30:25.553Z"}
+[32minfo[39m: [CA 98] Column positions detected {"cashTransCol":8,"contractCol":9,"invNoCol":7,"nameCol":2,"pcnoCol":1,"qnoCol":0,"service":"clinic-automation","sexCol":3,"spCodeCol":4,"timeInCol":5,"timeOutCol":6,"timestamp":"2026-02-17T12:30:25.553Z"}
+[32minfo[39m: [CA 99] Parsing Excel file {"headerCount":13,"headerRowIndex":2,"service":"clinic-automation","timestamp":"2026-02-17T12:30:25.553Z","worksheetName":"Sheet1"}
+[32minfo[39m: [CA 100] Excel parsing complete {"itemsFound":22,"service":"clinic-automation","timestamp":"2026-02-17T12:30:25.556Z"}
+[32minfo[39m: [CA 101] Queue report Excel parsed {"count":22,"label":"nested","service":"clinic-automation","timestamp":"2026-02-17T12:30:25.556Z"}
+[32minfo[39m: [REPORTS] Extracted 22 items from queue list for 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-17T12:30:25.557Z"}
+[32minfo[39m: Extracted 22 items for 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-17T12:30:25.853Z"}
+[32minfo[39m: [BATCH] Saved visit for WANG WEI TING SARAH {"service":"clinic-automation","timestamp":"2026-02-17T12:30:26.806Z","visitId":"abc41d6e-c387-46bd-867b-2e5e7698761c"}
+[32minfo[39m: [BATCH] Saved visit for SION HUI CHIN {"service":"clinic-automation","timestamp":"2026-02-17T12:30:27.289Z","visitId":"485f285f-b8c6-4b2b-a6b8-d836e436c01f"}
+[32minfo[39m: [BATCH] Saved visit for WANG WEI TING SARAH {"service":"clinic-automation","timestamp":"2026-02-17T12:30:27.925Z","visitId":"60d73c5d-913f-43d0-a3ca-42e3a5cd8f1a"}
+[32minfo[39m: [BATCH] Saved visit for CHIDIRE ANURAG {"service":"clinic-automation","timestamp":"2026-02-17T12:30:28.387Z","visitId":"4f48a541-1751-4734-81ef-9eb201909c4c"}
+[32minfo[39m: [BATCH] Saved visit for WANG YIXIN {"service":"clinic-automation","timestamp":"2026-02-17T12:30:28.940Z","visitId":"7eafcb82-5406-4de9-abbd-3e5f6f803218"}
+[32minfo[39m: [BATCH] Saved visit for TOH KAI LI EFFIE {"service":"clinic-automation","timestamp":"2026-02-17T12:30:29.452Z","visitId":"74ea018a-ce3c-4aae-8812-e50ed5a83666"}
+[32minfo[39m: [BATCH] Saved visit for HAN SUIANG-SHIUH {"service":"clinic-automation","timestamp":"2026-02-17T12:30:29.989Z","visitId":"ad17c70e-ee17-4cc8-a29b-dfb95bea4844"}
+[32minfo[39m: [BATCH] Saved visit for SION HUI CHIN {"service":"clinic-automation","timestamp":"2026-02-17T12:30:30.447Z","visitId":"6de17dfb-7ed7-4c3c-b095-85b18a8e3cec"}
+[32minfo[39m: [BATCH] Saved visit for HASLINA BINTE HASSAN BASRI {"service":"clinic-automation","timestamp":"2026-02-17T12:30:30.910Z","visitId":"65ff1924-e660-4ffd-9f91-ab8deccd6175"}
+[32minfo[39m: [BATCH] Saved visit for DYLAN AUSTIN TARIN {"service":"clinic-automation","timestamp":"2026-02-17T12:30:31.515Z","visitId":"8eb44ca6-5331-4b98-be7a-c5ae9e011782"}
+[32minfo[39m: [BATCH] Saved visit for YEOH QIU LI GERMAINE {"service":"clinic-automation","timestamp":"2026-02-17T12:30:31.947Z","visitId":"3a3ec969-778f-4a5d-b3dd-ff3b45940655"}
+[32minfo[39m: [BATCH] Saved visit for DYLAN AUSTIN TARIN {"service":"clinic-automation","timestamp":"2026-02-17T12:30:32.523Z","visitId":"b37a787c-abfe-4453-839f-25146f4dc9c8"}
+[32minfo[39m: [BATCH] Saved visit for HASLINA BINTE HASSAN BASRI {"service":"clinic-automation","timestamp":"2026-02-17T12:30:33.141Z","visitId":"3698327f-e674-4261-aee9-7e9fba1b9a30"}
+[32minfo[39m: [BATCH] Saved visit for LIM SI MIN PRISCILLA {"service":"clinic-automation","timestamp":"2026-02-17T12:30:33.758Z","visitId":"8a45877f-d3d2-47b9-802b-0fc470a6aa2f"}
+[32minfo[39m: [BATCH] Saved visit for SHI HANG {"service":"clinic-automation","timestamp":"2026-02-17T12:30:34.258Z","visitId":"94cd84c3-1c7d-43fa-b553-4e5f7fc63ad1"}
+[32minfo[39m: [BATCH] Saved visit for SCHAEFER LISA-MARIE ULRIKE MARGARETE {"service":"clinic-automation","timestamp":"2026-02-17T12:30:34.782Z","visitId":"07fb886e-42b2-41d3-965e-4799c43e4481"}
+[32minfo[39m: [BATCH] Saved visit for DYLAN AUSTIN TARIN {"service":"clinic-automation","timestamp":"2026-02-17T12:30:35.242Z","visitId":"99f6251e-3a3f-4155-b617-4f05f7337031"}
+[32minfo[39m: [BATCH] Saved visit for CHEN JIAWEN {"service":"clinic-automation","timestamp":"2026-02-17T12:30:35.717Z","visitId":"809b5c9c-5712-4f66-8c66-2ae4827e3296"}
+[32minfo[39m: [BATCH] Saved visit for KOH HWA KEN {"service":"clinic-automation","timestamp":"2026-02-17T12:30:36.161Z","visitId":"90e02f51-9075-4a25-97ad-16f91efc87f9"}
+[32minfo[39m: [BATCH] Saved visit for TARA NIRMAL {"service":"clinic-automation","timestamp":"2026-02-17T12:30:36.821Z","visitId":"f56f7b0f-dbc3-4fe2-a0d1-6147209f8d39"}
+[32minfo[39m: [BATCH] Saved visit for JAMES LOCKHART {"service":"clinic-automation","timestamp":"2026-02-17T12:30:37.255Z","visitId":"a4b414e5-e25d-4815-8c6f-02c6756c984b"}
+[32minfo[39m: [BATCH] Saved visit for SCHAEFER LISA-MARIE ULRIKE MARGARETE {"service":"clinic-automation","timestamp":"2026-02-17T12:30:37.756Z","visitId":"7521a947-b88d-4de2-8ae6-91d289e3daf1"}
+[32minfo[39m: [BATCH STEP 06/10] Saved 22/22 items to CRM {"service":"clinic-automation","timestamp":"2026-02-17T12:30:37.756Z"}
+[32minfo[39m: ✅ Successfully saved 22/22 items for 2026-02-16 {"service":"clinic-automation","timestamp":"2026-02-17T12:30:37.757Z"}
+[32minfo[39m: 
+=== Extraction Summary === {"service":"clinic-automation","timestamp":"2026-02-17T12:30:37.757Z"}
+[32minfo[39m: Total dates processed: 3 {"service":"clinic-automation","timestamp":"2026-02-17T12:30:37.757Z"}
+[32minfo[39m: Successful: 2 {"service":"clinic-automation","timestamp":"2026-02-17T12:30:37.757Z"}
+[32minfo[39m: Failed: 0 {"service":"clinic-automation","timestamp":"2026-02-17T12:30:37.757Z"}
+[32minfo[39m: Skipped (no data): 1 {"service":"clinic-automation","timestamp":"2026-02-17T12:30:37.757Z"}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-17T12:30:37.972Z"}

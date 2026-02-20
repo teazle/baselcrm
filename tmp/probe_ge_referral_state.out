@@ -1,0 +1,439 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T09:22:21.951Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T09:22:21.956Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T09:22:21.957Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T09:22:21.957Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T09:22:25.117Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T09:22:25.123Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T09:22:27.934Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:22:30.467Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T09:22:32.503Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T09:22:33.875Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:22:35.365Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T09:22:36.891Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T09:22:38.429Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T09:22:39.937Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T09:22:41.145Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T09:22:41.763Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T09:22:44.482Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T09:22:46.327Z"}
+[probe] initial {
+  "msg": "",
+  "refValue": "",
+  "refType": "",
+  "oldRefType": "",
+  "clinicId": "7b820cae-c206-4537-a164-ef28dc2641f9",
+  "parentClinicId": "",
+  "primaryCode": "",
+  "primaryText": "",
+  "suggestions": [],
+  "hiddenInteresting": [
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis1",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis1",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis2",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis2",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis3",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis3",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis4",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis4",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfClinicType",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfClinicType",
+      "value": "SP"
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfClinicID",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfClinicID",
+      "value": "7b820cae-c206-4537-a164-ef28dc2641f9"
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfAcuteDiagnosis",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfAcuteDiagnosis",
+      "value": "True"
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis",
+      "value": "True"
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfNetworkClinicMapID",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfNetworkClinicMapID",
+      "value": "D68CC82A-A06C-49F7-8E4B-CE4B17672F1A"
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfOldReferenceClinicType",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfOldReferenceClinicType",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfReferenceClinicType",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfReferenceClinicType",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfOldRefBenefitType",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfOldRefBenefitType",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfSpecializedProcedureFeeBeforeGST",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfSpecializedProcedureFeeBeforeGST",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfSpecializedProcedureFeeAfterGST",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfSpecializedProcedureFeeAfterGST",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfPrimaryDiagnosisID",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfPrimaryDiagnosisID",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfSecondaryDiagnosisID",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfSecondaryDiagnosisID",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfProcedureFee",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfProcedureFee",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfDentalProcedureFee",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfDentalProcedureFee",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfAcuteDiagnosis3ID",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfAcuteDiagnosis3ID",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfAcuteDiagnosis4ID",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfAcuteDiagnosis4ID",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfClinicGroups",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfClinicGroups",
+      "value": "SP"
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfClinicCode",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfClinicCode",
+      "value": "ASP1120"
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfPrimaryDiagnosisCode",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfPrimaryDiagnosisCode",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfSecondaryDiagnosisCode",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfSecondaryDiagnosisCode",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfAcuteDiagnosis3Code",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfAcuteDiagnosis3Code",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfAcuteDiagnosis4Code",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfAcuteDiagnosis4Code",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis1Code",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis1Code",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis2Code",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis2Code",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis3Code",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis3Code",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis4Code",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis4Code",
+      "value": ""
+    }
+  ],
+  "buttons": [
+    {
+      "id": "",
+      "value": "Show Benefit",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+      "value": "+",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnCancel",
+      "value": "Cancel",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnReloadData",
+      "value": "",
+      "visible": true
+    }
+  ]
+}
+[probe] after-fill {
+  "msg": "",
+  "refValue": "SINGAPORE SPORTS",
+  "refType": "",
+  "oldRefType": "",
+  "clinicId": "7b820cae-c206-4537-a164-ef28dc2641f9",
+  "parentClinicId": "",
+  "primaryCode": "",
+  "primaryText": "",
+  "suggestions": [],
+  "hiddenInteresting": [
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis1",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis1",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis2",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis2",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis3",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis3",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis4",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis4",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfClinicType",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfClinicType",
+      "value": "SP"
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfClinicID",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfClinicID",
+      "value": "7b820cae-c206-4537-a164-ef28dc2641f9"
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfAcuteDiagnosis",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfAcuteDiagnosis",
+      "value": "True"
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis",
+      "value": "True"
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfNetworkClinicMapID",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfNetworkClinicMapID",
+      "value": "D68CC82A-A06C-49F7-8E4B-CE4B17672F1A"
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfOldReferenceClinicType",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfOldReferenceClinicType",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfReferenceClinicType",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfReferenceClinicType",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfOldRefBenefitType",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfOldRefBenefitType",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfSpecializedProcedureFeeBeforeGST",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfSpecializedProcedureFeeBeforeGST",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfSpecializedProcedureFeeAfterGST",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfSpecializedProcedureFeeAfterGST",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfPrimaryDiagnosisID",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfPrimaryDiagnosisID",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfSecondaryDiagnosisID",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfSecondaryDiagnosisID",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfProcedureFee",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfProcedureFee",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfDentalProcedureFee",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfDentalProcedureFee",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfAcuteDiagnosis3ID",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfAcuteDiagnosis3ID",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfAcuteDiagnosis4ID",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfAcuteDiagnosis4ID",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfClinicGroups",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfClinicGroups",
+      "value": "SP"
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfClinicCode",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfClinicCode",
+      "value": "ASP1120"
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfPrimaryDiagnosisCode",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfPrimaryDiagnosisCode",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfSecondaryDiagnosisCode",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfSecondaryDiagnosisCode",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfAcuteDiagnosis3Code",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfAcuteDiagnosis3Code",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfAcuteDiagnosis4Code",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfAcuteDiagnosis4Code",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis1Code",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis1Code",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis2Code",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis2Code",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis3Code",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis3Code",
+      "value": ""
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_hfChronicDiagnosis4Code",
+      "name": "ctl00$MainContent$uc_MakeClaim$hfChronicDiagnosis4Code",
+      "value": ""
+    }
+  ],
+  "buttons": [
+    {
+      "id": "",
+      "value": "Show Benefit",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+      "value": "+",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnCancel",
+      "value": "Cancel",
+      "visible": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnReloadData",
+      "value": "",
+      "visible": true
+    }
+  ]
+}
+[probe] after-select {
+  "msg": "",
+  "refValue": "",
+  "refType": "",
+  "oldRefType": "",
+  "clinicId": "",
+  "parentClinicId": "",
+  "primaryCode": "",
+  "primaryText": "",
+  "suggestions": [],
+  "hiddenInteresting": [
+    {
+      "id": "ctl00_MainContent_uc_AddClaim__hfClinicTypeID",
+      "name": "ctl00$MainContent$uc_AddClaim$_hfClinicTypeID",
+      "value": ""
+    }
+  ],
+  "buttons": [
+    {
+      "id": "ctl00_MainContent_uc_AddClaim_btnSearchByName",
+      "value": "Search",
+      "visible": true
+    }
+  ]
+}
+[probe] after-calc {
+  "msg": "",
+  "refValue": "",
+  "refType": "",
+  "oldRefType": "",
+  "clinicId": "",
+  "parentClinicId": "",
+  "primaryCode": "",
+  "primaryText": "",
+  "suggestions": [],
+  "hiddenInteresting": [
+    {
+      "id": "ctl00_MainContent_uc_AddClaim__hfClinicTypeID",
+      "name": "ctl00$MainContent$uc_AddClaim$_hfClinicTypeID",
+      "value": ""
+    }
+  ],
+  "buttons": [
+    {
+      "id": "ctl00_MainContent_uc_AddClaim_btnSearchByName",
+      "value": "Search",
+      "visible": true
+    }
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T09:23:00.509Z"}

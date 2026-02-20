@@ -1,0 +1,605 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-13T00:19:52.568Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-13T00:19:52.573Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-13T00:19:52.574Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-13T00:19:52.574Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-13T00:19:54.437Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-13T00:19:54.438Z"}
+[32minfo[39m: [CA 01] Login start {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-13T00:19:54.581Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: Logging into Clinic Assist... {"service":"clinic-automation","timestamp":"2026-02-13T00:19:54.581Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-13T00:19:58.470Z"}
+[32minfo[39m: [CA 02] Username filled {"service":"clinic-automation","timestamp":"2026-02-13T00:19:58.472Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-13T00:19:59.014Z"}
+[32minfo[39m: [CA 03] Password filled {"service":"clinic-automation","timestamp":"2026-02-13T00:19:59.014Z"}
+[32minfo[39m: Clinic Group filled: ssoc {"service":"clinic-automation","timestamp":"2026-02-13T00:19:59.541Z"}
+[32minfo[39m: [CA 04] Clinic Group filled {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-13T00:19:59.542Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-13T00:20:00.628Z"}
+[32minfo[39m: [CA 05] Login submitted {"service":"clinic-automation","timestamp":"2026-02-13T00:20:00.629Z"}
+[32minfo[39m: Clinic Assist 2FA not required (verification inputs disabled) {"service":"clinic-automation","timestamp":"2026-02-13T00:20:03.657Z"}
+[32minfo[39m: Successfully logged into Clinic Assist {"service":"clinic-automation","timestamp":"2026-02-13T00:20:03.877Z"}
+[32minfo[39m: [CA 06] Login ok {"service":"clinic-automation","timestamp":"2026-02-13T00:20:03.877Z"}
+[32minfo[39m: [CA 07] Navigate to Patient Page - START {"service":"clinic-automation","timestamp":"2026-02-13T00:20:03.878Z"}
+[32minfo[39m: [CA 08] Current URL before navigation {"service":"clinic-automation","timestamp":"2026-02-13T00:20:03.878Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: [CA 09] Need to select Reception/room first before accessing Patient Page {"service":"clinic-automation","timestamp":"2026-02-13T00:20:03.879Z"}
+[32minfo[39m: [CA 10] Clicking Reception/room to access system {"selector":"button:has-text(\"Reception\")","service":"clinic-automation","timestamp":"2026-02-13T00:20:04.463Z"}
+[32minfo[39m: [CA 11] Reception clicked, checking URL {"newUrl":"https://clinicassist.sg:1080/Home/Reception#","service":"clinic-automation","timeTaken":4926,"timestamp":"2026-02-13T00:20:08.805Z"}
+[32minfo[39m: [CA 12] Successfully entered Reception room {"newUrl":"https://clinicassist.sg:1080/Home/Reception#","service":"clinic-automation","timeTaken":4954,"timestamp":"2026-02-13T00:20:08.833Z"}
+[32minfo[39m: [CA 13] Looking for sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-13T00:20:08.833Z"}
+[32minfo[39m: [CA 14] Found menu toggle, clicking {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-13T00:20:08.839Z"}
+[32minfo[39m: [CA 15] Looking for Patient sidebar link {"service":"clinic-automation","timestamp":"2026-02-13T00:20:09.563Z"}
+[32minfo[39m: [CA 16] Patient link status {"count":1,"isVisible":true,"selector":"a:has-text(\"Patient\")","service":"clinic-automation","timestamp":"2026-02-13T00:20:09.594Z"}
+[32minfo[39m: [CA 17] Clicking Patient sidebar link via UI {"selector":"a:has-text(\"Patient\")","service":"clinic-automation","timestamp":"2026-02-13T00:20:09.594Z"}
+[32minfo[39m: [CA 18] Patient link clicked via Playwright {"service":"clinic-automation","timeTaken":591,"timestamp":"2026-02-13T00:20:10.177Z"}
+[32minfo[39m: [CA 19] After Patient click, checking URL {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-13T00:20:11.190Z","totalTime":2357}
+[32minfo[39m: [CA 20] Successfully navigated to Patient Page via UI click {"finalUrl":"https://clinicassist.sg:1080/Patient/PatientSearch","service":"clinic-automation","timestamp":"2026-02-13T00:20:11.190Z","totalTime":7312}
+[32minfo[39m: [CA 21] Navigate to Patient Page - COMPLETE {"service":"clinic-automation","timestamp":"2026-02-13T00:20:11.190Z","totalTime":7312}
+[32minfo[39m: [CA 22] Search patient by number {"patientNumber":"78145","service":"clinic-automation","timestamp":"2026-02-13T00:20:11.191Z"}
+[32minfo[39m: [CA 23] Pressing Enter to execute search (may need to dismiss dialog first) {"service":"clinic-automation","timestamp":"2026-02-13T00:20:13.007Z"}
+[32minfo[39m: [CA 24] Patient search executed by number (Enter key x2) {"patientNumber":"78145","service":"clinic-automation","timestamp":"2026-02-13T00:20:15.128Z"}
+[32minfo[39m: [CA 25] Open patient from search results by number {"patientNumber":"78145","service":"clinic-automation","timestamp":"2026-02-13T00:20:16.633Z"}
+[32minfo[39m: [CA 26] Found patient row by number {"hasLink":true,"rowIndex":1,"service":"clinic-automation","timestamp":"2026-02-13T00:20:18.645Z"}
+[32minfo[39m: [CA 27] Clicked patient link via filter method {"service":"clinic-automation","timestamp":"2026-02-13T00:20:19.200Z"}
+[32minfo[39m: [CA 28] Patient opened from search results by number {"service":"clinic-automation","timestamp":"2026-02-13T00:20:21.410Z"}
+[32minfo[39m: [CA 29] Navigate to TX History {"service":"clinic-automation","timestamp":"2026-02-13T00:20:22.913Z"}
+[32minfo[39m: [CA 30] Navigated to TX History {"service":"clinic-automation","timestamp":"2026-02-13T00:20:26.897Z"}
+[32minfo[39m: [CA 31] Open Medicine Tab {"service":"clinic-automation","timestamp":"2026-02-13T00:20:28.101Z"}
+[32minfo[39m: [CA 32] Medicine Tab opened {"service":"clinic-automation","timestamp":"2026-02-13T00:20:31.205Z"}
+{
+  "url": "https://clinicassist.sg:1080/QueueLog/PatientVisit?queryString=YS7n8P1u4p7BTiHTj+y5NC/JwgZb6AMYI18LK0CFo2OeM8080/FtFjs7tWF1Yj3eXsXTMtcIAEKQAkJUtouiguzTPlh+p6Tn1PO7e7DUAgA=",
+  "title": "Patient Biodata",
+  "tables": [
+    {
+      "ti": 0,
+      "header": "",
+      "rowCount": 0,
+      "rows": []
+    },
+    {
+      "ti": 1,
+      "header": "Date Grp Description Amount Charge Branch",
+      "rowCount": 1,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "Date",
+            "Grp",
+            "Description",
+            "Amount",
+            "Charge",
+            "Branch"
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 2,
+      "header": "",
+      "rowCount": 3,
+      "rows": [
+        {
+          "ri": 1,
+          "cells": [
+            "02/02/2026",
+            "Pcr",
+            "EXTENDED PHYSIOTHERAPY - WY",
+            "1.00 1",
+            "$260.00",
+            "SSOC"
+          ]
+        },
+        {
+          "ri": 2,
+          "cells": [
+            "02/02/2026",
+            "Med",
+            "Celebrex (200 mg)",
+            "40.00 Tabs",
+            "$140.00",
+            "SSOC"
+          ]
+        },
+        {
+          "ri": 3,
+          "cells": [
+            "02/02/2026",
+            "Pcr",
+            "SPECIALIST FIRST CONSULTATION",
+            "1.00",
+            "$120.00",
+            "SSOC"
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 3,
+      "header": "Date Description Prescribed Consumption Code Branch Precaution",
+      "rowCount": 1,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "Date",
+            "Grp",
+            "Description",
+            "Prescribed",
+            "Consumption",
+            "Vaccination",
+            "Dosage Type",
+            "Lot No",
+            "",
+            "Code",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "Medi_Claim",
+            "CHAS_Claim",
+            "Status",
+            "SufficientStock",
+            "Branch",
+            "Precaution"
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 4,
+      "header": "",
+      "rowCount": 1,
+      "rows": [
+        {
+          "ri": 1,
+          "cells": [
+            "02/02/2026",
+            "M",
+            "Celebrex (200 mg)",
+            "40.00 Tabs",
+            "Take 1 tab/s 2 times a day",
+            "",
+            "",
+            "",
+            "127873",
+            "CELE_200",
+            "40.00 Tabs",
+            "1 tab/s",
+            "B",
+            "02/02/2026",
+            "2",
+            "",
+            "",
+            "",
+            "Active",
+            "",
+            "SSOC",
+            "Anti-Inflammatory Medicine To Be Taken After Food"
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 5,
+      "header": "",
+      "rowCount": 0,
+      "rows": []
+    },
+    {
+      "ti": 6,
+      "header": "",
+      "rowCount": 0,
+      "rows": []
+    },
+    {
+      "ti": 7,
+      "header": "",
+      "rowCount": 0,
+      "rows": []
+    },
+    {
+      "ti": 8,
+      "header": "",
+      "rowCount": 0,
+      "rows": []
+    },
+    {
+      "ti": 9,
+      "header": "",
+      "rowCount": 0,
+      "rows": []
+    },
+    {
+      "ti": 10,
+      "header": "",
+      "rowCount": 0,
+      "rows": []
+    },
+    {
+      "ti": 11,
+      "header": "Code Description Type",
+      "rowCount": 1,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "",
+            "Code",
+            "Description",
+            "Type"
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 12,
+      "header": "",
+      "rowCount": 0,
+      "rows": []
+    },
+    {
+      "ti": 13,
+      "header": "Type Description Onset Date Severity Reaction Remarks",
+      "rowCount": 1,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "",
+            "Type",
+            "Description",
+            "Onset Date",
+            "Severity",
+            "Reaction",
+            "Remarks"
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 14,
+      "header": "",
+      "rowCount": 0,
+      "rows": []
+    },
+    {
+      "ti": 15,
+      "header": "",
+      "rowCount": 0,
+      "rows": []
+    },
+    {
+      "ti": 16,
+      "header": "Drug",
+      "rowCount": 4,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "Drug"
+          ]
+        },
+        {
+          "ri": 1,
+          "cells": [
+            "Stock"
+          ]
+        },
+        {
+          "ri": 2,
+          "cells": [
+            "Consumable"
+          ]
+        },
+        {
+          "ri": 3,
+          "cells": [
+            "Vendor"
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 17,
+      "header": "Company",
+      "rowCount": 2,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "Company"
+          ]
+        },
+        {
+          "ri": 1,
+          "cells": [
+            "Expenses"
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 18,
+      "header": "Patient",
+      "rowCount": 2,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "Patient"
+          ]
+        },
+        {
+          "ri": 1,
+          "cells": [
+            "Finance"
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 19,
+      "header": "Reception",
+      "rowCount": 2,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "Reception"
+          ]
+        },
+        {
+          "ri": 1,
+          "cells": [
+            "Submission"
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 20,
+      "header": "Daily",
+      "rowCount": 8,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "Daily"
+          ]
+        },
+        {
+          "ri": 1,
+          "cells": [
+            "Inventory"
+          ]
+        },
+        {
+          "ri": 2,
+          "cells": [
+            "Finance"
+          ]
+        },
+        {
+          "ri": 3,
+          "cells": [
+            "Consumable"
+          ]
+        },
+        {
+          "ri": 4,
+          "cells": [
+            "Company"
+          ]
+        },
+        {
+          "ri": 5,
+          "cells": [
+            "GST"
+          ]
+        },
+        {
+          "ri": 6,
+          "cells": [
+            "Patient"
+          ]
+        },
+        {
+          "ri": 7,
+          "cells": [
+            "Audit"
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 21,
+      "header": "Treatment",
+      "rowCount": 10,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "Treatment"
+          ]
+        },
+        {
+          "ri": 1,
+          "cells": [
+            "Visit"
+          ]
+        },
+        {
+          "ri": 2,
+          "cells": [
+            "Revenue"
+          ]
+        },
+        {
+          "ri": 3,
+          "cells": [
+            "Cost"
+          ]
+        },
+        {
+          "ri": 4,
+          "cells": [
+            "Commission"
+          ]
+        },
+        {
+          "ri": 5,
+          "cells": [
+            "Patient"
+          ]
+        },
+        {
+          "ri": 6,
+          "cells": [
+            "Package"
+          ]
+        },
+        {
+          "ri": 7,
+          "cells": [
+            "Membership"
+          ]
+        },
+        {
+          "ri": 8,
+          "cells": [
+            "Marketing"
+          ]
+        },
+        {
+          "ri": 9,
+          "cells": [
+            "Others"
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 22,
+      "header": "Staff",
+      "rowCount": 1,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "Staff"
+          ]
+        }
+      ]
+    },
+    {
+      "ti": 23,
+      "header": "Program",
+      "rowCount": 17,
+      "rows": [
+        {
+          "ri": 0,
+          "cells": [
+            "Program"
+          ]
+        },
+        {
+          "ri": 1,
+          "cells": [
+            "Forms"
+          ]
+        },
+        {
+          "ri": 2,
+          "cells": [
+            "Patient"
+          ]
+        },
+        {
+          "ri": 3,
+          "cells": [
+            "Charges"
+          ]
+        },
+        {
+          "ri": 4,
+          "cells": [
+            "Appointment"
+          ]
+        },
+        {
+          "ri": 5,
+          "cells": [
+            "Inventory"
+          ]
+        },
+        {
+          "ri": 6,
+          "cells": [
+            "Payment"
+          ]
+        },
+        {
+          "ri": 7,
+          "cells": [
+            "Referral"
+          ]
+        },
+        {
+          "ri": 8,
+          "cells": [
+            "Memo"
+          ]
+        },
+        {
+          "ri": 9,
+          "cells": [
+            "Case Note"
+          ]
+        },
+        {
+          "ri": 10,
+          "cells": [
+            "Media"
+          ]
+        },
+        {
+          "ri": 11,
+          "cells": [
+            "Service Provider"
+          ]
+        },
+        {
+          "ri": 12,
+          "cells": [
+            "Surgical"
+          ]
+        },
+        {
+          "ri": 13,
+          "cells": [
+            "Queue"
+          ]
+        },
+        {
+          "ri": 14,
+          "cells": [
+            "Access Control"
+          ]
+        },
+        {
+          "ri": 15,
+          "cells": [
+            "Lab"
+          ]
+        },
+        {
+          "ri": 16,
+          "cells": [
+            "Other"
+          ]
+        }
+      ]
+    }
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-13T00:20:32.622Z"}

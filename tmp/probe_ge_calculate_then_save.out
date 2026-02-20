@@ -1,0 +1,142 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T07:15:44.795Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T07:15:44.799Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T07:15:44.799Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T07:15:44.799Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T07:15:47.623Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T07:15:47.624Z"}
+[32minfo[39m: [ALLIANCE] Filled username {"selector":"input[placeholder*=\"login id\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:15:51.212Z"}
+[32minfo[39m: [ALLIANCE] Filled password {"selector":"input[placeholder*=\"pass\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:15:52.281Z"}
+[32minfo[39m: [ALLIANCE] Clicked login {"selector":"button:has-text(\"Login\")","service":"clinic-automation","timestamp":"2026-02-19T07:15:52.876Z"}
+[32minfo[39m: [ALLIANCE] Login successful {"service":"clinic-automation","timestamp":"2026-02-19T07:15:54.884Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:15:55.856Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T07:15:57.833Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:15:58.396Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T07:15:59.919Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T07:16:01.467Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T07:16:02.976Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:16:04.042Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T07:16:04.630Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T07:16:07.315Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T07:16:09.125Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":10000,"service":"clinic-automation","timestamp":"2026-02-19T07:16:19.577Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":20000,"service":"clinic-automation","timestamp":"2026-02-19T07:16:30.151Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":30000,"service":"clinic-automation","timestamp":"2026-02-19T07:16:40.677Z"}
+[probe] before calculate {
+  "msg": "",
+  "feeType": "consultationfee",
+  "calc": true,
+  "buttons": [
+    {
+      "id": "",
+      "name": "",
+      "v": "Show Benefit",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+      "name": "ctl00$MainContent$uc_MakeClaim$btnmcreasons",
+      "v": "+",
+      "vis": true
+    },
+    {
+      "id": "",
+      "name": "",
+      "v": "Add Drug",
+      "vis": true
+    },
+    {
+      "id": "btnSearchProcedure",
+      "name": "",
+      "v": "Select",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnsaveprocedure",
+      "name": "ctl00$MainContent$uc_MakeClaim$btnsaveprocedure",
+      "v": "Add Item",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btncalculateclaim",
+      "name": "ctl00$MainContent$uc_MakeClaim$btncalculateclaim",
+      "v": "Calculate Claim",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnCancel",
+      "name": "ctl00$MainContent$uc_MakeClaim$btnCancel",
+      "v": "Cancel",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnReloadData",
+      "name": "ctl00$MainContent$uc_MakeClaim$btnReloadData",
+      "v": "",
+      "vis": true
+    }
+  ],
+  "totals": {
+    "total": "",
+    "payable": ""
+  }
+}
+[probe] after calculate {
+  "msg": "Please select a valid referral clinic",
+  "feeType": "consultationfee",
+  "calc": true,
+  "buttons": [
+    {
+      "id": "",
+      "name": "",
+      "v": "Show Benefit",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnmcreasons",
+      "name": "ctl00$MainContent$uc_MakeClaim$btnmcreasons",
+      "v": "+",
+      "vis": true
+    },
+    {
+      "id": "",
+      "name": "",
+      "v": "Add Drug",
+      "vis": true
+    },
+    {
+      "id": "btnSearchProcedure",
+      "name": "",
+      "v": "Select",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnsaveprocedure",
+      "name": "ctl00$MainContent$uc_MakeClaim$btnsaveprocedure",
+      "v": "Add Item",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btncalculateclaim",
+      "name": "ctl00$MainContent$uc_MakeClaim$btncalculateclaim",
+      "v": "Calculate Claim",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnCancel",
+      "name": "ctl00$MainContent$uc_MakeClaim$btnCancel",
+      "v": "Cancel",
+      "vis": true
+    },
+    {
+      "id": "ctl00_MainContent_uc_MakeClaim_btnReloadData",
+      "name": "ctl00$MainContent$uc_MakeClaim$btnReloadData",
+      "v": "",
+      "vis": true
+    }
+  ],
+  "totals": {
+    "total": "",
+    "payable": ""
+  }
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T07:17:02.958Z"}

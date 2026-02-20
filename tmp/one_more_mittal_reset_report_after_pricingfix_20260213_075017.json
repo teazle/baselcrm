@@ -1,0 +1,77 @@
+{
+  "visitId": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+  "before": {
+    "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "submission_status": "draft",
+    "submitted_at": "2026-02-13T00:37:27.991+00:00",
+    "submission_error": null,
+    "submission_metadata": {
+      "mcDays": 0,
+      "portal": "MHC Asia",
+      "success": true,
+      "persisted": true,
+      "chargeType": "first",
+      "hasDiagnosis": true,
+      "savedAsDraft": true,
+      "draftReference": "EV16090142",
+      "routingOverride": null,
+      "draftVerification": {
+        "row": {
+          "type": "Employee Visit",
+          "mcDays": "0.0",
+          "remarks": "",
+          "visitNo": "EV16090142",
+          "totalFee": "$130.80",
+          "visitDate": "02/02/2026",
+          "totalClaim": "$130.80",
+          "patientName": "SACHIN MITTAL",
+          "patientNric": "M4539893L"
+        },
+        "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+        "found": true,
+        "context": "mhc",
+        "attempts": [
+          {
+            "url": "https://www.mhcasia.net/mhc/ClinicEmpVisitDraftListSubmit.ec",
+            "match": {
+              "type": "Employee Visit",
+              "mcDays": "0.0",
+              "remarks": "",
+              "visitNo": "EV16090142",
+              "totalFee": "$130.80",
+              "visitDate": "02/02/2026",
+              "totalClaim": "$130.80",
+              "patientName": "SACHIN MITTAL",
+              "patientNric": "M4539893L"
+            },
+            "opened": true,
+            "context": "mhc",
+            "matched": true,
+            "rowsSeen": 1,
+            "attemptNo": 1
+          }
+        ],
+        "rowsSeen": 1
+      },
+      "diagnosisResolution": {
+        "status": "resolved",
+        "confidence": 1,
+        "source_chain": [
+          {
+            "found": true,
+            "source": "diagnosis_tab"
+          }
+        ],
+        "reason_if_unresolved": null
+      }
+    }
+  },
+  "after": {
+    "id": "31b5a688-9104-4507-bd7a-347a9f9ce866",
+    "submission_status": null,
+    "submitted_at": null,
+    "submission_error": null,
+    "submission_metadata": null
+  },
+  "generatedAt": "2026-02-13T00:50:18.072Z"
+}

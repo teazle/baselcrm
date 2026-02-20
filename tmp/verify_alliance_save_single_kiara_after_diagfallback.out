@@ -1,0 +1,79 @@
+(node:70146) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/vincent/Baselrpacrm/apps/crm/src/lib/rpa/portals.shared.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/vincent/Baselrpacrm/apps/crm/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T13:14:25.120Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T13:14:25.126Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T13:14:25.126Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T13:14:25.127Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T13:14:27.268Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T13:14:27.278Z"}
+[32minfo[39m: [SUBMIT STEP 01/10] Submitting claim for KIARA SINGH {"payType":"ALLIANC","service":"clinic-automation","timestamp":"2026-02-19T13:14:27.447Z","visitId":"d3a164b7-1b4f-490d-afbf-f9ef6dc1bd14"}
+[32minfo[39m: [SUBMIT STEP 02/10] Submitting to Alliance Medinet {"service":"clinic-automation","timestamp":"2026-02-19T13:14:28.491Z"}
+[32minfo[39m: [SUBMIT] Alliance form data: {"doctorName":"Palanisamy Arul Murugan","matchedTag":"ALLIANC","nric":"T1722895H","service":"clinic-automation","spCode":"PAM","timestamp":"2026-02-19T13:14:28.494Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T13:14:31.236Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T13:14:32.277Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T13:14:34.243Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T13:14:34.837Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T13:14:36.366Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T13:14:37.886Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T13:14:39.399Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T13:14:40.559Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T13:14:41.144Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-14/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T13:14:43.868Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-14/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T13:14:45.718Z"}
+[32minfo[39m: [ALLIANCE] Selected member and opened claim form {"service":"clinic-automation","timestamp":"2026-02-19T13:14:54.788Z"}
+[32minfo[39m: [ALLIANCE] Set MC Days {"selector":"input[placeholder*=\"MC Days\" i]","service":"clinic-automation","timestamp":"2026-02-19T13:14:58.183Z"}
+[32minfo[39m: [ALLIANCE] Clicked Add Diagnosis {"selector":"button:has-text(\"Add Diagnosis\")","service":"clinic-automation","timestamp":"2026-02-19T13:14:58.802Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Name (Missing diagnosis) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Name\" i]","service":"clinic-automation","timestamp":"2026-02-19T13:14:59.944Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (Missing diagnosis) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-19T13:15:00.595Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Name (Missing) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Name\" i]","service":"clinic-automation","timestamp":"2026-02-19T13:15:03.641Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (Missing) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-19T13:15:04.293Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Name (pain in limb) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Name\" i]","service":"clinic-automation","timestamp":"2026-02-19T13:15:07.370Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (pain in limb) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-19T13:15:08.020Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Name (foot pain) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Name\" i]","service":"clinic-automation","timestamp":"2026-02-19T13:15:11.135Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (foot pain) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-19T13:15:11.759Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Name (lower back pain) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Name\" i]","service":"clinic-automation","timestamp":"2026-02-19T13:15:13.420Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (lower back pain) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-19T13:15:14.068Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Name (back pain) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Name\" i]","service":"clinic-automation","timestamp":"2026-02-19T13:15:15.711Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (back pain) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-19T13:15:16.334Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Name (pain) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Name\" i]","service":"clinic-automation","timestamp":"2026-02-19T13:15:18.004Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (pain) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-19T13:15:18.621Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Name (fever) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Name\" i]","service":"clinic-automation","timestamp":"2026-02-19T13:15:21.151Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (fever) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-19T13:15:21.739Z"}
+[32minfo[39m: [ALLIANCE] Filled Diagnosis Name (headache) {"selector":"[role=\"dialog\"] input[placeholder*=\"Diagnosis Name\" i]","service":"clinic-automation","timestamp":"2026-02-19T13:15:24.126Z"}
+[32minfo[39m: [ALLIANCE] Clicked Diagnosis Search (headache) {"selector":"[role=\"dialog\"] button:has-text(\"Search\")","service":"clinic-automation","timestamp":"2026-02-19T13:15:24.752Z"}
+[33mwarn[39m: [ALLIANCE] Using low-confidence diagnosis fallback in draft mode {"diagnosisCode":null,"diagnosisName":"Missing diagnosis","fallbackReason":"no_signal","fallbackScore":0,"fallbackText":"Low back pain","service":"clinic-automation","timestamp":"2026-02-19T13:15:26.456Z"}
+[33mwarn[39m: [ALLIANCE] Consultation Fee capped for Follow Up type {"cappedAmount":69,"originalAmount":76.3,"service":"clinic-automation","timestamp":"2026-02-19T13:15:38.999Z"}
+[32minfo[39m: [ALLIANCE] Set Consultation Fee {"selector":"input[placeholder*=\"Consultation Fee\" i]","service":"clinic-automation","timestamp":"2026-02-19T13:15:41.118Z"}
+[32minfo[39m: [ALLIANCE] Filled remark {"selector":"textarea[placeholder*=\"remark\" i]","service":"clinic-automation","timestamp":"2026-02-19T13:15:42.221Z"}
+[32minfo[39m: [ALLIANCE] Draft mode enabled: skipping strict calculate/validation gate {"service":"clinic-automation","timestamp":"2026-02-19T13:15:42.222Z"}
+[32minfo[39m: [ALLIANCE] Clicked Calculate Claim (pre-draft) {"selector":"button:has-text(\"Calculate Claim\")","service":"clinic-automation","timestamp":"2026-02-19T13:15:43.555Z"}
+[33mwarn[39m: [ALLIANCE] Calculate before draft save did not reach summary {"error":"Could not trigger Calculate Claim","service":"clinic-automation","timestamp":"2026-02-19T13:15:44.765Z"}
+[32minfo[39m: [ALLIANCE] Clicked Save on Claim Summary for draft persistence {"service":"clinic-automation","timestamp":"2026-02-19T13:15:45.425Z"}
+[32minfo[39m: [ALLIANCE] Clicked Confirm Save as Draft {"selector":"[role=\"dialog\"] button:has-text(\"Confirm\")","service":"clinic-automation","timestamp":"2026-02-19T13:15:46.385Z"}
+{
+  "visitId": "d3a164b7-1b4f-490d-afbf-f9ef6dc1bd14",
+  "result": {
+    "success": true,
+    "portal": "Alliance Medinet",
+    "matchedTag": "ALLIANC",
+    "spCode": "PAM",
+    "doctorCode": "PAM",
+    "doctorName": "Palanisamy Arul Murugan",
+    "savedAsDraft": true,
+    "persisted": true,
+    "submitted": false,
+    "attempt": 1,
+    "diagnosisPortalMatch": {
+      "portal": "Alliance Medinet",
+      "match_text": "Low back pain",
+      "match_score": 0,
+      "match_method": "search",
+      "matched_by": "token_fuzzy",
+      "fallback": true,
+      "fallback_reason": "no_signal"
+    }
+  }
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T13:16:02.916Z"}

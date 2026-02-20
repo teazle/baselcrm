@@ -1,0 +1,7 @@
+[
+  {
+    "status": 200,
+    "url": "https://connect.alliancemedinet.com/mda/api/v1/member-policies/provider/filter",
+    "body": "{\"data\":[{\"memberPolicyId\":\"493259a4-b775-42c9-b2be-b62ac9c4e739\",\"memberPersonName\":\"Dylan Chern See Woo\",\"memberUniqueIdentityNumber\":\"T****699I\",\"memberCode\":\"G0002702-T0801699I\",\"memberType\":\"Dependent\",\"memberDateOfBirth\":\"10/1/2008 12:00:00 am\",\"coverageStartDate\":\"1/1/2026 12:00:00 am\",\"coverageEndDate\":\"31/12/2026 12:00:00 am\",\"contactNumber\":\"97686283\",\"emailAddress\":\"dylanwoochernsee@gmail.com\",\"companyEntityId\":\"00000000-0000-0000-0000-000000000000\",\"companyEntityCode\":null,\"companyEntityName\":\"Pacific Refreshments Pte Ltd\",\"benefitPlanCode\":\"G05-PR01-ATA\",\"tenantId\":\"GE\",\"memberVVIP\":\"0\",\"policy\":{\"id\":\"00000000-0000-0000-0000-000000000000\",\"policyNumber\":\"G0002702\",\"programPanelId\":null,\"program\":{\"name\":\"GE\"}},\"memberBenefitPlans\":[],\"route\":\"M1\"}],\"messages\":[],\"timeGenerated\":\"02/17/2026 17:20:31\",\"isSuccess\":true,\"currentPage\":1,\"totalPages\":1,\"totalCount\":1,\"pageSize\":50,\"hasPreviousPage\":false,\"hasNextPage\":false}"
+  }
+]

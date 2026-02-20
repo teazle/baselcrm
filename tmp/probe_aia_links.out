@@ -1,0 +1,49 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-12T06:37:15.939Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-12T06:37:15.946Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-12T06:37:15.946Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-12T06:37:15.946Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-12T06:37:18.019Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-12T06:37:18.020Z"}
+[32minfo[39m: [MHC 01] Login start {"attempt":1,"maxAttempts":3,"service":"clinic-automation","timestamp":"2026-02-12T06:37:18.258Z"}
+[32minfo[39m: Logging into MHC Asia... {"service":"clinic-automation","timestamp":"2026-02-12T06:37:18.258Z"}
+[32minfo[39m: [MHC 02] Country selected (best-effort) {"label":"MHC SINGAPORE","service":"clinic-automation","timestamp":"2026-02-12T06:37:20.766Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-12T06:37:21.331Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-12T06:37:21.860Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-12T06:37:23.259Z"}
+[32minfo[39m: Successfully logged into MHC Asia {"service":"clinic-automation","timestamp":"2026-02-12T06:37:24.022Z"}
+[32minfo[39m: [MHC 03] Login ok {"service":"clinic-automation","timestamp":"2026-02-12T06:37:24.022Z"}
+[32minfo[39m: [MHC 04] Ensure at MHC home {"service":"clinic-automation","timestamp":"2026-02-12T06:37:24.022Z"}
+[32minfo[39m: Clicked: Switch System {"service":"clinic-automation","timestamp":"2026-02-12T06:37:24.830Z"}
+[32minfo[39m: Clicked: AIA Clinic {"service":"clinic-automation","timestamp":"2026-02-12T06:37:26.725Z"}
+[32minfo[39m: [MHC 05] Dialog handler set up {"service":"clinic-automation","timestamp":"2026-02-12T06:37:31.363Z"}
+[32minfo[39m: [MHC 06] Switch system verification {"hasAddAiaVisit":true,"hasPolicyNoHeader":false,"hasSearchAiaMember":false,"hasSwitchSystem":false,"isAiaDomain":true,"isMhcDomain":false,"isSinglifeDomain":false,"labelForLog":"AIA Clinic","looksLikeAiaFlow":true,"service":"clinic-automation","timestamp":"2026-02-12T06:37:31.418Z","url":"https://www.aiaclinic.com/aia/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2"}
+[32minfo[39m: Switched system to: AIA Clinic {"service":"clinic-automation","timestamp":"2026-02-12T06:37:31.418Z"}
+switchOK true url https://www.aiaclinic.com/aia/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2
+{
+  "url": "https://www.aiaclinic.com/aia/ClinicAnnouncement.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2",
+  "title": "Clinic announcement",
+  "count": 5,
+  "sample": [
+    {
+      "text": "Add AIA Visit",
+      "href": "ClinicAddIECCardImage.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2"
+    },
+    {
+      "text": "View Submitted Visits",
+      "href": "ClinicIECAIAEmpVisitList.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2"
+    },
+    {
+      "text": "Edit/Draft Visits",
+      "href": "ClinicEmpVisitDraftList.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2"
+    },
+    {
+      "text": "Add Imaging AIA Visit",
+      "href": "ClinicIECXrayVisitSelectPatient.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2"
+    },
+    {
+      "text": "Add Lab AIA Visit",
+      "href": "ClinicIECLabVisitSelectPatient.ec?OWASP_CSRFTOKEN=MRHE-UPG8-UL9B-R0F7-DG2Y-ANSN-Y7WX-NJZ2"
+    }
+  ]
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-12T06:37:31.607Z"}

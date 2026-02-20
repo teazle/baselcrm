@@ -1,0 +1,132 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-14T09:53:23.508Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-14T09:53:23.514Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-14T09:53:23.514Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-14T09:53:23.515Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-14T09:53:26.000Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-14T09:53:26.007Z"}
+[32minfo[39m: [CA 01] Login start {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-14T09:53:26.441Z","url":"https://clinicassist.sg:1080/"}
+[32minfo[39m: Logging into Clinic Assist... {"service":"clinic-automation","timestamp":"2026-02-14T09:53:26.442Z"}
+[32minfo[39m: Username filled {"service":"clinic-automation","timestamp":"2026-02-14T09:53:30.546Z"}
+[32minfo[39m: [CA 02] Username filled {"service":"clinic-automation","timestamp":"2026-02-14T09:53:30.548Z"}
+[32minfo[39m: Password filled {"service":"clinic-automation","timestamp":"2026-02-14T09:53:31.098Z"}
+[32minfo[39m: [CA 03] Password filled {"service":"clinic-automation","timestamp":"2026-02-14T09:53:31.102Z"}
+[32minfo[39m: Clinic Group filled: ssoc {"service":"clinic-automation","timestamp":"2026-02-14T09:53:31.621Z"}
+[32minfo[39m: [CA 04] Clinic Group filled {"clinicGroup":"ssoc","service":"clinic-automation","timestamp":"2026-02-14T09:53:31.622Z"}
+[32minfo[39m: Login button clicked {"service":"clinic-automation","timestamp":"2026-02-14T09:53:32.736Z"}
+[32minfo[39m: [CA 05] Login submitted {"service":"clinic-automation","timestamp":"2026-02-14T09:53:32.737Z"}
+[32minfo[39m: Clinic Assist 2FA not required (verification inputs disabled) {"service":"clinic-automation","timestamp":"2026-02-14T09:53:35.754Z"}
+[32minfo[39m: Successfully logged into Clinic Assist {"service":"clinic-automation","timestamp":"2026-02-14T09:53:35.991Z"}
+[32minfo[39m: [CA 06] Login ok {"service":"clinic-automation","timestamp":"2026-02-14T09:53:35.991Z"}
+[32minfo[39m: [BATCH STEP 03/10] Reports → Queue List (date-based extraction) {"service":"clinic-automation","timestamp":"2026-02-14T09:53:37.953Z"}
+[32minfo[39m: [REPORTS] Navigating to Queue List report for date: 2026-02-03 {"service":"clinic-automation","timestamp":"2026-02-14T09:53:37.953Z"}
+[32minfo[39m: [CA 07] Navigating to Reports section {"service":"clinic-automation","timestamp":"2026-02-14T09:53:37.954Z"}
+[32minfo[39m: [CA 08] Need to select Reception/room first before accessing Reports {"service":"clinic-automation","timestamp":"2026-02-14T09:53:38.977Z"}
+[32minfo[39m: [CA 09] Clicking Reception/room to access system {"selector":"button:has-text(\"Reception\")","service":"clinic-automation","timestamp":"2026-02-14T09:53:38.981Z"}
+[32minfo[39m: [CA 10] Trying to open sidebar/hamburger menu {"service":"clinic-automation","timestamp":"2026-02-14T09:53:43.397Z"}
+[32minfo[39m: [CA 11] Found menu toggle, clicking to open sidebar {"selector":"[class*=\"nav-toggle\"]","service":"clinic-automation","timestamp":"2026-02-14T09:53:43.427Z"}
+[32minfo[39m: [CA 12] Looking for Reports link in sidebar {"service":"clinic-automation","timestamp":"2026-02-14T09:53:44.942Z"}
+[32minfo[39m: [CA 13] Found SidebarmenuReports, trying to trigger click via JavaScript {"service":"clinic-automation","timestamp":"2026-02-14T09:53:45.578Z"}
+[32minfo[39m: [CA 14] After JS click on SidebarmenuReports {"service":"clinic-automation","timestamp":"2026-02-14T09:53:48.585Z","url":"https://clinicassist.sg:1080/ReportsMenu/ReportsMenu"}
+[32minfo[39m: [CA 15] Successfully navigated via SidebarmenuReports click {"service":"clinic-automation","timestamp":"2026-02-14T09:53:48.586Z"}
+[32minfo[39m: [CA 16] Navigating to Queue List report {"service":"clinic-automation","timestamp":"2026-02-14T09:53:50.635Z"}
+[32minfo[39m: [CA 17] Queue List navigation context {"frameUrl":null,"kind":"page","pageUrl":"https://clinicassist.sg:1080/ReportsMenu/ReportsMenu","service":"clinic-automation","timestamp":"2026-02-14T09:53:58.758Z"}
+[32minfo[39m: [CA 18] Trying to click Queue Report link by ID 60017 {"service":"clinic-automation","timestamp":"2026-02-14T09:53:59.873Z"}
+[32minfo[39m: [CA 19] JS click result for Queue Report {"found":true,"method":"class","service":"clinic-automation","text":"Queue Report","timestamp":"2026-02-14T09:53:59.879Z"}
+[32minfo[39m: [CA 20] URL after JS click on Queue Report {"frameUrl":null,"pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-14T09:54:03.882Z"}
+[32minfo[39m: [CA 21] Successfully navigated to QueueReport page via JS click {"frameUrl":null,"pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-14T09:54:03.890Z"}
+[32minfo[39m: [CA 22] Searching Queue List by date {"date":"2026-02-03","service":"clinic-automation","timestamp":"2026-02-14T09:54:05.986Z"}
+[32minfo[39m: [CA 23] QueueReport search context {"frameUrl":null,"kind":"page","pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-14T09:54:14.122Z"}
+[32minfo[39m: [CA 24] QueueReport date field candidates {"count":1,"fields":[{"id":"txtOtherDateFrom","name":"DateFrom","placeholder":"","readOnly":false,"value":"14/2/2026"}],"service":"clinic-automation","timestamp":"2026-02-14T09:54:14.127Z"}
+[32minfo[39m: [CA 25] QueueReport date filled {"selector":"input[id=\"txtOtherDateFrom\"]","service":"clinic-automation","timestamp":"2026-02-14T09:54:15.184Z","value":"03/02/2026"}
+[32minfo[39m: [CA 26] QueueReport generate clicked via JS {"found":true,"service":"clinic-automation","timestamp":"2026-02-14T09:54:15.278Z","via":"btnOK"}
+[32minfo[39m: [CA 27] Extracting queue list results (root-aware) {"service":"clinic-automation","timestamp":"2026-02-14T09:54:26.436Z"}
+[32minfo[39m: [CA 28] QueueReport extract context {"frameUrl":null,"kind":"page","pageUrl":"https://clinicassist.sg:1080/QueueLog/QueueReport","service":"clinic-automation","timestamp":"2026-02-14T09:54:34.634Z"}
+[32minfo[39m: [CA 29] Queue report Excel downloaded {"excelPath":"/Users/vincent/Baselrpacrm/downloads/queueListing.xls","label":"nested","service":"clinic-automation","timestamp":"2026-02-14T09:54:44.626Z","why":"click #Button4"}
+[32minfo[39m: [CA 30] Found header row {"headers":["QNO","PCNO","NAME","SEX","SP\nCODE","TIME IN","TIMEOUT","INV NO","CASH TRANS","CONTRACT","TOTAL","GST","ADJ"],"rowIndex":2,"service":"clinic-automation","timestamp":"2026-02-14T09:54:44.662Z"}
+[32minfo[39m: [CA 31] Column positions detected {"cashTransCol":8,"contractCol":-1,"invNoCol":7,"nameCol":2,"pcnoCol":1,"qnoCol":0,"service":"clinic-automation","sexCol":3,"spCodeCol":4,"timeInCol":5,"timeOutCol":6,"timestamp":"2026-02-14T09:54:44.662Z"}
+[32minfo[39m: [CA 32] Parsing Excel file {"headerCount":13,"headerRowIndex":2,"service":"clinic-automation","timestamp":"2026-02-14T09:54:44.662Z","worksheetName":"Sheet1"}
+[32minfo[39m: [CA 33] Stopping Queue Listing parse at non-visit section {"rowIndex":44,"rowText":"PATIENT ACCOUNT PAYMENT AMOUNT INV.NO INV.DATE","service":"clinic-automation","timestamp":"2026-02-14T09:54:44.667Z"}
+[32minfo[39m: [CA 34] Excel parsing complete {"itemsFound":37,"service":"clinic-automation","timestamp":"2026-02-14T09:54:44.667Z"}
+[32minfo[39m: [CA 35] Queue report Excel parsed {"count":37,"label":"nested","service":"clinic-automation","timestamp":"2026-02-14T09:54:44.667Z"}
+[32minfo[39m: [REPORTS] Extracted 37 items from queue list for 2026-02-03 {"service":"clinic-automation","timestamp":"2026-02-14T09:54:44.667Z"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129564 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:46.334Z"}
+[32minfo[39m: [BATCH] Saved visit for ANDREW JOHN CROPP {"service":"clinic-automation","timestamp":"2026-02-14T09:54:46.597Z","visitId":"bd064ae6-3c6c-4b00-ab3b-a399edab613f"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129571 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:46.832Z"}
+[32minfo[39m: [BATCH] Saved visit for FRYKSTEN MAJA MARIA {"service":"clinic-automation","timestamp":"2026-02-14T09:54:47.057Z","visitId":"84a41e6c-a663-4a26-92e3-c36d9209981c"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129566 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:47.272Z"}
+[32minfo[39m: [BATCH] Saved visit for SATAPATHY PRADIPTA KUMAR {"service":"clinic-automation","timestamp":"2026-02-14T09:54:47.492Z","visitId":"fb202ed9-fa13-4624-9d38-dc5cbc263fe3"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129562 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:47.727Z"}
+[32minfo[39m: [BATCH] Saved visit for VIMALA DEVI RAO {"service":"clinic-automation","timestamp":"2026-02-14T09:54:47.970Z","visitId":"ef766a88-0d98-45fb-9546-eaf9385ba016"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129570 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:48.216Z"}
+[32minfo[39m: [BATCH] Saved visit for LEY MEI PIM {"service":"clinic-automation","timestamp":"2026-02-14T09:54:48.447Z","visitId":"6c964363-a7a7-4fbb-989e-e74065cd4f79"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129565 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:48.679Z"}
+[32minfo[39m: [BATCH] Saved visit for YEOH QIU LI GERMAINE {"service":"clinic-automation","timestamp":"2026-02-14T09:54:49.042Z","visitId":"726d26e4-9133-4bda-bf66-8f22c9aca324"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129568 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:49.311Z"}
+[32minfo[39m: [BATCH] Saved visit for PHILI SOPHIE IRIS MOORE {"service":"clinic-automation","timestamp":"2026-02-14T09:54:49.526Z","visitId":"b71cef82-6e40-4017-b1e2-fd80b10c0b34"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129572 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:49.737Z"}
+[32minfo[39m: [BATCH] Saved visit for GREGORIO III ALFREDO VARGAS {"service":"clinic-automation","timestamp":"2026-02-14T09:54:50.031Z","visitId":"eb686f04-9987-42e7-8fa1-ded1464a7ba6"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129563 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:50.245Z"}
+[32minfo[39m: [BATCH] Saved visit for ANDREW JOHN CROPP {"service":"clinic-automation","timestamp":"2026-02-14T09:54:50.465Z","visitId":"6879c3c6-0e6c-4087-a7c6-0feacbf19cf8"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129567 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:50.694Z"}
+[32minfo[39m: [BATCH] Saved visit for David Bako {"service":"clinic-automation","timestamp":"2026-02-14T09:54:50.913Z","visitId":"7a0f5332-2109-4b70-9c6b-781714472a16"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129575 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:51.123Z"}
+[32minfo[39m: [BATCH] Saved visit for TAN WEE SEN ERIC {"service":"clinic-automation","timestamp":"2026-02-14T09:54:51.463Z","visitId":"ed94b31a-4229-429d-bc2a-7cd5cc3a0fcb"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129569 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:51.676Z"}
+[32minfo[39m: [BATCH] Saved visit for LEE BEE HOON {"service":"clinic-automation","timestamp":"2026-02-14T09:54:51.918Z","visitId":"794b5d25-245c-446c-b5cb-cb8728448003"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129579 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:52.134Z"}
+[32minfo[39m: [BATCH] Saved visit for SIM SOON CHUAN WATSON {"service":"clinic-automation","timestamp":"2026-02-14T09:54:52.345Z","visitId":"a491ba7a-38dd-49a4-8c5f-ae2dac790e1e"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129577 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:52.558Z"}
+[32minfo[39m: [BATCH] Saved visit for REBECCA ELIZABETH BLUNT {"service":"clinic-automation","timestamp":"2026-02-14T09:54:52.804Z","visitId":"5a83310a-07d7-48b7-b7e6-3f66e2cd4b05"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129574 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:53.013Z"}
+[32minfo[39m: [BATCH] Saved visit for Makhasiri Khanoei {"service":"clinic-automation","timestamp":"2026-02-14T09:54:53.232Z","visitId":"4804f501-cdc2-42af-a98f-3e9ce567bd7a"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129573 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:53.450Z"}
+[32minfo[39m: [BATCH] Saved visit for Makhasiri Khanoei {"service":"clinic-automation","timestamp":"2026-02-14T09:54:53.686Z","visitId":"2de60e72-a1f3-493e-b018-6c2c1abefbb0"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129576 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:53.896Z"}
+[32minfo[39m: [BATCH] Saved visit for CHEW SIEW LING {"service":"clinic-automation","timestamp":"2026-02-14T09:54:54.130Z","visitId":"0a1695ab-8ea3-4fba-b5a5-ec47ea933e40"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129585 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:54.340Z"}
+[32minfo[39m: [BATCH] Saved visit for LI ZHI YI PRISCILLA {"service":"clinic-automation","timestamp":"2026-02-14T09:54:54.553Z","visitId":"dc8309f8-d691-4bfe-8131-577c658c17bb"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129582 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:54.770Z"}
+[32minfo[39m: [BATCH] Saved visit for SIM HENG LEONG {"service":"clinic-automation","timestamp":"2026-02-14T09:54:54.997Z","visitId":"acf05fcc-211c-404d-90d4-ce3f4e1a2237"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129588 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:55.212Z"}
+[32minfo[39m: [BATCH] Saved visit for CHU FANG {"service":"clinic-automation","timestamp":"2026-02-14T09:54:55.428Z","visitId":"d4466461-43ba-45b3-b0cb-c6070c1ac7ab"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129578 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:55.643Z"}
+[32minfo[39m: [BATCH] Saved visit for CROUSE KEN {"service":"clinic-automation","timestamp":"2026-02-14T09:54:55.863Z","visitId":"6e14c9bd-4318-47fa-8b4d-a73d7d73bab4"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129584 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:56.101Z"}
+[32minfo[39m: [BATCH] Saved visit for ENG CHAI PIN ELYNE XANDRIA {"service":"clinic-automation","timestamp":"2026-02-14T09:54:56.318Z","visitId":"60e0c382-d6cb-4d35-a5b9-e17ce5b20c73"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129581 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:56.526Z"}
+[32minfo[39m: [BATCH] Saved visit for AKSHOB RAM KUMAR {"service":"clinic-automation","timestamp":"2026-02-14T09:54:56.748Z","visitId":"c49335be-c255-4a5b-b0d7-e3f840d3c076"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129580 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:56.955Z"}
+[32minfo[39m: [BATCH] Saved visit for SEE WENN CHYI {"service":"clinic-automation","timestamp":"2026-02-14T09:54:57.181Z","visitId":"870fdcf6-d2cf-4c0a-83b1-8a61dcee0ff8"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129583 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:57.388Z"}
+[32minfo[39m: [BATCH] Saved visit for TANAKA DAISUKE {"service":"clinic-automation","timestamp":"2026-02-14T09:54:57.602Z","visitId":"ef142ce7-769a-4dc6-958b-5be6f37707f9"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129587 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:57.820Z"}
+[32minfo[39m: [BATCH] Saved visit for FAN HONGYI {"service":"clinic-automation","timestamp":"2026-02-14T09:54:58.039Z","visitId":"c3c483d2-83d4-46be-936e-77767dd568b3"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129586 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:58.247Z"}
+[32minfo[39m: [BATCH] Saved visit for FAN HONGYI {"service":"clinic-automation","timestamp":"2026-02-14T09:54:58.464Z","visitId":"35dd57a9-92fd-4af1-a4fd-8458ba766b9d"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129590 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:58.675Z"}
+[32minfo[39m: [BATCH] Saved visit for ABDUL HAFIEZ BIN ABDUL RASHID {"service":"clinic-automation","timestamp":"2026-02-14T09:54:58.895Z","visitId":"c06081ea-9843-491c-9580-81e4fc0d7ce1"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129589 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:59.105Z"}
+[32minfo[39m: [BATCH] Saved visit for PAROMITA DUTTA {"service":"clinic-automation","timestamp":"2026-02-14T09:54:59.333Z","visitId":"0aa44ba7-2684-4b53-a52e-a886451bcdb4"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129591 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:59.547Z"}
+[32minfo[39m: [BATCH] Saved visit for TAN YING TE {"service":"clinic-automation","timestamp":"2026-02-14T09:54:59.762Z","visitId":"417c205b-66f5-4d5c-9e5f-06891fa87978"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129592 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:54:59.969Z"}
+[32minfo[39m: [BATCH] Saved visit for HE DAILE {"service":"clinic-automation","timestamp":"2026-02-14T09:55:00.184Z","visitId":"e76e872b-6737-4b6f-bfed-09869c8e2bed"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129598 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:55:00.391Z"}
+[32minfo[39m: [BATCH] Saved visit for DWIVEDI ABHISHEK {"service":"clinic-automation","timestamp":"2026-02-14T09:55:00.607Z","visitId":"78b3af9a-263d-41d8-b81b-0e246ad2eb5c"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129593 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:55:00.828Z"}
+[32minfo[39m: [BATCH] Saved visit for GONG YANJUN {"service":"clinic-automation","timestamp":"2026-02-14T09:55:01.038Z","visitId":"52fecb6c-155a-4568-8a3e-d30f43c40506"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129594 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:55:01.255Z"}
+[32minfo[39m: [BATCH] Saved visit for ISHAAN KRISHNAN {"service":"clinic-automation","timestamp":"2026-02-14T09:55:01.471Z","visitId":"4e6d6c4d-08d7-4bd3-aa82-a97f50c675e1"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129596 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:55:01.685Z"}
+[32minfo[39m: [BATCH] Saved visit for NG WING YAN HILDA {"service":"clinic-automation","timestamp":"2026-02-14T09:55:01.919Z","visitId":"e393e0d5-46c8-44f9-b2dd-1b8db3ffc1ef"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129597 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:55:02.130Z"}
+[32minfo[39m: [BATCH] Saved visit for LEE GUAN HOCK {"service":"clinic-automation","timestamp":"2026-02-14T09:55:02.429Z","visitId":"8664261b-7512-4923-8e21-2cc9db9e35d2"}
+[32minfo[39m: [BATCH] Found existing record for record_no 129595 on 2026-02-03, will update instead of insert {"service":"clinic-automation","timestamp":"2026-02-14T09:55:02.725Z"}
+[32minfo[39m: [BATCH] Saved visit for LEE FUI CHIN {"service":"clinic-automation","timestamp":"2026-02-14T09:55:02.946Z","visitId":"c89739d3-f999-4395-bf90-9e10b636e577"}
+[32minfo[39m: [BATCH STEP 06/10] Saved 37/37 items to CRM {"service":"clinic-automation","timestamp":"2026-02-14T09:55:02.947Z"}
+{
+  "date": "2026-02-03",
+  "extractedCount": 37,
+  "savedCount": 37
+}
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-14T09:55:03.250Z"}

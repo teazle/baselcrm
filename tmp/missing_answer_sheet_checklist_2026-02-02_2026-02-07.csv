@@ -1,0 +1,9 @@
+step,visit_id,patient_name,nric,visit_date,pay_type,flow2_status,flow2_diag,submitted_reference,submitted_form_captured,submitted_diag_from_form,evidence_path,notes
+"1","6af6ea13-14d9-43c6-917e-d0ca5da4ab0f","HASLINA BINTE HASSAN BASRI","S7349449D","2026-02-02","MHC","missing","Missing diagnosis","","NO","","",""
+"2","6eb5aa60-ee97-472b-a904-c4ccf2855b18","FAN HONGYI","S8481103C","2026-02-02","MHC","resolved","sprain of left knee","","NO","","",""
+"3","b19f4854-6445-4965-a695-befdc5f1c531","SZENTIRMAY IBOLYA MARGARET","M4427511W","2026-02-02","MHC","ambiguous","arthritis of left knee","","NO","","",""
+"4","c3c483d2-83d4-46be-936e-77767dd568b3","FAN HONGYI","S8481103C","2026-02-03","MHC","resolved","Pain in left knee","","NO","","",""
+"5","60e0c382-d6cb-4d35-a5b9-e17ce5b20c73","ENG CHAI PIN ELYNE XANDRIA","S8570522I","2026-02-03","MHC","missing","Missing diagnosis","","NO","","",""
+"6","dcbbe4e8-586c-45c4-905a-c76bacfcd860","CAROLINE ADRIANA ARCHER","S7288611I","2026-02-04","MHC","ambiguous","Sprain Of The Knee","","NO","","",""
+"7","78f0430c-6d4f-4043-a54f-d529e7ef57fb","YIP CHOI YEAN","S0121655D","2026-02-05","MHC","missing","Missing diagnosis","","NO","","",""
+"8","416a02fb-3feb-435b-b3f8-3f3197a60e0f","TJIA NATHANAEL THOMAS","T1208937B","2026-02-06","MHC","resolved","Sprain & strain wrist part unspecified","","NO","","",""

@@ -1,0 +1,32 @@
+{
+  "flowName": "Flow 2 Visit Details Extraction",
+  "generatedAt": "2026-02-20T11:29:05.141Z",
+  "scope": {
+    "from": "1900-01-01",
+    "to": "1900-01-01",
+    "date": null,
+    "payType": "Portal scope",
+    "portalTargets": "MHC,MHCAXA,AIA,AIACLIENT,AVIVA,SINGLIFE,FULLERT,IHP,PARKWAY,ALL,ALLIMED,ALLIANZ,ALLIANCE,GE,NTUC_IM,TOKIOM,ALLIANC,ALLSING,AXAMED,PRUDEN",
+    "visitIds": null
+  },
+  "totals": {
+    "total_candidates": 0,
+    "to_process": 0,
+    "completed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "skipped_precheck": 0
+  },
+  "rows": [
+    {
+      "date": "1900-01-01..1900-01-01",
+      "patientName": "-",
+      "nric": "-",
+      "payType": "-",
+      "portal": "-",
+      "status": "no_records",
+      "diagnosisStatus": "-",
+      "notes": "No visits found for selected scope"
+    }
+  ]
+}

@@ -1,0 +1,250 @@
+[32minfo[39m: Launching browser... {"service":"clinic-automation","timestamp":"2026-02-19T08:38:02.561Z"}
+[32minfo[39m: Using extension for VPN - proxy auto-discovery disabled {"service":"clinic-automation","timestamp":"2026-02-19T08:38:02.566Z"}
+[32minfo[39m: Using Chromium executable: /Users/vincent/Library/Caches/ms-playwright/chromium-1200/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing {"service":"clinic-automation","timestamp":"2026-02-19T08:38:02.566Z"}
+[32minfo[39m: Filtering out Urban VPN extension {"service":"clinic-automation","timestamp":"2026-02-19T08:38:02.566Z"}
+[32minfo[39m: Applied external protocol guard script {"service":"clinic-automation","timestamp":"2026-02-19T08:38:06.046Z"}
+[32minfo[39m: Browser launched successfully {"service":"clinic-automation","timestamp":"2026-02-19T08:38:06.055Z"}
+[32minfo[39m: [ALLIANCE] Already logged in (active session detected) {"service":"clinic-automation","timestamp":"2026-02-19T08:38:08.906Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T08:38:12.719Z"}
+[32minfo[39m: [ALLIANCE] Navigated directly to Create Panel Claim {"service":"clinic-automation","target":"https://connect.alliancemedinet.com/claim/panel-create","timestamp":"2026-02-19T08:38:14.702Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar li:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T08:38:18.798Z"}
+[32minfo[39m: [ALLIANCE] Clicked sidebar Create Panel Claim {"selector":"div.sidebar a.nav-link:has-text(\"Create Panel Claim\")","service":"clinic-automation","timestamp":"2026-02-19T08:38:20.336Z"}
+[32minfo[39m: [ALLIANCE] Clicked Medical Treatment {"selector":"div.main-panel button.action-btn:has-text(\"Medical Treatment\")","service":"clinic-automation","timestamp":"2026-02-19T08:38:21.907Z"}
+[32minfo[39m: [ALLIANCE] Navigated to Medical Treatment claim flow {"service":"clinic-automation","timestamp":"2026-02-19T08:38:23.416Z"}
+[32minfo[39m: [ALLIANCE] Filled Member UIN/Membership ID {"selector":"input[placeholder*=\"Membership\" i]","service":"clinic-automation","timestamp":"2026-02-19T08:38:24.607Z"}
+[32minfo[39m: [ALLIANCE] Clicked Claim Type {"selector":"[role=\"dialog\"] div:has-text(\"Claim Type\"):has([role=\"combobox\"])","service":"clinic-automation","timestamp":"2026-02-19T08:38:25.188Z"}
+[32minfo[39m: [ALLIANCE] Set Date of Visit (candidate-13/2/2026) {"selector":"input[placeholder*=\"Date of Visit\" i]","service":"clinic-automation","timestamp":"2026-02-19T08:38:27.898Z"}
+[32minfo[39m: [ALLIANCE] Clicked Search Others (candidate-13/2/2026) {"selector":"button:has-text(\"Search Others\")","service":"clinic-automation","timestamp":"2026-02-19T08:38:29.802Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":10000,"searchKind":"search_others","service":"clinic-automation","timestamp":"2026-02-19T08:38:40.430Z"}
+[32minfo[39m: [ALLIANCE] Waiting for search result table to load {"attempt":"candidate-13/2/2026","elapsedMs":20000,"searchKind":"search_others","service":"clinic-automation","timestamp":"2026-02-19T08:38:51.165Z"}
+{
+  "location": "https://supremecare.greateasternlife.com/Views/Provider/SearchDiagnosis.aspx?dtype=primarydiagnosis&dgroup=acute&callback=reloadPageOnItemSelected&keepThis=true&",
+  "links": [
+    {
+      "text": "A",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkA','')",
+      "id": "ctl00_PopupPageContent_lnkA",
+      "title": ""
+    },
+    {
+      "text": "B",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkB','')",
+      "id": "ctl00_PopupPageContent_lnkB",
+      "title": ""
+    },
+    {
+      "text": "C",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkC','')",
+      "id": "ctl00_PopupPageContent_lnkC",
+      "title": ""
+    },
+    {
+      "text": "D",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkD','')",
+      "id": "ctl00_PopupPageContent_lnkD",
+      "title": ""
+    },
+    {
+      "text": "E",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkE','')",
+      "id": "ctl00_PopupPageContent_lnkE",
+      "title": ""
+    },
+    {
+      "text": "F",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkF','')",
+      "id": "ctl00_PopupPageContent_lnkF",
+      "title": ""
+    },
+    {
+      "text": "G",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkG','')",
+      "id": "ctl00_PopupPageContent_lnkG",
+      "title": ""
+    },
+    {
+      "text": "H",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkH','')",
+      "id": "ctl00_PopupPageContent_lnkH",
+      "title": ""
+    },
+    {
+      "text": "I",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkI','')",
+      "id": "ctl00_PopupPageContent_lnkI",
+      "title": ""
+    },
+    {
+      "text": "J",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkJ','')",
+      "id": "ctl00_PopupPageContent_lnkJ",
+      "title": ""
+    },
+    {
+      "text": "K",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkK','')",
+      "id": "ctl00_PopupPageContent_lnkK",
+      "title": ""
+    },
+    {
+      "text": "L",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkL','')",
+      "id": "ctl00_PopupPageContent_lnkL",
+      "title": ""
+    },
+    {
+      "text": "M",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkM','')",
+      "id": "ctl00_PopupPageContent_lnkM",
+      "title": ""
+    },
+    {
+      "text": "N",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkN','')",
+      "id": "ctl00_PopupPageContent_lnkN",
+      "title": ""
+    },
+    {
+      "text": "O",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkO','')",
+      "id": "ctl00_PopupPageContent_lnkO",
+      "title": ""
+    },
+    {
+      "text": "P",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkP','')",
+      "id": "ctl00_PopupPageContent_lnkP",
+      "title": ""
+    },
+    {
+      "text": "Q",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkQ','')",
+      "id": "ctl00_PopupPageContent_lnkQ",
+      "title": ""
+    },
+    {
+      "text": "R",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkR','')",
+      "id": "ctl00_PopupPageContent_lnkR",
+      "title": ""
+    },
+    {
+      "text": "S",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkS','')",
+      "id": "ctl00_PopupPageContent_lnkS",
+      "title": ""
+    },
+    {
+      "text": "T",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkT','')",
+      "id": "ctl00_PopupPageContent_lnkT",
+      "title": ""
+    },
+    {
+      "text": "U",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkU','')",
+      "id": "ctl00_PopupPageContent_lnkU",
+      "title": ""
+    },
+    {
+      "text": "V",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkV','')",
+      "id": "ctl00_PopupPageContent_lnkV",
+      "title": ""
+    },
+    {
+      "text": "W",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkW','')",
+      "id": "ctl00_PopupPageContent_lnkW",
+      "title": ""
+    },
+    {
+      "text": "X",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkX','')",
+      "id": "ctl00_PopupPageContent_lnkX",
+      "title": ""
+    },
+    {
+      "text": "Y",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkY','')",
+      "id": "ctl00_PopupPageContent_lnkY",
+      "title": ""
+    },
+    {
+      "text": "Z",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkZ','')",
+      "id": "ctl00_PopupPageContent_lnkZ",
+      "title": ""
+    },
+    {
+      "text": "All",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$lnkAll','')",
+      "id": "ctl00_PopupPageContent_lnkAll",
+      "title": ""
+    },
+    {
+      "text": "Abdominal and pelvic pain",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl02$lbtnPrimaryDiagnosis','')",
+      "id": "ctl00_PopupPageContent_dgDiagnosis_ctl02_lbtnPrimaryDiagnosis",
+      "title": ""
+    },
+    {
+      "text": "Pain and other conditions associated with female genital organs and menstrual cycle",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl03$lbtnPrimaryDiagnosis','')",
+      "id": "ctl00_PopupPageContent_dgDiagnosis_ctl03_lbtnPrimaryDiagnosis",
+      "title": ""
+    },
+    {
+      "text": "Pain associated with micturition",
+      "href": "javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl04$lbtnPrimaryDiagnosis','')",
+      "id": "ctl00_PopupPageContent_dgDiagnosis_ctl04_lbtnPrimaryDiagnosis",
+      "title": ""
+    }
+  ],
+  "rows": [
+    {
+      "i": 0,
+      "text": "Select Diagnosis",
+      "html": "\n            <td>\n                Select Diagnosis\n            </td>\n        "
+    },
+    {
+      "i": 2,
+      "text": "List Diagnosis by A B C D E F G H I J K L M N O P Q R S T U V W X Y Z All",
+      "html": "\n            <td style=\"padding: 5px; padding-bottom: 0px;\">\n                List Diagnosis by &nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkA\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkA','')\">A</a>\n                &nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkB\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkB','')\">B</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkC\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkC','')\">C</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkD\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkD','')\">D</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkE\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkE','')\">E</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkF\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkF','')\">F</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkG\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkG','')\">G</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkH\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkH','')\">H</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkI\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkI','')\">I</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkJ\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkJ','')\">J</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkK\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkK','')\">K</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkL\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkL','')\">L</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkM\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkM','')\">M</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkN\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkN','')\">N</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkO\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkO','')\">O</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkP\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkP','')\">P</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkQ\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkQ','')\">Q</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkR\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkR','')\">R</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkS\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkS','')\">S</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkT\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkT','')\">T</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkU\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkU','')\">U</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkV\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkV','')\">V</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkW\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkW','')\">W</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkX\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkX','')\">X</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkY\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkY','')\">Y</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkZ\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkZ','')\">Z</a>&nbsp;\n                <a id=\"ctl00_PopupPageContent_lnkAll\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$lnkAll','')\">All</a>\n            </td>\n        "
+    },
+    {
+      "i": 3,
+      "text": "CodeDiagnosis",
+      "html": "\n\t\t<td>Code</td><td>Diagnosis</td>\n\t"
+    },
+    {
+      "i": 4,
+      "text": "R10 Abdominal and pelvic pain",
+      "html": "\n\t\t<td>R10</td><td>\n                    <a id=\"ctl00_PopupPageContent_dgDiagnosis_ctl02_lbtnPrimaryDiagnosis\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl02$lbtnPrimaryDiagnosis','')\">Abdominal and pelvic pain</a>\n                </td>\n\t"
+    },
+    {
+      "i": 5,
+      "text": "N94 Pain and other conditions associated with female genital organs and menstrual cycle",
+      "html": "\n\t\t<td>N94</td><td>\n                    <a id=\"ctl00_PopupPageContent_dgDiagnosis_ctl03_lbtnPrimaryDiagnosis\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl03$lbtnPrimaryDiagnosis','')\">Pain and other conditions associated with female genital organs and menstrual cycle</a>\n                </td>\n\t"
+    },
+    {
+      "i": 6,
+      "text": "R30 Pain associated with micturition",
+      "html": "\n\t\t<td>R30</td><td>\n                    <a id=\"ctl00_PopupPageContent_dgDiagnosis_ctl04_lbtnPrimaryDiagnosis\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl04$lbtnPrimaryDiagnosis','')\">Pain associated with micturition</a>\n                </td>\n\t"
+    },
+    {
+      "i": 7,
+      "text": "R07 Pain in throat and chest",
+      "html": "\n\t\t<td>R07</td><td>\n                    <a id=\"ctl00_PopupPageContent_dgDiagnosis_ctl05_lbtnPrimaryDiagnosis\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl05$lbtnPrimaryDiagnosis','')\">Pain in throat and chest</a>\n                </td>\n\t"
+    },
+    {
+      "i": 8,
+      "text": "R52 Pain, not elsewhere classified",
+      "html": "\n\t\t<td>R52</td><td>\n                    <a id=\"ctl00_PopupPageContent_dgDiagnosis_ctl06_lbtnPrimaryDiagnosis\" href=\"javascript:__doPostBack('ctl00$PopupPageContent$dgDiagnosis$ctl06$lbtnPrimaryDiagnosis','')\">Pain, not elsewhere classified</a>\n                </td>\n\t"
+    }
+  ],
+  "tableSnippet": ""
+}
+[probe] fatal TypeError: frame.screenshot is not a function
+    at file:///Users/vincent/Baselrpacrm/tmp/probe_ge_popup_rows.mjs:69:15
+[32minfo[39m: Browser closed {"service":"clinic-automation","timestamp":"2026-02-19T08:39:00.011Z"}

@@ -1,0 +1,91 @@
+{
+  "visit": {
+    "id": "d3a164b7-1b4f-490d-afbf-f9ef6dc1bd14",
+    "patient_name": "KIARA SINGH",
+    "visit_date": "2026-02-14",
+    "nric": "T1722895H",
+    "pay_type": "ALLIANC",
+    "pcno": "77546"
+  },
+  "flow2_saved": {
+    "diagnosis_description": "Missing diagnosis",
+    "diagnosis_code": null,
+    "diagnosis_resolution": {
+      "status": "missing",
+      "date_ok": false,
+      "confidence": 0,
+      "date_policy": "on_or_before_30_days",
+      "source_chain": [
+        {
+          "found": true,
+          "source": "diagnosis_tab",
+          "source_date": "2026-02-07",
+          "source_age_days": 7
+        },
+        {
+          "found": false,
+          "source": "diagnosis_tab_latest",
+          "source_date": null,
+          "source_age_days": null
+        },
+        {
+          "found": false,
+          "source": "diagnosis_tab_raw",
+          "source_date": null,
+          "source_age_days": null
+        },
+        {
+          "found": false,
+          "source": "all_tab",
+          "source_date": null,
+          "source_age_days": null
+        },
+        {
+          "found": false,
+          "source": "visit_tab",
+          "source_date": null,
+          "source_age_days": null
+        },
+        {
+          "found": false,
+          "source": "past_notes",
+          "source_date": null,
+          "source_age_days": null
+        }
+      ],
+      "fallback_age_days": null,
+      "reason_if_unresolved": "not_found_in_diagnosis_all_visit_pastnotes",
+      "source_date_match_type": "latest"
+    },
+    "diagnosis_canonical": {
+      "side": null,
+      "code_raw": null,
+      "body_part": null,
+      "condition": null,
+      "source_date": null,
+      "code_normalized": null,
+      "description_raw": null,
+      "source_age_days": null,
+      "description_canonical": null,
+      "source_date_match_type": "latest"
+    }
+  },
+  "browser_extract": {
+    "diagnosisForDate": {
+      "code": "S10",
+      "description": "LAB TEST (THYROID SCREEN-TS10)",
+      "date": "07/02/2026"
+    },
+    "latestDiagnosis": null,
+    "rawDiagnosis": null,
+    "allTabDiagnosis": null,
+    "visitTabDiagnosis": null,
+    "pastNotesDiagnosis": null,
+    "pastNotesIntent": null
+  },
+  "artifacts": {
+    "patientBiodata": "/Users/vincent/Baselrpacrm/output/playwright/flow2-diag-2026-02-14-77546-2026-02-19T12-54-16-180Z-patient-biodata.png",
+    "diagnosisTab": "/Users/vincent/Baselrpacrm/output/playwright/flow2-diag-2026-02-14-77546-2026-02-19T12-54-16-180Z-tx-diagnosis-tab.png",
+    "pastNotes": "/Users/vincent/Baselrpacrm/output/playwright/flow2-diag-2026-02-14-77546-2026-02-19T12-54-16-180Z-tx-past-notes.png"
+  }
+}
