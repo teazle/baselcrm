@@ -1,12 +1,10 @@
-import dotenv from 'dotenv';
+import 'dotenv/config';
 import { BrowserManager } from '../utils/browser.js';
 import { BatchExtraction } from '../core/batch-extraction.js';
 import { createSupabaseClient } from '../utils/supabase-client.js';
 import { logger } from '../utils/logger.js';
 import { resolveFlow3PortalTarget } from '../../apps/crm/src/lib/rpa/portals.shared.js';
 import { portalTargetToLabel, writeRunSummaryReport } from '../utils/run-summary-report.js';
-
-dotenv.config();
 
 /**
  * Extract queue list data for a date range

@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import 'dotenv/config';
 import { BrowserManager } from '../utils/browser.js';
 import { VisitDetailsExtractor } from '../core/visit-details-extractor.js';
 import { createSupabaseClient } from '../utils/supabase-client.js';
@@ -9,8 +9,6 @@ import {
   resolveFlow3PortalTarget,
 } from '../../apps/crm/src/lib/rpa/portals.shared.js';
 import { portalTargetToLabel, writeRunSummaryReport } from '../utils/run-summary-report.js';
-
-dotenv.config();
 
 /**
  * Extract visit details (diagnosis, medicines, MC, charge type) for visits that have not been enhanced yet

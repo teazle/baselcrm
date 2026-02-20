@@ -381,8 +381,10 @@ export class BrowserManager {
   }
 
   _buildRunScopedUserDataDir() {
-    const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14);
-    return `${this.userDataDir}-run-${stamp}`;
+    const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '');
+    const pid = process.pid;
+    const rand = Math.random().toString(36).slice(2, 8);
+    return `${this.baseUserDataDir}-run-${stamp}-${pid}-${rand}`;
   }
 
   async _applyExternalProtocolGuard(context) {
