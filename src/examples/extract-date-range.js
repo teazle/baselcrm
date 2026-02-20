@@ -9,16 +9,19 @@ import { portalTargetToLabel, writeRunSummaryReport } from '../utils/run-summary
 /**
  * Extract queue list data for a date range
  * Processes dates from start to end, skipping dates that already have data
- * 
+ *
  * Usage:
  *   node src/examples/extract-date-range.js
  *   node src/examples/extract-date-range.js 2025-12-27 2026-01-12
+ *   node src/examples/extract-date-range.js 2026-02-13 2026-02-13 --force
  */
 async function extractDateRange() {
   // Parse command line arguments
   const args = process.argv.slice(2);
-  const startDateStr = args[0] || '2025-12-27'; // Default: Dec 27, 2025
-  const endDateStr = args[1] || new Date().toISOString().split('T')[0]; // Default: today
+  const force = args.includes('--force');
+  const positionalArgs = args.filter(arg => !arg.startsWith('--'));
+  const startDateStr = positionalArgs[0] || '2025-12-27'; // Default: Dec 27, 2025
+  const endDateStr = positionalArgs[1] || new Date().toISOString().split('T')[0]; // Default: today
 
   // Validate date format (YYYY-MM-DD)
   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -42,6 +45,7 @@ async function extractDateRange() {
 
   logger.info('=== Date Range Extraction ===');
   logger.info(`Date range: ${startDateStr} to ${endDateStr}`);
+  logger.info(`Force replay existing dates: ${force}`);
   const reportRows = [];
 
   // Query existing dates from database
@@ -66,9 +70,7 @@ async function extractDateRange() {
 
   // Extract unique dates
   const existingDates = new Set(
-    (existingDatesData || [])
-      .map(row => row.visit_date)
-      .filter(Boolean)
+    (existingDatesData || []).map(row => row.visit_date).filter(Boolean)
   );
 
   logger.info(`Found ${existingDates.size} dates with existing data in range`);
@@ -78,7 +80,7 @@ async function extractDateRange() {
   const currentDate = new Date(startDate);
   while (currentDate <= endDate) {
     const dateStr = currentDate.toISOString().split('T')[0];
-    if (!existingDates.has(dateStr)) {
+    if (force || !existingDates.has(dateStr)) {
       datesToProcess.push(dateStr);
     }
     currentDate.setDate(currentDate.getDate() + 1);
@@ -123,7 +125,9 @@ async function extractDateRange() {
     process.exit(0);
   }
 
-  logger.info(`Processing ${datesToProcess.length} dates: ${datesToProcess[0]} to ${datesToProcess[datesToProcess.length - 1]}`);
+  logger.info(
+    `Processing ${datesToProcess.length} dates: ${datesToProcess[0]} to ${datesToProcess[datesToProcess.length - 1]}`
+  );
 
   const browserManager = new BrowserManager();
   const batchExtractor = new BatchExtraction(await browserManager.newPage());
@@ -186,7 +190,9 @@ async function extractDateRange() {
         }));
 
         // Save to CRM with the correct visit date
-        const saveResult = await batchExtractor.saveToCRM(extractedItems, date, { withDetails: true });
+        const saveResult = await batchExtractor.saveToCRM(extractedItems, date, {
+          withDetails: true,
+        });
         const savedCount =
           typeof saveResult === 'number' ? saveResult : Number(saveResult?.savedCount || 0);
         const detailRows = Array.isArray(saveResult?.details) ? saveResult.details : [];
@@ -235,7 +241,6 @@ async function extractDateRange() {
         if (i < datesToProcess.length - 1) {
           await batchExtractor.clinicAssist.page.waitForTimeout(2000);
         }
-
       } catch (error) {
         logger.error(`❌ Error processing ${date}:`, error.message);
         results.failed++;
@@ -294,7 +299,6 @@ async function extractDateRange() {
     if (results.failed > 0) {
       process.exit(1);
     }
-
   } catch (error) {
     logger.error('Fatal error during extraction:', error);
     const report = await writeRunSummaryReport({
