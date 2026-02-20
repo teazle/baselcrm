@@ -47,16 +47,22 @@ from (
     ('MHC', 'MHC', 'supported'),
     ('AIA', 'AIA', 'supported'),
     ('AIACLIENT', 'AIACLIENT', 'supported'),
+    ('AVIVA', 'AVIVA', 'supported'),
+    ('SINGLIFE', 'SINGLIFE', 'supported'),
+    ('MHCAXA', 'MHCAXA', 'supported'),
     ('TOKIOM', 'TOKIOM', 'supported'),
     ('ALLIANC', 'ALLIANC', 'supported'),
     ('ALLSING', 'ALLSING', 'supported'),
     ('AXAMED', 'AXAMED', 'supported'),
     ('PRUDEN', 'PRUDEN', 'supported'),
+    ('ALLIANZ', 'ALLIANZ', 'unsupported'),
+    ('ALLIANCE', 'ALLIANCE', 'unsupported'),
+    ('PARKWAY', 'PARKWAY', 'unsupported'),
+    ('NTUC_IM', 'NTUC_IM', 'unsupported'),
     ('IHP', 'IHP', 'unsupported'),
     ('GE', 'GE', 'unsupported'),
     ('FULLERT', 'FULLERT', 'unsupported'),
     ('ALLIMED', 'ALLIMED', 'unsupported'),
-    ('ALL', 'ALL', 'unsupported'),
-    ('ALLIANCE', 'ALLIANCE', 'unsupported')
+    ('ALL', 'ALL', 'unsupported')
 ) as v(portal_code, label, status)
 where not exists (select 1 from public.rpa_portals);

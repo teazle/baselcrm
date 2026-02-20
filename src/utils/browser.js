@@ -354,7 +354,35 @@ export class BrowserManager {
     this.proxyValidator = new ProxyValidator();
     this.currentProxy = null;
     this.proxyRetryCount = 0;
-    this.userDataDir = path.join(os.homedir(), '.playwright-browser-data');
+    const configuredUserDataDir = String(process.env.PLAYWRIGHT_USER_DATA_DIR || '').trim();
+    this.userDataDir = configuredUserDataDir
+      ? path.resolve(configuredUserDataDir)
+      : path.join(os.homedir(), '.playwright-browser-data');
+    this.baseUserDataDir = this.userDataDir;
+  }
+
+  _isProfileLockError(error) {
+    const msg = String(error?.message || error || '').toLowerCase();
+    return (
+      msg.includes('processsingleton') ||
+      msg.includes('singletonlock') ||
+      msg.includes('profile directory is already in use')
+    );
+  }
+
+  _isRecoverablePersistentLaunchError(error) {
+    if (this._isProfileLockError(error)) return true;
+    const msg = String(error?.message || error || '').toLowerCase();
+    return (
+      msg.includes('crashpad/settings.dat') ||
+      msg.includes('operation not permitted') ||
+      msg.includes('target page, context or browser has been closed')
+    );
+  }
+
+  _buildRunScopedUserDataDir() {
+    const stamp = new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14);
+    return `${this.userDataDir}-run-${stamp}`;
   }
 
   async _applyExternalProtocolGuard(context) {
@@ -533,8 +561,25 @@ export class BrowserManager {
           logger.info(`Extensions: ${extensionPaths.map(p => path.basename(p)).join(', ')}`);
         }
 
-        // launchPersistentContext returns a BrowserContext directly
-        this.context = await chromium.launchPersistentContext(this.userDataDir, contextOptions);
+        // launchPersistentContext returns a BrowserContext directly.
+        // If the default profile is locked by another live automation window,
+        // retry once with a run-scoped profile directory.
+        try {
+          this.context = await chromium.launchPersistentContext(this.userDataDir, contextOptions);
+        } catch (error) {
+          const canRetryWithIsolatedProfile =
+            this.userDataDir === this.baseUserDataDir && this._isRecoverablePersistentLaunchError(error);
+          if (!canRetryWithIsolatedProfile) throw error;
+          const fallbackUserDataDir = this._buildRunScopedUserDataDir();
+          logger.warn(
+            `Persistent profile launch failed, retrying with run-scoped profile: ${fallbackUserDataDir}`
+          );
+          if (!fs.existsSync(fallbackUserDataDir)) {
+            fs.mkdirSync(fallbackUserDataDir, { recursive: true });
+          }
+          this.userDataDir = fallbackUserDataDir;
+          this.context = await chromium.launchPersistentContext(this.userDataDir, contextOptions);
+        }
         // For persistent context, we don't have a separate browser object
         this.browser = null;
       } else {

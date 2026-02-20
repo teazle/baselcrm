@@ -198,7 +198,9 @@ export default function Flow2EnhanceData() {
           return payType.includes('SINGLIFE') || payType.includes('AVIVA');
         case 'alliance':
           return (
-            !!extractAllianceMedinetTag(payType, row.patient_name) || payType.includes('ALLIANCE')
+            !!extractAllianceMedinetTag(payType, row.patient_name) ||
+            payType.includes('ALLIANCE') ||
+            payType.includes('ALLIANZ')
           );
         case 'fullerton':
           return payType.includes('FULLERT');

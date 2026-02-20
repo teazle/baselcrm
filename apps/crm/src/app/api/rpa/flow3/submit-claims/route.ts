@@ -24,6 +24,11 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const visitIds = Array.isArray(body?.visitIds) ? body.visitIds : undefined;
   const payType = typeof body?.payType === "string" ? body.payType : undefined;
+  const portalTargets = Array.isArray(body?.portalTargets)
+    ? body.portalTargets
+      .map((value: unknown) => String(value ?? "").trim().toUpperCase())
+      .filter(Boolean)
+    : undefined;
   const from = typeof body?.from === "string" ? body.from : undefined;
   const to = typeof body?.to === "string" ? body.to : undefined;
   const portalOnly = Boolean(body?.portalOnly);
@@ -39,6 +44,9 @@ export async function POST(request: Request) {
     }
     if (payType) {
       args.push("--pay-type", payType);
+    }
+    if (portalTargets && portalTargets.length > 0) {
+      args.push("--portal-targets", portalTargets.join(","));
     }
     if (from) {
       args.push("--from", from);
@@ -58,6 +66,7 @@ export async function POST(request: Request) {
     if (
       (!visitIds || visitIds.length === 0) &&
       !payType &&
+      (!portalTargets || portalTargets.length === 0) &&
       !from &&
       !to &&
       !portalOnly

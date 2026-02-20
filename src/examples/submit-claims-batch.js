@@ -1,11 +1,13 @@
-import dotenv from 'dotenv';
+import 'dotenv/config';
 import { BrowserManager } from '../utils/browser.js';
 import { ClaimSubmitter } from '../core/claim-submitter.js';
 import { createSupabaseClient } from '../utils/supabase-client.js';
 import { logger } from '../utils/logger.js';
 import { registerRunExitHandler, markRunFinalized } from '../utils/run-exit-handler.js';
-
-dotenv.config();
+import {
+  getFlow3PortalTargets,
+  normalizeFlow3PortalTarget,
+} from '../../apps/crm/src/lib/rpa/portals.shared.js';
 
 function printUsage() {
   console.log(`
@@ -15,12 +17,14 @@ Usage:
   node src/examples/submit-claims-batch.js --from 2026-02-02 --to 2026-02-07 --portal-only
   node src/examples/submit-claims-batch.js --visit-ids id1,id2,id3
   node src/examples/submit-claims-batch.js --pay-type MHC
+  node src/examples/submit-claims-batch.js --portal-targets MHC,ALLIANCE_MEDINET --from 2026-02-02 --to 2026-02-07
   node src/examples/submit-claims-batch.js --save-as-draft --from 2026-02-02 --to 2026-02-07 --portal-only
   node src/examples/submit-claims-batch.js --all-pending
 
 Options:
   --visit-ids <csv>      Specific visit IDs (comma separated)
   --pay-type <value>     Filter by pay type
+  --portal-targets <csv> Restrict Flow 3 submit service routes (MHC,ALLIANCE_MEDINET,ALLIANZ,FULLERTON,IHP,IXCHANGE,GE_NTUC)
   --from <YYYY-MM-DD>    Start date filter
   --to <YYYY-MM-DD>      End date filter
   --portal-only          Only rows in portal scope (MHC/AIA/AVIVA/SINGLIFE + Allianz Medinet tags)
@@ -35,6 +39,7 @@ function parseCliArgs(argv) {
   const opts = {
     visitIds: undefined,
     payType: null,
+    portalTargets: undefined,
     from: null,
     to: null,
     portalOnly: false,
@@ -89,6 +94,22 @@ function parseCliArgs(argv) {
     }
     if (arg === '--pay-type') {
       opts.payType = readValue(i);
+      i++;
+      continue;
+    }
+    if (arg.startsWith('--portal-targets=')) {
+      opts.portalTargets = arg
+        .split('=')[1]
+        ?.split(',')
+        .map(v => String(v || '').trim().toUpperCase())
+        .filter(Boolean);
+      continue;
+    }
+    if (arg === '--portal-targets') {
+      opts.portalTargets = readValue(i)
+        .split(',')
+        .map(v => String(v || '').trim().toUpperCase())
+        .filter(Boolean);
       i++;
       continue;
     }
@@ -149,10 +170,27 @@ async function submitClaimsBatch() {
     return;
   }
 
-  const { visitIds, payType, from, to, portalOnly, saveAsDraft, leaveOpen, allPending } = parsed;
+  const { visitIds, payType, portalTargets, from, to, portalOnly, saveAsDraft, leaveOpen, allPending } = parsed;
+  const normalizedPortalTargets = Array.isArray(portalTargets)
+    ? [...new Set(portalTargets.map(v => normalizeFlow3PortalTarget(v)).filter(Boolean))]
+    : undefined;
+  if (Array.isArray(portalTargets) && portalTargets.length > 0 && (!normalizedPortalTargets || normalizedPortalTargets.length === 0)) {
+    throw new Error(
+      `Invalid --portal-targets value. Allowed: ${getFlow3PortalTargets().join(', ')}`
+    );
+  }
+  const droppedPortalTargets = (portalTargets || []).filter(v => !normalizeFlow3PortalTarget(v));
+  if (droppedPortalTargets.length > 0) {
+    logger.warn(`Ignoring unknown portal targets: ${droppedPortalTargets.join(', ')}`);
+  }
 
   const hasScope = Boolean(
-    (Array.isArray(visitIds) && visitIds.length > 0) || payType || from || to || portalOnly
+    (Array.isArray(visitIds) && visitIds.length > 0) ||
+      payType ||
+      from ||
+      to ||
+      portalOnly ||
+      (Array.isArray(normalizedPortalTargets) && normalizedPortalTargets.length > 0)
   );
   if (!hasScope && !allPending) {
     logger.error(
@@ -167,6 +205,9 @@ async function submitClaimsBatch() {
     `Visit IDs: ${visitIds ? visitIds.join(', ') : allPending ? 'All pending (explicit)' : 'Scoped query'}`
   );
   logger.info(`Pay Type: ${payType || 'All'}`);
+  logger.info(
+    `Portal Targets: ${normalizedPortalTargets?.length ? normalizedPortalTargets.join(', ') : 'All routes'}`
+  );
   logger.info(`Date Range: ${from || '-'} to ${to || '-'}`);
   logger.info(`Portal Only: ${portalOnly}`);
   logger.info(`Save as Draft: ${saveAsDraft}`);
@@ -178,7 +219,16 @@ async function submitClaimsBatch() {
     process.exit(1);
   }
 
-  const runMetadata = { visitIds, payType, from, to, portalOnly, saveAsDraft, trigger: 'manual' };
+  const runMetadata = {
+    visitIds,
+    payType,
+    portalTargets: normalizedPortalTargets,
+    from,
+    to,
+    portalOnly,
+    saveAsDraft,
+    trigger: 'manual',
+  };
   const runId = await startRun(supabase, runMetadata);
   if (runId) {
     const updateRunBound = (id, updates) => updateRun(supabase, id, updates);
@@ -205,7 +255,12 @@ async function submitClaimsBatch() {
 
   try {
     // Get visits to submit (either specific IDs or all pending)
-    const visits = await submitter.getPendingClaims(payType, visitIds, { from, to, portalOnly });
+    const visits = await submitter.getPendingClaims(payType, visitIds, {
+      from,
+      to,
+      portalOnly,
+      portalTargets: normalizedPortalTargets,
+    });
 
     totalRecords = visits.length;
     logger.info(`Found ${totalRecords} visit(s) to process`);
@@ -238,7 +293,12 @@ async function submitClaimsBatch() {
           if (result.reason === 'unknown_pay_type') {
             logger.warn(`Unsupported/unknown pay type: ${visit.pay_type}`);
           } else {
-            logger.warn(`Portal not implemented for pay type: ${visit.pay_type}`);
+            const portalService = String(
+              result.portalService || result.portal || result.route || 'unknown'
+            ).toUpperCase();
+            logger.warn(
+              `Portal service not implemented: ${portalService} (pay type: ${visit.pay_type})`
+            );
           }
         } else {
           errorCount++;

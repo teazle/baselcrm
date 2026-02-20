@@ -69,7 +69,7 @@ async function extractVisitDetailsBatch() {
 
   // Build query: visits for enhancement, with status filtering for resume
   // Filter to specific date if specified via --date argument
-  // Filter to only portal-related pay types (MHC, FULLERT, IHP, ALL, ALLIANZ, AIA, GE)
+  // Filter to portal-related pay types/tags from shared routing config.
   const targetDate = getArgValue('--date');
   const fromDate = getArgValue('--from');
   const toDate = getArgValue('--to');

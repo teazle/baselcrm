@@ -3,6 +3,7 @@
 import dotenv from 'dotenv';
 import { createSupabaseClient } from '../utils/supabase-client.js';
 import { logger } from '../utils/logger.js';
+import { getPortalScopeOrFilter } from '../../apps/crm/src/lib/rpa/portals.shared.js';
 
 dotenv.config();
 
@@ -40,8 +41,6 @@ async function main() {
     process.exit(1);
   }
 
-  const portalPayTypes = ['MHC', 'FULLERT', 'IHP', 'ALL', 'ALLIANZ', 'AIA', 'GE', 'AIACLIENT', 'AVIVA', 'SINGLIFE'];
-
   let q = supabase
     .from('visits')
     .select(
@@ -53,7 +52,7 @@ async function main() {
     .order('visit_date', { ascending: true })
     .limit(2000);
 
-  if (portalOnly) q = q.in('pay_type', portalPayTypes);
+  if (portalOnly) q = q.or(getPortalScopeOrFilter());
 
   const { data, error } = await q;
   if (error) {
@@ -84,6 +83,7 @@ async function main() {
   const issues = {
     missingNric: [],
     missingDiagnosis: [],
+    unresolvedDiagnosis: [],
     suspiciousDiagnosis: [],
     missingMeds: [],
     junkMeds: [],
@@ -91,6 +91,9 @@ async function main() {
   };
   const diagnosisMissingReasonCounts = new Map();
   const diagnosisSourceCounts = new Map();
+  const diagnosisResolutionReasonCounts = new Map();
+  const diagnosisDateMatchTypeCounts = new Map();
+  const diagnosisDateFailureReasonCounts = new Map();
   const nricExtractionStatusCounts = new Map();
 
   for (const r of rows) {
@@ -111,6 +114,62 @@ async function main() {
 
     const diagText = (r.diagnosis_description || '').toString().trim();
     const diagCode = (m.diagnosisCode || '').toString().trim();
+    const diagResolutionStatus = String(m?.diagnosisResolution?.status || '').trim().toLowerCase();
+    const diagResolutionReason = String(m?.diagnosisResolution?.reason_if_unresolved || '').trim();
+    const diagDateMatchType = String(
+      m?.diagnosisCanonical?.source_date_match_type ||
+        m?.diagnosisResolution?.source_date_match_type ||
+        ''
+    ).trim() || 'unknown';
+    const diagDateOk = m?.diagnosisResolution?.date_ok === true;
+    const fallbackAgeRaw = m?.diagnosisResolution?.fallback_age_days;
+    const fallbackAgeDays = Number.isFinite(Number(fallbackAgeRaw))
+      ? Number(fallbackAgeRaw)
+      : null;
+    const payTypeUpper = String(r.pay_type || '').toUpperCase();
+    const isMhcFlowPayType = ['MHC', 'AIA', 'AIACLIENT', 'AVIVA', 'SINGLIFE'].includes(payTypeUpper);
+    if (isMhcFlowPayType) {
+      diagnosisDateMatchTypeCounts.set(
+        diagDateMatchType,
+        (diagnosisDateMatchTypeCounts.get(diagDateMatchType) || 0) + 1
+      );
+    }
+    const unresolvedByStatus = diagResolutionStatus !== 'resolved';
+    const unresolvedByDatePolicy = isMhcFlowPayType && (!diagDateOk || (fallbackAgeDays !== null && fallbackAgeDays > 30));
+    if (isMhcFlowPayType && (unresolvedByStatus || unresolvedByDatePolicy)) {
+      let reason = diagResolutionReason || (diagResolutionStatus ? `status_${diagResolutionStatus}` : 'status_missing');
+      if (!unresolvedByStatus) {
+        if (!diagDateOk) reason = 'diagnosis_date_policy_not_ok';
+        if (fallbackAgeDays !== null && fallbackAgeDays > 30) reason = `diagnosis_fallback_age_gt_30:${fallbackAgeDays}`;
+      }
+      diagnosisResolutionReasonCounts.set(reason, (diagnosisResolutionReasonCounts.get(reason) || 0) + 1);
+      if (!diagDateOk) {
+        diagnosisDateFailureReasonCounts.set(
+          'date_ok_false',
+          (diagnosisDateFailureReasonCounts.get('date_ok_false') || 0) + 1
+        );
+      }
+      if (fallbackAgeDays !== null && fallbackAgeDays > 30) {
+        diagnosisDateFailureReasonCounts.set(
+          'fallback_age_gt_30',
+          (diagnosisDateFailureReasonCounts.get('fallback_age_gt_30') || 0) + 1
+        );
+      }
+      issues.unresolvedDiagnosis.push({
+        id: r.id,
+        patient_name: r.patient_name,
+        visit_date: r.visit_date,
+        pay_type: r.pay_type,
+        diagnosisStatus: diagResolutionStatus || null,
+        diagnosisReason: reason,
+        diagnosisCode: diagCode || null,
+        diagnosis: diagText || null,
+        diagnosisDateMatchType: diagDateMatchType,
+        diagnosisDateOk: diagDateOk,
+        fallbackAgeDays,
+      });
+    }
+
     if (!diagText || diagText.toLowerCase() === 'missing diagnosis') {
       const missReason = m?.detailsExtractionSources?.diagnosisMissingReason || 'unspecified';
       diagnosisMissingReasonCounts.set(missReason, (diagnosisMissingReasonCounts.get(missReason) || 0) + 1);
@@ -156,6 +215,9 @@ async function main() {
   const countsObj = Object.fromEntries([...statusCounts.entries()].sort((a, b) => String(a[0]).localeCompare(String(b[0]))));
   const diagnosisReasonObj = Object.fromEntries([...diagnosisMissingReasonCounts.entries()].sort((a, b) => String(a[0]).localeCompare(String(b[0]))));
   const diagnosisSourceObj = Object.fromEntries([...diagnosisSourceCounts.entries()].sort((a, b) => String(a[0]).localeCompare(String(b[0]))));
+  const diagnosisResolutionReasonObj = Object.fromEntries([...diagnosisResolutionReasonCounts.entries()].sort((a, b) => String(a[0]).localeCompare(String(b[0]))));
+  const diagnosisDateMatchTypeObj = Object.fromEntries([...diagnosisDateMatchTypeCounts.entries()].sort((a, b) => String(a[0]).localeCompare(String(b[0]))));
+  const diagnosisDateFailureReasonObj = Object.fromEntries([...diagnosisDateFailureReasonCounts.entries()].sort((a, b) => String(a[0]).localeCompare(String(b[0]))));
   const nricStatusObj = Object.fromEntries([...nricExtractionStatusCounts.entries()].sort((a, b) => String(a[0]).localeCompare(String(b[0]))));
 
   logger.info('=== Validation Report ===');
@@ -166,10 +228,14 @@ async function main() {
   logger.info('Diagnosis source counts:', diagnosisSourceObj);
   logger.info('NRIC extraction status counts:', nricStatusObj);
   logger.info('Missing diagnosis reason counts:', diagnosisReasonObj);
+  logger.info('Unresolved diagnosis reason counts:', diagnosisResolutionReasonObj);
+  logger.info('Diagnosis date match type counts:', diagnosisDateMatchTypeObj);
+  logger.info('Diagnosis date failure counts:', diagnosisDateFailureReasonObj);
 
   logger.info('Issue counts:', {
     missingNric: issues.missingNric.length,
     missingDiagnosis: issues.missingDiagnosis.length,
+    unresolvedDiagnosis: issues.unresolvedDiagnosis.length,
     suspiciousDiagnosis: issues.suspiciousDiagnosis.length,
     missingMeds: issues.missingMeds.length,
     junkMeds: issues.junkMeds.length,
@@ -179,13 +245,17 @@ async function main() {
   const sample = (arr) => arr.slice(0, 10);
   logger.info('Sample missing NRIC:', sample(issues.missingNric));
   logger.info('Sample missing diagnosis:', sample(issues.missingDiagnosis));
+  logger.info('Sample unresolved diagnosis:', sample(issues.unresolvedDiagnosis));
   logger.info('Sample suspicious diagnosis:', sample(issues.suspiciousDiagnosis));
   logger.info('Sample missing meds:', sample(issues.missingMeds));
   logger.info('Sample junk meds:', sample(issues.junkMeds));
   logger.info('Sample not completed:', sample(issues.notCompleted));
 
-  // Exit non-zero if any not-completed (hard gate before Flow 3 save-draft) or suspicious diagnosis exists.
-  const hardFail = issues.notCompleted.length > 0 || issues.suspiciousDiagnosis.length > 0;
+  // Exit non-zero if any not-completed, unresolved MHC diagnosis, or suspicious diagnosis exists.
+  const hardFail =
+    issues.notCompleted.length > 0 ||
+    issues.unresolvedDiagnosis.length > 0 ||
+    issues.suspiciousDiagnosis.length > 0;
   process.exit(hardFail ? 2 : 0);
 }
 

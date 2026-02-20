@@ -1,11 +1,20 @@
 import { logger } from '../utils/logger.js';
 import { MHCAsiaAutomation } from '../automations/mhc-asia.js';
 import { AllianceMedinetAutomation } from '../automations/alliance-medinet.js';
+import { resolveDiagnosisAgainstPortalOptions } from '../automations/clinic-assist.js';
+import { AllianceMedinetSubmitter } from './alliance-medinet-submitter.js';
+import { AllianzSubmitter } from './allianz-submitter.js';
+import { FullertonSubmitter } from './fullerton-submitter.js';
+import { IHPSubmitter } from './ihp-submitter.js';
+import { IXChangeSubmitter } from './ixchange-submitter.js';
+import { GENtucSubmitter } from './ge-submitter.js';
 import { StepLogger } from '../utils/step-logger.js';
 import { createSupabaseClient } from '../utils/supabase-client.js';
+import { decryptPortalSecret } from '../utils/portal-credentials-crypto.js';
 import {
-  extractAllianceMedinetTag,
   getPortalScopeOrFilter,
+  matchesFlow3PortalTargets,
+  resolveFlow3PortalTarget,
 } from '../../apps/crm/src/lib/rpa/portals.shared.js';
 
 /**
@@ -16,8 +25,99 @@ export class ClaimSubmitter {
     this.mhcAsia = new MHCAsiaAutomation(mhcAsiaPage);
     this.allianceMedinet = new AllianceMedinetAutomation(mhcAsiaPage);
     this.steps = new StepLogger({ total: 10, prefix: 'SUBMIT' });
+    this.allianceMedinetSubmitter = new AllianceMedinetSubmitter(this.allianceMedinet, this.steps);
+    this.allianzSubmitter = new AllianzSubmitter(this.steps);
+    this.fullertonSubmitter = new FullertonSubmitter(this.steps);
+    this.ihpSubmitter = new IHPSubmitter(this.steps);
+    this.ixchangeSubmitter = new IXChangeSubmitter(this.steps);
+    this.geSubmitter = new GENtucSubmitter(this.allianceMedinet, this.steps);
     this.supabase = createSupabaseClient();
     this.mhcAsiaLoggedIn = false;
+    this.portalCredentialCache = null;
+  }
+
+  async _loadPortalCredentials() {
+    if (this.portalCredentialCache) return this.portalCredentialCache;
+    if (!this.supabase) {
+      this.portalCredentialCache = {};
+      return this.portalCredentialCache;
+    }
+    try {
+      const { data, error } = await this.supabase
+        .from('rpa_portal_credentials')
+        .select(
+          'portal_target,portal_url,username,password,username_encrypted,password_encrypted,is_active'
+        );
+      if (error) {
+        logger.warn('[SUBMIT] Unable to load rpa_portal_credentials; falling back to env config', {
+          error: error.message,
+        });
+        this.portalCredentialCache = {};
+        return this.portalCredentialCache;
+      }
+      const map = {};
+      for (const row of data || []) {
+        const key = String(row?.portal_target || '')
+          .trim()
+          .toUpperCase();
+        if (!key || row?.is_active === false) continue;
+        const encodedUsername =
+          String(row?.username_encrypted || '').trim() || String(row?.username || '').trim() || null;
+        const encodedPassword =
+          String(row?.password_encrypted || '').trim() || String(row?.password || '').trim() || null;
+
+        let username = null;
+        let password = null;
+        try {
+          username = decryptPortalSecret(encodedUsername);
+        } catch (error) {
+          logger.warn('[SUBMIT] Failed to decode portal username, ignoring stored username', {
+            portalTarget: key,
+            error: error?.message || String(error),
+          });
+        }
+        try {
+          password = decryptPortalSecret(encodedPassword);
+        } catch (error) {
+          logger.warn('[SUBMIT] Failed to decode portal password, ignoring stored password', {
+            portalTarget: key,
+            error: error?.message || String(error),
+          });
+        }
+        map[key] = {
+          url: String(row?.portal_url || '').trim() || null,
+          username: username ? String(username).trim() : null,
+          password: password ? String(password).trim() : null,
+        };
+      }
+      this.portalCredentialCache = map;
+      return map;
+    } catch (error) {
+      logger.warn('[SUBMIT] Failed to query portal credentials; falling back to env config', {
+        error: error?.message || String(error),
+      });
+      this.portalCredentialCache = {};
+      return this.portalCredentialCache;
+    }
+  }
+
+  async _getPortalCredential(target) {
+    const key = String(target || '')
+      .trim()
+      .toUpperCase();
+    if (!key) return null;
+    const map = await this._loadPortalCredentials();
+    return map[key] || null;
+  }
+
+  async _applyRuntimeCredential(target, portalConfig) {
+    if (!portalConfig || typeof portalConfig !== 'object') return null;
+    const credential = await this._getPortalCredential(target);
+    if (!credential) return null;
+    if (credential.url) portalConfig.url = credential.url;
+    if (credential.username) portalConfig.username = credential.username;
+    if (credential.password) portalConfig.password = credential.password;
+    return credential;
   }
 
   /**
@@ -29,7 +129,7 @@ export class ClaimSubmitter {
       return [];
     }
 
-    const { from = null, to = null, portalOnly = false } = opts || {};
+    const { from = null, to = null, portalOnly = false, portalTargets = null } = opts || {};
 
     let query = this.supabase
       .from('visits')
@@ -64,7 +164,68 @@ export class ClaimSubmitter {
       return [];
     }
 
-    return data || [];
+    let rows = data || [];
+    if (Array.isArray(portalTargets) && portalTargets.length > 0) {
+      rows = rows.filter(visit =>
+        matchesFlow3PortalTargets(
+          visit?.pay_type || null,
+          visit?.patient_name || null,
+          portalTargets,
+          visit?.extraction_metadata || null
+        )
+      );
+    }
+
+    return rows;
+  }
+
+  async _mergeVisitExtractionMetadataPatch(visitId, patch = {}) {
+    if (!this.supabase || !visitId || !patch || typeof patch !== 'object') return;
+    try {
+      const { data: current, error: fetchError } = await this.supabase
+        .from('visits')
+        .select('extraction_metadata')
+        .eq('id', visitId)
+        .single();
+      if (fetchError) {
+        logger.warn('[SUBMIT] Failed to read current extraction_metadata for patch', {
+          visitId,
+          error: fetchError.message,
+        });
+        return;
+      }
+      const currentMetadata =
+        current && current.extraction_metadata && typeof current.extraction_metadata === 'object'
+          ? current.extraction_metadata
+          : {};
+      const nextMetadata = {
+        ...currentMetadata,
+        ...patch,
+      };
+      if (patch.diagnosis && typeof patch.diagnosis === 'object') {
+        nextMetadata.diagnosis = {
+          ...(currentMetadata.diagnosis && typeof currentMetadata.diagnosis === 'object'
+            ? currentMetadata.diagnosis
+            : {}),
+          ...patch.diagnosis,
+        };
+      }
+      const { error: updateError } = await this.supabase
+        .from('visits')
+        .update({ extraction_metadata: nextMetadata })
+        .eq('id', visitId);
+      if (updateError) {
+        logger.warn('[SUBMIT] Failed to patch extraction_metadata', {
+          visitId,
+          error: updateError.message,
+        });
+      }
+    } catch (error) {
+      logger.warn('[SUBMIT] Unexpected extraction_metadata patch failure', {
+        visitId,
+        error: error?.message || String(error),
+      });
+    }
   }
 
   /**
@@ -87,29 +248,48 @@ export class ClaimSubmitter {
     try {
       let result = null;
 
-      // Route to appropriate portal based on pay type
-      // Note: AVIVA/SINGLIFE are handled via MHC Asia "Switch System" -> Singlife PCP (pcpcare) flow.
-      if (
-        /(^|[^A-Z])MHC([^A-Z]|$)/.test(payTypeRaw) ||
-        payTypeRaw.includes('AIA') ||
-        payTypeRaw.includes('AIACLIENT') ||
-        payTypeRaw.includes('AVIVA') ||
-        payTypeRaw.includes('SINGLIFE')
-      ) {
-        result = await this.submitToMHCAsia(visit);
-      } else if (extractAllianceMedinetTag(visit.pay_type, visit.patient_name)) {
-        result = await this.submitToAllianceMedinet(visit);
-      } else if (payTypeRaw.includes('IHP')) {
-        result = await this.submitToIHP(visit);
-      } else if (payTypeRaw.includes('GE')) {
-        result = await this.submitToGE(visit);
-      } else if (payTypeRaw.includes('FULLERT')) {
-        result = await this.submitToFullert(visit);
-      } else if (payTypeRaw.includes('ALLIMED') || payTypeRaw === 'ALL') {
-        result = await this.submitToAllimed(visit);
-      } else {
-        logger.warn(`[SUBMIT] Unknown pay type: ${payTypeRaw}. Skipping submission.`);
-        return { success: false, reason: 'unknown_pay_type', payType: payTypeRaw || null };
+      // Route to appropriate portal service. Flow logic for each portal is isolated by submit method.
+      const route = resolveFlow3PortalTarget(
+        visit.pay_type,
+        visit.patient_name,
+        visit.extraction_metadata || null
+      );
+      switch (route) {
+        case 'MHC':
+          result = await this.submitToMHCAsia(visit);
+          break;
+        case 'ALLIANCE_MEDINET':
+          result = await this.submitToAllianceMedinet(visit);
+          break;
+        case 'ALLIANZ':
+          result = await this.submitToAllianz(visit);
+          break;
+        case 'FULLERTON':
+          result = await this.submitToFullerton(visit);
+          break;
+        case 'IHP':
+          result = await this.submitToIHP(visit);
+          break;
+        case 'IXCHANGE':
+          result = await this.submitToIXChange(visit);
+          break;
+        case 'GE_NTUC':
+          result = await this.submitToGENtuc(visit);
+          break;
+        // Backward-compatible route aliases.
+        case 'GE':
+          result = await this.submitToGENtuc(visit);
+          break;
+        case 'FULLERT':
+          result = await this.submitToFullerton(visit);
+          break;
+        case 'ALLIMED':
+        case 'ALL':
+          result = await this.submitToIXChange(visit);
+          break;
+        default:
+          logger.warn(`[SUBMIT] Unknown pay type: ${payTypeRaw}. Skipping submission.`);
+          return { success: false, reason: 'unknown_pay_type', payType: payTypeRaw || null };
       }
 
       // Persist submission status only when we actually did a portal action that should advance the workflow.
@@ -128,6 +308,13 @@ export class ClaimSubmitter {
             error: 'Live submit blocked (draft-only mode)',
           };
         }
+        if (result?.diagnosisPortalMatch) {
+          await this._mergeVisitExtractionMetadataPatch(visit.id, {
+            diagnosis_portal_match: result.diagnosisPortalMatch,
+            diagnosis: { portal_match: result.diagnosisPortalMatch },
+          });
+        }
+
         const shouldPersist =
           Boolean(result.savedAsDraft) || (allowLiveSubmit && Boolean(result.submitted));
         const submissionStatus = result.savedAsDraft
@@ -141,7 +328,8 @@ export class ClaimSubmitter {
             .update({
               submitted_at: new Date().toISOString(),
               submission_status: submissionStatus,
-              submission_portal: payTypeRaw || null,
+              submission_portal: result?.portal || route || payTypeRaw || null,
+              submission_error: null,
               submission_metadata: result,
             })
             .eq('id', visit.id);
@@ -160,15 +348,22 @@ export class ClaimSubmitter {
         error: error.message,
       });
 
+      const failureMetadata =
+        error && typeof error === 'object' && error.submissionMetadata ? error.submissionMetadata : null;
+
       // Update visit with error status only when this run intends to advance workflow state.
       // For fill-only verification, keep the DB clean and rely on run logs/screenshots instead.
       if (this.supabase && shouldPersistErrors) {
+        const errorUpdate = {
+          submission_status: 'error',
+          submission_error: error.message,
+        };
+        if (failureMetadata && typeof failureMetadata === 'object') {
+          errorUpdate.submission_metadata = failureMetadata;
+        }
         await this.supabase
           .from('visits')
-          .update({
-            submission_status: 'error',
-            submission_error: error.message,
-          })
+          .update(errorUpdate)
           .eq('id', visit.id);
       } else {
         logger.info('[SUBMIT] Verification run: not persisting submission_status=error', {
@@ -193,6 +388,7 @@ export class ClaimSubmitter {
    */
   async submitToMHCAsia(visit) {
     this.steps.step(2, 'Submitting to MHC Asia');
+    await this._applyRuntimeCredential('MHC', this.mhcAsia?.config);
 
     const metadata = visit.extraction_metadata || {};
     const payTypeRaw = String(visit.pay_type || '').toUpperCase();
@@ -204,7 +400,10 @@ export class ClaimSubmitter {
       if (!s) return '';
       // Search must NOT include the tag prefix (clinic requirement).
       return s
-        .replace(/^(MHC|AVIVA|SINGLIFE|AIA|AIACLIENT|FULLERT|ALLIANZ|ALL|IHP|GE)\\s*[-:]+\\s*/i, '')
+        .replace(
+          /^(MHC|MHCAXA|AVIVA|SINGLIFE|AIA|AIACLIENT|FULLERT|ALLIANZ|ALLIANCE|ALL|IHP|GE|NTUC_IM|PARKWAY)\\s*[-:]+\\s*/i,
+          ''
+        )
         .trim();
     };
 
@@ -221,8 +420,23 @@ export class ClaimSubmitter {
     const chargeType = metadata.chargeType || 'follow';
     const mcDays = metadata.mcDays || 0;
     const mcStartDate = metadata.mcStartDate || null;
-    const diagnosisDesc = visit.diagnosis_description;
+    const diagnosisDesc = String(visit.diagnosis_description || '').trim();
+    const diagnosisMissingText = !diagnosisDesc || /^missing diagnosis$/i.test(diagnosisDesc);
     const diagnosisCode = metadata.diagnosisCode || null;
+    const diagnosisCanonical = metadata.diagnosisCanonical || null;
+    const diagnosisResolution = metadata.diagnosisResolution || null;
+    const allowGenericDiagnosisFallback = process.env.FLOW2_ENABLE_GENERIC_DIAG_FALLBACK !== '0';
+    const saveDraftMode = process.env.WORKFLOW_SAVE_DRAFT !== '0';
+    const allowMissingDiagnosisDraftFallback =
+      saveDraftMode && process.env.MHC_ALLOW_MISSING_DIAG_DRAFT_FALLBACK !== '0';
+    const genericDraftDiagnosisText =
+      String(process.env.MHC_GENERIC_DRAFT_DIAGNOSIS || 'General medical condition').trim() ||
+      'General medical condition';
+    let diagnosisMatch = metadata.diagnosisMatch || null;
+    let portalDiagnosisOptions = Array.isArray(metadata.portalDiagnosisOptions)
+      ? metadata.portalDiagnosisOptions
+      : [];
+    let diagnosisFallbackMode = null;
 
     logger.info('[SUBMIT] MHC form data:', {
       nric: nric || null,
@@ -231,6 +445,9 @@ export class ClaimSubmitter {
       mcDays,
       mcStartDate,
       diagnosis: diagnosisDesc?.substring(0, 50),
+      diagnosisResolutionStatus: diagnosisResolution?.status || null,
+      diagnosisCanonical: diagnosisCanonical?.description_canonical?.slice?.(0, 80) || null,
+      allowMissingDiagnosisDraftFallback,
       forceSinglife,
     });
 
@@ -247,6 +464,9 @@ export class ClaimSubmitter {
       visitDateFormatted && /^\d{2}\/\d{2}\/\d{4}$/.test(visitDateFormatted)
         ? visitDateFormatted
         : null;
+    const preferReuseExistingDraft =
+      process.env.WORKFLOW_SAVE_DRAFT !== '0' && process.env.MHC_REUSE_EXISTING_DRAFT !== '0';
+    const preferredReuseContext = /AIA/i.test(payTypeRaw) ? 'aia' : 'mhc';
     if (forceSinglife) {
       // Singlife/Aviva: MHC -> Switch System -> Singlife PCP -> Add Normal Visit -> search by NRIC.
       // This path lands directly on the visit form (no separate addVisit step).
@@ -265,68 +485,148 @@ export class ClaimSubmitter {
     } else {
       let routedToAia = false;
       let alreadyOnVisitForm = false;
-      // MHC/AIA: Normal Visit search inside MHC portal.
-      const searchResult = await this.mhcAsia.searchPatientByNRIC({
-        nric: nric || null,
-        visitDate: visitDateForSearch,
-      });
-
-      // Some members trigger a portal alert: "Please submit this claim under www.aiaclinic.com".
-      // If that dialog appears, route immediately to AIA Clinic and skip MHC patient opening.
-      if (this.mhcAsia.needsAIAClinicSwitch && nric) {
-        routingOverride = 'AIA_CLINIC_DIALOG';
-        logger.info('[SUBMIT] Routing override: AIA Clinic required by portal dialog', {
-          nric: nric,
-          msg: this.mhcAsia.lastDialogMessage || null,
-        });
-        await this.mhcAsia.switchToAIAClinicIfNeeded();
-        const ok = await this.mhcAsia.navigateToAIAVisitAndSearch(nric);
-        if (!ok) {
-          throw new Error(
-            `Failed to open AIA visit form for NRIC ${nric} (see screenshots/mhc-asia-aia-*.png)`
-          );
+      if (preferReuseExistingDraft && nric) {
+        const existingDraft = await this.mhcAsia
+          .openExistingDraftVisit({
+            nric,
+            visitDate: visitDateForSearch,
+            patientName: fullName,
+            contextHint: preferredReuseContext,
+            allowCrossContext: preferredReuseContext === 'aia',
+          })
+          .catch(() => null);
+        if (existingDraft?.found) {
+          alreadyOnVisitForm = true;
+          logger.info('[SUBMIT] Reusing existing draft before fill', {
+            nric,
+            visitNo: existingDraft?.row?.visitNo || null,
+            visitDate: existingDraft?.row?.visitDate || null,
+            context: existingDraft?.context || preferredReuseContext,
+          });
         }
-        routedToAia = true;
-      } else if (searchResult?.memberNotFound) {
-        return {
-          success: false,
-          reason: 'not_found',
-          error: `Member not found in MHC Asia: ${nric}`,
-        };
-      } else if (!searchResult || !searchResult.found) {
+      }
+
+      if (!alreadyOnVisitForm) {
+        // MHC/AIA: Normal Visit search inside MHC portal.
+        const searchResult = await this.mhcAsia.searchPatientByNRIC({
+          nric: nric || null,
+          visitDate: visitDateForSearch,
+        });
+
         // Some members trigger a portal alert: "Please submit this claim under www.aiaclinic.com".
-        // In that case, we must switch system and continue the AIA Clinic flow even if no
-        // patient row is shown on the MHC search results table.
-        throw new Error(`Patient not found in MHC Asia: ${nric}`);
-      } else {
-        const opened = await this.mhcAsia.openPatientFromSearchResults(nric);
-        alreadyOnVisitForm = opened === true;
+        // If that dialog appears, route immediately to AIA Clinic and skip MHC patient opening.
         if (this.mhcAsia.needsAIAClinicSwitch && nric) {
           routingOverride = 'AIA_CLINIC_DIALOG';
-          logger.info(
-            '[SUBMIT] Routing override: AIA Clinic required by portal dialog (after patient click)',
-            {
-              nric: nric,
-              msg: this.mhcAsia.lastDialogMessage || null,
-            }
-          );
+          logger.info('[SUBMIT] Routing override: AIA Clinic required by portal dialog', {
+            nric: nric,
+            msg: this.mhcAsia.lastDialogMessage || null,
+          });
           await this.mhcAsia.switchToAIAClinicIfNeeded();
-          const ok = await this.mhcAsia.navigateToAIAVisitAndSearch(nric);
-          if (!ok) {
-            throw new Error(
-              `Failed to open AIA visit form for NRIC ${nric} (see screenshots/mhc-asia-aia-*.png)`
-            );
+          let reusedAiaDraft = false;
+          if (preferReuseExistingDraft && nric) {
+            const existingAiaDraft = await this.mhcAsia
+              .openExistingDraftVisit({
+                nric,
+                visitDate: visitDateForSearch,
+                patientName: fullName,
+                contextHint: 'aia',
+                allowCrossContext: false,
+              })
+              .catch(() => null);
+            if (existingAiaDraft?.found) {
+              reusedAiaDraft = true;
+              alreadyOnVisitForm = true;
+              logger.info('[SUBMIT] Reusing existing AIA draft after routing override', {
+                nric,
+                visitNo: existingAiaDraft?.row?.visitNo || null,
+                visitDate: existingAiaDraft?.row?.visitDate || null,
+              });
+            }
+          }
+          if (!reusedAiaDraft) {
+            const ok = await this.mhcAsia.navigateToAIAVisitAndSearch(nric, {
+              visitDate: visitDateForSearch,
+            });
+            if (!ok) {
+              throw new Error(
+                `Failed to open AIA visit form for NRIC ${nric} (see screenshots/mhc-asia-aia-*.png)`
+              );
+            }
           }
           routedToAia = true;
-        } else if (!opened) {
-          if (searchResult?.memberNotFound) {
-            return {
-              success: false,
-              reason: 'not_found',
-              error: `Member not found in MHC Asia: ${nric}`,
-            };
+        } else if (searchResult?.memberNotFound) {
+          return {
+            success: false,
+            reason: 'not_found',
+            error: `Member not found in MHC Asia: ${nric}`,
+          };
+        } else if (!searchResult || !searchResult.found) {
+          // Some members trigger a portal alert: "Please submit this claim under www.aiaclinic.com".
+          // In that case, we must switch system and continue the AIA Clinic flow even if no
+          // patient row is shown on the MHC search results table.
+          throw new Error(`Patient not found in MHC Asia: ${nric}`);
+        } else {
+          const opened = await this.mhcAsia.openPatientFromSearchResults(nric, {
+            preferredContext:
+              /AIA|AIACLIENT/i.test(payTypeRaw) || routingOverride === 'AIA_CLINIC_DIALOG'
+                ? 'aia'
+                : forceSinglife
+                  ? 'singlife'
+                  : 'mhc',
+          });
+          alreadyOnVisitForm = opened === true;
+          if (this.mhcAsia.needsAIAClinicSwitch && nric) {
+            routingOverride = 'AIA_CLINIC_DIALOG';
+            logger.info(
+              '[SUBMIT] Routing override: AIA Clinic required by portal dialog (after patient click)',
+              {
+                nric: nric,
+                msg: this.mhcAsia.lastDialogMessage || null,
+              }
+            );
+            await this.mhcAsia.switchToAIAClinicIfNeeded();
+            let reusedAiaDraft = false;
+            if (preferReuseExistingDraft && nric) {
+              const existingAiaDraft = await this.mhcAsia
+                .openExistingDraftVisit({
+                  nric,
+                  visitDate: visitDateForSearch,
+                  patientName: fullName,
+                  contextHint: 'aia',
+                  allowCrossContext: false,
+                })
+                .catch(() => null);
+              if (existingAiaDraft?.found) {
+                reusedAiaDraft = true;
+                alreadyOnVisitForm = true;
+                logger.info('[SUBMIT] Reusing existing AIA draft after routing override', {
+                  nric,
+                  visitNo: existingAiaDraft?.row?.visitNo || null,
+                  visitDate: existingAiaDraft?.row?.visitDate || null,
+                });
+              }
+            }
+            if (!reusedAiaDraft) {
+              const ok = await this.mhcAsia.navigateToAIAVisitAndSearch(nric, {
+                visitDate: visitDateForSearch,
+              });
+              if (!ok) {
+                throw new Error(
+                  `Failed to open AIA visit form for NRIC ${nric} (see screenshots/mhc-asia-aia-*.png)`
+                );
+              }
+            }
+            routedToAia = true;
+          } else if (!opened) {
+            if (searchResult?.memberNotFound) {
+              return {
+                success: false,
+                reason: 'not_found',
+                error: `Member not found in MHC Asia: ${nric}`,
+              };
+            }
+            throw new Error(`Could not open patient from search results: ${nric}`);
           }
-          throw new Error(`Could not open patient from search results: ${nric}`);
         }
       }
 
@@ -372,10 +672,41 @@ export class ClaimSubmitter {
 
     // Set charge type (First Consult vs Follow Up)
     if (chargeType === 'first') {
-      await this.mhcAsia.setChargeTypeNewVisit();
-      await this.mhcAsia.setWaiverOfReferral(true).catch(() => {});
+      // Prefer the newer robust filler (row/options scan) before legacy selectors.
+      const ok = await this.mhcAsia.fillChargeType('new').catch(() => false);
+      if (!ok) await this.mhcAsia.setChargeTypeNewVisit().catch(() => {});
+      const waiverSet = await this.mhcAsia.setWaiverOfReferral(true).catch(() => false);
+      if (!waiverSet) {
+        const referralRequiredHint = await this.mhcAsia.page
+          .evaluate(() => {
+            const t = String(document.body?.innerText || '');
+            return /referring\s+clinic\s+is\s+required|referral\s+letter\s+is\s+required|waiver\s+of\s+referral/i.test(
+              t
+            );
+          })
+          .catch(() => false);
+        if (referralRequiredHint) {
+          const waiverState = this.mhcAsia.getLastWaiverReferralState?.() || null;
+          const err = new Error(
+            `referral_waiver_unset: unable to satisfy referral requirement before save (visitId=${visit.id}, nric=${nric})`
+          );
+          err.submissionMetadata = {
+            success: false,
+            portal: 'MHC Asia',
+            savedAsDraft: false,
+            reason: 'referral_waiver_unset',
+            visitId: visit.id,
+            nric: nric || null,
+            payType: payTypeRaw || null,
+            chargeType,
+            waiverState,
+          };
+          throw err;
+        }
+      }
     } else {
-      await this.mhcAsia.setChargeTypeFollowUp();
+      const ok = await this.mhcAsia.fillChargeType('follow up').catch(() => false);
+      if (!ok) await this.mhcAsia.setChargeTypeFollowUp().catch(() => {});
     }
     await this.mhcAsia.page.waitForTimeout(200);
 
@@ -390,12 +721,313 @@ export class ClaimSubmitter {
       await this.mhcAsia.fillMcStartDate(mcStartDate).catch(() => {});
     }
 
-    // Fill diagnosis if available
-    if (diagnosisDesc && diagnosisDesc !== 'Missing diagnosis') {
-      const diagObj = { code: diagnosisCode, description: diagnosisDesc };
-      const ok = await this.mhcAsia.selectDiagnosis(diagObj).catch(() => false);
-      if (!ok) await this.mhcAsia.fillDiagnosisPrimary(diagObj).catch(() => {});
+    const assertFlow2DiagnosisReadyOrThrow = (stage = 'pre_fill') => {
+      const flow2DiagnosisStatus = diagnosisResolution?.status || null;
+      const flow2Resolved = flow2DiagnosisStatus === 'resolved';
+      const flow2Missing =
+        flow2DiagnosisStatus === 'missing' ||
+        (!flow2DiagnosisStatus && diagnosisMissingText) ||
+        diagnosisMissingText;
+      const flow2FallbackLowConfidence =
+        allowGenericDiagnosisFallback && flow2DiagnosisStatus === 'fallback_low_confidence';
+      const flow2DatePolicy = String(diagnosisResolution?.date_policy || '').trim() || null;
+      const flow2DateOk = diagnosisResolution?.date_ok === true;
+      const fallbackAgeDaysRaw = diagnosisResolution?.fallback_age_days;
+      const fallbackAgeDays = Number.isFinite(Number(fallbackAgeDaysRaw))
+        ? Number(fallbackAgeDaysRaw)
+        : null;
+      const fallbackWithinLimit = fallbackAgeDays === null || fallbackAgeDays <= 30;
+      const flow2DateGatePassed = flow2DateOk && fallbackWithinLimit;
+      if ((flow2Resolved && flow2DateGatePassed) || flow2FallbackLowConfidence) return;
+      if (allowMissingDiagnosisDraftFallback && flow2Missing) {
+        diagnosisFallbackMode = {
+          mode: 'generic_draft_missing_diagnosis',
+          stage,
+          text: genericDraftDiagnosisText,
+          flow2Status: flow2DiagnosisStatus || null,
+          reason: diagnosisResolution?.reason_if_unresolved || null,
+        };
+        logger.warn('[SUBMIT] Flow 2 diagnosis unresolved; using draft-only generic diagnosis fallback', {
+          visitId: visit.id,
+          nric: nric || null,
+          payType: payTypeRaw || null,
+          flow2Status: flow2DiagnosisStatus || null,
+          diagnosis: diagnosisDesc || null,
+          genericDraftDiagnosisText,
+        });
+        return;
+      }
+      const allowGenericDraftFallback = allowGenericDiagnosisFallback && saveDraftMode;
+      if (allowGenericDraftFallback) {
+        diagnosisFallbackMode = {
+          mode: flow2Missing ? 'generic_draft_missing_diagnosis' : 'generic_draft_unresolved_diagnosis',
+          stage,
+          text: genericDraftDiagnosisText,
+          flow2Status: flow2DiagnosisStatus || null,
+          reason: diagnosisResolution?.reason_if_unresolved || 'flow2_unresolved',
+          dateGatePassed: flow2DateGatePassed,
+        };
+        logger.warn('[SUBMIT] Flow 2 diagnosis unresolved; using draft-only generic diagnosis fallback', {
+          visitId: visit.id,
+          nric: nric || null,
+          payType: payTypeRaw || null,
+          flow2Status: flow2DiagnosisStatus || null,
+          diagnosis: diagnosisDesc || null,
+          genericDraftDiagnosisText,
+          dateGatePassed: flow2DateGatePassed,
+        });
+        return;
+      }
+
+      const diagMeta = {
+        stage,
+        visitId: visit.id,
+        nric: nric || null,
+        payType: payTypeRaw || null,
+        rawDiagnosis: {
+          code: diagnosisCode || null,
+          description: diagnosisDesc || null,
+        },
+        canonicalDiagnosis: diagnosisCanonical || null,
+        flow2DiagnosisResolution: diagnosisResolution || null,
+        flow2DatePolicy,
+        flow2DateOk,
+        flow2FallbackLowConfidence,
+        fallbackAgeDays,
+        fallbackAgeLimitDays: 30,
+        flow2DateGatePassed,
+        reason: 'diagnosis_mapping_failed',
+      };
+      logger.error('[SUBMIT] Flow 2 diagnosis gate failed before fill', diagMeta);
+      const err = new Error(
+        `diagnosis_mapping_failed: unresolved Flow 2 diagnosis before form fill (visitId=${visit.id}, nric=${nric})`
+      );
+      err.submissionMetadata = {
+        success: false,
+        portal: 'MHC Asia',
+        savedAsDraft: false,
+        reason: 'diagnosis_mapping_failed',
+        ...diagMeta,
+      };
+      throw err;
+    };
+    await assertFlow2DiagnosisReadyOrThrow();
+
+    const portalContextHint =
+      forceSinglife
+        ? 'singlife'
+        : this.mhcAsia.isAiaClinicSystem || routingOverride === 'AIA_CLINIC_DIALOG'
+          ? 'aia'
+          : 'mhc';
+
+    const diagnosisPrefetch = await this.mhcAsia
+      .prefetchDiagnosisOptions({
+        diagnosisHint: {
+          code: diagnosisCanonical?.code_normalized || diagnosisCode || null,
+          description: diagnosisCanonical?.description_canonical || diagnosisDesc || null,
+        },
+        contextHint: portalContextHint,
+        nric,
+        visitDate: visit.visit_date || null,
+      })
+      .catch(() => null);
+    portalDiagnosisOptions = Array.isArray(diagnosisPrefetch?.options)
+      ? diagnosisPrefetch.options
+      : [];
+
+    const diagnosisMinScore = Number(process.env.DIAGNOSIS_MATCH_MIN_SCORE || 90);
+    diagnosisMatch = resolveDiagnosisAgainstPortalOptions({
+      diagnosis: {
+        code: diagnosisCanonical?.code_normalized || diagnosisCode || null,
+        description: diagnosisCanonical?.description_canonical || diagnosisDesc || null,
+        side: diagnosisCanonical?.side || null,
+        body_part: diagnosisCanonical?.body_part || null,
+        condition: diagnosisCanonical?.condition || null,
+      },
+      portalOptions: portalDiagnosisOptions,
+      minScore: Number.isFinite(diagnosisMinScore) ? diagnosisMinScore : 90,
+      codeMode: 'secondary',
+    });
+
+    const diagnosisResolutionWithPortal = {
+      ...(diagnosisResolution || {}),
+      portal_option_verified: !diagnosisFallbackMode && diagnosisMatch?.blocked === false,
+      draft_generic_fallback_used: !!diagnosisFallbackMode,
+      draft_generic_fallback_reason: diagnosisFallbackMode?.reason || null,
+    };
+    await this._mergeVisitExtractionMetadataPatch(visit.id, {
+      portalDiagnosisOptions,
+      diagnosisMatch,
+      diagnosisResolution: diagnosisResolutionWithPortal,
+    });
+
+    if (!diagnosisMatch || diagnosisMatch.blocked !== false) {
+      const flow2FallbackLowConfidence =
+        allowGenericDiagnosisFallback && diagnosisResolution?.status === 'fallback_low_confidence';
+      if (saveDraftMode && (flow2FallbackLowConfidence || diagnosisFallbackMode)) {
+        logger.warn('[SUBMIT] Draft-mode diagnosis bypass enabled', {
+          visitId: visit.id,
+          nric: nric || null,
+          diagnosis: diagnosisDesc || null,
+          diagnosisCode: diagnosisCode || null,
+          diagnosisMatch: diagnosisMatch || null,
+          diagnosisFallbackMode: diagnosisFallbackMode || null,
+        });
+      } else {
+        const err = new Error(
+          `diagnosis_mapping_failed: no safe portal diagnosis option match (visitId=${visit.id}, nric=${nric})`
+        );
+        err.submissionMetadata = {
+          success: false,
+          portal: 'MHC Asia',
+          savedAsDraft: false,
+          reason: 'diagnosis_mapping_failed',
+          visitId: visit.id,
+          nric: nric || null,
+          payType: payTypeRaw || null,
+          portalContextHint,
+          rawDiagnosis: {
+            code: diagnosisCode || null,
+            description: diagnosisDesc || null,
+          },
+          canonicalDiagnosis: diagnosisCanonical || null,
+          flow2DiagnosisResolution: diagnosisResolution || null,
+          diagnosisMatch: diagnosisMatch || null,
+          portalDiagnosisOptionsCount: portalDiagnosisOptions.length,
+        };
+        throw err;
+      }
     }
+
+    // Fill diagnosis (matched option first; draft-only missing diagnosis falls back to generic free text).
+    if (diagnosisFallbackMode) {
+      const ok = await this.mhcAsia
+        .fillDiagnosisPrimary(
+          { code: null, description: diagnosisFallbackMode.text || genericDraftDiagnosisText },
+          { allowTextFallback: true }
+        )
+        .catch(() => false);
+      if (!ok) {
+        const err = new Error(
+          `diagnosis_mapping_failed: unable to apply generic draft diagnosis fallback (visitId=${visit.id}, nric=${nric})`
+        );
+        err.submissionMetadata = {
+          success: false,
+          portal: 'MHC Asia',
+          savedAsDraft: false,
+          reason: 'diagnosis_mapping_failed',
+          visitId: visit.id,
+          nric: nric || null,
+          payType: payTypeRaw || null,
+          diagnosisFallbackMode,
+        };
+        throw err;
+      }
+    } else if (diagnosisDesc && !diagnosisMissingText && diagnosisMatch?.blocked === false) {
+      const diagObj = {
+        code:
+          diagnosisMatch?.selected_code ||
+          diagnosisCanonical?.code_normalized ||
+          diagnosisCode,
+        description:
+          diagnosisMatch?.selected_text ||
+          diagnosisCanonical?.description_canonical ||
+          diagnosisDesc,
+        value: diagnosisMatch?.selected_value || null,
+      };
+      let ok = await this.mhcAsia.selectDiagnosis(diagObj).catch(() => false);
+      if (!ok) {
+        ok = await this.mhcAsia
+          .fillDiagnosisPrimary(diagObj, { allowTextFallback: false })
+          .catch(() => false);
+      }
+      if (!ok) {
+        const err = new Error(
+          `diagnosis_mapping_failed: unable to select matched diagnosis option on portal (visitId=${visit.id}, nric=${nric})`
+        );
+        err.submissionMetadata = {
+          success: false,
+          portal: 'MHC Asia',
+          savedAsDraft: false,
+          reason: 'diagnosis_mapping_failed',
+          visitId: visit.id,
+          nric: nric || null,
+          payType: payTypeRaw || null,
+          diagnosisMatch: diagnosisMatch || null,
+        };
+        throw err;
+      }
+    }
+
+    const assertDiagnosisResolvedOrThrow = async (stage = 'pre_save') => {
+      const domDiagnosisState = await this.mhcAsia
+        .getDiagnosisResolutionState({ waitMs: 300 })
+        .catch(() => null);
+      const flow2DiagnosisStatus = diagnosisResolution?.status || null;
+      const flow2Resolved = flow2DiagnosisStatus === 'resolved';
+      const flow2FallbackLowConfidence =
+        allowGenericDiagnosisFallback && flow2DiagnosisStatus === 'fallback_low_confidence';
+      const flow2DatePolicy = String(diagnosisResolution?.date_policy || '').trim() || null;
+      const flow2DateOk = diagnosisResolution?.date_ok === true;
+      const fallbackAgeDaysRaw = diagnosisResolution?.fallback_age_days;
+      const fallbackAgeDays = Number.isFinite(Number(fallbackAgeDaysRaw))
+        ? Number(fallbackAgeDaysRaw)
+        : null;
+      const fallbackWithinLimit = fallbackAgeDays === null || fallbackAgeDays <= 30;
+      const flow2DateGatePassed = flow2DateOk && fallbackWithinLimit;
+      const domResolved = !!domDiagnosisState?.resolved;
+      const diagnosisMatchOk = diagnosisMatch?.blocked === false;
+      if (saveDraftMode && flow2FallbackLowConfidence) return;
+      if (saveDraftMode && diagnosisFallbackMode && domResolved) return;
+      if (
+        ((flow2Resolved && flow2DateGatePassed) || flow2FallbackLowConfidence) &&
+        domResolved &&
+        diagnosisMatchOk
+      ) {
+        return;
+      }
+
+      const diagnosisSelection = this.mhcAsia.getLastDiagnosisSelectionState?.() || null;
+      const diagMeta = {
+        stage,
+        visitId: visit.id,
+        nric: nric || null,
+        payType: payTypeRaw || null,
+        rawDiagnosis: {
+          code: diagnosisCode || null,
+          description: diagnosisDesc || null,
+        },
+        canonicalDiagnosis: diagnosisCanonical || null,
+        flow2DiagnosisResolution: diagnosisResolution || null,
+        flow2DatePolicy,
+        flow2DateOk,
+        flow2FallbackLowConfidence,
+        fallbackAgeDays,
+        fallbackAgeLimitDays: 30,
+        flow2DateGatePassed,
+        domDiagnosisState: domDiagnosisState || null,
+        diagnosisMatch: diagnosisMatch || null,
+        portalDiagnosisOptionsCount: portalDiagnosisOptions.length,
+        diagnosisSelection: diagnosisSelection || null,
+        attemptedSelectors: diagnosisSelection?.attemptedSelectors || null,
+        lastPortalDialogMessage: this.mhcAsia.lastDialogMessage || null,
+        diagnosisFallbackMode: diagnosisFallbackMode || null,
+        reason: 'diagnosis_mapping_failed',
+      };
+      logger.error('[SUBMIT] Diagnosis gate failed', diagMeta);
+      const err = new Error(
+        `diagnosis_mapping_failed: unresolved primary diagnosis before save (visitId=${visit.id}, nric=${nric})`
+      );
+      err.submissionMetadata = {
+        success: false,
+        portal: 'MHC Asia',
+        savedAsDraft: false,
+        reason: 'diagnosis_mapping_failed',
+        ...diagMeta,
+      };
+      throw err;
+    };
+    await assertDiagnosisResolvedOrThrow('post_diagnosis');
 
     // Fill services/drugs from Flow 2 if we have them.
     const meds = Array.isArray(metadata.medicines) ? metadata.medicines : null;
@@ -423,14 +1055,26 @@ export class ClaimSubmitter {
       const m = s.match(/\d+(?:\.\d+)?/);
       return m ? m[0] : s;
     };
+    const normalizeMoney = value => {
+      if (value === null || value === undefined) return null;
+      const s = String(value).replace(/,/g, '').trim();
+      if (!s) return null;
+      const m = s.match(/-?\d+(?:\.\d+)?/);
+      if (!m) return null;
+      const n = Number.parseFloat(m[0]);
+      if (!Number.isFinite(n)) return null;
+      return String(Number(n.toFixed(4)));
+    };
     const items = (meds && meds.length ? meds : [])
       .map(m => {
         if (typeof m === 'string') return { name: m, quantity: null };
         const name = m?.name || m?.description || '';
-        const quantityRaw =
-          m?.quantity ?? m?.qty ?? m?.qtyValue ?? m?.qtyText ?? m?.amount ?? m?.amountText ?? null;
+        const quantityRaw = m?.quantity ?? m?.qty ?? m?.qtyValue ?? m?.qtyText ?? null;
         const quantity = normalizeQty(quantityRaw);
-        return { name, quantity };
+        const unit = m?.unit ?? m?.uom ?? m?.unitCode ?? null;
+        const unitPrice = normalizeMoney(m?.unitPrice ?? m?.unit_price ?? m?.price ?? null);
+        const amount = normalizeMoney(m?.amount ?? m?.lineAmount ?? m?.total ?? null);
+        return { name, quantity, unit, unitPrice, amount };
       })
       .map(m => ({
         ...m,
@@ -453,12 +1097,20 @@ export class ClaimSubmitter {
       const saveDraftMode = process.env.WORKFLOW_SAVE_DRAFT !== '0';
       const skipProceduresForDraft = process.env.MHC_SKIP_PROCEDURES_FOR_DRAFT !== '0';
       const isAiaFlow = this.mhcAsia.isAiaClinicSystem || routingOverride === 'AIA_CLINIC_DIALOG';
-      const skipProcedures = saveDraftMode && skipProceduresForDraft && isAiaFlow;
+      // Draft-mode reliability: procedure rows frequently require master-code selections and
+      // can hard-block save. Skip procedure fill for all MHC-family draft runs by default.
+      const skipProcedures = saveDraftMode && skipProceduresForDraft;
       logger.info('[SUBMIT] Medicines summary', {
         count: items.length,
         qtyCount,
         skipProcedures,
-        sample: items.slice(0, 5).map(m => ({ name: m.name, quantity: m.quantity })),
+        isAiaFlow,
+        sample: items.slice(0, 5).map(m => ({
+          name: m.name,
+          quantity: m.quantity,
+          unitPrice: m.unitPrice,
+          amount: m.amount,
+        })),
       });
       await this.mhcAsia.fillServicesAndDrugs(items, { skipProcedures }).catch(() => {});
     } else if (visit.treatment_detail) {
@@ -469,8 +1121,7 @@ export class ClaimSubmitter {
       if (lines.length) {
         const saveDraftMode = process.env.WORKFLOW_SAVE_DRAFT !== '0';
         const skipProceduresForDraft = process.env.MHC_SKIP_PROCEDURES_FOR_DRAFT !== '0';
-        const isAiaFlow = this.mhcAsia.isAiaClinicSystem || routingOverride === 'AIA_CLINIC_DIALOG';
-        const skipProcedures = saveDraftMode && skipProceduresForDraft && isAiaFlow;
+        const skipProcedures = saveDraftMode && skipProceduresForDraft;
         await this.mhcAsia.fillServicesAndDrugs(lines, { skipProcedures }).catch(() => {});
       }
     }
@@ -491,24 +1142,103 @@ export class ClaimSubmitter {
 
     // Save as draft (safety - don't auto-submit)
     const saveDraft = process.env.WORKFLOW_SAVE_DRAFT !== '0';
+    let draftVerification = null;
+    let draftSavedAccepted = false;
     if (saveDraft) {
+      await assertDiagnosisResolvedOrThrow('pre_save');
+
       const ok = await this.mhcAsia.saveAsDraft();
       if (!ok) {
-        throw new Error(
-          'Failed to save as draft (see screenshots/mhc-asia-save-draft-not-found.png and screenshots/mhc-asia-before-save-draft.png)'
+        const saveDraftResult = this.mhcAsia.getLastSaveDraftResult?.() || null;
+        const reason = String(saveDraftResult?.reason || 'save_draft_failed');
+        const isDuplicateVisit = reason === 'duplicate_visit_same_day';
+        const err = new Error(
+          isDuplicateVisit
+            ? `Failed to save as draft (duplicate_visit_same_day): portal already has a same-day visit for this patient`
+            : `Failed to save as draft (${reason}) (see screenshots/mhc-asia-save-draft-not-found.png and screenshots/mhc-asia-before-save-draft.png)`
         );
+        err.submissionMetadata = {
+          success: false,
+          portal: 'MHC Asia',
+          savedAsDraft: false,
+          reason,
+          visitId: visit.id,
+          nric: nric || null,
+          payType: payTypeRaw || null,
+          chargeType,
+          saveDraftResult,
+          lastPortalDialogMessage: this.mhcAsia.lastDialogMessage || null,
+        };
+        throw err;
+      }
+      draftSavedAccepted = true;
+
+      const verificationContext = forceSinglife
+        ? 'singlife'
+        : (this.mhcAsia.isAiaClinicSystem || routingOverride === 'AIA_CLINIC_DIALOG')
+          ? 'aia'
+          : 'mhc';
+      const allowCrossContext = verificationContext !== 'mhc';
+
+      draftVerification = await this.mhcAsia.verifyDraftSavedInPortal({
+        nric,
+        visitDate: visit.visit_date || visitDateForSearch || null,
+        patientName: fullName,
+        contextHint: verificationContext,
+        allowCrossContext,
+      });
+
+      if (!draftVerification?.found) {
+        const saveDraftResult = this.mhcAsia.getLastSaveDraftResult?.() || null;
+        const flow2FallbackLowConfidence =
+          allowGenericDiagnosisFallback && diagnosisResolution?.status === 'fallback_low_confidence';
+        const allowUnverifiedDraftAcceptance =
+          saveDraftResult?.success === true && saveDraftMode && flow2FallbackLowConfidence;
+        if (allowUnverifiedDraftAcceptance) {
+          logger.warn('[SUBMIT] Accepting unverified draft save for fallback_low_confidence case', {
+            visitId: visit.id,
+            nric: nric || null,
+            contextHint: verificationContext,
+            verification: draftVerification || null,
+            saveDraftResult,
+          });
+          draftVerification = {
+            ...(draftVerification || {}),
+            found: false,
+            accepted: true,
+            unverified: true,
+            reason: 'save_clicked_unverified_listing',
+          };
+        } else {
+          draftSavedAccepted = false;
+        logger.error('[SUBMIT] Save-as-draft click did not produce a verifiable draft entry', {
+          visitId: visit.id,
+          nric: nric || null,
+          contextHint: verificationContext,
+          verification: draftVerification || null,
+        });
+        throw new Error(
+          `Draft not found in Edit/Draft after save click (nric=${nric}, context=${verificationContext})`
+        );
+        }
       }
     }
 
     return {
       success: true,
       portal: 'MHC Asia',
-      savedAsDraft: saveDraft,
+      savedAsDraft: Boolean(saveDraft && draftSavedAccepted),
       persisted: saveDraft,
       routingOverride,
+      draftVerification: draftVerification || null,
+      draftReference: draftVerification?.row?.visitNo || null,
       chargeType,
       mcDays,
-      hasDiagnosis: !!(diagnosisDesc && diagnosisDesc !== 'Missing diagnosis'),
+      diagnosisResolution: diagnosisResolutionWithPortal || null,
+      diagnosisMatch: diagnosisMatch || null,
+      diagnosisFallbackMode: diagnosisFallbackMode || null,
+      portalDiagnosisOptionsCount: portalDiagnosisOptions.length,
+      hasDiagnosis: !!((diagnosisDesc && !diagnosisMissingText) || diagnosisFallbackMode),
     };
   }
 
@@ -560,97 +1290,59 @@ export class ClaimSubmitter {
     return '';
   }
 
-  _mapAllianceDoctorFromSpCode(spCodeRaw) {
-    const raw = String(spCodeRaw || '')
-      .toUpperCase()
-      .trim();
-    const compact = raw.replace(/[^A-Z]/g, '');
-    if (!compact) {
-      return { doctorName: null, matchedCode: null, normalizedSpCode: raw || null };
-    }
-
-    const priority = [
-      { code: 'ARU', doctorName: 'Palanisamy Arul Murugan' },
-      { code: 'KT', doctorName: 'Tan Guoping Kelvin' },
-      { code: 'KY', doctorName: 'Yip Man Hing Kevin' },
-      { code: 'MT', doctorName: 'Tung Yu Kee Mathew' },
-    ];
-    for (const entry of priority) {
-      if (compact.includes(entry.code)) {
-        return { doctorName: entry.doctorName, matchedCode: entry.code, normalizedSpCode: raw };
-      }
-    }
-
-    return { doctorName: null, matchedCode: null, normalizedSpCode: raw };
-  }
-
   async submitToAllianceMedinet(visit) {
-    this.steps.step(2, 'Submitting to Alliance Medinet');
+    await this._applyRuntimeCredential('ALLIANCE_MEDINET', this.allianceMedinet?.config);
+    try {
+      return await this.allianceMedinetSubmitter.submit(visit);
+    } catch (error) {
+      const message = String(error?.message || '');
+      const reason = String(error?.submissionMetadata?.reason || '').trim().toLowerCase();
+      const allianceCode = error?.allianceError?.code || null;
+      const allianceNetwork = String(error?.allianceError?.networkCode || '')
+        .toUpperCase()
+        .trim();
+      const suggestedPortal = String(error?.allianceError?.suggestedPortal || '')
+        .toUpperCase()
+        .trim();
+      const metadataHint = String(
+        visit?.extraction_metadata?.allianceNetwork || visit?.extraction_metadata?.flow3PortalHint || ''
+      )
+        .toUpperCase()
+        .trim();
+      const looksLikeGePortalRuntime =
+        metadataHint.includes('GE') &&
+        /cannot\s+read\s+properties\s+of\s+undefined\s*\(reading\s*'res'\)/i.test(message);
+      const isGeNetworkMismatch =
+        reason === 'portal_route_mismatch_ge' ||
+        suggestedPortal === 'GE_NTUC' ||
+        allianceNetwork === 'GE' ||
+        allianceCode === 'ge_popup_redirect' ||
+        /tagged\s+under\s+GE\s+network/i.test(message) ||
+        /redirected this member to GE portal popup/i.test(message);
+      if (!isGeNetworkMismatch && !looksLikeGePortalRuntime) throw error;
 
-    const metadata = visit.extraction_metadata || {};
-    const nric = this._pickNricForVisit(visit, metadata);
-    if (!nric) {
-      throw new Error(
-        'NRIC not found in visit record - Alliance Medinet requires Member UIN/Membership ID'
-      );
-    }
+      logger.warn('[SUBMIT] Alliance Medinet indicates GE-network route; rerouting to GE/NTUC service', {
+        visitId: visit?.id || null,
+        payType: visit?.pay_type || null,
+      });
 
-    const matchedTag = extractAllianceMedinetTag(visit.pay_type, visit.patient_name);
-    const spCode = metadata.spCode || metadata.sp_code || null;
-    const doctor = this._mapAllianceDoctorFromSpCode(spCode);
-    if (!doctor.doctorName) {
-      throw new Error(
-        `Unable to map doctor from SP code "${spCode || ''}" (required for Alliance Medinet flow)`
-      );
-    }
+      await this._mergeVisitExtractionMetadataPatch(visit?.id, {
+        allianceNetwork: 'GE',
+        flow3PortalHint: 'GE_NTUC',
+        allianceRerouteReason: 'network_ge_from_alliance_medinet',
+        allianceRerouteAt: new Date().toISOString(),
+      });
 
-    logger.info('[SUBMIT] Alliance form data:', {
-      nric,
-      matchedTag: matchedTag || null,
-      spCode: doctor.normalizedSpCode || null,
-      doctorName: doctor.doctorName,
-    });
-
-    await this.allianceMedinet.login();
-    await this.allianceMedinet.navigateToMedicalTreatmentClaim();
-
-    const found = await this.allianceMedinet.searchMemberByNric(nric, visit.visit_date || null);
-    if (!found?.found) {
-      return {
-        success: false,
-        reason: 'not_found',
-        error: `Member not found in Alliance Medinet: ${nric}`,
-      };
-    }
-
-    await this.allianceMedinet.selectMemberAndAdd();
-    await this.allianceMedinet.fillClaimForm(
-      {
+      const reroutedVisit = {
         ...visit,
-        nric,
-      },
-      doctor.doctorName
-    );
-
-    const saveDraft = process.env.WORKFLOW_SAVE_DRAFT !== '0';
-    if (saveDraft) {
-      const ok = await this.allianceMedinet.saveAsDraft();
-      if (!ok) {
-        throw new Error('Failed to save Alliance Medinet claim as draft');
-      }
+        extraction_metadata: {
+          ...(visit?.extraction_metadata || {}),
+          allianceNetwork: 'GE',
+          flow3PortalHint: 'GE_NTUC',
+        },
+      };
+      return this.submitToGENtuc(reroutedVisit);
     }
-
-    return {
-      success: true,
-      portal: 'Alliance Medinet',
-      matchedTag: matchedTag || null,
-      spCode: doctor.normalizedSpCode || null,
-      doctorCode: doctor.matchedCode || null,
-      doctorName: doctor.doctorName,
-      savedAsDraft: saveDraft,
-      persisted: saveDraft,
-      submitted: false,
-    };
   }
 
   /**
@@ -667,40 +1359,29 @@ export class ClaimSubmitter {
     return dateStr;
   }
 
-  /**
-   * Submit to IHP portal (placeholder - implement when IHP automation is available)
-   */
-  async submitToIHP(_visit) {
-    this.steps.step(2, 'Submitting to IHP portal');
-    logger.warn('[SUBMIT] IHP portal automation not yet implemented');
-    return { success: false, reason: 'not_implemented', portal: 'IHP' };
+  async submitToAllianz(visit) {
+    const runtimeCredential = await this._getPortalCredential('ALLIANZ');
+    return this.allianzSubmitter.submit(visit, runtimeCredential);
   }
 
-  /**
-   * Submit to GE portal (placeholder)
-   */
-  async submitToGE(_visit) {
-    this.steps.step(2, 'Submitting to GE portal');
-    logger.warn('[SUBMIT] GE portal automation not yet implemented');
-    return { success: false, reason: 'not_implemented', portal: 'GE' };
+  async submitToFullerton(visit) {
+    const runtimeCredential = await this._getPortalCredential('FULLERTON');
+    return this.fullertonSubmitter.submit(visit, runtimeCredential);
   }
 
-  /**
-   * Submit to Fullert portal (placeholder)
-   */
-  async submitToFullert(_visit) {
-    this.steps.step(2, 'Submitting to Fullert portal');
-    logger.warn('[SUBMIT] Fullert portal automation not yet implemented');
-    return { success: false, reason: 'not_implemented', portal: 'Fullert' };
+  async submitToIHP(visit) {
+    const runtimeCredential = await this._getPortalCredential('IHP');
+    return this.ihpSubmitter.submit(visit, runtimeCredential);
   }
 
-  /**
-   * Submit to Allimed portal (placeholder)
-   */
-  async submitToAllimed(_visit) {
-    this.steps.step(2, 'Submitting to Allimed portal');
-    logger.warn('[SUBMIT] Allimed portal automation not yet implemented');
-    return { success: false, reason: 'not_implemented', portal: 'Allimed' };
+  async submitToIXChange(visit) {
+    const runtimeCredential = await this._getPortalCredential('IXCHANGE');
+    return this.ixchangeSubmitter.submit(visit, runtimeCredential);
+  }
+
+  async submitToGENtuc(visit) {
+    const runtimeCredential = await this._getPortalCredential('GE_NTUC');
+    return this.geSubmitter.submit(visit, runtimeCredential);
   }
 
   /**

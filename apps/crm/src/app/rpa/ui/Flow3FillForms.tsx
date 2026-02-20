@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -15,10 +15,12 @@ import {
 } from '@/lib/utils/date';
 import { cn } from '@/lib/cn';
 import {
+  getFlow3PortalTargets,
   getPortalScopeOrFilter,
   getSupportedPortals,
   getUnsupportedPortals,
   isAllianceMedinetVisit,
+  matchesFlow3PortalTargets,
   isSupportedPortal,
   isUnsupportedPortal,
 } from '@/lib/rpa/portals';
@@ -32,7 +34,12 @@ type VisitRow = {
   nric: string | null;
   submission_status: string | null;
   submitted_at: string | null;
-  submission_metadata: Record<string, any> | null;
+  submission_metadata: {
+    portal?: string;
+    savedAsDraft?: boolean;
+    drafted_at?: string;
+    [key: string]: unknown;
+  } | null;
   extraction_metadata: {
     nric?: string | null;
   } | null;
@@ -46,6 +53,16 @@ const filters: Array<{ key: FilterKey; label: string }> = [
   { key: 'submitted', label: 'Processed (submitted)' },
   { key: 'not_started', label: 'Not started' },
   { key: 'error', label: 'Error' },
+];
+
+const portalTargetOptions: Array<{ key: string; label: string }> = [
+  { key: 'MHC', label: 'MHC / AIA / AVIVA / SINGLIFE / MHCAXA' },
+  { key: 'ALLIANCE_MEDINET', label: 'Alliance Medinet' },
+  { key: 'ALLIANZ', label: 'Allianz Worldwide Care' },
+  { key: 'FULLERTON', label: 'Fullerton' },
+  { key: 'IHP', label: 'IHP' },
+  { key: 'IXCHANGE', label: 'IXCHANGE (PARKWAY / ALL)' },
+  { key: 'GE_NTUC', label: 'GE / NTUC IM' },
 ];
 
 function shiftSingaporeDate(dateString: string, days: number): string {
@@ -64,38 +81,41 @@ export default function Flow3FillForms() {
   const [fromDate, setFromDate] = useState(() => shiftSingaporeDate(getTodaySingapore(), -6));
   const [toDate, setToDate] = useState(() => getTodaySingapore());
   const [portalOnly, setPortalOnly] = useState(true);
+  const [selectedPortalTargets, setSelectedPortalTargets] = useState<string[]>(() =>
+    getFlow3PortalTargets().map(v => String(v))
+  );
   const [leaveBrowserOpen, setLeaveBrowserOpen] = useState(false);
   const [portalConfig, setPortalConfig] = useState<{
     supported: Set<string>;
     unsupported: Set<string>;
   } | null>(null);
 
-  const normalizePortal = (value?: string | null) => {
+  const normalizePortal = useCallback((value?: string | null) => {
     if (!value) return null;
     const code = String(value).trim().toUpperCase();
     return code.length > 0 ? code : null;
-  };
+  }, []);
 
-  const isSupported = (payType?: string | null) => {
+  const isSupported = useCallback((payType?: string | null) => {
     const code = normalizePortal(payType);
     if (!code) return false;
     if (portalConfig) return portalConfig.supported.has(code);
     return isSupportedPortal(code);
-  };
+  }, [normalizePortal, portalConfig]);
 
-  const isUnsupported = (payType?: string | null) => {
+  const isUnsupported = useCallback((payType?: string | null) => {
     const code = normalizePortal(payType);
     if (!code) return false;
     if (portalConfig) return portalConfig.unsupported.has(code);
     return isUnsupportedPortal(code);
-  };
+  }, [normalizePortal, portalConfig]);
 
-  const getSubmissionStatus = (
+  const getSubmissionStatus = useCallback((
     visit: VisitRow
   ): 'draft' | 'submitted' | 'error' | 'not_started' => {
     const status = visit.submission_status;
     const payType = visit.pay_type;
-    const allianceTagged = isAllianceMedinetVisit(payType, visit.patient_name);
+    const allianceTagged = isAllianceMedinetVisit(payType, visit.patient_name, visit.extraction_metadata);
 
     // Status precedence: error > submitted > draft > not_started
     if (status === 'error') return 'error';
@@ -115,7 +135,7 @@ export default function Flow3FillForms() {
     if (!status) return 'not_started';
 
     return 'not_started';
-  };
+  }, [isUnsupported]);
 
   useEffect(() => {
     let cancelled = false;
@@ -197,7 +217,7 @@ export default function Flow3FillForms() {
     return () => {
       cancelled = true;
     };
-  }, [fromDate, portalOnly, toDate]);
+  }, [fromDate, portalOnly, toDate, normalizePortal]);
 
   const handleSubmitClaims = async (visitIds?: string[], saveAsDraft?: boolean) => {
     setSubmitBusy(true);
@@ -213,6 +233,7 @@ export default function Flow3FillForms() {
           from: fromDate,
           to: toDate,
           portalOnly,
+          portalTargets: selectedPortalTargets,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -232,6 +253,17 @@ export default function Flow3FillForms() {
 
   const filtered = useMemo(() => {
     return rows.filter(row => {
+      if (
+        selectedPortalTargets.length > 0 &&
+        !matchesFlow3PortalTargets(
+          row.pay_type,
+          row.patient_name,
+          selectedPortalTargets,
+          row.extraction_metadata
+        )
+      ) {
+        return false;
+      }
       const status = getSubmissionStatus(row);
       switch (filter) {
         case 'draft':
@@ -246,18 +278,26 @@ export default function Flow3FillForms() {
           return true;
       }
     });
-  }, [filter, rows, portalConfig]);
+  }, [filter, rows, selectedPortalTargets, getSubmissionStatus]);
 
   const metrics = useMemo(() => {
-    if (!rows.length) {
+    const scopedRows = rows.filter(row =>
+      matchesFlow3PortalTargets(
+        row.pay_type,
+        row.patient_name,
+        selectedPortalTargets,
+        row.extraction_metadata
+      )
+    );
+    if (!scopedRows.length) {
       return { draft: 0, submitted: 0, notStarted: 0, error: 0, total: 0 };
     }
-    const draft = rows.filter(r => getSubmissionStatus(r) === 'draft').length;
-    const submitted = rows.filter(r => getSubmissionStatus(r) === 'submitted').length;
-    const notStarted = rows.filter(r => getSubmissionStatus(r) === 'not_started').length;
-    const error = rows.filter(r => getSubmissionStatus(r) === 'error').length;
-    return { draft, submitted, notStarted, error, total: rows.length };
-  }, [rows, portalConfig]);
+    const draft = scopedRows.filter(r => getSubmissionStatus(r) === 'draft').length;
+    const submitted = scopedRows.filter(r => getSubmissionStatus(r) === 'submitted').length;
+    const notStarted = scopedRows.filter(r => getSubmissionStatus(r) === 'not_started').length;
+    const error = scopedRows.filter(r => getSubmissionStatus(r) === 'error').length;
+    return { draft, submitted, notStarted, error, total: scopedRows.length };
+  }, [rows, selectedPortalTargets, getSubmissionStatus]);
 
   const flowStatus =
     metrics.error > 0
@@ -269,8 +309,19 @@ export default function Flow3FillForms() {
           : { label: 'Ready', tone: 'success' as const };
 
   const errorIds = useMemo(
-    () => rows.filter(r => getSubmissionStatus(r) === 'error').map(r => r.id),
-    [rows, portalConfig]
+    () =>
+      rows
+        .filter(r =>
+          matchesFlow3PortalTargets(
+            r.pay_type,
+            r.patient_name,
+            selectedPortalTargets,
+            r.extraction_metadata
+          )
+        )
+        .filter(r => getSubmissionStatus(r) === 'error')
+        .map(r => r.id),
+    [rows, selectedPortalTargets, getSubmissionStatus]
   );
 
   const getStatusLabel = (visit: VisitRow) => {
@@ -333,6 +384,38 @@ export default function Flow3FillForms() {
             <span className="text-sm">Portal pay types only</span>
           </label>
         </div>
+        <div className="mt-3 space-y-2">
+          <div className="text-xs text-muted-foreground">Flow 3 submit service targets</div>
+          <div className="flex flex-wrap gap-2">
+            {portalTargetOptions.map(option => {
+              const selected = selectedPortalTargets.includes(option.key);
+              return (
+                <button
+                  key={option.key}
+                  type="button"
+                  className={cn(
+                    'rounded-full border px-3 py-1 text-xs font-medium transition',
+                    selected
+                      ? 'border-primary bg-primary text-primary-foreground'
+                      : 'border-border bg-card text-foreground hover:bg-muted'
+                  )}
+                  onClick={() =>
+                    setSelectedPortalTargets(prev =>
+                      prev.includes(option.key)
+                        ? prev.filter(v => v !== option.key)
+                        : [...prev, option.key]
+                    )
+                  }
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Selected: {selectedPortalTargets.length > 0 ? selectedPortalTargets.join(', ') : 'none'}
+          </div>
+        </div>
         <div className="mt-2 text-xs text-muted-foreground">
           Showing {portalOnly ? 'portal-tagged visits' : 'all visits'} between {fromDate} and{' '}
           {toDate}.
@@ -386,7 +469,7 @@ export default function Flow3FillForms() {
             <Button
               type="button"
               onClick={() => handleSubmitClaims(undefined, false)}
-              disabled={submitBusy}
+              disabled={submitBusy || selectedPortalTargets.length === 0}
             >
               {submitBusy ? 'Starting...' : 'Fill All Pending (no save)'}
             </Button>
@@ -394,7 +477,7 @@ export default function Flow3FillForms() {
               type="button"
               variant="outline"
               onClick={() => handleSubmitClaims(undefined, true)}
-              disabled={submitBusy}
+              disabled={submitBusy || selectedPortalTargets.length === 0}
             >
               Save All as Draft
             </Button>
@@ -402,7 +485,7 @@ export default function Flow3FillForms() {
               type="button"
               variant="outline"
               onClick={() => handleSubmitClaims(errorIds, true)}
-              disabled={submitBusy || errorIds.length === 0}
+              disabled={submitBusy || errorIds.length === 0 || selectedPortalTargets.length === 0}
             >
               Retry Errors (save draft) ({errorIds.length})
             </Button>
@@ -410,7 +493,7 @@ export default function Flow3FillForms() {
               type="button"
               variant="outline"
               onClick={() => handleSubmitClaims(errorIds, false)}
-              disabled={submitBusy || errorIds.length === 0}
+              disabled={submitBusy || errorIds.length === 0 || selectedPortalTargets.length === 0}
             >
               Retry Errors (fill only) ({errorIds.length})
             </Button>

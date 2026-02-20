@@ -26,45 +26,88 @@ export class VisitDetailsExtractor {
       // 1. Mark visit as 'in_progress'
       await this._updateExtractionStatus(visit.id, 'in_progress', null);
 
-      // 2. Navigate to Patient Page
+      // 2. Get PCNO (patient number) from extraction_metadata or use name as fallback
+      const pcno = visit.extraction_metadata?.pcno || null;
+      const usePatientNumber = pcno && /^\d{4,5}$/.test(String(pcno).trim()); // 4-5 digit number
+      const cleanName = normalizePatientNameForSearch(visit.patient_name);
+      const queueFallbackIdentifier =
+        (usePatientNumber ? String(pcno).trim() : null) || cleanName || visit.patient_name || '__AUTO_MHC_AIA__';
+      let patientContextOpened = false;
+      let openContextError = null;
+
+      // 3. Primary path: Patient Search page
       logger.info(`[VisitDetails] Navigating to Patient Page for visit ${visit.id} (${visit.patient_name})`);
       const patientPageOpened = await this.clinicAssist.navigateToPatientPage();
       if (!patientPageOpened) {
-        throw new Error('Failed to navigate to Patient Page');
-      }
-
-      // 3. Get PCNO (patient number) from extraction_metadata or use name as fallback
-      const pcno = visit.extraction_metadata?.pcno || null;
-      const usePatientNumber = pcno && /^\d{4,5}$/.test(String(pcno).trim()); // 4-5 digit number
-
-      if (usePatientNumber) {
-        // 3a. Search for patient by number (more accurate)
-        logger.info(`[VisitDetails] Searching for patient by number: ${pcno} (${visit.patient_name})`);
-        await this.clinicAssist.searchPatientByNumber(String(pcno).trim());
-        await this.clinicAssist.page.waitForTimeout(2000);
-
-        // 4a. Open patient from search results by number
-        logger.info(`[VisitDetails] Opening patient record by number: ${pcno}`);
-        await this.clinicAssist.openPatientFromSearchResultsByNumber(String(pcno).trim());
+        openContextError = new Error('Failed to navigate to Patient Page');
       } else {
-        // 3b. Fallback: Search for patient by name
-        const cleanName = normalizePatientNameForSearch(visit.patient_name);
-        logger.info(`[VisitDetails] PCNO not available, searching for patient by name: ${cleanName || visit.patient_name}`);
-        await this.clinicAssist.searchPatientByName(cleanName || visit.patient_name);
-        await this.clinicAssist.page.waitForTimeout(2000);
-
-        // 4b. Open patient from search results by name
-        logger.info(`[VisitDetails] Opening patient record for: ${cleanName || visit.patient_name}`);
-        await this.clinicAssist.openPatientFromSearchResults(cleanName || visit.patient_name);
+        try {
+          if (usePatientNumber) {
+            logger.info(`[VisitDetails] Searching for patient by number: ${pcno} (${visit.patient_name})`);
+            await this.clinicAssist.searchPatientByNumber(String(pcno).trim());
+            await this.clinicAssist.page.waitForTimeout(2000);
+            logger.info(`[VisitDetails] Opening patient record by number: ${pcno}`);
+            await this.clinicAssist.openPatientFromSearchResultsByNumber(String(pcno).trim());
+          } else {
+            logger.info(
+              `[VisitDetails] PCNO not available, searching for patient by name: ${cleanName || visit.patient_name}`
+            );
+            await this.clinicAssist.searchPatientByName(cleanName || visit.patient_name);
+            await this.clinicAssist.page.waitForTimeout(2000);
+            logger.info(`[VisitDetails] Opening patient record for: ${cleanName || visit.patient_name}`);
+            await this.clinicAssist.openPatientFromSearchResults(cleanName || visit.patient_name);
+          }
+          patientContextOpened = true;
+        } catch (error) {
+          openContextError = error;
+          if (usePatientNumber) {
+            logger.warn('[VisitDetails] PCNO search/open failed, trying patient name search', {
+              visitId: visit.id,
+              patientName: visit.patient_name,
+              pcno: String(pcno).trim(),
+              error: error?.message || String(error),
+            });
+            try {
+              await this.clinicAssist.navigateToPatientPage();
+              await this.clinicAssist.searchPatientByName(cleanName || visit.patient_name);
+              await this.clinicAssist.page.waitForTimeout(2000);
+              await this.clinicAssist.openPatientFromSearchResults(cleanName || visit.patient_name);
+              patientContextOpened = true;
+            } catch (nameError) {
+              openContextError = nameError;
+            }
+          }
+        }
       }
-      
+
+      // 4. Fallback path: open directly from Queue row by PCNO/name.
+      // This recovers cases where PatientSearch does not return rows even though visit/patient exists.
+      if (!patientContextOpened) {
+        logger.warn('[VisitDetails] Patient search open failed, falling back to Queue open', {
+          visitId: visit.id,
+          patientName: visit.patient_name,
+          pcno: usePatientNumber ? String(pcno).trim() : null,
+          error: openContextError?.message || null,
+        });
+        const queueOpened = await this.clinicAssist.navigateToQueue(this.branchName, this.deptName).catch(
+          () => false
+        );
+        if (!queueOpened) {
+          throw new Error(
+            `Failed to open patient context: Patient Search and Queue fallback failed (${openContextError?.message || 'unknown'})`
+          );
+        }
+        await this.clinicAssist.openQueuedPatientForExtraction(queueFallbackIdentifier);
+        patientContextOpened = true;
+      }
+
       // Wait for biodata page to load
       await this.clinicAssist.page.waitForTimeout(2000);
       
       // 4b. Extract NRIC from biodata page (before navigating to TX History)
       // This is the best place to get NRIC as it's displayed on the patient biodata/info page
       logger.info(`[VisitDetails] Extracting NRIC from biodata page for: ${visit.patient_name}`);
-      const extractedNric = await this.clinicAssist.extractPatientNricFromPatientInfo();
+      const extractedNric = await this.clinicAssist.getPatientNRIC();
       const nricExtractionStatus = extractedNric ? 'found' : 'missing';
       if (extractedNric) {
         logger.info(`[VisitDetails] Found NRIC: ${extractedNric} for patient: ${visit.patient_name}`);
@@ -81,16 +124,19 @@ export class VisitDetailsExtractor {
       // - mcDays: number of MC days
       // - mcStartDate: MC start date in DD/MM/YYYY format
       logger.info(`[VisitDetails] Extracting charge type, diagnosis, and MC data for visit ${visit.id} on ${visit.visit_date}`);
-      const txData = await this.clinicAssist.getChargeTypeAndDiagnosis(visit.visit_date);
+      const txData = await this.clinicAssist.getChargeTypeAndDiagnosis(visit.visit_date, {
+        payType: visit.pay_type || null,
+      });
       
       const chargeType = txData.chargeType || 'follow';
       const mcDays = txData.mcDays || 0;
       const mcStartDate = txData.mcStartDate || null;
       
-      // Extract diagnosis from txData
-      let finalDiagnosis = 'Missing diagnosis';
+      // Extract diagnosis from txData.
+      // If Flow 2 does not find a diagnosis, we preserve any meaningful Flow 1 diagnosis in _updateVisitWithDetails.
+      let finalDiagnosis = null;
       let diagnosisCode = null;
-      
+
       if (txData.diagnosis) {
         if (txData.diagnosis.description && txData.diagnosis.description.trim()) {
           finalDiagnosis = txData.diagnosis.description.trim();
@@ -102,7 +148,7 @@ export class VisitDetailsExtractor {
       
       logger.info(`[VisitDetails] Extracted data for visit ${visit.id}:`, {
         chargeType,
-        diagnosis: finalDiagnosis.substring(0, 50),
+        diagnosis: (finalDiagnosis || 'Missing diagnosis').substring(0, 50),
         mcDays,
         mcStartDate
       });
@@ -117,7 +163,10 @@ export class VisitDetailsExtractor {
           const name = (m.name || m.description || '').toString().trim();
           if (!name) return null;
           const quantity = m.quantity ?? null;
-          return { name, quantity };
+          const unit = m.unit ?? null;
+          const unitPrice = m.unitPrice ?? m.unit_price ?? null;
+          const amount = m.amount ?? m.total ?? null;
+          return { name, quantity, unit, unitPrice, amount };
         })
         .filter(Boolean);
       const treatmentDetail = medicines.length
@@ -134,12 +183,17 @@ export class VisitDetailsExtractor {
         diagnosisSource: txData.diagnosisSource || null,
         diagnosisMissingReason: txData.diagnosisMissingReason || null,
         diagnosisAttempts: txData.diagnosisAttempts || [],
+        diagnosisCanonical: txData.diagnosisCanonical || null,
+        diagnosisResolution: txData.diagnosisResolution || null,
+        diagnosisCandidates: txData.diagnosisCandidates || [],
         medicineFilterStats: txData.medicineFilterStats || null,
         nricExtractionStatus,
+        existingSymptoms: visit.symptoms || null,
+        existingTreatmentDetail: visit.treatment_detail || null,
       });
 
       logger.info(`[VisitDetails] Successfully extracted details for visit ${visit.id}`, {
-        diagnosis: finalDiagnosis.substring(0, 100),
+        diagnosis: (finalDiagnosis || 'Missing diagnosis').substring(0, 100),
         chargeType,
         mcDays
       });
@@ -147,12 +201,14 @@ export class VisitDetailsExtractor {
       return {
         success: true,
         visitId: visit.id,
-        diagnosis: finalDiagnosis,
+        diagnosis: finalDiagnosis || 'Missing diagnosis',
         diagnosisCode: diagnosisCode,
         chargeType: chargeType,
         mcDays: mcDays,
         mcStartDate: mcStartDate,
         treatmentDetail: treatmentDetail,
+        diagnosisCanonical: txData.diagnosisCanonical || null,
+        diagnosisResolution: txData.diagnosisResolution || null,
         sources: {
           source: 'tx_history_combined',
           extractionMethod: 'getChargeTypeAndDiagnosis'
@@ -239,8 +295,11 @@ export class VisitDetailsExtractor {
           failed_count: results.failed,
         });
 
-        // Small delay between visits to avoid overwhelming the system
-        await this.clinicAssist.page.waitForTimeout(1000);
+        // Small delay between visits to avoid overwhelming the system.
+        // Guard against transient page replacement/closure between iterations.
+        if (this.clinicAssist.page && !this.clinicAssist.page.isClosed()) {
+          await this.clinicAssist.page.waitForTimeout(1000).catch(() => {});
+        }
       }
 
       logger.info(`[VisitDetails] Batch extraction complete: ${results.completed} completed, ${results.failed} failed, ${results.skipped} skipped`);
@@ -363,7 +422,7 @@ export class VisitDetailsExtractor {
       // Read current metadata
       const { data: currentVisit, error: fetchError } = await this.supabase
         .from('visits')
-        .select('extraction_metadata')
+        .select('diagnosis_description, extraction_metadata')
         .eq('id', visitId)
         .single();
 
@@ -373,28 +432,132 @@ export class VisitDetailsExtractor {
       }
 
       const currentMetadata = currentVisit?.extraction_metadata || {};
+      const existingDiagnosis = String(currentVisit?.diagnosis_description || '').trim();
+      const hasExistingDiagnosis =
+        existingDiagnosis.length > 0 && !/^missing diagnosis$/i.test(existingDiagnosis);
+      const existingResolutionStatus = String(
+        currentMetadata?.diagnosisResolution?.status || ''
+      )
+        .trim()
+        .toLowerCase();
+      const existingDiagnosisLooksNonPortable = /(?:\blab(?:oratory)?\b|\btest\b|\bscreen(?:ing)?\b|\bpanel\b|\bconsult(?:ation)?\b|\bprocedure\b|\btherapy\b)/i.test(
+        existingDiagnosis
+      );
+      const existingDiagnosisFallbackAllowed =
+        hasExistingDiagnosis &&
+        !existingDiagnosisLooksNonPortable &&
+        (!existingResolutionStatus || existingResolutionStatus === 'resolved');
+      const incomingDiagnosis = String(diagnosisText || '').trim();
+      const hasIncomingDiagnosis =
+        incomingDiagnosis.length > 0 && !/^missing diagnosis$/i.test(incomingDiagnosis);
+      const incomingResolutionStatus = String(sources?.diagnosisResolution?.status || '')
+        .trim()
+        .toLowerCase();
+      const incomingDiagnosisLooksNonPortable = /(?:\blab(?:oratory)?\b|\btest\b|\bscreen(?:ing)?\b|\bpanel\b|\bconsult(?:ation)?\b|\bprocedure\b|\btherapy\b)/i.test(
+        incomingDiagnosis
+      );
+      const incomingDiagnosisUnresolved =
+        !hasIncomingDiagnosis ||
+        incomingResolutionStatus === 'missing' ||
+        incomingResolutionStatus === 'ambiguous' ||
+        incomingResolutionStatus === 'unresolved' ||
+        (incomingDiagnosisLooksNonPortable && incomingResolutionStatus !== 'resolved');
+      const shouldUseIncomingDiagnosis = hasIncomingDiagnosis && !incomingDiagnosisUnresolved;
+      const incomingCode = String(diagnosisCode || '').trim();
+      const existingCode = String(currentMetadata?.diagnosisCode || '').trim();
+      const usedExistingDiagnosisFallback = incomingDiagnosisUnresolved && existingDiagnosisFallbackAllowed;
+      const genericFallback = incomingDiagnosisUnresolved && !usedExistingDiagnosisFallback
+        ? this._resolveGenericDiagnosisFallback({
+            diagnosisText,
+            diagnosisCode,
+            treatmentDetail,
+            sources,
+          })
+        : null;
+      const usedGenericDiagnosisFallback = !!genericFallback;
+
+      let diagnosisToStore = shouldUseIncomingDiagnosis
+        ? incomingDiagnosis
+        : usedExistingDiagnosisFallback
+          ? existingDiagnosis
+          : 'Missing diagnosis';
+      let diagnosisCodeToStore = shouldUseIncomingDiagnosis
+        ? (incomingCode || null)
+        : (usedExistingDiagnosisFallback ? existingCode : '') || null;
+      if (usedGenericDiagnosisFallback) {
+        diagnosisToStore = genericFallback.description;
+        diagnosisCodeToStore = genericFallback.code;
+      }
 
       // Extract charge type and MC data from sources (if provided by getChargeTypeAndDiagnosis)
       const chargeType = sources?.chargeType || null;
       const mcDays = sources?.mcDays || 0;
       const mcStartDate = sources?.mcStartDate || null;
       const medicines = Array.isArray(sources?.medicines) ? sources.medicines : null;
+      let diagnosisCanonical = sources?.diagnosisCanonical || null;
+      let diagnosisResolution = sources?.diagnosisResolution || null;
+      const diagnosisCandidates = Array.isArray(sources?.diagnosisCandidates)
+        ? sources.diagnosisCandidates
+        : [];
+      if (usedGenericDiagnosisFallback) {
+        diagnosisCanonical = {
+          ...(diagnosisCanonical || {}),
+          side: null,
+          code_raw: genericFallback.code,
+          body_part: null,
+          condition: genericFallback.reason === 'pain_symptom_hint' ? 'pain' : null,
+          source_date: null,
+          code_normalized: genericFallback.code,
+          description_raw: genericFallback.description,
+          source_age_days: null,
+          description_canonical: genericFallback.description,
+          source_date_match_type: 'fallback',
+        };
+        diagnosisResolution = {
+          ...(diagnosisResolution || {}),
+          status: 'fallback_low_confidence',
+          date_ok: true,
+          confidence: 0,
+          date_policy: 'fallback_generic',
+          fallback_age_days: null,
+          source_date_match_type: 'fallback',
+          reason_if_unresolved: 'no_reliable_source_data',
+          source_chain: Array.isArray(diagnosisResolution?.source_chain)
+            ? diagnosisResolution.source_chain
+            : [],
+          fallback_code: genericFallback.code,
+          fallback_description: genericFallback.description,
+          fallback_reason: genericFallback.reason,
+        };
+      }
 
       // Store all extracted data in extraction_metadata for Flow 3 to use
       const updateData = {
-        diagnosis_description: diagnosisText,
+        diagnosis_description: diagnosisToStore,
         treatment_detail: treatmentDetail,
         extraction_metadata: {
           ...currentMetadata,
           detailsExtractionStatus: 'completed',
           detailsExtractedAt: new Date().toISOString(),
-          detailsExtractionSources: sources,
-          diagnosisCode: diagnosisCode,
+          detailsExtractionSources: {
+            ...sources,
+            diagnosisIncomingStatus: incomingResolutionStatus || null,
+            diagnosisIncomingUnresolved: incomingDiagnosisUnresolved,
+            diagnosisFallbackFromExisting: usedExistingDiagnosisFallback,
+            diagnosisGenericFallbackApplied: usedGenericDiagnosisFallback,
+            diagnosisGenericFallback: genericFallback
+              ? { code: genericFallback.code, description: genericFallback.description, reason: genericFallback.reason }
+              : null,
+          },
+          diagnosisCode: diagnosisCodeToStore,
+          diagnosisCanonical,
+          diagnosisResolution,
+          diagnosisCandidates,
           // These fields are used by Flow 3 (ClaimSubmitter) for form filling
           chargeType: chargeType,       // 'first' or 'follow'
           mcDays: mcDays,               // Number of MC days
           mcStartDate: mcStartDate,     // MC start date in DD/MM/YYYY format
-          medicines: medicines,         // [{name, quantity}] from TX History Medicine tab (optional)
+          medicines: medicines,         // [{name, quantity, unit, unitPrice, amount}] from TX History Medicine tab (optional)
         },
       };
 
@@ -413,6 +576,43 @@ export class VisitDetailsExtractor {
       logger.error(`[VisitDetails] Error updating visit details: ${error.message}`);
       throw error;
     }
+  }
+
+  _resolveGenericDiagnosisFallback({ diagnosisText, diagnosisCode, treatmentDetail, sources } = {}) {
+    const enabled = process.env.FLOW2_ENABLE_GENERIC_DIAG_FALLBACK === '1';
+    if (!enabled) return null;
+
+    const combined = [
+      diagnosisText,
+      diagnosisCode,
+      treatmentDetail,
+      sources?.existingSymptoms,
+      sources?.existingTreatmentDetail,
+      ...(Array.isArray(sources?.diagnosisAttempts)
+        ? sources.diagnosisAttempts.map(a => a?.description).filter(Boolean)
+        : []),
+    ]
+      .filter(Boolean)
+      .map(v => String(v))
+      .join(' ')
+      .toLowerCase();
+
+    const painLike = /\b(pain|ache|aching|sore|soreness|tender|sprain|strain|injury)\b/i.test(
+      combined
+    );
+    if (painLike) {
+      return {
+        code: 'R52',
+        description: 'Pain, unspecified',
+        reason: 'pain_symptom_hint',
+      };
+    }
+
+    return {
+      code: 'R69',
+      description: 'Illness, unspecified',
+      reason: 'no_reliable_source_data',
+    };
   }
 
   async _startRun(runType, metadata = {}) {

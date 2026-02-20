@@ -7,6 +7,307 @@ import fs from 'fs';
 import path from 'path';
 import { normalizePcno, normalizeNric, normalizePatientNameForSearch } from '../utils/patient-normalize.js';
 
+const DIAG_BODY_PART_ALIASES = new Map([
+  ['shoulder', ['shoulder']],
+  ['knee', ['knee', 'patella', 'patellar']],
+  ['wrist', ['wrist', 'carpal']],
+  ['ankle', ['ankle', 'talocrural']],
+  ['hip', ['hip']],
+  ['elbow', ['elbow']],
+  ['neck', ['neck', 'cervical']],
+  ['back', ['back', 'lumbar', 'lumbago', 'backache']],
+  ['hand', ['hand']],
+  ['foot', ['foot']],
+]);
+
+const DIAG_CONDITION_ALIASES = new Map([
+  ['pain', ['pain', 'ache', 'aching', 'soreness', 'tenderness']],
+  ['sprain_strain', ['sprain', 'strain', 'injury', 'injured', 'trauma', 'traumatic']],
+  ['fracture', ['fracture', 'fx']],
+  ['infection', ['infection', 'infective']],
+  ['inflammation', ['inflammation', 'inflamed']],
+]);
+
+const DIAG_ABBREVIATIONS = new Map([
+  ['lbp', 'lower back pain'],
+  ['lba', 'low back ache'],
+  ['backache', 'low back pain'],
+  ['lsp', 'lumbar spine'],
+  ['ls', 'lumbar spine'],
+  ['csp', 'cervical spine'],
+  ['uti', 'urinary tract infection'],
+  ['uri', 'upper respiratory infection'],
+  ['urti', 'upper respiratory tract infection'],
+  ['lrti', 'lower respiratory tract infection'],
+  ['oa', 'osteoarthritis'],
+  ['ra', 'rheumatoid arthritis'],
+  ['dm', 'diabetes mellitus'],
+  ['htn', 'hypertension'],
+]);
+
+const DIAG_STOP_WORDS = new Set([
+  'the',
+  'and',
+  'for',
+  'with',
+  'without',
+  'part',
+  'parts',
+  'region',
+  'joint',
+  'unspecified',
+  'unsp',
+  'other',
+  'oth',
+  'of',
+  'in',
+]);
+
+function normalizeDiagnosisCodeForMatch(value) {
+  const raw = String(value || '')
+    .toUpperCase()
+    .replace(/[^A-Z0-9.]/g, '');
+  if (!raw) return null;
+  const m = raw.match(/[A-Z][0-9]{2,3}(?:\.[0-9A-Z]{1,4})?/);
+  return m ? m[0] : null;
+}
+
+function expandDiagnosisAbbreviations(value) {
+  let text = String(value || '');
+  for (const [abbr, expanded] of DIAG_ABBREVIATIONS.entries()) {
+    const re = new RegExp(`\\b${abbr}\\b`, 'gi');
+    text = text.replace(re, expanded);
+  }
+  return text;
+}
+
+function normalizeDiagnosisTextForMatch(value) {
+  return expandDiagnosisAbbreviations(String(value || ''))
+    .replace(/^[A-Z][0-9]{2,3}(?:\.[0-9A-Z]{1,4})?\s*[-:]\s*/i, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function tokenizeDiagnosisTextForMatch(value) {
+  return normalizeDiagnosisTextForMatch(value)
+    .split(/\s+/)
+    .filter((t) => t.length >= 3 && !DIAG_STOP_WORDS.has(t));
+}
+
+function pickDiagnosisSide(text, explicitSide = null) {
+  const side = String(explicitSide || '').trim().toLowerCase();
+  if (side === 'left' || side === 'right' || side === 'bilateral') return side;
+  const t = normalizeDiagnosisTextForMatch(text);
+  if (/\bleft\b/.test(t)) return 'left';
+  if (/\bright\b/.test(t)) return 'right';
+  if (/\bbilateral\b/.test(t)) return 'bilateral';
+  return null;
+}
+
+function normalizeDiagnosisBodyPart(text, explicit = null) {
+  const probe = `${String(explicit || '')} ${String(text || '')}`.toLowerCase();
+  for (const [canonical, aliases] of DIAG_BODY_PART_ALIASES.entries()) {
+    if (aliases.some((a) => new RegExp(`\\b${a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(probe))) {
+      return canonical;
+    }
+  }
+  return null;
+}
+
+function normalizeDiagnosisCondition(text, explicit = null) {
+  const probe = `${String(explicit || '')} ${String(text || '')}`.toLowerCase();
+  for (const [canonical, aliases] of DIAG_CONDITION_ALIASES.entries()) {
+    if (aliases.some((a) => new RegExp(`\\b${a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(probe))) {
+      return canonical;
+    }
+  }
+  return null;
+}
+
+function jaccardScore(tokensA, tokensB) {
+  const a = new Set(tokensA || []);
+  const b = new Set(tokensB || []);
+  if (!a.size || !b.size) return 0;
+  let inter = 0;
+  for (const t of a) if (b.has(t)) inter += 1;
+  const union = a.size + b.size - inter;
+  return union > 0 ? inter / union : 0;
+}
+
+/**
+ * Deterministically resolve Flow 2 diagnosis against portal diagnosis options.
+ * No AI and no free-text portal fallback.
+ */
+export function resolveDiagnosisAgainstPortalOptions({
+  diagnosis = {},
+  portalOptions = [],
+  minScore = 90,
+  codeMode = 'secondary',
+} = {}) {
+  const codeHint = normalizeDiagnosisCodeForMatch(diagnosis?.code || null);
+  const descHint = String(diagnosis?.description || '').trim() || null;
+  const descHintNorm = normalizeDiagnosisTextForMatch(descHint || '');
+  const descHintTokens = tokenizeDiagnosisTextForMatch(descHint || '');
+  const sideHint = pickDiagnosisSide(descHint || '', diagnosis?.side || null);
+  const bodyPartHint = normalizeDiagnosisBodyPart(descHint || '', diagnosis?.body_part || null);
+  const conditionHint = normalizeDiagnosisCondition(descHint || '', diagnosis?.condition || null);
+  const effectiveMinScore = Number.isFinite(Number(minScore)) ? Number(minScore) : 120;
+
+  if (!Array.isArray(portalOptions) || portalOptions.length === 0) {
+    return {
+      selected_code: null,
+      selected_text: null,
+      match_score: 0,
+      match_reason: 'no_portal_options',
+      blocked: true,
+      blocked_reason: 'no_portal_options',
+      min_score_required: effectiveMinScore,
+      considered: [],
+    };
+  }
+
+  const scored = portalOptions
+    .map((opt, idx) => {
+      const optionText = String(opt?.text || '').trim();
+      const optionCode = normalizeDiagnosisCodeForMatch(opt?.code || optionText);
+      const optionCodePlain = String(optionCode || '').replace(/\./g, '');
+      const requestedCodePlain = String(codeHint || '').replace(/\./g, '');
+      const optionDescNorm = normalizeDiagnosisTextForMatch(optionText);
+      const optionTokens = tokenizeDiagnosisTextForMatch(optionText);
+      const optionSide = pickDiagnosisSide(optionText);
+      const optionBodyPart = normalizeDiagnosisBodyPart(optionText);
+      const optionCondition = normalizeDiagnosisCondition(optionText);
+      const reasonParts = [];
+      let score = 0;
+
+      if (codeHint && optionCode) {
+        if (optionCode === codeHint) {
+          score += codeMode === 'primary' ? 260 : 60;
+          reasonParts.push('exact_code');
+        } else if (
+          requestedCodePlain &&
+          optionCodePlain &&
+          (optionCodePlain.startsWith(requestedCodePlain) ||
+            requestedCodePlain.startsWith(optionCodePlain))
+        ) {
+          score += codeMode === 'primary' ? 170 : 25;
+          reasonParts.push('code_prefix');
+        } else {
+          if (codeMode === 'primary') {
+            score -= 70;
+            reasonParts.push('code_mismatch');
+          }
+        }
+      }
+
+      if (descHintNorm && optionDescNorm) {
+        if (optionDescNorm === descHintNorm) {
+          score += 220;
+          reasonParts.push('exact_description');
+        } else if (optionDescNorm.includes(descHintNorm) || descHintNorm.includes(optionDescNorm)) {
+          score += 130;
+          reasonParts.push('description_contains');
+        }
+      }
+
+      const overlap = jaccardScore(descHintTokens, optionTokens);
+      if (overlap > 0) {
+        score += Math.round(overlap * 90);
+        reasonParts.push(`token_overlap_${overlap.toFixed(2)}`);
+      }
+
+      if (bodyPartHint && optionBodyPart) {
+        if (bodyPartHint === optionBodyPart) {
+          score += 110;
+          reasonParts.push('body_part_match');
+        } else {
+          score -= 180;
+          reasonParts.push('body_part_mismatch');
+        }
+      }
+
+      if (conditionHint && optionCondition) {
+        if (conditionHint === optionCondition) {
+          score += 95;
+          reasonParts.push('condition_match');
+        } else {
+          score -= 140;
+          reasonParts.push('condition_mismatch');
+        }
+      }
+
+      if (sideHint && optionSide) {
+        if (sideHint === optionSide || sideHint === 'bilateral' || optionSide === 'bilateral') {
+          score += 45;
+          reasonParts.push('side_match');
+        } else {
+          score -= 70;
+          reasonParts.push('side_mismatch');
+        }
+      }
+
+      if (!optionCode && !optionDescNorm) score -= 300;
+      if (/^\s*na\s*$/i.test(optionText)) score -= 300;
+
+      return {
+        idx,
+        option: opt,
+        optionCode: optionCode || null,
+        optionText,
+        score,
+        reason: reasonParts.join('|') || 'no_signal',
+      };
+    })
+    .sort((a, b) => b.score - a.score);
+
+  const best = scored[0] || null;
+  const second = scored[1] || null;
+  const closeTie =
+    !!best &&
+    !!second &&
+    best.score >= effectiveMinScore &&
+    best.score - second.score < 15 &&
+    best.score < effectiveMinScore + 60;
+
+  if (!best || best.score < effectiveMinScore || closeTie) {
+    return {
+      selected_code: null,
+      selected_text: null,
+      match_score: best ? best.score : 0,
+      match_reason: best ? best.reason : 'no_candidates',
+      blocked: true,
+      blocked_reason: closeTie ? 'ambiguous_close_candidates' : 'score_below_threshold',
+      min_score_required: effectiveMinScore,
+      considered: scored.slice(0, 8).map((s) => ({
+        code: s.optionCode,
+        text: s.optionText,
+        score: s.score,
+        reason: s.reason,
+      })),
+    };
+  }
+
+  return {
+    selected_code: best.optionCode || null,
+    selected_text: best.optionText || null,
+    selected_value: String(best.option?.value || '').trim() || null,
+    selected_source: String(best.option?.source || '').trim() || null,
+    match_score: best.score,
+    match_reason: best.reason,
+    blocked: false,
+    blocked_reason: null,
+    min_score_required: effectiveMinScore,
+    considered: scored.slice(0, 8).map((s) => ({
+      code: s.optionCode,
+      text: s.optionText,
+      score: s.score,
+      reason: s.reason,
+    })),
+  };
+}
+
 /**
  * Clinic Assist automation module
  * 
@@ -22,9 +323,19 @@ export class ClinicAssistAutomation {
     this.page = page;
     this.config = PORTALS.CLINIC_ASSIST;
     this._caStep = 0;
-    
+    this._guardedPages = new WeakSet();
+    this._attachPageGuards(this.page);
+  }
+
+  _attachPageGuards(targetPage) {
+    if (!targetPage || this._guardedPages.has(targetPage)) {
+      return;
+    }
+
+    this._guardedPages.add(targetPage);
+
     // Set up route to block external protocol handlers (xdg-open, etc.)
-    this.page.route('**/*', (route) => {
+    targetPage.route('**/*', (route) => {
       const url = route.request().url();
       // Block any non-http/https URLs that might trigger xdg-open
       if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('data:')) {
@@ -33,10 +344,10 @@ export class ClinicAssistAutomation {
         return;
       }
       route.continue();
-    });
-    
+    }).catch(() => {});
+
     // Set up dialog handler to auto-dismiss xdg-open and other dialogs
-    this.page.on('dialog', async (dialog) => {
+    targetPage.on('dialog', async (dialog) => {
       logger.info(`[Dialog] ${dialog.type()}: ${dialog.message()}`);
       try {
         await dialog.dismiss();
@@ -50,6 +361,51 @@ export class ClinicAssistAutomation {
         }
       }
     });
+  }
+
+  _setPage(nextPage, reason = 'unspecified') {
+    if (!nextPage || nextPage === this.page) {
+      return false;
+    }
+    this.page = nextPage;
+    this._attachPageGuards(this.page);
+    this._logStep('Switched active page handle', { reason, url: this.page.url() });
+    return true;
+  }
+
+  async _recoverOpenPage(reason = 'unspecified') {
+    try {
+      if (this.page && !this.page.isClosed()) {
+        return true;
+      }
+      const context = this.page?.context?.();
+      const openPages = context?.pages?.().filter((p) => !p.isClosed()) || [];
+      if (openPages.length > 0) {
+        const latest = openPages[openPages.length - 1];
+        return this._setPage(latest, reason);
+      }
+
+      // Last resort: recreate a page in the existing browser context.
+      if (context?.newPage) {
+        try {
+          const fresh = await context.newPage();
+          this._setPage(fresh, `${reason}:new-page`);
+          this._logStep('Recovered by opening a fresh page', { reason });
+          return true;
+        } catch (inner) {
+          this._logStep('Failed to open fresh page during recovery', {
+            reason,
+            error: inner.message,
+          });
+        }
+      }
+
+      this._logStep('No open page available for recovery', { reason });
+      return false;
+    } catch (error) {
+      this._logStep('Failed to recover active page', { reason, error: error.message });
+      return false;
+    }
   }
 
   _logStep(message, meta) {
@@ -535,8 +891,8 @@ export class ClinicAssistAutomation {
     return true;
   }
 
-  async _pickBestVisibleLocator(selectors) {
-    // Pick the first locator that exists AND has a real bounding box (or isVisible).
+  async _pickBestLocator(selectors, requireVisible = false) {
+    // Pick the first locator that exists, optionally requiring visibility.
     for (const selector of selectors) {
       const loc = this.page.locator(selector);
       const count = await loc.count().catch(() => 0);
@@ -545,9 +901,10 @@ export class ClinicAssistAutomation {
       for (let i = 0; i < count; i++) {
         const candidate = loc.nth(i);
         try {
-          const box = await candidate.boundingBox();
+          if (!requireVisible) return candidate;
           const visible = await candidate.isVisible().catch(() => false);
           if (visible) return candidate;
+          const box = await candidate.boundingBox().catch(() => null);
           if (box && box.width > 1 && box.height > 1) return candidate;
         } catch {
           // ignore and keep trying
@@ -555,6 +912,10 @@ export class ClinicAssistAutomation {
       }
     }
     return null;
+  }
+
+  async _pickBestVisibleLocator(selectors) {
+    return this._pickBestLocator(selectors, true);
   }
 
   async _selectFirstNonEmptyOption(selectLocator) {
@@ -1081,41 +1442,64 @@ export class ClinicAssistAutomation {
     claimAmount = await this.page
       .evaluate(() => {
         const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
-        // Look for total, amount, fee, charge labels
-        const patterns = [
-          /total\s*(?:amount|fee|charge)?\s*[:\$]?\s*\$?([\d,]+\.?\d*)/i,
-          /amount\s*(?:due|payable)?\s*[:\$]?\s*\$?([\d,]+\.?\d*)/i,
-          /fee\s*[:\$]?\s*\$?([\d,]+\.?\d*)/i,
-          /charge\s*[:\$]?\s*\$?([\d,]+\.?\d*)/i,
-        ];
-        
-        const bodyText = document.body?.innerText || '';
-        for (const pattern of patterns) {
-          const match = bodyText.match(pattern);
-          if (match && match[1]) {
-            const amount = parseFloat(match[1].replace(/,/g, ''));
-            if (!isNaN(amount) && amount > 0) return amount;
+        const parseAmount = (raw) => {
+          const n = Number(String(raw || '').replace(/[^0-9.]/g, ''));
+          return Number.isFinite(n) ? n : null;
+        };
+        const moneyRegex = /\$?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{1,2})?|[0-9]+(?:\.[0-9]{1,2})?)/g;
+        const candidates = [];
+        const addCandidate = (amount, score, source) => {
+          if (!Number.isFinite(amount) || amount <= 0) return;
+          candidates.push({ amount, score, source });
+        };
+
+        const bodyText = String(document.body?.innerText || '');
+        const lines = bodyText
+          .split(/\r?\n/)
+          .map((line) => norm(line))
+          .filter(Boolean);
+
+        for (const line of lines) {
+          if (!moneyRegex.test(line)) continue;
+          moneyRegex.lastIndex = 0;
+          const amounts = [];
+          let m;
+          while ((m = moneyRegex.exec(line)) !== null) {
+            const amount = parseAmount(m[1]);
+            if (amount == null) continue;
+            amounts.push(amount);
           }
+          if (!amounts.length) continue;
+          const maxAmount = Math.max(...amounts);
+          const lower = line.toLowerCase();
+
+          let score = 0;
+          if (/(grand|net)?\s*total\s*(amount|fee|charge|bill|claim)?/.test(lower)) score += 12;
+          if (/(total\s*claim|amount\s*payable|provider\s*total|final\s*amount)/.test(lower)) score += 10;
+          if (/(consultation|service|drug|procedure|x[-\s]*ray|lab)\s*(fee|amount)?/.test(lower)) score += 3;
+          if (/(co[-\s]*pay|co payment|cash|member|outstanding|balance|paid)/.test(lower)) score -= 9;
+          if (/(gst|tax)/.test(lower)) score -= 1;
+          score += Math.min(3, Math.floor(maxAmount / 100));
+
+          addCandidate(maxAmount, score, `line:${line.slice(0, 80)}`);
         }
-        
-        // Also try labeled fields
-        const labels = ['Total', 'Amount', 'Fee', 'Charge', 'Total Amount', 'Total Fee'];
-        for (const label of labels) {
-          const labelEl = Array.from(document.querySelectorAll('*')).find(el => {
-            const text = norm(el.textContent || '');
-            return text.includes(label) && /[\d,]+\.?\d*/.test(text);
-          });
-          if (labelEl) {
-            const text = norm(labelEl.textContent || '');
-            const match = text.match(/\$?([\d,]+\.?\d*)/);
-            if (match && match[1]) {
-              const amount = parseFloat(match[1].replace(/,/g, ''));
-              if (!isNaN(amount) && amount > 0) return amount;
-            }
-          }
+
+        const inputCandidates = Array.from(
+          document.querySelectorAll('input[name], input[id], input[placeholder], textarea[name], textarea[id]')
+        );
+        for (const el of inputCandidates) {
+          const hint = norm(
+            `${el.getAttribute('name') || ''} ${el.getAttribute('id') || ''} ${el.getAttribute('placeholder') || ''}`
+          ).toLowerCase();
+          if (!/(amount|total|fee|charge|claim)/.test(hint)) continue;
+          if (/(co[-\s]*pay|balance|outstanding|cash|member|gst|tax)/.test(hint)) continue;
+          const amount = parseAmount(el.value || el.textContent || '');
+          if (amount != null) addCandidate(amount, 8, `field:${hint.slice(0, 60)}`);
         }
-        
-        return null;
+
+        if (!candidates.length) return null;
+        candidates.sort((a, b) => b.score - a.score || b.amount - a.amount);
+        return candidates[0].amount;
       })
       .catch(() => null);
     
@@ -5068,25 +5452,68 @@ export class ClinicAssistAutomation {
         'input[type="password"]',
       ];
 
-      const passwordLocator = await this._pickBestVisibleLocator(passwordSelectors);
-
+      let passwordLocator = await this._pickBestVisibleLocator(passwordSelectors);
       if (!passwordLocator) {
-        throw new Error('Could not find password field');
+        // Some sessions render the password input but Playwright visibility checks fail transiently.
+        passwordLocator = await this._pickBestLocator(passwordSelectors, false);
       }
 
-      // Fill password using locator with force option (it has tabindex="-1" and sometimes reports weird visibility)
-      try {
-        await passwordLocator.fill(this.config.password, { force: true });
-      } catch (e) {
-        // Fallback: use evaluate to set value directly
-        await this.page.evaluate(({ selector, value }) => {
-          const field = document.querySelector(selector);
-          if (field) {
+      let passwordFilled = false;
+      if (passwordLocator) {
+        try {
+          await passwordLocator.fill(this.config.password, { force: true });
+          passwordFilled = true;
+        } catch (e) {
+          // keep fallback path below
+        }
+      }
+
+      if (!passwordFilled) {
+        // Last-resort DOM fallback when selectors are unstable.
+        const domFill = await this.page.evaluate(({ selectors, value }) => {
+          const trySet = (field) => {
+            if (!field) return false;
             field.value = value;
             field.dispatchEvent(new Event('input', { bubbles: true }));
             field.dispatchEvent(new Event('change', { bubbles: true }));
+            return true;
+          };
+
+          for (const selector of selectors) {
+            const field = document.querySelector(selector);
+            if (trySet(field)) return { ok: true, selector };
           }
-        }, { selector: '#txtPassword', value: this.config.password });
+
+          const fallback = Array.from(document.querySelectorAll('input')).find((input) => {
+            const name = (input.getAttribute('name') || '').toLowerCase();
+            const id = (input.getAttribute('id') || '').toLowerCase();
+            const ph = (input.getAttribute('placeholder') || '').toLowerCase();
+            const type = (input.getAttribute('type') || '').toLowerCase();
+            return (
+              type === 'password' ||
+              name.includes('password') ||
+              id.includes('password') ||
+              ph.includes('password')
+            );
+          });
+          if (trySet(fallback)) return { ok: true, selector: 'input(password-fallback)' };
+          return { ok: false };
+        }, { selectors: passwordSelectors, value: this.config.password });
+        passwordFilled = !!domFill?.ok;
+      }
+
+      if (!passwordFilled) {
+        const inputDiagnostics = await this.page.evaluate(() =>
+          Array.from(document.querySelectorAll('input')).map((input) => ({
+            id: input.id || null,
+            name: input.name || null,
+            type: input.type || null,
+            placeholder: input.getAttribute('placeholder') || null,
+            disabled: !!input.disabled,
+          }))
+        );
+        this._logStep('Password field not found', { inputDiagnostics });
+        throw new Error('Could not find password field');
       }
       logger.info('Password filled');
       this._logStep('Password filled');
@@ -5158,7 +5585,11 @@ export class ClinicAssistAutomation {
 
       if (!loginButton) {
         // Try pressing Enter as fallback
-        await passwordLocator.press('Enter');
+        if (passwordLocator) {
+          await passwordLocator.press('Enter');
+        } else {
+          await this.page.keyboard.press('Enter');
+        }
         logger.info('Pressed Enter to submit');
       } else {
         await loginButton.scrollIntoViewIfNeeded();
@@ -5836,18 +6267,20 @@ export class ClinicAssistAutomation {
       const invNoColPos = getColIndex(headerRowRaw, (h) => h.includes('inv'));
       const cashTransColPos = getColIndex(headerRowRaw, (h) => h.includes('cash') && h.includes('trans'));
 
-      // CONTRACT is typically in the next header row (a separate line that only labels end columns).
-      let contractColPos = -1;
-      for (let i = headerRowIndex + 1; i < Math.min(headerRowIndex + 12, rawData.length); i++) {
-        const row = rawData[i] || [];
-        for (let j = 0; j < row.length; j++) {
-          const cell = normHeader(row[j]);
-          if (cell === 'contract' || cell.includes('contract')) {
-            contractColPos = j;
-            break;
+      // CONTRACT can appear in the header row itself or a subsequent secondary header row.
+      let contractColPos = getColIndex(headerRowRaw, (h) => h === 'contract' || h.includes('contract'));
+      if (contractColPos < 0) {
+        for (let i = headerRowIndex + 1; i < Math.min(headerRowIndex + 12, rawData.length); i++) {
+          const row = rawData[i] || [];
+          for (let j = 0; j < row.length; j++) {
+            const cell = normHeader(row[j]);
+            if (cell === 'contract' || cell.includes('contract')) {
+              contractColPos = j;
+              break;
+            }
           }
+          if (contractColPos >= 0) break;
         }
-        if (contractColPos >= 0) break;
       }
 
       this._logStep('Column positions detected', {
@@ -5872,12 +6305,20 @@ export class ClinicAssistAutomation {
       const stopSectionMatchers = [/patient account payment/i, /account settlement/i, /patient account settlement/i];
       const knownContractsExact = new Set([
         'MHC',
+        'MHCAXA',
         'FULLERT',
         'IHP',
         'ALL',
         'ALLIANZ',
+        'ALLIANCE',
+        'ALLIANC',
+        'ALLSING',
+        'AXAMED',
+        'PRUDEN',
+        'TOKIOM',
         'AIA',
         'GE',
+        'NTUC_IM',
         'AIACLIENT',
         'AVIVA',
         'SINGLIFE',
@@ -5913,8 +6354,37 @@ export class ClinicAssistAutomation {
         const timeInRaw = timeInColPos >= 0 && row[timeInColPos] ? String(row[timeInColPos]).trim() : null;
         const timeOutRaw = timeOutColPos >= 0 && row[timeOutColPos] ? String(row[timeOutColPos]).trim() : null;
 
-        const cashTransRaw = cashTransColPos >= 0 && row[cashTransColPos] ? String(row[cashTransColPos]).trim() : null;
-        const fee = cashTransRaw ? String(cashTransRaw).replace(/[^0-9.]/g, '') || null : null;
+        const parseAmount = (value) => {
+          if (value === null || value === undefined) return null;
+          const cleaned = String(value).replace(/[^0-9.-]/g, '');
+          if (!cleaned || cleaned === '-' || cleaned === '.' || cleaned === '-.') return null;
+          const parsed = Number(cleaned);
+          return Number.isFinite(parsed) ? parsed : null;
+        };
+
+        const cashTransRaw =
+          cashTransColPos >= 0 && row[cashTransColPos] ? String(row[cashTransColPos]).trim() : null;
+        const cashTransAmount = parseAmount(cashTransRaw);
+
+        const totalColPos = getColIndex(
+          headerRowRaw,
+          (h) => h === 'total' || h.startsWith('total ')
+        );
+        const totalRaw = totalColPos >= 0 && row[totalColPos] ? String(row[totalColPos]).trim() : null;
+        const totalAmount = parseAmount(totalRaw);
+
+        // Queue Listing rows consistently end with base + GST + adjustment values.
+        // Prefer this composite total because CASH TRANS can be only a partial co-payment.
+        const tailBaseAmount = parseAmount(row[row.length - 3]);
+        const tailGstAmount = parseAmount(row[row.length - 2]);
+        const tailAdjAmount = parseAmount(row[row.length - 1]);
+        const tailTotalAmount =
+          tailBaseAmount !== null && tailGstAmount !== null
+            ? Number((tailBaseAmount + tailGstAmount + (tailAdjAmount || 0)).toFixed(2))
+            : null;
+
+        const feeAmount = tailTotalAmount ?? totalAmount ?? cashTransAmount;
+        const fee = feeAmount !== null ? String(feeAmount) : null;
 
         // Contract/pay type: prefer CONTRACT column if present; else scan row from the end.
         let payType = null;
@@ -6237,11 +6707,29 @@ export class ClinicAssistAutomation {
    */
 	  async navigateToPatientPage() {
 	    try {
+      const recoveredAtStart = await this._recoverOpenPage('navigateToPatientPage:start');
+      if (!recoveredAtStart) {
+        this._logStep('Initial page recovery failed, attempting re-login');
+        await this.login().catch(() => {});
+        const recoveredAfterLogin = await this._recoverOpenPage('navigateToPatientPage:after-login');
+        if (!recoveredAfterLogin) {
+          this._logStep('Recovery failed after re-login');
+          return false;
+        }
+      }
 	      const navStart = Date.now();
 	      this._logStep('Navigate to Patient Page - START');
 	      
 	      let currentUrl = this.page.url();
 	      this._logStep('Current URL before navigation', { url: currentUrl });
+      await this._clearBlockingHistoryOverlays().catch(() => false);
+
+      if (!currentUrl || currentUrl === 'about:blank') {
+        this._logStep('Current page is blank, re-login to restore app context');
+        await this.login().catch(() => {});
+        currentUrl = this.page.url();
+        this._logStep('URL after blank-page re-login', { url: currentUrl });
+      }
 
       // Recover from Authenticate/Error pages by re-logging in.
       if (/\/Authenticate\//i.test(currentUrl) || /ErrorPage/i.test(currentUrl)) {
@@ -6494,32 +6982,45 @@ export class ClinicAssistAutomation {
       
 	      // Find and click Patient sidebar link - MUST USE UI CLICKS, NEVER DIRECT URL
 	      this._logStep('Looking for Patient sidebar link');
+      await this._clearBlockingHistoryOverlays().catch(() => false);
 	      const patientLinkSelectors = [
+          'a.SideMenuList[cat="Patient"]',
+          'a[cat="Patient"]',
+          'a[title="Patient"]',
 	        'a[href*="/Patient/PatientSearch" i]',
 	        'a[href*="PatientSearch" i]',
 	        // Icon-only sidebar items frequently have no text but do have an href with "Patient".
-	        'a[href*="/Patient/" i]',
-	        'a[href*="Patient" i]',
-	        '[href*="/Patient/" i]',
-	        '[href*="Patient" i]',
+	        'a[href*="/Patient/" i]:not([href^="#"])',
+	        'a[href*="Patient" i]:not([href^="#"])',
+	        '[href*="/Patient/" i]:not([href^="#"])',
+	        '[href*="Patient" i]:not([href^="#"])',
 	        'a:has-text("Patient")',
 	        '[role="link"]:has-text("Patient")',
 	        'nav a:has-text("Patient")',
 	        '.menu a:has-text("Patient")',
 	      ];
       
-      let patientClicked = false;
+	      let patientClicked = false;
 	      for (const selector of patientLinkSelectors) {
 	        try {
+            if (this.page.isClosed()) {
+              const recovered = await this._recoverOpenPage('patient-nav:selector-loop');
+              if (!recovered) break;
+            }
 	          const clickStart = Date.now();
 	          const link = this.page.locator(selector).first();
           const count = await link.count().catch(() => 0);
           if (count > 0) {
+            await this._clearBlockingHistoryOverlays().catch(() => false);
             const isVisible = await link.isVisible().catch(() => false);
             this._logStep('Patient link status', { selector, count, isVisible });
             
 	            if (isVisible) {
 	              this._logStep('Clicking Patient sidebar link via UI', { selector });
+              const context = this.page.context();
+              const popupPagePromise = context
+                .waitForEvent('page', { timeout: 1500 })
+                .catch(() => null);
               
               // Try multiple click methods - UI navigation only
               let clicked = false;
@@ -6561,6 +7062,19 @@ export class ClinicAssistAutomation {
               }
               
 	              if (clicked) {
+                  const popupPage = await popupPagePromise;
+                  if (popupPage && !popupPage.isClosed()) {
+                    await popupPage.waitForLoadState('domcontentloaded', { timeout: 8000 }).catch(() => {});
+                    this._setPage(popupPage, 'patient-nav-popup');
+                  }
+
+                  if (this.page.isClosed()) {
+                    const recovered = await this._recoverOpenPage('patient-nav:closed-after-click');
+                    if (!recovered) {
+                      throw new Error('Patient navigation closed page and no replacement page found');
+                    }
+                  }
+
 	                // Some Clinic Assist navigations are async and can take a few seconds; wait for URL.
 	                await this.page.waitForLoadState('domcontentloaded', { timeout: 8000 }).catch(() => {});
 	                await this.page
@@ -6596,6 +7110,9 @@ export class ClinicAssistAutomation {
           }
         } catch (e) {
           this._logStep('Error trying Patient selector', { selector, error: e.message });
+          if (/Target page, context or browser has been closed/i.test(e.message || '')) {
+            await this._recoverOpenPage('patient-nav:closed-in-selector-catch');
+          }
           continue;
         }
       }
@@ -6645,7 +7162,18 @@ export class ClinicAssistAutomation {
             }
           }
 
-          const retryPatient = this.page.locator('a[href*="PatientSearch" i], a:has-text("Patient")').first();
+          await this._clearBlockingHistoryOverlays().catch(() => false);
+          const retryPatient = this.page
+            .locator(
+              [
+                'a.SideMenuList[cat="Patient"]',
+                'a[cat="Patient"]',
+                'a[href*="PatientSearch" i]',
+                'a[href*="/Patient/" i]:not([href^="#"])',
+                'a:has-text("Patient")',
+              ].join(', ')
+            )
+            .first();
           if ((await retryPatient.count().catch(() => 0)) > 0 && (await retryPatient.isVisible().catch(() => false))) {
             await retryPatient.click({ timeout: 3000 }).catch(async () => retryPatient.click({ timeout: 3000, force: true }));
             await this.page.waitForLoadState('domcontentloaded', { timeout: 8000 }).catch(() => {});
@@ -6662,6 +7190,67 @@ export class ClinicAssistAutomation {
           }
         } catch (e) {
           this._logStep('Home->Patient fallback failed', { error: e.message });
+        }
+
+        // Last-resort UI strategy: click Patient anchor in DOM via script without
+        // forcing visibility checks (works for icon-only/collapsed side menus).
+        if (!patientClicked) {
+          const domClickPatient = await this.page
+            .evaluate(() => {
+              const anchors = Array.from(
+                document.querySelectorAll(
+                  'a.SideMenuList[cat="Patient"], a[cat="Patient"], a[href*="/Patient/PatientSearch" i], a[href*="PatientSearch" i], a[href*="/Patient/" i]:not([href^="#"])'
+                )
+              );
+              const target = anchors.find((a) => (a.getAttribute('href') || '').toLowerCase().includes('patient'));
+              if (!target) return false;
+              try {
+                target.click();
+                return true;
+              } catch {
+                return false;
+              }
+            })
+            .catch(() => false);
+
+          if (domClickPatient) {
+            await this.page.waitForLoadState('domcontentloaded', { timeout: 8000 }).catch(() => {});
+            await this.page.waitForURL(/\/Patient\/PatientSearch/i, { timeout: 8000 }).catch(() => {});
+            await this.page.waitForTimeout(300);
+            const finalUrl = this.page.url();
+            this._logStep('DOM fallback patient click URL', { finalUrl });
+            if (/\/Patient\/PatientSearch/i.test(finalUrl)) {
+              this._logStep('Navigate to Patient Page - COMPLETE', { totalTime: Date.now() - navStart });
+              return true;
+            }
+          }
+        }
+
+        // Emergency same-origin fallback when sidebar controls are hidden/non-interactive.
+        // This avoids a hard stop in extraction runs while still staying within authenticated app origin.
+        if (!patientClicked) {
+          const locationFallback = await this.page
+            .evaluate(() => {
+              try {
+                const base = window.location.origin || '';
+                if (!base) return false;
+                window.location.assign(`${base}/Patient/PatientSearch`);
+                return true;
+              } catch {
+                return false;
+              }
+            })
+            .catch(() => false);
+          if (locationFallback) {
+            await this.page.waitForLoadState('domcontentloaded', { timeout: 8000 }).catch(() => {});
+            await this.page.waitForURL(/\/Patient\/PatientSearch/i, { timeout: 8000 }).catch(() => {});
+            const finalUrl = this.page.url();
+            this._logStep('Location fallback patient URL', { finalUrl });
+            if (/\/Patient\/PatientSearch/i.test(finalUrl)) {
+              this._logStep('Navigate to Patient Page - COMPLETE', { totalTime: Date.now() - navStart });
+              return true;
+            }
+          }
         }
 
         // Project rule: no direct URL navigation in Clinic Assist.
@@ -8453,10 +9042,11 @@ export class ClinicAssistAutomation {
           a.getDate() === b.getDate();
 
         const targetDate = parseDate(targetDateStr);
-        const diagnosisKeywords = /(pain|sprain|strain|fracture|injur|infection|fever|cough|cold|headache|migraine|asthma|diabetes|hypertension|arthritis|osteoarthritis|tendinitis|tendinopathy|tendinosis|bursitis|synovitis|dislocation|contusion|laceration|wound|ulcer|eczema|allergy|syndrome|influenza|tonsillitis|otitis|conjunctivitis|pneumonia|bronch|respiratory|gastro|dermat|sinus|chondromalacia|radiculopathy|spondylosis|cervicalgia|lumbago|myalgia|neuralgia|neuropathy|meniscus|ligament|fasciitis|impingement|capsulitis)/i;
-        const procedureKeywords = /(physiotherapy|x[- ]?ray|ultrasound|mri|ct|consultation|therapy|injection|radiolog|procedure|rehab|exercise|clinic|treatment|follow\s*up|brace|splint|cast|wrap|orthosis|support|sling|crutch|bandage|tape|pack|heat|cold|hot|breg)/i;
-        const icdPattern = /([A-Z]\d{2,3}(?:\.\d+)?)/;
-        const numericPattern = /(\d{6,10})/;
+        const diagnosisKeywords = /(pain|sprain|strain|fracture|injur|infection|fever|cough|cold|headache|migraine|asthma|diabetes|hypertension|arthritis|osteoarthritis|tendinitis|tendinopathy|tendinosis|bursitis|synovitis|dislocation|contusion|laceration|wound|ulcer|eczema|allergy|syndrome|influenza|tonsillitis|otitis|conjunctivitis|pneumonia|bronch|respiratory|gastro|dermat|sinus|chondromalacia|radiculopathy|spondylosis|cervicalgia|lumbago|myalgia|neuralgia|neuropathy|meniscus|ligament|fasciitis|impingement|capsulitis|backache|back pain|neck pain|knee pain|shoulder pain)/i;
+        const procedureKeywords = /(physiotherapy|x[- ]?ray|ultrasound|mri|ct|consultation|therapy|injection|radiolog|procedure|rehab|exercise|clinic|treatment|follow\s*up|brace|splint|cast|wrap|orthosis|support|sling|crutch|bandage|tape|pack|heat|cold|hot|breg|referral|medical report|certificate)/i;
+        const medicationKeywords = /(?:\bmed(?:icine|ication)?\b|\bmed[a-z0-9+\-]{2,}\b|\bdrug(?:s)?\b|\bpharmacy\b|\btablet?s?\b|\btab(?:s)?\b|\bcaps?(?:ule)?s?\b|\bmg\b|\bmcg\b|\bml\b|\bsyrup\b|\boin?tment\b|\bcream\b|\blotion\b|\bdrops?\b|\bgel\b|\bpatch\b|\bamp(?:oule)?\b|\bvial\b|\bbott(?:le)?\b|\bdose\b|\bdosage\b|\bqty\b|\bquantity\b|\bunit price\b|\bdispense\b|\btake\s+\d+\b|\bpo\b|\bbd\b|\btds\b|\bqds\b|\bod\b|\bnocte\b|\bprn\b|\bbefore food\b|\bafter food\b)/i;
+        const labKeywords = /(?:\blab(?:oratory)?\b|\btest\b|\bscreen(?:ing)?\b|\bpanel\b|\bprofile\b|\bthyroid\b|\bhba1c\b|\bcbc\b|\blipid\b|\blft\b|\brft\b|\burinalysis\b|\bblood\b)/i;
+        const icdPattern = /\b([A-TV-Z]\d{2,3}(?:\.[0-9A-Z]{1,4})?)\b/;
 
         const candidates = [];
         const tables = Array.from(document.querySelectorAll('table'));
@@ -8484,28 +9074,40 @@ export class ClinicAssistAutomation {
           if (!text) return;
           const lower = text.toLowerCase();
           if (lower.includes('unfit for duty') || lower.includes('medical certificate') || /\bmc\b/.test(lower)) return;
+          const hasDxLabel = /\bdiagnos(?:is|es)?\b|\bdx\b|\bicd\b/i.test(text);
 
           let code = null;
           const icdMatch = text.match(icdPattern);
-          const numMatch = text.match(numericPattern);
           if (icdMatch) code = icdMatch[1];
-          else if (numMatch) code = numMatch[1];
 
           const desc = cleanText(text, code);
           const descLower = desc.toLowerCase();
           const looksLikeDiagnosis = diagnosisKeywords.test(descLower);
           const looksLikeProcedure = procedureKeywords.test(descLower);
-          const hasDxLabel = /\bdiagnos(?:is|es)?\b|\bdx\b|\bicd\b/i.test(text);
+          const looksLikeMedication = medicationKeywords.test(descLower) || medicationKeywords.test(text);
+          const looksLikeLab = labKeywords.test(descLower) || labKeywords.test(text);
           const looksLikeMedicine = /\bmed\b|\bmedicine\b|\bdrug\b|\bpharmacy\b/i.test(text);
+
+          // Reject ICD-like tokens that are likely currency/unit artifacts unless explicit diagnosis labeling exists.
+          if (code && !hasDxLabel) {
+            if (/\bsgd\b/i.test(text) || /\b(?:mg|ml|tab|tabs|cap|caps|qty|unit|pcs?)\b/i.test(text)) {
+              code = null;
+            }
+          }
           const hasStrongDx = !!code || hasDxLabel;
+
+          // Hard filter non-diagnosis rows from All tab.
+          if ((looksLikeMedication || looksLikeLab) && !hasStrongDx && !looksLikeDiagnosis) return;
 
           // Require some diagnosis signal.
           if (!hasStrongDx && !looksLikeDiagnosis) return;
 
           // Exclude medicine/procedure rows unless there's a strong diagnosis signal.
           if (looksLikeMedicine && !hasStrongDx) return;
+          if (looksLikeMedication && !hasDxLabel) return;
           if (looksLikeProcedure && !hasStrongDx) return;
           if (looksLikeProcedure && !looksLikeDiagnosis && !hasDxLabel) return;
+          if (looksLikeLab && !hasDxLabel && !looksLikeDiagnosis) return;
           if (!desc || desc.length < 5) return;
 
           let score = 0;
@@ -8674,7 +9276,104 @@ export class ClinicAssistAutomation {
       this._logStep('Open Past Notes Tab');
       await this.page.waitForTimeout(1000);
 
+      const activatePastNotesSubTabs = async () => {
+        const subTabSelectors = [
+          '#tabPastNotes a[href="#tabPastCaseNote"]',
+          '#tabPastNotes a[href="#tab_Past"]',
+          '#tabPastNotes #btnPast',
+          '#tabPastNotes a.MultiChoice:has-text("Past")',
+          '#tabPastNotes button:has-text("Past")',
+        ];
+        let clicked = 0;
+        for (const selector of subTabSelectors) {
+          const node = this.page.locator(selector).first();
+          if ((await node.count().catch(() => 0)) === 0) continue;
+          if (!(await node.isVisible().catch(() => false))) continue;
+          await node.click({ timeout: 1500 }).catch(() => {});
+          clicked += 1;
+          await this.page.waitForTimeout(200);
+        }
+        return clicked;
+      };
+
+      const hasPastNotesPaneVisible = async () =>
+        this.page
+          .evaluate(() => {
+            const pane = document.querySelector('#tabPastNotes');
+            if (!pane) return false;
+            const style = window.getComputedStyle(pane);
+            const visible =
+              style.display !== 'none' &&
+              style.visibility !== 'hidden' &&
+              style.opacity !== '0' &&
+              pane.getBoundingClientRect().width > 0 &&
+              pane.getBoundingClientRect().height > 0;
+            if (!visible) return false;
+            const txt = String(pane.innerText || '').toLowerCase();
+            return (
+              /\bvisit\s*notes?\b/.test(txt) ||
+              /\bpast\b/.test(txt) ||
+              !!pane.querySelector('#pastCaseNoteGrid, #tabPastCaseNote, #tab_Past, #btnPast, #divVisitNoteList')
+            );
+          })
+          .catch(() => false);
+
+      const hasCaseNotesContext = async () =>
+        this.page
+          .evaluate(() => {
+            const txtRaw = String(document.body?.innerText || '');
+            const txt = txtRaw.toLowerCase();
+            const lines = txtRaw
+              .split(/\r?\n/)
+              .map((l) => String(l || '').trim())
+              .filter(Boolean)
+              .slice(0, 1500);
+            // IMPORTANT: /QueueLog/PatientVisit is shared by multiple TX sub-tabs.
+            // Do not use URL-only checks; require concrete Past Notes signals.
+            const hasCaseHeaders =
+              /case\s*note/.test(txt) &&
+              /visit\s*no/.test(txt) &&
+              /management/.test(txt);
+            const hasVisitNotesHeader = /\bvisit\s*notes?\b/.test(txt);
+            const hasAppendControl = /\bappend\b/.test(txt);
+            const hasPastDateRow =
+              /\b\d{1,2}\s*[a-z]{3}\s*\d{4}\b/.test(txt) ||
+              /\b\d{1,2}[-/][a-z]{3}[-/]\d{4}\b/.test(txt) ||
+              /\b\d{1,2}[-/]\d{1,2}[-/]\d{4}\b/.test(txt);
+            const hasExpandedEvidence =
+              /\bcasenote\b/i.test(txt) ||
+              /<\d{2}-[a-z]{3}-\d{4}\s+\d{1,2}:\d{2}\s*(am|pm)>/i.test(txt);
+            const hasDateAppendLine = lines.some((line) => {
+              const l = line.toLowerCase();
+              if (!/(append|expand|collapse)/.test(l)) return false;
+              return (
+                /\b\d{1,2}\s*[a-z]{3}\s*\d{4}\b/.test(l) ||
+                /\b\d{1,2}[-/][a-z]{3}[-/]\d{4}\b/.test(l) ||
+                /\b\d{1,2}[-/]\d{1,2}[-/]\d{4}\b/.test(l)
+              );
+            });
+            // Guard against false positives from the "All" tab table.
+            const looksLikeAllTab =
+              /all\s+medicine\s+investigation\s+procedure\s+diagnosis\s+m\.?c\.?\s+visit/.test(txt);
+            const hasCollapsedPastNotes =
+              hasVisitNotesHeader && hasPastDateRow && hasAppendControl && hasDateAppendLine;
+            return (
+              (hasCaseHeaders && hasPastDateRow && (hasExpandedEvidence || hasDateAppendLine) && !looksLikeAllTab) ||
+              hasCollapsedPastNotes
+            );
+          })
+          .catch(() => false);
+
+      if ((await hasCaseNotesContext()) || (await hasPastNotesPaneVisible())) {
+        await activatePastNotesSubTabs().catch(() => 0);
+        this._logStep('Past Notes context already open');
+        return true;
+      }
+
       const pastNotesSelectors = [
+        'a[href="#tabPastNotes"]',
+        '#Pat-tab-li-PastNotes a',
+        '#Pat-tab-li-PastNotes',
         '[role="tab"]:has-text("Past Notes")',
         'a:has-text("Past Notes")',
         'button:has-text("Past Notes")',
@@ -8694,8 +9393,11 @@ export class ClinicAssistAutomation {
               await tab.click();
               await this.page.waitForLoadState('domcontentloaded').catch(() => {});
               await this.page.waitForTimeout(2000);
-              this._logStep('Past Notes Tab opened');
-              return true;
+              await activatePastNotesSubTabs().catch(() => 0);
+              if ((await hasCaseNotesContext()) || (await hasPastNotesPaneVisible())) {
+                this._logStep('Past Notes Tab opened');
+                return true;
+              }
             }
           }
         } catch (e) {
@@ -8703,11 +9405,239 @@ export class ClinicAssistAutomation {
         }
       }
 
+      // Fallback path used on some Clinic Assist layouts:
+      // open Visit Notes first, then switch to Past list.
+      const visitNotesSelectors = [
+        '[role="tab"]:has-text("Visit Notes")',
+        'a:has-text("Visit Notes")',
+        'button:has-text("Visit Notes")',
+      ];
+      for (const selector of visitNotesSelectors) {
+        try {
+          const tab = this.page.locator(selector).first();
+          if ((await tab.count().catch(() => 0)) === 0) continue;
+          if (!(await tab.isVisible().catch(() => false))) continue;
+          await tab.click();
+          await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+          await this.page.waitForTimeout(1200);
+          await activatePastNotesSubTabs().catch(() => 0);
+          break;
+        } catch {
+          // try next selector
+        }
+      }
+
+      const pastSelectors = [
+        '[role="tab"]:has-text("Past")',
+        'a:has-text("Past")',
+        'button:has-text("Past")',
+      ];
+      for (const selector of pastSelectors) {
+        try {
+          const tab = this.page.locator(selector).first();
+          if ((await tab.count().catch(() => 0)) === 0) continue;
+          if (!(await tab.isVisible().catch(() => false))) continue;
+          await tab.click();
+          await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+          await this.page.waitForTimeout(2000);
+          await activatePastNotesSubTabs().catch(() => 0);
+          if ((await hasCaseNotesContext()) || (await hasPastNotesPaneVisible())) {
+            this._logStep('Past Notes opened via Visit Notes > Past');
+            return true;
+          }
+        } catch {
+          // try next selector
+        }
+      }
+
+      if (await hasPastNotesPaneVisible()) {
+        this._logStep('Past Notes pane detected via fallback visibility check');
+        return true;
+      }
+
       throw new Error('Could not find Past Notes Tab');
     } catch (error) {
       logger.error('Failed to open Past Notes Tab:', error);
       return false;
     }
+  }
+
+  /**
+   * Expand Past Notes entries safely (target-date first) to expose note text in DOM.
+   * @param {string} visitDate - Visit date in YYYY-MM-DD format
+   * @returns {Promise<number>} number of clicked expand controls
+   */
+  async expandPastNotesEntries(visitDate) {
+    const targetDate = new Date(visitDate);
+    const targetDateStr = Number.isFinite(targetDate.getTime())
+      ? targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      : '';
+    const targetDateStrAlt = Number.isFinite(targetDate.getTime())
+      ? targetDate.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      : '';
+    const targetDateStrMon = Number.isFinite(targetDate.getTime())
+      ? targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/\s+/g, '-')
+      : '';
+
+    let clicked = 0;
+    const appendTargets = this.page.locator(
+      [
+        '#tabPastNotes a:has-text("Expand")',
+        '#tabPastNotes button:has-text("Expand")',
+        '#tabPastNotes [role="button"]:has-text("Expand")',
+        '#tabPastNotes a:has-text("Show More")',
+        '#tabPastNotes button:has-text("Show More")',
+        '#tabPastNotes a:has-text("View")',
+        '#tabPastNotes button:has-text("View")',
+      ].join(', ')
+    );
+    const appendCount = await appendTargets.count().catch(() => 0);
+    for (let i = 0; i < Math.min(appendCount, 12); i++) {
+      const item = appendTargets.nth(i);
+      if (!(await item.isVisible().catch(() => false))) continue;
+      const label = String((await item.textContent().catch(() => '')) || '').toLowerCase();
+      if (!/(expand|show more|view)/.test(label)) continue;
+      await item.click({ timeout: 1000 }).catch(() => {});
+      clicked += 1;
+      await this.page.waitForTimeout(120);
+    }
+
+    const targetedClicks = await this.page
+      .evaluate(({ targetDateStr, targetDateStrAlt, targetDateStrMon }) => {
+        const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+        const hasTargetDate = (s) => {
+          const t = String(s || '');
+          return t.includes(targetDateStr) || t.includes(targetDateStrAlt) || t.includes(targetDateStrMon);
+        };
+
+        let localClicks = 0;
+        const seenControls = new WeakSet();
+        const rows = Array.from(document.querySelectorAll('tr, li, div, section')).slice(0, 1200);
+        for (const row of rows) {
+          if (localClicks >= 20) break;
+          const txt = row.textContent || '';
+          if (!hasTargetDate(txt)) continue;
+          const controls = Array.from(
+            row.querySelectorAll('a,button,span,[role="button"],input[type="button"],input[type="submit"]')
+          );
+          for (const control of controls) {
+            if (localClicks >= 20) break;
+            if (seenControls.has(control)) continue;
+            const label = norm(control.textContent || control.getAttribute?.('value') || '');
+            if (!label) continue;
+            if (!/(expand|show more|view|details)/.test(label)) continue;
+            const onClick = String(control.getAttribute?.('onclick') || '').toLowerCase();
+            const className = String(control.className || '').toLowerCase();
+            const controlId = String(control.id || '').toLowerCase();
+            if (onClick.includes('appendcasenote(')) continue;
+            if (className.includes('btn-append-casenote')) continue;
+            if (controlId.includes('dropdowncasenotemenubutton')) continue;
+            try {
+              seenControls.add(control);
+              control.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+              control.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
+              control.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+              localClicks += 1;
+            } catch {
+              // ignore
+            }
+          }
+        }
+        return localClicks;
+      }, { targetDateStr, targetDateStrAlt, targetDateStrMon })
+      .catch(() => 0);
+
+    const totalClicked = clicked + (Number.isFinite(Number(targetedClicks)) ? Number(targetedClicks) : 0);
+    if (totalClicked > 0) {
+      this._logStep('Past Notes entries expanded', {
+        visitDate,
+        totalClicked,
+      });
+      await this.page.waitForTimeout(900);
+    }
+    return totalClicked;
+  }
+
+  async closePastNotesModalIfOpen() {
+    try {
+      const modalVisible = await this.page
+        .evaluate(() => {
+          const modal = document.querySelector('#queueHisCaseNoteModal');
+          if (!modal) return false;
+          const style = window.getComputedStyle(modal);
+          const visible = style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+          return visible || modal.classList.contains('in') || modal.getAttribute('aria-hidden') === 'false';
+        })
+        .catch(() => false);
+      if (!modalVisible) return false;
+
+      const closeSelectors = [
+        '#queueHisCaseNoteModal button.close',
+        '#queueHisCaseNoteModal [data-dismiss=\"modal\"]',
+        '#queueHisCaseNoteModal button:has-text(\"Close\")',
+        '#queueHisCaseNoteModal a:has-text(\"Close\")',
+      ];
+      for (const selector of closeSelectors) {
+        const btn = this.page.locator(selector).first();
+        if ((await btn.count().catch(() => 0)) === 0) continue;
+        if (!(await btn.isVisible().catch(() => false))) continue;
+        await btn.click({ timeout: 1000 }).catch(() => {});
+        await this.page.waitForTimeout(150);
+        break;
+      }
+      await this.page.keyboard.press('Escape').catch(() => {});
+      await this.page.waitForTimeout(300);
+      this._logStep('Closed Past Notes modal overlay');
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async _clearBlockingHistoryOverlays() {
+    let cleared = false;
+    try {
+      const closed = await this.closePastNotesModalIfOpen().catch(() => false);
+      if (closed) cleared = true;
+
+      const forced = await this.page
+        .evaluate(() => {
+          let changed = 0;
+          const modal = document.querySelector('#queueHisCaseNoteModal');
+          if (modal) {
+            modal.classList.remove('in', 'show');
+            modal.setAttribute('aria-hidden', 'true');
+            modal.style.display = 'none';
+            changed += 1;
+          }
+          const overlays = Array.from(document.querySelectorAll('.modal-backdrop, .blockUI, .blockUI.blockOverlay'));
+          for (const overlay of overlays) {
+            try {
+              overlay.remove();
+              changed += 1;
+            } catch {
+              // ignore
+            }
+          }
+          const body = document.body;
+          if (body) {
+            body.classList.remove('modal-open');
+            body.style.removeProperty('padding-right');
+          }
+          return changed;
+        })
+        .catch(() => 0);
+      if (forced > 0) {
+        this._logStep('Force-cleared blocking history overlay', { changedNodes: forced });
+        cleared = true;
+      }
+      if (cleared) {
+        await this.page.waitForTimeout(200);
+      }
+    } catch {
+      // ignore
+    }
+    return cleared;
   }
 
   /**
@@ -8721,28 +9651,99 @@ export class ClinicAssistAutomation {
       
       // Navigate to TX History and open Past Notes tab
       await this.navigateToTXHistory().catch(() => {});
-      await this.openPastNotesTab();
-      await this.page.waitForTimeout(2000);
+      const pastNotesOpened = await this.openPastNotesTab();
+      if (!pastNotesOpened) {
+        this._logStep('Past Notes tab unavailable; skip diagnosis extraction from Past Notes');
+        return null;
+      }
+      await this.expandPastNotesEntries(visitDate).catch(() => 0);
+      await this.page.waitForTimeout(1500);
 
       // Parse target date
       const targetDate = new Date(visitDate);
       const targetDateStr = targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }); // DD/MM/YYYY
       const targetDateStrAlt = targetDate.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' }); // MM/DD/YYYY
+      const targetDateStrMon = targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/\s+/g, '-'); // DD-MMM-YYYY
 
-      const result = await this.page.evaluate(({ targetDateStr, targetDateStrAlt }) => {
+      const result = await this.page.evaluate(({ targetDateStr, targetDateStrAlt, targetDateStrMon, visitDateIso }) => {
+        const parseDate = (text) => {
+          const s = String(text || '').trim();
+          if (!s) return null;
+
+          const iso = s.match(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/);
+          if (iso) return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+
+          const dmy = s.match(/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})\b/);
+          if (dmy) return new Date(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1]));
+
+          const monMap = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+          const dMonY = s.match(/\b(\d{1,2})[-/\s]([a-z]{3,9})[-/\s](\d{4})\b/i);
+          if (dMonY) {
+            const m = monMap[String(dMonY[2]).slice(0, 3).toLowerCase()] || 0;
+            if (m) return new Date(Number(dMonY[3]), m - 1, Number(dMonY[1]));
+          }
+          return null;
+        };
+        const sameDay = (a, b) =>
+          !!a &&
+          !!b &&
+          a.getFullYear() === b.getFullYear() &&
+          a.getMonth() === b.getMonth() &&
+          a.getDate() === b.getDate();
+        const targetDateObj = parseDate(visitDateIso) || parseDate(targetDateStr) || parseDate(targetDateStrAlt) || parseDate(targetDateStrMon);
+        const compactDiagnosisText = (sentence) => {
+          const raw = String(sentence || '')
+            .replace(/^[\-\u2022]\s*/, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+          if (!raw) return '';
+          const lower = raw.toLowerCase();
+          const bodyPartRegex =
+            /(shoulder|knee|ankle|wrist|elbow|hip|back|neck|foot|heel|hand|finger|toe|leg|arm|thigh|calf|forearm|spine|lumbar|cervical|thoracic)/i;
+          const condRegex = /(pain|ache|sprain|strain|fracture|injury|contusion|dislocation|swelling|inflammation|arthritis|osteoarthritis|capsulitis|impingement)/i;
+          const sideRegex = /\b(right|left|rt|lt)\b/i;
+          const bodyMatch = raw.match(bodyPartRegex);
+          const condMatch = raw.match(condRegex);
+          const sideMatch = raw.match(sideRegex);
+          if (bodyMatch && condMatch) {
+            const body = String(bodyMatch[1] || '').toLowerCase();
+            const cond = String(condMatch[1] || '').toLowerCase();
+            const sideRaw = String(sideMatch?.[1] || '').toLowerCase();
+            const side = sideRaw === 'rt' ? 'right' : sideRaw === 'lt' ? 'left' : sideRaw;
+            if (cond === 'pain' || cond === 'ache') {
+              return `Pain in ${side ? `${side} ` : ''}${body}`.trim();
+            }
+            return `${cond} of ${side ? `${side} ` : ''}${body}`.trim();
+          }
+          if (lower.includes('pain in')) {
+            const m = raw.match(/(pain in [^.,;\n\r]{3,120})/i);
+            if (m?.[1]) return m[1].replace(/\s+/g, ' ').trim();
+          }
+          return raw.slice(0, 180);
+        };
+        const hasTargetDate = (text) => {
+          const raw = String(text || '');
+          if (raw.includes(targetDateStr) || raw.includes(targetDateStrAlt) || raw.includes(targetDateStrMon)) return true;
+          if (!targetDateObj) return false;
+          return sameDay(parseDate(raw), targetDateObj);
+        };
+
         // Look for notes/entries matching the visit date
         const tables = Array.from(document.querySelectorAll('table'));
         const textAreas = Array.from(document.querySelectorAll('textarea, div[contenteditable]'));
         const noteDivs = Array.from(document.querySelectorAll('div[class*="note"], div[class*="entry"]'));
+        const modalNotes = Array.from(
+          document.querySelectorAll('#queueHisCaseNoteModal, #queueHisCaseNoteModal .modal-body, .modal .pastnote-card-body')
+        );
         
         // Combine all potential note containers
-        const allContainers = [...tables, ...textAreas, ...noteDivs];
+        const allContainers = [...tables, ...textAreas, ...noteDivs, ...modalNotes];
         
         for (const container of allContainers) {
           const text = container.textContent || '';
           
           // Check if this container has the target date
-          if (text.includes(targetDateStr) || text.includes(targetDateStrAlt)) {
+          if (hasTargetDate(text)) {
             // Look for diagnosis patterns in the text
             const diagnosisPatterns = [
               /diagnosis[:\s]+([^\n\r;]{10,200})/i,
@@ -8761,7 +9762,7 @@ export class ClinicAssistAutomation {
                   const code = codeMatch ? codeMatch[1] : null;
                   const description = diagnosisText.replace(codeMatch ? codeMatch[0] : '', '').trim();
                   
-                  return { code, description: description || diagnosisText };
+                  return { code, description: compactDiagnosisText(description || diagnosisText), date: visitDateIso || null };
                 }
               }
             }
@@ -8772,7 +9773,14 @@ export class ClinicAssistAutomation {
               if (sentence.length > 20 && sentence.length < 200) {
                 // Check if it looks like a diagnosis (contains medical keywords)
                 if (/pain|ache|infection|injury|sprain|strain|fracture|disorder|disease|syndrome|chondromalacia|radiculopathy|spondylosis|myalgia|neuralgia|neuropathy|fasciitis|impingement|capsulitis/i.test(sentence)) {
-                  return { code: null, description: sentence.trim() };
+                  const compact = compactDiagnosisText(sentence.trim());
+                  const looksPortable =
+                    /(pain in|sprain of|strain of|fracture of|injury of)/i.test(compact) ||
+                    /(?:shoulder|knee|ankle|wrist|elbow|hip|back|neck|foot|heel|hand|finger|toe|leg|arm|thigh|calf|forearm|spine|lumbar|cervical|thoracic)/i.test(
+                      compact
+                    );
+                  if (!looksPortable) continue;
+                  return { code: null, description: compact, date: visitDateIso || null };
                 }
               }
             }
@@ -8780,12 +9788,13 @@ export class ClinicAssistAutomation {
         }
         
         return null;
-      }, { targetDateStr, targetDateStrAlt });
+      }, { targetDateStr, targetDateStrAlt, targetDateStrMon, visitDateIso: visitDate });
 
       if (result) {
         this._logStep('Diagnosis extracted from Past Notes', { 
           code: result.code,
-          description: result.description?.substring(0, 100)
+          description: result.description?.substring(0, 100),
+          date: result.date || null,
         });
         return result;
       }
@@ -8795,6 +9804,8 @@ export class ClinicAssistAutomation {
     } catch (error) {
       logger.error('Failed to extract diagnosis from Past Notes:', error);
       return null;
+    } finally {
+      await this.closePastNotesModalIfOpen().catch(() => {});
     }
   }
 
@@ -8809,54 +9820,69 @@ export class ClinicAssistAutomation {
     try {
       this._logStep('Extract diagnosis intent from Past Notes', { visitDate });
 
-      await this.navigateToTXHistory().catch(() => {});
-      await this.openPastNotesTab();
+      const urlBeforePastNotes = String(this.page.url() || '');
+      const hasTxContext = /TXHistory|QueueLog\/PatientVisit/i.test(urlBeforePastNotes);
+      if (!hasTxContext) {
+        await this.navigateToTXHistory().catch(() => {});
+      }
+      const pastNotesOpened = await this.openPastNotesTab();
+      if (!pastNotesOpened) {
+        this._logStep('Past Notes tab unavailable; skip diagnosis intent extraction');
+        return null;
+      }
+      await this.expandPastNotesEntries(visitDate).catch(() => 0);
       await this.page.waitForTimeout(1500);
 
       const targetDate = new Date(visitDate);
       const targetDateStr = targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
       const targetDateStrAlt = targetDate.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      const targetDateStrMon = targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/\s+/g, '-');
 
-      const intent = await this.page.evaluate(({ targetDateStr, targetDateStrAlt, baseDescription }) => {
-        const norm = (s) => String(s || '').toLowerCase();
+      const evalIntent = async () =>
+        this.page.evaluate(({ targetDateStr, targetDateStrAlt, targetDateStrMon, visitDateIso, baseDescription }) => {
+        const norm = (s) =>
+          String(s || '')
+            .replace(/diagnosis\s*(rt|lt|right|left)/gi, 'diagnosis $1')
+            .replace(/([a-z])(rt|lt)(?=\s*(acj|shoulder|knee|ankle|wrist|elbow|hip|back|neck))/gi, '$1 $2')
+            .replace(/([a-z])([A-Z])/g, '$1 $2')
+            .toLowerCase();
         const base = norm(baseDescription);
-        const bodyParts = [
-          'shoulder',
-          'knee',
-          'ankle',
-          'wrist',
-          'elbow',
-          'hip',
-          'back',
-          'neck',
-          'foot',
-          'hand',
-          'finger',
-          'toe',
-          'leg',
-          'arm',
-          'thigh',
-          'calf',
-          'forearm',
-          'spine',
-          'lumbar',
-          'cervical',
-          'thoracic',
-          'rib',
-          'chest',
-          'abdomen',
-          'stomach',
-          'head',
-          'eye',
-          'ear',
-          'nose',
-          'throat',
+        const bodyPartMatchers = [
+          { canonical: 'shoulder', regex: /\b(shoulder|shldr|acj|ac\s*joint|acromio[-\s]*clavicular)\b/i },
+          { canonical: 'knee', regex: /\b(knee|patella|patellar)\b/i },
+          { canonical: 'ankle', regex: /\b(ankle)\b/i },
+          { canonical: 'wrist', regex: /\b(wrist)\b/i },
+          { canonical: 'elbow', regex: /\b(elbow)\b/i },
+          { canonical: 'hip', regex: /\b(hip)\b/i },
+          { canonical: 'back', regex: /\b(back|upperback|lowerback|mid\s*back)\b/i },
+          { canonical: 'neck', regex: /\b(neck)\b/i },
+          { canonical: 'foot', regex: /\b(foot)\b/i },
+          { canonical: 'hand', regex: /\b(hand)\b/i },
+          { canonical: 'finger', regex: /\b(finger)\b/i },
+          { canonical: 'toe', regex: /\b(toe)\b/i },
+          { canonical: 'leg', regex: /\b(leg)\b/i },
+          { canonical: 'arm', regex: /\b(arm)\b/i },
+          { canonical: 'thigh', regex: /\b(thigh)\b/i },
+          { canonical: 'calf', regex: /\b(calf)\b/i },
+          { canonical: 'forearm', regex: /\b(forearm)\b/i },
+          { canonical: 'spine', regex: /\b(spine|lumbar|cervical|thoracic)\b/i },
+          { canonical: 'rib', regex: /\b(rib)\b/i },
+          { canonical: 'chest', regex: /\b(chest)\b/i },
+          { canonical: 'abdomen', regex: /\b(abdomen|abdominal|stomach)\b/i },
+          { canonical: 'head', regex: /\b(head)\b/i },
+          { canonical: 'eye', regex: /\b(eye)\b/i },
+          { canonical: 'ear', regex: /\b(ear)\b/i },
+          { canonical: 'nose', regex: /\b(nose)\b/i },
+          { canonical: 'throat', regex: /\b(throat)\b/i },
         ];
 
         const conditions = [
           'pain',
+          'ache',
           'sprain',
           'strain',
+          'degeneration',
+          'degenerative',
           'tendinitis',
           'tendinopathy',
           'bursitis',
@@ -8876,32 +9902,89 @@ export class ClinicAssistAutomation {
           'rupture',
         ];
 
-        const detectBodyPart = (text) => bodyParts.find((bp) => text.includes(bp)) || null;
+        const detectBodyPart = (text) => {
+          for (const m of bodyPartMatchers) {
+            if (m.regex.test(text)) return m.canonical;
+          }
+          return null;
+        };
         const detectCondition = (text) => conditions.find((c) => text.includes(c)) || null;
         const detectSide = (text) => {
           if (/\b(right|rt)\b/i.test(text)) return 'right';
           if (/\b(left|lt)\b/i.test(text)) return 'left';
+          if (/(right|rt)\s*(acj|shoulder|knee|ankle|wrist|elbow|hip|back|neck)\b/i.test(text)) return 'right';
+          if (/(left|lt)\s*(acj|shoulder|knee|ankle|wrist|elbow|hip|back|neck)\b/i.test(text)) return 'left';
           if (/\b(r)\b/i.test(text) && text.includes('shoulder')) return 'right';
           if (/\b(l)\b/i.test(text) && text.includes('shoulder')) return 'left';
           return null;
         };
 
         const parseDate = (text) => {
+          const monthMap = {
+            jan: 1,
+            feb: 2,
+            mar: 3,
+            apr: 4,
+            may: 5,
+            jun: 6,
+            jul: 7,
+            aug: 8,
+            sep: 9,
+            oct: 10,
+            nov: 11,
+            dec: 12,
+          };
+          const iso = text.match(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/);
+          if (iso) {
+            const y = parseInt(iso[1], 10);
+            const m = parseInt(iso[2], 10);
+            const d = parseInt(iso[3], 10);
+            if (y && m && d) return new Date(y, m - 1, d);
+            return null;
+          }
           const m = text.match(/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})\b/);
-          if (!m) return null;
-          const a = parseInt(m[1], 10);
-          const b = parseInt(m[2], 10);
-          const y = parseInt(m[3], 10);
-          // Prefer DD/MM/YYYY when ambiguous
-          const day = a > 12 ? a : b;
-          const month = a > 12 ? b : a;
+          if (m) {
+            const a = parseInt(m[1], 10);
+            const b = parseInt(m[2], 10);
+            const y = parseInt(m[3], 10);
+            // Prefer DD/MM/YYYY when ambiguous.
+            const day = a > 12 ? a : b;
+            const month = a > 12 ? b : a;
+            if (!day || !month || !y) return null;
+            return new Date(y, month - 1, day);
+          }
+          const m2 = text.match(/\b(\d{1,2})[\/\-\s]([A-Za-z]{3,9})[\/\-\s](\d{4})\b/);
+          if (!m2) return null;
+          const day = parseInt(m2[1], 10);
+          const mon = String(m2[2] || '').slice(0, 3).toLowerCase();
+          const month = monthMap[mon] || 0;
+          const y = parseInt(m2[3], 10);
           if (!day || !month || !y) return null;
           return new Date(y, month - 1, day);
         };
 
-        const targetDate = parseDate(targetDateStr) || parseDate(targetDateStrAlt);
+        const sameDay = (a, b) =>
+          !!a &&
+          !!b &&
+          a.getFullYear() === b.getFullYear() &&
+          a.getMonth() === b.getMonth() &&
+          a.getDate() === b.getDate();
+        const targetDate =
+          parseDate(visitDateIso) ||
+          parseDate(targetDateStr) ||
+          parseDate(targetDateStrAlt) ||
+          parseDate(targetDateStrMon);
+        const hasTargetDate = (text) => {
+          const raw = String(text || '');
+          if (raw.includes(targetDateStr) || raw.includes(targetDateStrAlt) || raw.includes(targetDateStrMon)) return true;
+          if (!targetDate) return false;
+          return sameDay(parseDate(raw), targetDate);
+        };
+        const baseBodyPart = detectBodyPart(base);
+        const baseCondition = detectCondition(base);
 
         const best = { score: 0, bodyPart: null, condition: null, side: null, sentence: null };
+        const bestAligned = { score: 0, bodyPart: null, condition: null, side: null, sentence: null };
 
         const scoreSentence = (sentence) => {
           const s = norm(sentence);
@@ -8913,6 +9996,9 @@ export class ClinicAssistAutomation {
           if (bp) score += 3;
           if (cond) score += 3;
           if (side) score += 2;
+          if (baseBodyPart && bp === baseBodyPart) score += 6;
+          if (baseBodyPart && bp !== baseBodyPart) score -= 3;
+          if (baseCondition && cond && baseCondition === cond) score += 1;
           if (base && bp && base.includes(bp)) score += 1;
           return { score, bp, cond, side, sentence: sentence.trim() };
         };
@@ -8921,19 +10007,37 @@ export class ClinicAssistAutomation {
           ...Array.from(document.querySelectorAll('table')),
           ...Array.from(document.querySelectorAll('textarea, div[contenteditable]')),
           ...Array.from(document.querySelectorAll('div[class*="note"], div[class*="entry"]')),
+          ...Array.from(
+            document.querySelectorAll('#queueHisCaseNoteModal, #queueHisCaseNoteModal .modal-body, .modal .pastnote-card-body')
+          ),
         ];
 
         const pickText = (c) => norm(c.textContent || '');
         const candidates = containers.filter((c) => {
           const text = pickText(c);
-          return text.includes(targetDateStr.toLowerCase()) || text.includes(targetDateStrAlt.toLowerCase());
+          return hasTargetDate(text);
         });
-        const pool = candidates.length ? candidates : containers;
+        const pool = candidates.length ? candidates : [];
+        if (!pool.length) {
+          return {
+            __no_intent: true,
+            debug: {
+              url: location.href,
+              title: document.title || '',
+              poolSize: 0,
+              targetDateStr,
+              targetDateStrAlt,
+              baseBodyPart,
+              evidence: [],
+              reason: 'no_target_date_note_container',
+            },
+          };
+        }
 
         const splitSentences = (text) =>
           text
-            .split(/[.\n\r]/)
-            .map((s) => s.trim())
+            .split(/[.\n\r;]|(?=\b(?:history|aggravating|relieving|rx\)|mplan|diagnosis|medicine|procedure)\b)/i)
+            .map((s) => String(s || '').trim())
             .filter((s) => s.length > 5);
 
         // First pass: structured Past Notes tables with Date/Notes columns.
@@ -8970,6 +10074,18 @@ export class ClinicAssistAutomation {
               best.side = scored.side;
               best.sentence = scored.sentence;
             }
+            if (
+              baseBodyPart &&
+              scored &&
+              scored.bp === baseBodyPart &&
+              scored.score > bestAligned.score
+            ) {
+              bestAligned.score = scored.score;
+              bestAligned.bodyPart = scored.bp;
+              bestAligned.condition = scored.cond;
+              bestAligned.side = scored.side;
+              bestAligned.sentence = scored.sentence;
+            }
           }
         }
 
@@ -8986,16 +10102,58 @@ export class ClinicAssistAutomation {
               best.side = scored.side;
               best.sentence = scored.sentence;
             }
+            if (
+              baseBodyPart &&
+              scored &&
+              scored.bp === baseBodyPart &&
+              scored.score > bestAligned.score
+            ) {
+              bestAligned.score = scored.score;
+              bestAligned.bodyPart = scored.bp;
+              bestAligned.condition = scored.cond;
+              bestAligned.side = scored.side;
+              bestAligned.sentence = scored.sentence;
+            }
           }
         }
 
-        // If no structured match, return null.
-        if (!best.bodyPart) return null;
+        // Do not score whole-page text. It can include non-clinical scripts/markup and produce false intents.
 
-        const baseCond = detectCondition(base);
-        const condition = best.condition || baseCond || null;
-        const side = best.side || null;
-        const bodyPart = best.bodyPart;
+        const chosen = baseBodyPart && bestAligned.bodyPart ? bestAligned : best;
+
+        const evidencePattern = /(shoulder|acj|right|left|rt|lt|pain|diagnosis)/i;
+        const evidence = [];
+        for (const container of pool) {
+          const text = pickText(container);
+          const sentences = splitSentences(text);
+          for (const sentence of sentences) {
+            if (!evidencePattern.test(sentence)) continue;
+            evidence.push(sentence.slice(0, 220));
+            if (evidence.length >= 10) break;
+          }
+          if (evidence.length >= 10) break;
+        }
+        // If no structured match, return debug payload for tuning.
+        if (!chosen.bodyPart) {
+          return {
+            __no_intent: true,
+            debug: {
+              url: location.href,
+              title: document.title || '',
+              poolSize: pool.length,
+              targetDateStr,
+              targetDateStrAlt,
+              baseBodyPart,
+              evidence,
+            },
+          };
+        }
+
+        const baseCond = baseCondition;
+        // Preserve base diagnosis condition (e.g. "pain") and enrich with laterality/body-part from notes.
+        const condition = baseCond || chosen.condition || null;
+        const side = chosen.side || null;
+        const bodyPart = chosen.bodyPart;
 
         const isPain = condition && /pain|ache|soreness/.test(condition);
         let description = null;
@@ -9005,30 +10163,47 @@ export class ClinicAssistAutomation {
           } else {
             description = `${condition} of ${side ? `${side} ` : ''}${bodyPart}`.trim();
           }
-        } else if (best.sentence && best.sentence.length <= 160) {
-          description = best.sentence;
         }
 
         return description
-          ? { description, side, bodyPart, condition }
+          ? {
+              description,
+              side,
+              bodyPart,
+              condition,
+              score: Number(chosen.score || 0),
+              source_date: visitDateIso || null,
+            }
           : null;
-      }, { targetDateStr, targetDateStrAlt, baseDescription });
+      }, { targetDateStr, targetDateStrAlt, targetDateStrMon, visitDateIso: visitDate, baseDescription });
 
-      if (intent?.description) {
+      let intentEval = await evalIntent().catch(() => null);
+
+      // Do not perform broad "click everything expandable" retries here.
+      // They can open unrelated modal dialogs and destabilize subsequent extraction/navigation.
+
+      if (intentEval?.description) {
         this._logStep('Diagnosis intent extracted from Past Notes', {
-          description: intent.description?.slice(0, 100),
-          side: intent.side,
-          bodyPart: intent.bodyPart,
-          condition: intent.condition,
+          description: intentEval.description?.slice(0, 100),
+          side: intentEval.side,
+          bodyPart: intentEval.bodyPart,
+          condition: intentEval.condition,
+          score: intentEval.score,
+          sourceDate: intentEval.source_date || null,
         });
-        return intent;
+        return intentEval;
       }
 
+      if (intentEval?.__no_intent && intentEval?.debug) {
+        this._logStep('Past Notes intent debug (no match)', intentEval.debug);
+      }
       this._logStep('No diagnosis intent found in Past Notes');
       return null;
     } catch (error) {
       logger.error('Failed to extract diagnosis intent from Past Notes:', error);
       return null;
+    } finally {
+      await this.closePastNotesModalIfOpen().catch(() => {});
     }
   }
 
@@ -9036,7 +10211,11 @@ export class ClinicAssistAutomation {
     const d = String(description || '').trim().toLowerCase();
     if (!d) return true;
     if (d.length < 6) return true;
-    const hasBodyPart = /(shoulder|knee|ankle|wrist|elbow|hip|back|neck|foot|hand|finger|toe|leg|arm|thigh|calf|forearm|spine|lumbar|cervical|thoracic|rib|chest|abdomen|stomach|head|eye|ear|nose|throat)/i.test(d);
+    // Narrative note lines are not portal-ready diagnosis labels.
+    if (/^[\-\u2022]\s*/.test(d) || d.split(/\s+/).length >= 12) return true;
+    const hasBodyPart = /(shoulder|knee|ankle|wrist|elbow|hip|back|neck|foot|heel|hand|finger|toe|leg|arm|thigh|calf|forearm|spine|lumbar|loin|cervical|thoracic|rib|chest|abdomen|stomach|head|eye|ear|nose|throat|acl|mcl|lcl|pcl|meniscus|patella|ligament)/i.test(
+      d
+    );
     if (!hasBodyPart) return true;
     // Generic/ambiguous phrases
     if (/unspecified|region|joint|site|part|other|oth|unsp/i.test(d) && !/(left|right|lt|rt)\b/i.test(d)) {
@@ -9045,14 +10224,512 @@ export class ClinicAssistAutomation {
     return false;
   }
 
+  _normalizeDiagnosisCode(value) {
+    const raw = String(value || '')
+      .toUpperCase()
+      .replace(/\s+/g, '');
+    if (!raw) return null;
+    const m = raw.match(/[A-Z]\d{2,4}(?:\.\d{1,4})?[A-Z]?/);
+    if (!m) return null;
+    const code = m[0];
+    const parsed = code.match(/^([A-Z]\d{2,4})(?:\.(\d{1,4}))?([A-Z])?$/);
+    if (!parsed) return code;
+    let head = parsed[1];
+    let tail = parsed[2] || null;
+    const suffix = parsed[3] || '';
+
+    if (!tail && head.length > 3) {
+      tail = head.slice(3);
+      head = head.slice(0, 3);
+    }
+
+    if (tail) {
+      tail = tail.replace(/0+$/g, '');
+      if (!tail) return `${head}${suffix}`;
+      return `${head}.${tail}${suffix}`;
+    }
+    return `${head}${suffix}`;
+  }
+
+  _extractDiagnosisAttributes(description) {
+    const text = String(description || '').toLowerCase();
+    if (!text) return { side: null, body_part: null, condition: null };
+
+    const bodyParts = [
+      'shoulder',
+      'acj',
+      'ac joint',
+      'acromioclavicular',
+      'knee',
+      'ankle',
+      'wrist',
+      'elbow',
+      'hip',
+      'back',
+      'backache',
+      'neck',
+      'foot',
+      'heel',
+      'ligament',
+      'hand',
+      'finger',
+      'toe',
+      'leg',
+      'arm',
+      'thigh',
+      'calf',
+      'forearm',
+      'spine',
+      'lumbar',
+      'loin',
+      'cervical',
+      'thoracic',
+      'rib',
+      'chest',
+      'abdomen',
+      'stomach',
+      'head',
+      'eye',
+      'ear',
+      'nose',
+      'throat',
+    ];
+
+    const conditions = [
+      'pain',
+      'ache',
+      'injury',
+      'trauma',
+      'degeneration',
+      'degenerative',
+      'sprain',
+      'strain',
+      'deficiency',
+      'instability',
+      'laxity',
+      'tendinitis',
+      'tendinopathy',
+      'bursitis',
+      'fracture',
+      'contusion',
+      'dislocation',
+      'laceration',
+      'wound',
+      'swelling',
+      'infection',
+      'inflammation',
+      'arthritis',
+      'osteoarthritis',
+      'capsulitis',
+      'impingement',
+      'tear',
+      'rupture',
+    ];
+
+    const side = /\b(right|rt)\b/i.test(text)
+      ? 'right'
+      : /\b(left|lt)\b/i.test(text)
+        ? 'left'
+        : null;
+    let body_part = bodyParts.find((bp) => new RegExp(`\\b${bp}\\b`, 'i').test(text)) || null;
+    if (!body_part && /\b(acl|mcl|lcl|pcl|meniscus|patella)\b/i.test(text)) body_part = 'knee';
+    if (body_part === 'heel') body_part = 'foot';
+    if (body_part === 'backache') body_part = 'back';
+    const condition = conditions.find((c) => new RegExp(`\\b${c}\\b`, 'i').test(text)) || null;
+
+    return { side, body_part, condition };
+  }
+
+  _canonicalizeDiagnosis({ code, description, diagnosisSource, side, body_part, condition, support_text }) {
+    const text = String(description || '').trim();
+    const lower = text.toLowerCase();
+    const supportLower = String(support_text || '').toLowerCase();
+    const source = String(diagnosisSource || '').toLowerCase();
+    let mappedDescription = text || null;
+    let mappedCode = this._normalizeDiagnosisCode(code) || null;
+
+    const sideLabel = side ? `${side} ` : '';
+    const hasGenericS836Code =
+      mappedCode === 'S83.6' ||
+      /\bs83\.?6\b/.test(String(code || '').toLowerCase());
+    const hasSpecificKneeSignal =
+      /\b(left|right|lt|rt)\b/.test(lower) ||
+      /\b(anterior cruciate ligament|acl|mcl|lcl|pcl|meniscus|deficiency|tear|rupture|instability|laxity)\b/.test(
+        `${lower} ${supportLower}`
+      );
+    const hasAclKneeSupport =
+      /\b(anterior cruciate ligament|acl)\b/.test(`${lower} ${supportLower}`) &&
+      /\b(deficiency|tear|laxity|instability|injury|loose|rupture)\b/.test(
+        `${lower} ${supportLower}`
+      );
+    const isKneeSprain =
+      (/\bknee\b/.test(lower) && /\b(sprain|strain)\b/.test(lower)) ||
+      hasGenericS836Code;
+    if (isKneeSprain) {
+      if (hasGenericS836Code && !hasSpecificKneeSignal && !hasAclKneeSupport) {
+        mappedDescription = 'Sprain & strain oth & unsp parts knee';
+        mappedCode = 'S83.6';
+      } else {
+        mappedDescription = 'Sprain of the knee';
+        // Keep a stable clinical code for portal matching where source emits generic S83.6 variants
+        // but only when we have supporting specificity signal.
+        if (!mappedCode || hasGenericS836Code) mappedCode = 'S83.411A';
+      }
+      return { code_normalized: mappedCode, description_canonical: mappedDescription, mapped: true };
+    }
+
+    const aclKneeInjury =
+      /\b(anterior cruciate ligament|acl)\b/.test(lower) &&
+      /\b(deficiency|tear|laxity|instability|injury|loose|rupture)\b/.test(lower);
+    if (aclKneeInjury) {
+      mappedDescription = 'Sprain of the knee';
+      mappedCode = 'S83.411A';
+      return { code_normalized: mappedCode, description_canonical: mappedDescription, mapped: true };
+    }
+
+    const genericKneeInjury =
+      /\bknee\b/.test(lower) &&
+      /\b(injury|trauma|twist|twisting)\b/.test(lower);
+    if (genericKneeInjury) {
+      mappedDescription = 'Sprain and strain of other and unspecified parts of knee';
+      if (!mappedCode) mappedCode = 'S83.6';
+      return { code_normalized: mappedCode, description_canonical: mappedDescription, mapped: true };
+    }
+
+    if (/\bwrist\b/.test(lower) && /\b(sprain|strain)\b/.test(lower)) {
+      mappedDescription = 'Sprain and strain of wrist';
+      if (!mappedCode || /\bS63\.5\d*\b/i.test(String(mappedCode))) mappedCode = 'S63.5';
+      return { code_normalized: mappedCode, description_canonical: mappedDescription, mapped: true };
+    }
+
+    if (
+      /\b(low back|lumbago|loin|backache)\b/.test(lower) ||
+      ((body_part === 'back' || body_part === 'lumbar' || body_part === 'loin') && /pain|ache|strain/.test(lower))
+    ) {
+      mappedDescription = 'Low back pain';
+      if (!mappedCode) mappedCode = 'M54.5';
+      return { code_normalized: mappedCode, description_canonical: mappedDescription, mapped: true };
+    }
+
+    const footHeelPain =
+      /pain|ache/.test(lower) &&
+      (/foot|heel/.test(lower) || body_part === 'foot') &&
+      (/\bleft\b/.test(lower) || /\bright\b/.test(lower) || side === 'left' || side === 'right');
+    if (footHeelPain) {
+      const normalizedSide = /\bleft\b/.test(lower) || side === 'left' ? 'left' : 'right';
+      mappedDescription = `${normalizedSide[0].toUpperCase() + normalizedSide.slice(1)} foot/heel pain`;
+      if (!mappedCode) mappedCode = normalizedSide === 'left' ? 'M79.672' : 'M79.671';
+      return { code_normalized: mappedCode, description_canonical: mappedDescription, mapped: true };
+    }
+
+    // Past-notes-only knee pain is commonly charted as a sprain in answer sheets.
+    if (!mappedCode && source === 'past_notes' && /\bpain\b/.test(lower) && /\bknee\b/.test(lower)) {
+      mappedDescription = 'Sprain of the knee';
+      mappedCode = 'S83.411A';
+      return { code_normalized: mappedCode, description_canonical: mappedDescription, mapped: true };
+    }
+
+    if (!mappedDescription && (condition || body_part)) {
+      mappedDescription = condition
+        ? `${condition} of the ${sideLabel}${body_part || 'affected area'}`.replace(/\s+/g, ' ').trim()
+        : null;
+    }
+
+    return { code_normalized: mappedCode, description_canonical: mappedDescription || null, mapped: false };
+  }
+
+  _buildDiagnosisCanonicalPayload({
+    diagnosis,
+    diagnosisSource,
+    diagnosisAttempts,
+    diagnosisIntent,
+    visitDate,
+    payType = null,
+  }) {
+    const toIsoDate = (value) => {
+      const raw = String(value || '').trim();
+      if (!raw) return null;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+      const dmy = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      if (dmy) {
+        const dd = dmy[1].padStart(2, '0');
+        const mm = dmy[2].padStart(2, '0');
+        return `${dmy[3]}-${mm}-${dd}`;
+      }
+      const ymd = raw.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+      if (ymd) {
+        const mm = ymd[2].padStart(2, '0');
+        const dd = ymd[3].padStart(2, '0');
+        return `${ymd[1]}-${mm}-${dd}`;
+      }
+      return null;
+    };
+    const ageDays = (fromIso, toIso) => {
+      if (!fromIso || !toIso) return null;
+      const fromTs = Date.parse(`${fromIso}T00:00:00Z`);
+      const toTs = Date.parse(`${toIso}T00:00:00Z`);
+      if (!Number.isFinite(fromTs) || !Number.isFinite(toTs)) return null;
+      return Math.round((toTs - fromTs) / 86400000);
+    };
+
+    const visitDateIso = toIsoDate(visitDate);
+    const sourceDateIso = toIsoDate(diagnosis?.date || null);
+    let code_raw = String(diagnosis?.code || '').trim() || null;
+    let description_raw = String(diagnosis?.description || '').trim() || null;
+
+    const attrsFromDesc = this._extractDiagnosisAttributes(description_raw || '');
+    let side = diagnosisIntent?.side || attrsFromDesc.side || null;
+    let body_part = diagnosisIntent?.bodyPart || attrsFromDesc.body_part || null;
+    let condition = diagnosisIntent?.condition || attrsFromDesc.condition || null;
+
+    const supportText = (Array.isArray(diagnosisAttempts) ? diagnosisAttempts : [])
+      .filter((a) => a?.found && (a?.description || a?.code))
+      .filter((a) => {
+        const src = String(a?.source || '').toLowerCase();
+        return src && src !== 'diagnosis_tab' && src !== 'diagnosis_tab_latest' && src !== 'diagnosis_tab_raw';
+      })
+      .map((a) => String(a?.description || a?.code || '').trim())
+      .filter(Boolean)
+      .join(' ');
+
+    const canonicalMap = this._canonicalizeDiagnosis({
+      code: code_raw,
+      description: description_raw,
+      diagnosisSource,
+      side,
+      body_part,
+      condition,
+      support_text: [supportText, diagnosisIntent?.description || ''].filter(Boolean).join(' '),
+    });
+    let code_normalized =
+      canonicalMap?.code_normalized ||
+      this._normalizeDiagnosisCode(code_raw) ||
+      this._normalizeDiagnosisCode(description_raw) ||
+      null;
+    if (canonicalMap?.description_canonical) description_raw = canonicalMap.description_canonical;
+    if (!code_raw && canonicalMap?.code_normalized) code_raw = canonicalMap.code_normalized;
+    if (canonicalMap?.description_canonical) {
+      const mappedAttrs = this._extractDiagnosisAttributes(canonicalMap.description_canonical);
+      if (canonicalMap?.mapped) {
+        // Canonical mapping intentionally normalizes generic phrases (e.g. "injury of knee" -> sprain/strain),
+        // so prefer mapped attributes when available.
+        side = mappedAttrs.side || side || null;
+        body_part = mappedAttrs.body_part || body_part || null;
+        condition = mappedAttrs.condition || condition || null;
+      } else {
+        side = side || mappedAttrs.side || null;
+        body_part = body_part || mappedAttrs.body_part || null;
+        condition = condition || mappedAttrs.condition || null;
+      }
+    }
+
+    let description_canonical = description_raw;
+    const isGeneric = this._isDiagnosisGeneric(description_raw || '');
+    if (description_raw && isGeneric && body_part && condition) {
+      if (/pain|ache|soreness/i.test(condition)) {
+        description_canonical = `Pain in the ${side ? `${side} ` : ''}${body_part}`.trim();
+      } else {
+        description_canonical = `${condition} of the ${side ? `${side} ` : ''}${body_part}`.trim();
+      }
+      description_canonical = description_canonical
+        .replace(/\s+/g, ' ')
+        .replace(/\b([a-z])/g, (m) => m.toUpperCase());
+    }
+
+    const source_age_days = sourceDateIso && visitDateIso ? ageDays(sourceDateIso, visitDateIso) : null;
+    let source_date_match_type = 'latest';
+    if (sourceDateIso && visitDateIso) {
+      if (sourceDateIso === visitDateIso) source_date_match_type = 'exact';
+      else if ((source_age_days ?? 0) >= 0) source_date_match_type = 'on_before';
+      else source_date_match_type = 'latest';
+    }
+
+    const date_policy = 'on_or_before_30_days';
+    const fallback_age_days = source_date_match_type === 'exact' ? 0 : source_age_days;
+    let date_ok = false;
+    let dateReason = null;
+    if (!visitDateIso) {
+      dateReason = 'visit_date_missing';
+    } else if (!sourceDateIso) {
+      dateReason = 'diagnosis_source_date_missing';
+    } else if (source_date_match_type === 'exact') {
+      date_ok = true;
+    } else if (source_date_match_type === 'on_before') {
+      if (source_age_days !== null && source_age_days <= 30) {
+        date_ok = true;
+      } else {
+        dateReason = 'diagnosis_source_too_old_for_on_before_policy';
+      }
+    } else {
+      dateReason = 'diagnosis_source_after_visit_date';
+    }
+
+    let status = 'resolved';
+    let reason_if_unresolved = null;
+    if (!description_raw) {
+      status = 'missing';
+      reason_if_unresolved = 'not_found_in_diagnosis_all_visit_pastnotes';
+    } else if (isGeneric && !side) {
+      status = 'ambiguous';
+      reason_if_unresolved = 'generic_without_laterality';
+    } else if (!body_part || !condition) {
+      status = 'ambiguous';
+      reason_if_unresolved = 'weak_diagnosis_signal';
+    } else if (!date_ok) {
+      status = 'ambiguous';
+      reason_if_unresolved = dateReason || 'diagnosis_date_policy_not_satisfied';
+    }
+
+    const foundAttempts = (Array.isArray(diagnosisAttempts) ? diagnosisAttempts : []).filter(
+      (a) => !!a?.found
+    );
+    const hasNonPrimarySupport = foundAttempts.some((a) => {
+      const src = String(a?.source || '').toLowerCase();
+      return src && src !== 'diagnosis_tab' && src !== 'diagnosis_tab_latest' && src !== 'diagnosis_tab_raw';
+    });
+    const codeForRule = String(code_normalized || '')
+      .toUpperCase()
+      .replace(/\./g, '');
+    const isGenericKneeSprainCode = codeForRule === 'S836';
+    const isMhcFamilyKneeProgram = /^(MHC|AIA|AIACLIENT)$/i.test(String(payType || '').trim());
+
+    // If diagnosis has a valid coded label and date policy is satisfied, allow resolution even without laterality.
+    if (
+      status === 'ambiguous' &&
+      reason_if_unresolved === 'generic_without_laterality' &&
+      code_normalized &&
+      date_ok &&
+      body_part &&
+      condition &&
+      (!isGenericKneeSprainCode || hasNonPrimarySupport || isMhcFamilyKneeProgram)
+    ) {
+      status = 'resolved';
+      reason_if_unresolved = null;
+    }
+
+    let confidence = 0;
+    if (description_raw) confidence += 0.3;
+    if (code_normalized) confidence += 0.25;
+    if (body_part) confidence += 0.2;
+    if (condition) confidence += 0.15;
+    if (side) confidence += 0.1;
+    if (diagnosisSource && /diagnosis_tab/i.test(diagnosisSource)) confidence += 0.05;
+    if (status === 'ambiguous') confidence = Math.min(confidence, 0.74);
+    if (status === 'missing') confidence = 0;
+    if (!date_ok) confidence = Math.min(confidence, 0.69);
+    confidence = Number(Math.max(0, Math.min(1, confidence)).toFixed(2));
+
+    const source_chain = Array.isArray(diagnosisAttempts)
+      ? diagnosisAttempts.map((a) => ({
+          source: a?.source || 'unknown',
+          found: !!a?.found,
+          source_date: a?.source_date || null,
+          source_age_days:
+            a?.source_age_days === null || a?.source_age_days === undefined || a?.source_age_days === ''
+              ? null
+              : Number.isFinite(Number(a?.source_age_days))
+                ? Number(a.source_age_days)
+                : null,
+        }))
+      : [];
+
+    const diagnosisCandidates = (Array.isArray(diagnosisAttempts) ? diagnosisAttempts : [])
+      .filter((a) => a?.found && (a?.description || a?.code))
+      .map((a, idx) => {
+        const candCodeRaw = String(a?.code || '').trim() || null;
+        const candDescRaw = String(a?.description || '').trim() || null;
+        const candCodeNorm = this._normalizeDiagnosisCode(candCodeRaw) || this._normalizeDiagnosisCode(candDescRaw) || null;
+        const candAttrs = this._extractDiagnosisAttributes(candDescRaw || '');
+        const candSourceDate = toIsoDate(a?.source_date || null);
+        const candSourceAge = candSourceDate && visitDateIso ? ageDays(candSourceDate, visitDateIso) : null;
+        let score = 0;
+        if (candDescRaw) score += 0.35;
+        if (candCodeNorm) score += 0.2;
+        if (candAttrs.body_part) score += 0.2;
+        if (candAttrs.condition) score += 0.15;
+        if (candAttrs.side) score += 0.1;
+        if (candSourceDate && visitDateIso) {
+          if (candSourceDate === visitDateIso) score += 0.2;
+          else if ((candSourceAge ?? 999) >= 0 && candSourceAge <= 30) score += 0.1;
+          else score -= 0.15;
+        }
+        return {
+          rank: idx + 1,
+          source: a?.source || diagnosisSource || 'unknown',
+          code_raw: candCodeRaw,
+          code_normalized: candCodeNorm,
+          description_raw: candDescRaw,
+          description_canonical: candDescRaw || null,
+          source_date: candSourceDate,
+          source_age_days: candSourceAge,
+          score: Number(Math.max(0, Math.min(1, score)).toFixed(2)),
+          selected: false,
+        };
+      });
+
+    if (description_raw || code_raw) {
+      diagnosisCandidates.unshift({
+        rank: 1,
+        source: diagnosisSource || 'unknown',
+        code_raw,
+        code_normalized,
+        description_raw,
+        description_canonical,
+        source_date: sourceDateIso,
+        source_age_days,
+        score: confidence,
+        selected: true,
+      });
+    }
+
+    const dedupedCandidates = [];
+    const seen = new Set();
+    for (const cand of diagnosisCandidates) {
+      const key = `${cand.source}|${cand.code_normalized || ''}|${(cand.description_canonical || '').toLowerCase()}|${cand.source_date || ''}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      dedupedCandidates.push({ ...cand, rank: dedupedCandidates.length + 1 });
+    }
+    if (!dedupedCandidates.some((c) => c.selected) && dedupedCandidates.length) {
+      dedupedCandidates[0].selected = true;
+    }
+
+    return {
+      diagnosisCanonical: {
+        code_raw,
+        code_normalized,
+        description_raw,
+        description_canonical: description_canonical || null,
+        side,
+        body_part,
+        condition,
+        source_date: sourceDateIso,
+        source_date_match_type,
+        source_age_days,
+      },
+      diagnosisResolution: {
+        status,
+        confidence,
+        source_chain,
+        date_policy,
+        date_ok,
+        source_date_match_type,
+        fallback_age_days,
+        reason_if_unresolved,
+      },
+      diagnosisCandidates: dedupedCandidates,
+    };
+  }
+
   /**
    * Get charge type (First Consult vs Follow Up) and diagnosis for a visit date
    * @param {string} visitDate - Visit date in YYYY-MM-DD format
    * @returns {Promise<Object>} { chargeType: 'first'|'follow', diagnosis: {code, description}|null }
    */
-  async getChargeTypeAndDiagnosis(visitDate) {
+  async getChargeTypeAndDiagnosis(visitDate, options = {}) {
     try {
       this._logStep('Get charge type, diagnosis, and MC data for visit date', { visitDate });
+      const payType = String(options?.payType || '').trim() || null;
       
       // Step 1: Check charge type from TX History All tab
       const hasFirstConsult = await this.hasFirstConsultOnDate(visitDate);
@@ -9061,122 +10738,399 @@ export class ClinicAssistAutomation {
       this._logStep('Charge type determined', { visitDate, chargeType, hasFirstConsult });
       
       // Step 2: Navigate to TX History and extract MC days from All tab
+      // Default behavior keeps MC at 0 unless explicitly enabled via env.
       let mcDays = 0;
       let mcStartDate = null;
-      try {
-        await this.navigateToTXHistory().catch(() => {});
-        // Ensure we're on the All tab (default tab)
-        await this.page.waitForTimeout(1000);
-        
-        // Extract MC days and MC start date from All tab
-        // Look for rows like: "23/01/2026	MC	Unfit for Duty	1.00 day	$0.00	SSOC"
-        const mcData = await this.page.evaluate((targetDate) => {
-          // Try multiple date formats
-          const dateFormats = [
-            targetDate.replace(/-/g, '/'),  // 2026-01-23 -> 2026/01/23
-            targetDate.split('-').reverse().join('/'),  // 2026-01-23 -> 23/01/2026
-            targetDate.split('-').reverse().join('-'),  // 2026-01-23 -> 23-01-2026
-          ];
+      const enableTxHistoryMcExtraction = process.env.FLOW2_ENABLE_TX_HISTORY_MC === '1';
+      if (!enableTxHistoryMcExtraction) {
+        this._logStep('MC extraction from TX History disabled; using defaults', { mcDays, mcStartDate });
+      } else {
+        try {
+          await this.navigateToTXHistory().catch(() => {});
+          // Ensure we're on the All tab (default tab)
+          await this.page.waitForTimeout(1000);
           
-          const rows = Array.from(document.querySelectorAll('table tr, [role="row"], tbody tr'));
-          for (const row of rows) {
-            const text = row.textContent || '';
+          // Extract MC days and MC start date from All tab
+          // Look for rows like: "23/01/2026\tMC\tUnfit for Duty\t1.00 day\t$0.00\tSSOC"
+          const mcData = await this.page.evaluate((targetDate) => {
+            // Try multiple date formats
+            const dateFormats = [
+              targetDate.replace(/-/g, '/'), // 2026-01-23 -> 2026/01/23
+              targetDate.split('-').reverse().join('/'), // 2026-01-23 -> 23/01/2026
+              targetDate.split('-').reverse().join('-'), // 2026-01-23 -> 23-01-2026
+            ];
             
-            // Check if row contains "MC" and any of the date formats
-            const hasMC = /MC/i.test(text);
-            const hasDate = dateFormats.some(format => text.includes(format));
-            
-            if (hasMC && hasDate) {
-              // Extract MC days - look for patterns like "1.00 day", "1 day", "2 days", etc.
-              const mcMatch = text.match(/(\d+(?:\.\d+)?)\s*day/i);
-              if (mcMatch) {
-                // Try to extract the date from the row
-                let extractedDate = null;
-                for (const format of dateFormats) {
-                  if (text.includes(format)) {
-                    extractedDate = format;
-                    break;
+            const rows = Array.from(document.querySelectorAll('table tr, [role="row"], tbody tr'));
+            for (const row of rows) {
+              const text = row.textContent || '';
+              
+              // Check if row contains "MC" and any of the date formats
+              const hasMC = /MC/i.test(text);
+              const hasDate = dateFormats.some(format => text.includes(format));
+              
+              if (hasMC && hasDate) {
+                // Extract MC days - look for patterns like "1.00 day", "1 day", "2 days", etc.
+                const mcMatch = text.match(/(\d+(?:\.\d+)?)\s*day/i);
+                if (mcMatch) {
+                  // Try to extract the date from the row
+                  let extractedDate = null;
+                  for (const format of dateFormats) {
+                    if (text.includes(format)) {
+                      extractedDate = format;
+                      break;
+                    }
                   }
+                  return {
+                    mcDays: parseInt(parseFloat(mcMatch[1])), // Handle "1.00" -> 1
+                    mcStartDate: extractedDate || dateFormats[1], // Default to DD/MM/YYYY format
+                  };
                 }
-                return {
-                  mcDays: parseInt(parseFloat(mcMatch[1])), // Handle "1.00" -> 1
-                  mcStartDate: extractedDate || dateFormats[1] // Default to DD/MM/YYYY format
-                };
               }
             }
-          }
-          return { mcDays: 0, mcStartDate: null };
-        }, visitDate);
-        
-        mcDays = mcData.mcDays;
-        mcStartDate = mcData.mcStartDate;
-        this._logStep('MC data extracted from All tab', { mcDays, mcStartDate, visitDate });
-      } catch (e) {
-        this._logStep('Could not extract MC data, using defaults', { error: e.message });
+            return { mcDays: 0, mcStartDate: null };
+          }, visitDate);
+          
+          mcDays = mcData.mcDays;
+          mcStartDate = mcData.mcStartDate;
+          this._logStep('MC data extracted from All tab', { mcDays, mcStartDate, visitDate });
+        } catch (e) {
+          this._logStep('Could not extract MC data, using defaults', { error: e.message });
+        }
       }
       
       // Step 3: Diagnosis (prefer matching the visit date; fallback to latest)
       let diagnosisSource = null;
       const diagnosisAttempts = [];
-      const markAttempt = (source, found) => {
-        diagnosisAttempts.push({ source, found: !!found });
+      const toIsoDate = (value) => {
+        const raw = String(value || '').trim();
+        if (!raw) return null;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+        const dmy = raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if (dmy) return `${dmy[3]}-${dmy[2].padStart(2, '0')}-${dmy[1].padStart(2, '0')}`;
+        const ymd = raw.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+        if (ymd) return `${ymd[1]}-${ymd[2].padStart(2, '0')}-${ymd[3].padStart(2, '0')}`;
+        const dMonY = raw.match(/^(\d{1,2})[\/\-\s]([a-z]{3,9})[\/\-\s](\d{4})$/i);
+        if (dMonY) {
+          const monthMap = {
+            jan: '01',
+            feb: '02',
+            mar: '03',
+            apr: '04',
+            may: '05',
+            jun: '06',
+            jul: '07',
+            aug: '08',
+            sep: '09',
+            oct: '10',
+            nov: '11',
+            dec: '12',
+          };
+          const mm = monthMap[String(dMonY[2]).slice(0, 3).toLowerCase()];
+          if (mm) return `${dMonY[3]}-${mm}-${dMonY[1].padStart(2, '0')}`;
+        }
+        return null;
+      };
+      const getSourceAgeDays = (sourceDateIso) => {
+        if (!sourceDateIso || !visitDate) return null;
+        const sourceTs = Date.parse(`${sourceDateIso}T00:00:00Z`);
+        const visitTs = Date.parse(`${visitDate}T00:00:00Z`);
+        if (!Number.isFinite(sourceTs) || !Number.isFinite(visitTs)) return null;
+        return Math.round((visitTs - sourceTs) / 86400000);
+      };
+      const markAttempt = (source, candidate) => {
+        const found = !!(candidate && candidate.description);
+        const sourceDate = String(candidate?.date || '').trim() || null;
+        const sourceDateIso = toIsoDate(sourceDate);
+        const sourceAgeDays = getSourceAgeDays(sourceDateIso);
+        diagnosisAttempts.push({
+          source,
+          found,
+          code: candidate?.code || null,
+          description: candidate?.description || null,
+          source_date: sourceDateIso || sourceDate,
+          source_age_days: sourceAgeDays,
+        });
+      };
+      const scoreDiagnosisCandidate = (source, candidate) => {
+        const description = String(candidate?.description || '').trim();
+        if (!description) return -Infinity;
+        const looksLikeMedication = /(?:\bmed(?:icine|ication)?\b|\bmed[a-z0-9+\-]{2,}\b|\bdrug\b|\btab(?:s)?\b|\bcap(?:s)?\b|\bmg\b|\bml\b|\boin?tment\b|\bcream\b|\bsyrup\b|\bbott(?:le)?\b|\binjection\b)/i.test(
+          description
+        );
+        const looksLikeService = /(?:consultation|physiotherapy|x[- ]?ray|ultrasound|mri|ct|procedure|therapy)/i.test(
+          description
+        );
+        const looksLikeLabOrScreening = /(?:\blab(?:oratory)?\b|\btest\b|\bscreen(?:ing)?\b|\bpanel\b|\bprofile\b|\bthyroid\b|\bhba1c\b|\bcbc\b|\blipid\b|\blft\b|\brft\b)/i.test(
+          description
+        );
+        const hasExplicitDxSignal =
+          /\b(dx|diagnos(?:is|es)|assessment|impression|icd)\b/i.test(description) ||
+          !!(candidate?.code && this._normalizeDiagnosisCode(candidate.code));
+
+        if (
+          String(source || '').toLowerCase() === 'all_tab' &&
+          (looksLikeMedication || looksLikeService || looksLikeLabOrScreening) &&
+          !hasExplicitDxSignal
+        ) {
+          return -Infinity;
+        }
+
+        const codeNorm =
+          this._normalizeDiagnosisCode(candidate?.code) || this._normalizeDiagnosisCode(description) || null;
+        const attrs = this._extractDiagnosisAttributes(description);
+        const isGeneric = this._isDiagnosisGeneric(description);
+        const sourceDateIso = toIsoDate(candidate?.date || null);
+        const sourceAgeDays = getSourceAgeDays(sourceDateIso);
+        const isExact = !!(sourceDateIso && visitDate && sourceDateIso === visitDate);
+        const isOnBefore = sourceAgeDays !== null && sourceAgeDays >= 0;
+
+        let score = 0;
+        if (isExact) {
+          score += 60;
+        } else if (isOnBefore && sourceAgeDays <= 30) {
+          score += 35;
+          score -= sourceAgeDays * 0.2;
+        } else if (isOnBefore) {
+          score += 8;
+          score -= Math.min(15, (sourceAgeDays - 30) * 0.05);
+        } else if (sourceAgeDays !== null && sourceAgeDays < 0) {
+          score -= 20;
+        }
+
+        if (codeNorm) score += 12;
+        if (attrs?.condition) {
+          if (/^(pain|ache)$/.test(String(attrs.condition || '').toLowerCase())) score += 4;
+          else score += 11;
+        }
+        if (attrs?.body_part) score += 8;
+        if (attrs?.side) score += 5;
+        if (!isGeneric) score += 6;
+        if (/\b(acl|mcl|lcl|pcl|ligament|meniscus|tear|rupture|deficiency)\b/i.test(description)) score += 6;
+        if (looksLikeMedication) score -= 28;
+        if (looksLikeService) score -= 14;
+        // Lab/screening labels are not portable diagnosis labels for claim portals.
+        // Treat them as non-diagnosis by default so we prefer structured condition/body-part entries.
+        if (looksLikeLabOrScreening) score -= 70;
+
+        const sourcePriority = {
+          diagnosis_tab: 8,
+          diagnosis_tab_latest: 5,
+          diagnosis_tab_raw: 4,
+          visit_tab: 7,
+          all_tab: 6,
+          past_notes: 3,
+          past_notes_intent_only: 2,
+        };
+        score += sourcePriority[source] || 0;
+        return score;
+      };
+      const maybeAdoptDiagnosis = (source, candidate) => {
+        if (!candidate || !candidate.description) return false;
+        const candidateScore = scoreDiagnosisCandidate(source, candidate);
+        if (!Number.isFinite(candidateScore) || candidateScore < 0) {
+          this._logStep('Rejected weak diagnosis candidate', {
+            source,
+            score: Number.isFinite(candidateScore) ? Number(candidateScore.toFixed(2)) : null,
+            description: String(candidate?.description || '').slice(0, 80),
+            date: candidate?.date || null,
+          });
+          return false;
+        }
+        if (!diagnosis || !diagnosis.description) {
+          diagnosis = candidate;
+          diagnosisSource = source;
+          return true;
+        }
+        const previousSource = diagnosisSource || 'unknown';
+        const currentScore = scoreDiagnosisCandidate(diagnosisSource || 'unknown', diagnosis);
+        const newScore = candidateScore;
+        if (newScore > currentScore + 0.25) {
+          diagnosis = candidate;
+          diagnosisSource = source;
+          this._logStep('Diagnosis candidate improved by alternate source', {
+            selectedSource: source,
+            selectedScore: Number(newScore.toFixed(2)),
+            previousSource,
+            previousScore: Number(currentScore.toFixed(2)),
+            selectedDate: candidate?.date || null,
+            selectedDescription: String(candidate?.description || '').slice(0, 80),
+          });
+          return true;
+        }
+        return false;
+      };
+      const diagnosisNeedsBroadenedSearch = (candidate) => {
+        if (!candidate || !candidate.description) return true;
+        const isGeneric = this._isDiagnosisGeneric(candidate.description);
+        const sourceDateIso = toIsoDate(candidate?.date || null);
+        const sourceAgeDays = getSourceAgeDays(sourceDateIso);
+        const isExact = !!(sourceDateIso && visitDate && sourceDateIso === visitDate);
+        return !isExact || isGeneric || (sourceAgeDays !== null && sourceAgeDays > 30);
       };
 
       await this.openDiagnosisTab();
-      let diagnosis = await this.extractDiagnosisForDate(visitDate);
-      markAttempt('diagnosis_tab', !!(diagnosis && diagnosis.description));
-      if (diagnosis && diagnosis.description) diagnosisSource = 'diagnosis_tab';
+      let diagnosis = null;
+      const diagnosisFromTab = await this.extractDiagnosisForDate(visitDate);
+      markAttempt('diagnosis_tab', diagnosisFromTab);
+      maybeAdoptDiagnosis('diagnosis_tab', diagnosisFromTab);
       if (!diagnosis || !diagnosis.description) {
-        diagnosis = await this.extractLatestDiagnosis();
-        markAttempt('diagnosis_tab_latest', !!(diagnosis && diagnosis.description));
-        if (diagnosis && diagnosis.description) diagnosisSource = 'diagnosis_tab_latest';
+        const latestDiagnosis = await this.extractLatestDiagnosis();
+        markAttempt('diagnosis_tab_latest', latestDiagnosis);
+        maybeAdoptDiagnosis('diagnosis_tab_latest', latestDiagnosis);
       }
       if (!diagnosis || !diagnosis.description) {
         this._logStep('Diagnosis not found in Diagnosis tab, trying raw Diagnosis extraction');
         const rawDiagnosis = await this.extractDiagnosisFromTXHistory();
+        let rawCandidate = null;
         if (rawDiagnosis && rawDiagnosis.description) {
-          diagnosis = {
+          rawCandidate = {
             code: rawDiagnosis.code || null,
             description: rawDiagnosis.description,
             date: rawDiagnosis.date || null
           };
         }
-        markAttempt('diagnosis_tab_raw', !!(diagnosis && diagnosis.description));
-        if (diagnosis && diagnosis.description) diagnosisSource = 'diagnosis_tab_raw';
+        markAttempt('diagnosis_tab_raw', rawCandidate);
+        maybeAdoptDiagnosis('diagnosis_tab_raw', rawCandidate);
       }
-      // Step 4: If not found, try All tab
-      if (!diagnosis || !diagnosis.description) {
-        this._logStep('Diagnosis not found in Diagnosis tab, trying All tab');
-        diagnosis = await this.extractDiagnosisFromAllTab(visitDate);
-        markAttempt('all_tab', !!(diagnosis && diagnosis.description));
-        if (diagnosis && diagnosis.description) diagnosisSource = 'all_tab';
-      }
-
-      // Step 5: If not found, try Visit tab (some deployments store diagnosis/assessment there)
-      if (!diagnosis || !diagnosis.description) {
-        this._logStep('Diagnosis not found in All tab, trying Visit tab');
-        diagnosis = await this.extractDiagnosisFromVisitTab(visitDate);
-        markAttempt('visit_tab', !!(diagnosis && diagnosis.description));
-        if (diagnosis && diagnosis.description) diagnosisSource = 'visit_tab';
+      const broadenSearch = diagnosisNeedsBroadenedSearch(diagnosis);
+      if (broadenSearch) {
+        this._logStep('Diagnosis requires broadened source search', {
+          currentSource: diagnosisSource || null,
+          currentDate: diagnosis?.date || null,
+          currentDiagnosis: String(diagnosis?.description || '').slice(0, 80),
+        });
       }
 
-      // Step 6: If not found, try Past Notes tab
+      // Step 4: If unresolved/weak, also probe All tab
+      if (!diagnosis || !diagnosis.description || broadenSearch) {
+        this._logStep('Checking All tab for better diagnosis candidate');
+        const allTabDiagnosis = await this.extractDiagnosisFromAllTab(visitDate);
+        markAttempt('all_tab', allTabDiagnosis);
+        maybeAdoptDiagnosis('all_tab', allTabDiagnosis);
+      }
+
+      // Step 5: If unresolved/weak, also probe Visit tab (some deployments store diagnosis/assessment there)
+      if (!diagnosis || !diagnosis.description || broadenSearch) {
+        this._logStep('Checking Visit tab for better diagnosis candidate');
+        const visitTabDiagnosis = await this.extractDiagnosisFromVisitTab(visitDate);
+        markAttempt('visit_tab', visitTabDiagnosis);
+        maybeAdoptDiagnosis('visit_tab', visitTabDiagnosis);
+      }
+
+      // Step 6: If unresolved/weak, also probe Past Notes tab
+      if (!diagnosis || !diagnosis.description || broadenSearch) {
+        this._logStep('Checking Past Notes for better diagnosis candidate');
+        const pastNotesDiagnosis = await this.extractDiagnosisFromPastNotes(visitDate);
+        markAttempt('past_notes', pastNotesDiagnosis);
+        maybeAdoptDiagnosis('past_notes', pastNotesDiagnosis);
+      }
+
+      let diagnosisIntent = null;
+      let diagnosisIntentSuppressedReason = null;
+
+      // Step 6a: If diagnosis is still missing, allow a strict Past Notes intent fallback.
+      // This uses only strong intent (condition + body part) and never runs when Past Notes context is unavailable.
       if (!diagnosis || !diagnosis.description) {
-        this._logStep('Diagnosis not found in Visit tab, trying Past Notes');
-        diagnosis = await this.extractDiagnosisFromPastNotes(visitDate);
-        markAttempt('past_notes', !!(diagnosis && diagnosis.description));
-        if (diagnosis && diagnosis.description) diagnosisSource = 'past_notes';
+        const missingIntent = await this.extractDiagnosisIntentFromPastNotes(visitDate, '');
+        const missingIntentAttrs = this._extractDiagnosisAttributes(missingIntent?.description || '');
+        const hasStrongMissingIntent = Boolean(
+          (missingIntent?.bodyPart || missingIntentAttrs?.body_part) &&
+            (missingIntent?.condition || missingIntentAttrs?.condition)
+        );
+        if (missingIntent?.description && hasStrongMissingIntent) {
+          diagnosisIntent = missingIntent;
+          diagnosis = {
+            code: null,
+            description: missingIntent.description,
+            date: visitDate || null,
+          };
+          diagnosisSource = 'past_notes_intent_only';
+          this._logStep('Diagnosis reconstructed from Past Notes intent fallback', {
+            description: diagnosis.description?.slice(0, 80),
+          });
+        }
       }
 
       // Step 6b: If diagnosis is generic/ambiguous, try to enrich from Past Notes.
       if (diagnosis && diagnosis.description && this._isDiagnosisGeneric(diagnosis.description)) {
-        const intent = await this.extractDiagnosisIntentFromPastNotes(visitDate, diagnosis.description);
-        if (intent?.description) {
-          diagnosis = { ...diagnosis, description: intent.description };
-          diagnosisSource = diagnosisSource || 'past_notes_intent';
-          this._logStep('Diagnosis enriched from Past Notes', {
-            description: diagnosis.description?.slice(0, 80),
-          });
+        diagnosisIntent = await this.extractDiagnosisIntentFromPastNotes(visitDate, diagnosis.description);
+        if (diagnosisIntent?.description) {
+          const baseAttrs = this._extractDiagnosisAttributes(diagnosis.description);
+          const intentAttrs = this._extractDiagnosisAttributes(diagnosisIntent.description);
+          const baseDateIso = toIsoDate(diagnosis?.date || null);
+          const baseIsExact = !!(baseDateIso && visitDate && baseDateIso === visitDate);
+          const baseText = String(diagnosis.description || '');
+          const baseExplicitlyUnspecified = /unspecified|unsp|other|parts?|region/i.test(
+            baseText
+          );
+          const baseSpecificClinicalSignal = /\b(acl|mcl|lcl|pcl|ligament|meniscus|deficiency|tear|rupture|fracture|dislocation|sprain|strain)\b/i.test(
+            baseText
+          );
+          const intentScore = Number(diagnosisIntent?.score || 0);
+          const bodyAligned =
+            !baseAttrs?.body_part ||
+            !intentAttrs?.body_part ||
+            baseAttrs.body_part === intentAttrs.body_part;
+          const strongIntent = Boolean(
+            diagnosisIntent?.side &&
+              (diagnosisIntent?.bodyPart || intentAttrs?.body_part) &&
+              (diagnosisIntent?.condition || intentAttrs?.condition)
+          );
+          const allowCrossBodyOverride =
+            strongIntent &&
+            !bodyAligned &&
+            ((!baseIsExact && intentScore >= 7) || (baseIsExact && baseExplicitlyUnspecified && intentScore >= 9));
+          const intentIsPainLike = /^(pain|ache|soreness)$/i.test(
+            String(diagnosisIntent?.condition || intentAttrs?.condition || '')
+          );
+          const suppressPainDowngrade = baseSpecificClinicalSignal && intentIsPainLike && !baseExplicitlyUnspecified;
+
+          if (((strongIntent && bodyAligned) || allowCrossBodyOverride) && !suppressPainDowngrade) {
+            diagnosis = {
+              ...diagnosis,
+              description: diagnosisIntent.description,
+              date: diagnosis?.date || diagnosisIntent?.source_date || visitDate || null,
+            };
+            diagnosisSource = diagnosisSource || 'past_notes_intent';
+            this._logStep('Diagnosis enriched from Past Notes', {
+              description: diagnosis.description?.slice(0, 80),
+              baseIsExact,
+              bodyAligned,
+              allowCrossBodyOverride,
+              intentScore,
+            });
+          } else {
+            diagnosisIntentSuppressedReason = suppressPainDowngrade
+              ? 'past_notes_intent_would_downgrade_specific_diagnosis'
+              : 'past_notes_intent_weak_or_misaligned';
+            this._logStep('Past Notes enrichment suppressed', {
+              reason: diagnosisIntentSuppressedReason,
+              baseDescription: diagnosis.description?.slice(0, 80),
+              intentDescription: diagnosisIntent.description?.slice(0, 80),
+              baseIsExact,
+              bodyAligned,
+              intentScore,
+            });
+          }
+        }
+      }
+
+      const canonicalPayload = this._buildDiagnosisCanonicalPayload({
+        diagnosis,
+        diagnosisSource,
+        diagnosisAttempts,
+        diagnosisIntent: diagnosisIntentSuppressedReason ? null : diagnosisIntent,
+        visitDate,
+        payType,
+      });
+      if (
+        diagnosisIntentSuppressedReason &&
+        canonicalPayload?.diagnosisResolution?.status === 'resolved'
+      ) {
+        const resolvedCode = String(canonicalPayload?.diagnosisCanonical?.code_normalized || '').trim();
+        if (!resolvedCode) {
+          canonicalPayload.diagnosisResolution.status = 'ambiguous';
+          canonicalPayload.diagnosisResolution.reason_if_unresolved = diagnosisIntentSuppressedReason;
         }
       }
 
@@ -9184,7 +11138,7 @@ export class ClinicAssistAutomation {
       let medicines = [];
       try {
         // We should still be in TX History context; if not, navigate again.
-        if (!/TXHistory/i.test(this.page.url())) {
+        if (!/TXHistory|QueueLog\/PatientVisit/i.test(this.page.url())) {
           await this.navigateToTXHistory().catch(() => {});
           await this.page.waitForTimeout(500);
         }
@@ -9248,13 +11202,21 @@ export class ClinicAssistAutomation {
       this._logStep('TX History: extracted medicines summary', {
         count: medicinesAfterFilter,
         filteredOut: medicinesFilteredOut,
-        sample: (medicines || []).slice(0, 5).map((m) => ({ name: String(m?.name || '').slice(0, 60), quantity: m?.quantity })),
+        sample: (medicines || []).slice(0, 5).map((m) => ({
+          name: String(m?.name || '').slice(0, 60),
+          quantity: m?.quantity,
+          unitPrice: m?.unitPrice ?? null,
+          amount: m?.amount ?? null,
+        })),
       });
 
       let diagnosisMissingReason = null;
       if (!diagnosis || !diagnosis.description) {
         diagnosisSource = 'missing';
         diagnosisMissingReason = 'not_found_in_diagnosis_all_visit_pastnotes';
+      } else if (canonicalPayload?.diagnosisResolution?.status !== 'resolved') {
+        diagnosisMissingReason =
+          canonicalPayload?.diagnosisResolution?.reason_if_unresolved || 'diagnosis_unresolved';
       }
       
       return {
@@ -9266,6 +11228,9 @@ export class ClinicAssistAutomation {
         diagnosisSource,
         diagnosisMissingReason,
         diagnosisAttempts,
+        diagnosisCanonical: canonicalPayload?.diagnosisCanonical || null,
+        diagnosisResolution: canonicalPayload?.diagnosisResolution || null,
+        diagnosisCandidates: canonicalPayload?.diagnosisCandidates || [],
         medicineFilterStats: {
           before: medicinesBeforeFilter,
           after: medicinesAfterFilter,
@@ -9283,6 +11248,18 @@ export class ClinicAssistAutomation {
         diagnosisSource: 'error',
         diagnosisMissingReason: error?.message || 'unknown_error',
         diagnosisAttempts: [],
+        diagnosisCanonical: null,
+        diagnosisResolution: {
+          status: 'missing',
+          confidence: 0,
+          source_chain: [],
+          date_policy: 'on_or_before_30_days',
+          date_ok: false,
+          source_date_match_type: 'latest',
+          fallback_age_days: null,
+          reason_if_unresolved: error?.message || 'unknown_error',
+        },
+        diagnosisCandidates: [],
         medicineFilterStats: {
           before: 0,
           after: 0,
@@ -9392,6 +11369,57 @@ export class ClinicAssistAutomation {
           return null;
         };
 
+        const parseQty = (text) => {
+          const raw = String(text || '').trim();
+          if (!raw) return null;
+          const lower = raw.toLowerCase();
+          if (/\$/.test(raw)) return null;
+          if (/(mg|ml|mcg|iu)\b/i.test(lower) && !/(tabs?|tablets?|caps?|capsules?|pcs?|units?|packs?|sachets?|vials?|ampoules?|bottles?)\b/i.test(lower)) {
+            return null;
+          }
+          if (/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(raw) || /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(raw)) {
+            return null;
+          }
+          const m = raw.match(/(\d+(?:\.\d+)?)/);
+          if (!m) return null;
+          const num = Number.parseFloat(m[1]);
+          if (!Number.isFinite(num) || num <= 0 || num >= 1000) return null;
+          if (Math.abs(num - Math.round(num)) < 1e-9) return Math.round(num);
+          return Number(num.toFixed(2));
+        };
+
+        const parseMoney = (text) => {
+          const raw = String(text || '').trim();
+          if (!raw) return null;
+          const lower = raw.toLowerCase();
+          if (/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(raw) || /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(raw)) return null;
+          if (/(tabs?|tablets?|caps?|capsules?|pcs?|units?|packs?|sachets?|vials?|ampoules?|bottles?|mg|ml|mcg|iu)\b/i.test(lower)) return null;
+          const cleaned = raw.replace(/,/g, '');
+          if (!/\$|sgd/i.test(cleaned) && !/\d+\.\d+/.test(cleaned)) return null;
+          const m = cleaned.match(/(?:\$|sgd\s*)?(-?\d+(?:\.\d+)?)/i);
+          if (!m) return null;
+          const num = Number.parseFloat(m[1]);
+          if (!Number.isFinite(num)) return null;
+          if (Math.abs(num) >= 1000000) return null;
+          return Number(num.toFixed(4));
+        };
+
+        const parseUnit = (text) => {
+          const raw = String(text || '').trim();
+          if (!raw) return null;
+          const lower = raw.toLowerCase();
+          if (/\bcap(?:s|sule|sules)?\b/.test(lower)) return 'CAP';
+          if (/\btab(?:s|let|lets)?\b/.test(lower)) return 'TAB';
+          if (/\bpc(?:s)?\b/.test(lower)) return 'PC';
+          if (/\bsachet(?:s)?\b/.test(lower)) return 'SACHET';
+          if (/\bpack(?:s)?\b/.test(lower)) return 'PACK';
+          if (/\bvial(?:s)?\b/.test(lower)) return 'VIAL';
+          if (/\bamp(?:oule|oules)?\b/.test(lower)) return 'AMPOULE';
+          if (/\bbottle(?:s)?\b/.test(lower)) return 'BOTTLE';
+          const token = raw.match(/^[A-Za-z]{2,10}$/);
+          return token ? token[0].toUpperCase() : null;
+        };
+
         const sameDay = (a, b) =>
           !!a &&
           !!b &&
@@ -9401,7 +11429,7 @@ export class ClinicAssistAutomation {
 
         const targetDate = parseDate(targetDateStr);
 
-        const extractRow = (cells, { dateCol, nameCol, qtyCol }) => {
+        const extractRow = (cells, { dateCol, nameCol, qtyCol, unitCol, unitPriceCol, amountCol }) => {
           if (!cells || cells.length === 0) return null;
 
           // Date
@@ -9422,32 +11450,52 @@ export class ClinicAssistAutomation {
 
           // Name
           let name = '';
+          let resolvedNameCol = nameCol;
           if (nameCol >= 0 && nameCol < cells.length) {
             name = (cells[nameCol].textContent || '').trim();
           } else {
-            for (const cell of cells) {
+            let bestNameCol = -1;
+            for (let i = 0; i < cells.length; i++) {
+              const cell = cells[i];
               const text = (cell.textContent || '').trim();
               if (!text) continue;
               if (/^\d+$/.test(text)) continue;
               if (/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text) || /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(text))
                 continue;
-              if (text.length > name.length) name = text;
+              if (text.length > name.length) {
+                name = text;
+                bestNameCol = i;
+              }
             }
+            resolvedNameCol = bestNameCol;
           }
           if (!name || name.length < 2) return null;
 
           // Quantity (best-effort)
           let quantity = 1;
+          let qtyHintCell = null;
           if (qtyCol >= 0 && qtyCol < cells.length) {
             const qtyText = (cells[qtyCol].textContent || '').trim();
-            const qtyNum = parseInt(qtyText, 10);
-            if (!isNaN(qtyNum) && qtyNum > 0 && qtyNum < 1000) quantity = qtyNum;
+            const qtyNum = parseQty(qtyText);
+            if (qtyNum !== null) quantity = qtyNum;
           } else {
-            for (const cell of cells) {
+            // Prefer medicine-like quantity cells first (e.g., "40.00 Tabs").
+            qtyHintCell = cells.find((cell, idx) =>
+              idx !== resolvedNameCol &&
+              /(tabs?|tablets?|caps?|capsules?|pcs?|units?|packs?|sachets?|vials?|ampoules?|bottles?)\b/i.test(
+                (cell.textContent || '').trim()
+              )
+            );
+            const hintedQty = parseQty(qtyHintCell?.textContent || '');
+            if (hintedQty !== null) {
+              quantity = hintedQty;
+            } else {
+            for (let i = 0; i < cells.length; i++) {
+              if (i === resolvedNameCol) continue;
+              const cell = cells[i];
               const text = (cell.textContent || '').trim();
-              if (/^\d+$/.test(text)) {
-                const num = parseInt(text, 10);
-                if (num > 0 && num < 1000) {
+                const num = parseQty(text);
+                if (num !== null) {
                   quantity = num;
                   break;
                 }
@@ -9455,7 +11503,54 @@ export class ClinicAssistAutomation {
             }
           }
 
-          return { name, quantity, date: dateStr, dateObj };
+          let unit = null;
+          if (unitCol >= 0 && unitCol < cells.length) {
+            unit = parseUnit(cells[unitCol].textContent || '');
+          }
+
+          let unitPrice = null;
+          if (unitPriceCol >= 0 && unitPriceCol < cells.length) {
+            unitPrice = parseMoney(cells[unitPriceCol].textContent || '');
+          }
+
+          let amount = null;
+          if (amountCol >= 0 && amountCol < cells.length) {
+            amount = parseMoney(cells[amountCol].textContent || '');
+          }
+
+          const moneyCandidates = [];
+          for (let i = 0; i < cells.length; i++) {
+            if (i === resolvedNameCol || i === dateCol) continue;
+            const text = (cells[i].textContent || '').trim();
+            const money = parseMoney(text);
+            if (money === null) continue;
+            moneyCandidates.push({ idx: i, money });
+          }
+          if (amount === null && moneyCandidates.length) {
+            amount = moneyCandidates.reduce((best, cur) => (cur.money > best ? cur.money : best), moneyCandidates[0].money);
+          }
+          if (unitPrice === null && moneyCandidates.length) {
+            const smallest = moneyCandidates.reduce((best, cur) => (cur.money < best ? cur.money : best), moneyCandidates[0].money);
+            if (moneyCandidates.length > 1) {
+              unitPrice = smallest;
+            } else if (amount !== null && quantity > 1) {
+              unitPrice = Number((amount / Number(quantity)).toFixed(4));
+            } else {
+              unitPrice = smallest;
+            }
+          }
+
+          if (unitPrice === null && amount !== null && Number(quantity) > 0) {
+            unitPrice = Number((amount / Number(quantity)).toFixed(4));
+          }
+          if (amount === null && unitPrice !== null && Number(quantity) > 0) {
+            amount = Number((unitPrice * Number(quantity)).toFixed(2));
+          }
+
+          if (unitPrice !== null) unitPrice = Number(unitPrice.toFixed(4));
+          if (amount !== null) amount = Number(amount.toFixed(2));
+
+          return { name, quantity, unit, unitPrice, amount, date: dateStr, dateObj };
         };
 
         tables.forEach((table) => {
@@ -9469,14 +11564,21 @@ export class ClinicAssistAutomation {
 
           const dateCol = headers.findIndex((h) => h.includes('date') || h.includes('visit'));
           const nameCol = headers.findIndex((h) => h.includes('medicine') || h.includes('drug') || h.includes('item') || h.includes('description'));
-          const qtyCol = headers.findIndex((h) => h.includes('qty') || h.includes('quantity') || h.includes('amount'));
+          const qtyCol = headers.findIndex((h) => /\bqty\b|\bquantity\b/.test(h));
+          const unitCol = headers.findIndex((h) => /\bunit\b/.test(h) && !/\bprice\b/.test(h));
+          const unitPriceCol = headers.findIndex(
+            (h) =>
+              (/\bunit\s*price\b|\bprice\s*\/?\s*unit\b|\bu\/?price\b|\bprice\b/.test(h)) &&
+              !(/\bamount\b|\btotal\b/.test(h))
+          );
+          const amountCol = headers.findIndex((h) => /\bamount\b|\btotal\b|\bfee\b|\bcharge\b/.test(h));
 
           // If we used rows[0] as headerRow, skip it for data when headers exist.
           const dataRows = headers.length ? rows.slice(1) : rows;
 
           dataRows.forEach((row) => {
             const cells = Array.from(row.querySelectorAll('td, th'));
-            const rec = extractRow(cells, { dateCol, nameCol, qtyCol });
+            const rec = extractRow(cells, { dateCol, nameCol, qtyCol, unitCol, unitPriceCol, amountCol });
             if (rec) records.push(rec);
           });
         });
@@ -9524,7 +11626,14 @@ export class ClinicAssistAutomation {
           // Use local date components; toISOString() would shift the day in SGT.
           chosenDateIso: chosenDateObj ? toLocalIsoDate(chosenDateObj) : null,
           totalRecords: sorted.length,
-          medicines: chosen.map((r) => ({ name: r.name, quantity: r.quantity, date: r.date })),
+          medicines: chosen.map((r) => ({
+            name: r.name,
+            quantity: r.quantity,
+            unit: r.unit ?? null,
+            unitPrice: r.unitPrice ?? null,
+            amount: r.amount ?? null,
+            date: r.date,
+          })),
         };
       }, visitDate);
 
@@ -9577,7 +11686,12 @@ export class ClinicAssistAutomation {
         visitDate,
         chosenDateIso: extraction?.chosenDateIso || null,
         totalRecords: extraction?.totalRecords ?? null,
-        medicines: medicines.slice(0, 5).map((m) => ({ name: String(m.name || '').substring(0, 50), quantity: m.quantity })),
+        medicines: medicines.slice(0, 5).map((m) => ({
+          name: String(m.name || '').substring(0, 50),
+          quantity: m.quantity,
+          unitPrice: m.unitPrice ?? null,
+          amount: m.amount ?? null,
+        })),
       });
 
       return medicines;

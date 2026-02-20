@@ -482,12 +482,103 @@ export class BatchExtraction {
     }
   }
 
+  _toFeeNumber(value) {
+    if (value === null || value === undefined) return null;
+    const parsed = parseFloat(String(value).replace(/[^0-9.]/g, ''));
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  /**
+   * Queue Listing can split one logical visit into two adjacent rows:
+   * - Row A: has CONTRACT/payType but 0 fee
+   * - Row B: has fee but blank CONTRACT/payType
+   * Normalize this so the tagged row carries the fee and the orphan row is dropped.
+   */
+  _normalizeQueueListingRows(items) {
+    if (!Array.isArray(items) || items.length === 0) return items;
+
+    const normalized = items.map((item) => ({ ...item }));
+    const consumedIndexes = new Set();
+
+    const isLikelyQueueListingRow = (item) =>
+      String(item?.source || '').includes('reports_queue_list');
+
+    for (let i = 0; i < normalized.length; i++) {
+      if (consumedIndexes.has(i)) continue;
+      const base = normalized[i];
+      if (!isLikelyQueueListingRow(base)) continue;
+      if (!base?.payType) continue;
+
+      const baseFee = this._toFeeNumber(base.fee);
+      if (baseFee !== null && baseFee > 0) continue;
+
+      const baseRowIndex = Number(base.rawRowIndex);
+      const baseInv = Number(base.invNo);
+
+      let matchIndex = -1;
+      let bestDistance = Number.POSITIVE_INFINITY;
+
+      for (let j = i + 1; j < normalized.length; j++) {
+        if (consumedIndexes.has(j)) continue;
+        const candidate = normalized[j];
+        if (!isLikelyQueueListingRow(candidate)) continue;
+        if (candidate?.payType) continue;
+        if ((candidate?.pcno || null) !== (base?.pcno || null)) continue;
+        if ((candidate?.patientName || '').trim() !== (base?.patientName || '').trim()) continue;
+        if ((candidate?.spCode || null) !== (base?.spCode || null)) continue;
+
+        const candidateFee = this._toFeeNumber(candidate.fee);
+        if (candidateFee === null || candidateFee <= 0) continue;
+
+        const candidateRowIndex = Number(candidate.rawRowIndex);
+        const rowDistance =
+          Number.isFinite(baseRowIndex) && Number.isFinite(candidateRowIndex)
+            ? Math.abs(candidateRowIndex - baseRowIndex)
+            : 999;
+
+        const candidateInv = Number(candidate.invNo);
+        const invDistance =
+          Number.isFinite(baseInv) && Number.isFinite(candidateInv)
+            ? Math.abs(candidateInv - baseInv)
+            : 0;
+
+        const closeByRows = rowDistance <= 3;
+        const nearbyInvoicePair = Number.isFinite(invDistance) && invDistance <= 2 && rowDistance <= 20;
+        if (!closeByRows && !nearbyInvoicePair) continue;
+
+        if (rowDistance < bestDistance) {
+          bestDistance = rowDistance;
+          matchIndex = j;
+        }
+      }
+
+      if (matchIndex >= 0) {
+        const donor = normalized[matchIndex];
+        base.fee = donor.fee;
+        base.mergedFeeFromInvNo = donor.invNo || null;
+        consumedIndexes.add(matchIndex);
+      }
+    }
+
+    const out = normalized.filter((_, idx) => !consumedIndexes.has(idx));
+    if (consumedIndexes.size > 0) {
+      logger.info('[BATCH] Normalized split queue-listing rows', {
+        originalCount: items.length,
+        normalizedCount: out.length,
+        mergedRows: consumedIndexes.size,
+      });
+    }
+    return out;
+  }
+
   /**
    * Save extracted items to CRM (Supabase)
    * @param {Array} items - Array of extracted visit items
    * @param {string} visitDate - Optional visit date in YYYY-MM-DD format. Defaults to today if not provided.
    */
   async saveToCRM(items, visitDate = null) {
+    const itemsToSave = this._normalizeQueueListingRows(items);
+
     if (!this.supabase) {
       logger.warn('[BATCH] Supabase not configured; saving to JSON file instead');
       // Fallback to JSON file
@@ -504,11 +595,11 @@ export class BatchExtraction {
       const filepath = join(dataDir, filename);
       await writeFile(
         filepath,
-        JSON.stringify({ items, extractedAt: new Date().toISOString() }, null, 2)
+        JSON.stringify({ items: itemsToSave, extractedAt: new Date().toISOString() }, null, 2)
       );
 
-      logger.info(`[BATCH] Saved ${items.length} items to ${filepath}`);
-      return items.length;
+      logger.info(`[BATCH] Saved ${itemsToSave.length} items to ${filepath}`);
+      return itemsToSave.length;
     }
 
     // Get system user_id for automated extractions
@@ -520,7 +611,7 @@ export class BatchExtraction {
     // Use provided visitDate, or default to today
     const targetDate = visitDate || new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
-    for (const item of items) {
+    for (const item of itemsToSave) {
       try {
         // Parse fee amount - prefer extracted claimAmount, fallback to queue fee
         const feeAmount =
@@ -543,21 +634,8 @@ export class BatchExtraction {
           total_amount: feeAmount,
           amount_outstanding: feeAmount,
 
-          // Claim details
-          diagnosis_description: item.claimDetails?.diagnosisText || null,
-          symptoms: item.claimDetails?.notesText || null,
-          treatment_detail: item.claimDetails?.items?.join('\n') || null,
-
-          // MC days
-          mc_required: (item.claimDetails?.mcDays || 0) > 0,
-          mc_start_date: (item.claimDetails?.mcDays || 0) > 0 ? targetDate : null,
-          mc_end_date: (item.claimDetails?.mcDays || 0) > 0 ? targetDate : null,
-
           // Metadata
           source: 'Clinic Assist',
-          pay_type: item.payType,
-          visit_type: item.visitType,
-          nric: item.nric,
           extraction_metadata: {
             extracted: item.extracted,
             extractedAt: item.extractedAt || new Date().toISOString(),
@@ -566,6 +644,22 @@ export class BatchExtraction {
             spCode: item.spCode || null, // Save SP code for Allianz Medinet doctor mapping in Flow 3
           },
         };
+
+        // Preserve existing classification/identity data if queue row does not provide it.
+        if (item.payType) visitData.pay_type = item.payType;
+        if (item.visitType) visitData.visit_type = item.visitType;
+        if (item.nric) visitData.nric = item.nric;
+
+        // Only update detailed clinical fields when we actually extracted claim details.
+        // Queue-listing refresh rows intentionally do not carry diagnosis/MC detail.
+        if (item.claimDetails) {
+          visitData.diagnosis_description = item.claimDetails?.diagnosisText || null;
+          visitData.symptoms = item.claimDetails?.notesText || null;
+          visitData.treatment_detail = item.claimDetails?.items?.join('\n') || null;
+          visitData.mc_required = (item.claimDetails?.mcDays || 0) > 0;
+          visitData.mc_start_date = (item.claimDetails?.mcDays || 0) > 0 ? targetDate : null;
+          visitData.mc_end_date = (item.claimDetails?.mcDays || 0) > 0 ? targetDate : null;
+        }
 
         // Deduplication:
         // Use visit_record_no + visit_date when possible (invoice/record number is unique per visit/claim).
@@ -665,7 +759,7 @@ export class BatchExtraction {
       }
     }
 
-    this.steps.step(6, `Saved ${savedCount}/${items.length} items to CRM`);
+    this.steps.step(6, `Saved ${savedCount}/${itemsToSave.length} items to CRM`);
     return savedCount;
   }
 

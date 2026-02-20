@@ -33,12 +33,16 @@ export function normalizePatientNameForSearch(value) {
     'AVIVA',
     'SINGLIFE',
     'MHC',
+    'MHCAXA',
     'AIA',
     'AIACLIENT',
     'GE',
+    'NTUC_IM',
     'ALLIANZ',
+    'ALLIANCE',
     'FULLERT',
     'IHP',
+    'PARKWAY',
     'TOKIOM',
     'ALLIANC',
     'ALLSING',
@@ -66,7 +70,7 @@ export function normalizePatientNameForSearch(value) {
     // Also remove any remaining leading tokens and separators.
     s = s
       .replace(
-        /^(?:\s*(?:TAG\s+)?(?:AVIVA|SINGLIFE|MHC|AIA|AIACLIENT|GE|ALLIANZ|FULLERT|IHP|TOKIOM|ALLIANC|ALLSING|AXAMED|PRUDEN)\s*)+(?:[|:/-]+\s*)*/i,
+        /^(?:\s*(?:TAG\s+)?(?:AVIVA|SINGLIFE|MHC|MHCAXA|AIA|AIACLIENT|GE|NTUC_IM|ALLIANZ|ALLIANCE|FULLERT|IHP|PARKWAY|TOKIOM|ALLIANC|ALLSING|AXAMED|PRUDEN)\s*)+(?:[|:/-]+\s*)*/i,
         ''
       )
       .trim();

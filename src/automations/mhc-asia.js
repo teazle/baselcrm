@@ -15,6 +15,12 @@ export class MHCAsiaAutomation {
     this._lastLoginAt = 0;
     this.isAiaClinicSystem = false;
     this.isSinglifeSystem = false;
+    this.lastDiagnosisSelection = null;
+    this.lastDiagnosisResolutionCheck = null;
+    this.lastWaiverReferralState = null;
+    this.lastSaveDraftResult = null;
+    this.lastDiagnosisPrefetch = null;
+    this.lastDrugSelectionByRow = {};
   }
 
   /**
@@ -486,15 +492,32 @@ export class MHCAsiaAutomation {
         throw new Error('Blocked unsafe submit click on claim form');
       }
     }
+    let clicked = false;
+    let clickError = null;
     try {
       await locator.click({ timeout: timeoutMs });
-    } catch {
-      await locator.click({ timeout: timeoutMs, force: true }).catch(() => {});
+      clicked = true;
+    } catch (error) {
+      clickError = error;
+      try {
+        await locator.click({ timeout: timeoutMs, force: true });
+        clicked = true;
+      } catch (forcedError) {
+        clickError = forcedError;
+      }
     }
     // Avoid waiting for networkidle (many portals keep connections open)
     await this.page.waitForLoadState('domcontentloaded', { timeout: 3000 }).catch(() => {});
     await this.page.waitForTimeout(200); // Reduced wait
-    if (label) logger.info(`Clicked: ${label}`);
+    if (clicked && label) logger.info(`Clicked: ${label}`);
+    if (!clicked) {
+      logger.warn('[MHC] Click failed', {
+        label: label || null,
+        error: clickError?.message || null,
+        url: this.page.url(),
+      });
+    }
+    return clicked;
   }
 
   _normalizeText(s) {
@@ -569,6 +592,173 @@ export class MHCAsiaAutomation {
       await this.page.waitForTimeout(250);
     }
     return { ok: false, snap: await this._getPortalContextSnapshot() };
+  }
+
+  _extractSwitchSystemHref(rawValue) {
+    const raw = String(rawValue || '').trim();
+    if (!raw) return null;
+    if (/switchsystem\.ec/i.test(raw)) {
+      try {
+        return new URL(raw, this.page.url()).toString();
+      } catch {
+        return raw;
+      }
+    }
+    const fromQuery = raw.match(/[?&]url=([^&]+)/i)?.[1] || null;
+    if (fromQuery) {
+      try {
+        return decodeURIComponent(fromQuery);
+      } catch {
+        return fromQuery;
+      }
+    }
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return null;
+  }
+
+  async _collectVisibleSystemSwitchOptions(targetRegex, opts = {}) {
+    const includeHidden = opts?.includeHidden === true;
+    return this.page
+      .evaluate((regexSource, regexFlags, includeHiddenOptions) => {
+        const rx = new RegExp(regexSource, regexFlags);
+        const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+        const isVisible = (el) => {
+          if (!el) return false;
+          const style = window.getComputedStyle(el);
+          if (!style) return false;
+          if (style.display === 'none' || style.visibility === 'hidden') return false;
+          const r = el.getBoundingClientRect();
+          return !!r && r.width > 0 && r.height > 0;
+        };
+        const options = [];
+        for (const a of Array.from(document.querySelectorAll('a[href]'))) {
+          const text = norm(a.textContent || a.getAttribute('title') || '');
+          if (!text || !rx.test(text)) continue;
+          if (!includeHiddenOptions && !isVisible(a)) continue;
+          options.push({
+            kind: 'anchor',
+            text,
+            href: String(a.getAttribute('href') || '').trim(),
+            selectorHint: String(a.id || '').trim() || null,
+          });
+        }
+        for (const sel of Array.from(document.querySelectorAll('select'))) {
+          if (!includeHiddenOptions && !isVisible(sel)) continue;
+          for (const opt of Array.from(sel.options || [])) {
+            const text = norm(opt.textContent || opt.label || '');
+            if (!text || !rx.test(text)) continue;
+            options.push({
+              kind: 'option',
+              text,
+              value: String(opt.value || '').trim(),
+              selectName: String(sel.getAttribute('name') || '').trim() || null,
+              selectId: String(sel.id || '').trim() || null,
+            });
+          }
+        }
+        return options;
+      }, targetRegex.source, targetRegex.flags, includeHidden)
+      .catch(() => []);
+  }
+
+  async _collectSwitchSystemDebugTargets(targetRegex) {
+    return this.page
+      .evaluate((regexSource, regexFlags) => {
+        const rx = new RegExp(regexSource, regexFlags);
+        const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+        const isVisible = (el) => {
+          if (!el) return false;
+          const style = window.getComputedStyle(el);
+          if (!style) return false;
+          if (style.display === 'none' || style.visibility === 'hidden') return false;
+          const r = el.getBoundingClientRect();
+          return !!r && r.width > 0 && r.height > 0;
+        };
+
+        const out = [];
+        const nodes = Array.from(document.querySelectorAll('a, option, li, div, span, td, button'));
+        for (const el of nodes) {
+          const text = norm(el.textContent || el.getAttribute('title') || '');
+          const href = String(el.getAttribute('href') || '').trim();
+          const onclick = String(el.getAttribute('onclick') || '').trim();
+          const interesting =
+            rx.test(text) ||
+            /switchsystem\.ec/i.test(href) ||
+            /switchsystem\.ec/i.test(onclick) ||
+            /aia\s*clinic/i.test(text);
+          if (!interesting) continue;
+          out.push({
+            tag: (el.tagName || '').toLowerCase(),
+            text,
+            href: href || null,
+            onclick: onclick || null,
+            id: String(el.id || '').trim() || null,
+            className: String(el.className || '').trim() || null,
+            visible: isVisible(el),
+          });
+          if (out.length >= 40) break;
+        }
+        return out;
+      }, targetRegex.source, targetRegex.flags)
+      .catch(() => []);
+  }
+
+  async _collectSwitchSystemHrefCandidatesAcrossFrames(targetRegex) {
+    const collectFromRoot = async (root, source) => {
+      const rows = await root
+        .evaluate((regexSource, regexFlags) => {
+          const rx = new RegExp(regexSource, regexFlags);
+          const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+          const out = [];
+          for (const a of Array.from(document.querySelectorAll('a[href], area[href]'))) {
+            const text = norm(a.textContent || a.getAttribute('title') || '');
+            const href = String(a.getAttribute('href') || '').trim();
+            if (!href) continue;
+            const interesting =
+              rx.test(text) ||
+              rx.test(href) ||
+              /switchsystem\.ec/i.test(href) ||
+              /aiaclinic\.com/i.test(href) ||
+              /pcpcare|singlife|myglobalbenefit/i.test(href);
+            if (!interesting) continue;
+            out.push({ text, href });
+            if (out.length >= 80) break;
+          }
+          return out;
+        }, targetRegex.source, targetRegex.flags)
+        .catch(() => []);
+      return (rows || []).map((r) => ({ ...r, source }));
+    };
+
+    const all = [];
+    all.push(...(await collectFromRoot(this.page, 'page')));
+    for (const frame of this.page.frames()) {
+      if (frame === this.page.mainFrame()) continue;
+      const frameLabel = frame.url() ? `frame:${frame.url()}` : 'frame';
+      all.push(...(await collectFromRoot(frame, frameLabel)));
+    }
+
+    const seen = new Set();
+    const filtered = [];
+    for (const row of all) {
+      const key = `${row.href}::${row.source}`;
+      if (!row.href || seen.has(key)) continue;
+      seen.add(key);
+      filtered.push(row);
+    }
+    return filtered;
+  }
+
+  _getDefaultSwitchSystemUrl(targetRegex, labelForLog = '') {
+    const source = String(targetRegex?.source || '').toLowerCase();
+    const label = String(labelForLog || '').toLowerCase();
+    if (/aia/.test(source) || /aia/.test(label)) {
+      return 'SwitchSystem.ec?url=https://www.aiaclinic.com';
+    }
+    if (/singlife|aviva|pcp/.test(source) || /singlife|aviva|pcp/.test(label)) {
+      return 'SwitchSystem.ec?url=https://www.pcpcare.com';
+    }
+    return null;
   }
 
   _parseDiagnosisCandidate(text) {
@@ -982,6 +1172,7 @@ export class MHCAsiaAutomation {
 
   async fillServicesAndDrugs(items, options = {}) {
 	    this._logStep('Fill services/drugs', { count: (items || []).length });
+      this.lastDrugSelectionByRow = {};
       const skipProcedures = options?.skipProcedures === true;
 	    const isJunkLine = (s) => {
 	      const n = String(s || '').trim().replace(/\s+/g, ' ');
@@ -1005,14 +1196,18 @@ export class MHCAsiaAutomation {
 
 	    const list = (items || [])
 	      .map((x) => {
-	        if (typeof x === 'string') return { name: this._normalizeText(x), quantity: null };
+	        if (typeof x === 'string') return { name: this._normalizeText(x), quantity: null, unit: null, unitPrice: null, amount: null };
 	        const name = this._normalizeText(x?.name || x?.description || '');
-	        const quantityRaw =
-	          x?.quantity ?? x?.qty ?? x?.qtyValue ?? x?.qtyText ?? x?.amount ?? x?.amountText ?? null;
+	        const quantityRaw = x?.quantity ?? x?.qty ?? x?.qtyValue ?? x?.qtyText ?? null;
 	        const quantity = quantityRaw === null || quantityRaw === undefined
 	          ? null
 	          : String(quantityRaw).trim();
-	        return { name, quantity };
+	        const unit = x?.unit ?? x?.uom ?? x?.unitCode ?? null;
+	        const unitPriceRaw = x?.unitPrice ?? x?.unit_price ?? x?.price ?? null;
+	        const amountRaw = x?.amount ?? x?.lineAmount ?? x?.total ?? null;
+	        const unitPrice = unitPriceRaw === null || unitPriceRaw === undefined ? null : String(unitPriceRaw).trim();
+	        const amount = amountRaw === null || amountRaw === undefined ? null : String(amountRaw).trim();
+	        return { name, quantity, unit, unitPrice, amount };
 	      })
 	      .map((x) => ({ ...x, name: (x.name || '').toString().trim().replace(/\s+/g, ' ') }))
 	      .filter((x) => x.name && !isJunkLine(x.name));
@@ -1020,33 +1215,85 @@ export class MHCAsiaAutomation {
 
 	    const procedures = [];
 	    const drugs = [];
+      const skippedProcedureLikes = [];
+      const procedureLikeRe =
+        /(xray|x-ray|scan|ultrasound|procedure|physio|physiotherapy|ecg|injection|dressing|suturing|vaccine|mri|ct\b|dexa|density|bmd|radiolog|radiology|imaging|consultation|consult\b|medical\s+expenses?)/i;
 	    for (const it of list) {
-	      if (!skipProcedures && /(xray|x-ray|scan|ultrasound|procedure|physio|physiotherapy|ecg|injection|dressing|suturing|vaccine|mri|ct\b|dexa|density|bmd|radiolog|radiology|imaging|consultation|consult\b|medical\s+expenses?)/i.test(it.name)) {
+        const isProcedureLike = procedureLikeRe.test(it.name);
+	      if (isProcedureLike) {
+          if (skipProcedures) {
+            skippedProcedureLikes.push(it.name);
+            continue;
+          }
 	        procedures.push(it.name);
-	      } else {
-	        drugs.push(it);
-	      }
+          continue;
+        }
+	      drugs.push(it);
 	    }
 
       if (skipProcedures) {
-        logger.info('[MHC] Procedure fill skipped by policy for this portal/form variant');
+        logger.info('[MHC] Procedure fill skipped by policy for this run', {
+          skippedCount: skippedProcedureLikes.length,
+          skippedSample: skippedProcedureLikes.slice(0, 5),
+        });
       }
 
-    let drugFilled = 0;
-    for (let i = 0; i < Math.min(3, drugs.length); i++) {
-      if (i > 0) await this.clickMoreDrug().catch(() => {});
-      const quantity = drugs[i].quantity ?? '1';
-      const ok = await this.fillDrugItem({ name: drugs[i].name, quantity }, i + 1).catch(() => false);
-      if (ok) {
-        drugFilled += 1;
-        // Ensure qty is filled even when the direct fill couldn't locate the qty cell.
-        const qtyFallbackOk = await this.fillDrugQuantityFallback(i + 1, quantity).catch(() => false);
-        const qtyVerified = await this.verifyDrugQuantity(i + 1, quantity).catch(() => false);
-        if (!qtyFallbackOk || !qtyVerified) {
-          logger.warn(`Drug qty may be missing for row ${i + 1} (${drugs[i].name})`);
-        }
-      }
-    }
+	    let drugFilled = 0;
+	    for (let i = 0; i < Math.min(3, drugs.length); i++) {
+	      if (i > 0) await this.clickMoreDrug().catch(() => {});
+	      const quantity = drugs[i].quantity ?? '1';
+	      const unit = drugs[i].unit ?? null;
+	      const amountRaw = String(drugs[i].amount ?? '').trim();
+	      const unitPriceRaw = String(drugs[i].unitPrice ?? '').trim();
+	      const qn = Number.parseFloat(String(quantity).replace(/[^\d.]/g, ''));
+	      const amountNum = Number.parseFloat(amountRaw.replace(/[^\d.]/g, ''));
+	      const priceNum = Number.parseFloat(unitPriceRaw.replace(/[^\d.]/g, ''));
+	      const amount = Number.isFinite(amountNum) && amountNum > 0 ? String(Number(amountNum.toFixed(4))) : null;
+	      const unitPriceDerived =
+	        Number.isFinite(priceNum) && priceNum > 0
+	          ? String(Number(priceNum.toFixed(4)))
+	          : Number.isFinite(amountNum) && amountNum > 0 && Number.isFinite(qn) && qn > 0
+	            ? String(Number((amountNum / qn).toFixed(4)))
+	            : null;
+	      const ok = await this.fillDrugItem({ name: drugs[i].name, quantity, unit, unitPrice: unitPriceDerived, amount }, i + 1).catch(() => false);
+	      if (ok) {
+	        drugFilled += 1;
+	        // Ensure qty is filled even when the direct fill couldn't locate the qty cell.
+	        const qtyFallbackOk = await this.fillDrugQuantityFallback(i + 1, quantity).catch(() => false);
+	        const qtyVerified = await this.verifyDrugQuantity(i + 1, quantity).catch(() => false);
+	        if (!qtyFallbackOk || !qtyVerified) {
+	          logger.warn(`Drug qty may be missing for row ${i + 1} (${drugs[i].name})`);
+	        }
+		        const masterResolved =
+              this.lastDrugSelectionByRow?.[i + 1]?.fromMaster === true;
+            const portalContext = this._inferPortalContext();
+            if ((unitPriceDerived || amount) && (!masterResolved && portalContext === 'aia')) {
+              this._logStep('Skip AIA drug pricing fallback without resolved drug master code', {
+                rowIndex: i + 1,
+                drug: drugs[i].name,
+                unitPrice: unitPriceDerived,
+                amount,
+              });
+            } else if (unitPriceDerived || amount) {
+		          const pricingOk = await this.fillDrugPricingFallback(i + 1, {
+		            unit,
+		            quantity,
+		            unitPrice: unitPriceDerived,
+		            amount,
+		          }).catch(() => false);
+	          const pricingVerified = await this.verifyDrugPricing(i + 1, {
+	            unitPrice: unitPriceDerived,
+	            amount,
+	          }).catch(() => false);
+		          if (!pricingOk || !pricingVerified) {
+		            logger.warn(`Drug pricing may be missing for row ${i + 1} (${drugs[i].name})`, {
+		              unitPrice: unitPriceDerived,
+		              amount,
+		            });
+		          }
+		        }
+	      }
+	    }
     if (drugs.length && drugFilled === 0) {
       drugFilled = (await this._fillTextInputsInTableSection(/Drug Name/i, /Total Drug Fee/i, drugs.map((d) => d.name))).filled;
       // When the generic table fill is used, the Qty column is not touched. Ensure it is set.
@@ -2299,10 +2546,11 @@ export class MHCAsiaAutomation {
    * From search results, click into the patient row/name if present
    * @param {string} nric
    */
-  async openPatientFromSearchResults(nric) {
+  async openPatientFromSearchResults(nric, opts = {}) {
     try {
       const term = String(nric || '').trim();
-      this._logStep('Open patient from results', { nric: term });
+      const preferredContext = String(opts?.preferredContext || '').trim().toLowerCase() || null;
+      this._logStep('Open patient from results', { nric: term, preferredContext });
       logger.info('Opening patient from search results...');
       if (this.needsAIAClinicSwitch) {
         logger.warn('AIA Clinic switch already required; skipping patient open on MHC');
@@ -2316,8 +2564,9 @@ export class MHCAsiaAutomation {
       for (const frame of this.page.frames()) {
         try {
           const handle = await frame.evaluateHandle(
-            ({ t, strict }) => {
+            ({ t, strict, preferred }) => {
               const termLower = String(t || '').trim().toLowerCase();
+              const preferredContext = String(preferred || '').trim().toLowerCase();
               const isPatientLink = (a) => {
                 const tt = (a.textContent || '').trim().toLowerCase();
                 if (!tt) return false;
@@ -2325,6 +2574,36 @@ export class MHCAsiaAutomation {
                 if (tt === 'benefit') return false;
                 if (tt === 'subsidiaries') return false;
                 return true;
+              };
+              const contextScore = (text) => {
+                const s = String(text || '').toLowerCase();
+                if (!preferredContext) return 0;
+                if (preferredContext === 'aia') {
+                  let score = 0;
+                  if (/aia\s*clinic|aiaclinic|cliniciecaia/i.test(s)) score += 240;
+                  if (/singlife|pcpcare|aviva/i.test(s)) score -= 220;
+                  return score;
+                }
+                if (preferredContext === 'singlife') {
+                  let score = 0;
+                  if (/singlife|pcpcare|aviva/i.test(s)) score += 240;
+                  if (/aia\s*clinic|aiaclinic|cliniciecaia/i.test(s)) score -= 220;
+                  return score;
+                }
+                if (preferredContext === 'mhc') {
+                  let score = 0;
+                  if (/mhc|medical\s*network|make\s*health\s*connect/i.test(s)) score += 40;
+                  if (/aia\s*clinic|aiaclinic|singlife|pcpcare|aviva/i.test(s)) score -= 80;
+                  return score;
+                }
+                return 0;
+              };
+              const hrefScore = (href) => {
+                const s = String(href || '').toLowerCase();
+                let score = 0;
+                if (/empvisitadd|visitadd|empvisit/i.test(s)) score += 30;
+                score += contextScore(s);
+                return score;
               };
 
               // Prefer the dedicated result table when present.
@@ -2341,9 +2620,9 @@ export class MHCAsiaAutomation {
               const root = resultTable || document;
               const rows = Array.from(root.querySelectorAll('tr'));
 
-              const candidates = [];
-              const allPatientLinks = [];
+              const scoredCandidates = [];
               const rowCandidates = [];
+              let rowIndex = 0;
 
               for (const r of rows) {
                 const text = (r.innerText || '').toLowerCase();
@@ -2355,22 +2634,30 @@ export class MHCAsiaAutomation {
                   rowCandidates.push(r);
                 }
                 if (links.length) {
-                  for (const a of links) allPatientLinks.push(a);
-                  if (termLower && text.includes(termLower)) {
-                    candidates.push(...links);
+                  for (const a of links) {
+                    const linkText = (a.textContent || '').toLowerCase();
+                    const href = String(a.getAttribute('href') || a.href || '').trim();
+                    let score = 0;
+                    const blob = `${text} ${linkText} ${href}`.toLowerCase();
+                    if (termLower && blob.includes(termLower)) score += 140;
+                    else if (termLower) score -= 60;
+                    score += contextScore(blob);
+                    score += hrefScore(href);
+                    score += Math.max(0, 20 - rowIndex); // keep upper rows preferred when tied
+                    scoredCandidates.push({ element: a, score, rowIndex });
                   }
                 }
+                rowIndex += 1;
               }
 
-              // If no term match, fall back to the first patient link when the result set is unambiguous.
-              const usable = candidates.length ? candidates : allPatientLinks;
-              if (strict && usable.length !== 1 && rowCandidates.length !== 1) return null;
-              if (usable[0]) return usable[0];
+              const sortable = scoredCandidates.sort((a, b) => b.score - a.score);
+              if (strict && sortable.length !== 1 && rowCandidates.length !== 1) return null;
+              if (sortable[0]?.element) return sortable[0].element;
               if (rowCandidates.length === 1) return rowCandidates[0];
               if (!strict && rowCandidates.length > 0) return rowCandidates[0];
               return null;
             },
-            { t: term, strict: strictUnique }
+            { t: term, strict: strictUnique, preferred: preferredContext }
           );
 
           const el = handle?.asElement?.() || null;
@@ -2409,6 +2696,18 @@ export class MHCAsiaAutomation {
           await this.page.bringToFront().catch(() => {});
           if (this.needsAIAClinicSwitch) {
             logger.warn('AIA Clinic dialog detected after patient click; aborting MHC open');
+            return false;
+          }
+          if (
+            preferredContext &&
+            preferredContext !== this._inferPortalContext() &&
+            !this.needsAIAClinicSwitch
+          ) {
+            this._logStep('Patient row context mismatch after click', {
+              expected: preferredContext,
+              actual: this._inferPortalContext(),
+              url: this.page.url(),
+            });
             return false;
           }
 
@@ -2491,7 +2790,7 @@ export class MHCAsiaAutomation {
       }
 
       await this.page.screenshot({ path: 'screenshots/mhc-asia-patient-open-not-found.png', fullPage: true }).catch(() => {});
-      logger.warn('Could not open patient from search results', { term, strictUnique });
+      logger.warn('Could not open patient from search results', { term, strictUnique, preferredContext });
       return false;
     } catch (error) {
       logger.error('Failed to open patient from results:', error);
@@ -2712,22 +3011,20 @@ export class MHCAsiaAutomation {
       const switchSystemSelectors = [
         'a:has-text("Switch System")',
         'button:has-text("Switch System")',
-        'text=/Switch\\s+System/i',
-        '[onclick*="switch" i]',
-        '.switch-system',
-        'a[href*="switch" i]',
+        'select[name*="system" i]',
+        'select[id*="system" i]',
       ];
       
       let switchClicked = false;
       for (const selector of switchSystemSelectors) {
         try {
           const switchBtn = this.page.locator(selector).first();
-          if ((await switchBtn.count().catch(() => 0)) > 0) {
-            await this._safeClick(switchBtn, 'Switch System');
-            await this.page.waitForTimeout(500);
-            switchClicked = true;
-            break;
-          }
+          if ((await switchBtn.count().catch(() => 0)) === 0) continue;
+          const visible = await switchBtn.isVisible().catch(() => false);
+          if (!visible) continue;
+          switchClicked = await this._safeClick(switchBtn, 'Switch System');
+          await this.page.waitForTimeout(500);
+          if (switchClicked) break;
         } catch {
           continue;
         }
@@ -2777,52 +3074,157 @@ export class MHCAsiaAutomation {
         return false;
       }
       
-      // Step 2: Select "AIA Clinic" from the list
-      const aiaClinicSelectors = [
-        'a:has-text("AIA Clinic")',
-        'button:has-text("AIA Clinic")',
-        'option:has-text("AIA Clinic")',
-        'li:has-text("AIA Clinic")',
-        '[value*="aiaclinic" i]',
-      ];
-      
-      for (const selector of aiaClinicSelectors) {
+      // Step 2: Select "AIA Clinic" from actionable controls.
+      // Prime hover menus first (some deployments require hover to reveal switch links).
+      await this.page
+        .locator('a:has-text("Switch System"), button:has-text("Switch System"), text=/Switch\\s+System/i')
+        .first()
+        .hover()
+        .catch(() => {});
+      await this.page.waitForTimeout(250);
+
+      let options = await this._collectVisibleSystemSwitchOptions(/aia\s*clinic/i);
+      if (!options.length) {
+        this._logStep('No visible AIA switch options; trying hidden switch links');
+        options = await this._collectVisibleSystemSwitchOptions(/aia\s*clinic/i, { includeHidden: true });
+      }
+      if (!options.length) {
+        const debugTargets = await this._collectSwitchSystemDebugTargets(/aia\s*clinic/i);
+        this._logStep('AIA switch debug targets', { count: debugTargets.length, sample: debugTargets.slice(0, 12) });
+        const hrefFallbackCandidates = await this._collectSwitchSystemHrefCandidatesAcrossFrames(
+          /aia\s*clinic|aiaclinic/i
+        );
+        this._logStep('AIA switch href fallback candidates', {
+          count: hrefFallbackCandidates.length,
+          sample: hrefFallbackCandidates.slice(0, 8),
+        });
+        for (const candidate of hrefFallbackCandidates) {
+          const switchHref = this._extractSwitchSystemHref(candidate.href);
+          if (!switchHref) continue;
+          const nextUrl = /^https?:\/\//i.test(switchHref)
+            ? switchHref
+            : new URL(switchHref, this.page.url()).toString();
+          await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+          const fallbackSwitch = await this._waitForAiaSwitch(9000);
+          this._logStep('AIA switch verification via href fallback', {
+            candidate,
+            ...fallbackSwitch.snap,
+          });
+          if (fallbackSwitch.ok) {
+            this.isAiaClinicSystem = true;
+            this.isSinglifeSystem = false;
+            if (flaggedByDialog) this.needsAIAClinicSwitch = false;
+            await this.page
+              .screenshot({ path: 'screenshots/mhc-asia-switched-to-aia-clinic.png' })
+              .catch(() => {});
+            return true;
+          }
+        }
+
+        const defaultSwitchUrl = this._getDefaultSwitchSystemUrl(/aia\s*clinic|aiaclinic/i, 'AIA Clinic');
+        if (defaultSwitchUrl) {
+          const nextUrl = new URL(defaultSwitchUrl, this.page.url()).toString();
+          this._logStep('AIA switch deterministic default fallback', { nextUrl });
+          await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+          const defaultFallback = await this._waitForAiaSwitch(9000);
+          this._logStep('AIA switch verification via default fallback', {
+            nextUrl,
+            ...defaultFallback.snap,
+          });
+          if (defaultFallback.ok) {
+            this.isAiaClinicSystem = true;
+            this.isSinglifeSystem = false;
+            if (flaggedByDialog) this.needsAIAClinicSwitch = false;
+            await this.page
+              .screenshot({ path: 'screenshots/mhc-asia-switched-to-aia-clinic.png' })
+              .catch(() => {});
+            return true;
+          }
+        }
+      }
+      for (const option of options) {
         try {
-          const aiaClinic = this.page.locator(selector).first();
-          if ((await aiaClinic.count().catch(() => 0)) > 0) {
+          this._logStep('AIA switch option candidate', option);
+          if (option.kind === 'option') {
+            const selLocator = option.selectName
+              ? this.page.locator(`select[name="${option.selectName}"]`).first()
+              : option.selectId
+                ? this.page.locator(`#${option.selectId}`).first()
+                : this.page.locator('select').first();
+            if ((await selLocator.count().catch(() => 0)) === 0) continue;
+            await selLocator.selectOption({ value: option.value }).catch(async () => {
+              await selLocator.selectOption({ label: option.text });
+            });
+          } else {
             const prevPage = this.page;
             const popupPromise = this.page.context().waitForEvent('page', { timeout: 6000 }).catch(() => null);
-            await this._safeClick(aiaClinic, 'AIA Clinic');
-            const popup = await popupPromise;
-            if (popup) {
-              await popup.waitForLoadState('domcontentloaded').catch(() => {});
-              this.page = popup;
-              this.setupDialogHandler({ reset: false });
-              await this.page.bringToFront().catch(() => {});
-              await this.page.evaluate(() => window.focus()).catch(() => {});
-              if (prevPage && prevPage !== popup) {
-                await prevPage.close().catch(() => {});
+            const link = this.page
+              .locator('a[href]')
+              .filter({
+                hasText: new RegExp(
+                  `^\\s*${option.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`,
+                  'i'
+                ),
+              })
+              .first();
+            const linkCount = await link.count().catch(() => 0);
+            const linkVisible = linkCount > 0 && (await link.isVisible().catch(() => false));
+            if (linkVisible) {
+              const clicked = await this._safeClick(link, 'AIA Clinic');
+              if (!clicked) continue;
+              const popup = await popupPromise;
+              if (popup) {
+                await popup.waitForLoadState('domcontentloaded').catch(() => {});
+                this.page = popup;
+                this.setupDialogHandler({ reset: false });
+                await this.page.bringToFront().catch(() => {});
+                await this.page.evaluate(() => window.focus()).catch(() => {});
+                if (prevPage && prevPage !== popup) {
+                  await prevPage.close().catch(() => {});
+                }
               }
             }
-            const switchResult = await this._waitForAiaSwitch(9000);
-            const snap = switchResult.snap;
-            this._logStep('AIA switch verification', snap);
-            if (switchResult.ok) {
-              logger.info('Switched to AIA Clinic system');
+          }
+
+          const switchResult = await this._waitForAiaSwitch(9000);
+          const snap = switchResult.snap;
+          this._logStep('AIA switch verification', { option, ...snap });
+          if (switchResult.ok) {
+            logger.info('Switched to AIA Clinic system');
+            this.isAiaClinicSystem = true;
+            this.isSinglifeSystem = false;
+            this._logStep('Switched to AIA Clinic');
+            await this.page.screenshot({ path: 'screenshots/mhc-asia-switched-to-aia-clinic.png' }).catch(() => {});
+            await this.page.bringToFront().catch(() => {});
+            if (flaggedByDialog) this.needsAIAClinicSwitch = false;
+            return true;
+          }
+
+          const switchHref =
+            this._extractSwitchSystemHref(option.href) ||
+            this._extractSwitchSystemHref(option.value);
+          if (switchHref) {
+            const nextUrl = /^https?:\/\//i.test(switchHref)
+              ? switchHref
+              : new URL(switchHref, this.page.url()).toString();
+            this._logStep('AIA switch deterministic fallback via URL', {
+              option,
+              switchHref,
+              nextUrl,
+            });
+            await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            const fallbackSwitch = await this._waitForAiaSwitch(9000);
+            this._logStep('AIA switch verification after URL fallback', {
+              option,
+              ...fallbackSwitch.snap,
+            });
+            if (fallbackSwitch.ok) {
               this.isAiaClinicSystem = true;
               this.isSinglifeSystem = false;
-              this._logStep('Switched to AIA Clinic');
-              await this.page.screenshot({ path: 'screenshots/mhc-asia-switched-to-aia-clinic.png' }).catch(() => {});
-              await this.page.bringToFront().catch(() => {});
               if (flaggedByDialog) this.needsAIAClinicSwitch = false;
+              await this.page.screenshot({ path: 'screenshots/mhc-asia-switched-to-aia-clinic.png' }).catch(() => {});
               return true;
             }
-            logger.warn('AIA option clicked but system did not switch context', {
-              url: snap.url,
-              hasAddAiaVisit: snap.hasAddAiaVisit,
-              hasSearchAiaMember: snap.hasSearchAiaMember,
-              hasPolicyNoHeader: snap.hasPolicyNoHeader,
-            });
           }
         } catch {
           continue;
@@ -2838,7 +3240,7 @@ export class MHCAsiaAutomation {
             await select.selectOption({ label: /AIA.*Clinic/i });
             const switchResult = await this._waitForAiaSwitch(9000);
             const snap = switchResult.snap;
-            this._logStep('AIA dropdown switch verification', snap);
+            this._logStep('AIA dropdown switch verification', { selectSel, ...snap });
             if (switchResult.ok) {
               logger.info('Selected AIA Clinic from dropdown');
               this.isAiaClinicSystem = true;
@@ -2900,87 +3302,269 @@ export class MHCAsiaAutomation {
   }
 
   async _switchSystemTo(targetRegex, labelForLog) {
+    const isAiaTarget = /aia/i.test(labelForLog) || targetRegex?.test?.('AIA');
+    const isSinglifeTarget = /singlife|aviva|pcp/i.test(
+      `${labelForLog || ''} ${targetRegex?.source || ''}`
+    );
+    const preSnap = await this._getPortalContextSnapshot().catch(() => null);
+    if (isAiaTarget && preSnap?.looksLikeAiaFlow) {
+      this.isAiaClinicSystem = true;
+      this.isSinglifeSystem = false;
+      return true;
+    }
+    if (
+      isSinglifeTarget &&
+      (preSnap?.isSinglifeDomain || /singlife|pcpcare/i.test(String(preSnap?.url || '')))
+    ) {
+      this.isSinglifeSystem = true;
+      this.isAiaClinicSystem = false;
+      return true;
+    }
+
     // Step 1: Find and click "Switch System" in top right corner
     const switchSystemSelectors = [
       'a:has-text("Switch System")',
       'button:has-text("Switch System")',
-      'text=/Switch\\s+System/i',
-      '[onclick*="switch" i]',
-      '.switch-system',
-      'a[href*="switch" i]',
+      'select[name*="system" i]',
+      'select[id*="system" i]',
     ];
 
     let switchClicked = false;
     for (const selector of switchSystemSelectors) {
       try {
         const switchBtn = this.page.locator(selector).first();
-        if ((await switchBtn.count().catch(() => 0)) > 0) {
-          await this._safeClick(switchBtn, 'Switch System');
-          await this.page.waitForTimeout(500);
-          switchClicked = true;
-          break;
-        }
+        if ((await switchBtn.count().catch(() => 0)) === 0) continue;
+        const visible = await switchBtn.isVisible().catch(() => false);
+        if (!visible) continue;
+        switchClicked = await this._safeClick(switchBtn, 'Switch System');
+        await this.page.waitForTimeout(500);
+        if (switchClicked) break;
       } catch {
         continue;
       }
     }
 
     if (!switchClicked) {
+      const directSwitchUrl = this._getDefaultSwitchSystemUrl(targetRegex, labelForLog);
+      if (directSwitchUrl) {
+        const nextUrl = new URL(directSwitchUrl, this.page.url()).toString();
+        this._logStep('Switch system direct fallback without menu', { labelForLog, nextUrl });
+        await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        const directSnapCheck = isAiaTarget
+          ? await this._waitForAiaSwitch(9000)
+          : { ok: true, snap: await this._getPortalContextSnapshot() };
+        const directSnap = directSnapCheck.snap;
+        this._logStep('Switch system direct fallback verification', {
+          labelForLog,
+          nextUrl,
+          ...directSnap,
+        });
+        if (isAiaTarget && directSnapCheck.ok && directSnap.looksLikeAiaFlow) {
+          this.isAiaClinicSystem = true;
+          this.isSinglifeSystem = false;
+          return true;
+        }
+        if (
+          isSinglifeTarget &&
+          (directSnap.isSinglifeDomain || /singlife|pcpcare/i.test(directSnap.url))
+        ) {
+          this.isSinglifeSystem = true;
+          this.isAiaClinicSystem = false;
+          return true;
+        }
+      }
       logger.warn('Could not find Switch System button');
       return false;
     }
 
-    // Step 2: Select the target system from the list
-    const candidates = ['a', 'button', 'option', 'li', 'div', 'span'];
+    // Step 2: Select the target system from actionable controls.
+    await this.page
+      .locator('a:has-text("Switch System"), button:has-text("Switch System"), text=/Switch\\s+System/i')
+      .first()
+      .hover()
+      .catch(() => {});
+    await this.page.waitForTimeout(250);
 
-    for (const tag of candidates) {
+    let options = await this._collectVisibleSystemSwitchOptions(targetRegex);
+    if (!options.length) {
+      this._logStep('No visible switch options; trying hidden switch links', { labelForLog });
+      options = await this._collectVisibleSystemSwitchOptions(targetRegex, { includeHidden: true });
+    }
+    if (!options.length) {
+      const debugTargets = await this._collectSwitchSystemDebugTargets(targetRegex);
+      this._logStep('Switch system debug targets', {
+        labelForLog,
+        count: debugTargets.length,
+        sample: debugTargets.slice(0, 12),
+      });
+      const hrefFallbackCandidates = await this._collectSwitchSystemHrefCandidatesAcrossFrames(
+        targetRegex
+      );
+      this._logStep('Switch system href fallback candidates', {
+        labelForLog,
+        count: hrefFallbackCandidates.length,
+        sample: hrefFallbackCandidates.slice(0, 8),
+      });
+      for (const candidate of hrefFallbackCandidates) {
+        const switchHref = this._extractSwitchSystemHref(candidate.href);
+        if (!switchHref) continue;
+        const nextUrl = /^https?:\/\//i.test(switchHref)
+          ? switchHref
+          : new URL(switchHref, this.page.url()).toString();
+        await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        const fallbackSnapCheck = isAiaTarget
+          ? await this._waitForAiaSwitch(9000)
+          : { ok: true, snap: await this._getPortalContextSnapshot() };
+        const fallbackSnap = fallbackSnapCheck.snap;
+        this._logStep('Switch system verification via href fallback', {
+          labelForLog,
+          candidate,
+          ...fallbackSnap,
+        });
+        if (isAiaTarget && fallbackSnapCheck.ok && fallbackSnap.looksLikeAiaFlow) {
+          this.isAiaClinicSystem = true;
+          this.isSinglifeSystem = false;
+          return true;
+        }
+        if (
+          isSinglifeTarget &&
+          (fallbackSnap.isSinglifeDomain || /singlife|pcpcare/i.test(fallbackSnap.url))
+        ) {
+          this.isSinglifeSystem = true;
+          this.isAiaClinicSystem = false;
+          return true;
+        }
+      }
+
+      const defaultSwitchUrl = this._getDefaultSwitchSystemUrl(targetRegex, labelForLog);
+      if (defaultSwitchUrl) {
+        const nextUrl = new URL(defaultSwitchUrl, this.page.url()).toString();
+        await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        const defaultSnapCheck = isAiaTarget
+          ? await this._waitForAiaSwitch(9000)
+          : { ok: true, snap: await this._getPortalContextSnapshot() };
+        const defaultSnap = defaultSnapCheck.snap;
+        this._logStep('Switch system verification via default fallback', {
+          labelForLog,
+          nextUrl,
+          ...defaultSnap,
+        });
+        if (isAiaTarget && defaultSnapCheck.ok && defaultSnap.looksLikeAiaFlow) {
+          this.isAiaClinicSystem = true;
+          this.isSinglifeSystem = false;
+          return true;
+        }
+        if (
+          isSinglifeTarget &&
+          (defaultSnap.isSinglifeDomain || /singlife|pcpcare/i.test(defaultSnap.url))
+        ) {
+          this.isSinglifeSystem = true;
+          this.isAiaClinicSystem = false;
+          return true;
+        }
+      }
+    }
+    for (const option of options) {
       try {
-        const loc = this.page
-          .locator(tag)
-          .filter({ hasText: targetRegex })
-          .filter({ hasNotText: /Add\s+AIA\s+Visit|AIA\s+Visit|Visit/i })
-          .first();
-        if ((await loc.count().catch(() => 0)) > 0 && (await loc.isVisible().catch(() => true))) {
+        this._logStep('Switch system option candidate', { labelForLog, option });
+        if (option.kind === 'option') {
+          const selectLocator = option.selectName
+            ? this.page.locator(`select[name="${option.selectName}"]`).first()
+            : option.selectId
+              ? this.page.locator(`#${option.selectId}`).first()
+              : this.page.locator('select').first();
+          if ((await selectLocator.count().catch(() => 0)) === 0) continue;
+          await selectLocator.selectOption({ value: option.value }).catch(async () => {
+            await selectLocator.selectOption({ label: option.text });
+          });
+        } else {
           const prevPage = this.page;
           const popupPromise = this.page.context().waitForEvent('page', { timeout: 6000 }).catch(() => null);
-          await this._safeClick(loc, labelForLog);
-          const popup = await popupPromise;
-          if (popup) {
-            await popup.waitForLoadState('domcontentloaded').catch(() => {});
-            this.page = popup;
-            this.setupDialogHandler({ reset: false });
-            await this.page.bringToFront().catch(() => {});
-            await this.page.evaluate(() => window.focus()).catch(() => {});
-            if (prevPage && prevPage !== popup) {
-              await prevPage.close().catch(() => {});
+          const link = this.page
+            .locator('a[href]')
+            .filter({
+              hasText: new RegExp(
+                `^\\s*${option.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`,
+                'i'
+              ),
+            })
+            .first();
+          const linkCount = await link.count().catch(() => 0);
+          const linkVisible = linkCount > 0 && (await link.isVisible().catch(() => false));
+          if (linkVisible) {
+            const clicked = await this._safeClick(link, labelForLog);
+            if (!clicked) continue;
+            const popup = await popupPromise;
+            if (popup) {
+              await popup.waitForLoadState('domcontentloaded').catch(() => {});
+              this.page = popup;
+              this.setupDialogHandler({ reset: false });
+              await this.page.bringToFront().catch(() => {});
+              await this.page.evaluate(() => window.focus()).catch(() => {});
+              if (prevPage && prevPage !== popup) {
+                await prevPage.close().catch(() => {});
+              }
             }
           }
-          const snapCheck =
-            /aia/i.test(labelForLog) || targetRegex?.test?.('AIA')
-              ? await this._waitForAiaSwitch(9000)
-              : { ok: true, snap: await this._getPortalContextSnapshot() };
-          const snap = snapCheck.snap;
-          this._logStep('Switch system verification', { labelForLog, ...snap });
-          if (/aia/i.test(labelForLog) || targetRegex?.test?.('AIA')) {
-            if (snapCheck.ok && snap.looksLikeAiaFlow) {
-              logger.info(`Switched system to: ${labelForLog}`);
-              this.isAiaClinicSystem = true;
-              this.isSinglifeSystem = false;
-              return true;
-            }
-            continue;
+        }
+
+        const snapCheck = isAiaTarget
+          ? await this._waitForAiaSwitch(9000)
+          : { ok: true, snap: await this._getPortalContextSnapshot() };
+        const snap = snapCheck.snap;
+        this._logStep('Switch system verification', { labelForLog, option, ...snap });
+        if (isAiaTarget) {
+          if (snapCheck.ok && snap.looksLikeAiaFlow) {
+            logger.info(`Switched system to: ${labelForLog}`);
+            this.isAiaClinicSystem = true;
+            this.isSinglifeSystem = false;
+            return true;
           }
-          if (/singlife|aviva|pcp/i.test(labelForLog)) {
-            if (snap.isSinglifeDomain || /singlife/i.test(snap.url)) {
-              logger.info(`Switched system to: ${labelForLog}`);
-              this.isSinglifeSystem = true;
-              this.isAiaClinicSystem = false;
-              return true;
-            }
-            continue;
+        } else if (isSinglifeTarget) {
+          if (snap.isSinglifeDomain || /singlife|pcpcare/i.test(snap.url)) {
+            logger.info(`Switched system to: ${labelForLog}`);
+            this.isSinglifeSystem = true;
+            this.isAiaClinicSystem = false;
+            return true;
           }
+        } else {
           logger.info(`Switched system to: ${labelForLog}`);
           return true;
+        }
+
+        const switchHref =
+          this._extractSwitchSystemHref(option.href) ||
+          this._extractSwitchSystemHref(option.value);
+        if (switchHref) {
+          const nextUrl = /^https?:\/\//i.test(switchHref)
+            ? switchHref
+            : new URL(switchHref, this.page.url()).toString();
+          this._logStep('Switch system deterministic fallback via URL', {
+            labelForLog,
+            option,
+            switchHref,
+            nextUrl,
+          });
+          await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+          const fallbackSnapCheck = isAiaTarget
+            ? await this._waitForAiaSwitch(9000)
+            : { ok: true, snap: await this._getPortalContextSnapshot() };
+          const fallbackSnap = fallbackSnapCheck.snap;
+          this._logStep('Switch system verification after URL fallback', {
+            labelForLog,
+            option,
+            ...fallbackSnap,
+          });
+          if (isAiaTarget && fallbackSnapCheck.ok && fallbackSnap.looksLikeAiaFlow) {
+            this.isAiaClinicSystem = true;
+            this.isSinglifeSystem = false;
+            return true;
+          }
+          if (isSinglifeTarget && (fallbackSnap.isSinglifeDomain || /singlife|pcpcare/i.test(fallbackSnap.url))) {
+            this.isSinglifeSystem = true;
+            this.isAiaClinicSystem = false;
+            return true;
+          }
         }
       } catch {
         continue;
@@ -3001,14 +3585,35 @@ export class MHCAsiaAutomation {
           if (!match) continue;
           await select.selectOption({ value: match.value }).catch(async () => select.selectOption({ label: match.label }));
           await this.page.waitForTimeout(500);
-          logger.info(`Switched system to: ${match.label || labelForLog}`);
-          if (/aia/i.test(match.label || labelForLog)) {
-            this.isAiaClinicSystem = true;
-            this.isSinglifeSystem = false;
-          } else if (/singlife|aviva|pcp/i.test(match.label || labelForLog)) {
-            this.isSinglifeSystem = true;
-            this.isAiaClinicSystem = false;
+          const snapCheck = isAiaTarget
+            ? await this._waitForAiaSwitch(9000)
+            : { ok: true, snap: await this._getPortalContextSnapshot() };
+          const snap = snapCheck.snap;
+          this._logStep('Switch system dropdown verification', {
+            labelForLog,
+            selectSel,
+            selected: match.label || match.value,
+            ...snap,
+          });
+          if (isAiaTarget) {
+            if (snapCheck.ok && snap.looksLikeAiaFlow) {
+              this.isAiaClinicSystem = true;
+              this.isSinglifeSystem = false;
+              logger.info(`Switched system to: ${match.label || labelForLog}`);
+              return true;
+            }
+            continue;
           }
+          if (isSinglifeTarget) {
+            if (snap.isSinglifeDomain || /singlife|pcpcare/i.test(snap.url)) {
+              this.isSinglifeSystem = true;
+              this.isAiaClinicSystem = false;
+              logger.info(`Switched system to: ${match.label || labelForLog}`);
+              return true;
+            }
+            continue;
+          }
+          logger.info(`Switched system to: ${match.label || labelForLog}`);
           return true;
         }
       } catch {
@@ -3032,7 +3637,12 @@ export class MHCAsiaAutomation {
    */
   async navigateToAIAVisitAndSearch(nric, opts = {}) {
     try {
-      this._logStep('Navigate to AIA Visit', { nric });
+      const visitDateDdMmYyyy = String(opts.visitDate || opts.visitDateDdMmYyyy || '').trim();
+      const hasTargetVisitDate = /^\d{2}\/\d{2}\/\d{4}$/.test(visitDateDdMmYyyy);
+      this._logStep('Navigate to AIA Visit', {
+        nric,
+        visitDate: hasTargetVisitDate ? visitDateDdMmYyyy : null,
+      });
       const retryCount = Number(opts.retryCount || 0);
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
       
@@ -3240,6 +3850,56 @@ export class MHCAsiaAutomation {
           logger.warn('Could not find search icon, continuing anyway');
         }
       }
+
+      if (hasTargetVisitDate) {
+        this._logStep('Set AIA search visit date', { visitDate: visitDateDdMmYyyy });
+        const dateSelectors = [
+          'input[name="visitDateAsString"]',
+          '#visitDateAsString',
+          'tr:has-text("Visit Date") input[type="text"]',
+          'tr:has-text("Visit Date") input:not([type="hidden"])',
+          'input[name*="visitDate" i]',
+          'input[id*="visitDate" i]',
+        ];
+        let dateFilled = false;
+        for (const selector of dateSelectors) {
+          try {
+            const field = this.page.locator(selector).first();
+            if ((await field.count().catch(() => 0)) === 0) continue;
+            if (!(await field.isVisible().catch(() => false))) continue;
+            await field.fill(visitDateDdMmYyyy).catch(async () => {
+              await field.evaluate((el, value) => {
+                el.value = value;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+                el.dispatchEvent(new Event('blur', { bubbles: true }));
+              }, visitDateDdMmYyyy);
+            });
+            let valueNow = (await field.inputValue().catch(() => '')).trim();
+            if (valueNow !== visitDateDdMmYyyy) {
+              await field.click({ clickCount: 3 }).catch(() => {});
+              await this.page.keyboard.press('Meta+A').catch(() => {});
+              await this.page.keyboard.press('Control+A').catch(() => {});
+              await this.page.keyboard.type(visitDateDdMmYyyy, { delay: 15 }).catch(() => {});
+              await field.dispatchEvent('change').catch(() => {});
+              await field.dispatchEvent('blur').catch(() => {});
+              valueNow = (await field.inputValue().catch(() => '')).trim();
+            }
+            if (valueNow === visitDateDdMmYyyy) {
+              dateFilled = true;
+              this._logStep('AIA search visit date set', { selector, valueNow });
+              break;
+            }
+          } catch {
+            continue;
+          }
+        }
+        if (!dateFilled) {
+          logger.warn('Unable to confirm AIA search visit date field value', {
+            visitDate: visitDateDdMmYyyy,
+          });
+        }
+      }
       
       // Step 3: Enter NRIC in search field
       // The form shows: "NRIC/FIN/Member ID" label with input field next to it
@@ -3359,6 +4019,16 @@ export class MHCAsiaAutomation {
       
       // Step 4: Click patient name from results
       this._logStep('Click patient from AIA search results');
+      const withVisitDateParam = (href) => {
+        if (!hasTargetVisitDate || !href) return null;
+        try {
+          const u = new URL(href, this.page.url());
+          u.searchParams.set('visitDateAsString', visitDateDdMmYyyy);
+          return u.toString();
+        } catch {
+          return null;
+        }
+      };
       
       // Look for patient link/row in results
       const patientSelectors = [
@@ -3378,14 +4048,25 @@ export class MHCAsiaAutomation {
           const patientLink = this.page.locator(selector).first();
           if ((await patientLink.count().catch(() => 0)) > 0) {
             const beforeUrl = this.page.url();
-            const popupPromise = this.page.context().waitForEvent('page', { timeout: 1500 }).catch(() => null);
-            await this._safeClick(patientLink, 'Patient in AIA results');
-            const popup = await popupPromise;
-            if (popup) {
-              await popup.waitForLoadState('domcontentloaded').catch(() => {});
-              this.page = popup;
-              this.setupDialogHandler({ reset: false });
-              await this.page.bringToFront().catch(() => {});
+            const originalHref = await patientLink.getAttribute('href').catch(() => '');
+            const patchedHref = withVisitDateParam(originalHref);
+            if (patchedHref) {
+              this._logStep('AIA patient link patched with visit date', {
+                originalHref,
+                patchedHref,
+                visitDate: visitDateDdMmYyyy,
+              });
+              await this.page.goto(patchedHref, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            } else {
+              const popupPromise = this.page.context().waitForEvent('page', { timeout: 1500 }).catch(() => null);
+              await this._safeClick(patientLink, 'Patient in AIA results');
+              const popup = await popupPromise;
+              if (popup) {
+                await popup.waitForLoadState('domcontentloaded').catch(() => {});
+                this.page = popup;
+                this.setupDialogHandler({ reset: false });
+                await this.page.bringToFront().catch(() => {});
+              }
             }
             // Wait for the visit-add form to appear.
             await Promise.race([
@@ -3440,7 +4121,10 @@ export class MHCAsiaAutomation {
                 }, nric)
                 .catch(() => null);
               if (directHref) {
-                await this.page.goto(directHref, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+                const patchedDirectHref = withVisitDateParam(directHref) || directHref;
+                await this.page
+                  .goto(patchedDirectHref, { waitUntil: 'domcontentloaded', timeout: 15000 })
+                  .catch(() => {});
                 await this.page.waitForTimeout(300);
                 const formOk =
                   (await this.page.locator('text=/Consultation\\s+Fee/i').count().catch(() => 0)) > 0 ||
@@ -3451,7 +4135,12 @@ export class MHCAsiaAutomation {
               const currentUrl = this.page.url();
               if (/aiaclinic\.com\/?$/.test(currentUrl) && retryCount < 1) {
                 logger.warn('AIA redirected to home after patient click; retrying Add AIA Visit flow once');
-                const retryOk = await this.navigateToAIAVisitAndSearch(nric, { retryCount: retryCount + 1 }).catch(() => false);
+                const retryOk = await this
+                  .navigateToAIAVisitAndSearch(nric, {
+                    retryCount: retryCount + 1,
+                    visitDate: hasTargetVisitDate ? visitDateDdMmYyyy : undefined,
+                  })
+                  .catch(() => false);
                 return retryOk;
               }
               return false;
@@ -4182,34 +4871,73 @@ export class MHCAsiaAutomation {
   async setWaiverOfReferral(checked = true) {
     try {
       this._logStep('Set waiver of referral', { checked });
-      const selectors = [
-        'input[type="checkbox"][name*="waiver" i]',
-        'input[type="checkbox"][id*="waiver" i]',
-        'tr:has-text("Waiver") input[type="checkbox"]',
-        'tr:has-text("Referral") input[type="checkbox"]',
+      const candidates = [
+        {
+          locator: this.page
+            .locator('tr:has-text("Waiver Of Referral") input[type="checkbox"], tr:has-text("Waiver of Referral") input[type="checkbox"]')
+            .first(),
+          reason: 'waiver_row',
+        },
+        {
+          locator: this.page
+            .locator('tr:has-text("Waiver") input[type="checkbox"], tr:has-text("Referral") input[type="checkbox"]')
+            .first(),
+          reason: 'waiver_or_referral_row',
+        },
+        {
+          locator: this.page
+            .locator('input[type="checkbox"][name*="waiver" i], input[type="checkbox"][id*="waiver" i], input[type="checkbox"][name*="referral" i], input[type="checkbox"][id*="referral" i]')
+            .first(),
+          reason: 'name_or_id_fallback',
+        },
       ];
 
-      for (const selector of selectors) {
-        const box = this.page.locator(selector).first();
+      for (const candidate of candidates) {
+        const box = candidate.locator;
         if ((await box.count().catch(() => 0)) === 0) continue;
-        const visible = await box.isVisible().catch(() => true);
+        const visible = await box.isVisible().catch(() => false);
         if (!visible) continue;
-        const isChecked = await box.isChecked().catch(() => false);
-        if (checked && !isChecked) {
+
+        const before = await box.isChecked().catch(() => false);
+        if (checked && !before) {
           await box.check({ force: true }).catch(() => {});
-          await this.page.waitForTimeout(200);
-          return true;
-        }
-        if (!checked && isChecked) {
+        } else if (!checked && before) {
           await box.uncheck({ force: true }).catch(() => {});
-          await this.page.waitForTimeout(200);
-          return true;
         }
-        return true;
+        await this.page.waitForTimeout(200);
+        const after = await box.isChecked().catch(() => false);
+        const ok = checked ? after : !after;
+        this.lastWaiverReferralState = {
+          success: ok,
+          checkedRequested: checked,
+          checkedBefore: before,
+          checkedAfter: after,
+          strategy: candidate.reason,
+          checkedAt: new Date().toISOString(),
+          url: this.page.url(),
+        };
+        this._logStep('Waiver of referral set result', this.lastWaiverReferralState);
+        return ok;
       }
+
+      this.lastWaiverReferralState = {
+        success: false,
+        checkedRequested: checked,
+        reason: 'waiver_checkbox_not_found',
+        checkedAt: new Date().toISOString(),
+        url: this.page.url(),
+      };
+      this._logStep('Waiver of referral not found', this.lastWaiverReferralState);
       return false;
     } catch (error) {
       logger.warn('Failed to set waiver of referral (non-fatal)', { error: error.message });
+      this.lastWaiverReferralState = {
+        success: false,
+        checkedRequested: checked,
+        reason: `waiver_checkbox_error:${error?.message || 'unknown'}`,
+        checkedAt: new Date().toISOString(),
+        url: this.page.url(),
+      };
       return false;
     }
   }
@@ -4334,6 +5062,11 @@ export class MHCAsiaAutomation {
   async saveAsDraft() {
     try {
       logger.info('Saving claim as draft (NOT submitting)...');
+      this.lastSaveDraftResult = {
+        success: false,
+        reason: 'not_attempted',
+        checkedAt: new Date().toISOString(),
+      };
       
       // Safety: never click submit-like buttons
       if (!this.draftOnly) {
@@ -4345,7 +5078,7 @@ export class MHCAsiaAutomation {
 
       // Helper: click and capture any blocking dialog message.
       const clickWithDialogCapture = async (locator, label) => {
-        const dialogPromise = this.page.waitForEvent('dialog', { timeout: 2000 }).catch(() => null);
+        const dialogPromise = this.page.waitForEvent('dialog', { timeout: 4000 }).catch(() => null);
         await this._safeClick(locator, label);
         const dialog = await dialogPromise;
         if (!dialog) return null;
@@ -4354,9 +5087,139 @@ export class MHCAsiaAutomation {
         await dialog.accept().catch(() => {});
         return msg;
       };
+      const mapDialogToSaveReason = (msg) => {
+        const text = String(msg || '').toLowerCase();
+        if (!text) return null;
+        if (/must\s+compute\s+claim/.test(text)) return 'compute_claim_required';
+        if (/referring\s+clinic\s+is\s+required|referral\s+letter\s+is\s+required|waiver\s+of\s+referral/.test(text)) {
+          return 'referral_required_or_waiver_missing';
+        }
+        if (/valid\s+amount\s+for\s+procedure|please\s+select\s+procedure\s+first/.test(text)) {
+          return 'procedure_amount_invalid';
+        }
+        if (/(please\s+enter|valid\s+amount|required|invalid|can\s*not|cannot|failed|error)/.test(text)) {
+          return 'validation_error';
+        }
+        return 'portal_dialog';
+      };
+      const captureInlineSaveValidation = async () => {
+        const payload = await this.page
+          .evaluate(() => {
+            const clean = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+            const texts = [];
+            const pushIfInteresting = (raw) => {
+              const text = clean(raw);
+              if (!text) return;
+              if (text.length > 280) return;
+              const lower = text.toLowerCase();
+              if (!/(remark|error|required|invalid|duplicate|failed|not allowed|cannot|can not)/i.test(lower)) return;
+              texts.push(text);
+            };
+            for (const node of Array.from(document.querySelectorAll('font, span, div, p, li, label, b, strong'))) {
+              const style = window.getComputedStyle(node);
+              const color = String(style?.color || '').toLowerCase();
+              const isRed = /rgb\(\s*255\s*,\s*0\s*,\s*0\s*\)|#f00|red/.test(color);
+              const text = clean(node.textContent || '');
+              if (!text) continue;
+              if (isRed || /remark/i.test(text) || /error/i.test(text)) pushIfInteresting(text);
+            }
+            return Array.from(new Set(texts)).slice(0, 20);
+          })
+          .catch(() => []);
+        const joined = (payload || []).join(' | ').toLowerCase();
+        if (!joined) return { reason: null, messages: [] };
+        if (/same\s+day\s+duplicate\s+visit/i.test(joined)) {
+          return { reason: 'duplicate_visit_same_day', messages: payload };
+        }
+        if (/diagnosis.*required/i.test(joined)) {
+          return { reason: 'diagnosis_required', messages: payload };
+        }
+        if (/referr(al|ing).*required|waiver.*referr/i.test(joined)) {
+          return { reason: 'referral_required_or_waiver_missing', messages: payload };
+        }
+        if (/(required|invalid|cannot|can not|failed|error)/i.test(joined)) {
+          return { reason: 'validation_error', messages: payload };
+        }
+        return { reason: null, messages: payload };
+      };
+      const shouldRetryAfterDisclaimer = async (dialogMsg) => {
+        const msg = String(dialogMsg || '').toLowerCase();
+        if (!/draft\s+claims\s+will\s+be\s+deleted|billing\s+cycle\s+cut-?off/i.test(msg)) return false;
+        const stillHasDraftButton = await this.page
+          .locator(
+            'input[value*="save as draft" i], input[value*="save a draft" i], input[value*="save draft" i], button:has-text("Save As Draft")'
+          )
+          .first()
+          .isVisible()
+          .catch(() => false);
+        const stillOnVisitForm =
+          (await this.page.locator('text=/Employee\\s+Visit\\s*-\\s*(Add|Edit)/i').first().isVisible().catch(() => false)) ||
+          (await this.page.locator('text=/Charge\\s*Type/i').first().isVisible().catch(() => false));
+        return stillHasDraftButton && stillOnVisitForm;
+      };
+
+      const captureDraftFieldState = async (phase) => {
+        const state = await this.page
+          .evaluate(() => {
+            const pick = (name) => {
+              const el = document.querySelector(`[name="${name}"]`);
+              if (!el) return null;
+              return String(el.value || '').trim();
+            };
+            return {
+              visitNo: pick('visitNo'),
+              visitDateAsString: pick('visitDateAsString'),
+              visitDate: pick('visitDate'),
+              claimStatus: pick('claimStatus'),
+              drug_drugName: pick('drug_drugName'),
+              drug_drugCode: pick('drug_drugCode'),
+              drug_unit: pick('drug_unit'),
+              drug_unitPrice: pick('drug_unitPrice'),
+              drug_quantity: pick('drug_quantity'),
+              drug_amount: pick('drug_amount'),
+              drugFee: pick('drugFee'),
+              totalB4Gst: pick('totalB4Gst'),
+              gst: pick('gst'),
+              totalFee: pick('totalFee'),
+              totalClaim: pick('totalClaim'),
+              totalClaimInitial: pick('totalClaimInitial'),
+              totalClaimRevised: pick('totalClaimRevised'),
+              empVisitDetail_totalClaim: pick('empVisitDetail_totalClaim'),
+              empVisitDetail_totalFee: pick('empVisitDetail_totalFee'),
+              empVisitDetail_totalUnitClaim: pick('empVisitDetail_totalUnitClaim'),
+              empVisitDetail_totalUnitFee: pick('empVisitDetail_totalUnitFee'),
+            };
+          })
+          .catch(() => null);
+        this._logStep(`Draft field state (${phase})`, state || {});
+        return state;
+      };
+
+      await captureDraftFieldState('pre_compute');
 
       // Step 0: Click "Compute claim" if available (portal may require it before saving/submitting).
-      await this.computeClaim().catch(() => false);
+      const computeDone = await this.computeClaim().catch(() => false);
+      // Portal postbacks can settle slowly; wait before attempting Save As Draft.
+      if (computeDone) await this.page.waitForTimeout(2000);
+      await captureDraftFieldState('post_compute');
+      await this.page.screenshot({ path: 'screenshots/mhc-asia-after-compute-before-save.png', fullPage: true }).catch(() => {});
+
+      // Fast-fail on known inline portal validations (for example same-day duplicate visit)
+      // so Flow 3 gets a deterministic reason without a misleading save click.
+      const preSaveInlineValidation = await captureInlineSaveValidation();
+      if (preSaveInlineValidation?.reason) {
+        logger.warn('Draft save blocked by pre-save inline validation', preSaveInlineValidation);
+        await this.page
+          .screenshot({ path: 'screenshots/mhc-asia-draft-save-inline-validation-precheck.png', fullPage: true })
+          .catch(() => {});
+        this.lastSaveDraftResult = {
+          success: false,
+          reason: preSaveInlineValidation.reason,
+          inlineMessages: preSaveInlineValidation.messages || [],
+          checkedAt: new Date().toISOString(),
+        };
+        return false;
+      }
 
       // Only click buttons that explicitly indicate DRAFT (never generic "Save" to avoid risky actions).
       const saveDraftLocators = [
@@ -4396,6 +5259,12 @@ export class MHCAsiaAutomation {
           await this.page.screenshot({ path: 'screenshots/mhc-asia-draft-saved.png', fullPage: true }).catch(() => {});
           if (dialogMsg && /must\s+compute\s+claim/i.test(dialogMsg)) {
             logger.warn('Draft save blocked: portal requires Compute claim first (already attempted).');
+            this.lastSaveDraftResult = {
+              success: false,
+              reason: mapDialogToSaveReason(dialogMsg) || 'compute_claim_required',
+              dialogMessage: dialogMsg,
+              checkedAt: new Date().toISOString(),
+            };
             return false;
           }
           if (dialogMsg && /valid\s+amount\s+for\s+procedure|please\s+select\s+procedure\s+first/i.test(dialogMsg)) {
@@ -4407,28 +5276,110 @@ export class MHCAsiaAutomation {
             await this.page.waitForTimeout(400);
             if (
               retryDialog &&
-              /(please\s+enter|valid\s+amount|required|invalid|cannot|failed|error)/i.test(retryDialog) &&
+              /(please\s+enter|valid\s+amount|required|invalid|can\s*not|cannot|failed|error)/i.test(retryDialog) &&
               !/are\s+you\s+sure|confirm/i.test(retryDialog)
             ) {
               logger.warn(`Draft retry still blocked: ${retryDialog}`);
               await this.page
                 .screenshot({ path: 'screenshots/mhc-asia-draft-save-validation-error.png', fullPage: true })
                 .catch(() => {});
+              this.lastSaveDraftResult = {
+                success: false,
+                reason: mapDialogToSaveReason(retryDialog) || 'validation_error',
+                dialogMessage: retryDialog,
+                checkedAt: new Date().toISOString(),
+              };
               return false;
             }
             logger.info('Claim saved as draft after clearing invalid procedure rows');
+            this.lastSaveDraftResult = {
+              success: true,
+              reason: 'saved_after_procedure_clear',
+              checkedAt: new Date().toISOString(),
+            };
             return true;
           }
           if (
             dialogMsg &&
-            /(please\s+enter|valid\s+amount|required|invalid|cannot|failed|error)/i.test(dialogMsg) &&
+            /(please\s+enter|valid\s+amount|required|invalid|can\s*not|cannot|failed|error)/i.test(dialogMsg) &&
             !/are\s+you\s+sure|confirm/i.test(dialogMsg)
           ) {
             logger.warn(`Draft save blocked by validation dialog: ${dialogMsg}`);
             await this.page.screenshot({ path: 'screenshots/mhc-asia-draft-save-validation-error.png', fullPage: true }).catch(() => {});
+            this.lastSaveDraftResult = {
+              success: false,
+              reason: mapDialogToSaveReason(dialogMsg) || 'validation_error',
+              dialogMessage: dialogMsg,
+              checkedAt: new Date().toISOString(),
+            };
             return false;
           }
+          const inlineValidation = await captureInlineSaveValidation();
+          if (inlineValidation?.reason) {
+            logger.warn('Draft save blocked by inline validation', inlineValidation);
+            await this.page
+              .screenshot({ path: 'screenshots/mhc-asia-draft-save-inline-validation-error.png', fullPage: true })
+              .catch(() => {});
+            this.lastSaveDraftResult = {
+              success: false,
+              reason: inlineValidation.reason,
+              inlineMessages: inlineValidation.messages || [],
+              checkedAt: new Date().toISOString(),
+            };
+            return false;
+          }
+          let usedSecondClick = false;
+          let secondDialogMsg = null;
+          if (await shouldRetryAfterDisclaimer(dialogMsg)) {
+            this._logStep('Draft save retry after disclaimer', { visitNo: this._lastSavedDraftVisitNo || null });
+            secondDialogMsg = await clickWithDialogCapture(locator, 'Save As Draft (retry after disclaimer)');
+            await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+            await this.page.waitForTimeout(500);
+            if (
+              secondDialogMsg &&
+              /(please\s+enter|valid\s+amount|required|invalid|can\s*not|cannot|failed|error)/i.test(secondDialogMsg) &&
+              !/are\s+you\s+sure|confirm|draft\s+claims\s+will\s+be\s+deleted/i.test(secondDialogMsg)
+            ) {
+              logger.warn(`Draft retry blocked by validation dialog: ${secondDialogMsg}`);
+              await this.page
+                .screenshot({ path: 'screenshots/mhc-asia-draft-save-validation-error-retry.png', fullPage: true })
+                .catch(() => {});
+              this.lastSaveDraftResult = {
+                success: false,
+                reason: mapDialogToSaveReason(secondDialogMsg) || 'validation_error',
+                dialogMessage: secondDialogMsg,
+                checkedAt: new Date().toISOString(),
+              };
+              return false;
+            }
+            usedSecondClick = true;
+            const inlineValidationAfterRetry = await captureInlineSaveValidation();
+            if (inlineValidationAfterRetry?.reason) {
+              logger.warn('Draft retry blocked by inline validation', inlineValidationAfterRetry);
+              await this.page
+                .screenshot({ path: 'screenshots/mhc-asia-draft-save-inline-validation-error-retry.png', fullPage: true })
+                .catch(() => {});
+              this.lastSaveDraftResult = {
+                success: false,
+                reason: inlineValidationAfterRetry.reason,
+                inlineMessages: inlineValidationAfterRetry.messages || [],
+                checkedAt: new Date().toISOString(),
+              };
+              return false;
+            }
+          }
+
+          const postSaveState = await captureDraftFieldState('post_save');
+          this._lastSavedDraftVisitNo = String(postSaveState?.visitNo || '').trim() || null;
+          await this.page.screenshot({ path: 'screenshots/mhc-asia-after-save-draft-state.png', fullPage: true }).catch(() => {});
           logger.info('Claim saved as draft (clicked Save As Draft)');
+          this.lastSaveDraftResult = {
+            success: true,
+            reason: usedSecondClick ? 'saved_after_second_click' : 'saved',
+            visitNo: this._lastSavedDraftVisitNo || null,
+            dialogMessage: secondDialogMsg || dialogMsg || null,
+            checkedAt: new Date().toISOString(),
+          };
           return true;
         } catch {
           continue;
@@ -4437,11 +5388,497 @@ export class MHCAsiaAutomation {
 
       logger.warn('Could not find Save As Draft button');
       await this.page.screenshot({ path: 'screenshots/mhc-asia-save-draft-not-found.png', fullPage: true }).catch(() => {});
+      this.lastSaveDraftResult = {
+        success: false,
+        reason: 'save_draft_button_not_found',
+        checkedAt: new Date().toISOString(),
+      };
       return false;
     } catch (error) {
       logger.error('Failed to save as draft:', error);
+      this.lastSaveDraftResult = {
+        success: false,
+        reason: `save_draft_error:${error?.message || 'unknown'}`,
+        checkedAt: new Date().toISOString(),
+      };
       throw error;
     }
+  }
+
+  _normalizeDraftDate(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    const ymd = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (ymd) return `${ymd[3]}/${ymd[2]}/${ymd[1]}`;
+    const dmy = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (dmy) return `${dmy[1]}/${dmy[2]}/${dmy[3]}`;
+    return raw;
+  }
+
+  _normalizeDraftName(value) {
+    return String(value || '')
+      .toUpperCase()
+      .replace(/^(MHC|AVIVA|SINGLIFE|AIA|AIACLIENT)\s*[-:|]+\s*/i, '')
+      .replace(/[^A-Z0-9]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  _draftVisitNoRank(visitNo) {
+    const raw = String(visitNo || '').trim().toUpperCase();
+    const m = raw.match(/^EV(\d+)$/i);
+    if (!m) return -1;
+    const n = Number.parseInt(m[1], 10);
+    return Number.isFinite(n) ? n : -1;
+  }
+
+  _inferPortalContext() {
+    const url = this.page.url() || '';
+    if (this.isSinglifeSystem || /pcpcare|singlife/i.test(url)) return 'singlife';
+    if (this.isAiaClinicSystem || /aiaclinic\.com/i.test(url)) return 'aia';
+    return 'mhc';
+  }
+
+  async _switchToPortalContext(context) {
+    const snap = await this._getPortalContextSnapshot().catch(() => null);
+    if (context === 'aia' && snap?.looksLikeAiaFlow) {
+      this.isAiaClinicSystem = true;
+      this.isSinglifeSystem = false;
+      return true;
+    }
+    if (
+      context === 'singlife' &&
+      (snap?.isSinglifeDomain || /singlife|pcpcare/i.test(String(snap?.url || '')))
+    ) {
+      this.isSinglifeSystem = true;
+      this.isAiaClinicSystem = false;
+      return true;
+    }
+    if (
+      context === 'mhc' &&
+      snap?.isMhcDomain &&
+      !snap?.isAiaDomain &&
+      !snap?.isSinglifeDomain
+    ) {
+      this.isAiaClinicSystem = false;
+      this.isSinglifeSystem = false;
+      return true;
+    }
+
+    if (context === 'mhc') {
+      await this.ensureAtMhcHome();
+      return true;
+    }
+
+    if (context === 'singlife') {
+      await this.ensureAtMhcHome();
+      const switched = await this.switchToSinglifeIfNeeded({ force: true }).catch(() => false);
+      if (switched) return true;
+      const fallbackUrl = this._getDefaultSwitchSystemUrl(/singlife|aviva|pcp/i, 'Singlife');
+      if (fallbackUrl) {
+        const nextUrl = new URL(fallbackUrl, this.page.url()).toString();
+        await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        const fallbackSnap = await this._getPortalContextSnapshot().catch(() => null);
+        if (
+          fallbackSnap &&
+          (fallbackSnap.isSinglifeDomain || /singlife|pcpcare/i.test(String(fallbackSnap.url || '')))
+        ) {
+          this.isSinglifeSystem = true;
+          this.isAiaClinicSystem = false;
+          return true;
+        }
+      }
+      return false;
+    }
+
+    if (context === 'aia') {
+      await this.ensureAtMhcHome();
+      const switched = await this._switchSystemTo(/aia\s*clinic/i, 'AIA Clinic').catch(() => false);
+      if (switched) return true;
+      const fallbackUrl = this._getDefaultSwitchSystemUrl(/aia\s*clinic|aiaclinic/i, 'AIA Clinic');
+      if (fallbackUrl) {
+        const nextUrl = new URL(fallbackUrl, this.page.url()).toString();
+        await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        const fallbackSwitch = await this._waitForAiaSwitch(9000).catch(() => ({ ok: false, snap: null }));
+        if (fallbackSwitch.ok) {
+          this.isAiaClinicSystem = true;
+          this.isSinglifeSystem = false;
+          return true;
+        }
+      }
+      return false;
+    }
+
+    return false;
+  }
+
+  async _openEditDraftVisits() {
+    const selectors = [
+      'a:has-text("Edit/Draft Visits")',
+      'button:has-text("Edit/Draft Visits")',
+      'a[href*="ClinicEmpVisitDraftList"]',
+      'a[href*="DraftList"]',
+      'text=/Edit\\s*\\/\\s*Draft\\s+Visits/i',
+    ];
+    for (const selector of selectors) {
+      const loc = this.page.locator(selector).first();
+      if ((await loc.count().catch(() => 0)) === 0) continue;
+      const visible = await loc.isVisible().catch(() => true);
+      if (!visible) continue;
+      await this._safeClick(loc, 'Edit/Draft Visits');
+      await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+      await this.page.waitForTimeout(700);
+      return true;
+    }
+    return false;
+  }
+
+  async _searchDraftByNric(nric) {
+    const normalized = String(nric || '').toUpperCase().trim();
+    if (!normalized) return false;
+
+    await this.page
+      .evaluate(value => {
+        const pickOption = (sel, matcher) => {
+          if (!sel) return false;
+          const opts = Array.from(sel.options || []);
+          const hit = opts.find(matcher);
+          if (!hit) return false;
+          sel.value = hit.value;
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
+          return true;
+        };
+
+        const keySel = document.querySelector('select[name="key"]');
+        pickOption(
+          keySel,
+          opt =>
+            /patient\s*nric|nric/i.test(String(opt.textContent || '')) ||
+            /patientnric|nric/i.test(String(opt.value || ''))
+        );
+
+        const keyTypeSel = document.querySelector('select[name="keyType"]');
+        pickOption(
+          keyTypeSel,
+          opt => /equals/i.test(String(opt.textContent || '')) || String(opt.value || '') === 'E'
+        );
+
+        const input = document.querySelector('input[name="keyValue"]');
+        if (input) {
+          input.focus();
+          input.value = value;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      }, normalized)
+      .catch(() => {});
+
+    const searchBtn = this.page.locator('input[name="SearchAction"], button:has-text("Search")').first();
+    if ((await searchBtn.count().catch(() => 0)) > 0) {
+      await Promise.all([
+        this.page.waitForLoadState('domcontentloaded').catch(() => {}),
+        this._safeClick(searchBtn, 'Search Draft Visits').catch(() => {}),
+      ]);
+    } else {
+      await this.page.keyboard.press('Enter').catch(() => {});
+      await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+    }
+
+    await this.page.waitForTimeout(700);
+    return true;
+  }
+
+  async _extractDraftRows() {
+    return this.page
+      .evaluate(() => {
+        const clean = s => String(s || '').replace(/\s+/g, ' ').trim();
+        const rows = [];
+        for (const tr of Array.from(document.querySelectorAll('table tr'))) {
+          const cells = Array.from(tr.querySelectorAll('th,td')).map(td => clean(td.textContent));
+          if (cells.length < 5) continue;
+          if (!/^\d{2}\/\d{2}\/\d{4}$/.test(cells[0])) continue;
+          if (!/^EV/i.test(cells[1] || '')) continue;
+          if (!/^[A-Z]\d{7}[A-Z]$/i.test(cells[3] || '')) continue;
+          rows.push({
+            visitDate: cells[0] || '',
+            visitNo: cells[1] || '',
+            type: cells[2] || '',
+            patientNric: cells[3] || '',
+            patientName: cells[4] || '',
+            totalFee: cells[5] || '',
+            totalClaim: cells[6] || '',
+            mcDays: cells[7] || '',
+            remarks: cells[8] || '',
+          });
+        }
+        return { rows, url: location.href, title: document.title };
+      })
+      .catch(() => ({ rows: [], url: this.page.url() || '', title: '' }));
+  }
+
+  async openExistingDraftVisit({
+    nric,
+    visitDate = null,
+    patientName = '',
+    contextHint = null,
+    allowCrossContext = false,
+    expectedVisitNo = null,
+  } = {}) {
+    const normalizedNric = String(nric || '').toUpperCase().trim();
+    if (!normalizedNric) return { found: false, reason: 'missing_nric' };
+
+    const hint = String(contextHint || this._inferPortalContext() || 'mhc').toLowerCase();
+    const normalizedExpectedVisitNo = String(expectedVisitNo || '').toUpperCase().trim();
+    const contextOrder = [];
+    const addCtx = ctx => {
+      if (!ctx || contextOrder.includes(ctx)) return;
+      contextOrder.push(ctx);
+    };
+
+    addCtx(hint);
+    if (allowCrossContext && hint === 'aia') addCtx('mhc');
+    if (allowCrossContext && hint === 'mhc') addCtx('aia');
+    if (allowCrossContext && hint === 'singlife') addCtx('mhc');
+    if (!contextOrder.length) addCtx('mhc');
+
+    const attempts = [];
+    for (const context of contextOrder) {
+      const switched = await this._switchToPortalContext(context).catch(() => false);
+      if (!switched) {
+        attempts.push({ context, opened: false, rowsSeen: 0, reason: 'context_switch_failed' });
+        continue;
+      }
+
+      const opened = await this._openEditDraftVisits();
+      if (!opened) {
+        attempts.push({ context, opened: false, rowsSeen: 0, reason: 'edit_draft_link_not_found' });
+        continue;
+      }
+
+      await this._searchDraftByNric(normalizedNric);
+      const extracted = await this._extractDraftRows();
+      const matchPick = this._pickDraftRowWithReason(extracted.rows, {
+        nric: normalizedNric,
+        visitDate,
+        patientName,
+        expectedVisitNo: normalizedExpectedVisitNo || null,
+      });
+      const row = matchPick?.row || null;
+      if (!row) {
+        attempts.push({
+          context,
+          opened: true,
+          rowsSeen: extracted.rows.length,
+          reason: matchPick?.reason || 'draft_not_found',
+          url: extracted.url,
+        });
+        continue;
+      }
+
+      const visitNo = String(row.visitNo || '').trim();
+      if (!visitNo) {
+        attempts.push({
+          context,
+          opened: true,
+          rowsSeen: extracted.rows.length,
+          reason: 'draft_row_missing_visit_no',
+          row,
+          url: extracted.url,
+        });
+        continue;
+      }
+
+      const link = this.page.locator('a', { hasText: visitNo }).first();
+      if ((await link.count().catch(() => 0)) === 0) {
+        attempts.push({
+          context,
+          opened: true,
+          rowsSeen: extracted.rows.length,
+          reason: 'draft_link_not_found',
+          row,
+          url: extracted.url,
+        });
+        continue;
+      }
+
+      await this._safeClick(link, `Open Draft ${visitNo}`).catch(async () => {
+        await link.click({ timeout: 10000 }).catch(() => {});
+      });
+      await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+      await this.page.waitForTimeout(900);
+
+      this._lastSavedDraftVisitNo = visitNo;
+      return {
+        found: true,
+        context,
+        row,
+        rowsSeen: extracted.rows.length,
+        url: extracted.url,
+        attempts,
+      };
+    }
+
+    return {
+      found: false,
+      reason: 'draft_not_found',
+      attempts,
+    };
+  }
+
+  _pickDraftRow(rows, { nric, visitDate, patientName, expectedVisitNo = null }) {
+    const picked = this._pickDraftRowWithReason(rows, { nric, visitDate, patientName, expectedVisitNo });
+    return picked?.row || null;
+  }
+
+  _pickDraftRowWithReason(rows, { nric, visitDate, patientName, expectedVisitNo = null }) {
+    const normalizedNric = String(nric || '').toUpperCase().trim();
+    const normalizedDate = this._normalizeDraftDate(visitDate);
+    const normalizedName = this._normalizeDraftName(patientName);
+    const normalizedVisitNo = String(expectedVisitNo || '').toUpperCase().trim();
+
+    const byNric = (rows || []).filter(
+      row => String(row?.patientNric || '').toUpperCase().trim() === normalizedNric
+    );
+    if (!byNric.length) return { row: null, reason: 'nric_no_match' };
+
+    const byDate = normalizedDate
+      ? byNric.filter(row => String(row?.visitDate || '').trim() === normalizedDate)
+      : byNric;
+    if (normalizedDate && !byDate.length) {
+      return { row: null, reason: 'date_mismatch_no_match', byNricCount: byNric.length };
+    }
+
+    const candidates = normalizedDate ? byDate : byNric;
+    const sorted = [...candidates].sort(
+      (a, b) => this._draftVisitNoRank(b?.visitNo) - this._draftVisitNoRank(a?.visitNo)
+    );
+
+    if (normalizedVisitNo) {
+      const byVisitNo = sorted.find(
+        row => String(row?.visitNo || '').toUpperCase().trim() === normalizedVisitNo
+      );
+      return byVisitNo
+        ? { row: byVisitNo, reason: 'expected_visit_no_match' }
+        : { row: null, reason: 'expected_visit_no_not_found', byNricCount: byNric.length };
+    }
+
+    if (!normalizedName) {
+      return sorted[0]
+        ? { row: sorted[0], reason: normalizedDate ? 'nric_date_match' : 'nric_match_latest' }
+        : { row: null, reason: normalizedDate ? 'date_mismatch_no_match' : 'nric_no_match' };
+    }
+
+    const byName = sorted.find(row => {
+      const rowName = this._normalizeDraftName(row?.patientName || '');
+      return rowName && (rowName.includes(normalizedName) || normalizedName.includes(rowName));
+    });
+    if (byName) return { row: byName, reason: normalizedDate ? 'nric_date_name_match' : 'nric_name_match' };
+    if (normalizedDate) {
+      return sorted[0]
+        ? { row: sorted[0], reason: 'nric_date_match_name_relaxed' }
+        : { row: null, reason: 'date_mismatch_no_match' };
+    }
+    return sorted[0]
+      ? { row: sorted[0], reason: 'nric_match_latest' }
+      : { row: null, reason: 'nric_no_match' };
+  }
+
+  async verifyDraftSavedInPortal({
+    nric,
+    visitDate,
+    patientName = '',
+    contextHint = null,
+    allowCrossContext = true,
+    expectedVisitNo = null,
+  } = {}) {
+    const hint = String(contextHint || this._inferPortalContext()).toLowerCase();
+    const normalizedExpectedVisitNo = String(expectedVisitNo || this._lastSavedDraftVisitNo || '')
+      .toUpperCase()
+      .trim();
+    const contextOrder = [];
+    const addCtx = ctx => {
+      if (!ctx || contextOrder.includes(ctx)) return;
+      contextOrder.push(ctx);
+    };
+
+    addCtx(hint);
+    if (allowCrossContext && hint === 'aia') addCtx('mhc');
+    if (allowCrossContext && hint === 'mhc') addCtx('aia');
+    if (!contextOrder.includes('singlife') && hint === 'singlife') addCtx('singlife');
+
+    const attempts = [];
+    for (const context of contextOrder) {
+      try {
+        const switched = await this._switchToPortalContext(context);
+        if (!switched) {
+          attempts.push({ context, opened: false, rowsSeen: 0, reason: 'context_switch_failed' });
+          continue;
+        }
+
+        for (let attemptNo = 1; attemptNo <= 3; attemptNo++) {
+          const opened = await this._openEditDraftVisits();
+          if (!opened) {
+            attempts.push({
+              context,
+              attemptNo,
+              opened: false,
+              rowsSeen: 0,
+              reason: 'edit_draft_link_not_found',
+            });
+            break;
+          }
+
+          await this._searchDraftByNric(nric);
+          const extracted = await this._extractDraftRows();
+          const matchPick = this._pickDraftRowWithReason(extracted.rows, {
+            nric,
+            visitDate,
+            patientName,
+            expectedVisitNo: normalizedExpectedVisitNo || null,
+          });
+          const match = matchPick?.row || null;
+          attempts.push({
+            context,
+            attemptNo,
+            opened: true,
+            rowsSeen: extracted.rows.length,
+            url: extracted.url,
+            matched: Boolean(match),
+            reason: match ? null : (matchPick?.reason || 'draft_not_found'),
+            expectedVisitNo: normalizedExpectedVisitNo || null,
+            match: match || null,
+          });
+          if (match) {
+            return {
+              found: true,
+              context,
+              row: match,
+              rowsSeen: extracted.rows.length,
+              url: extracted.url,
+              attempts,
+            };
+          }
+
+          if (attemptNo < 3) {
+            // Some rows appear a few seconds after save due backend postback latency.
+            await this.page.waitForTimeout(2500 * attemptNo);
+          }
+        }
+      } catch (error) {
+        attempts.push({
+          context,
+          opened: false,
+          rowsSeen: 0,
+          reason: error?.message || 'unknown_error',
+        });
+      }
+    }
+
+    return {
+      found: false,
+      contextTried: contextOrder,
+      attempts,
+    };
   }
 
   /**
@@ -5280,6 +6717,12 @@ export class MHCAsiaAutomation {
             if (style.display === 'none' || style.visibility === 'hidden') return false;
             return true;
           };
+          const sameNumeric = (a, b) => {
+            const n1 = Number(String(a || '').trim());
+            const n2 = Number(String(b || '').trim());
+            if (!Number.isFinite(n1) || !Number.isFinite(n2)) return false;
+            return Math.abs(n1 - n2) < 1e-9;
+          };
           const cells = Array.from(document.querySelectorAll('td, th, label, span, b, strong'));
           const label = cells.find((el) => /^Consultation\s*Fee\b/i.test(norm(el.textContent)));
           if (!label) return { ok: false, reason: 'label_not_found' };
@@ -5449,31 +6892,481 @@ export class MHCAsiaAutomation {
     }
   }
 
+  getLastDiagnosisSelectionState() {
+    return this.lastDiagnosisSelection || null;
+  }
+
+  getLastWaiverReferralState() {
+    return this.lastWaiverReferralState || null;
+  }
+
+  getLastSaveDraftResult() {
+    return this.lastSaveDraftResult || null;
+  }
+
+  getLastDiagnosisPrefetchState() {
+    return this.lastDiagnosisPrefetch || null;
+  }
+
+  _extractDiagnosisCodeToken(value) {
+    const raw = String(value || '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9.]/g, ' ');
+    const m = raw.match(/\b[A-Z][0-9]{2,3}(?:\.[0-9A-Z]{1,4})?\b/);
+    return m ? m[0] : null;
+  }
+
+  _buildDiagnosisSearchTermsFromHint(diagnosisHint) {
+    const code = String(diagnosisHint?.code || '').trim();
+    const desc = String(diagnosisHint?.description || '').trim();
+    const descNorm = desc
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const side = descNorm.match(/\b(left|right|bilateral)\b/)?.[1] || '';
+    const stop = new Set([
+      'sprain',
+      'strain',
+      'pain',
+      'ache',
+      'with',
+      'without',
+      'part',
+      'parts',
+      'region',
+      'other',
+      'others',
+      'oth',
+      'unspecified',
+      'unsp',
+      'site',
+      'body',
+      'left',
+      'right',
+      'bilateral',
+      'of',
+      'the',
+      'in',
+    ]);
+    const tokens = descNorm
+      .split(/\s+/)
+      .filter((w) => w.length >= 3 && !stop.has(w));
+    const bodyPart = tokens[0] || '';
+    const sideBody = side && bodyPart ? `${side} ${bodyPart}` : '';
+    const noDot = code ? code.replace(/\./g, '') : '';
+    const candidates = [
+      sideBody,
+      bodyPart,
+      tokens.slice(0, 2).join(' '),
+      descNorm.split(' ').slice(0, 5).join(' '),
+      descNorm,
+      code,
+      noDot,
+    ]
+      .map((v) => String(v || '').trim())
+      .filter((v) => v.length >= 2);
+    return Array.from(new Set(candidates));
+  }
+
+  async prefetchDiagnosisOptions(opts = {}) {
+    const {
+      diagnosisHint = null,
+      maxRows = 100,
+      maxTerms = 6,
+      contextHint = null,
+    } = opts || {};
+
+    const fetchedAt = new Date().toISOString();
+    const context = String(contextHint || this._inferPortalContext() || 'mhc').toLowerCase();
+    const options = [];
+    const seen = new Set();
+    const searchTerms = this._buildDiagnosisSearchTermsFromHint(diagnosisHint).slice(0, maxTerms);
+    const addOption = (row) => {
+      const text = String(row?.text || '').replace(/\s+/g, ' ').trim();
+      if (!text) return;
+      if (/^\s*na\s*$/i.test(text)) return;
+      const code = this._extractDiagnosisCodeToken(row?.code || text) || null;
+      const key = `${code || ''}|${text.toLowerCase()}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      options.push({
+        code,
+        text,
+        value: String(row?.value || '').trim() || null,
+        source: row?.source || 'unknown',
+        context,
+        fetched_at: fetchedAt,
+      });
+    };
+
+    try {
+      // 1) Fast path: collect from diagnosis dropdown options on the form.
+      const dropdown = this.page
+        .locator('select[name="diagnosisPriIdTemp"], select[id*="diagnosisPriIdTemp" i]')
+        .first();
+      if ((await dropdown.count().catch(() => 0)) > 0 && (await dropdown.isVisible().catch(() => false))) {
+        const dropdownOptions = await dropdown
+          .locator('option')
+          .evaluateAll((opts) =>
+            opts.map((o) => ({
+              text: String(o.textContent || '').trim(),
+              value: String(o.value || '').trim(),
+            }))
+          )
+          .catch(() => []);
+        for (const opt of dropdownOptions) {
+          addOption({
+            code: this._extractDiagnosisCodeToken(opt.text || opt.value || ''),
+            text: opt.text,
+            value: opt.value,
+            source: 'dropdown',
+          });
+        }
+      }
+
+      // 2) Modal search path: gather selectable diagnosis rows.
+      const mButtonSelectors = [
+        'input[name="SelectDiagnosisFromMaster"][onclick*="diagnosisPriId"]',
+        'input[onclick*="doSelectMasterDiagnosis"][onclick*="diagnosisPriId"]',
+        'tr:has-text("Diagnosis Pri") input[name="SelectDiagnosisFromMaster"]',
+        'tr:has-text("Diagnosis Pri") input[value*="M"]',
+        'tr:has-text("Diagnosis Pri") input[type="button"][value*="M"]',
+      ];
+
+      const popupPromise = this.page.waitForEvent('popup', { timeout: 5000 }).catch(() => null);
+      let mClicked = false;
+      for (const selector of mButtonSelectors) {
+        const btn = this.page.locator(selector).first();
+        if ((await btn.count().catch(() => 0)) === 0) continue;
+        if (!(await btn.isVisible().catch(() => false))) continue;
+        await btn.click({ timeout: 2000 }).catch(async () => {
+          await btn.click({ force: true, timeout: 2000 }).catch(() => {});
+        });
+        mClicked = true;
+        break;
+      }
+
+      if (mClicked) {
+        const popup = await popupPromise;
+        if (popup) {
+          await popup.waitForLoadState('domcontentloaded').catch(() => {});
+          await popup.waitForTimeout(250);
+        } else {
+          await this.page.waitForTimeout(350);
+        }
+
+        let ctx = null;
+        if (popup) {
+          ctx = {
+            kind: 'popup',
+            locator: (sel) => popup.locator(sel),
+            waitForTimeout: (ms) => popup.waitForTimeout(ms),
+            close: async () => popup.close().catch(() => {}),
+          };
+        } else {
+          const modal = this.page
+            .locator('dialog, [role="dialog"], .ui-dialog, .modal, .popup')
+            .filter({
+              has: this.page.locator('input[type="text"], input[type="search"], input:not([type])'),
+            })
+            .first();
+          if ((await modal.count().catch(() => 0)) > 0 && (await modal.isVisible().catch(() => false))) {
+            ctx = {
+              kind: 'modal',
+              locator: (sel) => modal.locator(sel),
+              waitForTimeout: (ms) => this.page.waitForTimeout(ms),
+              close: async () => {
+                const closeBtn = modal
+                  .locator('button:has-text("Close"), button.close, [data-dismiss="modal"], a:has-text("Close")')
+                  .first();
+                if ((await closeBtn.count().catch(() => 0)) > 0) {
+                  await closeBtn.click().catch(() => {});
+                }
+                await this.page.keyboard.press('Escape').catch(() => {});
+              },
+            };
+          }
+        }
+
+        if (ctx) {
+          const searchField = ctx
+            .locator(
+              [
+                'input[name="keyValue"]:not([readonly]):not([disabled])',
+                'input[name*="search" i]:not([readonly]):not([disabled])',
+                'input[type="search"]:not([readonly]):not([disabled])',
+                'input[type="text"]:not([readonly]):not([disabled])',
+              ].join(', ')
+            )
+            .first();
+          const hasSearchField = (await searchField.count().catch(() => 0)) > 0;
+          if (hasSearchField && searchTerms.length) {
+            const searchBtn = ctx
+              .locator(
+                [
+                  'input[name="SearchAction"]',
+                  'input[value*="Search" i]',
+                  'button:has-text("Search")',
+                  'button:has-text("Find")',
+                  'input[type="submit"]',
+                  'input[type="button"][value*="Search" i]',
+                ].join(', ')
+              )
+              .first();
+
+            for (const term of searchTerms) {
+              await searchField.fill(term).catch(async () => {
+                await searchField.click().catch(() => {});
+                await searchField.press('Control+A').catch(() => {});
+                await searchField.type(term).catch(() => {});
+              });
+              if ((await searchBtn.count().catch(() => 0)) > 0 && (await searchBtn.isVisible().catch(() => false))) {
+                await searchBtn.click().catch(() => {});
+              } else {
+                await searchField.press('Enter').catch(() => {});
+              }
+              await ctx.waitForTimeout(650);
+
+              const rows = ctx.locator('table tr');
+              const rowCount = Math.min(await rows.count().catch(() => 0), maxRows);
+              for (let i = 0; i < rowCount; i++) {
+                const row = rows.nth(i);
+                const rowText = String((await row.innerText().catch(() => '')) || '')
+                  .replace(/\s+/g, ' ')
+                  .trim();
+                if (!rowText) continue;
+                if (/click on the diagnosis|starts with|equals to|next|prev|sort/i.test(rowText.toLowerCase())) {
+                  continue;
+                }
+                const hasSelectable = (await row.locator('a, button, input[type="button"], input[type="submit"]').count().catch(() => 0)) > 0;
+                if (!hasSelectable) continue;
+                const code = this._extractDiagnosisCodeToken(rowText);
+                if (!code && !/[a-z]{3,}/i.test(rowText)) continue;
+                addOption({
+                  code,
+                  text: rowText,
+                  source: `modal:${term.slice(0, 32)}`,
+                });
+              }
+            }
+          }
+          await ctx.close?.().catch(() => {});
+        }
+      }
+
+      const result = {
+        fetched_at: fetchedAt,
+        context,
+        searchTerms,
+        options,
+        total: options.length,
+      };
+      this.lastDiagnosisPrefetch = result;
+      this._logStep('Prefetched portal diagnosis options', {
+        context,
+        total: options.length,
+        searchTerms: searchTerms.slice(0, 6),
+      });
+      return result;
+    } catch (error) {
+      const result = {
+        fetched_at: fetchedAt,
+        context,
+        searchTerms,
+        options,
+        total: options.length,
+        error: error?.message || String(error),
+      };
+      this.lastDiagnosisPrefetch = result;
+      logger.warn('[MHC] Failed to prefetch diagnosis options', {
+        context,
+        error: error?.message || String(error),
+      });
+      return result;
+    }
+  }
+
+  async getDiagnosisResolutionState(opts = {}) {
+    const { waitMs = 0 } = opts || {};
+    if (waitMs > 0) {
+      await this.page.waitForTimeout(waitMs).catch(() => {});
+    }
+
+    const state = await this.page
+      .evaluate(() => {
+        const readInputValue = (selector) => {
+          const el = document.querySelector(selector);
+          if (!el) return '';
+          return String(el.value || '').trim();
+        };
+        const readSelectLabel = (selector) => {
+          const el = document.querySelector(selector);
+          if (!el || el.tagName?.toLowerCase() !== 'select') return '';
+          const selected = el.options?.[el.selectedIndex];
+          return String(selected?.textContent || el.value || '').trim();
+        };
+
+        const diagnosisPriId = readInputValue('input[name="diagnosisPriId"], input[id*="diagnosisPriId" i]');
+        const diagnosisPriDesc = readInputValue(
+          'input[name="diagnosisPriDesc"], input[id*="diagnosisPriDesc" i], input[name*="diagnosisPriDesc" i]'
+        );
+        const diagnosisPriIdTemp = readSelectLabel(
+          'select[name="diagnosisPriIdTemp"], select[id*="diagnosisPriIdTemp" i]'
+        );
+
+        const bodyText = String(document.body?.innerText || '');
+        const hasPrimaryRequiredError = /Diagnosis\s+Primary\s+is\s+required/i.test(bodyText);
+
+        const descNorm = diagnosisPriDesc.toLowerCase();
+        const hasValidDesc =
+          !!diagnosisPriDesc &&
+          !/^\s*na\s*$/i.test(diagnosisPriDesc) &&
+          !/^\s*missing diagnosis\s*$/i.test(descNorm);
+        const hasValidId = !!diagnosisPriId;
+        const dropdownStillNa = /^\s*na\s*$/i.test(diagnosisPriIdTemp || '');
+        // Some portal contexts accept a filled primary diagnosis description even when
+        // the dropdown text remains "NA" after modal interactions.
+        let resolved = hasValidId || hasValidDesc;
+        if (hasPrimaryRequiredError) resolved = false;
+
+        const reasons = [];
+        if (!hasValidId) reasons.push('missing_diagnosis_pri_id');
+        if (!hasValidDesc) reasons.push('missing_or_invalid_diagnosis_pri_desc');
+        if (hasPrimaryRequiredError) reasons.push('portal_error_diagnosis_primary_required');
+        if (dropdownStillNa) reasons.push('diagnosis_dropdown_still_na');
+
+        return {
+          resolved,
+          diagnosisPriId,
+          diagnosisPriDesc,
+          diagnosisPriIdTemp,
+          hasPrimaryRequiredError,
+          reasons,
+        };
+      })
+      .catch((error) => ({
+        resolved: false,
+        diagnosisPriId: '',
+        diagnosisPriDesc: '',
+        diagnosisPriIdTemp: '',
+        hasPrimaryRequiredError: false,
+        reasons: [`diagnosis_state_eval_failed:${error?.message || 'unknown'}`],
+      }));
+
+    const out = {
+      ...state,
+      checkedAt: new Date().toISOString(),
+      url: this.page.url(),
+    };
+    this.lastDiagnosisResolutionCheck = out;
+    this._logStep('Diagnosis resolution check', {
+      resolved: out.resolved,
+      diagnosisPriId: out.diagnosisPriId ? '[set]' : '',
+      diagnosisPriDesc: out.diagnosisPriDesc ? out.diagnosisPriDesc.slice(0, 80) : '',
+      reasons: out.reasons,
+    });
+    return out;
+  }
+
   /**
    * Fill Primary Diagnosis using "M" button search modal.
    * Accepts either a string, or an object { code, description }.
    */
-  async fillDiagnosisPrimary(diagnosisText) {
+  async fillDiagnosisPrimary(diagnosisText, options = {}) {
     try {
+      const allowTextFallback =
+        options?.allowTextFallback === true || process.env.MHC_ALLOW_DIAG_TEXT_FALLBACK === '1';
       const code = diagnosisText && typeof diagnosisText === 'object' ? String(diagnosisText.code || '').trim() : '';
       const desc =
         diagnosisText && typeof diagnosisText === 'object' ? String(diagnosisText.description || '').trim() : String(diagnosisText || '').trim();
 
       const preview = (code || desc).slice(0, 50);
       this._logStep('Fill primary diagnosis via M button', { diagnosis: preview });
+      this.lastDiagnosisSelection = {
+        ok: false,
+        method: 'modal',
+        diagnosis: { code: code || null, description: desc || null },
+        reason: 'not_attempted',
+        checkedAt: new Date().toISOString(),
+      };
+
+      const finalizeDiagnosisResult = async (meta = {}) => {
+        const resolution = await this.getDiagnosisResolutionState({ waitMs: 350 }).catch(() => ({
+          resolved: false,
+          reasons: ['diagnosis_state_check_failed'],
+        }));
+        const ok = !!resolution?.resolved;
+        const selection = {
+          ok,
+          method: meta.method || 'modal',
+          diagnosis: { code: code || null, description: desc || null },
+          reason: ok ? null : 'diagnosis_mapping_failed',
+          resolution,
+          ...meta,
+          checkedAt: new Date().toISOString(),
+        };
+        this.lastDiagnosisSelection = selection;
+        return ok;
+      };
 
       if (!(code || desc) || (code || desc).length < 2) {
         logger.warn('Diagnosis text too short, skipping');
+        this.lastDiagnosisSelection = {
+          ok: false,
+          method: 'modal',
+          diagnosis: { code: code || null, description: desc || null },
+          reason: 'search_term_too_short',
+          checkedAt: new Date().toISOString(),
+        };
         return false;
       }
 
       const fillInFormTextFallback = async (why) => {
         const fallbackText = [code, desc].filter(Boolean).join(' - ').slice(0, 80);
         if (!fallbackText) return false;
-        // Never write diagnosis into AIA Clinic free-text fields (risk of Special Remarks).
+        // In AIA Clinic pages, only write to explicit diagnosis primary description inputs.
+        // Avoid generic fallback that could spill into Special Remarks.
         const urlNow = this.page.url() || '';
         if (this.isAiaClinicSystem || /aiaclinic\.com/i.test(urlNow)) {
-          logger.warn('AIA Clinic: skipping in-form diagnosis fallback to avoid Special Remarks');
+          const safeFilled = await this.page
+            .evaluate((value) => {
+              const isVisible = (el) => {
+                if (!el) return false;
+                const style = window.getComputedStyle(el);
+                if (!style) return false;
+                if (style.display === 'none' || style.visibility === 'hidden') return false;
+                const rect = el.getBoundingClientRect();
+                if (!rect || rect.width <= 0 || rect.height <= 0) return false;
+                return true;
+              };
+              const candidates = Array.from(
+                document.querySelectorAll(
+                  'input[name="diagnosisPriDesc"], input[id*="diagnosisPriDesc" i], input[name*="diagnosisPriDesc" i]'
+                )
+              ).filter((el) => {
+                const name = `${el.getAttribute('name') || ''} ${el.id || ''}`.toLowerCase();
+                if (name.includes('sec') || name.includes('secondary')) return false;
+                if (el.disabled) return false;
+                return isVisible(el);
+              });
+              if (!candidates.length) return false;
+              const target = candidates[0];
+              target.readOnly = false;
+              target.removeAttribute && target.removeAttribute('readonly');
+              target.value = String(value || '');
+              target.dispatchEvent(new Event('input', { bubbles: true }));
+              target.dispatchEvent(new Event('change', { bubbles: true }));
+              return String(target.value || '').trim().length > 0;
+            }, fallbackText)
+            .catch(() => false);
+          if (safeFilled) {
+            this._logStep('AIA Clinic: diagnosisPriDesc filled via explicit safe fallback');
+            return true;
+          }
+          logger.warn(
+            'AIA Clinic: explicit diagnosisPriDesc fallback failed; skipping generic in-form fallback to avoid Special Remarks'
+          );
           return false;
         }
         if (why) this._logStep(why, { url: this.page.url() });
@@ -5508,6 +7401,37 @@ export class MHCAsiaAutomation {
               if (tag === 'textarea' && !/diag|dx|icd/.test(name)) return false;
               return tag === 'input' || tag === 'textarea';
             };
+            const setField = (el, value) => {
+              if (!el) return false;
+              try {
+                el.readOnly = false;
+                el.disabled = false;
+                el.removeAttribute && el.removeAttribute('readonly');
+                el.removeAttribute && el.removeAttribute('disabled');
+              } catch {
+                // ignore
+              }
+              el.scrollIntoView && el.scrollIntoView({ block: 'center' });
+              el.value = String(value || '');
+              el.dispatchEvent(new Event('input', { bubbles: true }));
+              el.dispatchEvent(new Event('change', { bubbles: true }));
+              return String(el.value || '').trim().length > 0;
+            };
+
+            // Fast path: explicit primary diagnosis text field (common on MHC).
+            const explicit = Array.from(
+              document.querySelectorAll(
+                'input[name="diagnosisPriDesc"], input[id*="diagnosisPriDesc" i], input[name*="diagnosisPriDesc" i]'
+              )
+            ).filter((el) => {
+              const name = `${el.getAttribute('name') || ''} ${el.id || ''}`.toLowerCase();
+              if (name.includes('sec') || name.includes('secondary')) return false;
+              return true;
+            });
+            for (const el of explicit) {
+              if (setField(el, val)) return true;
+            }
+
             const score = (el) => {
               const tag = el.tagName?.toLowerCase();
               const name = `${el.getAttribute('name') || ''} ${el.id || ''} ${el.getAttribute('aria-label') || ''}`.toLowerCase();
@@ -5546,11 +7470,7 @@ export class MHCAsiaAutomation {
               candidates.sort((a, b) => score(b) - score(a));
               const target = candidates[0];
               if (!target) continue;
-              target.scrollIntoView({ block: 'center' });
-              target.value = String(val);
-              target.dispatchEvent(new Event('input', { bubbles: true }));
-              target.dispatchEvent(new Event('change', { bubbles: true }));
-              return true;
+              if (setField(target, val)) return true;
             }
             return false;
           }, fallbackText)
@@ -5570,6 +7490,16 @@ export class MHCAsiaAutomation {
       // Do not auto-adjust MC Day here. Some portals treat "0" as invalid and show blocking alerts.
 
       const stop = new Set([
+        'the',
+        'and',
+        'for',
+        'of',
+        'in',
+        'on',
+        'to',
+        'at',
+        'from',
+        'due',
         'sprain',
         'strain',
         'pain',
@@ -5586,17 +7516,82 @@ export class MHCAsiaAutomation {
         'unsp',
         'site',
         'body',
+        'left',
+        'right',
+        'bilateral',
       ]);
-      const keywords = (desc || '')
+      const descClean = String(desc || '')
+        .replace(/^[A-Z]\d{2,3}(?:\.[0-9A-Z]{1,4})?\s*[-: ]\s*/i, '')
+        .trim();
+      const keywords = descClean
         .toLowerCase()
         .replace(/[^a-z0-9\s]/g, ' ')
         .split(/\s+/)
-        .filter((w) => w.length >= 4)
+        .filter((w) => w.length >= 3)
+        .filter((w) => !/\d/.test(w))
         .filter((w) => !stop.has(w));
-      const minScore = Number(process.env.MHC_DIAG_MIN_SCORE || '50');
-      // Prefer the most specific description keyword over ICD code.
+      // Practical default: many valid diagnosis rows only match one strong keyword
+      // (e.g., "shoulder"), so 50 is too strict and leaves Diagnosis Pri as NA.
+      const minScore = Number(process.env.MHC_DIAG_MIN_SCORE || '25');
+      // Prefer a concrete body-part phrase over ICD code; this popup often indexes by description.
       const keyword = keywords.slice().sort((a, b) => b.length - a.length)[0] || '';
-      const searchText = (keyword || desc || code).slice(0, 50);
+      const descNorm = String(descClean || desc || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const sideToken = descNorm.match(/\b(left|right|bilateral)\b/i)?.[1]?.toLowerCase() || '';
+      const shoulderPhrase = /\bshoulder\b/i.test(descNorm) ? `${sideToken ? `${sideToken} ` : ''}shoulder`.trim() : '';
+      const sideWordSet = new Set(['left', 'right', 'bilateral']);
+      const weakBodyTokens = new Set(['acute', 'chronic', 'joint', 'region', 'unspecified']);
+      const knownBodyParts = [
+        'shoulder',
+        'knee',
+        'ankle',
+        'wrist',
+        'elbow',
+        'hip',
+        'back',
+        'neck',
+        'foot',
+        'heel',
+        'hand',
+      ];
+      const descWords = descNorm.split(' ').filter(Boolean);
+      const bodyPartKeywordPool = keywords.filter(
+        (w) => !weakBodyTokens.has(w) && !sideWordSet.has(w) && /^[a-z]+$/.test(w)
+      );
+      const bodyPartToken =
+        knownBodyParts.find((k) => descWords.includes(k) || descNorm.includes(k)) ||
+        bodyPartKeywordPool.find((k) => knownBodyParts.includes(k)) ||
+        '';
+      const sideBodyPhrase = sideToken && bodyPartToken ? `${sideToken} ${bodyPartToken}` : '';
+      const descPhrase = String(descNorm || '')
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 6)
+        .join(' ');
+      const codeRaw = String(code || '').trim();
+      const codeNoDot = codeRaw.replace(/\./g, '');
+      const rankedSearchTerms = [sideBodyPhrase, shoulderPhrase, bodyPartToken, keyword, descPhrase, descNorm, codeRaw, codeNoDot];
+      const searchCandidates = Array.from(
+        new Set(
+          rankedSearchTerms
+            .map((v) => String(v || '').trim())
+            .filter((v) => v.length >= 2)
+            .filter((v) => !sideWordSet.has(String(v).toLowerCase()))
+            .filter((v, idx, arr) => arr.indexOf(v) === idx)
+            .filter((v, idx, arr) => !(idx > 0 && v.toLowerCase() === arr[idx - 1].toLowerCase()))
+            .map((v) => v.slice(0, 50))
+        )
+      );
+      let searchText = (searchCandidates[0] || code || keyword || desc).slice(0, 50);
+      this._logStep('Diagnosis search seed prepared', {
+        code: code || null,
+        keyword: keyword || null,
+        searchText,
+        searchCandidates: searchCandidates.slice(0, 5),
+      });
 
       // Singlife/Aviva PCP (pcpcare.com) uses a server-postback for the "M" control and can
       // revert the Visit Date if the hidden backing field wasn't updated. Since we don't rely
@@ -5604,7 +7599,30 @@ export class MHCAsiaAutomation {
       // write a readable diagnosis into the in-form free-text field.
       const urlNow = this.page.url();
       if (/pcpcare\.com\/pcpcare/i.test(urlNow)) {
-        return await fillInFormTextFallback('PcpCare portal: skipping diagnosis modal and using in-form text fallback');
+        if (allowTextFallback) {
+          const fallbackOk = await fillInFormTextFallback(
+            'PcpCare portal: skipping diagnosis modal and using in-form text fallback'
+          );
+          if (!fallbackOk) {
+            this.lastDiagnosisSelection = {
+              ok: false,
+              method: 'in_form_text_fallback',
+              diagnosis: { code: code || null, description: desc || null },
+              reason: 'pcpcare_fallback_failed',
+              checkedAt: new Date().toISOString(),
+            };
+            return false;
+          }
+          return await finalizeDiagnosisResult({ method: 'in_form_text_fallback', mode: 'pcpcare' });
+        }
+        this.lastDiagnosisSelection = {
+          ok: false,
+          method: 'modal',
+          diagnosis: { code: code || null, description: desc || null },
+          reason: 'pcpcare_modal_required',
+          checkedAt: new Date().toISOString(),
+        };
+        return false;
       }
 
       const preUrl = this.page.url();
@@ -5614,61 +7632,95 @@ export class MHCAsiaAutomation {
       const popupPromise = this.page.waitForEvent('popup', { timeout: 8000 }).catch(() => null);
 
       // Exact selector: #visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input
+      // Important: keep this click as a real Playwright user action. JS-only clicks can be treated as
+      // non-user gestures and block popup creation in some portal states.
       const mButtonSelectors = [
+        'input[name="SelectDiagnosisFromMaster"][onclick*="diagnosisPriId"]',
+        'input[onclick*="doSelectMasterDiagnosis"][onclick*="diagnosisPriId"]',
+        'tr:has-text("Diagnosis Pri") input[name="SelectDiagnosisFromMaster"]',
         '#visit_form > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > input',
-        'tr:has-text("Diagnosis Pri") input[value="M"]',
-        'tr:has-text("Diagnosis Pri") input[type="button"][value="M"]',
-        'input[value="M"]:near(text="Diagnosis Pri", 200)',
-        'input[type="submit"][value="M"]',
-        'input[type="button"][value="M"]',
+        'tr:has-text("Diagnosis Pri") input[value*="M"]',
+        'tr:has-text("Diagnosis Pri") input[type="button"][value*="M"]',
+        'tr:has-text("Diagnosis Pri") input[type="submit"][value*="M"]',
+        'input[name="SelectDiagnosisFromMaster"][value*="M"]',
+        'input[value*="M"]:near(text="Diagnosis Pri", 200)',
       ];
 
+      const clickMButtonByLocator = async (locator, meta = {}) => {
+        if (!locator) return false;
+        const count = await locator.count().catch(() => 0);
+        if (!count) return false;
+        const btn = locator.first();
+        const isVisible = await btn.isVisible().catch(() => false);
+        if (!isVisible) return false;
+        await btn.scrollIntoViewIfNeeded().catch(() => {});
+        await btn.click({ timeout: 2500 }).catch(async () => {
+          await btn.click({ force: true, timeout: 2500 }).catch(() => {});
+        });
+        this._logStep('Clicked M button for diagnosis search', meta);
+        return true;
+      };
+
       let mButtonFound = false;
+
+      // Selector-first path with explicit Diagnosis Pri control targeting.
       for (const selector of mButtonSelectors) {
         try {
-          const mButton = this.page.locator(selector).first();
-          if ((await mButton.count().catch(() => 0)) > 0) {
-            await mButton.click();
-            this._logStep('Clicked M button for diagnosis search', { selector });
-            mButtonFound = true;
-            break;
-          }
-        } catch (e) {
+          const mButton = this.page.locator(selector);
+          mButtonFound = await clickMButtonByLocator(mButton, { strategy: 'selector', selector });
+          if (mButtonFound) break;
+        } catch {
           continue;
         }
       }
 
+      // Scan fallback: inspect all "M"-like controls and choose one in Diagnosis Pri row.
       if (!mButtonFound) {
-        // Try JavaScript click as fallback
-        const clicked = await this.page.evaluate(() => {
-          // Find the M button near Diagnosis Pri row
-          const rows = document.querySelectorAll('tr');
-          for (const row of rows) {
-            if (row.textContent?.includes('Diagnosis Pri')) {
-              const mButton = row.querySelector('input[value="M"]');
-              if (mButton) {
-                mButton.click();
+        try {
+          const allButtons = this.page.locator(
+            '#visit_form input[type="button"], #visit_form input[type="submit"], #visit_form button'
+          );
+          const total = await allButtons.count().catch(() => 0);
+          for (let i = 0; i < Math.min(total, 220); i++) {
+            const candidate = allButtons.nth(i);
+            const matches = await candidate
+              .evaluate((el) => {
+                const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+                const style = window.getComputedStyle(el);
+                if (!style || style.display === 'none' || style.visibility === 'hidden') return false;
+                const rect = el.getBoundingClientRect();
+                if (!rect || rect.width <= 0 || rect.height <= 0) return false;
+                const value = norm(
+                  el.getAttribute('value') || el.textContent || el.getAttribute('aria-label') || ''
+                );
+                const onclick = norm(el.getAttribute('onclick') || '');
+                // Strong match: explicit primary diagnosis master selector.
+                if (onclick.includes('doselectmasterdiagnosis') && onclick.includes('diagnosispriid')) return true;
+                if (value !== 'm') return false;
+                const rowText = norm(el.closest('tr')?.textContent || '');
+                if (!/diagnosis\s*pri/.test(rowText)) return false;
+                if (/diagnosis\s*sec/.test(rowText)) return false;
                 return true;
-              }
-            }
+              })
+              .catch(() => false);
+            if (!matches) continue;
+            mButtonFound = await clickMButtonByLocator(candidate, { strategy: 'scan', index: i, total });
+            if (mButtonFound) break;
           }
-          // Try exact selector
-          const exactBtn = document.querySelector('#visit_form input[value="M"]');
-          if (exactBtn) {
-            exactBtn.click();
-            return true;
-          }
-          return false;
-        });
-        
-        if (clicked) {
-          this._logStep('Clicked M button via JavaScript');
-          mButtonFound = true;
+        } catch {
+          // ignore and continue
         }
       }
 
       if (!mButtonFound) {
         logger.warn('M button for diagnosis not found');
+        this.lastDiagnosisSelection = {
+          ok: false,
+          method: 'modal',
+          diagnosis: { code: code || null, description: desc || null },
+          reason: 'diagnosis_m_button_not_found',
+          checkedAt: new Date().toISOString(),
+        };
         return false;
       }
 
@@ -5778,15 +7830,53 @@ export class MHCAsiaAutomation {
         this._logStep('Diagnosis search UI not detected; leaving diagnosis blank', { url: urlNow });
         await this.page.screenshot({ path: 'screenshots/mhc-diagnosis-modal-not-detected.png', fullPage: true }).catch(() => {});
         if (this.isAiaClinicSystem || /aiaclinic\.com/i.test(urlNow)) {
-          logger.warn('AIA Clinic diagnosis modal not detected; skipping fallback to avoid writing into Special Remarks');
+          if (allowTextFallback) {
+            const fallbackOk = await fillInFormTextFallback(
+              'AIA Clinic diagnosis modal not detected; attempting explicit diagnosisPriDesc fallback'
+            );
+            if (fallbackOk) {
+              return await finalizeDiagnosisResult({
+                method: 'in_form_text_fallback',
+                mode: 'aia_no_search_ui',
+                attemptedSelectors: mButtonSelectors,
+              });
+            }
+          }
+          logger.warn('AIA Clinic diagnosis modal not detected; strict mode requires modal selection');
+          this.lastDiagnosisSelection = {
+            ok: false,
+            method: 'modal',
+            diagnosis: { code: code || null, description: desc || null },
+            reason: 'diagnosis_search_ui_not_detected_aia',
+            checkedAt: new Date().toISOString(),
+          };
           return false;
         }
+        if (allowTextFallback) {
+          const fallbackOk = await fillInFormTextFallback(
+            'Diagnosis search UI not detected; using in-form diagnosis fallback'
+          );
+          if (fallbackOk) {
+            return await finalizeDiagnosisResult({
+              method: 'in_form_text_fallback',
+              mode: 'no_search_ui',
+            });
+          }
+        }
+        this.lastDiagnosisSelection = {
+          ok: false,
+          method: 'in_form_text_fallback',
+          diagnosis: { code: code || null, description: desc || null },
+          reason: 'diagnosis_search_ui_not_detected',
+          checkedAt: new Date().toISOString(),
+        };
         return false;
       }
 
       // Find search field in modal
       const searchSelectors = [
         // Prefer modal/popup-specific fields first so we never accidentally target underlying form inputs like MC Day or Visit Date.
+        'input[name="keyValue"]:not([readonly]):not([disabled])',
         'input[name*="search" i]:not([readonly]):not([disabled])',
         'input[placeholder*="search" i]:not([readonly]):not([disabled])',
         'input[type="search"]:not([readonly]):not([disabled])',
@@ -5812,25 +7902,36 @@ export class MHCAsiaAutomation {
 
       if (!searchField) {
         logger.warn('Search field in modal not found');
+        this.lastDiagnosisSelection = {
+          ok: false,
+          method: 'modal',
+          diagnosis: { code: code || null, description: desc || null },
+          reason: 'diagnosis_search_field_not_found',
+          checkedAt: new Date().toISOString(),
+        };
         return false;
       }
 
-      // Enter diagnosis search text (best-effort, don't hang on non-editable fields)
-      try {
-        await searchField.fill(searchText, { timeout: 4000 });
-      } catch {
+      const enterSearchTerm = async (term) => {
         try {
-          await searchField.click({ timeout: 2000 });
-          await searchField.type(searchText, { timeout: 4000 });
+          await searchField.fill(term, { timeout: 4000 });
+          return true;
         } catch {
-          logger.warn('Could not fill diagnosis search field (modal)');
-          return false;
+          try {
+            await searchField.click({ timeout: 2000 });
+            await searchField.press('Control+A').catch(() => {});
+            await searchField.type(term, { timeout: 4000 });
+            return true;
+          } catch {
+            return false;
+          }
         }
-      }
-      this._logStep('Entered diagnosis search text');
+      };
 
       // Click search/find button or press Enter
       const searchButtonSelectors = [
+        'input[name="SearchAction"]',
+        'input[value*="Search" i]',
         'button:has-text("Search")',
         'button:has-text("Find")',
         'button[type="submit"]',
@@ -5838,27 +7939,240 @@ export class MHCAsiaAutomation {
         'input[type="button"][value*="Search" i]',
       ];
 
-      let searchButtonFound = false;
-      for (const selector of searchButtonSelectors) {
-        try {
-          const button = ctx.locator(selector).first();
-          if ((await button.count().catch(() => 0)) > 0 && (await button.isVisible().catch(() => false))) {
-            await button.click();
-            searchButtonFound = true;
-            break;
+      const triggerDiagnosisSearch = async () => {
+        for (const selector of searchButtonSelectors) {
+          try {
+            const button = ctx.locator(selector).first();
+            if (
+              (await button.count().catch(() => 0)) > 0 &&
+              (await button.isVisible().catch(() => false))
+            ) {
+              await button.click();
+              return true;
+            }
+          } catch {
+            continue;
           }
-        } catch (e) {
-          continue;
+        }
+        await searchField.press('Enter').catch(() => {});
+        return false;
+      };
+
+      const setDiagnosisSearchModeContains = async () => {
+        const modeSelectors = [
+          'select[name*="contains" i]',
+          'select[name*="search" i]',
+          'select[name*="match" i]',
+          'select:has(option:text-matches("contains","i"))',
+        ];
+        for (const selector of modeSelectors) {
+          try {
+            const sel = ctx.locator(selector).first();
+            if ((await sel.count().catch(() => 0)) === 0) continue;
+            const options = await sel
+              .locator('option')
+              .evaluateAll((opts) =>
+                opts.map((o) => ({
+                  value: o.value,
+                  label: (o.textContent || '').trim(),
+                }))
+              )
+              .catch(() => []);
+            const containsOpt = options.find((o) =>
+              /\bcontains\b/i.test(`${o.label || ''} ${o.value || ''}`)
+            );
+            if (!containsOpt) continue;
+            const selected = await sel
+              .selectOption({ value: containsOpt.value })
+              .then(() => true)
+              .catch(async () => {
+                if (containsOpt.label) {
+                  return sel
+                    .selectOption({ label: containsOpt.label })
+                    .then(() => true)
+                    .catch(() => false);
+                }
+                return false;
+              });
+            if (selected) {
+              this._logStep('Diagnosis search mode set', {
+                selector,
+                mode: containsOpt.label || containsOpt.value || 'contains',
+              });
+              return true;
+            }
+          } catch {
+            continue;
+          }
+        }
+        return false;
+      };
+
+      const hasSelectableDiagnosisRows = async () => {
+        try {
+          const rows = ctx.locator('table tr');
+          const rowCount = Math.min(await rows.count().catch(() => 0), 40);
+          const forbidden =
+            /(click on the diagnosis|that contains|starts with|equals to|sort code|next|prev|page|\d+\s*-\s*\d+\s+of\s+\d+)/i;
+          for (let i = 0; i < rowCount; i++) {
+            const row = rows.nth(i);
+            const text = String((await row.innerText().catch(() => '')) || '')
+              .replace(/\s+/g, ' ')
+              .trim();
+            if (!text) continue;
+            if (forbidden.test(text)) continue;
+            if (!/\b[A-Z][0-9]{2,3}(?:\.[0-9A-Z]+)?\b/.test(text.toUpperCase())) continue;
+            const link = row.locator('a, button, input[type="button"], input[type="submit"]').first();
+            const hasLink = (await link.count().catch(() => 0)) > 0;
+            if (hasLink) return true;
+          }
+        } catch {
+          return false;
+        }
+        return false;
+      };
+
+      const entered = await enterSearchTerm(searchText);
+      if (!entered) {
+        logger.warn('Could not fill diagnosis search field (modal)');
+        this.lastDiagnosisSelection = {
+          ok: false,
+          method: 'modal',
+          diagnosis: { code: code || null, description: desc || null },
+          reason: 'diagnosis_search_input_fill_failed',
+          checkedAt: new Date().toISOString(),
+        };
+        return false;
+      }
+      await setDiagnosisSearchModeContains();
+      this._logStep('Entered diagnosis search text', { searchText });
+      await triggerDiagnosisSearch();
+      this._logStep('Triggered diagnosis search', { searchText });
+      await ctx.waitForTimeout(1200);
+
+      // Retry with alternative search terms before scoring/selecting a row.
+      if (!(await hasSelectableDiagnosisRows())) {
+        for (const candidate of searchCandidates.slice(1, 7)) {
+          const term = String(candidate || '').trim();
+          if (!term || term === searchText) continue;
+          const ok = await enterSearchTerm(term);
+          if (!ok) continue;
+          await triggerDiagnosisSearch();
+          await ctx.waitForTimeout(1000);
+          const rowsReady = await hasSelectableDiagnosisRows();
+          this._logStep('Retried diagnosis search term', {
+            previousSearchText: searchText,
+            searchText: term,
+            rowsReady,
+          });
+          searchText = term;
+          if (rowsReady) break;
         }
       }
 
-      if (!searchButtonFound) {
-        // Try pressing Enter
-        await searchField.press('Enter');
-      }
+      // Popup/same-page diagnosis lists often use doSelect(...) anchors rather than clean row structures.
+      // Match selectable anchors directly before row-based scoring.
+      const pickedAnchor = await (async () => {
+        const normalizeCode = (value) =>
+          String(value || '')
+            .toUpperCase()
+            .replace(/[^A-Z0-9.]/g, '');
+        const extractCode = (value) => {
+          const m = normalizeCode(value).match(/[A-Z]\d{2,3}(?:\.[0-9A-Z]+)?/);
+          return m ? m[0] : '';
+        };
+        const requestedCode = extractCode(code || '');
+        const requestedCodePlain = requestedCode.replace(/\./g, '');
+        const kw = Array.isArray(keywords) ? keywords.filter(Boolean).map((k) => String(k).toLowerCase()) : [];
 
-      this._logStep('Triggered diagnosis search');
-      await ctx.waitForTimeout(1200);
+        const links = ctx.locator('a[onclick*="doSelect"], a[href="#"]');
+        const count = Math.min(await links.count().catch(() => 0), 220);
+        let bestIdx = -1;
+        let bestScore = 0;
+        let bestText = '';
+        let bestRow = '';
+        let bestOptionCode = '';
+
+        for (let i = 0; i < count; i++) {
+          const link = links.nth(i);
+          const onclick = String((await link.getAttribute('onclick').catch(() => '')) || '');
+          const href = String((await link.getAttribute('href').catch(() => '')) || '');
+          const text = String((await link.innerText().catch(() => '')) || '')
+            .replace(/\s+/g, ' ')
+            .trim();
+          if (!text) continue;
+          if (!/doSelect/i.test(onclick) && href !== '#') continue;
+          if (/^(next|prev|previous|sort|code|description)$/i.test(text)) continue;
+          if (/click on the diagnosis/i.test(text)) continue;
+
+          const rowText = await link
+            .evaluate((el) => String(el.closest('tr')?.innerText || '').replace(/\s+/g, ' ').trim())
+            .catch(() => '');
+          const combined = `${text} ${rowText}`.trim();
+          const lower = combined.toLowerCase();
+          const optionCode = extractCode(combined);
+          const optionCodePlain = optionCode.replace(/\./g, '');
+
+          let score = 0;
+          let codeHits = 0;
+          let keywordHits = 0;
+          if (requestedCodePlain && optionCodePlain) {
+            if (optionCodePlain === requestedCodePlain) {
+              score += 1000;
+              codeHits += 1;
+            } else if (optionCodePlain.startsWith(requestedCodePlain)) {
+              score += 900;
+              codeHits += 1;
+            } else if (requestedCodePlain.startsWith(optionCodePlain)) {
+              score += 700;
+              codeHits += 1;
+            } else if (requestedCodePlain.slice(0, 3) && optionCodePlain.startsWith(requestedCodePlain.slice(0, 3))) {
+              score += 200;
+              codeHits += 1;
+            }
+          }
+          for (const k of kw) {
+            if (!k) continue;
+            if (lower.includes(k)) {
+              score += 40;
+              keywordHits += 1;
+            }
+          }
+          if (codeHits === 0 && keywordHits < 2) continue;
+          if (score < minScore) continue;
+          if (score > bestScore) {
+            bestScore = score;
+            bestIdx = i;
+            bestText = text.slice(0, 120);
+            bestRow = rowText.slice(0, 220);
+            bestOptionCode = optionCode;
+          }
+        }
+
+        if (bestIdx < 0) return { ok: false };
+        const target = links.nth(bestIdx);
+        await target.click().catch(() => {});
+        return {
+          ok: true,
+          score: bestScore,
+          text: bestText,
+          row: bestRow,
+          optionCode: bestOptionCode,
+        };
+      })();
+
+      if (pickedAnchor?.ok) {
+        this._logStep('Selected diagnosis result (anchor match)', pickedAnchor);
+        await ctx.waitForTimeout(500).catch(() => {});
+        if (ctx.close) await ctx.close().catch(() => {});
+        return await finalizeDiagnosisResult({
+          method: 'modal',
+          mode: 'anchor_match',
+          selection: pickedAnchor,
+          attemptedSelectors: mButtonSelectors,
+          searchText,
+        });
+      }
 
       // Prefer a best-match row rather than blindly taking the first result.
       // Only do document-level evaluation when the diagnosis search is a dedicated page (popup or full-page nav).
@@ -5889,6 +8203,9 @@ export class MHCAsiaAutomation {
           };
           const codeVariants = code ? buildCodeVariants(code) : [];
           const codeRegexes = codeVariants.map((v) => new RegExp(`\\b${esc(v)}\\b`, 'i'));
+          const forbidden = /(click on the diagnosis|that contains|starts with|equals to|sort code|next|prev|page|\d+\s*-\s*\d+\s+of\s+\d+)/i;
+          const hasIcdLikeCode = (txt) => /\b[A-Z][0-9]{2,3}(?:\.[0-9A-Z]+)?\b/.test(String(txt || '').toUpperCase());
+          const isHeaderLike = (txt) => /^\s*(code|description|diagnosis|icd)\b/i.test(String(txt || '').trim());
 
           const tables = Array.from(document.querySelectorAll('table')).filter((t) => isVisible(t));
           let best = null;
@@ -5896,10 +8213,18 @@ export class MHCAsiaAutomation {
 
           const scoreText = (txt) => {
             const t = String(txt || '').toLowerCase();
-            let s = 0;
-            for (const r of codeRegexes) if (r.test(txt)) s += 1000;
-            for (const k of keywords || []) if (k && t.includes(k)) s += 25;
-            return s;
+            if (!t) return null;
+            if (forbidden.test(t) || isHeaderLike(t) || !hasIcdLikeCode(t)) return null;
+            let codeHits = 0;
+            for (const r of codeRegexes) if (r.test(txt)) codeHits += 1;
+            let keywordHits = 0;
+            for (const k of keywords || []) if (k && t.includes(k)) keywordHits += 1;
+            if (codeHits === 0 && keywordHits < 2) return null;
+            return {
+              score: codeHits * 1000 + keywordHits * 40,
+              codeHits,
+              keywordHits,
+            };
           };
 
           for (const table of tables) {
@@ -5908,17 +8233,30 @@ export class MHCAsiaAutomation {
               const link = row.querySelector('a, button, input[type="button"], input[type="submit"]');
               if (!link || !isVisible(link)) continue;
               const txt = row.innerText || row.textContent || '';
-              const sc = scoreText(txt);
-              if (sc > bestScore) {
-                bestScore = sc;
-                best = { row, link, txt: String(txt).trim().slice(0, 120) };
+              const scored = scoreText(txt);
+              if (!scored || scored.score < minScore) continue;
+              if (scored.score > bestScore) {
+                bestScore = scored.score;
+                best = {
+                  row,
+                  link,
+                  txt: String(txt).trim().slice(0, 120),
+                  codeHits: scored.codeHits,
+                  keywordHits: scored.keywordHits,
+                };
               }
             }
           }
 
           if (best && best.link && bestScore >= minScore) {
             (best.link instanceof HTMLElement ? best.link : best.row).click();
-            return { ok: true, score: bestScore, text: best.txt };
+            return {
+              ok: true,
+              score: bestScore,
+              text: best.txt,
+              codeHits: best.codeHits,
+              keywordHits: best.keywordHits,
+            };
           }
           return { ok: false };
         }, { code, keywords, minScore })
@@ -5926,13 +8264,18 @@ export class MHCAsiaAutomation {
 
       if (pickedEval?.ok) {
         this._logStep('Selected diagnosis result (best match)', pickedEval);
-        await this.page.waitForTimeout(500);
-        if (ctx.close) await ctx.close();
-        return true;
+        await this.page.waitForTimeout(500).catch(() => {});
+        if (ctx.close) await ctx.close().catch(() => {});
+        return await finalizeDiagnosisResult({
+          method: 'modal',
+          mode: 'best_match_eval',
+          selection: pickedEval,
+          attemptedSelectors: mButtonSelectors,
+        });
       }
 
       // Locator-based best-match for modal/iframe (and as a fallback for popup/page).
-        const pickedLocator = await (async () => {
+      const pickedLocator = await (async () => {
         const esc = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const buildCodeVariants = (c) => {
           const s = String(c || '').replace(/\s+/g, '').toUpperCase();
@@ -5953,28 +8296,45 @@ export class MHCAsiaAutomation {
         // If no signal at all, avoid selecting a random row.
         if (!codeRegexes.length && !kw.length) return { ok: false };
 
+        const forbidden = /(click on the diagnosis|that contains|starts with|equals to|sort code|next|prev|page|\d+\s*-\s*\d+\s+of\s+\d+)/i;
         const rows = ctx.locator('table tr');
         const rowCount = Math.min(await rows.count().catch(() => 0), 80);
         let bestIdx = -1;
         let bestScore = 0;
         let bestText = '';
+        let bestSignals = null;
 
         const scoreText = (txt) => {
           const t = String(txt || '').toLowerCase();
-          let s = 0;
-          for (const r of codeRegexes) if (r.test(txt)) s += 1000;
-          for (const k of kw) if (k && t.includes(k)) s += 25;
-          return s;
+          if (!t) return null;
+          if (forbidden.test(t)) return null;
+          if (/^\s*(code|description|diagnosis|icd)\b/i.test(t)) return null;
+          if (!/\b[A-Z][0-9]{2,3}(?:\.[0-9A-Z]+)?\b/.test(String(txt || '').toUpperCase())) return null;
+          let codeHits = 0;
+          for (const r of codeRegexes) if (r.test(txt)) codeHits += 1;
+          let keywordHits = 0;
+          for (const k of kw) if (k && t.includes(k)) keywordHits += 1;
+          if (codeHits === 0 && keywordHits < 2) return null;
+          return {
+            score: codeHits * 1000 + keywordHits * 40,
+            codeHits,
+            keywordHits,
+          };
         };
 
         for (let i = 0; i < rowCount; i++) {
           const row = rows.nth(i);
           const txt = await row.innerText().catch(() => '');
-          const sc = scoreText(txt);
-          if (sc > bestScore) {
-            bestScore = sc;
+          const scored = scoreText(txt);
+          if (!scored || scored.score < minScore) continue;
+          if (scored.score > bestScore) {
+            bestScore = scored.score;
             bestIdx = i;
             bestText = String(txt || '').trim().slice(0, 120);
+            bestSignals = {
+              codeHits: scored.codeHits,
+              keywordHits: scored.keywordHits,
+            };
           }
         }
 
@@ -5987,24 +8347,419 @@ export class MHCAsiaAutomation {
           } else {
             await row.click().catch(() => {});
           }
-          return { ok: true, score: bestScore, text: bestText };
+          return {
+            ok: true,
+            score: bestScore,
+            text: bestText,
+            codeHits: bestSignals?.codeHits || 0,
+            keywordHits: bestSignals?.keywordHits || 0,
+          };
         }
         return { ok: false };
       })();
 
       if (pickedLocator?.ok) {
         this._logStep('Selected diagnosis result (best match via locator)', pickedLocator);
-        await ctx.waitForTimeout(500);
-        if (ctx.close) await ctx.close();
-        return true;
+        await ctx.waitForTimeout(500).catch(() => {});
+        if (ctx.close) await ctx.close().catch(() => {});
+        return await finalizeDiagnosisResult({
+          method: 'modal',
+          mode: 'best_match_locator',
+          selection: pickedLocator,
+          attemptedSelectors: mButtonSelectors,
+        });
       }
 
-      this._logStep('Diagnosis search had no confident match; leaving diagnosis blank');
+      // Strict fallback: select only when the row itself looks like a diagnosis and score is meaningful.
+      const pickedFallback = await (async () => {
+        const codeTokens = [code, code?.replace(/\./g, '')]
+          .map((x) => String(x || '').toLowerCase().trim())
+          .filter(Boolean);
+        const kw = Array.isArray(keywords) ? keywords.filter(Boolean).map((k) => String(k).toLowerCase()) : [];
+        const rows = ctx.locator('table tr');
+        const rowCount = Math.min(await rows.count().catch(() => 0), 120);
+        let bestIdx = -1;
+        let bestScore = 0;
+        let bestText = '';
+        const forbidden = /(click on the diagnosis|that contains|starts with|equals to|sort code|next|prev|page|\d+\s*-\s*\d+\s+of\s+\d+)/i;
+        for (let i = 0; i < rowCount; i++) {
+          const row = rows.nth(i);
+          const link = row.locator('a, button, input[type="button"], input[type="submit"]').first();
+          const hasLink = (await link.count().catch(() => 0)) > 0;
+          const rowCanClick = hasLink || (await row.getAttribute('onclick').catch(() => null));
+          if (!rowCanClick) continue;
+          const txt = String((await row.innerText().catch(() => '')) || '').replace(/\s+/g, ' ').trim();
+          if (!txt) continue;
+          if (forbidden.test(txt)) continue;
+          const lower = txt.toLowerCase();
+          const upper = txt.toUpperCase();
+          if (/^\s*(code|description|diagnosis|icd)\b/.test(lower)) continue;
+          const hasIcdCode = /\b[A-Z][0-9]{2,3}(?:\.[0-9A-Z]+)?\b/.test(upper);
+          if (!hasIcdCode) continue;
+          let score = 0;
+          let codeHits = 0;
+          for (const t of codeTokens) {
+            if (!t) continue;
+            if (lower.includes(t)) {
+              score += 200;
+              codeHits += 1;
+            }
+          }
+          let keywordHits = 0;
+          for (const k of kw) {
+            if (!k) continue;
+            if (lower.includes(k)) {
+              score += 40;
+              keywordHits += 1;
+            }
+          }
+          if (codeHits === 0 && keywordHits < 2) continue;
+          if (score < minScore) continue;
+          if (score > bestScore) {
+            bestScore = score;
+            bestIdx = i;
+            bestText = txt.slice(0, 140);
+          }
+        }
+
+        if (bestIdx < 0) return { ok: false };
+        const row = rows.nth(bestIdx);
+        const link = row.locator('a, button, input[type="button"], input[type="submit"]').first();
+        await link.click().catch(() => row.click({ force: true }));
+        return {
+          ok: true,
+          mode: 'best_available_strict',
+          score: bestScore,
+          text: bestText,
+        };
+      })();
+      if (pickedFallback?.ok) {
+        this._logStep('Selected diagnosis result (fallback)', pickedFallback);
+        await ctx.waitForTimeout(500).catch(() => {});
+        if (ctx.close) await ctx.close().catch(() => {});
+        return await finalizeDiagnosisResult({
+          method: 'modal',
+          mode: 'strict_fallback',
+          selection: pickedFallback,
+          attemptedSelectors: mButtonSelectors,
+        });
+      }
+
+      const noMatchSample = await (async () => {
+        try {
+          const rows = ctx.locator('table tr');
+          const rowCount = Math.min(await rows.count().catch(() => 0), 40);
+          const sample = [];
+          for (let i = 0; i < rowCount; i++) {
+            const row = rows.nth(i);
+            const text = String((await row.innerText().catch(() => '')) || '')
+              .replace(/\s+/g, ' ')
+              .trim();
+            if (!text) continue;
+            const link = row.locator('a, button, input[type="button"], input[type="submit"]').first();
+            const hasLink = (await link.count().catch(() => 0)) > 0;
+            const hasIcdLikeCode = /\b[A-Z][0-9]{2,3}(?:\.[0-9A-Z]+)?\b/.test(text.toUpperCase());
+            sample.push({
+              idx: i,
+              hasLink,
+              hasIcdLikeCode,
+              text: text.slice(0, 180),
+            });
+          }
+          return sample;
+        } catch {
+          return [];
+        }
+      })();
+
+      if (noMatchSample.length) {
+        this._logStep('Diagnosis search sample (no confident match)', {
+          searchText,
+          sample: noMatchSample.slice(0, 25),
+        });
+      }
+
+      this._logStep('Diagnosis search had no confident match');
       logger.warn('Could not select diagnosis result');
-      if (ctx.close) await ctx.close();
-      return false;
+      const genericSafePick = await (async () => {
+        const forbidden = /(click on the diagnosis|that contains|starts with|equals to|sort code|next|prev|page|\d+\s*-\s*\d+\s+of\s+\d+)/i;
+        try {
+          const rows = ctx.locator('table tr');
+          const rowCount = Math.min(await rows.count().catch(() => 0), 80);
+          for (let i = 0; i < rowCount; i++) {
+            const row = rows.nth(i);
+            const text = String((await row.innerText().catch(() => '')) || '')
+              .replace(/\s+/g, ' ')
+              .trim();
+            if (!text) continue;
+            if (forbidden.test(text)) continue;
+            if (/^\s*(code|description|diagnosis|icd)\b/i.test(text)) continue;
+            if (!/\b[A-Z][0-9]{2,3}(?:\.[0-9A-Z]+)?\b/.test(text.toUpperCase())) continue;
+            const action = row.locator('a, button, input[type="button"], input[type="submit"]').first();
+            const hasAction = (await action.count().catch(() => 0)) > 0;
+            if (!hasAction) continue;
+            await action.click().catch(async () => {
+              await row.click({ force: true }).catch(() => {});
+            });
+            return { ok: true, idx: i, text: text.slice(0, 180) };
+          }
+        } catch {
+          // ignore
+        }
+        return { ok: false };
+      })();
+      if (genericSafePick?.ok) {
+        this._logStep('Selected diagnosis result (generic safe fallback)', genericSafePick);
+        await ctx.waitForTimeout(500).catch(() => {});
+        if (ctx.close) await ctx.close().catch(() => {});
+        const genericOk = await finalizeDiagnosisResult({
+          method: 'modal',
+          mode: 'generic_safe_fallback',
+          selection: genericSafePick,
+          attemptedSelectors: mButtonSelectors,
+        });
+        if (genericOk) return true;
+      }
+      if (ctx.close) await ctx.close().catch(() => {});
+      if (!allowTextFallback) {
+        this.lastDiagnosisSelection = {
+          ok: false,
+          method: 'modal',
+          diagnosis: { code: code || null, description: desc || null },
+          reason: 'diagnosis_mapping_failed',
+          attemptedSelectors: mButtonSelectors,
+          checkedAt: new Date().toISOString(),
+        };
+        return false;
+      }
+      const fallbackOk = await fillInFormTextFallback(
+        'Diagnosis search had no confident match; using in-form diagnosis fallback'
+      );
+      if (!fallbackOk) {
+        this.lastDiagnosisSelection = {
+          ok: false,
+          method: 'modal',
+          diagnosis: { code: code || null, description: desc || null },
+          reason: 'diagnosis_mapping_failed',
+          attemptedSelectors: mButtonSelectors,
+          checkedAt: new Date().toISOString(),
+        };
+        return false;
+      }
+      return await finalizeDiagnosisResult({
+        method: 'in_form_text_fallback',
+        mode: 'no_confident_match',
+        attemptedSelectors: mButtonSelectors,
+        searchText,
+        searchSample: noMatchSample.slice(0, 25),
+      });
     } catch (error) {
       logger.error('Failed to fill primary diagnosis:', error);
+      this.lastDiagnosisSelection = {
+        ok: false,
+        method: 'modal',
+        diagnosis: {
+          code: diagnosisText && typeof diagnosisText === 'object' ? diagnosisText.code || null : null,
+          description:
+            diagnosisText && typeof diagnosisText === 'object'
+              ? diagnosisText.description || null
+              : String(diagnosisText || '').trim() || null,
+        },
+        reason: `error:${error?.message || 'unknown'}`,
+        checkedAt: new Date().toISOString(),
+      };
+      return false;
+    }
+  }
+
+  /**
+   * Try selecting a drug from the portal master popup via the row "M" button.
+   * This is required to populate hidden drug code/price fields used in claim totals.
+   */
+  async selectDrugFromMaster(drugName, rowIndex = 1) {
+    try {
+      const rawName = String(drugName || '').trim();
+      if (!rawName) return false;
+
+      const cleaned = rawName
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (!cleaned) return false;
+
+      const stop = new Set(['mg', 'ml', 'tab', 'tabs', 'cap', 'caps', 'tablet', 'capsule']);
+      const tokens = cleaned
+        .split(/\s+/)
+        .map((w) => w.trim())
+        .filter((w) => w.length >= 3 && !stop.has(w));
+      const primary = tokens[0] || cleaned.split(/\s+/)[0] || cleaned;
+      const searchTerms = Array.from(
+        new Set([primary, tokens.slice(0, 2).join(' ').trim(), cleaned].map((s) => String(s || '').trim()).filter(Boolean))
+      );
+
+      const popupPromise = this.page.waitForEvent('popup', { timeout: 6000 }).catch(() => null);
+      let clicked = false;
+
+      // Fast path: MHC drug rows expose a dedicated SelectMasterDrug button.
+      const masterButtons = this.page.locator('input[name="SelectMasterDrug"], input[name*="SelectMasterDrug" i]');
+      const masterButtonCount = await masterButtons.count().catch(() => 0);
+      if (masterButtonCount > 0) {
+        const idx = Math.min(Math.max(0, rowIndex - 1), masterButtonCount - 1);
+        const btn = masterButtons.nth(idx);
+        if (await btn.isVisible().catch(() => false)) {
+          await btn.click().catch(() => {});
+          clicked = true;
+        }
+      }
+
+      if (!clicked) {
+        clicked = await this.page
+          .evaluate((targetRowIndex) => {
+          const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+          const isVisible = (el) => {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            if (!style) return false;
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            const rect = el.getBoundingClientRect();
+            return !!rect && rect.width > 0 && rect.height > 0;
+          };
+
+          const tables = Array.from(document.querySelectorAll('table')).filter((t) => /drug\s*name/i.test(norm(t.innerText || '')));
+          const table = tables[0] || null;
+          if (!table) return false;
+
+          const rows = Array.from(table.querySelectorAll('tr')).filter((r) => r.closest('table') === table);
+          const headerIdx = rows.findIndex((r) => /drug\s*name/i.test(norm(r.innerText || '')));
+          if (headerIdx < 0) return false;
+
+          const dataRows = [];
+          for (let i = headerIdx + 1; i < rows.length; i++) {
+            const rowText = norm(rows[i].innerText || '');
+            if (/total\s+drug\s+fee/.test(rowText)) break;
+            if (rows[i].querySelector('input[type="text"], input:not([type]), textarea')) dataRows.push(rows[i]);
+          }
+          const target = dataRows[Math.max(0, Number(targetRowIndex || 1) - 1)];
+          if (!target) return false;
+
+          const pickMasterButton = (root) => {
+            const controls = Array.from(
+              root.querySelectorAll('input[type="button"], input[type="submit"], button')
+            );
+            return (
+              controls.find((el) => {
+                const name = String(el.getAttribute('name') || '').toLowerCase();
+                if (/selectmasterdrug/.test(name)) return true;
+                const value = String(el.getAttribute('value') || el.textContent || '')
+                  .replace(/\s+/g, '')
+                  .toUpperCase();
+                return value === 'M';
+              }) || null
+            );
+          };
+
+          let btn = pickMasterButton(target);
+          if (!btn) {
+            const global = Array.from(document.querySelectorAll('input[name*="SelectMasterDrug" i]'));
+            const idx = Math.max(0, Number(targetRowIndex || 1) - 1);
+            btn = global[idx] || global[0] || null;
+          }
+          if (!btn || !isVisible(btn)) return false;
+          btn.click();
+            return true;
+          },
+          rowIndex)
+          .catch(() => false);
+      }
+
+      if (!clicked) return false;
+
+      const popup = await popupPromise;
+      /** @type {{locator:(sel:string)=>import('@playwright/test').Locator, waitForTimeout:(ms:number)=>Promise<void>, close?:()=>Promise<void>}} */
+      let ctx = null;
+      if (popup) {
+        await popup.waitForLoadState('domcontentloaded', { timeout: 6000 }).catch(() => {});
+        await popup.waitForTimeout(250).catch(() => {});
+        ctx = {
+          locator: (sel) => popup.locator(sel),
+          waitForTimeout: (ms) => popup.waitForTimeout(ms),
+          close: async () => popup.close().catch(() => {}),
+        };
+      } else {
+        await this.page.waitForLoadState('domcontentloaded', { timeout: 4000 }).catch(() => {});
+        await this.page.waitForTimeout(250);
+        ctx = {
+          locator: (sel) => this.page.locator(sel),
+          waitForTimeout: (ms) => this.page.waitForTimeout(ms),
+        };
+      }
+
+      const searchInput = ctx.locator('input[name="keyValue"], input[name*="search" i], input[type="text"]').first();
+      if ((await searchInput.count().catch(() => 0)) === 0) {
+        if (ctx.close) await ctx.close().catch(() => {});
+        return false;
+      }
+
+      const clickSearch = async () => {
+        const btn = ctx.locator('input[name="SearchAction"], input[value*="Search" i], button:has-text("Search"), input[type="submit"]').first();
+        if ((await btn.count().catch(() => 0)) > 0 && (await btn.isVisible().catch(() => false))) {
+          await btn.click().catch(() => {});
+          return;
+        }
+        await searchInput.press('Enter').catch(() => {});
+      };
+
+      const pickResult = async (term) => {
+        const termLower = String(term || '').toLowerCase();
+        const kws = termLower.split(/\s+/).filter((w) => w.length >= 3);
+        const links = ctx.locator('a[onclick*="doSelect"], a[href="#"]');
+        const count = Math.min(await links.count().catch(() => 0), 250);
+        let bestIdx = -1;
+        let bestScore = 0;
+        for (let i = 0; i < count; i++) {
+          const link = links.nth(i);
+          const text = String((await link.innerText().catch(() => '')) || '').replace(/\s+/g, ' ').trim();
+          if (!text) continue;
+          if (/^(next|prev|previous|sort|code|description)$/i.test(text)) continue;
+          if (/click on the drug|click on the medicine|click on the diagnosis/i.test(text)) continue;
+          const rowText = await link
+            .evaluate((el) => String(el.closest('tr')?.innerText || '').replace(/\s+/g, ' ').trim())
+            .catch(() => '');
+          const combined = `${text} ${rowText}`.toLowerCase();
+          let score = 0;
+          for (const kw of kws) if (combined.includes(kw)) score += 40;
+          if (combined.includes(primary)) score += 120;
+          if (score > bestScore) {
+            bestScore = score;
+            bestIdx = i;
+          }
+        }
+        if (bestIdx < 0 || bestScore <= 0) return false;
+        await links.nth(bestIdx).click().catch(() => {});
+        return true;
+      };
+
+      for (const term of searchTerms) {
+        await searchInput.fill(term, { timeout: 4000 }).catch(async () => {
+          await searchInput.click({ timeout: 2000 }).catch(() => {});
+          await searchInput.type(term, { timeout: 4000 }).catch(() => {});
+        });
+        await clickSearch();
+        await ctx.waitForTimeout(900).catch(() => {});
+        const picked = await pickResult(term);
+        if (picked) {
+          await ctx.waitForTimeout(300).catch(() => {});
+          if (ctx.close) await ctx.close().catch(() => {});
+          this._logStep('Drug selected from master popup', { rowIndex, term, drug: rawName.slice(0, 80) });
+          return true;
+        }
+      }
+
+      if (ctx.close) await ctx.close().catch(() => {});
+      return false;
+    } catch (error) {
+      logger.warn('Drug master selection failed', { error: error?.message || String(error) });
       return false;
     }
   }
@@ -6022,6 +8777,19 @@ export class MHCAsiaAutomation {
         logger.warn('Drug name too short, skipping');
         return false;
       }
+
+	      const useMasterFirst = process.env.MHC_DRUG_MASTER_FIRST !== '0';
+	      if (useMasterFirst) {
+	        const selectedFromMaster = await this.selectDrugFromMaster(drugData.name, rowIndex).catch(() => false);
+	        if (selectedFromMaster) {
+            this.lastDrugSelectionByRow[rowIndex] = {
+              fromMaster: true,
+              name: String(drugData.name || '').trim(),
+              checkedAt: new Date().toISOString(),
+            };
+	          return true;
+	        }
+	      }
 
       // Prefer direct fill into the visible "Drug Name" cell for the requested row.
       // This is more reliable than modal selection for our "leave browser open" workflow.
@@ -6273,10 +9041,15 @@ export class MHCAsiaAutomation {
         )
         .catch(() => ({ ok: false, qtyOk: false }));
 
-      if (directFilled?.ok) {
-        this._logStep('Drug name filled directly in drug table', { rowIndex, qtyFilled: directFilled.qtyOk });
-        return true;
-      }
+	      if (directFilled?.ok) {
+	        this._logStep('Drug name filled directly in drug table', { rowIndex, qtyFilled: directFilled.qtyOk });
+          this.lastDrugSelectionByRow[rowIndex] = {
+            fromMaster: false,
+            name: String(drugData.name || '').trim(),
+            checkedAt: new Date().toISOString(),
+          };
+	        return true;
+	      }
 
       // Best-effort: modal selection is highly portal-specific; don't risk filling the wrong field.
       logger.warn(`Could not fill Drug Name row ${rowIndex} (direct fill did not locate the drug table)`);
@@ -6590,6 +9363,254 @@ export class MHCAsiaAutomation {
       .catch(() => false);
 
     if (ok) this._logStep('Drug qty verified', { rowIndex, quantity: qtyValue });
+    return ok;
+  }
+
+  /**
+   * Fill drug pricing fields (unit/unit price/amount) on a specific drug row.
+   * @param {number} rowIndex
+   * @param {{unit?: string|null, quantity?: string|number|null, unitPrice?: string|number|null, amount?: string|number|null}} pricing
+   */
+  async fillDrugPricingFallback(rowIndex = 1, pricing = {}) {
+    const normalizeNumber = (v, decimals = 4) => {
+      if (v === null || v === undefined) return null;
+      const s = String(v).replace(/,/g, '').trim();
+      if (!s) return null;
+      const m = s.match(/-?\d+(?:\.\d+)?/);
+      if (!m) return null;
+      const n = Number.parseFloat(m[0]);
+      if (!Number.isFinite(n)) return null;
+      return String(Number(n.toFixed(decimals)));
+    };
+    const unit = String(pricing?.unit || '').trim().toUpperCase() || null;
+    const qtyValue = normalizeNumber(pricing?.quantity, 4);
+    let unitPriceValue = normalizeNumber(pricing?.unitPrice, 4);
+    let amountValue = normalizeNumber(pricing?.amount, 4);
+    const qtyNum = qtyValue === null ? NaN : Number.parseFloat(qtyValue);
+    const amountNum = amountValue === null ? NaN : Number.parseFloat(amountValue);
+    if ((!unitPriceValue || Number.parseFloat(unitPriceValue) <= 0) && Number.isFinite(amountNum) && amountNum > 0 && Number.isFinite(qtyNum) && qtyNum > 0) {
+      unitPriceValue = String(Number((amountNum / qtyNum).toFixed(4)));
+    }
+    const priceNum = unitPriceValue === null ? NaN : Number.parseFloat(unitPriceValue);
+    if ((!amountValue || Number.parseFloat(amountValue) <= 0) && Number.isFinite(priceNum) && priceNum > 0 && Number.isFinite(qtyNum) && qtyNum > 0) {
+      amountValue = String(Number((priceNum * qtyNum).toFixed(4)));
+    }
+    if (!unit && !unitPriceValue && !amountValue) return false;
+
+    const result = await this.page
+      .evaluate(
+        ({ rowIndex, unit, unitPriceValue, amountValue }) => {
+          const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+          const isVisible = (el) => {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            if (!style) return false;
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            const r = el.getBoundingClientRect();
+            if (!r || r.width <= 0 || r.height <= 0) return false;
+            return true;
+          };
+          const setValue = (el, value) => {
+            if (!el) return false;
+            const val = String(value ?? '').trim();
+            if (!val) return false;
+            const tag = (el.tagName || '').toLowerCase();
+            if (tag === 'select') {
+              const options = Array.from(el.querySelectorAll('option'));
+              const exact = options.find((o) => norm(o.value) === norm(val) || norm(o.textContent) === norm(val));
+              const partial = exact || options.find((o) => norm(o.value).includes(norm(val)) || norm(o.textContent).includes(norm(val)));
+              if (!partial) return false;
+              el.value = partial.value;
+              el.dispatchEvent(new Event('input', { bubbles: true }));
+              el.dispatchEvent(new Event('change', { bubbles: true }));
+              return true;
+            }
+            try {
+              el.readOnly = false;
+              el.disabled = false;
+              el.removeAttribute && el.removeAttribute('readonly');
+              el.removeAttribute && el.removeAttribute('disabled');
+            } catch {
+              // ignore
+            }
+            el.focus && el.focus();
+            el.value = val;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+            el.blur && el.blur();
+            return String(el.value || '').trim().length > 0;
+          };
+
+          const table =
+            document.querySelector('#drugTable') ||
+            Array.from(document.querySelectorAll('table')).find((t) => /drug\s*name/i.test(norm(t.innerText || t.textContent || ''))) ||
+            null;
+          if (!table) return { unitSet: false, priceSet: false, amountSet: false };
+          const rows = Array.from(table.querySelectorAll('tr')).filter((r) => r.closest('table') === table);
+          const headerRow = rows.find((r) => /drug\s*name/i.test(norm(r.innerText || r.textContent || ''))) || null;
+          if (!headerRow) return { unitSet: false, priceSet: false, amountSet: false };
+          const headerIdx = rows.indexOf(headerRow);
+          if (headerIdx < 0) return { unitSet: false, priceSet: false, amountSet: false };
+
+          const dataRows = [];
+          for (let i = headerIdx + 1; i < rows.length; i++) {
+            const text = norm(rows[i].innerText || '');
+            if (/total\s+drug\s+fee/.test(text)) break;
+            if (rows[i].querySelector('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select')) {
+              dataRows.push(rows[i]);
+            }
+          }
+          const row = dataRows[Math.max(0, rowIndex - 1)];
+          if (!row) return { unitSet: false, priceSet: false, amountSet: false };
+
+          const rowInputs = Array.from(
+            row.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea')
+          ).filter((el) => isVisible(el));
+          if (!rowInputs.length) return { unitSet: false, priceSet: false, amountSet: false };
+
+          const idn = (el) => `${el.name || ''} ${el.id || ''}`.toLowerCase();
+          const unitInput =
+            rowInputs.find((el) => {
+              const s = idn(el);
+              return /unit/.test(s) && !/price|qty|quantity|amount|amt|code|claim|total/.test(s);
+            }) || null;
+          const priceInput =
+            rowInputs.find((el) => {
+              const s = idn(el);
+              return /unit\s*price|unitprice|price/.test(s) && !/amount|amt|qty|quantity|claim|total|gst/.test(s);
+            }) || null;
+          const amountInput =
+            rowInputs.find((el) => {
+              const s = idn(el);
+              return /amount|amt/.test(s) && !/claim|total|gst/.test(s);
+            }) || null;
+
+          let unitSet = false;
+          let priceSet = false;
+          let amountSet = false;
+          if (unit && unitInput) unitSet = setValue(unitInput, unit);
+          if (unitPriceValue && priceInput) priceSet = setValue(priceInput, unitPriceValue);
+          if (amountValue && amountInput) amountSet = setValue(amountInput, amountValue);
+
+          const priceFinal = priceInput ? String(priceInput.value || '').trim() : '';
+          const amountFinal = amountInput ? String(amountInput.value || '').trim() : '';
+          return {
+            unitSet,
+            priceSet,
+            amountSet,
+            priceFinal,
+            amountFinal,
+            unitField: unitInput ? { name: unitInput.name || '', id: unitInput.id || '' } : null,
+            priceField: priceInput ? { name: priceInput.name || '', id: priceInput.id || '' } : null,
+            amountField: amountInput ? { name: amountInput.name || '', id: amountInput.id || '' } : null,
+          };
+        },
+        { rowIndex, unit, unitPriceValue, amountValue }
+      )
+      .catch(() => ({ unitSet: false, priceSet: false, amountSet: false }));
+
+    if (result?.priceSet || result?.amountSet || result?.unitSet) {
+      this._logStep('Drug pricing filled (fallback)', {
+        rowIndex,
+        unit: unit || null,
+        unitPrice: unitPriceValue || null,
+        amount: amountValue || null,
+        result,
+      });
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Verify unit price/amount fields on a drug row.
+   * @param {number} rowIndex
+   * @param {{unitPrice?: string|number|null, amount?: string|number|null}} pricing
+   */
+  async verifyDrugPricing(rowIndex = 1, pricing = {}) {
+    const normalizeNumber = (v) => {
+      if (v === null || v === undefined) return null;
+      const s = String(v).replace(/,/g, '').trim();
+      if (!s) return null;
+      const m = s.match(/-?\d+(?:\.\d+)?/);
+      if (!m) return null;
+      const n = Number.parseFloat(m[0]);
+      if (!Number.isFinite(n)) return null;
+      return n;
+    };
+    const expectedPrice = normalizeNumber(pricing?.unitPrice);
+    const expectedAmount = normalizeNumber(pricing?.amount);
+    if (!Number.isFinite(expectedPrice) && !Number.isFinite(expectedAmount)) return false;
+
+    const ok = await this.page
+      .evaluate(
+        ({ rowIndex, expectedPrice, expectedAmount }) => {
+          const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+          const isVisible = (el) => {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            if (!style) return false;
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            const r = el.getBoundingClientRect();
+            return !!r && r.width > 0 && r.height > 0;
+          };
+          const asNumber = (v) => {
+            const s = String(v || '').replace(/,/g, '').trim();
+            const m = s.match(/-?\d+(?:\.\d+)?/);
+            if (!m) return NaN;
+            return Number.parseFloat(m[0]);
+          };
+          const same = (a, b) => Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) <= 0.05;
+
+          const table =
+            document.querySelector('#drugTable') ||
+            Array.from(document.querySelectorAll('table')).find((t) => /drug\s*name/i.test(norm(t.innerText || t.textContent || ''))) ||
+            null;
+          if (!table) return false;
+          const rows = Array.from(table.querySelectorAll('tr')).filter((r) => r.closest('table') === table);
+          const headerRow = rows.find((r) => /drug\s*name/i.test(norm(r.innerText || r.textContent || ''))) || null;
+          if (!headerRow) return false;
+          const headerIdx = rows.indexOf(headerRow);
+          if (headerIdx < 0) return false;
+
+          const dataRows = [];
+          for (let i = headerIdx + 1; i < rows.length; i++) {
+            const text = norm(rows[i].innerText || '');
+            if (/total\s+drug\s+fee/.test(text)) break;
+            if (rows[i].querySelector('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select')) {
+              dataRows.push(rows[i]);
+            }
+          }
+          const row = dataRows[Math.max(0, rowIndex - 1)];
+          if (!row) return false;
+
+          const rowInputs = Array.from(
+            row.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea')
+          ).filter((el) => isVisible(el));
+          const idn = (el) => `${el.name || ''} ${el.id || ''}`.toLowerCase();
+          const priceInput =
+            rowInputs.find((el) => {
+              const s = idn(el);
+              return /unit\s*price|unitprice|price/.test(s) && !/amount|amt|qty|quantity|claim|total|gst/.test(s);
+            }) || null;
+          const amountInput =
+            rowInputs.find((el) => {
+              const s = idn(el);
+              return /amount|amt/.test(s) && !/claim|total|gst/.test(s);
+            }) || null;
+
+          const actualPrice = priceInput ? asNumber(priceInput.value) : NaN;
+          const actualAmount = amountInput ? asNumber(amountInput.value) : NaN;
+
+          if (Number.isFinite(expectedPrice) && !same(actualPrice, expectedPrice)) return false;
+          if (Number.isFinite(expectedAmount) && !same(actualAmount, expectedAmount)) return false;
+          return true;
+        },
+        { rowIndex, expectedPrice, expectedAmount }
+      )
+      .catch(() => false);
+
+    if (ok) this._logStep('Drug pricing verified', { rowIndex, unitPrice: expectedPrice ?? null, amount: expectedAmount ?? null });
     return ok;
   }
 
@@ -7538,15 +10559,25 @@ export class MHCAsiaAutomation {
   async selectDiagnosis(searchTerm) {
     try {
       this._logStep('Select diagnosis from dropdown', { searchTerm });
+      this.lastDiagnosisSelection = {
+        ok: false,
+        method: 'dropdown',
+        searchTerm,
+        reason: 'not_attempted',
+        checkedAt: new Date().toISOString(),
+      };
       
       const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
       const terms = [];
       let codeOnly = null;
       let descOnly = null;
+      let preferredValue = null;
       if (searchTerm && typeof searchTerm === 'object') {
         const code = String(searchTerm.code || '').trim();
         const desc = String(searchTerm.description || '').trim();
+        const valueRaw = String(searchTerm.value || searchTerm.selectedValue || '').trim();
+        if (valueRaw) preferredValue = valueRaw;
         if (code) {
           codeOnly = code;
           terms.push(code);
@@ -7564,6 +10595,13 @@ export class MHCAsiaAutomation {
       const primary = terms.find((t) => t && t.length >= 2) || '';
       if (!primary) {
         logger.warn('Search term too short');
+        this.lastDiagnosisSelection = {
+          ok: false,
+          method: 'dropdown',
+          searchTerm,
+          reason: 'search_term_too_short',
+          checkedAt: new Date().toISOString(),
+        };
         return false;
       }
 
@@ -7588,19 +10626,42 @@ export class MHCAsiaAutomation {
       };
 
       const codeVariants = codeOnly ? buildCodeVariants(codeOnly) : [];
+      const normalizeCode = (value) =>
+        String(value || '')
+          .toUpperCase()
+          .replace(/[^A-Z0-9.]/g, '');
+      const extractCode = (value) => {
+        const m = normalizeCode(value).match(/[A-Z]\d{2,3}(?:\.[0-9A-Z]{1,4})?/);
+        return m ? m[0] : '';
+      };
+      const requestedCode = extractCode(codeOnly || '');
+      const requestedCodePlain = requestedCode.replace(/\./g, '');
       for (const v of codeVariants) {
         // Match code at start of option label like "S635 - ..." or "S63.5 - ..."
         searchPatterns.push(new RegExp(`\\b${escapeRegExp(v)}\\b`, 'i'));
+        // Also accept more specific descendants (e.g. M25.51 should match M25.511).
+        searchPatterns.push(new RegExp(`\\b${escapeRegExp(v)}\\d*\\b`, 'i'));
         if (/^[A-Z]\d{2,3}\d+$/i.test(v)) {
           // Also allow a dot between base and suffix: S635 -> S63.5
           const base = v.slice(0, 3);
           const rest = v.slice(3);
           searchPatterns.push(new RegExp(`\\b${escapeRegExp(base)}\\.${escapeRegExp(rest)}\\b`, 'i'));
+          searchPatterns.push(new RegExp(`\\b${escapeRegExp(base)}\\.${escapeRegExp(rest)}\\d*\\b`, 'i'));
         }
       }
 
       const normalizeDescKeywords = (desc) => {
         const stop = new Set([
+          'the',
+          'and',
+          'for',
+          'of',
+          'in',
+          'on',
+          'to',
+          'at',
+          'from',
+          'due',
           'sprain',
           'strain',
           'pain',
@@ -7617,18 +10678,55 @@ export class MHCAsiaAutomation {
           'unsp',
           'site',
           'body',
+          'left',
+          'right',
+          'bilateral',
         ]);
         return String(desc || '')
           .toLowerCase()
           .replace(/[^a-z0-9\s]/g, ' ')
           .split(/\s+/)
-          .filter((w) => w.length >= 4)
+          .filter((w) => w.length >= 3)
+          .filter((w) => !/\d/.test(w))
           .filter((w) => !stop.has(w));
       };
-      const descKeywords = descOnly ? normalizeDescKeywords(descOnly) : [];
+      const descForScoring = String(descOnly || '')
+        .replace(/^[A-Z]\d{2,3}(?:\.[0-9A-Z]{1,4})?\s*[-: ]\s*/i, '')
+        .trim();
+      const descKeywords = descForScoring ? normalizeDescKeywords(descForScoring) : [];
+      const descNorm = String(descForScoring || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      const sideToken = descNorm.match(/\b(left|right|bilateral)\b/)?.[1] || '';
+      const sideWordSet = new Set(['left', 'right', 'bilateral']);
+      const weakBodyTokens = new Set(['joint', 'region', 'site', 'part', 'acute', 'chronic', 'unspecified']);
+      const knownBodyParts = [
+        'shoulder',
+        'knee',
+        'ankle',
+        'wrist',
+        'elbow',
+        'hip',
+        'back',
+        'neck',
+        'foot',
+        'heel',
+        'hand',
+      ];
+      const descWords = descNorm.split(' ').filter(Boolean);
+      const lexicalKeywords = descKeywords.filter(
+        (k) => !weakBodyTokens.has(k) && /^[a-z]+$/.test(k) && !sideWordSet.has(k)
+      );
+      const bodyPartToken =
+        knownBodyParts.find((k) => descWords.includes(k) || descNorm.includes(k)) ||
+        lexicalKeywords.find((k) => knownBodyParts.includes(k)) ||
+        '';
+      const bodyPhrase = sideToken && bodyPartToken ? `${sideToken} ${bodyPartToken}` : bodyPartToken;
       
       // Conservative default: avoid false positives; leave blank if below threshold.
-      const dropdownMinScore = Number(process.env.MHC_DIAG_MIN_SCORE_DROPDOWN || '50');
+      const dropdownMinScore = Number(process.env.MHC_DIAG_MIN_SCORE_DROPDOWN || '25');
       // Try the diagnosis dropdown
       const diagSelectors = [
         'select[name="diagnosisPriIdTemp"]',
@@ -7649,30 +10747,106 @@ export class MHCAsiaAutomation {
             
             // 1) Prefer description-based matching when we have a description.
             let targetOption = null;
-            if (descOnly) {
-              const desc = String(descOnly).toLowerCase();
+            if (preferredValue) {
+              targetOption =
+                options.find((o) => String(o?.value || '').trim() === preferredValue) || null;
+              if (targetOption) {
+                this._logStep('Diagnosis selected by exact option value hint', {
+                  value: preferredValue,
+                  label: String(targetOption?.label || '').slice(0, 80),
+                });
+              }
+            }
+            if (!targetOption && descOnly) {
+              const desc = descNorm;
               const keywords = descKeywords;
               const score = (opt) => {
                 const l = String((opt?.label || '') + ' ' + (opt?.value || '')).toLowerCase();
+                const optionCode = extractCode(`${opt?.label || ''} ${opt?.value || ''}`);
+                const optionCodePlain = optionCode.replace(/\./g, '');
                 let s = 0;
-                for (const k of keywords) if (l.includes(k)) s += 10;
+                if (desc && l.includes(desc)) s += 260;
+                if (bodyPhrase && l.includes(bodyPhrase)) s += 180;
+                if (bodyPartToken && l.includes(bodyPartToken)) s += 120;
+                if (requestedCodePlain && optionCodePlain) {
+                  if (optionCodePlain === requestedCodePlain) s += 100;
+                  else if (optionCodePlain.startsWith(requestedCodePlain)) s += 70;
+                  else if (requestedCodePlain.startsWith(optionCodePlain)) s += 50;
+                  else if (requestedCodePlain.slice(0, 3) && optionCodePlain.startsWith(requestedCodePlain.slice(0, 3))) s += 20;
+                }
+                for (const k of keywords) if (l.includes(k)) s += 30;
                 return s;
               };
 
-              if (keywords.length === 0) {
-                this._logStep('Diagnosis scoring skipped (no meaningful keywords)', { desc: desc.slice(0, 120) });
-              } else {
-                let best = null;
-                let bestScore = 0;
-                for (const o of options) {
-                  const sc = score(o);
-                  if (sc > bestScore) {
-                    bestScore = sc;
-                    best = o;
-                  }
+              let best = null;
+              let bestScore = 0;
+              for (const o of options) {
+                const sc = score(o);
+                if (sc > bestScore) {
+                  bestScore = sc;
+                  best = o;
                 }
-              if (best && bestScore >= dropdownMinScore) targetOption = best;
+              }
+              if (best && bestScore >= dropdownMinScore) {
+                const bestCode = extractCode(`${best?.label || ''} ${best?.value || ''}`);
+                const bestCodePlain = String(bestCode || '').replace(/\./g, '');
+                const requestedPrefix = requestedCodePlain ? requestedCodePlain.slice(0, 3) : '';
+                const bestPrefix = bestCodePlain ? bestCodePlain.slice(0, 3) : '';
+                const prefixCompatible =
+                  !requestedCodePlain ||
+                  (!!bestCodePlain &&
+                    ((requestedPrefix && bestCodePlain.startsWith(requestedPrefix)) ||
+                      (bestPrefix && requestedCodePlain.startsWith(bestPrefix))));
+                const bodyCompatible =
+                  !bodyPartToken ||
+                  String(best?.label || '')
+                    .toLowerCase()
+                    .includes(bodyPartToken);
+                if (prefixCompatible || bodyCompatible) {
+                  targetOption = best;
+                } else {
+                  this._logStep('Rejected dropdown best-candidate as implausible', {
+                    requestedCode,
+                    requestedDesc: descNorm.slice(0, 80),
+                    bestLabel: String(best?.label || '').slice(0, 80),
+                    bestScore,
+                  });
+                }
+              }
+              if (!targetOption && keywords.length === 0 && desc) {
+                this._logStep('Diagnosis scoring had no keyword hits; relying on phrase/code weights', {
+                  desc: desc.slice(0, 120),
+                  bestScore,
+                });
+              }
             }
+
+            // 1.5) If description scoring didn't produce a match, perform a code-only closest match.
+            if (!targetOption && requestedCodePlain) {
+              let best = null;
+              let bestScore = 0;
+              for (const o of options) {
+                const optionCode = extractCode(`${o?.label || ''} ${o?.value || ''}`);
+                const optionCodePlain = optionCode.replace(/\./g, '');
+                if (!optionCodePlain) continue;
+                let score = 0;
+                if (optionCodePlain === requestedCodePlain) score = 1000;
+                else if (optionCodePlain.startsWith(requestedCodePlain)) score = 900;
+                else if (requestedCodePlain.startsWith(optionCodePlain)) score = 700;
+                else if (requestedCodePlain.slice(0, 3) && optionCodePlain.startsWith(requestedCodePlain.slice(0, 3))) score = 200;
+                if (score > bestScore) {
+                  bestScore = score;
+                  best = o;
+                }
+              }
+              if (best && bestScore >= 700) {
+                targetOption = best;
+                this._logStep('Diagnosis selected by code-prefix match', {
+                  requestedCode,
+                  selected: String(best.label || '').slice(0, 80),
+                  score: bestScore,
+                });
+              }
             }
 
             // 2) If still no match, try code patterns (fallback).
@@ -7684,9 +10858,45 @@ export class MHCAsiaAutomation {
             }
             
             if (targetOption) {
+              const candidateLabel = String(targetOption?.label || '');
+              const candidateValue = String(targetOption?.value || '');
+              const candidateCode = extractCode(`${candidateLabel} ${candidateValue}`);
+              const candidateCodePlain = candidateCode.replace(/\./g, '');
+              const requestedPrefix = requestedCodePlain ? requestedCodePlain.slice(0, 3) : '';
+              const candidatePrefix = candidateCodePlain ? candidateCodePlain.slice(0, 3) : '';
+              const candidatePrefixMismatch =
+                !!requestedCodePlain &&
+                !!candidateCodePlain &&
+                ((requestedPrefix && !candidateCodePlain.startsWith(requestedPrefix)) ||
+                  (candidatePrefix && !requestedCodePlain.startsWith(candidatePrefix)));
+              if (candidatePrefixMismatch && bodyPartToken) {
+                const candidateHasBody = candidateLabel.toLowerCase().includes(bodyPartToken);
+                if (!candidateHasBody) {
+                  this._logStep('Rejected dropdown selection (code/body mismatch)', {
+                    requestedCode,
+                    requestedBodyPart: bodyPartToken,
+                    selectedLabel: candidateLabel.slice(0, 80),
+                    selectedCode: candidateCode,
+                  });
+                  targetOption = null;
+                }
+              }
+            }
+
+            if (targetOption) {
               await select.selectOption({ value: targetOption.value });
               this._logStep('Diagnosis selected', { value: targetOption.value, label: targetOption.label });
-              return true;
+              const resolution = await this.getDiagnosisResolutionState({ waitMs: 300 });
+              this.lastDiagnosisSelection = {
+                ok: !!resolution?.resolved,
+                method: 'dropdown',
+                searchTerm,
+                selected: { value: targetOption.value, label: targetOption.label },
+                reason: resolution?.resolved ? null : 'diagnosis_mapping_failed',
+                resolution,
+                checkedAt: new Date().toISOString(),
+              };
+              return !!resolution?.resolved;
             }
           }
         } catch (e) {
@@ -7719,13 +10929,38 @@ export class MHCAsiaAutomation {
       
       if (selected.success) {
         this._logStep('Diagnosis selected via JavaScript', selected);
-        return true;
+        const resolution = await this.getDiagnosisResolutionState({ waitMs: 300 });
+        this.lastDiagnosisSelection = {
+          ok: !!resolution?.resolved,
+          method: 'dropdown_js',
+          searchTerm,
+          selected,
+          reason: resolution?.resolved ? null : 'diagnosis_mapping_failed',
+          resolution,
+          checkedAt: new Date().toISOString(),
+        };
+        return !!resolution?.resolved;
       }
 
       logger.warn('Diagnosis not found matching:', searchTerm);
+      this.lastDiagnosisSelection = {
+        ok: false,
+        method: 'dropdown',
+        searchTerm,
+        reason: 'no_dropdown_match',
+        optionsSample: lastOptionsSample || [],
+        checkedAt: new Date().toISOString(),
+      };
       return false;
     } catch (error) {
       logger.error('Failed to select diagnosis:', error);
+      this.lastDiagnosisSelection = {
+        ok: false,
+        method: 'dropdown',
+        searchTerm,
+        reason: `error:${error?.message || 'unknown'}`,
+        checkedAt: new Date().toISOString(),
+      };
       return false;
     }
   }
