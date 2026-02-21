@@ -1,0 +1,112 @@
+{
+  "flowName": "Flow 2 Visit Details Extraction",
+  "generatedAt": "2026-02-20T16:30:17.350Z",
+  "scope": {
+    "from": "2026-02-13",
+    "to": "2026-02-13",
+    "date": null,
+    "payType": "Portal scope",
+    "portalTargets": "MHC,MHCAXA,AIA,AIACLIENT,AVIVA,SINGLIFE,FULLERT,IHP,PARKWAY,ALL,ALLIMED,ALLIANZ,ALLIANCE,GE,NTUC_IM,TOKIOM,ALLIANC,ALLSING,AXAMED,PRUDEN",
+    "visitIds": null
+  },
+  "totals": {
+    "total_candidates": 9,
+    "to_process": 0,
+    "completed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "skipped_precheck": 9
+  },
+  "rows": [
+    {
+      "date": "2026-02-13",
+      "patientName": "MUHAMMAD FIRDAUS BIN JUMAT",
+      "nric": "S8314991D",
+      "payType": "IHP",
+      "portal": "IHP",
+      "status": "skipped",
+      "diagnosisStatus": "resolved",
+      "notes": "already_completed"
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "LEONG JIE XIANG",
+      "nric": "S9377992D",
+      "payType": "FULLERT",
+      "portal": "Fullerton",
+      "status": "skipped",
+      "diagnosisStatus": "ambiguous",
+      "notes": "already_completed"
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "HO NGAI LEONG",
+      "nric": "S7712316D",
+      "payType": "MHC",
+      "portal": "MHC Asia",
+      "status": "skipped",
+      "diagnosisStatus": "fallback_low_confidence",
+      "notes": "already_completed"
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "WOO CHERN SEE",
+      "nric": "T0801699I",
+      "payType": "ALLIANC",
+      "portal": "Alliance Medinet",
+      "status": "skipped",
+      "diagnosisStatus": "resolved",
+      "notes": "already_completed (attempts=1)"
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "LIM KIM HONG",
+      "nric": "S2569642E",
+      "payType": "IHP",
+      "portal": "IHP",
+      "status": "skipped",
+      "diagnosisStatus": "resolved",
+      "notes": "already_completed"
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "TAN YE CHIEN JOYCE",
+      "nric": "S7401529H",
+      "payType": "FULLERT",
+      "portal": "Fullerton",
+      "status": "skipped",
+      "diagnosisStatus": "ambiguous",
+      "notes": "already_completed"
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "GOH YIH EN GERMAINE",
+      "nric": "S9802259G",
+      "payType": "IHP",
+      "portal": "IHP",
+      "status": "skipped",
+      "diagnosisStatus": "missing",
+      "notes": "already_completed"
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "YEE JUNG YIEN VICTOR",
+      "nric": "S7088208F",
+      "payType": "FULLERT",
+      "portal": "Fullerton",
+      "status": "skipped",
+      "diagnosisStatus": "resolved",
+      "notes": "already_completed"
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "CHEN SIWEI",
+      "nric": "S8663145H",
+      "payType": "ALL",
+      "portal": "iXchange",
+      "status": "skipped",
+      "diagnosisStatus": "resolved",
+      "notes": "already_completed"
+    }
+  ]
+}

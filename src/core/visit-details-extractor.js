@@ -583,9 +583,9 @@ export class VisitDetailsExtractor {
     if (!enabled) return null;
 
     return {
-      code: 'R69',
-      description: 'Illness, unspecified',
-      reason: 'generic_fallback_r69',
+      code: 'R05',
+      description: 'Cough',
+      reason: 'generic_fallback_cough',
     };
   }
 

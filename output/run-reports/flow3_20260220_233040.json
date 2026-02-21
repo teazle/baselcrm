@@ -1,0 +1,92 @@
+{
+  "flowName": "Flow 3 Claim Submission",
+  "generatedAt": "2026-02-20T16:30:40.572Z",
+  "scope": {
+    "from": "2026-02-13",
+    "to": "2026-02-13",
+    "date": null,
+    "payType": "All",
+    "portalTargets": "Portal scope",
+    "visitIds": null
+  },
+  "totals": {
+    "total": 7,
+    "submitted": 0,
+    "drafts": 0,
+    "filled_only": 0,
+    "errors": 0,
+    "not_started": 7
+  },
+  "rows": [
+    {
+      "date": "2026-02-13",
+      "patientName": "MUHAMMAD FIRDAUS BIN JUMAT",
+      "nric": "S8314991D",
+      "payType": "IHP",
+      "portal": "IHP",
+      "status": "not_started",
+      "diagnosisStatus": "resolved",
+      "notes": "IHP portal submit service is selected but automation is not implemented yet"
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "LEONG JIE XIANG",
+      "nric": "S9377992D",
+      "payType": "FULLERT",
+      "portal": "Fullerton",
+      "status": "not_started",
+      "diagnosisStatus": "ambiguous",
+      "notes": "Fullerton portal submit service is selected but automation is not implemented yet"
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "LIM KIM HONG",
+      "nric": "S2569642E",
+      "payType": "IHP",
+      "portal": "IHP",
+      "status": "not_started",
+      "diagnosisStatus": "resolved",
+      "notes": "IHP portal submit service is selected but automation is not implemented yet"
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "TAN YE CHIEN JOYCE",
+      "nric": "S7401529H",
+      "payType": "FULLERT",
+      "portal": "Fullerton",
+      "status": "not_started",
+      "diagnosisStatus": "ambiguous",
+      "notes": "Fullerton portal submit service is selected but automation is not implemented yet"
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "GOH YIH EN GERMAINE",
+      "nric": "S9802259G",
+      "payType": "IHP",
+      "portal": "IHP",
+      "status": "not_started",
+      "diagnosisStatus": "missing",
+      "notes": "IHP portal submit service is selected but automation is not implemented yet"
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "YEE JUNG YIEN VICTOR",
+      "nric": "S7088208F",
+      "payType": "FULLERT",
+      "portal": "Fullerton",
+      "status": "not_started",
+      "diagnosisStatus": "resolved",
+      "notes": "Fullerton portal submit service is selected but automation is not implemented yet"
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "CHEN SIWEI",
+      "nric": "S8663145H",
+      "payType": "ALL",
+      "portal": "iXchange",
+      "status": "not_started",
+      "diagnosisStatus": "resolved",
+      "notes": "IXCHANGE portal submit service is selected but automation is not implemented yet"
+    }
+  ]
+}

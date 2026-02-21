@@ -10,44 +10,87 @@ jobs:
   health-check:
     name: Check EC2 Health
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
-      - name: Check EC2 Connection
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: ${{ secrets.EC2_PORT || 22 }}
-          script: |
-            echo "🏥 Health Check - $(date)"
-            echo ""
+      - name: Check EC2 Connection (with retries)
+        shell: bash
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_PORT: ${{ secrets.EC2_PORT || 22 }}
+          EC2_DEPLOY_PATH: ${{ secrets.EC2_DEPLOY_PATH || '~/Baselrpacrm' }}
+        run: |
+          set -euo pipefail
 
-            # Check disk space
-            echo "💾 Disk Space:"
-            df -h | grep -E '^/dev|Filesystem'
-            echo ""
+          if [ -z "${EC2_HOST}" ] || [ -z "${EC2_USERNAME}" ] || [ -z "${EC2_SSH_KEY}" ]; then
+            echo "❌ Missing required EC2 secrets (EC2_HOST, EC2_USERNAME, EC2_SSH_KEY)."
+            exit 1
+          fi
 
-            # Check memory
-            echo "🧠 Memory:"
-            free -h
-            echo ""
+          # Write private key for SSH client
+          KEY_FILE="${RUNNER_TEMP}/ec2_healthcheck_key"
+          umask 077
+          printf '%s\n' "${EC2_SSH_KEY}" | tr -d '\r' > "${KEY_FILE}"
+          chmod 600 "${KEY_FILE}"
 
-            # Check PM2 processes
-            if command -v pm2 &> /dev/null; then
-              echo "🔄 PM2 Status:"
-              pm2 status
-              echo ""
+          # Retry raw TCP reachability first to handle transient network blips.
+          CONNECTED=false
+          for attempt in 1 2 3; do
+            echo "🔌 Reachability check ${attempt}/3 to EC2 SSH port..."
+            if timeout 10 bash -c "cat < /dev/null > /dev/tcp/${EC2_HOST}/${EC2_PORT}" 2>/dev/null; then
+              CONNECTED=true
+              echo "✅ TCP connection to ${EC2_HOST}:${EC2_PORT} succeeded."
+              break
             fi
+            sleep 15
+          done
 
-            # Check if automation directory exists
-            DEPLOY_PATH="${{ secrets.EC2_DEPLOY_PATH || '~/Baselrpacrm' }}"
-            DEPLOY_PATH="${DEPLOY_PATH/#\~/$HOME}"
-            if [ -d "$DEPLOY_PATH" ]; then
-              echo "✅ Project directory exists: $DEPLOY_PATH"
-            else
-              echo "❌ Project directory not found: $DEPLOY_PATH"
-            fi
+          if [ "${CONNECTED}" != "true" ]; then
+            echo "❌ Cannot reach EC2 SSH endpoint from GitHub runner (${EC2_HOST}:${EC2_PORT})."
+            echo "Likely causes: EC2 stopped, wrong EC2_HOST/EC2_PORT, or AWS security rules blocking GitHub-hosted runners."
+            exit 1
+          fi
 
+          ssh \
+            -i "${KEY_FILE}" \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -o ConnectTimeout=20 \
+            -o ServerAliveInterval=15 \
+            -o ServerAliveCountMax=3 \
+            -p "${EC2_PORT}" \
+            "${EC2_USERNAME}@${EC2_HOST}" <<EOF
+          echo "🏥 Health Check - \$(date)"
+          echo ""
+
+          # Check disk space
+          echo "💾 Disk Space:"
+          df -h | grep -E '^/dev|Filesystem'
+          echo ""
+
+          # Check memory
+          echo "🧠 Memory:"
+          free -h
+          echo ""
+
+          # Check PM2 processes
+          if command -v pm2 &> /dev/null; then
+            echo "🔄 PM2 Status:"
+            pm2 status
             echo ""
-            echo "✅ Health check complete"
+          fi
+
+          # Check if automation directory exists
+          DEPLOY_PATH="${EC2_DEPLOY_PATH}"
+          DEPLOY_PATH="\${DEPLOY_PATH/#\~/\$HOME}"
+          if [ -d "\$DEPLOY_PATH" ]; then
+            echo "✅ Project directory exists: \$DEPLOY_PATH"
+          else
+            echo "❌ Project directory not found: \$DEPLOY_PATH"
+          fi
+
+          echo ""
+          echo "✅ Health check complete"
+          EOF

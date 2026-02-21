@@ -1,0 +1,702 @@
+{
+  "flowName": "Flow 1 Queue Extraction",
+  "generatedAt": "2026-02-20T17:39:12.557Z",
+  "scope": {
+    "from": "2026-02-13",
+    "to": "2026-02-13",
+    "date": null,
+    "payType": "All",
+    "portalTargets": "N/A",
+    "visitIds": "N/A"
+  },
+  "totals": {
+    "total_dates": 1,
+    "successful_dates": 1,
+    "failed_dates": 0,
+    "skipped_dates": 0,
+    "extracted_rows": 68,
+    "saved_rows": 68
+  },
+  "rows": [
+    {
+      "date": "2026-02-13",
+      "patientName": "SATISH CHANDRA ASHA RAO",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "SCHAEFER LISA-MARIE ULRIKE MARGARETE",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "LIM EH HONG DERRICK",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "LIM KIM HONG",
+      "nric": "-",
+      "payType": "IHP",
+      "portal": "IHP",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "RICKY NG KIAN HIN",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "TEE WAN WEN",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "TAN SEE PEI",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "GOH YIH EN GERMAINE",
+      "nric": "-",
+      "payType": "IHP",
+      "portal": "IHP",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "GOH YIH EN GERMAINE",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "LIM KIM HONG",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "CHEN SIWEI",
+      "nric": "-",
+      "payType": "ALL",
+      "portal": "iXchange",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "PARFENOVA ANNA",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "RAUTIAINEN JANI ANTERO",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "CHEA SREY",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "SCHECHTER ANITA",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "LOO AH LEK PETER @ LOH AH LAK",
+      "nric": "-",
+      "payType": "MIXED",
+      "portal": "MIXED",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "MARIA SARI CSAPO",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "FARHANA PARVIN",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "CHEN SIWEI",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "NG CHO HONG",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "CAO ERIC WEI",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "LEONG JIE XIANG",
+      "nric": "-",
+      "payType": "FULLERT",
+      "portal": "Fullerton",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "TEO CHRISTINA",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "MUNIR LIAO",
+      "nric": "-",
+      "payType": "-",
+      "portal": "UNKNOWN",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "VIMALA DEVI RAO",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "HEE XIAO JIE",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "AMORES JULIAN EYMARD RAPISURA",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "GAO YUAN",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "TAN YE CHIEN JOYCE",
+      "nric": "-",
+      "payType": "FULLERT",
+      "portal": "Fullerton",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "WOO CHERN SEE",
+      "nric": "-",
+      "payType": "ALLIANC",
+      "portal": "Alliance Medinet",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "YAP POH CHOO",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "TAY PATRICIA",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "LAU ONN TAI",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "TAN YE CHIEN JOYCE",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "HE ZHUBING",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "REBECCA ELIZABETH BLUNT",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "SCHECHTER ANITA",
+      "nric": "-",
+      "payType": "-",
+      "portal": "UNKNOWN",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "LOW ENG HAN",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "NGAU SENG KHENG",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "LAU ONN TAI",
+      "nric": "-",
+      "payType": "-",
+      "portal": "UNKNOWN",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "OUYANG WENBO",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "CHAN CHEE HOE",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "PHANG HUI LI",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "MUHAMMAD FIRDAUS BIN JUMAT",
+      "nric": "-",
+      "payType": "IHP",
+      "portal": "IHP",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "TAN XAVIER",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "Polly Kang",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "MUHAMMAD FIRDAUS BIN JUMAT",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "SIM SOK PING",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "EL RHAZI AYA",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "PARFENOVA ANNA",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "JAMES LOCKHART",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "SAHOTA VICTORIA EMMA AUGUSTA",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "YIM AI LIN",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "NG CHO HONG",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "HO NGAI LEONG",
+      "nric": "-",
+      "payType": "MHC",
+      "portal": "MHC Asia",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "HEGER RIVA",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "FAYE NG",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "LEE JAYWON",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "YEE JUNG YIEN VICTOR",
+      "nric": "-",
+      "payType": "FULLERT",
+      "portal": "Fullerton",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "LIM WEI YI",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "TOO LAI TING CANDICE",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "REBECCA LEE BERGER",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "CHUA WEI LOON ANDRE",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "TAN XAVIER",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "TAN XAVIER",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "TAN XAVIER",
+      "nric": "-",
+      "payType": "-",
+      "portal": "UNKNOWN",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "YEE JUNG YIEN VICTOR",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    },
+    {
+      "date": "2026-02-13",
+      "patientName": "TAN WEE PENG",
+      "nric": "-",
+      "payType": "CREDIT CARD",
+      "portal": "CREDIT CARD",
+      "status": "saved",
+      "diagnosisStatus": "-",
+      "notes": ""
+    }
+  ]
+}

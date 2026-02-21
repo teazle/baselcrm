@@ -1,0 +1,32 @@
+{
+  "flowName": "Flow 1 Queue Extraction",
+  "generatedAt": "2026-02-20T16:30:16.355Z",
+  "scope": {
+    "from": "2026-02-13",
+    "to": "2026-02-13",
+    "date": null,
+    "payType": "All",
+    "portalTargets": "N/A",
+    "visitIds": "N/A"
+  },
+  "totals": {
+    "total_dates": 0,
+    "successful_dates": 0,
+    "failed_dates": 0,
+    "skipped_dates": 0,
+    "extracted_rows": 0,
+    "saved_rows": 0
+  },
+  "rows": [
+    {
+      "date": "2026-02-13..2026-02-13",
+      "patientName": "-",
+      "nric": "-",
+      "payType": "-",
+      "portal": "-",
+      "status": "no_dates_to_process",
+      "diagnosisStatus": "-",
+      "notes": "All dates already exist in DB for this range"
+    }
+  ]
+}

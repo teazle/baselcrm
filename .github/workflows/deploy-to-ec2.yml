@@ -16,6 +16,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Validate EC2 SSH reachability
+        shell: bash
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_PORT: ${{ secrets.EC2_PORT || 22 }}
+        run: |
+          set -euo pipefail
+          CONNECTED=false
+          for attempt in 1 2 3; do
+            echo "🔌 Reachability check ${attempt}/3 to EC2 SSH port..."
+            if timeout 10 bash -c "cat < /dev/null > /dev/tcp/${EC2_HOST}/${EC2_PORT}" 2>/dev/null; then
+              CONNECTED=true
+              echo "✅ TCP connection to ${EC2_HOST}:${EC2_PORT} succeeded."
+              break
+            fi
+            sleep 15
+          done
+
+          if [ "${CONNECTED}" != "true" ]; then
+            echo "❌ Cannot reach EC2 SSH endpoint from GitHub runner (${EC2_HOST}:${EC2_PORT})."
+            echo "Likely causes: EC2 stopped, wrong EC2_HOST/EC2_PORT, or AWS security rules blocking GitHub-hosted runners."
+            exit 1
+          fi
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -23,6 +47,9 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.EC2_PORT || 22 }}
+          timeout: 60s
+          command_timeout: 40m
+          script_stop: true
           script: |
             # Expand ~ to home directory and set deploy path
             DEPLOY_PATH="${{ secrets.EC2_DEPLOY_PATH || '~/Baselrpacrm' }}"
@@ -100,9 +127,10 @@ jobs:
                 npm install || { echo "⚠️  Warning: CRM npm install failed"; }
               fi
               
-              # Build the Next.js app for production
+              # Build the Next.js app for production.
+              # Use webpack mode for CI/deploy stability on Next.js 16.
               echo "🏗️  Running production build..."
-              npm run build || { echo "❌ CRM build failed"; exit 1; }
+              npm run build -- --webpack || { echo "❌ CRM build failed"; exit 1; }
               
               # Verify build exists
               if [ ! -d .next ]; then
