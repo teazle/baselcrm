@@ -11,7 +11,7 @@ jobs:
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -42,6 +42,9 @@ jobs:
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          DEPLOY_ENV_FILE: ${{ secrets.EC2_ENV_FILE }}
+          DEPLOY_CRM_ENV_LOCAL: ${{ secrets.EC2_CRM_ENV_LOCAL }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
@@ -49,39 +52,64 @@ jobs:
           port: ${{ secrets.EC2_PORT || 22 }}
           timeout: 60s
           command_timeout: 40m
+          envs: DEPLOY_ENV_FILE,DEPLOY_CRM_ENV_LOCAL
           script_stop: true
           script: |
             # Expand ~ to home directory and set deploy path
             DEPLOY_PATH="${{ secrets.EC2_DEPLOY_PATH || '~/Baselrpacrm' }}"
             DEPLOY_PATH="${DEPLOY_PATH/#\~/$HOME}"
-            
+
             echo "📁 Deploy path: $DEPLOY_PATH"
             cd "$DEPLOY_PATH" || { echo "❌ Error: Cannot cd to $DEPLOY_PATH"; exit 1; }
-            
+
             # Verify we're in a git repository
             if [ ! -d .git ]; then
               echo "❌ Error: Not a git repository in $DEPLOY_PATH"
               exit 1
             fi
-            
+
             # Pull latest changes
             echo "📥 Pulling latest changes from Git..."
             git fetch origin || { echo "⚠️  Warning: git fetch failed"; }
-            
+
             # Get current branch
             CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "main")
             echo "🌿 Current branch: $CURRENT_BRANCH"
-            
+
             # Reset to latest from origin
             git reset --hard origin/main 2>/dev/null || git reset --hard origin/master 2>/dev/null || {
               echo "⚠️  Warning: git reset failed, trying pull instead"
               git pull origin "$CURRENT_BRANCH" || true
             }
-            
+
+            # Sync environment files from GitHub Secrets (if provided)
+            echo "🔐 Syncing environment files..."
+            if [ -n "${DEPLOY_ENV_FILE:-}" ]; then
+              printf '%s\n' "${DEPLOY_ENV_FILE}" | tr -d '\r' > .env
+              chmod 600 .env 2>/dev/null || true
+              echo "✅ Updated root .env from EC2_ENV_FILE"
+            else
+              echo "ℹ️  EC2_ENV_FILE not set; keeping existing root .env"
+            fi
+
+            if [ -d apps/crm ]; then
+              if [ -n "${DEPLOY_CRM_ENV_LOCAL:-}" ]; then
+                printf '%s\n' "${DEPLOY_CRM_ENV_LOCAL}" | tr -d '\r' > apps/crm/.env.local
+                chmod 600 apps/crm/.env.local 2>/dev/null || true
+                echo "✅ Updated apps/crm/.env.local from EC2_CRM_ENV_LOCAL"
+              elif [ -n "${DEPLOY_ENV_FILE:-}" ]; then
+                cp .env apps/crm/.env.local
+                chmod 600 apps/crm/.env.local 2>/dev/null || true
+                echo "✅ Synced apps/crm/.env.local from root .env"
+              else
+                echo "ℹ️  EC2_CRM_ENV_LOCAL not set; keeping existing apps/crm/.env.local"
+              fi
+            fi
+
             # Check if package.json changed (compare with previous commit if available)
             echo "📦 Checking for dependency updates..."
             PACKAGE_CHANGED=false
-            
+
             # Try to detect changes in package files
             if git rev-parse HEAD@{1} >/dev/null 2>&1; then
               # Previous commit exists, check diff
@@ -97,7 +125,7 @@ jobs:
                 fi
               fi
             fi
-            
+
             if [ "$PACKAGE_CHANGED" = true ]; then
               echo "📦 Installing/updating dependencies..."
               npm install || { echo "⚠️  Warning: npm install failed"; }
@@ -105,7 +133,7 @@ jobs:
             else
               echo "ℹ️  No dependency changes detected"
             fi
-            
+
             # Build and deploy Next.js CRM app
             if [ -d apps/crm ]; then
               echo "🏗️  Building CRM app (apps/crm)..."
@@ -115,7 +143,6 @@ jobs:
               echo "🛑 Stopping any process on port 3000..."
               if command -v pm2 &> /dev/null; then
                 pm2 delete crm 2>/dev/null || true
-                pm2 delete all 2>/dev/null || true
               fi
               # Kill any remaining process on port 3000
               sudo fuser -k 3000/tcp 2>/dev/null || true
@@ -141,8 +168,9 @@ jobs:
               
               # Start CRM with PM2 in production mode
               if command -v pm2 &> /dev/null; then
-                echo "🚀 Starting CRM in production mode with PM2..."
-                pm2 start ecosystem.config.cjs
+                echo "🚀 Starting CRM and restarting PM2 processes..."
+                pm2 start ecosystem.config.cjs --only crm --update-env
+                pm2 restart all --update-env || true
                 pm2 save
                 sleep 3
                 pm2 status
@@ -153,9 +181,9 @@ jobs:
               
               cd "$DEPLOY_PATH"
             fi
-            
+
             echo "✅ Deployment complete!"
-            
+
             # Show current status
             echo "📊 Current status:"
             echo "  Branch: $(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo 'unknown')"
