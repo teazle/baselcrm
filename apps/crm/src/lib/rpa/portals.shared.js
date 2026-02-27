@@ -1,6 +1,13 @@
 // Shared portal config for both frontend and backend (ESM)
-export const ALLIANCE_MEDINET_TAGS = ['TOKIOM', 'ALLIANC', 'ALLSING', 'AXAMED', 'PRUDEN'];
-export const ALLIANZ_TAGS = ['ALLIANZ', 'ALLIANCE'];
+export const ALLIANCE_MEDINET_TAGS = [
+  'TOKIOM',
+  'ALLIANC',
+  'ALLIANCE',
+  'ALLSING',
+  'AXAMED',
+  'PRUDEN',
+];
+export const ALLIANZ_TAGS = ['ALLIANZ'];
 export const FULLERTON_TAGS = ['FULLERT'];
 export const IHP_TAGS = ['IHP'];
 export const IXCHANGE_TAGS = ['PARKWAY', 'ALL'];
@@ -105,7 +112,8 @@ function containsAnyTag(payType, patientName, tags) {
 }
 
 export function extractAlliancePortalHint(extractionMetadata) {
-  const md = extractionMetadata && typeof extractionMetadata === 'object' ? extractionMetadata : null;
+  const md =
+    extractionMetadata && typeof extractionMetadata === 'object' ? extractionMetadata : null;
   if (!md) return null;
   const candidates = [
     md.allianceNetwork,
@@ -119,7 +127,7 @@ export function extractAlliancePortalHint(extractionMetadata) {
     const normalized = normalizeMetadataPortalHint(candidate);
     if (!normalized) continue;
     if (normalized === 'GE' || normalized === 'NTUCIM') return 'GE_NTUC';
-    if (normalized === 'ALLIANZ' || normalized === 'ALLIANCE') return 'ALLIANZ';
+    if (normalized === 'ALLIANZ') return 'ALLIANZ';
     if (normalized === 'FULLERT' || normalized === 'FULLERTON') return 'FULLERTON';
     if (normalized === 'IHP') return 'IHP';
     if (normalized === 'IXCHANGE' || normalized === 'PARKWAY') return 'IXCHANGE';
@@ -164,7 +172,9 @@ export function getFlow3PortalTargets() {
 }
 
 export function normalizeFlow3PortalTarget(value) {
-  let code = String(value || '').trim().toUpperCase();
+  let code = String(value || '')
+    .trim()
+    .toUpperCase();
   if (!code) return null;
   if (code === 'FULLERT') code = 'FULLERTON';
   if (code === 'GE' || code === 'NTUC_IM' || code === 'NTUCIM') code = 'GE_NTUC';
@@ -188,11 +198,21 @@ export function resolveFlow3PortalTarget(payType, patientName, extractionMetadat
   if (containsAnyTag(payType, patientName, IHP_TAGS)) return 'IHP';
   if (containsAnyTag(payType, patientName, GE_NTUC_TAGS)) return 'GE_NTUC';
   if (containsAnyTag(payType, patientName, IXCHANGE_TAGS)) return 'IXCHANGE';
-  if (String(payType || '').toUpperCase().includes('ALLIMED')) return 'IXCHANGE';
+  if (
+    String(payType || '')
+      .toUpperCase()
+      .includes('ALLIMED')
+  )
+    return 'IXCHANGE';
   return null;
 }
 
-export function matchesFlow3PortalTargets(payType, patientName, targets, extractionMetadata = null) {
+export function matchesFlow3PortalTargets(
+  payType,
+  patientName,
+  targets,
+  extractionMetadata = null
+) {
   if (!targets || targets.length === 0) return true;
   const normalizedTargets = targets.map(t => normalizeFlow3PortalTarget(t)).filter(Boolean);
   if (normalizedTargets.length === 0) return true;

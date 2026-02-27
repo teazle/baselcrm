@@ -7,8 +7,15 @@
  * (TypeScript will compile this to JavaScript)
  */
 
-export const ALLIANCE_MEDINET_TAGS = ['TOKIOM', 'ALLIANC', 'ALLSING', 'AXAMED', 'PRUDEN'] as const;
-export const ALLIANZ_TAGS = ['ALLIANZ', 'ALLIANCE'] as const;
+export const ALLIANCE_MEDINET_TAGS = [
+  'TOKIOM',
+  'ALLIANC',
+  'ALLIANCE',
+  'ALLSING',
+  'AXAMED',
+  'PRUDEN',
+] as const;
+export const ALLIANZ_TAGS = ['ALLIANZ'] as const;
 export const FULLERTON_TAGS = ['FULLERT'] as const;
 export const IHP_TAGS = ['IHP'] as const;
 export const IXCHANGE_TAGS = ['PARKWAY', 'ALL'] as const;
@@ -152,7 +159,7 @@ export function extractAlliancePortalHint(extractionMetadata: unknown): Flow3Por
     const normalized = normalizeMetadataPortalHint(candidate);
     if (!normalized) continue;
     if (normalized === 'GE' || normalized === 'NTUCIM') return 'GE_NTUC';
-    if (normalized === 'ALLIANZ' || normalized === 'ALLIANCE') return 'ALLIANZ';
+    if (normalized === 'ALLIANZ') return 'ALLIANZ';
     if (normalized === 'FULLERT' || normalized === 'FULLERTON') return 'FULLERTON';
     if (normalized === 'IHP') return 'IHP';
     if (normalized === 'IXCHANGE' || normalized === 'PARKWAY') return 'IXCHANGE';
@@ -203,13 +210,19 @@ export function getFlow3PortalTargets(): readonly string[] {
   return FLOW3_PORTAL_TARGETS;
 }
 
-export function normalizeFlow3PortalTarget(value: string | null | undefined): Flow3PortalTarget | null {
-  let code = String(value || '').trim().toUpperCase();
+export function normalizeFlow3PortalTarget(
+  value: string | null | undefined
+): Flow3PortalTarget | null {
+  let code = String(value || '')
+    .trim()
+    .toUpperCase();
   if (!code) return null;
   if (code === 'FULLERT') code = 'FULLERTON';
   if (code === 'GE' || code === 'NTUC_IM' || code === 'NTUCIM') code = 'GE_NTUC';
   if (code === 'ALLIMED' || code === 'ALL') code = 'IXCHANGE';
-  return FLOW3_PORTAL_TARGETS.includes(code as Flow3PortalTarget) ? (code as Flow3PortalTarget) : null;
+  return FLOW3_PORTAL_TARGETS.includes(code as Flow3PortalTarget)
+    ? (code as Flow3PortalTarget)
+    : null;
 }
 
 export function resolveFlow3PortalTarget(
@@ -232,7 +245,12 @@ export function resolveFlow3PortalTarget(
   if (containsAnyTag(payType, patientName, IHP_TAGS)) return 'IHP';
   if (containsAnyTag(payType, patientName, GE_NTUC_TAGS)) return 'GE_NTUC';
   if (containsAnyTag(payType, patientName, IXCHANGE_TAGS)) return 'IXCHANGE';
-  if (String(payType || '').toUpperCase().includes('ALLIMED')) return 'IXCHANGE';
+  if (
+    String(payType || '')
+      .toUpperCase()
+      .includes('ALLIMED')
+  )
+    return 'IXCHANGE';
   return null;
 }
 

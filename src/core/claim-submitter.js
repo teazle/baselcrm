@@ -26,10 +26,10 @@ export class ClaimSubmitter {
     this.allianceMedinet = new AllianceMedinetAutomation(mhcAsiaPage);
     this.steps = new StepLogger({ total: 10, prefix: 'SUBMIT' });
     this.allianceMedinetSubmitter = new AllianceMedinetSubmitter(this.allianceMedinet, this.steps);
-    this.allianzSubmitter = new AllianzSubmitter(this.steps);
-    this.fullertonSubmitter = new FullertonSubmitter(this.steps);
-    this.ihpSubmitter = new IHPSubmitter(this.steps);
-    this.ixchangeSubmitter = new IXChangeSubmitter(this.steps);
+    this.allianzSubmitter = new AllianzSubmitter(mhcAsiaPage, this.steps);
+    this.fullertonSubmitter = new FullertonSubmitter(mhcAsiaPage, this.steps);
+    this.ihpSubmitter = new IHPSubmitter(mhcAsiaPage, this.steps);
+    this.ixchangeSubmitter = new IXChangeSubmitter(mhcAsiaPage, this.steps);
     this.geSubmitter = new GENtucSubmitter(this.allianceMedinet, this.steps);
     this.supabase = createSupabaseClient();
     this.mhcAsiaLoggedIn = false;
@@ -62,9 +62,13 @@ export class ClaimSubmitter {
           .toUpperCase();
         if (!key || row?.is_active === false) continue;
         const encodedUsername =
-          String(row?.username_encrypted || '').trim() || String(row?.username || '').trim() || null;
+          String(row?.username_encrypted || '').trim() ||
+          String(row?.username || '').trim() ||
+          null;
         const encodedPassword =
-          String(row?.password_encrypted || '').trim() || String(row?.password || '').trim() || null;
+          String(row?.password_encrypted || '').trim() ||
+          String(row?.password || '').trim() ||
+          null;
 
         let username = null;
         let password = null;
@@ -254,6 +258,18 @@ export class ClaimSubmitter {
         visit.patient_name,
         visit.extraction_metadata || null
       );
+      if (route === 'IHP' && process.env.FLOW3_SKIP_IHP === '1') {
+        return {
+          success: false,
+          reason: 'skipped_by_config',
+          detailReason: 'ihp_temporarily_skipped',
+          portal: 'IHP eClaim',
+          portalService: 'IHP',
+          submitted: false,
+          savedAsDraft: false,
+          error: 'IHP route skipped by FLOW3_SKIP_IHP=1',
+        };
+      }
       switch (route) {
         case 'MHC':
           result = await this.submitToMHCAsia(visit);
@@ -349,7 +365,9 @@ export class ClaimSubmitter {
       });
 
       const failureMetadata =
-        error && typeof error === 'object' && error.submissionMetadata ? error.submissionMetadata : null;
+        error && typeof error === 'object' && error.submissionMetadata
+          ? error.submissionMetadata
+          : null;
 
       // Update visit with error status only when this run intends to advance workflow state.
       // For fill-only verification, keep the DB clean and rely on run logs/screenshots instead.
@@ -361,10 +379,7 @@ export class ClaimSubmitter {
         if (failureMetadata && typeof failureMetadata === 'object') {
           errorUpdate.submission_metadata = failureMetadata;
         }
-        await this.supabase
-          .from('visits')
-          .update(errorUpdate)
-          .eq('id', visit.id);
+        await this.supabase.from('visits').update(errorUpdate).eq('id', visit.id);
       } else {
         logger.info('[SUBMIT] Verification run: not persisting submission_status=error', {
           visitId: visit.id,
@@ -679,7 +694,7 @@ export class ClaimSubmitter {
       if (!waiverSet) {
         const referralRequiredHint = await this.mhcAsia.page
           .evaluate(() => {
-            const t = String(document.body?.innerText || '');
+            const t = String(globalThis.document?.body?.innerText || '');
             return /referring\s+clinic\s+is\s+required|referral\s+letter\s+is\s+required|waiver\s+of\s+referral/i.test(
               t
             );
@@ -747,35 +762,43 @@ export class ClaimSubmitter {
           flow2Status: flow2DiagnosisStatus || null,
           reason: diagnosisResolution?.reason_if_unresolved || null,
         };
-        logger.warn('[SUBMIT] Flow 2 diagnosis unresolved; using draft-only generic diagnosis fallback', {
-          visitId: visit.id,
-          nric: nric || null,
-          payType: payTypeRaw || null,
-          flow2Status: flow2DiagnosisStatus || null,
-          diagnosis: diagnosisDesc || null,
-          genericDraftDiagnosisText,
-        });
+        logger.warn(
+          '[SUBMIT] Flow 2 diagnosis unresolved; using draft-only generic diagnosis fallback',
+          {
+            visitId: visit.id,
+            nric: nric || null,
+            payType: payTypeRaw || null,
+            flow2Status: flow2DiagnosisStatus || null,
+            diagnosis: diagnosisDesc || null,
+            genericDraftDiagnosisText,
+          }
+        );
         return;
       }
       const allowGenericDraftFallback = allowGenericDiagnosisFallback && saveDraftMode;
       if (allowGenericDraftFallback) {
         diagnosisFallbackMode = {
-          mode: flow2Missing ? 'generic_draft_missing_diagnosis' : 'generic_draft_unresolved_diagnosis',
+          mode: flow2Missing
+            ? 'generic_draft_missing_diagnosis'
+            : 'generic_draft_unresolved_diagnosis',
           stage,
           text: genericDraftDiagnosisText,
           flow2Status: flow2DiagnosisStatus || null,
           reason: diagnosisResolution?.reason_if_unresolved || 'flow2_unresolved',
           dateGatePassed: flow2DateGatePassed,
         };
-        logger.warn('[SUBMIT] Flow 2 diagnosis unresolved; using draft-only generic diagnosis fallback', {
-          visitId: visit.id,
-          nric: nric || null,
-          payType: payTypeRaw || null,
-          flow2Status: flow2DiagnosisStatus || null,
-          diagnosis: diagnosisDesc || null,
-          genericDraftDiagnosisText,
-          dateGatePassed: flow2DateGatePassed,
-        });
+        logger.warn(
+          '[SUBMIT] Flow 2 diagnosis unresolved; using draft-only generic diagnosis fallback',
+          {
+            visitId: visit.id,
+            nric: nric || null,
+            payType: payTypeRaw || null,
+            flow2Status: flow2DiagnosisStatus || null,
+            diagnosis: diagnosisDesc || null,
+            genericDraftDiagnosisText,
+            dateGatePassed: flow2DateGatePassed,
+          }
+        );
         return;
       }
 
@@ -813,12 +836,11 @@ export class ClaimSubmitter {
     };
     await assertFlow2DiagnosisReadyOrThrow();
 
-    const portalContextHint =
-      forceSinglife
-        ? 'singlife'
-        : this.mhcAsia.isAiaClinicSystem || routingOverride === 'AIA_CLINIC_DIALOG'
-          ? 'aia'
-          : 'mhc';
+    const portalContextHint = forceSinglife
+      ? 'singlife'
+      : this.mhcAsia.isAiaClinicSystem || routingOverride === 'AIA_CLINIC_DIALOG'
+        ? 'aia'
+        : 'mhc';
 
     const diagnosisPrefetch = await this.mhcAsia
       .prefetchDiagnosisOptions({
@@ -925,10 +947,7 @@ export class ClaimSubmitter {
       }
     } else if (diagnosisDesc && !diagnosisMissingText && diagnosisMatch?.blocked === false) {
       const diagObj = {
-        code:
-          diagnosisMatch?.selected_code ||
-          diagnosisCanonical?.code_normalized ||
-          diagnosisCode,
+        code: diagnosisMatch?.selected_code || diagnosisCanonical?.code_normalized || diagnosisCode,
         description:
           diagnosisMatch?.selected_text ||
           diagnosisCanonical?.description_canonical ||
@@ -1175,7 +1194,7 @@ export class ClaimSubmitter {
 
       const verificationContext = forceSinglife
         ? 'singlife'
-        : (this.mhcAsia.isAiaClinicSystem || routingOverride === 'AIA_CLINIC_DIALOG')
+        : this.mhcAsia.isAiaClinicSystem || routingOverride === 'AIA_CLINIC_DIALOG'
           ? 'aia'
           : 'mhc';
       const allowCrossContext = verificationContext !== 'mhc';
@@ -1191,7 +1210,8 @@ export class ClaimSubmitter {
       if (!draftVerification?.found) {
         const saveDraftResult = this.mhcAsia.getLastSaveDraftResult?.() || null;
         const flow2FallbackLowConfidence =
-          allowGenericDiagnosisFallback && diagnosisResolution?.status === 'fallback_low_confidence';
+          allowGenericDiagnosisFallback &&
+          diagnosisResolution?.status === 'fallback_low_confidence';
         const allowUnverifiedDraftAcceptance =
           saveDraftResult?.success === true && saveDraftMode && flow2FallbackLowConfidence;
         if (allowUnverifiedDraftAcceptance) {
@@ -1211,15 +1231,15 @@ export class ClaimSubmitter {
           };
         } else {
           draftSavedAccepted = false;
-        logger.error('[SUBMIT] Save-as-draft click did not produce a verifiable draft entry', {
-          visitId: visit.id,
-          nric: nric || null,
-          contextHint: verificationContext,
-          verification: draftVerification || null,
-        });
-        throw new Error(
-          `Draft not found in Edit/Draft after save click (nric=${nric}, context=${verificationContext})`
-        );
+          logger.error('[SUBMIT] Save-as-draft click did not produce a verifiable draft entry', {
+            visitId: visit.id,
+            nric: nric || null,
+            contextHint: verificationContext,
+            verification: draftVerification || null,
+          });
+          throw new Error(
+            `Draft not found in Edit/Draft after save click (nric=${nric}, context=${verificationContext})`
+          );
         }
       }
     }
@@ -1296,7 +1316,9 @@ export class ClaimSubmitter {
       return await this.allianceMedinetSubmitter.submit(visit);
     } catch (error) {
       const message = String(error?.message || '');
-      const reason = String(error?.submissionMetadata?.reason || '').trim().toLowerCase();
+      const reason = String(error?.submissionMetadata?.reason || '')
+        .trim()
+        .toLowerCase();
       const allianceCode = error?.allianceError?.code || null;
       const allianceNetwork = String(error?.allianceError?.networkCode || '')
         .toUpperCase()
@@ -1305,7 +1327,9 @@ export class ClaimSubmitter {
         .toUpperCase()
         .trim();
       const metadataHint = String(
-        visit?.extraction_metadata?.allianceNetwork || visit?.extraction_metadata?.flow3PortalHint || ''
+        visit?.extraction_metadata?.allianceNetwork ||
+          visit?.extraction_metadata?.flow3PortalHint ||
+          ''
       )
         .toUpperCase()
         .trim();
@@ -1321,10 +1345,13 @@ export class ClaimSubmitter {
         /redirected this member to GE portal popup/i.test(message);
       if (!isGeNetworkMismatch && !looksLikeGePortalRuntime) throw error;
 
-      logger.warn('[SUBMIT] Alliance Medinet indicates GE-network route; rerouting to GE/NTUC service', {
-        visitId: visit?.id || null,
-        payType: visit?.pay_type || null,
-      });
+      logger.warn(
+        '[SUBMIT] Alliance Medinet indicates GE-network route; rerouting to GE/NTUC service',
+        {
+          visitId: visit?.id || null,
+          payType: visit?.pay_type || null,
+        }
+      );
 
       await this._mergeVisitExtractionMetadataPatch(visit?.id, {
         allianceNetwork: 'GE',

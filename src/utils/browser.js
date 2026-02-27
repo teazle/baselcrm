@@ -429,7 +429,9 @@ export class BrowserManager {
         } else {
           logger.warn('No Singapore proxies found via auto-discovery');
           logger.warn('Consider:');
-          logger.warn('1. Using a system-level VPN (Falcon VPN, VeePN) and set PROXY_ENABLED=false');
+          logger.warn(
+            '1. Using a system-level VPN (Falcon VPN, VeePN) and set PROXY_ENABLED=false'
+          );
           logger.warn('2. Manually configuring a proxy server in .env (PROXY_SERVER=...)');
           logger.warn('3. Retrying later (free proxy lists may be temporarily unavailable)');
         }
@@ -450,7 +452,7 @@ export class BrowserManager {
     if (!fs.existsSync(extensionsDir)) {
       return [];
     }
-    
+
     const extensions = [];
     const items = fs.readdirSync(extensionsDir, { withFileTypes: true });
     for (const item of items) {
@@ -468,7 +470,8 @@ export class BrowserManager {
     const fromEnv = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
     if (fromEnv && fs.existsSync(fromEnv)) return fromEnv;
 
-    const preferred = typeof chromium.executablePath === 'function' ? chromium.executablePath() : null;
+    const preferred =
+      typeof chromium.executablePath === 'function' ? chromium.executablePath() : null;
     if (preferred && fs.existsSync(preferred)) return preferred;
 
     const candidates = [];
@@ -481,8 +484,8 @@ export class BrowserManager {
     if (fs.existsSync(cacheRoot)) {
       const versions = fs
         .readdirSync(cacheRoot, { withFileTypes: true })
-        .filter((d) => d.isDirectory() && /^chromium-\d+$/i.test(d.name))
-        .map((d) => d.name)
+        .filter(d => d.isDirectory() && /^chromium-\d+$/i.test(d.name))
+        .map(d => d.name)
         .sort((a, b) => {
           const av = Number(a.split('-')[1] || '0');
           const bv = Number(b.split('-')[1] || '0');
@@ -490,10 +493,26 @@ export class BrowserManager {
         });
       for (const v of versions) {
         candidates.push(
-          path.join(cacheRoot, v, 'chrome-mac-arm64', 'Google Chrome for Testing.app', 'Contents', 'MacOS', 'Google Chrome for Testing')
+          path.join(
+            cacheRoot,
+            v,
+            'chrome-mac-arm64',
+            'Google Chrome for Testing.app',
+            'Contents',
+            'MacOS',
+            'Google Chrome for Testing'
+          )
         );
         candidates.push(
-          path.join(cacheRoot, v, 'chrome-mac-x64', 'Google Chrome for Testing.app', 'Contents', 'MacOS', 'Google Chrome for Testing')
+          path.join(
+            cacheRoot,
+            v,
+            'chrome-mac-x64',
+            'Google Chrome for Testing.app',
+            'Contents',
+            'MacOS',
+            'Google Chrome for Testing'
+          )
         );
       }
     }
@@ -510,10 +529,13 @@ export class BrowserManager {
   async init() {
     try {
       logger.info('Launching browser...');
-      
+
       const extensionPaths = this.getExtensionPaths();
-      const usePersistentContext = extensionPaths.length > 0 || process.env.USE_PERSISTENT_CONTEXT === 'true';
-      
+      const forceNonPersistent = process.env.FORCE_NON_PERSISTENT_CONTEXT === 'true';
+      const usePersistentContext =
+        !forceNonPersistent &&
+        (extensionPaths.length > 0 || process.env.USE_PERSISTENT_CONTEXT === 'true');
+
       // If using extension, prefer extension over proxy (unless proxy is explicitly configured)
       let proxyConfig = null;
       if (!usePersistentContext || process.env.FORCE_PROXY === 'true') {
@@ -522,7 +544,7 @@ export class BrowserManager {
         // When using extension, disable proxy auto-discovery to avoid conflicts
         logger.info('Using extension for VPN - proxy auto-discovery disabled');
       }
-      
+
       // Use persistent context if extensions are configured or explicitly requested
       if (usePersistentContext) {
         const executablePath = this._resolveChromiumExecutablePath();
@@ -538,7 +560,9 @@ export class BrowserManager {
         }
 
         // Filter out Urban VPN extension if present
-        const filteredExtensions = extensionPaths.filter(p => !path.basename(p).includes('urban-vpn'));
+        const filteredExtensions = extensionPaths.filter(
+          p => !path.basename(p).includes('urban-vpn')
+        );
         if (filteredExtensions.length !== extensionPaths.length) {
           logger.info('Filtering out Urban VPN extension');
           extensionPaths.length = 0;
@@ -559,7 +583,9 @@ export class BrowserManager {
             `--disable-extensions-except=${extensionPaths.join(',')}`,
             ...extensionPaths.map(ext => `--load-extension=${ext}`),
           ];
-          logger.info(`Using persistent browser context with ${extensionPaths.length} extension(s)`);
+          logger.info(
+            `Using persistent browser context with ${extensionPaths.length} extension(s)`
+          );
           logger.info(`Extensions: ${extensionPaths.map(p => path.basename(p)).join(', ')}`);
         }
 
@@ -570,7 +596,8 @@ export class BrowserManager {
           this.context = await chromium.launchPersistentContext(this.userDataDir, contextOptions);
         } catch (error) {
           const canRetryWithIsolatedProfile =
-            this.userDataDir === this.baseUserDataDir && this._isRecoverablePersistentLaunchError(error);
+            this.userDataDir === this.baseUserDataDir &&
+            this._isRecoverablePersistentLaunchError(error);
           if (!canRetryWithIsolatedProfile) throw error;
           const fallbackUserDataDir = this._buildRunScopedUserDataDir();
           logger.warn(
@@ -611,7 +638,7 @@ export class BrowserManager {
           contextOptions.proxy = {
             server: proxyConfig.server,
           };
-          
+
           if (proxyConfig.username && proxyConfig.password) {
             contextOptions.proxy.username = proxyConfig.username;
             contextOptions.proxy.password = proxyConfig.password;
@@ -641,9 +668,11 @@ export class BrowserManager {
             this.context,
             proxyConfig
           );
-          
+
           if (!validation.valid && this.proxyRetryCount < PROXY_CONFIG.maxRetries) {
-            logger.warn(`Proxy validation failed: ${validation.reason}. Retrying with different proxy...`);
+            logger.warn(
+              `Proxy validation failed: ${validation.reason}. Retrying with different proxy...`
+            );
             this.proxyRetryCount++;
             await this.context.close();
             if (this.browser) {
@@ -654,8 +683,12 @@ export class BrowserManager {
             this.proxyFinder.clearCache();
             return await this.init();
           } else if (!validation.valid) {
-            logger.error(`Proxy validation failed after ${this.proxyRetryCount} retries: ${validation.reason}`);
-            logger.error('Consider using a system-level VPN or manually configuring a proxy in .env');
+            logger.error(
+              `Proxy validation failed after ${this.proxyRetryCount} retries: ${validation.reason}`
+            );
+            logger.error(
+              'Consider using a system-level VPN or manually configuring a proxy in .env'
+            );
           }
         } catch (error) {
           logger.warn('Proxy validation error (continuing anyway):', error.message);
@@ -668,21 +701,20 @@ export class BrowserManager {
       return this.context;
     } catch (error) {
       logger.error('Failed to launch browser:', error);
-      
+
       // If proxy-related error, provide helpful message
       if (error.message.includes('proxy') || error.message.includes('PROXY')) {
         logger.error('\n=== Proxy Configuration Help ===');
-        logger.error('If you\'re having proxy issues, try:');
+        logger.error("If you're having proxy issues, try:");
         logger.error('1. Set PROXY_ENABLED=false in .env to disable proxy');
         logger.error('2. Use a system-level VPN (Falcon VPN, VeePN) and set PROXY_ENABLED=false');
         logger.error('3. Manually configure a proxy: PROXY_SERVER=http://proxy.example.com:8080');
         logger.error('================================\n');
       }
-      
+
       throw error;
     }
   }
-
 
   /**
    * Create a new page
@@ -702,16 +734,16 @@ export class BrowserManager {
     if (!this.browser && this.context) {
       return this.context;
     }
-    
+
     if (!this.browser) {
       await this.init();
     }
-    
+
     // If still no browser (persistent context), return existing context
     if (!this.browser) {
       return this.context;
     }
-    
+
     const contextOptions = {
       viewport: BROWSER_CONFIG.viewport,
       ignoreHTTPSErrors: true,
@@ -723,7 +755,7 @@ export class BrowserManager {
       contextOptions.proxy = {
         server: proxyConfig.server,
       };
-      
+
       if (proxyConfig.username && proxyConfig.password) {
         contextOptions.proxy.username = proxyConfig.username;
         contextOptions.proxy.password = proxyConfig.password;
@@ -757,20 +789,24 @@ export class BrowserManager {
    */
   async newContextWithVideo(options = {}) {
     const { dir = './videos', size = { width: 1920, height: 1080 } } = options;
-    
+
     // If using persistent context, we can't create new contexts with video
     if (!this.browser && this.context) {
-      logger.warn('Cannot create video context with persistent browser context. Using existing context without video.');
+      logger.warn(
+        'Cannot create video context with persistent browser context. Using existing context without video.'
+      );
       return this.context;
     }
-    
+
     if (!this.browser) {
       await this.init();
     }
-    
+
     // If still no browser (persistent context), return existing context
     if (!this.browser) {
-      logger.warn('Cannot create video context with persistent browser context. Using existing context without video.');
+      logger.warn(
+        'Cannot create video context with persistent browser context. Using existing context without video.'
+      );
       return this.context;
     }
 
@@ -779,8 +815,8 @@ export class BrowserManager {
       ignoreHTTPSErrors: true,
       recordVideo: {
         dir: dir,
-        size: size
-      }
+        size: size,
+      },
     };
 
     // Use same proxy configuration if available
@@ -789,7 +825,7 @@ export class BrowserManager {
       contextOptions.proxy = {
         server: proxyConfig.server,
       };
-      
+
       if (proxyConfig.username && proxyConfig.password) {
         contextOptions.proxy.username = proxyConfig.username;
         contextOptions.proxy.password = proxyConfig.password;
