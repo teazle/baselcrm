@@ -612,11 +612,26 @@ export class BrowserManager {
     try {
       logger.info('Launching browser...');
 
-      const extensionPaths = this.getExtensionPaths();
+      const discoveredExtensionPaths = this.getExtensionPaths();
       const forceNonPersistent = process.env.FORCE_NON_PERSISTENT_CONTEXT === 'true';
+      const headlessMode = BROWSER_CONFIG.headless === true;
+      let extensionPaths = discoveredExtensionPaths;
+      if (headlessMode && extensionPaths.length > 0) {
+        logger.info(
+          'Headless mode detected; disabling browser extensions and persistent extension context'
+        );
+        extensionPaths = [];
+      }
+      const persistentContextRequested =
+        process.env.USE_PERSISTENT_CONTEXT === 'true' || discoveredExtensionPaths.length > 0;
       const usePersistentContext =
-        !forceNonPersistent &&
-        (extensionPaths.length > 0 || process.env.USE_PERSISTENT_CONTEXT === 'true');
+        !forceNonPersistent && !headlessMode && persistentContextRequested;
+
+      if (headlessMode && persistentContextRequested) {
+        logger.info(
+          'Falling back to non-persistent headless browser; persisted storage state will still be restored'
+        );
+      }
 
       // If using extension, prefer extension over proxy (unless proxy is explicitly configured)
       let proxyConfig = null;

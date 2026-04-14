@@ -112,11 +112,12 @@ jobs:
             fi
 
             echo "Running Flow 3 submitted-truth audit on EC2..."
-            if command -v xvfb-run >/dev/null 2>&1; then
-              xvfb-run -a node src/examples/flow3-portal-truth-audit.js "${ARGS[@]}"
-            else
-              HEADLESS=true node src/examples/flow3-portal-truth-audit.js "${ARGS[@]}"
-            fi
+            echo "Audit browser mode: headless + non-persistent context + restored session state"
+            echo "Node: $(command -v node || echo missing)"
+            node -v || true
+            echo "Playwright user data dir: ${PLAYWRIGHT_USER_DATA_DIR:-$HOME/.playwright-browser-data}"
+            ls -la "${PLAYWRIGHT_USER_DATA_DIR:-$HOME/.playwright-browser-data}" 2>/dev/null | head -n 20 || true
+            HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/flow3-portal-truth-audit.js "${ARGS[@]}" 2>&1
 
             LATEST_JSON=$(ls -t output/run-reports/flow3_submitted_truth_audit_*.json | head -n 1)
             if [ -z "${LATEST_JSON:-}" ]; then
