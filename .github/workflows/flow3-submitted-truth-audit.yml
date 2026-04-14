@@ -126,34 +126,4 @@ jobs:
             fi
 
             echo "Latest audit report: $LATEST_JSON"
-            SUMMARY_SCRIPT=$(mktemp)
-            cat > "$SUMMARY_SCRIPT" <<'NODE'
-            const fs = require('fs');
-
-            const reportPath = process.argv[2];
-            const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
-            const rows = Array.isArray(report.rows) ? report.rows : [];
-
-            console.log('Audit summary:');
-            console.log(JSON.stringify({
-              generatedAt: report.generatedAt || null,
-              scope: report.scope || null,
-              totalRows: rows.length,
-            }, null, 2));
-
-            for (const row of rows) {
-              console.log(JSON.stringify({
-                visitId: row.visitId || null,
-                patientName: row.patientName || null,
-                visitDate: row.visitDate || null,
-                context: row.context || null,
-                submittedTruth: row.submittedTruth || null,
-                flow2VsSubmittedTruth: row.flow2VsSubmittedTruth || null,
-                botVsSubmittedTruth: row.botVsSubmittedTruth || null,
-                mismatchCategories: row.mismatchCategories || null,
-                notes: row.notes || null,
-              }));
-            }
-            NODE
-            node "$SUMMARY_SCRIPT" "$LATEST_JSON"
-            rm -f "$SUMMARY_SCRIPT"
+            node -e 'const fs = require("fs"); const reportPath = process.argv[1]; const report = JSON.parse(fs.readFileSync(reportPath, "utf8")); const rows = Array.isArray(report.rows) ? report.rows : []; console.log("Audit summary:"); console.log(JSON.stringify({ generatedAt: report.generatedAt || null, scope: report.scope || null, totalRows: rows.length }, null, 2)); for (const row of rows) { console.log(JSON.stringify({ visitId: row.visitId || null, patientName: row.patientName || null, visitDate: row.visitDate || null, context: row.context || null, submittedTruth: row.submittedTruth || null, flow2VsSubmittedTruth: row.flow2VsSubmittedTruth || null, botVsSubmittedTruth: row.botVsSubmittedTruth || null, mismatchCategories: row.mismatchCategories || null, notes: row.notes || null })); }' "$LATEST_JSON"
