@@ -181,6 +181,7 @@ function buildSelectors() {
       'a:has-text("+ Search Patient")',
     ],
     preSearchUrls: [],
+    requireSearchProgramType: true,
     searchInputPatientId: IXCHANGE_PATIENT_ID_SELECTORS,
     searchInputPatientName: IXCHANGE_PATIENT_NAME_SELECTORS,
     searchInput: IXCHANGE_PATIENT_ID_SELECTORS,
@@ -244,7 +245,7 @@ function buildSelectors() {
       'textarea',
     ],
     formAmount: ['input[name*="claim" i]', 'input[name*="amount" i]'],
-    minFilledFormFields: 1,
+    requiredFields: ['visitDate', 'diagnosis', 'fee'],
   });
 }
 
@@ -257,7 +258,7 @@ function getProgramTypeCandidates() {
   return ['Corporate'];
 }
 
-async function ensureIxchangeSearchReady(page) {
+async function ensureIxchangeSearchReady(page, state = null) {
   const hasSearchInputs = async () =>
     page
       .waitForSelector('input#patientId, input#patientName, button#filter-apply-button', {
@@ -357,27 +358,12 @@ async function ensureIxchangeSearchReady(page) {
     return clicked;
   };
 
-  const clientRouteToSearchPatient = async () =>
-    page
-      .evaluate(() => {
-        const target = '/spos/search-patient';
-        if (globalThis.location?.pathname === target) return true;
-        try {
-          globalThis.history?.pushState?.({}, '', target);
-          globalThis.dispatchEvent?.(new globalThis.PopStateEvent('popstate'));
-          globalThis.dispatchEvent?.(new globalThis.Event('hashchange'));
-          return true;
-        } catch {
-          return false;
-        }
-      })
-      .catch(() => false);
-
   for (let attempt = 0; attempt < 5; attempt += 1) {
     if (await hasSearchInputs()) return true;
     await expandSidebarIfCollapsed();
 
     if (await isAccessDenied()) {
+      if (state) state.sessionState = 'access_denied_recovered';
       await page
         .locator('button:has-text("Go Back"), a:has-text("Go Back")')
         .first()
@@ -387,10 +373,9 @@ async function ensureIxchangeSearchReady(page) {
     }
 
     if (await clickSearchPatientNav()) return true;
-    if (await clientRouteToSearchPatient()) {
-      await page.waitForTimeout(1000);
-      if (await hasSearchInputs()) return true;
-    }
+    await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => null);
+    await page.waitForTimeout(900);
+    if (await clickSearchPatientNav()) return true;
 
     // Non-search SPOS page: go to SPOS root and retry via in-app menu.
     if (!/\/spos(\/|$)/i.test(String(page.url() || ''))) {
@@ -401,12 +386,17 @@ async function ensureIxchangeSearchReady(page) {
     }
   }
 
-  return await hasSearchInputs();
+  const ready = await hasSearchInputs();
+  if (!ready && state) {
+    const denied = await isAccessDenied();
+    state.sessionState = denied ? 'access_denied_unrecovered' : 'poisoned';
+  }
+  return ready;
 }
 
 async function selectProgramType({ page, state, helpers }) {
   const candidates = getProgramTypeCandidates();
-  if (!candidates.length) return;
+  if (!candidates.length) return false;
 
   for (const candidate of candidates) {
     const nativeSelected = await page
@@ -432,7 +422,8 @@ async function selectProgramType({ page, state, helpers }) {
       .catch(() => false);
     if (nativeSelected) {
       state.search_program_type = { mode: 'native_select', value: candidate };
-      return;
+      state.search_program_type_verified = true;
+      return true;
     }
   }
 
@@ -541,7 +532,8 @@ async function selectProgramType({ page, state, helpers }) {
           value: candidate,
           stage: scriptedSelection.stage,
         };
-        return;
+        state.search_program_type_verified = true;
+        return true;
       }
     }
 
@@ -589,7 +581,10 @@ async function selectProgramType({ page, state, helpers }) {
       state.search_program_type = { mode: 'combobox', value: candidate, selector: picked };
       await page.waitForTimeout(250);
       const selected = await readProgramTypeText();
-      if (!selected || selected.toLowerCase().includes(candidate.toLowerCase())) return;
+      if (!selected || selected.toLowerCase().includes(candidate.toLowerCase())) {
+        state.search_program_type_verified = true;
+        return true;
+      }
     }
 
     // Fallback for react-select style controls: type candidate and press Enter.
@@ -606,7 +601,8 @@ async function selectProgramType({ page, state, helpers }) {
       const selected = await readProgramTypeText();
       if (selected.toLowerCase().includes(candidate.toLowerCase())) {
         state.search_program_type = { mode: 'react_type_enter', value: candidate };
-        return;
+        state.search_program_type_verified = true;
+        return true;
       }
     }
 
@@ -628,10 +624,97 @@ async function selectProgramType({ page, state, helpers }) {
       const selected = await readProgramTypeText();
       if (selected.toLowerCase().includes(candidate.toLowerCase())) {
         state.search_program_type = { mode: 'shift_tab_type_enter', value: candidate };
-        return;
+        state.search_program_type_verified = true;
+        return true;
       }
     }
   }
+
+  const finalValue = await page
+    .evaluate(() => {
+      const text = String(globalThis.document?.body?.innerText || '');
+      const line = text
+        .split(/\n+/)
+        .find(v => /program type/i.test(String(v || '')));
+      return String(line || '').trim();
+    })
+    .catch(() => '');
+  state.search_program_type = {
+    mode: 'unverified',
+    expected: candidates[0] || 'Corporate',
+    value: finalValue || null,
+  };
+  state.search_program_type_verified = false;
+  return false;
+}
+
+async function acknowledgeVisitDateChangePopup(page, state) {
+  const popupText = await page
+    .evaluate(() =>
+      /change visit date confirmation message/i.test(
+        String(globalThis.document?.body?.innerText || '')
+      )
+    )
+    .catch(() => false);
+  if (!popupText) return false;
+  const clicked = await page
+    .locator(
+      'button:has-text("Yes"), button:has-text("OK"), .modal-dialog button.btn-primary, .modal button:has-text("Yes")'
+    )
+    .first()
+    .click({ force: true, timeout: 2200 })
+    .then(() => true)
+    .catch(() => false);
+  if (clicked && state) state.visit_date_change_popup = 'yes_clicked';
+  await page.waitForTimeout(500);
+  return clicked;
+}
+
+async function extractIxchangeFeeEvidence(page) {
+  return page
+    .evaluate(() => {
+      const norm = value =>
+        String(value || '')
+          .replace(/\s+/g, ' ')
+          .trim();
+      const parseAmount = value => {
+        const match = norm(value).replace(/,/g, '').match(/\d+(?:\.\d{1,2})?/);
+        if (!match) return '';
+        const num = Number(match[0]);
+        return Number.isFinite(num) ? num.toFixed(2) : '';
+      };
+
+      const directInputs = Array.from(
+        globalThis.document?.querySelectorAll?.(
+          'input[name*="claim" i], input[name*="amount" i], input[name*="consult" i]'
+        ) || []
+      );
+      for (const input of directInputs) {
+        const amount = parseAmount(input.value || '');
+        if (!amount) continue;
+        const id = norm(input.getAttribute?.('id'));
+        const name = norm(input.getAttribute?.('name'));
+        return { ok: true, value: amount, source: `input:${name || id || 'amount'}` };
+      }
+
+      const rows = Array.from(globalThis.document?.querySelectorAll?.('tr, div') || []);
+      for (const row of rows) {
+        const text = norm(row.textContent || '');
+        if (!/consultation/i.test(text)) continue;
+        const amount = parseAmount(text);
+        if (!amount) continue;
+        return { ok: true, value: amount, source: 'summary:consultation' };
+      }
+
+      const body = norm(globalThis.document?.body?.innerText || '');
+      const bodyMatch = body.match(
+        /consultation[^0-9]{0,25}(\d+(?:\.\d{1,2})?)|grand total[^0-9]{0,25}(\d+(?:\.\d{1,2})?)/i
+      );
+      const raw = bodyMatch?.[1] || bodyMatch?.[2] || '';
+      if (raw) return { ok: true, value: Number(raw).toFixed(2), source: 'body:consultation' };
+      return { ok: false, value: '', source: null };
+    })
+    .catch(() => ({ ok: false, value: '', source: null }));
 }
 
 async function ensureIxchangeEditVisitForm({ page, state }) {
@@ -722,6 +805,7 @@ async function ensureIxchangeEditVisitForm({ page, state }) {
   const editDirectMatch = currentUrl.match(/\/spos\/claim\/edit\/(\d+)/i);
   if (editDirectMatch) {
     const editReady = await waitForEditReady(30000);
+    await acknowledgeVisitDateChangePopup(page, state);
     state.form_navigation = {
       mode: editReady ? 'already_edit_route' : 'already_edit_route_pending',
       from: currentUrl,
@@ -974,26 +1058,44 @@ async function ensureIxchangeEditVisitForm({ page, state }) {
     await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => null);
     let ready = await waitForEditReady(25000);
     if (!ready) {
-      // Recovery path: revisit create-success and click Edit one more time.
+      // UI-safe recovery: reload current route and wait for form readiness.
+      await page.reload({ waitUntil: 'domcontentloaded', timeout: 45000 }).catch(() => null);
+      await page.waitForTimeout(2200);
+      ready = await waitForEditReady(22000);
+    }
+
+    const allowDirectUrlRecovery =
+      String(process.env.IXCHANGE_ENABLE_DIRECT_URL_RECOVERY || '')
+        .trim()
+        .toLowerCase() === '1' ||
+      String(process.env.IXCHANGE_ENABLE_DIRECT_URL_RECOVERY || '')
+        .trim()
+        .toLowerCase() === 'true';
+    if (!ready && allowDirectUrlRecovery) {
       await page
         .goto(`https://spos.o2ixchange.com/spos/claim/create-success/${visitId}`, {
           waitUntil: 'domcontentloaded',
           timeout: 45000,
         })
         .catch(() => null);
-      await page.waitForTimeout(2000);
+      await page.waitForTimeout(1700);
       const retryEdit = page
         .locator('button:has-text("Edit Visit Record"), a:has-text("Edit Visit Record")')
         .first();
       if ((await retryEdit.count().catch(() => 0)) > 0) {
-        await retryEdit.click({ force: true, timeout: 4000 }).catch(() => null);
+        await retryEdit.click({ force: true, timeout: 3500 }).catch(() => null);
       }
-      await page.waitForTimeout(3000);
-      ready = await waitForEditReady(30000);
+      await page.waitForTimeout(2500);
+      ready = await waitForEditReady(20000);
     }
 
+    await acknowledgeVisitDateChangePopup(page, state);
     state.form_navigation = {
-      mode: ready ? 'edit_click_navigated' : 'edit_click_navigated_pending',
+      mode: ready
+        ? 'edit_click_navigated'
+        : allowDirectUrlRecovery
+          ? 'edit_click_navigated_pending_with_direct_recovery'
+          : 'edit_click_navigated_pending',
       from: currentUrl,
       to: afterUrl,
       visitId,
@@ -1019,6 +1121,7 @@ async function ensureIxchangeEditVisitForm({ page, state }) {
         .catch(() => null);
       await page.waitForTimeout(1200);
       await popup.close().catch(() => null);
+      await acknowledgeVisitDateChangePopup(page, state);
       state.form_navigation = {
         mode: 'edit_popup_url',
         from: currentUrl,
@@ -1037,6 +1140,7 @@ async function ensureIxchangeEditVisitForm({ page, state }) {
     }
   }
 
+  await acknowledgeVisitDateChangePopup(page, state);
   state.form_navigation = {
     mode: 'edit_click_no_navigation',
     from: currentUrl,
@@ -1069,13 +1173,34 @@ export class IXChangeSubmitter {
       defaultPassword: PORTALS.IXCHANGE?.password || '',
       supportsOtp: true,
       selectors: buildSelectors(),
+      disableDefaultSearchFallback: true,
       searchAttemptBuilder: buildIxchangeSearchAttempts,
       beforeSearch: async ({ page: runPage, state, helpers }) => {
-        state.search_page_ready = await ensureIxchangeSearchReady(runPage);
-        await selectProgramType({ page: runPage, state, helpers });
+        state.search_page_ready = await ensureIxchangeSearchReady(runPage, state);
+        const programSelected = await selectProgramType({ page: runPage, state, helpers });
+        if (!programSelected) {
+          state.search_program_type_verified = false;
+        }
       },
       beforeForm: async ({ page: runPage, state }) => {
         await ensureIxchangeEditVisitForm({ page: runPage, state });
+      },
+      adjustFillVerification: async ({ page: runPage, fillVerification, state }) => {
+        const feeStatus = String(fillVerification?.fee?.status || '');
+        if (feeStatus !== 'verified' && feeStatus !== 'readonly') {
+          const feeEvidence = await extractIxchangeFeeEvidence(runPage);
+          if (feeEvidence?.ok && feeEvidence?.value) {
+            fillVerification.fee = {
+              ...(fillVerification?.fee || {}),
+              status: 'readonly',
+              observed: feeEvidence.value,
+              selector: `eval:${feeEvidence.source || 'consultation'}`,
+              error: fillVerification?.fee?.error || null,
+            };
+          }
+        }
+        await acknowledgeVisitDateChangePopup(runPage, state);
+        return fillVerification;
       },
     });
   }

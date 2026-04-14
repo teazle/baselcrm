@@ -29,10 +29,8 @@ const PORTAL_MATCHERS = {
 };
 
 const GENERIC_OTP_REGEXES = [
-  /\b(?:otp|one[-\s]?time\s*password|verification\s*code|security\s*code)\D{0,12}(\d{4,8})\b/i,
-  /\b(\d{6})\b/,
-  /\b(\d{5})\b/,
-  /\b(\d{4})\b/,
+  /\b(?:otp|one[-\s]?time\s*password|verification\s*code|security\s*code|passcode)\D{0,20}(\d{6})\b/i,
+  /\b(?:code|pin)\D{0,12}(\d{6})\b/i,
 ];
 
 function toBoolean(value, fallback = false) {
@@ -56,16 +54,28 @@ function normalizePortal(portal) {
 function buildOtpRegexes(portal) {
   const key = normalizePortal(portal);
   if (key === 'ALLIANZ') {
-    return [/\b(?:allianz|worldwide\s*care).{0,80}?(\d{4,8})\b/i, ...GENERIC_OTP_REGEXES];
+    return [
+      /\b(?:allianz|worldwide\s*care).{0,40}?(?:otp|verification|security|code).{0,20}?(\d{6})\b/i,
+      ...GENERIC_OTP_REGEXES,
+    ];
   }
   if (key === 'FULLERTON') {
-    return [/\b(?:fullerton|fhn).{0,80}?(\d{4,8})\b/i, ...GENERIC_OTP_REGEXES];
+    return [
+      /\b(?:fullerton|fhn|2xsecure).{0,40}?(?:otp|verification|security|code).{0,20}?(\d{6})\b/i,
+      ...GENERIC_OTP_REGEXES,
+    ];
   }
   if (key === 'IHP') {
-    return [/\b(?:ihp|eclaim).{0,80}?(\d{4,8})\b/i, ...GENERIC_OTP_REGEXES];
+    return [
+      /\b(?:ihp|eclaim).{0,40}?(?:otp|verification|security|code).{0,20}?(\d{6})\b/i,
+      ...GENERIC_OTP_REGEXES,
+    ];
   }
   if (key === 'IXCHANGE') {
-    return [/\b(?:ixchange|spos).{0,80}?(\d{4,8})\b/i, ...GENERIC_OTP_REGEXES];
+    return [
+      /\b(?:ixchange|spos).{0,40}?(?:otp|verification|security|code).{0,20}?(\d{6})\b/i,
+      ...GENERIC_OTP_REGEXES,
+    ];
   }
   return GENERIC_OTP_REGEXES;
 }

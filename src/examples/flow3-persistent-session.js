@@ -36,8 +36,8 @@ const VISITS = {
 };
 
 const MAIN_URLS = {
-  FULLERTON: 'https://doctor.fhn3.com/app_index',
-  IXCHANGE: 'https://spos.o2ixchange.com/login',
+  FULLERTON: 'https://doctor.fhn3.com/patient_list',
+  IXCHANGE: 'https://spos.o2ixchange.com/spos/search-patient',
 };
 const IXCHANGE_SEARCH_URL = 'https://spos.o2ixchange.com/spos/search-patient';
 const IXCHANGE_PROGRAM_TYPES = ['Corporate', 'Shield', 'Individual', 'AIA'];

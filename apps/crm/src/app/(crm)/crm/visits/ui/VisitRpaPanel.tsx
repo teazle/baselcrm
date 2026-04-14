@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import { cn } from "@/lib/cn";
 import { formatDateTimeDDMMYYYY } from "@/lib/utils/date";
+import { classifyVisitForRpa } from "@/lib/rpa/portals";
 
 type VisitRow = {
   id: string;
@@ -14,7 +15,45 @@ type VisitRow = {
   treatment_detail: string | null;
   submission_status: string | null;
   submitted_at: string | null;
-  extraction_metadata: Record<string, any> | null;
+  submission_metadata: {
+    mode?: string | null;
+    blocked_reason?: string | null;
+    sessionState?: string | null;
+    evidence?: string | null;
+    submittedTruthSnapshot?: { source?: string | null } | null;
+    mismatchCategories?: string[] | null;
+    comparison?: {
+      state?: string | null;
+      flow2VsSubmittedTruth?: { state?: string | null } | null;
+      botVsSubmittedTruth?: { state?: string | null } | null;
+    } | null;
+    [key: string]: unknown;
+  } | null;
+  extraction_metadata: {
+    medicines?: Array<{ name?: string | null; quantity?: number | null }> | null;
+    detailsExtractionStatus?: string | null;
+    detailsExtractedAt?: string | null;
+    detailsExtractionLastAttempt?: string | null;
+    pcno?: string | null;
+    claimCandidateReasons?: string[] | null;
+    flow3PortalRoute?: string | null;
+    chargeType?: string | null;
+    mcDays?: number | null;
+    mcStartDate?: string | null;
+    diagnosisCode?: string | null;
+    diagnosisResolution?: { status?: string | null } | null;
+    diagnosisEvidence?: {
+      sourceTab?: string | null;
+      sourceDate?: string | null;
+      confidence?: number | null;
+      rejectionReason?: string | null;
+      artifactPaths?: {
+        json?: string | null;
+        screenshot?: string | null;
+      } | null;
+    } | null;
+    [key: string]: unknown;
+  } | null;
   updated_at: string | null;
 };
 
@@ -47,7 +86,7 @@ export default function VisitRpaPanel({ visitId }: { visitId: string }) {
       const { data, error: qErr } = await supabase
         .from("visits")
         .select(
-          "id,pay_type,nric,diagnosis_description,treatment_detail,submission_status,submitted_at,extraction_metadata,updated_at",
+          "id,pay_type,nric,diagnosis_description,treatment_detail,submission_status,submitted_at,submission_metadata,extraction_metadata,updated_at",
         )
         .eq("id", visitId)
         .maybeSingle();
@@ -73,7 +112,7 @@ export default function VisitRpaPanel({ visitId }: { visitId: string }) {
     const list = row?.extraction_metadata?.medicines;
     if (!Array.isArray(list)) return [];
     return list
-      .map((m: any) => ({
+      .map((m) => ({
         name: String(m?.name ?? "").trim().replace(/\s+/g, " "),
         quantity:
           typeof m?.quantity === "number" && Number.isFinite(m.quantity) ? m.quantity : null,
@@ -115,6 +154,21 @@ export default function VisitRpaPanel({ visitId }: { visitId: string }) {
 
   const md = row.extraction_metadata ?? {};
   const status = String(md.detailsExtractionStatus ?? "").trim() || null;
+  const candidate = classifyVisitForRpa(
+    row.pay_type,
+    null,
+    row.nric,
+    md,
+    row.submission_status,
+  );
+  const flow3Mode = String(row.submission_metadata?.mode || "").trim() || null;
+  const flow3Evidence = row.submission_metadata?.evidence || null;
+  const flow3BlockedReason = row.submission_metadata?.blocked_reason || null;
+  const flow3Comparison = row.submission_metadata?.comparison || null;
+  const flow3MismatchCategories = Array.isArray(row.submission_metadata?.mismatchCategories)
+    ? row.submission_metadata?.mismatchCategories
+    : [];
+  const flow3TruthCaptured = Boolean(row.submission_metadata?.submittedTruthSnapshot);
 
   return (
     <Card className="p-0">
@@ -140,6 +194,14 @@ export default function VisitRpaPanel({ visitId }: { visitId: string }) {
             }
           />
           <K label="PCNO" value={md.pcno ?? "--"} />
+          <K label="Claim candidate" value={candidate.status} />
+          <K
+            label="Candidate reasons"
+            value={Array.isArray(md.claimCandidateReasons) && md.claimCandidateReasons.length
+              ? md.claimCandidateReasons.join(", ")
+              : candidate.reasons.join(", ")}
+          />
+          <K label="Flow 3 route" value={md.flow3PortalRoute ?? "--"} />
           <K
             label="Extraction status"
             value={
@@ -181,6 +243,29 @@ export default function VisitRpaPanel({ visitId }: { visitId: string }) {
           />
           <K label="Diagnosis code" value={md.diagnosisCode ?? "--"} />
           <K label="Diagnosis (text)" value={row.diagnosis_description ?? "--"} />
+          <K label="Diagnosis resolution" value={md.diagnosisResolution?.status ?? "--"} />
+          <K
+            label="Diagnosis evidence"
+            value={
+              md.diagnosisEvidence ? (
+                <div className="space-y-1 text-xs">
+                  <div>Source: {md.diagnosisEvidence.sourceTab ?? "--"}</div>
+                  <div>Source date: {md.diagnosisEvidence.sourceDate ?? "--"}</div>
+                  <div>Confidence: {md.diagnosisEvidence.confidence ?? "--"}</div>
+                  <div>Reason: {md.diagnosisEvidence.rejectionReason ?? "--"}</div>
+                  <div>
+                    Artifacts:{" "}
+                    {md.diagnosisEvidence.artifactPaths?.json ||
+                    md.diagnosisEvidence.artifactPaths?.screenshot
+                      ? "saved"
+                      : "none"}
+                  </div>
+                </div>
+              ) : (
+                "--"
+              )
+            }
+          />
           <K
             label="Medicines"
             value={
@@ -229,6 +314,32 @@ export default function VisitRpaPanel({ visitId }: { visitId: string }) {
             }
           />
           <K label="Submission status" value={row.submission_status ?? "--"} />
+          <K label="Flow 3 mode" value={flow3Mode ?? "--"} />
+          <K label="Flow 3 blocked reason" value={flow3BlockedReason ?? "--"} />
+          <K label="Flow 3 session" value={row.submission_metadata?.sessionState ?? "--"} />
+          <K label="Flow 3 evidence" value={flow3Evidence ? "Captured" : "--"} />
+          <K
+            label="Submitted truth"
+            value={flow3TruthCaptured ? row.submission_metadata?.submittedTruthSnapshot?.source ?? "Captured" : "--"}
+          />
+          <K
+            label="Flow 3 compare"
+            value={
+              flow3Comparison ? (
+                <div className="space-y-1 text-xs">
+                  <div>Overall: {flow3Comparison.state ?? "--"}</div>
+                  <div>Bot vs submitted: {flow3Comparison.botVsSubmittedTruth?.state ?? "--"}</div>
+                  <div>Flow 2 vs submitted: {flow3Comparison.flow2VsSubmittedTruth?.state ?? "--"}</div>
+                </div>
+              ) : (
+                "--"
+              )
+            }
+          />
+          <K
+            label="Mismatch categories"
+            value={flow3MismatchCategories.length ? flow3MismatchCategories.join(", ") : "--"}
+          />
           <K label="Submitted at" value={formatDateTimeDDMMYYYY(row.submitted_at ?? null) ?? "--"} />
           <K label="Updated at" value={formatDateTimeDDMMYYYY(row.updated_at ?? null) ?? "--"} />
         </div>
@@ -236,4 +347,3 @@ export default function VisitRpaPanel({ visitId }: { visitId: string }) {
     </Card>
   );
 }
-

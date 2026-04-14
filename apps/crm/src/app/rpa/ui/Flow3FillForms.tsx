@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState, useMemo, useCallback } from 'react';
-import Link from 'next/link';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { DataTable, RowLink } from '@/components/ui/DataTable';
@@ -15,14 +14,10 @@ import {
 } from '@/lib/utils/date';
 import { cn } from '@/lib/cn';
 import {
+  classifyVisitForRpa,
   getFlow3PortalTargets,
   getPortalScopeOrFilter,
-  getSupportedPortals,
-  getUnsupportedPortals,
-  isAllianceMedinetVisit,
   matchesFlow3PortalTargets,
-  isSupportedPortal,
-  isUnsupportedPortal,
 } from '@/lib/rpa/portals';
 import FlowHeader from './FlowHeader';
 import RunSummaryPanel from './RunSummaryPanel';
@@ -36,23 +31,52 @@ type VisitRow = {
   submission_status: string | null;
   submitted_at: string | null;
   submission_metadata: {
+    mode?: string;
+    success?: boolean;
     portal?: string;
+    portalService?: string;
     savedAsDraft?: boolean;
     drafted_at?: string;
+    processedAt?: string;
+    blocked_reason?: string;
+    sessionState?: string | null;
+    evidence?: string | null;
+    mismatchCategories?: string[] | null;
+    submittedTruthSnapshot?: { source?: string | null } | null;
+    comparison?:
+      | {
+          state?: string;
+          unavailableReason?: string;
+          flow2VsSubmittedTruth?: { state?: string | null } | null;
+          botVsSubmittedTruth?: { state?: string | null } | null;
+        }
+      | null;
     [key: string]: unknown;
   } | null;
   extraction_metadata: {
     nric?: string | null;
+    claimCandidateStatus?: string | null;
+    claimCandidateReasons?: string[] | null;
+    flow3PortalRoute?: string | null;
   } | null;
 };
 
-type FilterKey = 'all' | 'draft' | 'submitted' | 'not_started' | 'error';
+type FilterKey =
+  | 'all'
+  | 'candidate_pending'
+  | 'manual_review'
+  | 'filled_evidence'
+  | 'draft'
+  | 'submitted'
+  | 'error';
 
 const filters: Array<{ key: FilterKey; label: string }> = [
   { key: 'all', label: 'All' },
-  { key: 'draft', label: 'Processed (draft)' },
-  { key: 'submitted', label: 'Processed (submitted)' },
-  { key: 'not_started', label: 'Not started' },
+  { key: 'candidate_pending', label: 'Candidate pending' },
+  { key: 'manual_review', label: 'Manual review' },
+  { key: 'filled_evidence', label: 'Filled + evidence' },
+  { key: 'draft', label: 'Draft' },
+  { key: 'submitted', label: 'Submitted' },
   { key: 'error', label: 'Error' },
 ];
 
@@ -86,57 +110,29 @@ export default function Flow3FillForms() {
     getFlow3PortalTargets().map(v => String(v))
   );
   const [leaveBrowserOpen, setLeaveBrowserOpen] = useState(false);
-  const [portalConfig, setPortalConfig] = useState<{
-    supported: Set<string>;
-    unsupported: Set<string>;
-  } | null>(null);
-
-  const normalizePortal = useCallback((value?: string | null) => {
-    if (!value) return null;
-    const code = String(value).trim().toUpperCase();
-    return code.length > 0 ? code : null;
-  }, []);
-
-  const isSupported = useCallback((payType?: string | null) => {
-    const code = normalizePortal(payType);
-    if (!code) return false;
-    if (portalConfig) return portalConfig.supported.has(code);
-    return isSupportedPortal(code);
-  }, [normalizePortal, portalConfig]);
-
-  const isUnsupported = useCallback((payType?: string | null) => {
-    const code = normalizePortal(payType);
-    if (!code) return false;
-    if (portalConfig) return portalConfig.unsupported.has(code);
-    return isUnsupportedPortal(code);
-  }, [normalizePortal, portalConfig]);
+  const [mode, setMode] = useState<'fill_evidence' | 'draft'>('fill_evidence');
 
   const getSubmissionStatus = useCallback((
     visit: VisitRow
-  ): 'draft' | 'submitted' | 'error' | 'not_started' => {
-    const status = visit.submission_status;
-    const payType = visit.pay_type;
-    const allianceTagged = isAllianceMedinetVisit(payType, visit.patient_name, visit.extraction_metadata);
+  ): 'candidate_pending' | 'manual_review' | 'filled_evidence' | 'draft' | 'submitted' | 'error' => {
+    const status = String(visit.submission_status || '').trim().toLowerCase();
+    const candidate = classifyVisitForRpa(
+      visit.pay_type,
+      visit.patient_name,
+      visit.nric || visit.extraction_metadata?.nric || null,
+      visit.extraction_metadata,
+      visit.submission_status
+    );
+    const metadataMode = String(visit.submission_metadata?.mode || '').trim().toLowerCase();
+    const metadataSuccess = visit.submission_metadata?.success === true;
 
-    // Status precedence: error > submitted > draft > not_started
     if (status === 'error') return 'error';
     if (status === 'submitted') return 'submitted';
     if (status === 'draft') return 'draft';
-
-    // Not started: status is null AND portal is unsupported
-    if (!status && payType && isUnsupported(payType)) {
-      return 'not_started';
-    }
-
-    if (!status && allianceTagged) {
-      return 'not_started';
-    }
-
-    // Also not started if status is null (even for supported portals that haven't been processed)
-    if (!status) return 'not_started';
-
-    return 'not_started';
-  }, [isUnsupported]);
+    if (metadataMode === 'fill_evidence' && metadataSuccess) return 'filled_evidence';
+    if (candidate.status === 'manual_review') return 'manual_review';
+    return 'candidate_pending';
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -163,10 +159,7 @@ export default function Flow3FillForms() {
       if (toDate) visitsQuery = visitsQuery.lte('visit_date', toDate);
       if (portalOnly) visitsQuery = visitsQuery.or(getPortalScopeOrFilter());
 
-      const [visitsRes, portalsRes] = await Promise.all([
-        visitsQuery,
-        supabase.from('rpa_portals').select('portal_code,status'),
-      ]);
+      const [visitsRes] = await Promise.all([visitsQuery]);
 
       if (cancelled) return;
       if (visitsRes.error) {
@@ -186,41 +179,18 @@ export default function Flow3FillForms() {
         setLoading(false);
         return;
       }
-      if (!portalsRes.error && portalsRes.data) {
-        if (portalsRes.data.length === 0) {
-          setPortalConfig({
-            supported: new Set(getSupportedPortals()),
-            unsupported: new Set(getUnsupportedPortals()),
-          });
-        } else {
-          const supported = new Set<string>();
-          const unsupported = new Set<string>();
-          portalsRes.data.forEach(row => {
-            const code = normalizePortal(row.portal_code);
-            if (!code) return;
-            if (row.status === 'supported') {
-              supported.add(code);
-            } else {
-              unsupported.add(code);
-            }
-          });
-          setPortalConfig({ supported, unsupported });
-        }
-      } else {
-        setPortalConfig({
-          supported: new Set(getSupportedPortals()),
-          unsupported: new Set(getUnsupportedPortals()),
-        });
-      }
       setRows((visitsRes.data ?? []) as VisitRow[]);
       setLoading(false);
     })();
     return () => {
       cancelled = true;
     };
-  }, [fromDate, portalOnly, toDate, normalizePortal]);
+  }, [fromDate, portalOnly, toDate]);
 
-  const handleSubmitClaims = async (visitIds?: string[], saveAsDraft?: boolean) => {
+  const handleSubmitClaims = async (
+    visitIds?: string[],
+    requestedMode: 'fill_evidence' | 'draft' = mode
+  ) => {
     setSubmitBusy(true);
     setNotice(null);
     try {
@@ -229,7 +199,7 @@ export default function Flow3FillForms() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           visitIds,
-          saveAsDraft,
+          mode: requestedMode,
           leaveOpen: leaveBrowserOpen,
           from: fromDate,
           to: toDate,
@@ -267,12 +237,16 @@ export default function Flow3FillForms() {
       }
       const status = getSubmissionStatus(row);
       switch (filter) {
+        case 'candidate_pending':
+          return status === 'candidate_pending';
+        case 'manual_review':
+          return status === 'manual_review';
+        case 'filled_evidence':
+          return status === 'filled_evidence';
         case 'draft':
           return status === 'draft';
         case 'submitted':
           return status === 'submitted';
-        case 'not_started':
-          return status === 'not_started';
         case 'error':
           return status === 'error';
         default:
@@ -291,21 +265,29 @@ export default function Flow3FillForms() {
       )
     );
     if (!scopedRows.length) {
-      return { draft: 0, submitted: 0, notStarted: 0, error: 0, total: 0 };
+      return {
+        candidatePending: 0,
+        manualReview: 0,
+        filledEvidence: 0,
+        draft: 0,
+        submitted: 0,
+        error: 0,
+        total: 0,
+      };
     }
+    const candidatePending = scopedRows.filter(r => getSubmissionStatus(r) === 'candidate_pending').length;
+    const manualReview = scopedRows.filter(r => getSubmissionStatus(r) === 'manual_review').length;
+    const filledEvidence = scopedRows.filter(r => getSubmissionStatus(r) === 'filled_evidence').length;
     const draft = scopedRows.filter(r => getSubmissionStatus(r) === 'draft').length;
     const submitted = scopedRows.filter(r => getSubmissionStatus(r) === 'submitted').length;
-    const notStarted = scopedRows.filter(r => getSubmissionStatus(r) === 'not_started').length;
     const error = scopedRows.filter(r => getSubmissionStatus(r) === 'error').length;
-    return { draft, submitted, notStarted, error, total: scopedRows.length };
+    return { candidatePending, manualReview, filledEvidence, draft, submitted, error, total: scopedRows.length };
   }, [rows, selectedPortalTargets, getSubmissionStatus]);
 
   const flowStatus =
     metrics.error > 0
       ? { label: 'Needs attention', tone: 'danger' as const }
-      : portalConfig && portalConfig.supported.size === 0
-        ? { label: 'Configure portals', tone: 'neutral' as const }
-        : metrics.notStarted > 0
+      : metrics.candidatePending > 0 || metrics.manualReview > 0
           ? { label: 'Pending', tone: 'warning' as const }
           : { label: 'Ready', tone: 'success' as const };
 
@@ -327,10 +309,13 @@ export default function Flow3FillForms() {
 
   const getStatusLabel = (visit: VisitRow) => {
     const status = getSubmissionStatus(visit);
-    if (status === 'draft') return 'Processed (draft)';
-    if (status === 'submitted') return 'Processed (submitted)';
+    if (status === 'candidate_pending') return 'Candidate pending';
+    if (status === 'manual_review') return 'Manual review';
+    if (status === 'filled_evidence') return 'Filled + evidence';
+    if (status === 'draft') return 'Draft';
+    if (status === 'submitted') return 'Submitted';
     if (status === 'error') return 'Error';
-    return 'Not started';
+    return 'Candidate pending';
   };
 
   return (
@@ -345,16 +330,6 @@ export default function Flow3FillForms() {
       />
 
       <RunSummaryPanel flowPrefix="flow3" />
-
-      {portalConfig && portalConfig.supported.size === 0 ? (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
-          No supported portals are configured. Configure supported portals in{' '}
-          <Link href="/rpa/settings" className="underline underline-offset-2">
-            RPA Settings
-          </Link>{' '}
-          before submitting claims.
-        </div>
-      ) : null}
 
       <Card className="p-5">
         <div className="text-xs font-medium text-muted-foreground">Scope</div>
@@ -419,28 +394,63 @@ export default function Flow3FillForms() {
             Selected: {selectedPortalTargets.length > 0 ? selectedPortalTargets.join(', ') : 'none'}
           </div>
         </div>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <div className="text-xs text-muted-foreground">Mode</div>
+          <button
+            type="button"
+            className={cn(
+              'rounded-full border px-3 py-1 text-xs font-medium transition',
+              mode === 'fill_evidence'
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border bg-card text-foreground hover:bg-muted'
+            )}
+            onClick={() => setMode('fill_evidence')}
+          >
+            Fill + evidence
+          </button>
+          <button
+            type="button"
+            className={cn(
+              'rounded-full border px-3 py-1 text-xs font-medium transition',
+              mode === 'draft'
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border bg-card text-foreground hover:bg-muted'
+            )}
+            onClick={() => setMode('draft')}
+          >
+            Draft
+          </button>
+        </div>
         <div className="mt-2 text-xs text-muted-foreground">
           Showing {portalOnly ? 'portal-tagged visits' : 'all visits'} between {fromDate} and{' '}
           {toDate}.
         </div>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-6">
         <Card className="p-5">
           <div className="text-xs text-muted-foreground">Total Claims</div>
           <div className="mt-2 text-2xl font-semibold">{metrics.total}</div>
         </Card>
         <Card className="p-5">
-          <div className="text-xs text-muted-foreground">Processed (draft)</div>
+          <div className="text-xs text-muted-foreground">Candidate pending</div>
+          <div className="mt-2 text-2xl font-semibold">{metrics.candidatePending}</div>
+        </Card>
+        <Card className="p-5">
+          <div className="text-xs text-muted-foreground">Manual review</div>
+          <div className="mt-2 text-2xl font-semibold">{metrics.manualReview}</div>
+        </Card>
+        <Card className="p-5">
+          <div className="text-xs text-muted-foreground">Filled + evidence</div>
+          <div className="mt-2 text-2xl font-semibold">{metrics.filledEvidence}</div>
+        </Card>
+        <Card className="p-5">
+          <div className="text-xs text-muted-foreground">Draft</div>
           <div className="mt-2 text-2xl font-semibold">{metrics.draft}</div>
         </Card>
         <Card className="p-5">
-          <div className="text-xs text-muted-foreground">Processed (submitted)</div>
+          <div className="text-xs text-muted-foreground">Submitted</div>
           <div className="mt-2 text-2xl font-semibold">{metrics.submitted}</div>
-        </Card>
-        <Card className="p-5">
-          <div className="text-xs text-muted-foreground">Not started</div>
-          <div className="mt-2 text-2xl font-semibold">{metrics.notStarted}</div>
         </Card>
         <Card className="p-5">
           <div className="text-xs text-muted-foreground">Error</div>
@@ -453,7 +463,7 @@ export default function Flow3FillForms() {
           <div className="text-xs font-medium text-muted-foreground">Manual Trigger</div>
           <div className="text-lg font-semibold">Submit Claims</div>
           <div className="mt-2 text-sm text-muted-foreground">
-            Submit claims to respective portals. Select specific visits or submit all pending.
+            Fill portal forms with evidence capture by default. Draft mode is available for validated routes only.
           </div>
         </div>
 
@@ -471,34 +481,30 @@ export default function Flow3FillForms() {
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
-              onClick={() => handleSubmitClaims(undefined, false)}
+              onClick={() => handleSubmitClaims(undefined, mode)}
               disabled={submitBusy || selectedPortalTargets.length === 0}
             >
-              {submitBusy ? 'Starting...' : 'Fill All Pending (no save)'}
+              {submitBusy
+                ? 'Starting...'
+                : mode === 'draft'
+                  ? 'Run Draft Mode'
+                  : 'Run Fill + Evidence'}
             </Button>
             <Button
               type="button"
               variant="outline"
-              onClick={() => handleSubmitClaims(undefined, true)}
-              disabled={submitBusy || selectedPortalTargets.length === 0}
-            >
-              Save All as Draft
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleSubmitClaims(errorIds, true)}
+              onClick={() => handleSubmitClaims(errorIds, 'draft')}
               disabled={submitBusy || errorIds.length === 0 || selectedPortalTargets.length === 0}
             >
-              Retry Errors (save draft) ({errorIds.length})
+              Retry Errors (draft) ({errorIds.length})
             </Button>
             <Button
               type="button"
               variant="outline"
-              onClick={() => handleSubmitClaims(errorIds, false)}
+              onClick={() => handleSubmitClaims(errorIds, 'fill_evidence')}
               disabled={submitBusy || errorIds.length === 0 || selectedPortalTargets.length === 0}
             >
-              Retry Errors (fill only) ({errorIds.length})
+              Retry Errors (fill + evidence) ({errorIds.length})
             </Button>
           </div>
         </div>
@@ -558,21 +564,19 @@ export default function Flow3FillForms() {
               {
                 header: 'Portal',
                 cell: row => {
-                  const payType = row.pay_type || '--';
-                  const supported = payType !== '--' && isSupported(payType);
-                  const unsupported = payType !== '--' && isUnsupported(payType);
+                  const portalLabel =
+                    row.submission_metadata?.portalService ||
+                    row.extraction_metadata?.flow3PortalRoute ||
+                    row.pay_type ||
+                    '--';
                   return (
                     <span
                       className={cn(
                         'inline-flex rounded-full border px-2.5 py-1 text-xs font-medium',
-                        supported
-                          ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                          : unsupported
-                            ? 'border-amber-200 bg-amber-50 text-amber-700'
-                            : 'border-border bg-muted/50 text-muted-foreground'
+                        'border-border bg-muted/50 text-foreground'
                       )}
                     >
-                      {payType}
+                      {portalLabel}
                     </span>
                   );
                 },
@@ -596,8 +600,12 @@ export default function Flow3FillForms() {
                         'inline-flex rounded-full border px-2.5 py-1 text-xs font-medium',
                         status === 'submitted'
                           ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                          : status === 'filled_evidence'
+                            ? 'border-sky-200 bg-sky-50 text-sky-700'
                           : status === 'draft'
                             ? 'border-blue-200 bg-blue-50 text-blue-700'
+                            : status === 'manual_review'
+                              ? 'border-amber-200 bg-amber-50 text-amber-700'
                             : status === 'error'
                               ? 'border-red-200 bg-red-50 text-red-700'
                               : 'border-border bg-muted/50 text-muted-foreground'
@@ -613,8 +621,11 @@ export default function Flow3FillForms() {
                 cell: row => {
                   const status = getSubmissionStatus(row);
                   const draftedAt = row.submission_metadata?.drafted_at;
+                  const processedAtMeta = row.submission_metadata?.processedAt;
                   const processedAt =
-                    status === 'draft' ? draftedAt || row.submitted_at : row.submitted_at;
+                    status === 'draft'
+                      ? draftedAt || row.submitted_at || processedAtMeta
+                      : row.submitted_at || processedAtMeta;
                   return formatDateTimeDDMMYYYY(processedAt) || '--';
                 },
               },
@@ -622,12 +633,53 @@ export default function Flow3FillForms() {
                 header: 'Metadata',
                 cell: row => {
                   const metadata = row.submission_metadata;
-                  if (!metadata) return '--';
-                  const portal = metadata.portal || '--';
+                  const candidate = classifyVisitForRpa(
+                    row.pay_type,
+                    row.patient_name,
+                    row.nric || row.extraction_metadata?.nric || null,
+                    row.extraction_metadata,
+                    row.submission_status
+                  );
+                  if (!metadata) {
+                    return (
+                      <div className="text-xs space-y-1">
+                        <div>Candidate: {candidate.status}</div>
+                        <div className="text-muted-foreground">
+                          {Array.isArray(candidate.reasons) && candidate.reasons.length
+                            ? candidate.reasons.join(', ')
+                            : '--'}
+                        </div>
+                      </div>
+                    );
+                  }
+                  const portal = metadata.portal || metadata.portalService || '--';
                   const savedAsDraft = metadata.savedAsDraft;
                   return (
                     <div className="text-xs space-y-1">
                       <div>Portal: {portal}</div>
+                      <div>Mode: {metadata.mode || '--'}</div>
+                      {metadata.blocked_reason ? (
+                        <div className="text-amber-700">Blocked: {String(metadata.blocked_reason)}</div>
+                      ) : null}
+                      {metadata.sessionState ? <div>Session: {String(metadata.sessionState)}</div> : null}
+                      {metadata.evidence ? <div>Evidence: captured</div> : null}
+                      {metadata.comparison && typeof metadata.comparison === 'object' ? (
+                        <div>
+                          Compare: {String(metadata.comparison.state || '--')}
+                          {metadata.comparison.botVsSubmittedTruth?.state
+                            ? ` / bot=${String(metadata.comparison.botVsSubmittedTruth.state)}`
+                            : ''}
+                          {metadata.comparison.flow2VsSubmittedTruth?.state
+                            ? ` / flow2=${String(metadata.comparison.flow2VsSubmittedTruth.state)}`
+                            : ''}
+                        </div>
+                      ) : null}
+                      {metadata.submittedTruthSnapshot ? <div>Submitted truth: captured</div> : null}
+                      {Array.isArray(metadata.mismatchCategories) && metadata.mismatchCategories.length ? (
+                        <div className="text-amber-700">
+                          Mismatch: {metadata.mismatchCategories.join(', ')}
+                        </div>
+                      ) : null}
                       {savedAsDraft && <div className="text-muted-foreground">Saved as draft</div>}
                     </div>
                   );

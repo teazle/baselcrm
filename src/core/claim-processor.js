@@ -106,7 +106,9 @@ export class ClaimProcessor {
    */
   async processClaimWorkflow(workflowParams) {
     try {
-      logger.info('Starting claim workflow...');
+      logger.warn(
+        'Starting legacy single-claim workflow. Prefer the CRM 3-flow pipeline (flow1 -> flow2 -> flow3) for production runs.'
+      );
       
       const { ClaimWorkflow } = await import('./claim-workflow.js');
       
@@ -140,4 +142,3 @@ export class ClaimProcessor {
     }
   }
 }
-

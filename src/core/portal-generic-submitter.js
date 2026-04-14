@@ -1,5 +1,6 @@
 import { logger } from '../utils/logger.js';
 import { getOtpCode } from '../utils/portal-otp.js';
+import { comparePortalLatestClaim } from '../utils/flow3-portal-compare.js';
 
 function sleep(ms) {
   return new Promise(resolve => globalThis.setTimeout(resolve, ms));
@@ -125,6 +126,71 @@ function toRegexList(items) {
     .filter(Boolean);
 }
 
+function toBoolean(value, fallback = false) {
+  if (value === undefined || value === null || value === '') return fallback;
+  const normalized = String(value).trim().toLowerCase();
+  if (['1', 'true', 'yes', 'y', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'n', 'off'].includes(normalized)) return false;
+  return fallback;
+}
+
+function normalizeDateValue(value) {
+  const raw = String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!raw) return '';
+  const dmy = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (dmy) {
+    const dd = String(Number(dmy[1])).padStart(2, '0');
+    const mm = String(Number(dmy[2])).padStart(2, '0');
+    return `${dmy[3]}-${mm}-${dd}`;
+  }
+  const ymd = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (ymd) {
+    const mm = String(Number(ymd[2])).padStart(2, '0');
+    const dd = String(Number(ymd[3])).padStart(2, '0');
+    return `${ymd[1]}-${mm}-${dd}`;
+  }
+  return raw.toLowerCase();
+}
+
+function normalizeAmountValue(value) {
+  const raw = String(value || '')
+    .replace(/,/g, '')
+    .trim();
+  if (!raw) return '';
+  const match = raw.match(/-?\d+(?:\.\d+)?/);
+  if (!match) return '';
+  const num = Number(match[0]);
+  if (!Number.isFinite(num)) return '';
+  return num.toFixed(2);
+}
+
+function normalizeGenericValue(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function valuesMatchByField(field, expected, observed) {
+  const key = String(field || '').toLowerCase();
+  if (!expected && !observed) return true;
+  if (key === 'visitdate' || key === 'date') {
+    return normalizeDateValue(expected) === normalizeDateValue(observed);
+  }
+  if (key === 'fee' || key === 'amount' || key === 'consultation') {
+    const e = normalizeAmountValue(expected);
+    const o = normalizeAmountValue(observed);
+    if (!e || !o) return false;
+    return Number(e) === Number(o);
+  }
+  const e = normalizeGenericValue(expected);
+  const o = normalizeGenericValue(observed);
+  if (!e || !o) return false;
+  return o.includes(e) || e.includes(o);
+}
+
 export class GenericPortalSubmitter {
   constructor(config) {
     this.config = config;
@@ -145,6 +211,13 @@ export class GenericPortalSubmitter {
         : null;
     this.searchAttemptBuilder =
       typeof config?.searchAttemptBuilder === 'function' ? config.searchAttemptBuilder : null;
+    this.disableDefaultSearchFallback = config?.disableDefaultSearchFallback === true;
+    this.adjustFillVerification =
+      typeof config?.adjustFillVerification === 'function' ? config.adjustFillVerification : null;
+    this.requiredFieldResolver =
+      typeof config?.requiredFieldResolver === 'function' ? config.requiredFieldResolver : null;
+    this.verifyFilledValues = toBoolean(process.env.FLOW3_VERIFY_FILLED_VALUES, true);
+    this.compareHistorical = toBoolean(process.env.FLOW3_COMPARE_HISTORICAL, true);
   }
 
   async _captureSearchDebug() {
@@ -260,6 +333,101 @@ export class GenericPortalSubmitter {
     return found.selector;
   }
 
+  async _readLocatorObserved(locator) {
+    return locator
+      .evaluate(el => {
+        if (!el) return { value: '', readonly: false, disabled: false };
+        const tag = String(el.tagName || '').toLowerCase();
+        const input = /** @type {HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement} */ (el);
+        const value =
+          'value' in input && typeof input.value === 'string' && input.value.trim()
+            ? input.value
+            : String(el.textContent || '');
+        const readonly = Boolean(
+          input.hasAttribute?.('readonly') ||
+            input.getAttribute?.('aria-readonly') === 'true' ||
+            input.getAttribute?.('readonly') === 'readonly'
+        );
+        const disabled = Boolean(
+          input.hasAttribute?.('disabled') ||
+            input.getAttribute?.('aria-disabled') === 'true' ||
+            input.getAttribute?.('disabled') === 'disabled'
+        );
+        return {
+          value: String(value || '').replace(/\s+/g, ' ').trim(),
+          readonly,
+          disabled,
+          tag,
+          type: String(input.getAttribute?.('type') || '').toLowerCase(),
+        };
+      })
+      .catch(() => ({ value: '', readonly: false, disabled: false }));
+  }
+
+  async _fillAndVerify(field, selectors, expectedValue, options = {}) {
+    const attemptedSelectors = Array.isArray(selectors) ? selectors.filter(Boolean) : [];
+    const expected = String(expectedValue ?? '').trim();
+    const result = {
+      status: 'not_found',
+      expected,
+      observed: '',
+      selector: null,
+      error: null,
+      attemptedSelectors,
+    };
+
+    if (!expected) {
+      return { ...result, status: 'skipped' };
+    }
+
+    const found = await this._waitForFirst(attemptedSelectors, {
+      timeout: Number(options.timeout || 2500),
+      visibleOnly: options.visibleOnly !== false,
+    });
+    if (!found) return result;
+
+    result.selector = found.selector;
+    let writeFailed = false;
+    try {
+      await found.locator.click({ timeout: 2000 }).catch(() => null);
+      await found.locator.fill(expected, { timeout: 3200 });
+    } catch (error) {
+      writeFailed = true;
+      result.error = error?.message || String(error);
+      await found.locator
+        .evaluate((el, v) => {
+          if (!el) return false;
+          const input = /** @type {HTMLInputElement | HTMLTextAreaElement} */ (el);
+          if (input.hasAttribute('readonly') || input.hasAttribute('disabled')) {
+            return false;
+          }
+          input.value = String(v ?? '');
+          input.dispatchEvent(new globalThis.Event('input', { bubbles: true }));
+          input.dispatchEvent(new globalThis.Event('change', { bubbles: true }));
+          return true;
+        }, expected)
+        .catch(() => false);
+    }
+
+    await this.page.waitForTimeout(140);
+    const observed = await this._readLocatorObserved(found.locator);
+    result.observed = String(observed?.value || '').trim();
+    const matched = valuesMatchByField(field, expected, result.observed);
+    if (matched) {
+      result.status = 'verified';
+      return result;
+    }
+    if (observed?.readonly || observed?.disabled) {
+      result.status = 'readonly';
+      if (!result.error && writeFailed) {
+        result.error = 'field_is_readonly_or_disabled';
+      }
+      return result;
+    }
+    result.status = 'mismatch';
+    return result;
+  }
+
   async _clickFirst(selectors, options = {}) {
     const found = await this._waitForFirst(selectors, {
       timeout: options.timeout || 2500,
@@ -300,12 +468,15 @@ export class GenericPortalSubmitter {
   }
 
   _buildResult(base, overrides = {}) {
+    const requestedMode = String(process.env.FLOW3_MODE || '').trim().toLowerCase() || 'fill_evidence';
     return {
       success: false,
       portal: this.portalName,
       portalService: this.portalTarget,
+      mode: requestedMode,
       savedAsDraft: false,
       submitted: false,
+      blocked_reason: null,
       ...base,
       ...overrides,
     };
@@ -507,6 +678,12 @@ export class GenericPortalSubmitter {
         .catch(() => null);
     }
 
+    if (this.selectors.requireSearchProgramType === true && state.search_program_type_verified !== true) {
+      state.search_state = 'program_type_unverified';
+      state.search_debug = await this._captureSearchDebug();
+      return { ok: false, reason: 'program_type_unverified', nric: null };
+    }
+
     const nric = extractNric(visit);
     let attempts = [];
     if (this.searchAttemptBuilder) {
@@ -559,7 +736,7 @@ export class GenericPortalSubmitter {
       }
     }
 
-    if (!attempts.length) {
+    if (!attempts.length && !this.disableDefaultSearchFallback) {
       const identifiers = this.searchIdentifierExtractor
         ? [
             ...new Set(
@@ -755,55 +932,154 @@ export class GenericPortalSubmitter {
     const diagnosis = extractDiagnosisText(visit);
     const amount = extractAmount(visit);
     const visitDate = toDdMmYyyy(visit?.visit_date);
+    const remarksText = `Flow3 probe ${new Date().toISOString()}`;
 
-    const visitDateSelector = await this._fillFirst(this.selectors.formVisitDate, visitDate, {
-      timeout: 2200,
-    });
-    const diagnosisSelector = await this._fillFirst(this.selectors.formDiagnosis, diagnosis, {
-      timeout: 2500,
-    });
-    const amountSelector = await this._fillFirst(this.selectors.formAmount, amount, {
-      timeout: 2200,
-    });
+    let fillVerification = {
+      visitDate: this.verifyFilledValues
+        ? await this._fillAndVerify('visitDate', this.selectors.formVisitDate, visitDate, {
+            timeout: 2200,
+          })
+        : {
+            status: (await this._fillFirst(this.selectors.formVisitDate, visitDate, {
+              timeout: 2200,
+            }))
+              ? 'verified'
+              : 'not_found',
+            expected: visitDate,
+            observed: '',
+            selector: null,
+            error: null,
+            attemptedSelectors: this.selectors.formVisitDate || [],
+          },
+      diagnosis: this.verifyFilledValues
+        ? await this._fillAndVerify('diagnosis', this.selectors.formDiagnosis, diagnosis, {
+            timeout: 2600,
+          })
+        : {
+            status: (await this._fillFirst(this.selectors.formDiagnosis, diagnosis, {
+              timeout: 2500,
+            }))
+              ? 'verified'
+              : 'not_found',
+            expected: diagnosis,
+            observed: '',
+            selector: null,
+            error: null,
+            attemptedSelectors: this.selectors.formDiagnosis || [],
+          },
+      fee: this.verifyFilledValues
+        ? await this._fillAndVerify('fee', this.selectors.formAmount, amount, {
+            timeout: 2300,
+          })
+        : {
+            status: (await this._fillFirst(this.selectors.formAmount, amount, {
+              timeout: 2200,
+            }))
+              ? 'verified'
+              : 'not_found',
+            expected: amount,
+            observed: '',
+            selector: null,
+            error: null,
+            attemptedSelectors: this.selectors.formAmount || [],
+          },
+      remarks: this.selectors.formRemarks?.length
+        ? await this._fillAndVerify('remarks', this.selectors.formRemarks, remarksText, {
+            timeout: 1400,
+          })
+        : {
+            status: 'skipped',
+            expected: '',
+            observed: '',
+            selector: null,
+            error: null,
+            attemptedSelectors: [],
+          },
+    };
 
-    let remarksSelector = null;
-    if (this.selectors.formRemarks?.length) {
-      remarksSelector = await this._fillFirst(
-        this.selectors.formRemarks,
-        `Flow3 probe ${new Date().toISOString()}`,
-        {
-          timeout: 1200,
+    if (this.adjustFillVerification) {
+      try {
+        const patch = await this.adjustFillVerification({
+          page: this.page,
+          visit,
+          state,
+          fillVerification,
+        });
+        if (patch && typeof patch === 'object') {
+          fillVerification = {
+            ...fillVerification,
+            ...patch,
+          };
         }
-      ).catch(() => null);
+      } catch (error) {
+        logger.warn(`[${this.portalTarget}] adjustFillVerification failed`, {
+          error: error?.message || String(error),
+        });
+      }
     }
 
-    const filledSelectors = [
-      visitDateSelector,
-      diagnosisSelector,
-      amountSelector,
-      remarksSelector,
-    ].filter(Boolean);
-    const minFilledFields = Number(this.selectors.minFilledFormFields || 1);
-    if (filledSelectors.length < minFilledFields) {
-      state.form_state = 'form_fields_missing';
-      state.formSelectors = {
-        visitDate: visitDateSelector || null,
-        diagnosis: diagnosisSelector || null,
-        amount: amountSelector || null,
-        remarks: remarksSelector || null,
+    state.fillVerification = fillVerification;
+    state.formSelectors = {
+      visitDate: fillVerification?.visitDate?.selector || null,
+      diagnosis: fillVerification?.diagnosis?.selector || null,
+      amount: fillVerification?.fee?.selector || null,
+      remarks: fillVerification?.remarks?.selector || null,
+    };
+
+    let requiredFields = [];
+    if (this.requiredFieldResolver) {
+      try {
+        const resolved = await this.requiredFieldResolver({ visit, state, fillVerification });
+        if (Array.isArray(resolved)) requiredFields = resolved;
+      } catch (error) {
+        logger.warn(`[${this.portalTarget}] requiredFieldResolver failed`, {
+          error: error?.message || String(error),
+        });
+      }
+    } else if (Array.isArray(this.selectors.requiredFields)) {
+      requiredFields = [...this.selectors.requiredFields];
+    }
+
+    const passingStatuses = new Set(['verified', 'readonly']);
+    const failedRequired = requiredFields.filter(
+      field => !passingStatuses.has(fillVerification?.[field]?.status || '')
+    );
+
+    if (requiredFields.length > 0) {
+      state.requiredFieldGate = {
+        required: requiredFields,
+        passed: failedRequired.length === 0,
+        failed: failedRequired,
       };
-      return { ok: false, filledCount: filledSelectors.length };
+      if (failedRequired.length > 0) {
+        state.form_state = 'form_fields_missing';
+        if (failedRequired.length === 1 && failedRequired[0] === 'fee') {
+          state.form_detail_reason = 'fee_evidence_missing';
+        }
+        return { ok: false, filledCount: 0 };
+      }
+      state.form_state = 'filled';
+      return { ok: true, filledCount: requiredFields.length };
+    }
+
+    const minFilledFields = Number(this.selectors.minFilledFormFields || 1);
+    const verifiedCount = ['visitDate', 'diagnosis', 'fee', 'remarks'].filter(key =>
+      passingStatuses.has(fillVerification?.[key]?.status || '')
+    ).length;
+
+    state.requiredFieldGate = {
+      required: [`minFilledFormFields>=${minFilledFields}`],
+      passed: verifiedCount >= minFilledFields,
+      failed: verifiedCount >= minFilledFields ? [] : ['minFilledFormFields'],
+    };
+
+    if (verifiedCount < minFilledFields) {
+      state.form_state = 'form_fields_missing';
+      return { ok: false, filledCount: verifiedCount };
     }
 
     state.form_state = 'filled';
-    state.formSelectors = {
-      visitDate: visitDateSelector || null,
-      diagnosis: diagnosisSelector || null,
-      amount: amountSelector || null,
-      remarks: remarksSelector || null,
-    };
-
-    return { ok: true, filledCount: filledSelectors.length };
+    return { ok: true, filledCount: verifiedCount };
   }
 
   async submit(visit, runtimeCredential = null) {
@@ -814,6 +1090,10 @@ export class GenericPortalSubmitter {
       form_state: 'pending',
       otp: null,
       evidence: null,
+      fillVerification: null,
+      requiredFieldGate: null,
+      comparison: null,
+      sessionState: 'healthy',
     };
 
     const url = String(runtimeCredential?.url || this.defaultUrl || '').trim();
@@ -902,16 +1182,40 @@ export class GenericPortalSubmitter {
         state.evidence = await this._safeScreenshot(visit, 'form-fields-missing');
         return this._buildResult(state, {
           reason: 'form_failed',
-          detailReason: state.form_state || 'form_failed',
+          detailReason: state.form_detail_reason || state.form_state || 'form_failed',
           error: `Claim form fields were not found in ${this.portalName}`,
           portalUrl: url,
         });
       }
+
+      if (this.compareHistorical) {
+        state.comparison = await comparePortalLatestClaim({
+          portalTarget: this.portalTarget,
+          page: this.page,
+          visit,
+          state,
+        }).catch(error => ({
+          baselineSource: null,
+          state: 'unavailable',
+          matchedFields: [],
+          mismatchedFields: [],
+          unavailableReason: error?.message || String(error),
+        }));
+      } else {
+        state.comparison = {
+          baselineSource: null,
+          state: 'unavailable',
+          matchedFields: [],
+          mismatchedFields: [],
+          unavailableReason: 'comparison_disabled',
+        };
+      }
+
       const evidence = await this._safeScreenshot(visit, 'form-filled');
 
       return this._buildResult(state, {
         success: true,
-        reason: 'filled_only',
+        reason: 'filled_evidence',
         detailReason: 'fill_only_probe',
         error: null,
         portalUrl: url,

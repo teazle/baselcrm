@@ -1,0 +1,151 @@
+name: Flow3 Submitted Truth Audit
+
+on:
+  workflow_dispatch:
+    inputs:
+      from:
+        description: "Start date (YYYY-MM-DD)"
+        required: false
+        type: string
+      to:
+        description: "End date (YYYY-MM-DD)"
+        required: false
+        type: string
+      visit_ids:
+        description: "Comma-separated visit IDs"
+        required: false
+        type: string
+      limit:
+        description: "Max visits to audit"
+        required: false
+        default: "10"
+        type: string
+      dry_run:
+        description: "Do not persist audit results back to DB"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  audit:
+    name: Run submitted-truth audit on EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate EC2 SSH reachability
+        shell: bash
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_PORT: ${{ secrets.EC2_PORT || 22 }}
+        run: |
+          set -euo pipefail
+          connected=false
+          for attempt in 1 2 3; do
+            echo "Reachability check ${attempt}/3 to EC2 SSH port..."
+            if timeout 10 bash -c "cat < /dev/null > /dev/tcp/${EC2_HOST}/${EC2_PORT}" 2>/dev/null; then
+              connected=true
+              echo "EC2 SSH endpoint is reachable."
+              break
+            fi
+            sleep 15
+          done
+
+          if [ "${connected}" != "true" ]; then
+            echo "Cannot reach EC2 SSH endpoint (${EC2_HOST}:${EC2_PORT})."
+            exit 1
+          fi
+
+      - name: Run audit on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          AUDIT_FROM: ${{ inputs.from }}
+          AUDIT_TO: ${{ inputs.to }}
+          AUDIT_VISIT_IDS: ${{ inputs.visit_ids }}
+          AUDIT_LIMIT: ${{ inputs.limit }}
+          AUDIT_DRY_RUN: ${{ inputs.dry_run }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || 22 }}
+          timeout: 60s
+          command_timeout: 60m
+          envs: AUDIT_FROM,AUDIT_TO,AUDIT_VISIT_IDS,AUDIT_LIMIT,AUDIT_DRY_RUN
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            DEPLOY_PATH="${{ secrets.EC2_DEPLOY_PATH || '~/Baselrpacrm' }}"
+            DEPLOY_PATH="${DEPLOY_PATH/#\~/$HOME}"
+
+            echo "Deploy path: $DEPLOY_PATH"
+            cd "$DEPLOY_PATH"
+
+            if [ ! -d .git ]; then
+              echo "Not a git repository in $DEPLOY_PATH"
+              exit 1
+            fi
+
+            echo "Current commit on EC2:"
+            git log -1 --oneline || true
+
+            ARGS=()
+            if [ -n "${AUDIT_FROM:-}" ]; then
+              ARGS+=(--from "$AUDIT_FROM")
+            fi
+            if [ -n "${AUDIT_TO:-}" ]; then
+              ARGS+=(--to "$AUDIT_TO")
+            fi
+            if [ -n "${AUDIT_VISIT_IDS:-}" ]; then
+              ARGS+=(--visit-ids "$AUDIT_VISIT_IDS")
+            fi
+            if [ -n "${AUDIT_LIMIT:-}" ]; then
+              ARGS+=(--limit "$AUDIT_LIMIT")
+            fi
+            if [ "${AUDIT_DRY_RUN:-true}" = "true" ]; then
+              ARGS+=(--dry-run)
+            fi
+
+            if [ ${#ARGS[@]} -eq 0 ]; then
+              echo "No audit scope provided. Pass visit_ids or from/to."
+              exit 1
+            fi
+
+            echo "Running Flow 3 submitted-truth audit on EC2..."
+            node src/examples/flow3-portal-truth-audit.js "${ARGS[@]}"
+
+            LATEST_JSON=$(ls -t output/run-reports/flow3_submitted_truth_audit_*.json | head -n 1)
+            if [ -z "${LATEST_JSON:-}" ]; then
+              echo "Audit finished but no report was found."
+              exit 1
+            fi
+
+            echo "Latest audit report: $LATEST_JSON"
+            node --input-type=module - "$LATEST_JSON" <<'NODE'
+            import fs from 'fs';
+
+            const reportPath = process.argv[2];
+            const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+            const rows = Array.isArray(report.rows) ? report.rows : [];
+
+            console.log('Audit summary:');
+            console.log(JSON.stringify({
+              generatedAt: report.generatedAt || null,
+              scope: report.scope || null,
+              totalRows: rows.length,
+            }, null, 2));
+
+            for (const row of rows) {
+              console.log(JSON.stringify({
+                visitId: row.visitId || null,
+                patientName: row.patientName || null,
+                visitDate: row.visitDate || null,
+                context: row.context || null,
+                submittedTruth: row.submittedTruth || null,
+                flow2VsSubmittedTruth: row.flow2VsSubmittedTruth || null,
+                botVsSubmittedTruth: row.botVsSubmittedTruth || null,
+                mismatchCategories: row.mismatchCategories || null,
+                notes: row.notes || null,
+              }));
+            }
+            NODE

@@ -6,6 +6,7 @@ import { logger } from '../utils/logger.js';
 import {
   getPortalPayTypes,
   getPortalScopeOrFilter,
+  isFlow2EligibleVisit,
   resolveFlow3PortalTarget,
 } from '../../apps/crm/src/lib/rpa/portals.shared.js';
 import { portalTargetToLabel, writeRunSummaryReport } from '../utils/run-summary-report.js';
@@ -204,8 +205,10 @@ async function extractVisitDetailsBatch() {
     process.exit(0);
   }
 
+  const eligibleVisits = allVisits.filter(visit => isFlow2EligibleVisit(visit.extraction_metadata || null));
+
   // Filter visits by status for resume capability
-  const visitsToProcess = allVisits.filter(visit => {
+  const visitsToProcess = eligibleVisits.filter(visit => {
     const metadata = visit.extraction_metadata || {};
     const status = metadata.detailsExtractionStatus;
     const attempts = metadata.detailsExtractionAttempts || 0;
@@ -229,10 +232,27 @@ async function extractVisitDetailsBatch() {
     return true;
   });
   const visitsToProcessIds = new Set(visitsToProcess.map(v => v.id));
-  const precheckSkippedVisits = allVisits.filter(v => !visitsToProcessIds.has(v.id));
-  reportTotals.total_candidates = allVisits.length;
+  const precheckSkippedVisits = eligibleVisits.filter(v => !visitsToProcessIds.has(v.id));
+  const nonCandidateSkippedVisits = allVisits.filter(v => !isFlow2EligibleVisit(v.extraction_metadata || null));
+  reportTotals.total_candidates = eligibleVisits.length;
   reportTotals.to_process = visitsToProcess.length;
-  reportTotals.skipped_precheck = precheckSkippedVisits.length;
+  reportTotals.skipped_precheck = precheckSkippedVisits.length + nonCandidateSkippedVisits.length;
+  for (const visit of nonCandidateSkippedVisits) {
+    const metadata = visit.extraction_metadata || {};
+    const reasons = Array.isArray(metadata.claimCandidateReasons)
+      ? metadata.claimCandidateReasons.join('|')
+      : 'not_claim_candidate';
+    reportRows.push({
+      date: visit.visit_date || '-',
+      patientName: visit.patient_name || '-',
+      nric: visit.nric || '-',
+      payType: visit.pay_type || '-',
+      portal: buildPortalLabel(visit),
+      status: 'skipped',
+      diagnosisStatus: buildDiagnosisStatus(visit),
+      notes: `claim_scope_excluded (${reasons})`,
+    });
+  }
   for (const visit of precheckSkippedVisits) {
     const metadata = visit.extraction_metadata || {};
     const detailsStatus = String(metadata.detailsExtractionStatus || '').trim();

@@ -1,3 +1,6 @@
+import fs from 'fs/promises';
+import os from 'os';
+import path from 'path';
 import { logger } from '../utils/logger.js';
 import { PORTALS } from '../config/portals.js';
 
@@ -21,6 +24,17 @@ export class MHCAsiaAutomation {
     this.lastSaveDraftResult = null;
     this.lastDiagnosisPrefetch = null;
     this.lastDrugSelectionByRow = {};
+    this.lastPortalGateState = null;
+    this._lastLoginSubmitAt = 0;
+    const baseUserDataDir = String(process.env.PLAYWRIGHT_USER_DATA_DIR || '').trim()
+      ? path.resolve(String(process.env.PLAYWRIGHT_USER_DATA_DIR || '').trim())
+      : path.join(os.homedir(), '.playwright-browser-data');
+    this.loginThrottleStatePath = String(process.env.MHC_LOGIN_STATE_PATH || '').trim()
+      ? path.resolve(String(process.env.MHC_LOGIN_STATE_PATH || '').trim())
+      : path.join(baseUserDataDir, 'mhc-login-state.json');
+    this.authStatePath = String(process.env.MHC_AUTH_STATE_PATH || '').trim()
+      ? path.resolve(String(process.env.MHC_AUTH_STATE_PATH || '').trim())
+      : path.join(baseUserDataDir, 'mhc-auth-state.json');
   }
 
   /**
@@ -28,6 +42,86 @@ export class MHCAsiaAutomation {
    * This is important between patients: after switching system to AIA Clinic,
    * the left-nav contains "AIA Visit" links that can confuse generic selectors.
    */
+  async _readPersistedAuthState() {
+    try {
+      const raw = await fs.readFile(this.authStatePath, 'utf8');
+      const parsed = JSON.parse(raw || '{}');
+      return {
+        lastAuthenticatedUrl: String(parsed?.lastAuthenticatedUrl || '').trim() || null,
+        savedAt: String(parsed?.savedAt || '').trim() || null,
+      };
+    } catch {
+      return {
+        lastAuthenticatedUrl: null,
+        savedAt: null,
+      };
+    }
+  }
+
+  async _writePersistedAuthState(url = null) {
+    const value = String(url || '').trim();
+    if (!value) return;
+    try {
+      await fs.mkdir(path.dirname(this.authStatePath), { recursive: true });
+      await fs.writeFile(
+        this.authStatePath,
+        `${JSON.stringify(
+          {
+            lastAuthenticatedUrl: value,
+            savedAt: new Date().toISOString(),
+          },
+          null,
+          2
+        )}\n`,
+        'utf8'
+      );
+    } catch (error) {
+      logger.warn('[MHC] Failed to persist authenticated portal URL', {
+        error: error?.message || String(error),
+      });
+    }
+  }
+
+  async _tryResumePersistedAuthenticatedPage() {
+    const authState = await this._readPersistedAuthState();
+    const resumeUrl = authState?.lastAuthenticatedUrl || null;
+    if (!resumeUrl) return false;
+    this._logStep('Try resume persisted authenticated page', {
+      resumeUrl,
+      savedAt: authState?.savedAt || null,
+    });
+    try {
+      await this.page.goto(resumeUrl, { waitUntil: 'domcontentloaded', timeout: 45000 });
+      await this.page.waitForTimeout(800);
+      const normalVisitVisible = await this.page
+        .locator('a:has-text("Normal Visit"), a:has-text("Add Normal Visit")')
+        .first()
+        .isVisible()
+        .catch(() => false);
+      const logoutVisible = await this.page
+        .locator('text=/Log\\s*Out/i')
+        .first()
+        .isVisible()
+        .catch(() => false);
+      const passwordVisible = await this.page
+        .locator('input[type="password"], input[name="txtPassword"], input[name*="password" i]')
+        .first()
+        .isVisible()
+        .catch(() => false);
+      if ((normalVisitVisible || logoutVisible) && !passwordVisible) {
+        this.isAiaClinicSystem = false;
+        this.isSinglifeSystem = false;
+        await this._writePersistedAuthState(this.page.url() || resumeUrl);
+        return true;
+      }
+    } catch (error) {
+      logger.warn('[MHC] Failed to resume persisted authenticated page', {
+        error: error?.message || String(error),
+      });
+    }
+    return false;
+  }
+
   async ensureAtMhcHome() {
     this._logStep('Ensure at MHC home');
 
@@ -76,8 +170,14 @@ export class MHCAsiaAutomation {
       if (!/502\s+bad\s+gateway|nginx/i.test(bodyText || '')) {
         this.isAiaClinicSystem = false;
         this.isSinglifeSystem = false;
+        await this._writePersistedAuthState(this.page.url() || currentUrl);
         return true;
       }
+    }
+
+    const resumed = await this._tryResumePersistedAuthenticatedPage();
+    if (resumed) {
+      return true;
     }
 
     // Always hard-navigate back to the base portal URL when not already on MHC.
@@ -93,6 +193,7 @@ export class MHCAsiaAutomation {
     if (normalVisitVisible) {
       this.isAiaClinicSystem = false;
       this.isSinglifeSystem = false;
+      await this._writePersistedAuthState(this.page.url() || this.config.url);
       return true;
     }
 
@@ -115,6 +216,7 @@ export class MHCAsiaAutomation {
     if (logoutVisible) {
       this.isAiaClinicSystem = false;
       this.isSinglifeSystem = false;
+      await this._writePersistedAuthState(this.page.url() || this.config.url);
       return true;
     }
 
@@ -135,6 +237,13 @@ export class MHCAsiaAutomation {
       .isVisible()
       .catch(() => false);
     const loginVisible = passwordVisible && (userVisible || loginBtnVisible);
+    const gateState = await this._detectPortalGateState();
+    if (gateState?.captchaBlocked) {
+      await this.page.screenshot({ path: 'screenshots/mhc-asia-home-captcha-blocked.png', fullPage: true }).catch(() => {});
+      throw this._buildPortalBlockedError('portal_captcha_blocked', {
+        gateState,
+      });
+    }
     if (loginVisible) {
       logger.info('Login form visible after ensureAtMhcHome; re-logging in');
       await this.login();
@@ -148,6 +257,119 @@ export class MHCAsiaAutomation {
     const tag = `[MHC ${String(this._mhcStep).padStart(2, '0')}]`;
     if (meta !== undefined) logger.info(`${tag} ${message}`, meta);
     else logger.info(`${tag} ${message}`);
+  }
+
+  async _detectPortalGateState() {
+    const state = await this.page
+      .evaluate(() => {
+        const clean = value =>
+          String(value || '')
+            .replace(/\s+/g, ' ')
+            .trim();
+        const bodyText = clean(document.body?.innerText || '');
+        const lower = bodyText.toLowerCase();
+        return {
+          url: location.href,
+          title: document.title,
+          bodyText,
+          csrfDetected: /csrf\s+detected/i.test(bodyText),
+          captchaBlocked:
+            /invalid\s+captcha/i.test(bodyText) ||
+            /captcha/i.test(bodyText) ||
+            /please\s+verify\s+you\s+are\s+human/i.test(bodyText),
+          authFailure:
+            /not\s+able\s+to\s+authenticate/i.test(bodyText) ||
+            /authentication\s+failed/i.test(bodyText) ||
+            /oops,\s*we\s+are\s+not\s+able\s+to\s+authenticate/i.test(bodyText),
+          logoutVisible: /log\s*out/i.test(bodyText),
+        };
+      })
+      .catch(() => ({
+        url: this.page.url() || '',
+        title: '',
+        bodyText: '',
+        csrfDetected: false,
+        captchaBlocked: false,
+        authFailure: false,
+        logoutVisible: false,
+      }));
+    this.lastPortalGateState = {
+      ...state,
+      checkedAt: new Date().toISOString(),
+    };
+    return this.lastPortalGateState;
+  }
+
+  _buildPortalBlockedError(reason, meta = {}) {
+    const err = new Error(reason);
+    err.code = reason;
+    err.portalBlocked = true;
+    err.submissionMetadata = {
+      success: false,
+      portal: 'MHC Asia',
+      reason,
+      blocked_reason: reason,
+      sessionState: reason === 'portal_captcha_blocked' ? 'captcha_blocked' : 'blocked',
+      checkedAt: new Date().toISOString(),
+      ...(meta || {}),
+    };
+    return err;
+  }
+
+  async _readLoginThrottleState() {
+    try {
+      const raw = await fs.readFile(this.loginThrottleStatePath, 'utf8');
+      const parsed = JSON.parse(raw || '{}');
+      return {
+        lastLoginSubmitAt: Number(parsed?.lastLoginSubmitAt || 0) || 0,
+      };
+    } catch {
+      return { lastLoginSubmitAt: 0 };
+    }
+  }
+
+  async _writeLoginThrottleState(lastLoginSubmitAt) {
+    try {
+      await fs.mkdir(path.dirname(this.loginThrottleStatePath), { recursive: true });
+      await fs.writeFile(
+        this.loginThrottleStatePath,
+        `${JSON.stringify({ lastLoginSubmitAt }, null, 2)}\n`,
+        'utf8'
+      );
+    } catch (error) {
+      logger.warn('[MHC] Failed to persist shared login throttle state', {
+        error: error?.message || String(error),
+      });
+    }
+  }
+
+  async _waitForLoginThrottle(attempt = 1) {
+    const minGapMs = Number.parseInt(process.env.MHC_LOGIN_MIN_GAP_MS || '8000', 10);
+    const sharedState = await this._readLoginThrottleState();
+    const lastSeenSubmitAt = Math.max(
+      this._lastLoginSubmitAt || 0,
+      sharedState?.lastLoginSubmitAt || 0
+    );
+    const now = Date.now();
+    const elapsed = now - lastSeenSubmitAt;
+    if (lastSeenSubmitAt && elapsed < minGapMs) {
+      const waitMs = minGapMs - elapsed;
+      this._logStep('Login throttle wait', { waitMs, attempt });
+      await this.page.waitForTimeout(waitMs).catch(() => {});
+    } else if (attempt > 1) {
+      const retryBackoffMs = Number.parseInt(process.env.MHC_LOGIN_RETRY_BACKOFF_MS || '6000', 10);
+      this._logStep('Login retry backoff', { waitMs: retryBackoffMs, attempt });
+      await this.page.waitForTimeout(retryBackoffMs).catch(() => {});
+    }
+  }
+
+  _shouldRetryLoginError(error, attempt, maxAttempts) {
+    if (!error || attempt >= maxAttempts) return false;
+    if (error.portalBlocked === true) return false;
+    const code = String(error.code || '').trim().toLowerCase();
+    if (code === 'csrf_detected') return true;
+    if (code === 'login_navigation_timeout') return true;
+    return false;
   }
 
   /**
@@ -176,25 +398,25 @@ export class MHCAsiaAutomation {
         this._logStep('Login start', { attempt, maxAttempts });
         logger.info(`Logging into ${this.config.name}...`);
 
-        if (attempt > 1) {
-          // Clear cookies/storage before retrying to avoid CSRF loops.
-          await this._resetMhcSession('login-retry').catch(() => {});
-        }
+        await this._waitForLoginThrottle(attempt);
 
         // Avoid 'networkidle' here; MHC pages can keep long-polling connections open.
         await this.page.goto(this.config.url, { waitUntil: 'domcontentloaded', timeout: 60000 });
         await this.page.waitForTimeout(800);
 
-        // If we land on a CSRF warning page, reset and retry.
-        const csrfPreLogin = await this.page
-          .locator('text=/csrf\\s+detected/i')
-          .first()
-          .isVisible()
-          .catch(() => false);
-        if (csrfPreLogin) {
+        const preLoginState = await this._detectPortalGateState();
+        if (preLoginState?.captchaBlocked) {
+          await this.page.screenshot({ path: 'screenshots/mhc-asia-login-captcha-blocked.png', fullPage: true }).catch(() => {});
+          throw this._buildPortalBlockedError('portal_captcha_blocked', {
+            gateState: preLoginState,
+          });
+        }
+        if (preLoginState?.csrfDetected) {
           logger.warn('[MHC] CSRF detected before login attempt; resetting session');
           await this._resetMhcSession('csrf-pre-login').catch(() => {});
-          if (attempt < maxAttempts) continue;
+          const csrfError = new Error('csrf_detected');
+          csrfError.code = 'csrf_detected';
+          throw csrfError;
         }
 
         // If already logged in (session cookies), bail out early.
@@ -207,6 +429,7 @@ export class MHCAsiaAutomation {
           logger.info(`Already logged into ${this.config.name}`);
           this._logStep('Login ok (already logged in)');
           this._lastLoginAt = Date.now();
+          await this._writePersistedAuthState(this.page.url() || this.config.url);
           return true;
         }
 
@@ -307,9 +530,13 @@ export class MHCAsiaAutomation {
         }
 
         if (!loginButton) {
+          this._lastLoginSubmitAt = Date.now();
+          await this._writeLoginThrottleState(this._lastLoginSubmitAt);
           await passwordField.press('Enter');
           logger.info('Pressed Enter to submit');
         } else {
+          this._lastLoginSubmitAt = Date.now();
+          await this._writeLoginThrottleState(this._lastLoginSubmitAt);
           await loginButton.click();
           logger.info('Login button clicked');
         }
@@ -318,49 +545,41 @@ export class MHCAsiaAutomation {
         await this.page.waitForLoadState('domcontentloaded').catch(() => {});
         await this.page.locator('text=/Log\\s*Out/i').first().waitFor({ state: 'attached', timeout: 1500 }).catch(() => {});
 
-        // If CSRF mismatch, retry with clean state.
-        const csrfDetected = await this.page
-          .locator('text=/csrf\\s+detected/i')
-          .first()
-          .isVisible()
-          .catch(() => false);
-        if (csrfDetected) {
+        const postLoginState = await this._detectPortalGateState();
+        if (postLoginState?.captchaBlocked) {
+          logger.error(`Login challenge detected: ${postLoginState.bodyText}`);
+          await this.page.screenshot({ path: 'screenshots/mhc-asia-login-captcha-blocked.png', fullPage: true }).catch(() => {});
+          throw this._buildPortalBlockedError('portal_captcha_blocked', {
+            gateState: postLoginState,
+          });
+        }
+        if (postLoginState?.csrfDetected) {
           logger.warn('[MHC] CSRF detected after login submit');
           await this.page.screenshot({ path: 'screenshots/mhc-asia-login-csrf.png', fullPage: true }).catch(() => {});
-          if (attempt < maxAttempts) {
-            await this._resetMhcSession('csrf-after-login').catch(() => {});
-            continue;
-          }
+          await this._resetMhcSession('csrf-after-login').catch(() => {});
+          const csrfError = new Error('csrf_detected');
+          csrfError.code = 'csrf_detected';
+          throw csrfError;
         }
 
-        // Check for auth error messages
-        const errorSelectors = [
-          ':has-text("not able to authenticate")',
-          ':has-text("authentication")',
-          '.error',
-          '.alert',
-        ];
-
-        for (const selector of errorSelectors) {
-          const el = await this.page.$(selector).catch(() => null);
-          if (!el) continue;
-          const errorText = (await el.textContent().catch(() => '')) || '';
-          if (errorText.toLowerCase().includes('authenticate')) {
-            logger.error(`Login error detected: ${errorText}`);
-            await this.page.screenshot({ path: 'screenshots/mhc-asia-login-error.png', fullPage: true }).catch(() => {});
-            throw new Error('Authentication failed');
-          }
+        if (postLoginState?.authFailure && !postLoginState?.logoutVisible) {
+          logger.error(`Login error detected: ${postLoginState.bodyText}`);
+          await this.page.screenshot({ path: 'screenshots/mhc-asia-login-error.png', fullPage: true }).catch(() => {});
+          const authError = new Error('Authentication failed');
+          authError.code = 'auth_failed';
+          throw authError;
         }
 
         await this.page.waitForLoadState('domcontentloaded').catch(() => {});
         logger.info(`Successfully logged into ${this.config.name}`);
         this._logStep('Login ok');
         this._lastLoginAt = Date.now();
+        await this._writePersistedAuthState(this.page.url() || this.config.url);
         return true;
       } catch (error) {
         logger.error(`Login failed for ${this.config.name}:`, error);
         await this.page.screenshot({ path: 'screenshots/mhc-asia-login-error.png', fullPage: true }).catch(() => {});
-        if (attempt >= maxAttempts) throw error;
+        if (!this._shouldRetryLoginError(error, attempt, maxAttempts)) throw error;
       } finally {
         this._loginInProgress = false;
       }
@@ -5378,6 +5597,7 @@ export class MHCAsiaAutomation {
             reason: usedSecondClick ? 'saved_after_second_click' : 'saved',
             visitNo: this._lastSavedDraftVisitNo || null,
             dialogMessage: secondDialogMsg || dialogMsg || null,
+            fieldState: postSaveState || null,
             checkedAt: new Date().toISOString(),
           };
           return true;
@@ -5689,7 +5909,15 @@ export class MHCAsiaAutomation {
       }
 
       const link = this.page.locator('a', { hasText: visitNo }).first();
-      if ((await link.count().catch(() => 0)) === 0) {
+      let openTarget = link;
+      if ((await openTarget.count().catch(() => 0)) === 0) {
+        openTarget = this.page
+          .locator(
+            `tr:has-text("${visitNo}") a, tr:has-text("${visitNo}") button, tr:has-text("${visitNo}") input[type="button"], tr:has-text("${visitNo}") input[type="submit"]`
+          )
+          .first();
+      }
+      if ((await openTarget.count().catch(() => 0)) === 0) {
         attempts.push({
           context,
           opened: true,
@@ -5701,8 +5929,8 @@ export class MHCAsiaAutomation {
         continue;
       }
 
-      await this._safeClick(link, `Open Draft ${visitNo}`).catch(async () => {
-        await link.click({ timeout: 10000 }).catch(() => {});
+      await this._safeClick(openTarget, `Open Draft ${visitNo}`).catch(async () => {
+        await openTarget.click({ timeout: 10000 }).catch(() => {});
       });
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
       await this.page.waitForTimeout(900);
@@ -5878,6 +6106,516 @@ export class MHCAsiaAutomation {
       found: false,
       contextTried: contextOrder,
       attempts,
+    };
+  }
+
+  async _openClaimsHistoryPage() {
+    const selectors = [
+      'a:has-text("Claims History")',
+      'button:has-text("Claims History")',
+      'a:has-text("View Submitted Visits")',
+      'button:has-text("View Submitted Visits")',
+      'a:has-text("View Submitted Visit")',
+      'button:has-text("View Submitted Visit")',
+      'a[href="visit_list"]',
+      'a[href*="visit_list"]',
+      'text=/Claims\\s+History/i',
+      'text=/View\\s+Submitted\\s+Visits?/i',
+    ];
+    for (const selector of selectors) {
+      const loc = this.page.locator(selector).first();
+      if ((await loc.count().catch(() => 0)) === 0) continue;
+      const visible = await loc.isVisible().catch(() => true);
+      if (!visible) continue;
+      await this._safeClick(loc, 'Open Submitted Visits');
+      await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+      await this.page.waitForTimeout(900);
+      return true;
+    }
+
+    const fallbackHref = await this.page
+      .evaluate(() => {
+        const anchors = Array.from(document.querySelectorAll('a[href]'));
+        const hit = anchors.find(anchor => {
+          const text = String(anchor.textContent || '').replace(/\s+/g, ' ').trim();
+          const href = String(anchor.getAttribute('href') || '').trim();
+          return (
+            /claims\s+history/i.test(text) ||
+            /view\s+submitted\s+visits?/i.test(text) ||
+            /^visit_list$/i.test(href) ||
+            /visit_list/i.test(href)
+          );
+        });
+        return hit ? String(hit.getAttribute('href') || '').trim() : '';
+      })
+      .catch(() => '');
+    if (!fallbackHref) return false;
+    await this.page.goto(new URL(fallbackHref, this.page.url()).toString(), {
+      waitUntil: 'domcontentloaded',
+      timeout: 15000,
+    }).catch(() => {});
+    await this.page.waitForTimeout(900);
+    return true;
+  }
+
+  async _searchSubmittedClaims({
+    expectedVisitNo = null,
+    nric = null,
+    visitDate = null,
+    patientName = null,
+  } = {}) {
+    const normalizedVisitNo = String(expectedVisitNo || '').trim().toUpperCase();
+    const normalizedNric = String(nric || '').trim().toUpperCase();
+    const normalizedVisitDate = this._normalizeDraftDate(visitDate);
+    const normalizedPatientName = String(patientName || '').trim();
+
+    const searchPayload = await this.page
+      .evaluate(({ normalizedVisitNo, normalizedNric, normalizedVisitDate, normalizedPatientName }) => {
+        const clean = value =>
+          String(value || '')
+            .replace(/\s+/g, ' ')
+            .trim();
+        const lower = value => clean(value).toLowerCase();
+        const setValue = (el, value) => {
+          if (!el) return false;
+          const tag = String(el.tagName || '').toLowerCase();
+          try {
+            el.removeAttribute?.('readonly');
+            el.removeAttribute?.('disabled');
+            el.readOnly = false;
+            el.disabled = false;
+          } catch {
+            // ignore
+          }
+          if (tag === 'select') {
+            const options = Array.from(el.options || []);
+            const match = options.find(option => {
+              const text = lower(option.textContent || '');
+              const val = lower(option.value || '');
+              if (value.kind === 'visitNo') return /visit\s*no|reference|claim/i.test(text) || /visit|claim/i.test(val);
+              if (value.kind === 'nric') return /nric|national id|member id|id no/i.test(text) || /nric|member|id/i.test(val);
+              if (value.kind === 'name') return /name|member/i.test(text) || /name/i.test(val);
+              if (value.kind === 'status') return /submitted|completed|approved/i.test(text) || /submitted|completed|approved/i.test(val);
+              return false;
+            });
+            if (!match) return false;
+            el.value = match.value;
+          } else {
+            el.value = value.value;
+          }
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+          return true;
+        };
+
+        const controls = Array.from(document.querySelectorAll('input, select, textarea'));
+        const summaries = controls.map(control => {
+          const tag = String(control.tagName || '').toLowerCase();
+          const type = String(control.getAttribute('type') || '').toLowerCase();
+          const name = clean(control.getAttribute('name') || control.getAttribute('id') || '');
+          const label = clean(control.closest('td,th,label,div')?.textContent || '');
+          return { control, tag, type, name, label };
+        });
+
+        const preferredTokens = normalizedVisitNo
+          ? [{ kind: 'visitNo', value: normalizedVisitNo }]
+          : normalizedNric
+            ? [{ kind: 'nric', value: normalizedNric }]
+            : normalizedPatientName
+              ? [{ kind: 'name', value: normalizedPatientName }]
+              : [];
+
+        const findDateControl = which => summaries.find(item => {
+          if (!['input', 'textarea'].includes(item.tag)) return false;
+          const hay = `${lower(item.name)} ${lower(item.label)}`;
+          return which === 'from'
+            ? /\bfrom\b/.test(hay) || /\bvisit\s*date\b/.test(hay)
+            : /\bto\b/.test(hay) || /\bend\b/.test(hay);
+        });
+        const findNamedControl = pattern =>
+          summaries.find(item => {
+            if (!['input', 'textarea'].includes(item.tag)) return false;
+            return pattern.test(lower(item.name));
+          });
+
+        let searchFieldFilled = false;
+        for (const token of preferredTokens) {
+          const textInput = summaries.find(item => {
+            if (item.tag !== 'input' && item.tag !== 'textarea') return false;
+            if (item.type && !['text', 'search', ''].includes(item.type)) return false;
+            const hay = `${lower(item.name)} ${lower(item.label)}`;
+            if (token.kind === 'visitNo') return /visit\s*no|claim|reference|search/i.test(hay);
+            if (token.kind === 'nric') return /nric|national id|member id|id no|search/i.test(hay);
+            if (token.kind === 'name') return /name|member|patient|search/i.test(hay);
+            return false;
+          });
+          if (textInput && setValue(textInput.control, token)) {
+            searchFieldFilled = true;
+            break;
+          }
+        }
+
+        const keySelect = summaries.find(item => item.tag === 'select' && /key|search/i.test(lower(item.name)));
+        const valueInput = summaries.find(
+          item =>
+            item.tag === 'input' &&
+            (!item.type || ['text', 'search', ''].includes(item.type)) &&
+            /keyvalue|search|keyword|value/.test(lower(item.name) + ' ' + lower(item.label))
+        );
+        if (!searchFieldFilled && keySelect && valueInput && preferredTokens.length > 0) {
+          const token = preferredTokens[0];
+          searchFieldFilled = setValue(keySelect.control, token) && setValue(valueInput.control, token);
+        }
+
+        if (normalizedVisitDate) {
+          const parts = normalizedVisitDate.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+          if (parts) {
+            const [, day, month, year] = parts;
+            const fromDay = findNamedControl(/^fromdateday$/);
+            const fromMonth = findNamedControl(/^fromdatemonth$/);
+            const fromYear = findNamedControl(/^fromdateyear$/);
+            const toDay = findNamedControl(/^todateday$/);
+            const toMonth = findNamedControl(/^todatemonth$/);
+            const toYear = findNamedControl(/^todateyear$/);
+            if (fromDay) setValue(fromDay.control, { kind: 'date_day', value: day });
+            if (fromMonth) setValue(fromMonth.control, { kind: 'date_month', value: month });
+            if (fromYear) setValue(fromYear.control, { kind: 'date_year', value: year });
+            if (toDay) setValue(toDay.control, { kind: 'date_day', value: day });
+            if (toMonth) setValue(toMonth.control, { kind: 'date_month', value: month });
+            if (toYear) setValue(toYear.control, { kind: 'date_year', value: year });
+          } else if (!normalizedVisitNo) {
+            const fromControl = findDateControl('from');
+            const toControl = findDateControl('to');
+            if (fromControl) setValue(fromControl.control, { kind: 'date', value: normalizedVisitDate });
+            if (toControl) setValue(toControl.control, { kind: 'date', value: normalizedVisitDate });
+          }
+        }
+
+        const statusSelect = summaries.find(item => item.tag === 'select' && /status/i.test(lower(item.name) + ' ' + lower(item.label)));
+        if (statusSelect) setValue(statusSelect.control, { kind: 'status', value: 'submitted' });
+        const keyTypeSelect = summaries.find(item => item.tag === 'select' && /keytype|match/i.test(lower(item.name) + ' ' + lower(item.label)));
+        if (keyTypeSelect && preferredTokens.length > 0) {
+          const token = preferredTokens[0];
+          if (token.kind === 'visitNo' || token.kind === 'nric') {
+            const options = Array.from(keyTypeSelect.control.options || []);
+            const exact = options.find(option => /equals\s*to/i.test(clean(option.textContent || '')) || /^=$/.test(clean(option.value || '')));
+            if (exact) {
+              keyTypeSelect.control.value = exact.value;
+              keyTypeSelect.control.dispatchEvent(new Event('input', { bubbles: true }));
+              keyTypeSelect.control.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          }
+        }
+
+        return {
+          searchFieldFilled,
+          controls: summaries.slice(0, 40).map(item => ({
+            tag: item.tag,
+            type: item.type,
+            name: item.name,
+            label: item.label,
+          })),
+        };
+      }, {
+        normalizedVisitNo,
+        normalizedNric,
+        normalizedVisitDate,
+        normalizedPatientName,
+      })
+      .catch(() => ({ searchFieldFilled: false, controls: [] }));
+
+    const searchButton = this.page
+      .locator(
+        'input[name="SearchAction"], button:has-text("Search"), button:has-text("Retrieve"), input[value*="Search" i], input[value*="Retrieve" i]'
+      )
+      .first();
+    if ((await searchButton.count().catch(() => 0)) > 0) {
+      await Promise.all([
+        this.page.waitForLoadState('domcontentloaded').catch(() => {}),
+        this._safeClick(searchButton, 'Search Submitted Claims').catch(() => {}),
+      ]);
+    } else {
+      await this.page.keyboard.press('Enter').catch(() => {});
+      await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+    }
+    await this.page.waitForTimeout(1000);
+    return searchPayload;
+  }
+
+  async _extractSubmittedRows() {
+    return this.page
+      .evaluate(() => {
+        const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
+        const rows = [];
+        for (const tr of Array.from(document.querySelectorAll('table tr'))) {
+          const cells = Array.from(tr.querySelectorAll('th,td')).map(td => clean(td.textContent));
+          if (cells.length < 3) continue;
+          const text = clean(tr.textContent);
+          const visitNo = cells.find(cell => /^(EV\d+|CL\d+)/i.test(cell)) || '';
+          const visitDate =
+            cells.find(cell => /^\d{2}\/\d{2}\/\d{4}$/.test(cell)) ||
+            cells.find(cell => /^\d{4}-\d{2}-\d{2}$/.test(cell)) ||
+            '';
+          const patientNric = cells.find(cell => /^[A-Z]\d{7}[A-Z]$/i.test(cell)) || '';
+          const patientName =
+            cells.find(
+              cell =>
+                !!cell &&
+                !/^(EV\d+|CL\d+)/i.test(cell) &&
+                !/^\d{2}\/\d{2}\/\d{4}$/.test(cell) &&
+                !/^[A-Z]\d{7}[A-Z]$/i.test(cell) &&
+                !/submitted|completed|approved|rejected|view|detail|edit/i.test(cell.toLowerCase())
+            ) || '';
+          const status =
+            cells.find(cell => /submitted|completed|approved|rejected|draft/i.test(cell.toLowerCase())) || '';
+          const totalClaim =
+            [...cells].reverse().find(cell => /\$?\d+(?:,\d{3})*(?:\.\d{2})/.test(cell)) || '';
+
+          const actions = Array.from(tr.querySelectorAll('a, button, input[type="button"], input[type="submit"]'))
+            .map(el => ({
+              text: clean(el.textContent || el.value || ''),
+              href: clean(el.getAttribute?.('href') || ''),
+            }))
+            .filter(action => action.text || action.href);
+
+          if (!visitNo && !visitDate && !patientNric && !patientName) continue;
+          rows.push({
+            visitNo,
+            visitDate,
+            patientNric,
+            patientName,
+            status,
+            totalClaim,
+            text,
+            cells,
+            actions,
+          });
+        }
+        return { rows, url: location.href, title: document.title };
+      })
+      .catch(() => ({ rows: [], url: this.page.url() || '', title: '' }));
+  }
+
+  _pickSubmittedRowWithReason(rows, {
+    nric,
+    visitDate,
+    patientName = '',
+    expectedVisitNo = null,
+  } = {}) {
+    const normalizedVisitNo = String(expectedVisitNo || '').trim().toUpperCase();
+    const normalizedNric = String(nric || '').trim().toUpperCase();
+    const normalizedDate = this._normalizeDraftDate(visitDate);
+    const normalizedName = this._normalizeDraftName(patientName);
+
+    const submittedRows = (rows || []).filter(row =>
+      !row?.status || /submitted|completed|approved/i.test(String(row.status || ''))
+    );
+    const pool = submittedRows.length ? submittedRows : rows || [];
+
+    if (normalizedVisitNo) {
+      const byVisitNo = pool.find(row => String(row?.visitNo || '').trim().toUpperCase() === normalizedVisitNo);
+      if (byVisitNo) return { row: byVisitNo, reason: 'visit_no_match' };
+    }
+
+    const byNric = normalizedNric
+      ? pool.filter(row => String(row?.patientNric || '').trim().toUpperCase() === normalizedNric)
+      : pool;
+    if (normalizedNric && !byNric.length) return { row: null, reason: 'nric_no_match' };
+
+    const byDate = normalizedDate
+      ? byNric.filter(row => this._normalizeDraftDate(row?.visitDate || '') === normalizedDate)
+      : byNric;
+    if (normalizedDate && !byDate.length) {
+      return { row: null, reason: 'date_mismatch_no_match' };
+    }
+
+    if (normalizedName) {
+      const byName = byDate.find(row => {
+        const rowName = this._normalizeDraftName(row?.patientName || '');
+        return rowName && (rowName.includes(normalizedName) || normalizedName.includes(rowName));
+      });
+      if (byName) return { row: byName, reason: 'nric_date_name_match' };
+    }
+
+    return byDate[0] ? { row: byDate[0], reason: 'best_available_match' } : { row: null, reason: 'submitted_detail_not_found' };
+  }
+
+  async openSubmittedClaimDetail({
+    nric,
+    visitDate = null,
+    patientName = '',
+    contextHint = null,
+    allowCrossContext = true,
+    expectedVisitNo = null,
+  } = {}) {
+    const normalizedNric = String(nric || '').toUpperCase().trim();
+    if (!normalizedNric && !expectedVisitNo && !patientName) {
+      return { found: false, reason: 'missing_identifiers' };
+    }
+
+    const hint = String(contextHint || this._inferPortalContext() || 'mhc').toLowerCase();
+    const contextOrder = [];
+    const addCtx = ctx => {
+      if (!ctx || contextOrder.includes(ctx)) return;
+      contextOrder.push(ctx);
+    };
+    addCtx(hint);
+    if (allowCrossContext && hint === 'aia') addCtx('mhc');
+    if (allowCrossContext && hint === 'mhc') addCtx('aia');
+    if (!contextOrder.length) addCtx('mhc');
+
+    const attempts = [];
+    for (const context of contextOrder) {
+      try {
+        const switched = await this._switchToPortalContext(context);
+        if (!switched) {
+          attempts.push({ context, opened: false, reason: 'context_switch_failed' });
+          continue;
+        }
+
+        const opened = await this._openClaimsHistoryPage();
+        if (!opened) {
+          attempts.push({ context, opened: false, reason: 'claims_history_link_not_found' });
+          continue;
+        }
+
+        const searchPayload = await this._searchSubmittedClaims({
+          expectedVisitNo,
+          nric: normalizedNric,
+          visitDate,
+          patientName,
+        }).catch(() => ({ searchFieldFilled: false, controls: [] }));
+        const extracted = await this._extractSubmittedRows();
+        const matchPick = this._pickSubmittedRowWithReason(extracted.rows, {
+          nric: normalizedNric,
+          visitDate,
+          patientName,
+          expectedVisitNo,
+        });
+        const row = matchPick?.row || null;
+        if (!row) {
+          attempts.push({
+            context,
+            opened: true,
+            reason: matchPick?.reason || 'submitted_detail_not_found',
+            rowsSeen: extracted.rows.length,
+            url: extracted.url,
+            searchPayload,
+          });
+          continue;
+        }
+
+        const rowKey = row.visitNo || row.patientNric || row.patientName || row.visitDate || '';
+        const detailTarget = this.page
+          .locator(
+            `tr:has-text("${rowKey}") a, tr:has-text("${rowKey}") button, tr:has-text("${rowKey}") input[type="button"], tr:has-text("${rowKey}") input[type="submit"]`
+          )
+          .filter({ hasText: /view|detail|open|edit/i })
+          .first();
+        const fallbackTarget = this.page
+          .locator(
+            `tr:has-text("${rowKey}") a, tr:has-text("${rowKey}") button, tr:has-text("${rowKey}") input[type="button"], tr:has-text("${rowKey}") input[type="submit"]`
+          )
+          .first();
+        const openTarget =
+          (await detailTarget.count().catch(() => 0)) > 0 ? detailTarget : fallbackTarget;
+
+        if ((await openTarget.count().catch(() => 0)) === 0) {
+          attempts.push({
+            context,
+            opened: true,
+            reason: 'submitted_detail_action_not_found',
+            rowsSeen: extracted.rows.length,
+            url: extracted.url,
+            row,
+          });
+          continue;
+        }
+
+        await this._safeClick(openTarget, `Open Submitted Claim ${rowKey}`).catch(async () => {
+          await openTarget.click({ timeout: 10000 }).catch(() => {});
+        });
+        await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+        await this.page.waitForTimeout(1000);
+
+        return {
+          found: true,
+          context,
+          row,
+          rowsSeen: extracted.rows.length,
+          url: extracted.url,
+          attempts,
+          searchPayload,
+        };
+      } catch (error) {
+        attempts.push({
+          context,
+          opened: false,
+          reason: error?.code || error?.message || 'unknown_error',
+        });
+        if (error?.portalBlocked === true) throw error;
+      }
+    }
+
+    return {
+      found: false,
+      reason: 'submitted_detail_not_found',
+      attempts,
+    };
+  }
+
+  async captureSubmittedTruthSnapshot({
+    visit = null,
+    nric,
+    visitDate = null,
+    patientName = '',
+    contextHint = null,
+    allowCrossContext = true,
+    expectedVisitNo = null,
+  } = {}) {
+    const opened = await this.openSubmittedClaimDetail({
+      nric,
+      visitDate,
+      patientName,
+      contextHint,
+      allowCrossContext,
+      expectedVisitNo,
+    });
+    if (!opened?.found) {
+      return {
+        found: false,
+        reason: opened?.reason || 'submitted_detail_not_found',
+        attempts: opened?.attempts || [],
+      };
+    }
+    const snapshot = await this.captureCurrentVisitFormSnapshot({
+      visit,
+      phase: 'submitted_truth',
+      portalTarget: 'MHC',
+      includeScreenshot: true,
+    });
+    const hasComparableTruth = Boolean(
+      snapshot?.patientName ||
+      snapshot?.patientNric ||
+      snapshot?.visitDate ||
+      snapshot?.diagnosisText ||
+      snapshot?.totalFee ||
+      snapshot?.totalClaim
+    );
+    if (!hasComparableTruth) {
+      return {
+        found: false,
+        reason: 'submitted_detail_navigation_failed',
+        attempts: opened?.attempts || [],
+      };
+    }
+    return {
+      ...opened,
+      found: true,
+      snapshot: {
+        ...snapshot,
+        source: 'mhc_submitted_detail',
+      },
     };
   }
 
@@ -6902,6 +7640,464 @@ export class MHCAsiaAutomation {
 
   getLastSaveDraftResult() {
     return this.lastSaveDraftResult || null;
+  }
+
+  async _extractCurrentVisitFormSnapshot() {
+    const snapshot = await this.page
+      .evaluate(() => {
+        const clean = value =>
+          String(value || '')
+            .replace(/\s+/g, ' ')
+            .trim();
+        const toKey = value =>
+          clean(value)
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '_')
+            .replace(/^_+|_+$/g, '');
+        const readValue = el => {
+          if (!el) return '';
+          const tag = String(el.tagName || '').toLowerCase();
+          const type = String(el.getAttribute?.('type') || '').toLowerCase();
+          if (type === 'checkbox') return el.checked ? 'true' : 'false';
+          if (type === 'radio') return el.checked ? clean(el.value || el.getAttribute?.('value') || 'true') : '';
+          if (tag === 'select') {
+            const selected = el.options?.[el.selectedIndex];
+            return clean(selected?.textContent || el.value || '');
+          }
+          return clean(el.value ?? el.textContent ?? '');
+        };
+        const isUsefulField = el => {
+          const tag = String(el.tagName || '').toLowerCase();
+          if (!['input', 'select', 'textarea'].includes(tag)) return false;
+          const type = String(el.getAttribute?.('type') || '').toLowerCase();
+          if (type === 'hidden' || type === 'button' || type === 'submit' || type === 'reset') return false;
+          return true;
+        };
+        const formFields = Array.from(document.querySelectorAll('input, select, textarea')).filter(isUsefulField);
+        const namedValues = {};
+        for (const field of formFields) {
+          const key = clean(field.getAttribute('name') || field.getAttribute('id') || '');
+          if (!key) continue;
+          const value = readValue(field);
+          if (!value) continue;
+          namedValues[key] = value;
+        }
+
+        const rows = Array.from(document.querySelectorAll('tr'));
+        const rowEntries = rows
+          .map(row => {
+            const cells = Array.from(row.querySelectorAll('th,td'));
+            if (!cells.length) return null;
+            const cellTexts = cells.map(cell => clean(cell.textContent));
+            const fields = Array.from(row.querySelectorAll('input, select, textarea'))
+              .filter(isUsefulField)
+              .map(field => {
+                const value = readValue(field);
+                const name = clean(field.getAttribute('name') || field.getAttribute('id') || '');
+                const label =
+                  clean(
+                    field.getAttribute('aria-label') ||
+                      field.getAttribute('placeholder') ||
+                      field.closest('td,th,label')?.textContent ||
+                      ''
+                  ) || null;
+                return {
+                  name: name || null,
+                  label,
+                  value: value || '',
+                  tag: String(field.tagName || '').toLowerCase(),
+                };
+              })
+              .filter(entry => entry.value || entry.name || entry.label);
+            if (!fields.length && cellTexts.length < 2) return null;
+            return {
+              label: cellTexts[0] || '',
+              text: clean(row.textContent),
+              cellTexts,
+              fields,
+            };
+          })
+          .filter(Boolean);
+
+        const findByNames = (...names) => {
+          for (const name of names) {
+            if (namedValues[name]) return namedValues[name];
+            const hit = Object.entries(namedValues).find(([key]) => key.toLowerCase() === String(name).toLowerCase());
+            if (hit?.[1]) return hit[1];
+          }
+          return '';
+        };
+
+        const findRowValue = (matcher, excludeMatcher = null) => {
+          for (const row of rowEntries) {
+            const label = clean(row.label || row.cellTexts?.[0] || '');
+            const text = clean(row.text || '');
+            if (!matcher(label) && !matcher(text)) continue;
+            if (excludeMatcher && (excludeMatcher(label) || excludeMatcher(text))) continue;
+            const fieldValue = row.fields.map(field => field.value).find(Boolean);
+            if (fieldValue) {
+              return {
+                value: fieldValue,
+                label: label || null,
+              };
+            }
+            const fallback = row.cellTexts.slice(1).find(Boolean);
+            if (fallback) {
+              return {
+                value: fallback,
+                label: label || null,
+              };
+            }
+          }
+          return null;
+        };
+        const findLabeledText = matcher => {
+          const candidates = rowEntries
+            .map(row => {
+              const label = clean(row.label || row.cellTexts?.[0] || '');
+              const text = clean(row.text || '');
+              return { row, label, text };
+            })
+            .filter(entry => matcher(entry.label) || matcher(entry.text))
+            .sort((left, right) => {
+              const leftExact = matcher(left.label) ? 1 : 0;
+              const rightExact = matcher(right.label) ? 1 : 0;
+              if (leftExact !== rightExact) return rightExact - leftExact;
+              return left.text.length - right.text.length;
+            });
+          for (const entry of candidates) {
+            const { row, label, text } = entry;
+            const compactCells = Array.isArray(row.cellTexts) ? row.cellTexts.filter(Boolean) : [];
+            if (compactCells.length >= 2 && matcher(compactCells[0])) {
+              return clean(compactCells.slice(1).join(' '));
+            }
+            if (label && text.startsWith(label)) {
+              const stripped = clean(text.slice(label.length));
+              if (stripped) return stripped;
+            }
+          }
+          return '';
+        };
+
+        const collectLineItems = () => {
+          const items = [];
+          const pushItem = (kind, name, meta = {}) => {
+            const cleanName = clean(name);
+            if (!cleanName) return;
+            if (/^(drug name|procedure name|unit|qty|claim|amount|medicine)$/i.test(cleanName)) return;
+            const normalizedKind = clean(kind) || 'item';
+            const dupeKey = `${normalizedKind}|${cleanName}|${clean(meta.quantity || '')}|${clean(meta.amount || '')}`;
+            if (items.some(item => item._dupeKey === dupeKey)) return;
+            items.push({
+              kind: normalizedKind,
+              name: cleanName,
+              quantity: clean(meta.quantity || '') || null,
+              unitPrice: clean(meta.unitPrice || '') || null,
+              amount: clean(meta.amount || '') || null,
+              raw: clean(meta.raw || '') || null,
+              _dupeKey: dupeKey,
+            });
+          };
+
+          for (const [key, value] of Object.entries(namedValues)) {
+            const lower = key.toLowerCase();
+            if (/drug[_-]?drugname|medicine|medication/i.test(lower) && clean(value)) {
+              pushItem('drug', value, {
+                quantity: namedValues.drug_quantity || namedValues.quantity || '',
+                unitPrice: namedValues.drug_unitPrice || namedValues.unitPrice || '',
+                amount: namedValues.drug_amount || namedValues.drugFee || '',
+              });
+            }
+            if (/procedure[_-]?procedurename|procedure_name/i.test(lower) && clean(value)) {
+              pushItem('procedure', value, {
+                amount: namedValues.proc_amount || namedValues.procedure_amount || '',
+              });
+            }
+          }
+
+          for (const row of rowEntries) {
+            const label = clean(row.label || row.cellTexts?.[0] || '');
+            const text = clean(row.text || '');
+            if (text.length > 220) continue;
+            if (!/\b(drug|medicine|medication|procedure|service)\b/i.test(label) &&
+                !/\b(drug|medicine|medication|procedure|service)\b/i.test(text)) {
+              continue;
+            }
+            const valueCells = row.cellTexts.slice(1).filter(Boolean);
+            if (!valueCells.length) continue;
+            if (valueCells.every(cell => !/\d/.test(cell) && /unit|qty|claim|amount|price|sgd/i.test(cell))) {
+              continue;
+            }
+            if (/first consult|follow up|repeat medicine/i.test(valueCells[0])) {
+              continue;
+            }
+            pushItem(
+              /\bprocedure\b/i.test(label) || /\bprocedure\b/i.test(text) ? 'procedure' : 'item',
+              valueCells[0],
+              {
+                quantity: valueCells[1] || '',
+                amount: valueCells[valueCells.length - 1] || '',
+                raw: text,
+              }
+            );
+          }
+
+          return items.map(item => ({
+            kind: item.kind,
+            name: item.name,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            amount: item.amount,
+            raw: item.raw,
+          }));
+        };
+
+        const diagnosisRow = findRowValue(
+          text => /\bdiagnosis\b/i.test(text),
+          text => /\bdiagnosis\s+history\b/i.test(text)
+        );
+        const diagnosisDesc = findByNames('diagnosisPriDesc') || diagnosisRow?.value || '';
+        const diagnosisCodeCandidate =
+          findByNames('diagnosisPriId') ||
+          findByNames('diagnosisPriIdTemp') ||
+          clean(diagnosisRow?.value || '').match(/[A-Z]\d{2,3}(?:\.\d+)?[A-Z]?/i)?.[0] ||
+          clean(diagnosisDesc).match(/[A-Z]\d{2,3}(?:\.\d+)?[A-Z]?/i)?.[0] ||
+          '';
+        const diagnosisCode = /^(NA|N\/A|NONE)$/i.test(diagnosisCodeCandidate)
+          ? clean(diagnosisDesc).match(/[A-Z]\d{2,3}(?:\.\d+)?[A-Z]?/i)?.[0] || ''
+          : diagnosisCodeCandidate;
+        const patientNameRow = findRowValue(
+          text => /\b(employee|member|patient)\s+name\b/i.test(text),
+          text => /\bdoctor\b/i.test(text)
+        );
+        const patientNricRow = findRowValue(text => /\b(nric|fin|member\s*id|employee\s*id|id\s*no)\b/i.test(text));
+        const chargeTypeRow = findRowValue(text => /\bcharge\s*type\b/i.test(text));
+        const mcDaysRow = findRowValue(
+          text => /^mc\s*day\b/i.test(text) || /\bmc\s*day\b/i.test(text),
+          text => /\bmc\s*start/i.test(text)
+        );
+        const mcStartRow = findRowValue(text => /\bmc\s*start\b/i.test(text));
+        const visitDateRow = findRowValue(text => /\bvisit\s*date\b/i.test(text));
+        const consultFeeRow = findRowValue(text => /\bconsultation\s*fee\b/i.test(text));
+        const totalFeeRow = findRowValue(text => /^total\s*fee\b/i.test(text) || /\btotal\s*fee\b/i.test(text));
+        const totalClaimRow = findRowValue(text => /^total\s*claim\b/i.test(text) || /\btotal\s*claim\b/i.test(text));
+        const remarksRow = findRowValue(text => /\bremarks?\b/i.test(text));
+        const claimStatusRow = findRowValue(text => /\bclaim\s*status\b/i.test(text));
+        const lineItems = collectLineItems();
+        const patientNameText = findLabeledText(text => /\b(employee|member|patient)\s+name\b/i.test(text));
+        const patientIdText = findLabeledText(text => /\b(patient|member|employee)\s+id\b/i.test(text));
+        const visitNoText = findLabeledText(text => /\bvisit\s+no\b/i.test(text));
+        const visitNoFromText =
+          clean(visitNoText).match(/\b(?:EV|CL)\d+\b/i)?.[0] ||
+          rowEntries
+            .map(row => clean(row.text || ''))
+            .map(text => text.match(/\b(?:EV|CL)\d+\b/i)?.[0] || '')
+            .find(Boolean) ||
+          '';
+        const specialRemarksText = findLabeledText(text => /\bspecial\s+remarks?\b/i.test(text));
+        const safeRowValue = row => {
+          const value = clean(row?.value || '');
+          return value.length > 120 ? '' : value;
+        };
+        const normalizedRemarks = (() => {
+          const fieldRemark =
+            findByNames('remarks', 'remark', 'specialRemarks', 'specialRemark') || '';
+          if (clean(fieldRemark)) return clean(fieldRemark);
+          const shortSpecialRemarks = clean(specialRemarksText);
+          if (shortSpecialRemarks && shortSpecialRemarks.length <= 160) return shortSpecialRemarks;
+          return '';
+        })();
+
+        const canonical = {
+          visitNo:
+            findByNames('visitNo') ||
+            visitNoFromText ||
+            clean(visitNoText).match(/\b(?:EV|CL)\d+\b/i)?.[0] ||
+            '',
+          visitDate: findByNames('visitDateAsString', 'visitDate') || visitDateRow?.value || '',
+          claimStatus: findByNames('claimStatus') || claimStatusRow?.value || '',
+          patientName:
+            findByNames('patientName', 'memberName', 'employeeName') ||
+            patientNameText ||
+            safeRowValue(patientNameRow) ||
+            '',
+          patientNric:
+            findByNames('nric', 'icNo', 'memberId', 'employeeId', 'patientId') ||
+            patientIdText ||
+            safeRowValue(patientNricRow) ||
+            '',
+          chargeType:
+            findByNames('chargeType', 'visitType') ||
+            findByNames('subType') ||
+            safeRowValue(chargeTypeRow) ||
+            '',
+          mcDays: findByNames('mcDay', 'mcDays', 'medicalLeaveDay') || mcDaysRow?.value || '',
+          mcStartDate:
+            findByNames('mcStartDateAsString', 'mcStartDate', 'mcDate', 'medicalLeaveDate') ||
+            safeRowValue(mcStartRow) ||
+            '',
+          diagnosisCode,
+          diagnosisText: diagnosisDesc,
+          consultationFee: findByNames('consultFee', 'consultationFee') || consultFeeRow?.value || '',
+          totalFee:
+            findByNames('totalUnitFee', 'totalFee', 'empVisitDetail_totalFee') || totalFeeRow?.value || '',
+          totalClaim:
+            findByNames(
+              'totalUnitClaim',
+              'totalClaim',
+              'totalClaimInitial',
+              'totalClaimRevised',
+              'empVisitDetail_totalClaim'
+            ) ||
+            totalClaimRow?.value ||
+            '',
+          remarks: normalizedRemarks || safeRowValue(remarksRow) || '',
+          lineItems,
+        };
+
+        return {
+          url: location.href,
+          title: document.title,
+          context: /aiaclinic/i.test(location.href)
+            ? 'aia'
+            : /pcpcare|singlife/i.test(location.href)
+              ? 'singlife'
+              : 'mhc',
+          canonical,
+          fieldState: {
+            ...namedValues,
+          },
+          lineItems,
+          rowHints: rowEntries
+            .slice(0, 80)
+            .map(row => ({
+              key: toKey(row.label || row.cellTexts?.[0] || row.text || ''),
+              label: row.label || null,
+              text: row.text || null,
+              values: row.fields.map(field => ({
+                name: field.name,
+                value: field.value,
+              })),
+            })),
+        };
+      })
+      .catch(error => ({
+        url: this.page.url() || '',
+        title: '',
+        context: this._inferPortalContext(),
+        canonical: {},
+        fieldState: {},
+        rowHints: [],
+        error: error?.message || String(error),
+      }));
+
+    return {
+      capturedAt: new Date().toISOString(),
+      source: 'mhc_current_form',
+      portalContext: snapshot?.context || this._inferPortalContext(),
+      url: snapshot?.url || this.page.url() || '',
+      title: snapshot?.title || '',
+      ...(snapshot?.canonical || {}),
+      fieldState: snapshot?.fieldState || {},
+      rowHints: snapshot?.rowHints || [],
+      error: snapshot?.error || null,
+    };
+  }
+
+  async captureCurrentVisitFormSnapshot({
+    visit = null,
+    phase = 'current_form',
+    portalTarget = 'MHC',
+    includeScreenshot = true,
+  } = {}) {
+    const snapshot = await this._extractCurrentVisitFormSnapshot();
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const safeId = String(visit?.id || 'unknown').replace(/[^A-Za-z0-9_-]/g, '_');
+    const safePhase = String(phase || 'current_form').replace(/[^A-Za-z0-9_-]/g, '_');
+    const baseDir = path.resolve(process.cwd(), 'output', 'playwright');
+    const screenshotPath = path.join(baseDir, `flow3-${safePhase}-${safeId}-${stamp}.png`);
+    const jsonPath = path.join(baseDir, `flow3-${safePhase}-${safeId}-${stamp}.json`);
+    const payload = {
+      generatedAt: new Date().toISOString(),
+      phase: safePhase,
+      portalTarget,
+      visit: visit
+        ? {
+            id: visit.id || null,
+            patient_name: visit.patient_name || null,
+            visit_date: visit.visit_date || null,
+            pay_type: visit.pay_type || null,
+            nric: visit.nric || null,
+          }
+        : null,
+      snapshot,
+    };
+
+    await fs.mkdir(baseDir, { recursive: true });
+    await fs.writeFile(jsonPath, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+
+    let savedScreenshotPath = null;
+    if (includeScreenshot) {
+      try {
+        await this.page.screenshot({ path: screenshotPath, fullPage: true });
+        savedScreenshotPath = screenshotPath;
+      } catch (error) {
+        logger.warn('[MHC] Failed to capture form snapshot screenshot', {
+          phase: safePhase,
+          visitId: visit?.id || null,
+          error: error?.message || String(error),
+        });
+      }
+    }
+
+    return {
+      ...snapshot,
+      phase: safePhase,
+      artifacts: {
+        json: jsonPath,
+        screenshot: savedScreenshotPath,
+      },
+    };
+  }
+
+  async captureDraftTruthSnapshot({
+    visit = null,
+    nric,
+    visitDate = null,
+    patientName = '',
+    contextHint = null,
+    allowCrossContext = true,
+    expectedVisitNo = null,
+  } = {}) {
+    const opened = await this.openExistingDraftVisit({
+      nric,
+      visitDate,
+      patientName,
+      contextHint,
+      allowCrossContext,
+      expectedVisitNo,
+    });
+    if (!opened?.found) {
+      return {
+        found: false,
+        reason: opened?.reason || 'draft_not_found',
+        attempts: opened?.attempts || [],
+      };
+    }
+    const snapshot = await this.captureCurrentVisitFormSnapshot({
+      visit,
+      phase: 'draft_truth',
+      portalTarget: 'MHC',
+      includeScreenshot: true,
+    });
+    return {
+      ...opened,
+      found: true,
+      snapshot: {
+        ...snapshot,
+        source: 'mhc_draft_form',
+      },
+    };
   }
 
   getLastDiagnosisPrefetchState() {

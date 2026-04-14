@@ -20,17 +20,18 @@ Usage:
   node src/examples/submit-claims-batch.js --visit-ids id1,id2,id3
   node src/examples/submit-claims-batch.js --pay-type MHC
   node src/examples/submit-claims-batch.js --portal-targets MHC,ALLIANCE_MEDINET --from 2026-02-02 --to 2026-02-07
-  node src/examples/submit-claims-batch.js --save-as-draft --from 2026-02-02 --to 2026-02-07 --portal-only
+  node src/examples/submit-claims-batch.js --mode draft --from 2026-02-02 --to 2026-02-07 --portal-only
   node src/examples/submit-claims-batch.js --all-pending
 
 Options:
   --visit-ids <csv>      Specific visit IDs (comma separated)
   --pay-type <value>     Filter by pay type
   --portal-targets <csv> Restrict Flow 3 submit service routes (MHC,ALLIANCE_MEDINET,ALLIANZ,FULLERTON,IHP,IXCHANGE,GE_NTUC)
+  --mode <value>         One of: fill_evidence, draft, submit
   --from <YYYY-MM-DD>    Start date filter
   --to <YYYY-MM-DD>      End date filter
   --portal-only          Only rows in portal scope (MHC/AIA/AVIVA/SINGLIFE + Allianz Medinet tags)
-  --save-as-draft        Click "Save as Draft" after fill
+  --save-as-draft        Deprecated alias for --mode draft
   --leave-open           Keep browser open for manual verification
   --all-pending          Explicitly allow unscoped run across all pending rows
   --help, -h             Show this help
@@ -42,10 +43,10 @@ function parseCliArgs(argv) {
     visitIds: undefined,
     payType: null,
     portalTargets: undefined,
+    mode: 'fill_evidence',
     from: null,
     to: null,
     portalOnly: false,
-    saveAsDraft: false,
     leaveOpen: process.env.BROWSER_LEAVE_OPEN === '1',
     allPending: false,
     help: false,
@@ -70,7 +71,16 @@ function parseCliArgs(argv) {
       continue;
     }
     if (arg === '--save-as-draft') {
-      opts.saveAsDraft = true;
+      opts.mode = 'draft';
+      continue;
+    }
+    if (arg.startsWith('--mode=')) {
+      opts.mode = arg.split('=')[1] || 'fill_evidence';
+      continue;
+    }
+    if (arg === '--mode') {
+      opts.mode = readValue(i);
+      i++;
       continue;
     }
     if (arg === '--leave-open') {
@@ -144,6 +154,12 @@ function parseCliArgs(argv) {
     throw new Error(`Invalid --to date format: ${opts.to} (expected YYYY-MM-DD)`);
   }
 
+  const normalizedMode = String(opts.mode || 'fill_evidence').trim().toLowerCase();
+  if (!['fill_evidence', 'draft', 'submit'].includes(normalizedMode)) {
+    throw new Error(`Invalid --mode value: ${opts.mode} (expected fill_evidence, draft, or submit)`);
+  }
+  opts.mode = normalizedMode;
+
   return opts;
 }
 
@@ -155,7 +171,7 @@ function parseCliArgs(argv) {
  *   node src/examples/submit-claims-batch.js --visit-ids id1,id2,id3
  *   node src/examples/submit-claims-batch.js --pay-type MHC
  *   node src/examples/submit-claims-batch.js --from 2026-02-02 --to 2026-02-07 --portal-only
- *   node src/examples/submit-claims-batch.js --save-as-draft
+ *   node src/examples/submit-claims-batch.js --mode draft
  */
 async function submitClaimsBatch() {
   let parsed;
@@ -172,7 +188,7 @@ async function submitClaimsBatch() {
     return;
   }
 
-  const { visitIds, payType, portalTargets, from, to, portalOnly, saveAsDraft, leaveOpen, allPending } = parsed;
+  const { visitIds, payType, portalTargets, mode, from, to, portalOnly, leaveOpen, allPending } = parsed;
   const normalizedPortalTargets = Array.isArray(portalTargets)
     ? [...new Set(portalTargets.map(v => normalizeFlow3PortalTarget(v)).filter(Boolean))]
     : undefined;
@@ -212,7 +228,7 @@ async function submitClaimsBatch() {
   );
   logger.info(`Date Range: ${from || '-'} to ${to || '-'}`);
   logger.info(`Portal Only: ${portalOnly}`);
-  logger.info(`Save as Draft: ${saveAsDraft}`);
+  logger.info(`Flow 3 Mode: ${mode}`);
   logger.info(`Leave Browser Open: ${leaveOpen}`);
 
   const supabase = createSupabaseClient();
@@ -228,7 +244,7 @@ async function submitClaimsBatch() {
     from,
     to,
     portalOnly,
-    saveAsDraft,
+    mode,
     trigger: 'manual',
   };
   const runId = await startRun(supabase, runMetadata);
@@ -241,12 +257,9 @@ async function submitClaimsBatch() {
   const mhcAsiaPage = await browserManager.newPage();
   const submitter = new ClaimSubmitter(mhcAsiaPage);
 
-  // Set environment variable for draft saving
-  if (saveAsDraft) {
-    process.env.WORKFLOW_SAVE_DRAFT = '1';
-  } else {
-    process.env.WORKFLOW_SAVE_DRAFT = '0';
-  }
+  process.env.FLOW3_MODE = mode;
+  process.env.WORKFLOW_SAVE_DRAFT = mode === 'draft' ? '1' : '0';
+  process.env.ALLOW_LIVE_SUBMIT = mode === 'submit' ? '1' : '0';
 
   let totalRecords = 0;
   let submittedCount = 0;
@@ -300,6 +313,102 @@ async function submitClaimsBatch() {
     return portalTargetToLabel(hinted);
   };
 
+  const buildFlow3VerificationNotes = result => {
+    if (!result || typeof result !== 'object') return '';
+    const bits = [];
+
+    const verification = result.fillVerification && typeof result.fillVerification === 'object'
+      ? result.fillVerification
+      : null;
+    if (verification) {
+      const summary = ['visitDate', 'diagnosis', 'fee']
+        .map(field => `${field}:${String(verification?.[field]?.status || 'n/a')}`)
+        .join(', ');
+      bits.push(`verified=${summary}`);
+      const failedRequired = Array.isArray(result?.requiredFieldGate?.failed)
+        ? result.requiredFieldGate.failed
+        : [];
+      if (failedRequired.length > 0) {
+        bits.push(`required_failed=${failedRequired.join('|')}`);
+      }
+    }
+
+    const comparison = result.comparison && typeof result.comparison === 'object' ? result.comparison : null;
+    if (comparison) {
+      const state = String(comparison.state || 'unavailable');
+      bits.push(`compare=${state}`);
+      if (comparison.botVsSubmittedTruth?.state) {
+        bits.push(`bot_vs_truth=${String(comparison.botVsSubmittedTruth.state)}`);
+      }
+      if (comparison.flow2VsSubmittedTruth?.state) {
+        bits.push(`flow2_vs_truth=${String(comparison.flow2VsSubmittedTruth.state)}`);
+      }
+      const mismatched = Array.isArray(comparison.mismatchedFields)
+        ? comparison.mismatchedFields
+            .map(item => (typeof item === 'string' ? item : item?.field))
+            .filter(Boolean)
+        : [];
+      if (mismatched.length > 0) {
+        bits.push(`compare_mismatch=${mismatched.join('|')}`);
+      } else if (comparison.unavailableReason) {
+        bits.push(`compare_reason=${String(comparison.unavailableReason)}`);
+      }
+    }
+
+    const mismatchCategories = Array.isArray(result.mismatchCategories)
+      ? result.mismatchCategories.filter(Boolean)
+      : [];
+    if (mismatchCategories.length > 0) {
+      bits.push(`mismatch_categories=${mismatchCategories.join('|')}`);
+    }
+
+    if (result.evidence) {
+      bits.push(`evidence=${String(result.evidence)}`);
+    }
+    if (result.sessionState) {
+      bits.push(`session=${String(result.sessionState)}`);
+    }
+    return bits.join(' ; ');
+  };
+
+  const buildFlow3StructuredSummary = result => {
+    if (!result || typeof result !== 'object') {
+      return { fillVerification: '-', comparison: '-', evidence: '-' };
+    }
+    const verification = result.fillVerification && typeof result.fillVerification === 'object'
+      ? result.fillVerification
+      : null;
+    const fillVerification = verification
+      ? ['visitDate', 'diagnosis', 'fee']
+          .map(field => `${field}:${String(verification?.[field]?.status || 'n/a')}`)
+          .join(', ')
+      : '-';
+
+    const comparison = result.comparison && typeof result.comparison === 'object'
+      ? (() => {
+          const state = String(result.comparison.state || 'unavailable');
+          const mismatched = Array.isArray(result.comparison.mismatchedFields)
+            ? result.comparison.mismatchedFields
+                .map(item => (typeof item === 'string' ? item : item?.field))
+                .filter(Boolean)
+            : [];
+          return mismatched.length > 0
+            ? `${state} (${mismatched.join('|')})`
+            : state;
+        })()
+      : '-';
+    const evidence = result.evidence ? String(result.evidence) : '-';
+    const mismatchCategories = Array.isArray(result.mismatchCategories) && result.mismatchCategories.length
+      ? result.mismatchCategories.join('|')
+      : '-';
+
+    return {
+      fillVerification,
+      comparison: mismatchCategories !== '-' ? `${comparison}; ${mismatchCategories}` : comparison,
+      evidence,
+    };
+  };
+
   try {
     // Get visits to submit (either specific IDs or all pending)
     const visits = await submitter.getPendingClaims(payType, visitIds, {
@@ -330,17 +439,21 @@ async function submitClaimsBatch() {
         if (result.success) {
           if (result.savedAsDraft) {
             draftCount++;
-            rowStatus = 'draft_saved';
+            rowStatus = 'draft';
             rowNotes = 'Draft saved in portal';
           } else if (result.submitted) {
             submittedCount++;
             rowStatus = 'submitted';
             rowNotes = 'Submitted in portal';
           } else {
-            // Fill-only verification run (no draft/submission).
+            // Fill + evidence run (no draft/submission).
             filledOnlyCount++;
-            rowStatus = 'filled_only';
-            rowNotes = 'Fill-only mode (no save/submission)';
+            rowStatus = 'filled_evidence';
+            rowNotes = 'Fill + evidence mode (no save/submission)';
+          }
+          const verificationNotes = buildFlow3VerificationNotes(result);
+          if (verificationNotes) {
+            rowNotes = rowNotes ? `${rowNotes} ; ${verificationNotes}` : verificationNotes;
           }
         } else if (result.reason === 'not_found') {
           notStartedCount++;
@@ -366,6 +479,10 @@ async function submitClaimsBatch() {
           logger.error(`Failed to submit: ${result.error || result.reason}`);
           rowStatus = 'error';
           rowNotes = result.error || result.reason || 'Submission failed';
+          const verificationNotes = buildFlow3VerificationNotes(result);
+          if (verificationNotes) {
+            rowNotes = rowNotes ? `${rowNotes} ; ${verificationNotes}` : verificationNotes;
+          }
         }
       } catch (error) {
         errorCount++;
@@ -375,6 +492,7 @@ async function submitClaimsBatch() {
       }
 
       reportRows.push({
+        ...buildFlow3StructuredSummary(rowResult),
         date: visit.visit_date || '-',
         patientName: visit.patient_name || '-',
         nric: visit.nric || '-',
@@ -398,7 +516,7 @@ async function submitClaimsBatch() {
     logger.info(`Total: ${totalRecords}`);
     logger.info(`Submitted: ${submittedCount}`);
     logger.info(`Drafts: ${draftCount}`);
-    logger.info(`Filled only (no DB update): ${filledOnlyCount}`);
+      logger.info(`Filled + evidence: ${filledOnlyCount}`);
     logger.info(`Errors: ${errorCount}`);
     logger.info(`Not Started (unsupported): ${notStartedCount}`);
 
@@ -410,7 +528,7 @@ async function submitClaimsBatch() {
         total: totalRecords,
         submitted: submittedCount,
         drafts: draftCount,
-        filled_only: filledOnlyCount,
+        filled_evidence: filledOnlyCount,
         errors: errorCount,
         not_started: notStartedCount,
       },
@@ -435,10 +553,10 @@ async function submitClaimsBatch() {
       status: 'completed',
       finished_at: new Date().toISOString(),
       total_records: totalRecords,
-      completed_count: submittedCount + draftCount + filledOnlyCount,
-      failed_count: errorCount,
-      metadata: {
-        ...runMetadata,
+        completed_count: submittedCount + draftCount + filledOnlyCount,
+        failed_count: errorCount,
+        metadata: {
+          ...runMetadata,
         submittedCount,
         draftCount,
         filledOnlyCount,
@@ -467,7 +585,7 @@ async function submitClaimsBatch() {
         total: totalRecords,
         submitted: submittedCount,
         drafts: draftCount,
-        filled_only: filledOnlyCount,
+        filled_evidence: filledOnlyCount,
         errors: errorCount,
         not_started: notStartedCount,
       },

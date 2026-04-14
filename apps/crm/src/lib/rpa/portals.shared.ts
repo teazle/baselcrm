@@ -71,11 +71,25 @@ export const PATIENT_NAME_PORTAL_TAGS = [
   'NTUC_IM',
   'MHCAXA',
 ] as const;
+export const CLAIM_CANDIDATE_STATUSES = [
+  "claim_candidate",
+  "not_claim_candidate",
+  "manual_review",
+] as const;
 
 export type SupportedPortal = (typeof SUPPORTED_PORTALS)[number];
 export type UnsupportedPortal = (typeof UNSUPPORTED_PORTALS)[number];
 export type Portal = SupportedPortal | UnsupportedPortal;
 export type Flow3PortalTarget = (typeof FLOW3_PORTAL_TARGETS)[number];
+export type ClaimCandidateStatus = (typeof CLAIM_CANDIDATE_STATUSES)[number];
+
+export type ClaimCandidateClassification = {
+  status: ClaimCandidateStatus;
+  reasons: string[];
+  portalTarget: Flow3PortalTarget | null;
+  normalizedPayType: string;
+  hasNric: boolean;
+};
 
 /**
  * Check if a pay type is a supported portal
@@ -124,6 +138,38 @@ function normalizeMetadataPortalHint(value: unknown): string {
     .toUpperCase()
     .replace(/[^A-Z0-9]+/g, '')
     .trim();
+}
+
+function normalizeCandidateStatus(value: unknown): ClaimCandidateStatus | null {
+  const raw = String(value || "").trim().toLowerCase();
+  if (
+    raw === "claim_candidate" ||
+    raw === "not_claim_candidate" ||
+    raw === "manual_review"
+  ) {
+    return raw as ClaimCandidateStatus;
+  }
+  return null;
+}
+
+function uniqueStrings(values: Array<string | null | undefined>): string[] {
+  return [...new Set(values.map((value) => String(value || "").trim()).filter(Boolean))];
+}
+
+function hasUsableNric(value: unknown): boolean {
+  const raw = String(value || "")
+    .trim()
+    .toUpperCase();
+  if (!raw) return false;
+  return /[STFGM]\d{7}[A-Z]/.test(raw) || raw.length >= 5;
+}
+
+function looksLikeCreditCardPayType(value: string): boolean {
+  return /\b(CREDIT\s*CARD|VISA|MASTERCARD|AMEX)\b/.test(value);
+}
+
+function looksLikeCashOrSelfPay(value: string): boolean {
+  return /\b(CASH|SELF\s*PAY(?:MENT)?|PRIVATE\s*PAY|SELFPAY)\b/.test(value);
 }
 
 function containsAnyTag(
@@ -252,6 +298,103 @@ export function resolveFlow3PortalTarget(
   )
     return 'IXCHANGE';
   return null;
+}
+
+export function classifyVisitForRpa(
+  payType: string | null | undefined,
+  patientName: string | null | undefined,
+  nric: string | null | undefined,
+  extractionMetadata: unknown = null,
+  submissionStatus: string | null | undefined = null,
+): ClaimCandidateClassification {
+  const normalizedPayType = normalizePortalTag(payType).replace(/\s+/g, " ").trim();
+  const existingStatus =
+    extractionMetadata && typeof extractionMetadata === "object"
+      ? normalizeCandidateStatus(
+          (extractionMetadata as Record<string, unknown>).claimCandidateStatus,
+        )
+      : null;
+  const route = resolveFlow3PortalTarget(payType, patientName, extractionMetadata);
+  const metadataNric =
+    extractionMetadata && typeof extractionMetadata === "object"
+      ? String((extractionMetadata as Record<string, unknown>).nric || "").trim()
+      : "";
+  const hasNric = hasUsableNric(nric) || hasUsableNric(metadataNric);
+  const submission = String(submissionStatus || "").trim().toLowerCase();
+
+  if (submission === "draft" || submission === "submitted") {
+    return {
+      status: "not_claim_candidate",
+      reasons: ["already_submitted"],
+      portalTarget: route,
+      normalizedPayType,
+      hasNric,
+    };
+  }
+
+  if (normalizedPayType && looksLikeCreditCardPayType(normalizedPayType)) {
+    return {
+      status: "not_claim_candidate",
+      reasons: ["credit_card"],
+      portalTarget: route,
+      normalizedPayType,
+      hasNric,
+    };
+  }
+
+  if (normalizedPayType && looksLikeCashOrSelfPay(normalizedPayType)) {
+    return {
+      status: "not_claim_candidate",
+      reasons: ["cash_self_pay"],
+      portalTarget: route,
+      normalizedPayType,
+      hasNric,
+    };
+  }
+
+  if (route) {
+    const reasons = uniqueStrings([
+      "portal_supported",
+      !hasNric ? "missing_nric" : null,
+    ]);
+    return {
+      status: hasNric ? "claim_candidate" : "manual_review",
+      reasons,
+      portalTarget: route,
+      normalizedPayType,
+      hasNric,
+    };
+  }
+
+  if (existingStatus) {
+    return {
+      status: existingStatus,
+      reasons: uniqueStrings(["portal_unknown"]),
+      portalTarget: route,
+      normalizedPayType,
+      hasNric,
+    };
+  }
+
+  return {
+    status: "manual_review",
+    reasons: ["portal_unknown"],
+    portalTarget: null,
+    normalizedPayType,
+    hasNric,
+  };
+}
+
+export function isFlow2EligibleVisit(extractionMetadata: unknown = null): boolean {
+  const status =
+    extractionMetadata && typeof extractionMetadata === "object"
+      ? normalizeCandidateStatus(
+          (extractionMetadata as Record<string, unknown>).claimCandidateStatus,
+        )
+      : null;
+  if (status === "claim_candidate" || status === "manual_review") return true;
+  if (status === "not_claim_candidate") return false;
+  return true;
 }
 
 export function matchesFlow3PortalTargets(

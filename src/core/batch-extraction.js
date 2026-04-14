@@ -7,6 +7,7 @@ import {
   validateClaimDetails,
   logValidationResults,
 } from '../utils/extraction-validator.js';
+import { classifyVisitForRpa } from '../../apps/crm/src/lib/rpa/portals.shared.js';
 
 /**
  * Batch extraction: Extract all queue items from today and save to CRM
@@ -488,6 +489,36 @@ export class BatchExtraction {
     return Number.isFinite(parsed) ? parsed : null;
   }
 
+  _mergeExtractionMetadata(existingMetadata = null, patch = {}) {
+    const current =
+      existingMetadata && typeof existingMetadata === 'object' ? existingMetadata : {};
+    const next = {
+      ...current,
+      ...patch,
+    };
+    const nextFlow1 =
+      patch.flow1 && typeof patch.flow1 === 'object'
+        ? {
+            ...(current.flow1 && typeof current.flow1 === 'object' ? current.flow1 : {}),
+            ...patch.flow1,
+          }
+        : current.flow1;
+    if (nextFlow1 && typeof nextFlow1 === 'object') {
+      next.flow1 = nextFlow1;
+    }
+    const nextSources =
+      patch.sources && typeof patch.sources === 'object'
+        ? {
+            ...(current.sources && typeof current.sources === 'object' ? current.sources : {}),
+            ...patch.sources,
+          }
+        : current.sources;
+    if (nextSources && typeof nextSources === 'object') {
+      next.sources = nextSources;
+    }
+    return next;
+  }
+
   /**
    * Queue Listing can split one logical visit into two adjacent rows:
    * - Row A: has CONTRACT/payType but 0 fee
@@ -643,52 +674,19 @@ export class BatchExtraction {
         // Prefer invoice/visit record number for deduplication (PCNO can repeat on the same day).
         const visitRecordNo = item.invNo || item.qno || null;
 
-        // Prepare visit data
-        const visitData = {
-          user_id: systemUserId, // Required field
-          visit_date: targetDate,
-          time_arrived: item.inTime || null,
-          time_left: item.outTime || null,
-          patient_name: item.patientName || null,
-          visit_record_no: visitRecordNo,
-          total_amount: feeAmount,
-          amount_outstanding: feeAmount,
-
-          // Metadata
-          source: 'Clinic Assist',
-          extraction_metadata: {
-            extracted: item.extracted,
-            extractedAt: item.extractedAt || new Date().toISOString(),
-            sources: item.claimDetails?.sources || {},
-            pcno: pcno, // Save PCNO (patient number) for future searches
-            spCode: item.spCode || null, // Save SP code for Allianz Medinet doctor mapping in Flow 3
-          },
-        };
-
-        // Preserve existing classification/identity data if queue row does not provide it.
-        if (item.payType) visitData.pay_type = item.payType;
-        if (item.visitType) visitData.visit_type = item.visitType;
-        if (item.nric) visitData.nric = item.nric;
-
-        // Only update detailed clinical fields when we actually extracted claim details.
-        // Queue-listing refresh rows intentionally do not carry diagnosis/MC detail.
-        if (item.claimDetails) {
-          visitData.diagnosis_description = item.claimDetails?.diagnosisText || null;
-          visitData.symptoms = item.claimDetails?.notesText || null;
-          visitData.treatment_detail = item.claimDetails?.items?.join('\n') || null;
-          visitData.mc_required = (item.claimDetails?.mcDays || 0) > 0;
-          visitData.mc_start_date = (item.claimDetails?.mcDays || 0) > 0 ? targetDate : null;
-          visitData.mc_end_date = (item.claimDetails?.mcDays || 0) > 0 ? targetDate : null;
-        }
+        let existingRecord = null;
+        let existingMetadata = {};
+        let existingSubmissionStatus = null;
+        let existingSubmittedAt = null;
+        let existingVisitId = null;
 
         // Deduplication:
         // Use visit_record_no + visit_date when possible (invoice/record number is unique per visit/claim).
         // Do NOT dedupe solely by PCNO because a patient can have multiple visits/invoices on the same day.
-        let existingRecord = null;
         if (visitRecordNo) {
           const { data: existingByRecordNo } = await this.supabase
             .from('visits')
-            .select('id')
+            .select('id, extraction_metadata, submission_status, submitted_at')
             .eq('visit_date', targetDate)
             .eq('visit_record_no', visitRecordNo)
             .limit(1)
@@ -704,7 +702,7 @@ export class BatchExtraction {
           // Last resort: if we have no record number, try to avoid duplicates by PCNO + time_arrived.
           const { data: existingData } = await this.supabase
             .from('visits')
-            .select('id, extraction_metadata, time_arrived')
+            .select('id, extraction_metadata, time_arrived, submission_status, submitted_at')
             .eq('visit_date', targetDate)
             .not('extraction_metadata', 'is', null)
             .limit(200);
@@ -723,6 +721,82 @@ export class BatchExtraction {
               `[BATCH] Found existing record for PCNO ${pcno} at ${item.inTime || 'n/a'} on ${targetDate}, will update instead of insert`
             );
           }
+        }
+
+        existingMetadata =
+          existingRecord?.extraction_metadata && typeof existingRecord.extraction_metadata === 'object'
+            ? existingRecord.extraction_metadata
+            : {};
+        existingSubmissionStatus = existingRecord?.submission_status || null;
+        existingSubmittedAt = existingRecord?.submitted_at || null;
+        existingVisitId = existingRecord?.id || null;
+
+        const candidate = classifyVisitForRpa(
+          item.payType || null,
+          item.patientName || null,
+          item.nric || null,
+          existingMetadata,
+          existingSubmissionStatus
+        );
+        const claimCandidateReasons = [...new Set([
+          ...(Array.isArray(candidate.reasons) ? candidate.reasons : []),
+          existingRecord ? 'duplicate_visit' : null,
+          existingSubmittedAt ? 'already_submitted' : null,
+        ].filter(Boolean))];
+
+        const mergedExtractionMetadata = this._mergeExtractionMetadata(existingMetadata, {
+          extracted: item.extracted,
+          extractedAt: item.extractedAt || new Date().toISOString(),
+          sources: item.claimDetails?.sources || {},
+          pcno: pcno,
+          spCode: item.spCode || existingMetadata?.spCode || null,
+          claimCandidateStatus: candidate.status,
+          claimCandidateReasons,
+          claimCandidateEvaluatedAt: new Date().toISOString(),
+          flow3PortalRoute:
+            candidate.portalTarget ||
+            existingMetadata?.flow3PortalRoute ||
+            null,
+          flow1: {
+            lastIngestedAt: new Date().toISOString(),
+            source: item.source || existingMetadata?.flow1?.source || null,
+            payType: item.payType || existingMetadata?.flow1?.payType || null,
+            rowIndex: item.rowIndex ?? existingMetadata?.flow1?.rowIndex ?? null,
+            dedupeDisposition: existingRecord ? 'updated_existing' : 'inserted_new',
+            visitRecordNo: visitRecordNo || existingMetadata?.flow1?.visitRecordNo || null,
+          },
+        });
+
+        // Prepare visit data
+        const visitData = {
+          user_id: systemUserId, // Required field
+          visit_date: targetDate,
+          time_arrived: item.inTime || null,
+          time_left: item.outTime || null,
+          patient_name: item.patientName || null,
+          visit_record_no: visitRecordNo,
+          total_amount: feeAmount,
+          amount_outstanding: feeAmount,
+
+          // Metadata
+          source: 'Clinic Assist',
+          extraction_metadata: mergedExtractionMetadata,
+        };
+
+        // Preserve existing classification/identity data if queue row does not provide it.
+        if (item.payType) visitData.pay_type = item.payType;
+        if (item.visitType) visitData.visit_type = item.visitType;
+        if (item.nric) visitData.nric = item.nric;
+
+        // Only update detailed clinical fields when we actually extracted claim details.
+        // Queue-listing refresh rows intentionally do not carry diagnosis/MC detail.
+        if (item.claimDetails) {
+          visitData.diagnosis_description = item.claimDetails?.diagnosisText || null;
+          visitData.symptoms = item.claimDetails?.notesText || null;
+          visitData.treatment_detail = item.claimDetails?.items?.join('\n') || null;
+          visitData.mc_required = (item.claimDetails?.mcDays || 0) > 0;
+          visitData.mc_start_date = (item.claimDetails?.mcDays || 0) > 0 ? targetDate : null;
+          visitData.mc_end_date = (item.claimDetails?.mcDays || 0) > 0 ? targetDate : null;
         }
 
         let data = null;

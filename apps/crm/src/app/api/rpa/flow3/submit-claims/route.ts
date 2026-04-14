@@ -29,11 +29,19 @@ export async function POST(request: Request) {
       .map((value: unknown) => String(value ?? "").trim().toUpperCase())
       .filter(Boolean)
     : undefined;
+  const requestedMode =
+    typeof body?.mode === "string" ? String(body.mode).trim().toLowerCase() : "";
   const from = typeof body?.from === "string" ? body.from : undefined;
   const to = typeof body?.to === "string" ? body.to : undefined;
   const portalOnly = Boolean(body?.portalOnly);
   const saveAsDraft = Boolean(body?.saveAsDraft);
   const leaveOpen = Boolean(body?.leaveOpen);
+  const mode =
+    requestedMode === "draft" || requestedMode === "submit" || requestedMode === "fill_evidence"
+      ? requestedMode
+      : saveAsDraft
+        ? "draft"
+        : "fill_evidence";
 
   try {
     // For now, we'll create a simple batch submission script
@@ -48,6 +56,7 @@ export async function POST(request: Request) {
     if (portalTargets && portalTargets.length > 0) {
       args.push("--portal-targets", portalTargets.join(","));
     }
+    args.push("--mode", mode);
     if (from) {
       args.push("--from", from);
     }
@@ -56,9 +65,6 @@ export async function POST(request: Request) {
     }
     if (portalOnly) {
       args.push("--portal-only");
-    }
-    if (saveAsDraft) {
-      args.push("--save-as-draft");
     }
     if (leaveOpen) {
       args.push("--leave-open");
@@ -79,11 +85,14 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       pid,
-      message: saveAsDraft
-        ? "Claim submission started (saving as draft)."
-        : leaveOpen
-          ? "Claim fill started (browser left open)."
-          : "Claim fill started.",
+      message:
+        mode === "draft"
+          ? "Flow 3 draft run started."
+          : mode === "submit"
+            ? "Flow 3 submit run started."
+            : leaveOpen
+              ? "Flow 3 fill + evidence run started (browser left open)."
+              : "Flow 3 fill + evidence run started.",
     });
   } catch (error) {
     return NextResponse.json(

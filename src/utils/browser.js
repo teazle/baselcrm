@@ -354,11 +354,16 @@ export class BrowserManager {
     this.proxyValidator = new ProxyValidator();
     this.currentProxy = null;
     this.proxyRetryCount = 0;
+    this.persistedOriginState = {};
     const configuredUserDataDir = String(process.env.PLAYWRIGHT_USER_DATA_DIR || '').trim();
     this.userDataDir = configuredUserDataDir
       ? path.resolve(configuredUserDataDir)
       : path.join(os.homedir(), '.playwright-browser-data');
     this.baseUserDataDir = this.userDataDir;
+    const configuredSessionStatePath = String(process.env.PLAYWRIGHT_SESSION_STATE_PATH || '').trim();
+    this.sessionStatePath = configuredSessionStatePath
+      ? path.resolve(configuredSessionStatePath)
+      : path.join(this.baseUserDataDir, 'session-state.json');
   }
 
   _isProfileLockError(error) {
@@ -393,6 +398,83 @@ export class BrowserManager {
       logger.info('Applied external protocol guard script');
     } catch (error) {
       logger.warn('Failed to apply external protocol guard script:', error.message);
+    }
+  }
+
+  async _restorePersistedSessionState(context) {
+    try {
+      if (!fs.existsSync(this.sessionStatePath)) {
+        this.persistedOriginState = {};
+        return { restored: false, reason: 'missing_state_file' };
+      }
+      const raw = fs.readFileSync(this.sessionStatePath, 'utf8');
+      const parsed = JSON.parse(raw || '{}');
+      const cookies = Array.isArray(parsed?.cookies) ? parsed.cookies : [];
+      const origins = Array.isArray(parsed?.origins) ? parsed.origins : [];
+
+      if (cookies.length > 0) {
+        await context.addCookies(cookies);
+      }
+
+      this.persistedOriginState = Object.fromEntries(
+        origins
+          .filter(entry => entry && typeof entry.origin === 'string' && Array.isArray(entry.localStorage))
+          .map(entry => [entry.origin, entry.localStorage])
+      );
+
+      logger.info('Restored persisted browser session state', {
+        cookies: cookies.length,
+        origins: Object.keys(this.persistedOriginState).length,
+        path: this.sessionStatePath,
+      });
+      return {
+        restored: cookies.length > 0 || origins.length > 0,
+        cookies: cookies.length,
+        origins: origins.length,
+      };
+    } catch (error) {
+      logger.warn('Failed to restore persisted browser session state:', error.message);
+      this.persistedOriginState = {};
+      return { restored: false, reason: error?.message || String(error) };
+    }
+  }
+
+  async _applyPersistedOriginState(context) {
+    const originState = this.persistedOriginState || {};
+    if (!originState || Object.keys(originState).length === 0) return;
+    try {
+      await context.addInitScript(origins => {
+        const entries = origins?.[window.location.origin];
+        if (!Array.isArray(entries) || entries.length === 0) return;
+        for (const entry of entries) {
+          try {
+            if (!entry || typeof entry.name !== 'string') continue;
+            window.localStorage.setItem(entry.name, String(entry.value ?? ''));
+          } catch (error) {
+            // ignore
+          }
+        }
+      }, originState);
+      logger.info('Applied persisted localStorage origin state', {
+        origins: Object.keys(originState).length,
+      });
+    } catch (error) {
+      logger.warn('Failed to apply persisted localStorage origin state:', error.message);
+    }
+  }
+
+  async _persistSessionState(context) {
+    try {
+      const dir = path.dirname(this.sessionStatePath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      await context.storageState({ path: this.sessionStatePath });
+      logger.info('Persisted browser session state', {
+        path: this.sessionStatePath,
+      });
+    } catch (error) {
+      logger.warn('Failed to persist browser session state:', error.message);
     }
   }
 
@@ -655,6 +737,9 @@ export class BrowserManager {
         this.context = await this.browser.newContext(contextOptions);
       }
 
+      await this._restorePersistedSessionState(this.context);
+      await this._applyPersistedOriginState(this.context);
+
       // Set default timeout
       this.context.setDefaultTimeout(BROWSER_CONFIG.timeout);
 
@@ -847,6 +932,7 @@ export class BrowserManager {
    */
   async close() {
     if (this.context) {
+      await this._persistSessionState(this.context);
       await this.context.close();
       logger.info('Browser closed');
     }

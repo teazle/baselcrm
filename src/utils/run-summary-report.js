@@ -51,15 +51,15 @@ function toMarkdown({
   }
   lines.push('');
   lines.push('## Records');
-  lines.push('| Date | Patient Name | NRIC | Pay Type | TPA/Portal | Status | Diagnosis Status | Notes |');
-  lines.push('| --- | --- | --- | --- | --- | --- | --- | --- |');
+  lines.push('| Date | Patient Name | NRIC | Pay Type | TPA/Portal | Status | Diagnosis Status | Fill Verification | Comparison | Evidence | Notes |');
+  lines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
   for (const row of rows) {
     lines.push(
-      `| ${escapeCell(row.date)} | ${escapeCell(row.patientName)} | ${escapeCell(row.nric)} | ${escapeCell(row.payType)} | ${escapeCell(row.portal)} | ${escapeCell(row.status)} | ${escapeCell(row.diagnosisStatus)} | ${escapeCell(row.notes)} |`
+      `| ${escapeCell(row.date)} | ${escapeCell(row.patientName)} | ${escapeCell(row.nric)} | ${escapeCell(row.payType)} | ${escapeCell(row.portal)} | ${escapeCell(row.status)} | ${escapeCell(row.diagnosisStatus)} | ${escapeCell(row.fillVerification)} | ${escapeCell(row.comparison)} | ${escapeCell(row.evidence)} | ${escapeCell(row.notes)} |`
     );
   }
   if (!rows.length) {
-    lines.push('| - | - | - | - | - | no_records | - | No records for this run |');
+    lines.push('| - | - | - | - | - | no_records | - | - | - | - | No records for this run |');
   }
   lines.push('');
   return `${lines.join('\n')}\n`;
@@ -100,4 +100,3 @@ export async function writeRunSummaryReport({
 
   return { mdPath, jsonPath };
 }
-

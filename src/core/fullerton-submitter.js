@@ -13,6 +13,89 @@ function withOverrides(base, overrides) {
   return next;
 }
 
+async function extractFullertonFeeEvidence(page) {
+  return page
+    .evaluate(() => {
+      const norm = value =>
+        String(value || '')
+          .replace(/\s+/g, ' ')
+          .trim();
+      const parseAmount = value => {
+        const m = norm(value).replace(/,/g, '').match(/\d+(?:\.\d{1,2})?/);
+        return m ? Number(m[0]).toFixed(2) : '';
+      };
+
+      const inputs = Array.from(
+        globalThis.document?.querySelectorAll?.(
+          'input[name*="consult" i], input[name*="fee" i], input[name*="amount" i], select[name*="consult" i], select[name*="fee" i]'
+        ) || []
+      );
+      for (const node of inputs) {
+        const raw = 'value' in node ? node.value : node.textContent || '';
+        const amount = parseAmount(raw);
+        if (!amount) continue;
+        const id = norm(node.getAttribute?.('id'));
+        const name = norm(node.getAttribute?.('name'));
+        return { ok: true, value: amount, source: `input:${name || id || 'consult'}` };
+      }
+
+      const rows = Array.from(globalThis.document?.querySelectorAll?.('tr') || []);
+      for (const row of rows) {
+        const text = norm(row.textContent || '');
+        if (!/consultation\s*cost|consult\s*price|consultation/i.test(text)) continue;
+        const amount = parseAmount(text);
+        if (!amount) continue;
+        return { ok: true, value: amount, source: 'row:consultation_cost' };
+      }
+
+      const body = norm(globalThis.document?.body?.innerText || '');
+      const bodyMatch = body.match(
+        /consultation\s*cost[^0-9]{0,30}(\d+(?:\.\d{1,2})?)|consult\s*price[^0-9]{0,30}(\d+(?:\.\d{1,2})?)/i
+      );
+      const bodyAmount = bodyMatch?.[1] || bodyMatch?.[2] || '';
+      if (bodyAmount) {
+        return { ok: true, value: Number(bodyAmount).toFixed(2), source: 'body:consultation_cost' };
+      }
+
+      return { ok: false, value: '', source: null };
+    })
+    .catch(() => ({ ok: false, value: '', source: null }));
+}
+
+async function extractFullertonVisitDateEvidence(page) {
+  return page
+    .evaluate(() => {
+      const norm = value =>
+        String(value || '')
+          .replace(/\s+/g, ' ')
+          .trim();
+      const dateLike = value => {
+        const text = norm(value);
+        if (!text) return '';
+        if (/\b\d{1,2}\/\d{1,2}\/\d{2,4}\b/.test(text)) return text;
+        if (/\b\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}\b/.test(text)) return text;
+        if (/\b\d{4}-\d{1,2}-\d{1,2}\b/.test(text)) return text;
+        return '';
+      };
+
+      const hiddenDate = globalThis.document?.querySelector?.('input[name="visit.visitDateStr"]');
+      const hiddenVal = dateLike(hiddenDate?.value || '');
+      if (hiddenVal) return { ok: true, value: hiddenVal, source: 'input:visit.visitDateStr' };
+
+      const visitDateCell = Array.from(globalThis.document?.querySelectorAll?.('tr, td, div') || [])
+        .map(node => norm(node.textContent || ''))
+        .find(text => /visit date/i.test(text) && dateLike(text));
+      if (visitDateCell) return { ok: true, value: visitDateCell, source: 'row:visit_date' };
+
+      const body = norm(globalThis.document?.body?.innerText || '');
+      const m = body.match(/visit date[^0-9A-Za-z]{0,10}([0-9]{1,2}\s+[A-Za-z]{3,9}\s+[0-9]{4}|[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{2,4}|[0-9]{4}-[0-9]{1,2}-[0-9]{1,2})/i);
+      if (m?.[1]) return { ok: true, value: norm(m[1]), source: 'body:visit_date' };
+
+      return { ok: false, value: '', source: null };
+    })
+    .catch(() => ({ ok: false, value: '', source: null }));
+}
+
 async function ensureFullertonVisitForm({ page, state, helpers }) {
   const isEditPage = () =>
     page
@@ -237,7 +320,7 @@ function buildSelectors() {
       'input[name*="amount" i]',
       'input[name*="total" i]',
     ],
-    minFilledFormFields: 2,
+    requiredFields: ['visitDate', 'diagnosis', 'fee'],
   });
 }
 
@@ -259,6 +342,35 @@ export class FullertonSubmitter {
       selectors: buildSelectors(),
       beforeForm: async ({ page: runPage, state, helpers }) => {
         await ensureFullertonVisitForm({ page: runPage, state, helpers });
+      },
+      adjustFillVerification: async ({ page: runPage, fillVerification }) => {
+        const visitDateStatus = String(fillVerification?.visitDate?.status || '');
+        if (visitDateStatus !== 'verified' && visitDateStatus !== 'readonly') {
+          const visitDateEvidence = await extractFullertonVisitDateEvidence(runPage);
+          if (visitDateEvidence?.ok && visitDateEvidence?.value) {
+            fillVerification.visitDate = {
+              ...(fillVerification?.visitDate || {}),
+              status: 'readonly',
+              observed: visitDateEvidence.value,
+              selector: `eval:${visitDateEvidence.source || 'visit_date'}`,
+              error: fillVerification?.visitDate?.error || null,
+            };
+          }
+        }
+
+        const feeStatus = String(fillVerification?.fee?.status || '');
+        if (feeStatus === 'verified' || feeStatus === 'readonly') return null;
+        const feeEvidence = await extractFullertonFeeEvidence(runPage);
+        if (!feeEvidence?.ok || !feeEvidence?.value) return null;
+        return {
+          fee: {
+            ...(fillVerification?.fee || {}),
+            status: 'readonly',
+            observed: feeEvidence.value,
+            selector: `eval:${feeEvidence.source || 'consultation_cost'}`,
+            error: fillVerification?.fee?.error || null,
+          },
+        };
       },
     });
   }

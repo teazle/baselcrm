@@ -7,6 +7,7 @@ import Link from "next/link";
 import RealTimeStatus from "./RealTimeStatus";
 import { supabaseBrowser } from "@/lib/supabase/browser";
 import FlowStepper from "./FlowStepper";
+import { classifyVisitForRpa } from "@/lib/rpa/portals";
 
 type RunSummary = {
   total: number;
@@ -24,10 +25,24 @@ type VisitSummary = {
 
 type ClaimSummary = {
   total: number;
+  candidatePending: number;
+  manualReview: number;
+  filledEvidence: number;
   draft: number;
   submitted: number;
-  notStarted: number;
   error: number;
+};
+
+type OverviewVisitRow = {
+  pay_type: string | null;
+  patient_name: string | null;
+  nric: string | null;
+  extraction_metadata: Record<string, unknown> | null;
+  submission_status: string | null;
+  submission_metadata: {
+    mode?: string | null;
+    success?: boolean | null;
+  } | null;
 };
 
 export default function RpaOverview() {
@@ -63,7 +78,7 @@ export default function RpaOverview() {
             .limit(100),
           supabase
             .from("visits")
-            .select("extraction_metadata,submission_status")
+            .select("pay_type,patient_name,nric,extraction_metadata,submission_status,submission_metadata")
             .eq("source", "Clinic Assist")
             .limit(1000),
         ]);
@@ -88,6 +103,28 @@ export default function RpaOverview() {
             .length,
         });
 
+        const getFlow3State = (visit: OverviewVisitRow) => {
+          const status = String(visit?.submission_status || "").trim().toLowerCase();
+          if (status === "error") return "error";
+          if (status === "submitted") return "submitted";
+          if (status === "draft") return "draft";
+          if (
+            String(visit?.submission_metadata?.mode || "").trim().toLowerCase() ===
+              "fill_evidence" &&
+            visit?.submission_metadata?.success === true
+          ) {
+            return "filled_evidence";
+          }
+          const candidate = classifyVisitForRpa(
+            visit?.pay_type || null,
+            visit?.patient_name || null,
+            visit?.nric || null,
+            visit?.extraction_metadata || null,
+            visit?.submission_status || null,
+          );
+          return candidate.status === "manual_review" ? "manual_review" : "candidate_pending";
+        };
+
         setVisitSummary({
           total: visits.length,
           pending: visits.filter(
@@ -103,10 +140,12 @@ export default function RpaOverview() {
 
         setClaimSummary({
           total: visits.length,
-          draft: visits.filter((v) => v?.submission_status === "draft").length,
-          submitted: visits.filter((v) => v?.submission_status === "submitted").length,
-          notStarted: visits.filter((v) => !v?.submission_status).length,
-          error: visits.filter((v) => v?.submission_status === "error").length,
+          candidatePending: visits.filter((v) => getFlow3State(v) === "candidate_pending").length,
+          manualReview: visits.filter((v) => getFlow3State(v) === "manual_review").length,
+          filledEvidence: visits.filter((v) => getFlow3State(v) === "filled_evidence").length,
+          draft: visits.filter((v) => getFlow3State(v) === "draft").length,
+          submitted: visits.filter((v) => getFlow3State(v) === "submitted").length,
+          error: visits.filter((v) => getFlow3State(v) === "error").length,
         });
 
         setLoading(false);
@@ -231,13 +270,13 @@ export default function RpaOverview() {
             status:
               (claimSummary?.error ?? 0) > 0
                 ? "attention"
-                : (claimSummary?.notStarted ?? 0) > 0
+                : ((claimSummary?.candidatePending ?? 0) > 0 || (claimSummary?.manualReview ?? 0) > 0)
                   ? "pending"
                   : "ready",
             statusLabel:
               (claimSummary?.error ?? 0) > 0
                 ? "Needs attention"
-                : (claimSummary?.notStarted ?? 0) > 0
+                : ((claimSummary?.candidatePending ?? 0) > 0 || (claimSummary?.manualReview ?? 0) > 0)
                   ? "Pending"
                   : "Ready",
           },
@@ -287,7 +326,8 @@ export default function RpaOverview() {
           <div className="mt-1 flex gap-3 text-xs text-muted-foreground">
             <span>{claimSummary?.submitted ?? 0} submitted</span>
             <span>{claimSummary?.draft ?? 0} draft</span>
-            <span>{claimSummary?.notStarted ?? 0} pending</span>
+            <span>{claimSummary?.candidatePending ?? 0} candidate pending</span>
+            <span>{claimSummary?.manualReview ?? 0} manual review</span>
           </div>
         </Card>
       </div>

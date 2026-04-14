@@ -5,7 +5,6 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { DataTable, RowLink } from '@/components/ui/DataTable';
 import { supabaseBrowser } from '@/lib/supabase/browser';
-import { StatusBadge, type Status } from './StatusBadge';
 import {
   formatDateDDMMYYYY,
   formatDateTimeDDMMYYYY,
@@ -14,7 +13,12 @@ import {
   parseDateSingapore,
 } from '@/lib/utils/date';
 import { cn } from '@/lib/cn';
-import { extractAllianceMedinetTag, getPortalScopeOrFilter } from '@/lib/rpa/portals';
+import {
+  classifyVisitForRpa,
+  extractAllianceMedinetTag,
+  getPortalScopeOrFilter,
+  isFlow2EligibleVisit,
+} from '@/lib/rpa/portals';
 import FlowHeader from './FlowHeader';
 import RunSummaryPanel from './RunSummaryPanel';
 
@@ -28,10 +32,27 @@ type VisitRow = {
   treatment_detail: string | null;
   extraction_metadata: {
     pcno?: string | null;
+    claimCandidateStatus?: string | null;
+    claimCandidateReasons?: string[] | null;
     detailsExtractionStatus?: string | null;
     detailsExtractedAt?: string | null;
     detailsExtractionLastAttempt?: string | null;
     diagnosisCode?: string | null;
+    diagnosisResolution?: {
+      status?: string | null;
+      confidence?: number | null;
+      reason_if_unresolved?: string | null;
+    } | null;
+    diagnosisEvidence?: {
+      sourceTab?: string | null;
+      sourceDate?: string | null;
+      confidence?: number | null;
+      rejectionReason?: string | null;
+      artifactPaths?: {
+        screenshot?: string | null;
+        json?: string | null;
+      } | null;
+    } | null;
     chargeType?: string | null;
     mcDays?: number | null;
     mcStartDate?: string | null;
@@ -63,17 +84,32 @@ const filters: Array<{ key: FilterKey; label: string }> = [
   { key: 'fullerton', label: 'Fullerton' },
 ];
 
-function normalizeStatus(value?: string | null): Status {
-  if (value === 'completed') return 'completed';
-  if (value === 'failed') return 'failed';
-  if (value === 'in_progress') return 'in_progress';
-  return 'pending';
-}
-
 function shiftSingaporeDate(dateString: string, days: number): string {
   const d = parseDateSingapore(dateString);
   d.setDate(d.getDate() + days);
   return formatDateSingapore(d);
+}
+
+function getFlow2State(row: VisitRow) {
+  const metadata = row.extraction_metadata ?? {};
+  const extractionStatus = metadata.detailsExtractionStatus ?? null;
+  const candidate = classifyVisitForRpa(
+    row.pay_type,
+    row.patient_name,
+    row.nric,
+    metadata,
+    null
+  );
+  const diagnosisStatus = String(metadata.diagnosisResolution?.status || '').trim().toLowerCase();
+
+  if (extractionStatus === 'failed') return 'failed';
+  if (extractionStatus === 'in_progress') return 'in_progress';
+  if (candidate.status === 'manual_review' && extractionStatus !== 'completed') return 'manual_review';
+  if (extractionStatus === 'completed') {
+    if (diagnosisStatus === 'resolved') return 'enhanced_resolved';
+    return 'enhanced_ambiguous';
+  }
+  return 'candidate_pending';
 }
 
 export default function Flow2EnhanceData() {
@@ -116,16 +152,7 @@ export default function Flow2EnhanceData() {
       if (toDate) visitsQuery = visitsQuery.lte('visit_date', toDate);
       if (portalOnly) visitsQuery = visitsQuery.or(getPortalScopeOrFilter());
 
-      let pendingQuery = supabase
-        .from('visits')
-        .select('id', { count: 'exact', head: true })
-        .eq('source', 'Clinic Assist')
-        .is('extraction_metadata->>detailsExtractionStatus', null);
-      if (fromDate) pendingQuery = pendingQuery.gte('visit_date', fromDate);
-      if (toDate) pendingQuery = pendingQuery.lte('visit_date', toDate);
-      if (portalOnly) pendingQuery = pendingQuery.or(getPortalScopeOrFilter());
-
-      const [visitsRes, pendingRes] = await Promise.all([visitsQuery, pendingQuery]);
+      const [visitsRes] = await Promise.all([visitsQuery]);
 
       if (cancelled) return;
       if (visitsRes.error) {
@@ -145,8 +172,13 @@ export default function Flow2EnhanceData() {
         setLoading(false);
         return;
       }
-      setRows((visitsRes.data ?? []) as VisitRow[]);
-      if (!pendingRes.error) setPendingCount(pendingRes.count ?? 0);
+      const scopedRows = ((visitsRes.data ?? []) as VisitRow[]).filter(row =>
+        isFlow2EligibleVisit(row.extraction_metadata ?? null)
+      );
+      setRows(scopedRows);
+      setPendingCount(
+        scopedRows.filter(row => getFlow2State(row) === 'candidate_pending' || getFlow2State(row) === 'manual_review').length
+      );
       setLoading(false);
     })();
     return () => {
@@ -183,10 +215,11 @@ export default function Flow2EnhanceData() {
       const metadata = row.extraction_metadata ?? {};
       const status = metadata.detailsExtractionStatus ?? null;
       const payType = (row.pay_type || '').toUpperCase();
+      const flow2State = getFlow2State(row);
 
       switch (filter) {
         case 'pending':
-          return status == null;
+          return flow2State === 'candidate_pending' || flow2State === 'manual_review';
         case 'in_progress':
           return status === 'in_progress';
         case 'completed':
@@ -213,9 +246,8 @@ export default function Flow2EnhanceData() {
 
   const metrics = {
     total: rows.length,
-    pending: rows.filter(r => !r.extraction_metadata?.detailsExtractionStatus).length,
-    completed: rows.filter(r => r.extraction_metadata?.detailsExtractionStatus === 'completed')
-      .length,
+    pending: rows.filter(r => getFlow2State(r) === 'candidate_pending' || getFlow2State(r) === 'manual_review').length,
+    completed: rows.filter(r => r.extraction_metadata?.detailsExtractionStatus === 'completed').length,
     failed: rows.filter(r => r.extraction_metadata?.detailsExtractionStatus === 'failed').length,
     withPcno: rows.filter(r => {
       const pcno = r.extraction_metadata?.pcno;
@@ -412,11 +444,26 @@ export default function Flow2EnhanceData() {
               },
               {
                 header: 'Status',
-                cell: row => (
-                  <StatusBadge
-                    status={normalizeStatus(row.extraction_metadata?.detailsExtractionStatus)}
-                  />
-                ),
+                cell: row => {
+                  const flow2State = getFlow2State(row);
+                  const tone =
+                    flow2State === 'enhanced_resolved'
+                      ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                      : flow2State === 'enhanced_ambiguous'
+                        ? 'border-amber-200 bg-amber-50 text-amber-700'
+                        : flow2State === 'manual_review'
+                          ? 'border-orange-200 bg-orange-50 text-orange-700'
+                          : flow2State === 'failed'
+                            ? 'border-red-200 bg-red-50 text-red-700'
+                            : flow2State === 'in_progress'
+                              ? 'border-blue-200 bg-blue-50 text-blue-700'
+                              : 'border-border bg-muted/50 text-muted-foreground';
+                  return (
+                    <span className={cn('inline-flex rounded-full border px-2.5 py-1 text-xs font-medium', tone)}>
+                      {flow2State}
+                    </span>
+                  );
+                },
               },
               {
                 header: 'Diagnosis Code',
@@ -439,6 +486,22 @@ export default function Flow2EnhanceData() {
                 },
               },
               {
+                header: 'Evidence',
+                cell: row => {
+                  const evidence = row.extraction_metadata?.diagnosisEvidence;
+                  const sourceTab = evidence?.sourceTab || '--';
+                  const confidence = evidence?.confidence;
+                  const artifact = evidence?.artifactPaths?.json || evidence?.artifactPaths?.screenshot;
+                  return (
+                    <div className="text-xs space-y-1">
+                      <div>Source: {sourceTab}</div>
+                      <div>Confidence: {confidence != null ? confidence : '--'}</div>
+                      <div className="text-muted-foreground">{artifact ? 'Artifacts saved' : 'No artifacts'}</div>
+                    </div>
+                  );
+                },
+              },
+              {
                 header: 'Diagnosis (Text)',
                 cell: row => {
                   const text = row.diagnosis_description || '';
@@ -448,9 +511,16 @@ export default function Flow2EnhanceData() {
                     return <span className="text-muted-foreground">Missing</span>;
                   }
                   return (
-                    <span title={cleaned} className="max-w-[320px] truncate">
-                      {cleaned}
-                    </span>
+                    <div className="max-w-[320px]">
+                      <div title={cleaned} className="truncate">
+                        {cleaned}
+                      </div>
+                      {row.extraction_metadata?.diagnosisResolution?.reason_if_unresolved ? (
+                        <div className="truncate text-xs text-muted-foreground">
+                          {row.extraction_metadata.diagnosisResolution.reason_if_unresolved}
+                        </div>
+                      ) : null}
+                    </div>
                   );
                 },
               },

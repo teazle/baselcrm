@@ -12,7 +12,14 @@ import { StepLogger } from '../utils/step-logger.js';
 import { createSupabaseClient } from '../utils/supabase-client.js';
 import { decryptPortalSecret } from '../utils/portal-credentials-crypto.js';
 import {
+  buildFillVerificationFromSnapshots,
+  comparePortalTruthSnapshots,
+  writeFlow3TruthArtifacts,
+} from '../utils/flow3-truth-compare.js';
+import {
+  classifyVisitForRpa,
   getPortalScopeOrFilter,
+  isFlow2EligibleVisit,
   matchesFlow3PortalTargets,
   resolveFlow3PortalTarget,
 } from '../../apps/crm/src/lib/rpa/portals.shared.js';
@@ -124,6 +131,78 @@ export class ClaimSubmitter {
     return credential;
   }
 
+  _getRequestedMode() {
+    const raw = String(process.env.FLOW3_MODE || '').trim().toLowerCase();
+    if (raw === 'draft' || raw === 'submit' || raw === 'fill_evidence') return raw;
+    if (process.env.WORKFLOW_SAVE_DRAFT === '1') return 'draft';
+    if (process.env.ALLOW_LIVE_SUBMIT === '1') return 'submit';
+    return 'fill_evidence';
+  }
+
+  _getDraftValidatedTargets() {
+    const raw = String(process.env.FLOW3_DRAFT_VALIDATED_TARGETS || 'MHC,ALLIANCE_MEDINET')
+      .split(',')
+      .map(value => String(value || '').trim().toUpperCase())
+      .filter(Boolean);
+    return new Set(raw);
+  }
+
+  _normalizePortalResult(result, visit, route) {
+    const requestedMode = this._getRequestedMode();
+    const portalResult = result && typeof result === 'object' ? result : {};
+    return {
+      mode: requestedMode,
+      success: portalResult.success === true,
+      portal: portalResult.portal || route || visit?.pay_type || null,
+      portalService: portalResult.portalService || route || null,
+      savedAsDraft: portalResult.savedAsDraft === true,
+      submitted: portalResult.submitted === true,
+      reason: portalResult.reason || null,
+      blocked_reason:
+        portalResult.blocked_reason ||
+        (portalResult.success === false ? portalResult.reason || null : null),
+      detailReason: portalResult.detailReason || null,
+      error: portalResult.error || null,
+      fillVerification: portalResult.fillVerification || null,
+      comparison: portalResult.comparison || null,
+      evidence: portalResult.evidence || null,
+      sessionState: portalResult.sessionState || null,
+      processedAt: new Date().toISOString(),
+      ...portalResult,
+    };
+  }
+
+  _mergeSubmissionMetadata(existingMetadata, patchMetadata) {
+    const existing =
+      existingMetadata && typeof existingMetadata === 'object' ? existingMetadata : {};
+    const patch = patchMetadata && typeof patchMetadata === 'object' ? patchMetadata : {};
+
+    return {
+      ...existing,
+      ...patch,
+      botSnapshot: patch.botSnapshot ?? existing.botSnapshot ?? null,
+      draftVerification: patch.draftVerification ?? existing.draftVerification ?? null,
+      fillVerification: patch.fillVerification ?? existing.fillVerification ?? null,
+      comparison: patch.comparison ?? existing.comparison ?? null,
+      mismatchCategories: patch.mismatchCategories ?? existing.mismatchCategories ?? [],
+      evidence: patch.evidence ?? existing.evidence ?? null,
+      sessionState: patch.sessionState ?? existing.sessionState ?? null,
+      blocked_reason: patch.blocked_reason ?? existing.blocked_reason ?? null,
+      submittedTruthSnapshot:
+        patch.submittedTruthSnapshot ?? existing.submittedTruthSnapshot ?? null,
+      submittedTruthCapture:
+        patch.submittedTruthCapture ?? existing.submittedTruthCapture ?? null,
+      evidenceArtifacts: {
+        ...(existing.evidenceArtifacts && typeof existing.evidenceArtifacts === 'object'
+          ? existing.evidenceArtifacts
+          : {}),
+        ...(patch.evidenceArtifacts && typeof patch.evidenceArtifacts === 'object'
+          ? patch.evidenceArtifacts
+          : {}),
+      },
+    };
+  }
+
   /**
    * Get pending claims from CRM that need to be submitted
    */
@@ -134,6 +213,7 @@ export class ClaimSubmitter {
     }
 
     const { from = null, to = null, portalOnly = false, portalTargets = null } = opts || {};
+    const explicitVisitIds = Array.isArray(visitIds) && visitIds.length > 0;
 
     let query = this.supabase
       .from('visits')
@@ -169,6 +249,26 @@ export class ClaimSubmitter {
     }
 
     let rows = data || [];
+    rows = rows.filter(visit => {
+      if (!isFlow2EligibleVisit(visit?.extraction_metadata || null)) return false;
+      const candidate = classifyVisitForRpa(
+        visit?.pay_type || null,
+        visit?.patient_name || null,
+        visit?.nric || null,
+        visit?.extraction_metadata || null,
+        visit?.submission_status || null
+      );
+      if (candidate.status === 'not_claim_candidate') return false;
+      if (candidate.status === 'manual_review' && !candidate.portalTarget) return false;
+      if (!explicitVisitIds) {
+        const mode = String(visit?.submission_metadata?.mode || '').trim().toLowerCase();
+        const success = visit?.submission_metadata?.success === true;
+        if (mode === 'fill_evidence' && success && !visit?.submission_status) {
+          return false;
+        }
+      }
+      return true;
+    });
     if (Array.isArray(portalTargets) && portalTargets.length > 0) {
       rows = rows.filter(visit =>
         matchesFlow3PortalTargets(
@@ -237,17 +337,18 @@ export class ClaimSubmitter {
    */
   async submitClaim(visit) {
     const payTypeRaw = String(visit.pay_type || '').toUpperCase();
+    const requestedMode = this._getRequestedMode();
 
     this.steps.step(1, `Submitting claim for ${visit.patient_name}`, {
       payType: payTypeRaw || null,
       visitId: visit.id,
+      mode: requestedMode,
     });
 
-    const isVerificationOnly = process.env.WORKFLOW_SAVE_DRAFT === '0';
-    const allowLiveSubmit = process.env.ALLOW_LIVE_SUBMIT === '1';
-    // By default we do NOT persist per-visit error states during verification (fill-only) runs.
-    // Persisting errors is only useful once we're actively saving drafts/submitting.
-    const shouldPersistErrors = process.env.WORKFLOW_PERSIST_ERRORS === '1' || !isVerificationOnly;
+    const isVerificationOnly = requestedMode === 'fill_evidence';
+    const allowLiveSubmit =
+      requestedMode === 'submit' && process.env.FLOW3_ENABLE_SUBMIT_MODE === '1';
+    const shouldPersistErrors = true;
 
     try {
       let result = null;
@@ -258,17 +359,42 @@ export class ClaimSubmitter {
         visit.patient_name,
         visit.extraction_metadata || null
       );
+      if (requestedMode === 'submit' && !allowLiveSubmit) {
+        return this._normalizePortalResult(
+          {
+            success: false,
+            reason: 'live_submit_disabled',
+            blocked_reason: 'live_submit_disabled',
+            error: 'Live submit is disabled for Flow 3. Use fill_evidence or draft.',
+          },
+          visit,
+          route
+        );
+      }
+      if (requestedMode === 'draft' && route && !this._getDraftValidatedTargets().has(route)) {
+        return this._normalizePortalResult(
+          {
+            success: false,
+            reason: 'draft_not_allowed',
+            blocked_reason: 'portal_contract_unvalidated',
+            error: `Draft mode is not enabled for ${route} yet`,
+          },
+          visit,
+          route
+        );
+      }
       if (route === 'IHP' && process.env.FLOW3_SKIP_IHP === '1') {
-        return {
+        return this._normalizePortalResult({
           success: false,
           reason: 'skipped_by_config',
+          blocked_reason: 'skipped_by_config',
           detailReason: 'ihp_temporarily_skipped',
           portal: 'IHP eClaim',
           portalService: 'IHP',
           submitted: false,
           savedAsDraft: false,
           error: 'IHP route skipped by FLOW3_SKIP_IHP=1',
-        };
+        }, visit, route);
       }
       switch (route) {
         case 'MHC':
@@ -305,8 +431,14 @@ export class ClaimSubmitter {
           break;
         default:
           logger.warn(`[SUBMIT] Unknown pay type: ${payTypeRaw}. Skipping submission.`);
-          return { success: false, reason: 'unknown_pay_type', payType: payTypeRaw || null };
+          return this._normalizePortalResult(
+            { success: false, reason: 'unknown_pay_type', blocked_reason: 'portal_unknown', payType: payTypeRaw || null },
+            visit,
+            route
+          );
       }
+
+      result = this._normalizePortalResult(result, visit, route);
 
       // Persist submission status only when we actually did a portal action that should advance the workflow.
       // Today we only support "Save as Draft" (and we intentionally avoid auto-submit).
@@ -321,6 +453,7 @@ export class ClaimSubmitter {
             ...result,
             success: false,
             submitted: false,
+            blocked_reason: 'live_submit_disabled',
             error: 'Live submit blocked (draft-only mode)',
           };
         }
@@ -332,12 +465,18 @@ export class ClaimSubmitter {
         }
 
         const shouldPersist =
-          Boolean(result.savedAsDraft) || (allowLiveSubmit && Boolean(result.submitted));
+          Boolean(result.savedAsDraft) ||
+          (allowLiveSubmit && Boolean(result.submitted)) ||
+          (requestedMode === 'fill_evidence' && Boolean(result.success));
         const submissionStatus = result.savedAsDraft
           ? 'draft'
           : allowLiveSubmit && result.submitted
             ? 'submitted'
             : null;
+        const mergedSubmissionMetadata = this._mergeSubmissionMetadata(
+          visit?.submission_metadata || null,
+          result
+        );
         if (shouldPersist && submissionStatus) {
           await this.supabase
             .from('visits')
@@ -346,7 +485,17 @@ export class ClaimSubmitter {
               submission_status: submissionStatus,
               submission_portal: result?.portal || route || payTypeRaw || null,
               submission_error: null,
-              submission_metadata: result,
+              submission_metadata: mergedSubmissionMetadata,
+            })
+            .eq('id', visit.id);
+        } else if (shouldPersist && requestedMode === 'fill_evidence') {
+          await this.supabase
+            .from('visits')
+            .update({
+              submission_status: null,
+              submission_portal: result?.portal || route || payTypeRaw || null,
+              submission_error: null,
+              submission_metadata: mergedSubmissionMetadata,
             })
             .eq('id', visit.id);
         } else {
@@ -372,13 +521,35 @@ export class ClaimSubmitter {
       // Update visit with error status only when this run intends to advance workflow state.
       // For fill-only verification, keep the DB clean and rely on run logs/screenshots instead.
       if (this.supabase && shouldPersistErrors) {
+        const failureResult = this._normalizePortalResult(
+          {
+            success: false,
+            reason:
+              failureMetadata?.reason ||
+              'portal_runtime_error',
+            blocked_reason:
+              failureMetadata?.blocked_reason ||
+              failureMetadata?.reason ||
+              'portal_runtime_error',
+            error: error.message,
+            ...(failureMetadata && typeof failureMetadata === 'object' ? failureMetadata : {}),
+          },
+          visit,
+          resolveFlow3PortalTarget(
+            visit.pay_type,
+            visit.patient_name,
+            visit.extraction_metadata || null
+          )
+        );
+        const mergedFailureMetadata = this._mergeSubmissionMetadata(
+          visit?.submission_metadata || null,
+          failureResult
+        );
         const errorUpdate = {
           submission_status: 'error',
           submission_error: error.message,
+          submission_metadata: mergedFailureMetadata,
         };
-        if (failureMetadata && typeof failureMetadata === 'object') {
-          errorUpdate.submission_metadata = failureMetadata;
-        }
         await this.supabase.from('visits').update(errorUpdate).eq('id', visit.id);
       } else {
         logger.info('[SUBMIT] Verification run: not persisting submission_status=error', {
@@ -388,7 +559,30 @@ export class ClaimSubmitter {
         });
       }
 
-      return { success: false, error: error.message };
+      return failureMetadata
+        ? this._normalizePortalResult(
+            failureMetadata,
+            visit,
+            resolveFlow3PortalTarget(
+              visit.pay_type,
+              visit.patient_name,
+              visit.extraction_metadata || null
+            )
+          )
+        : this._normalizePortalResult(
+            {
+              success: false,
+              reason: 'portal_runtime_error',
+              blocked_reason: 'portal_runtime_error',
+              error: error.message,
+            },
+            visit,
+            resolveFlow3PortalTarget(
+              visit.pay_type,
+              visit.patient_name,
+              visit.extraction_metadata || null
+            )
+          );
     }
   }
 
@@ -741,6 +935,8 @@ export class ClaimSubmitter {
       const flow2Resolved = flow2DiagnosisStatus === 'resolved';
       const flow2Missing =
         flow2DiagnosisStatus === 'missing' ||
+        flow2DiagnosisStatus === 'missing_in_source' ||
+        flow2DiagnosisStatus === 'found_but_invalid' ||
         (!flow2DiagnosisStatus && diagnosisMissingText) ||
         diagnosisMissingText;
       const flow2FallbackLowConfidence =
@@ -1159,10 +1355,28 @@ export class ClaimSubmitter {
       })
       .catch(() => {});
 
+    const botSnapshot = await this.mhcAsia
+      .captureCurrentVisitFormSnapshot({
+        visit,
+        phase: 'bot_fill',
+        portalTarget: 'MHC',
+        includeScreenshot: true,
+      })
+      .catch(error => ({
+        source: 'mhc_bot_fill',
+        error: error?.message || String(error),
+        artifacts: {
+          json: null,
+          screenshot: null,
+        },
+      }));
+
     // Save as draft (safety - don't auto-submit)
     const saveDraft = process.env.WORKFLOW_SAVE_DRAFT !== '0';
     let draftVerification = null;
     let draftSavedAccepted = false;
+    const submittedTruthSnapshot = visit?.submission_metadata?.submittedTruthSnapshot || null;
+    const submittedTruthCapture = visit?.submission_metadata?.submittedTruthCapture || null;
     if (saveDraft) {
       await assertDiagnosisResolvedOrThrow('pre_save');
 
@@ -1244,6 +1458,40 @@ export class ClaimSubmitter {
       }
     }
 
+    const comparison = comparePortalTruthSnapshots({
+      portalTarget: 'MHC',
+      visit,
+      botSnapshot,
+      submittedTruthSnapshot,
+      diagnosisMatch,
+    });
+    const fillVerification = buildFillVerificationFromSnapshots({
+      expectedSnapshot: comparison.expectedSnapshot || null,
+      botSnapshot,
+    });
+    const truthArtifacts = await writeFlow3TruthArtifacts({
+      visit,
+      portalTarget: 'MHC',
+      expectedSnapshot: comparison.expectedSnapshot || null,
+      botSnapshot,
+      submittedTruthSnapshot,
+      comparison,
+      extra: {
+        draftVerification: draftVerification || null,
+        diagnosisMatch: diagnosisMatch || null,
+        diagnosisResolution: diagnosisResolutionWithPortal || null,
+        routingOverride: routingOverride || null,
+      },
+    }).catch(() => null);
+
+    const evidenceSummary = [
+      botSnapshot?.artifacts?.json ? 'bot_snapshot' : null,
+      submittedTruthSnapshot?.artifacts?.json ? 'submitted_truth_snapshot' : null,
+      truthArtifacts?.json ? 'comparison_artifact' : null,
+    ]
+      .filter(Boolean)
+      .join(',');
+
     return {
       success: true,
       portal: 'MHC Asia',
@@ -1254,6 +1502,19 @@ export class ClaimSubmitter {
       draftReference: draftVerification?.row?.visitNo || null,
       chargeType,
       mcDays,
+      botSnapshot: botSnapshot || null,
+      submittedTruthSnapshot,
+      submittedTruthCapture,
+      fillVerification,
+      comparison,
+      mismatchCategories: comparison?.mismatchCategories || [],
+      evidence: evidenceSummary || null,
+      evidenceArtifacts: {
+        botSnapshot: botSnapshot?.artifacts || null,
+        submittedTruthSnapshot: submittedTruthSnapshot?.artifacts || null,
+        comparison: truthArtifacts || null,
+      },
+      sessionState: 'healthy',
       diagnosisResolution: diagnosisResolutionWithPortal || null,
       diagnosisMatch: diagnosisMatch || null,
       diagnosisFallbackMode: diagnosisFallbackMode || null,

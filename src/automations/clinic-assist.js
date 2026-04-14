@@ -10566,9 +10566,15 @@ export class ClinicAssistAutomation {
 
     let status = 'resolved';
     let reason_if_unresolved = null;
+    const foundAttempts = (Array.isArray(diagnosisAttempts) ? diagnosisAttempts : []).filter(
+      (a) => !!a?.found
+    );
     if (!description_raw) {
-      status = 'missing';
-      reason_if_unresolved = 'not_found_in_diagnosis_all_visit_pastnotes';
+      status = foundAttempts.length > 0 ? 'found_but_invalid' : 'missing_in_source';
+      reason_if_unresolved =
+        foundAttempts.length > 0
+          ? 'found_candidate_rejected_as_non_portable'
+          : 'not_found_in_diagnosis_all_visit_pastnotes';
     } else if (isGeneric && !side) {
       status = 'ambiguous';
       reason_if_unresolved = 'generic_without_laterality';
@@ -10579,10 +10585,6 @@ export class ClinicAssistAutomation {
       status = 'ambiguous';
       reason_if_unresolved = dateReason || 'diagnosis_date_policy_not_satisfied';
     }
-
-    const foundAttempts = (Array.isArray(diagnosisAttempts) ? diagnosisAttempts : []).filter(
-      (a) => !!a?.found
-    );
     const hasNonPrimarySupport = foundAttempts.some((a) => {
       const src = String(a?.source || '').toLowerCase();
       return src && src !== 'diagnosis_tab' && src !== 'diagnosis_tab_latest' && src !== 'diagnosis_tab_raw';
@@ -11213,7 +11215,9 @@ export class ClinicAssistAutomation {
       let diagnosisMissingReason = null;
       if (!diagnosis || !diagnosis.description) {
         diagnosisSource = 'missing';
-        diagnosisMissingReason = 'not_found_in_diagnosis_all_visit_pastnotes';
+        diagnosisMissingReason =
+          canonicalPayload?.diagnosisResolution?.reason_if_unresolved ||
+          'not_found_in_diagnosis_all_visit_pastnotes';
       } else if (canonicalPayload?.diagnosisResolution?.status !== 'resolved') {
         diagnosisMissingReason =
           canonicalPayload?.diagnosisResolution?.reason_if_unresolved || 'diagnosis_unresolved';
@@ -11250,7 +11254,7 @@ export class ClinicAssistAutomation {
         diagnosisAttempts: [],
         diagnosisCanonical: null,
         diagnosisResolution: {
-          status: 'missing',
+          status: 'missing_in_source',
           confidence: 0,
           source_chain: [],
           date_policy: 'on_or_before_30_days',

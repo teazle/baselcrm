@@ -1,4 +1,6 @@
 import { logger } from '../utils/logger.js';
+import fs from 'fs/promises';
+import path from 'path';
 import { registerRunExitHandler, markRunFinalized } from '../utils/run-exit-handler.js';
 import { ClinicAssistAutomation } from '../automations/clinic-assist.js';
 import { normalizePatientNameForSearch } from '../utils/patient-normalize.js';
@@ -13,6 +15,53 @@ export class VisitDetailsExtractor {
     this.supabase = supabase;
     this.branchName = '__FIRST__'; // Auto-selects "ssoc pte ltd"
     this.deptName = 'Reception';
+  }
+
+  async _writeDiagnosisEvidenceArtifacts(visit, payload = {}) {
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const safeId = String(visit?.id || 'unknown').replace(/[^A-Za-z0-9_-]/g, '_');
+    const baseDir = path.resolve(process.cwd(), 'output', 'playwright');
+    const screenshotPath = path.join(baseDir, `flow2-evidence-${safeId}-${stamp}.png`);
+    const jsonPath = path.join(baseDir, `flow2-evidence-${safeId}-${stamp}.json`);
+
+    await fs.mkdir(baseDir, { recursive: true });
+    const artifacts = {
+      screenshot: null,
+      json: jsonPath,
+    };
+
+    try {
+      await this.clinicAssist.page.screenshot({ path: screenshotPath, fullPage: true });
+      artifacts.screenshot = screenshotPath;
+    } catch (error) {
+      logger.warn('[VisitDetails] Failed to capture evidence screenshot', {
+        visitId: visit?.id || null,
+        error: error?.message || String(error),
+      });
+    }
+
+    await fs.writeFile(
+      jsonPath,
+      `${JSON.stringify(
+        {
+          generatedAt: new Date().toISOString(),
+          visit: {
+            id: visit?.id || null,
+            patient_name: visit?.patient_name || null,
+            visit_date: visit?.visit_date || null,
+            pay_type: visit?.pay_type || null,
+            nric: visit?.nric || null,
+          },
+          evidence: payload,
+          artifacts,
+        },
+        null,
+        2
+      )}\n`,
+      'utf8'
+    );
+
+    return artifacts;
   }
 
   /**
@@ -153,6 +202,21 @@ export class VisitDetailsExtractor {
         mcStartDate
       });
 
+      const diagnosisEvidenceArtifacts = await this._writeDiagnosisEvidenceArtifacts(visit, {
+        rawSourceFindings: Array.isArray(txData.diagnosisAttempts) ? txData.diagnosisAttempts : [],
+        canonicalDiagnosis: txData.diagnosisCanonical || null,
+        diagnosisResolution: txData.diagnosisResolution || null,
+        diagnosisCandidates: txData.diagnosisCandidates || [],
+        diagnosisSource: txData.diagnosisSource || null,
+        diagnosisMissingReason: txData.diagnosisMissingReason || null,
+      }).catch(error => {
+        logger.warn('[VisitDetails] Failed to persist diagnosis evidence artifacts', {
+          visitId: visit.id,
+          error: error?.message || String(error),
+        });
+        return { screenshot: null, json: null };
+      });
+
       // 6. Update database with all extracted data and mark as 'completed'
       // Store medicines/services extracted from TX History Medicine tab (Flow 2).
       // Keep it both as a newline string (treatment_detail) and a structured array in extraction_metadata.
@@ -186,6 +250,17 @@ export class VisitDetailsExtractor {
         diagnosisCanonical: txData.diagnosisCanonical || null,
         diagnosisResolution: txData.diagnosisResolution || null,
         diagnosisCandidates: txData.diagnosisCandidates || [],
+        diagnosisEvidence: {
+          rawSourceFindings: txData.diagnosisAttempts || [],
+          canonicalDiagnosis: txData.diagnosisCanonical || null,
+          diagnosisResolution: txData.diagnosisResolution || null,
+          diagnosisCandidates: txData.diagnosisCandidates || [],
+          sourceTab: txData.diagnosisSource || null,
+          sourceDate: txData.diagnosisCanonical?.source_date || null,
+          confidence: txData.diagnosisResolution?.confidence ?? null,
+          rejectionReason: txData.diagnosisResolution?.reason_if_unresolved || null,
+          artifactPaths: diagnosisEvidenceArtifacts,
+        },
         medicineFilterStats: txData.medicineFilterStats || null,
         nricExtractionStatus,
         existingSymptoms: visit.symptoms || null,
@@ -459,6 +534,8 @@ export class VisitDetailsExtractor {
       const incomingDiagnosisUnresolved =
         !hasIncomingDiagnosis ||
         incomingResolutionStatus === 'missing' ||
+        incomingResolutionStatus === 'missing_in_source' ||
+        incomingResolutionStatus === 'found_but_invalid' ||
         incomingResolutionStatus === 'ambiguous' ||
         incomingResolutionStatus === 'unresolved' ||
         (incomingDiagnosisLooksNonPortable && incomingResolutionStatus !== 'resolved');
@@ -531,6 +608,26 @@ export class VisitDetailsExtractor {
         };
       }
 
+      const mergedDiagnosisEvidence =
+        sources?.diagnosisEvidence && typeof sources.diagnosisEvidence === 'object'
+          ? {
+              ...(currentMetadata?.diagnosisEvidence &&
+              typeof currentMetadata.diagnosisEvidence === 'object'
+                ? currentMetadata.diagnosisEvidence
+                : {}),
+              ...sources.diagnosisEvidence,
+              canonicalDiagnosis: diagnosisCanonical,
+              diagnosisResolution,
+              diagnosisCandidates,
+              sourceDate:
+                diagnosisCanonical?.source_date ||
+                sources?.diagnosisEvidence?.sourceDate ||
+                null,
+              confidence: diagnosisResolution?.confidence ?? null,
+              rejectionReason: diagnosisResolution?.reason_if_unresolved || null,
+            }
+          : currentMetadata?.diagnosisEvidence || null;
+
       // Store all extracted data in extraction_metadata for Flow 3 to use
       const updateData = {
         diagnosis_description: diagnosisToStore,
@@ -553,6 +650,7 @@ export class VisitDetailsExtractor {
           diagnosisCanonical,
           diagnosisResolution,
           diagnosisCandidates,
+          diagnosisEvidence: mergedDiagnosisEvidence,
           // These fields are used by Flow 3 (ClaimSubmitter) for form filling
           chargeType: chargeType,       // 'first' or 'follow'
           mcDays: mcDays,               // Number of MC days
