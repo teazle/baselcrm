@@ -112,7 +112,11 @@ jobs:
             fi
 
             echo "Running Flow 3 submitted-truth audit on EC2..."
-            node src/examples/flow3-portal-truth-audit.js "${ARGS[@]}"
+            if command -v xvfb-run >/dev/null 2>&1; then
+              xvfb-run -a node src/examples/flow3-portal-truth-audit.js "${ARGS[@]}"
+            else
+              HEADLESS=true node src/examples/flow3-portal-truth-audit.js "${ARGS[@]}"
+            fi
 
             LATEST_JSON=$(ls -t output/run-reports/flow3_submitted_truth_audit_*.json | head -n 1)
             if [ -z "${LATEST_JSON:-}" ]; then
