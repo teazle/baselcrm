@@ -126,8 +126,9 @@ jobs:
             fi
 
             echo "Latest audit report: $LATEST_JSON"
-            node --input-type=module - "$LATEST_JSON" <<'NODE'
-            import fs from 'fs';
+            SUMMARY_SCRIPT=$(mktemp)
+            cat > "$SUMMARY_SCRIPT" <<'NODE'
+            const fs = require('fs');
 
             const reportPath = process.argv[2];
             const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
@@ -154,3 +155,5 @@ jobs:
               }));
             }
             NODE
+            node "$SUMMARY_SCRIPT" "$LATEST_JSON"
+            rm -f "$SUMMARY_SCRIPT"
