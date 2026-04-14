@@ -106,31 +106,9 @@ jobs:
               fi
             fi
 
-            # Check if dependency manifests changed.
-            echo "📦 Checking for dependency updates..."
-            PACKAGE_CHANGED=false
-            DIFF_BASE=""
-            if git rev-parse HEAD^ >/dev/null 2>&1; then
-              DIFF_BASE="HEAD^"
-            elif git rev-parse HEAD@{1} >/dev/null 2>&1; then
-              DIFF_BASE="HEAD@{1}"
-            fi
-
-            if [ -n "$DIFF_BASE" ]; then
-              if ! git diff --quiet "$DIFF_BASE" HEAD -- package.json package-lock.json apps/crm/package.json apps/crm/package-lock.json 2>/dev/null; then
-                PACKAGE_CHANGED=true
-              fi
-            fi
-
-            echo "📦 Dependency manifests changed: $PACKAGE_CHANGED"
-
-            if [ "$PACKAGE_CHANGED" = true ]; then
-              echo "📦 Installing/updating dependencies..."
-              npm install || { echo "⚠️  Warning: npm install failed"; }
-              npm run install-browsers || { echo "⚠️  Warning: install-browsers failed"; }
-            else
-              echo "ℹ️  No dependency changes detected"
-            fi
+            echo "📦 Refreshing root dependencies..."
+            npm install || { echo "⚠️  Warning: root npm install failed"; }
+            npm run install-browsers || { echo "⚠️  Warning: install-browsers failed"; }
 
             # Build and deploy Next.js CRM app
             if [ -d apps/crm ]; then
@@ -146,11 +124,8 @@ jobs:
               sudo fuser -k 3000/tcp 2>/dev/null || true
               sleep 2
               
-              # Install CRM dependencies if needed
-              if [ ! -d node_modules ] || [ "$PACKAGE_CHANGED" = true ]; then
-                echo "📦 Installing CRM dependencies..."
-                npm install || { echo "⚠️  Warning: CRM npm install failed"; }
-              fi
+              echo "📦 Installing CRM dependencies..."
+              npm install || { echo "⚠️  Warning: CRM npm install failed"; }
               
               # Build the Next.js app for production.
               # Use webpack mode for CI/deploy stability on Next.js 16.
