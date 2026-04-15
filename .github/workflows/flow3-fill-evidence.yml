@@ -1,0 +1,146 @@
+name: Flow3 Fill Evidence
+
+on:
+  workflow_dispatch:
+    inputs:
+      from:
+        description: "Start date (YYYY-MM-DD)"
+        required: false
+        type: string
+      to:
+        description: "End date (YYYY-MM-DD)"
+        required: false
+        type: string
+      visit_ids:
+        description: "Comma-separated visit IDs"
+        required: false
+        type: string
+      portal_targets:
+        description: "Comma-separated portal targets"
+        required: false
+        default: "MHC"
+        type: string
+      pay_type:
+        description: "Optional pay type filter"
+        required: false
+        type: string
+      portal_only:
+        description: "Restrict to portal-scope rows"
+        required: false
+        default: true
+        type: boolean
+      all_pending:
+        description: "Allow unscoped pending run"
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  fill-evidence:
+    name: Run fill_evidence on EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate EC2 SSH reachability
+        shell: bash
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_PORT: ${{ secrets.EC2_PORT || 22 }}
+        run: |
+          set -euo pipefail
+          connected=false
+          for attempt in 1 2 3; do
+            echo "Reachability check ${attempt}/3 to EC2 SSH port..."
+            if timeout 10 bash -c "cat < /dev/null > /dev/tcp/${EC2_HOST}/${EC2_PORT}" 2>/dev/null; then
+              connected=true
+              echo "EC2 SSH endpoint is reachable."
+              break
+            fi
+            sleep 15
+          done
+
+          if [ "${connected}" != "true" ]; then
+            echo "Cannot reach EC2 SSH endpoint (${EC2_HOST}:${EC2_PORT})."
+            exit 1
+          fi
+
+      - name: Run fill_evidence on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          FLOW_FROM: ${{ inputs.from }}
+          FLOW_TO: ${{ inputs.to }}
+          FLOW_VISIT_IDS: ${{ inputs.visit_ids }}
+          FLOW_PORTAL_TARGETS: ${{ inputs.portal_targets }}
+          FLOW_PAY_TYPE: ${{ inputs.pay_type }}
+          FLOW_PORTAL_ONLY: ${{ inputs.portal_only }}
+          FLOW_ALL_PENDING: ${{ inputs.all_pending }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || 22 }}
+          timeout: 60s
+          command_timeout: 60m
+          envs: FLOW_FROM,FLOW_TO,FLOW_VISIT_IDS,FLOW_PORTAL_TARGETS,FLOW_PAY_TYPE,FLOW_PORTAL_ONLY,FLOW_ALL_PENDING
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            DEPLOY_PATH="${{ secrets.EC2_DEPLOY_PATH || '~/Baselrpacrm' }}"
+            DEPLOY_PATH="${DEPLOY_PATH/#\~/$HOME}"
+
+            echo "Deploy path: $DEPLOY_PATH"
+            cd "$DEPLOY_PATH"
+
+            if [ ! -d .git ]; then
+              echo "Not a git repository in $DEPLOY_PATH"
+              exit 1
+            fi
+
+            echo "Current commit on EC2:"
+            git log -1 --oneline || true
+
+            ARGS=(--mode fill_evidence)
+            if [ -n "${FLOW_FROM:-}" ]; then
+              ARGS+=(--from "$FLOW_FROM")
+            fi
+            if [ -n "${FLOW_TO:-}" ]; then
+              ARGS+=(--to "$FLOW_TO")
+            fi
+            if [ -n "${FLOW_VISIT_IDS:-}" ]; then
+              ARGS+=(--visit-ids "$FLOW_VISIT_IDS")
+            fi
+            if [ -n "${FLOW_PORTAL_TARGETS:-}" ]; then
+              ARGS+=(--portal-targets "$FLOW_PORTAL_TARGETS")
+            fi
+            if [ -n "${FLOW_PAY_TYPE:-}" ]; then
+              ARGS+=(--pay-type "$FLOW_PAY_TYPE")
+            fi
+            if [ "${FLOW_PORTAL_ONLY:-true}" = "true" ]; then
+              ARGS+=(--portal-only)
+            fi
+            if [ "${FLOW_ALL_PENDING:-false}" = "true" ]; then
+              ARGS+=(--all-pending)
+            fi
+
+            HAS_SCOPE=false
+            if [ -n "${FLOW_FROM:-}" ] || [ -n "${FLOW_TO:-}" ] || [ -n "${FLOW_VISIT_IDS:-}" ] || [ -n "${FLOW_PAY_TYPE:-}" ] || [ "${FLOW_PORTAL_ONLY:-true}" = "true" ] || [ "${FLOW_ALL_PENDING:-false}" = "true" ]; then
+              HAS_SCOPE=true
+            fi
+            if [ "${HAS_SCOPE}" != "true" ]; then
+              echo "No fill scope provided. Pass visit_ids and/or from/to/pay_type, or set all_pending=true."
+              exit 1
+            fi
+
+            echo "Running Flow 3 fill_evidence on EC2..."
+            echo "Browser mode: headless + non-persistent context + restored session state"
+            HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/submit-claims-batch.js "${ARGS[@]}" 2>&1
+
+            LATEST_JSON=$(ls -t output/run-reports/flow3_[0-9]*.json | head -n 1)
+            if [ -z "${LATEST_JSON:-}" ]; then
+              echo "Flow 3 finished but no report was found."
+              exit 1
+            fi
+
+            echo "Latest Flow 3 report: $LATEST_JSON"
+            node -e 'const fs = require("fs"); const reportPath = process.argv[1]; const report = JSON.parse(fs.readFileSync(reportPath, "utf8")); const rows = Array.isArray(report.rows) ? report.rows : []; console.log("Flow 3 summary:"); console.log(JSON.stringify({ generatedAt: report.generatedAt || null, scope: report.scope || null, totals: report.totals || null, totalRows: rows.length }, null, 2)); for (const row of rows) { console.log(JSON.stringify({ date: row.date || null, patientName: row.patientName || null, nric: row.nric || null, payType: row.payType || null, portal: row.portal || null, status: row.status || null, diagnosisStatus: row.diagnosisStatus || null, fillVerification: row.fillVerification || null, comparison: row.comparison || null, evidence: row.evidence || null, notes: row.notes || null })); }' "$LATEST_JSON"
