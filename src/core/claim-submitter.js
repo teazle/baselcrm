@@ -214,12 +214,13 @@ export class ClaimSubmitter {
 
     const { from = null, to = null, portalOnly = false, portalTargets = null } = opts || {};
     const explicitVisitIds = Array.isArray(visitIds) && visitIds.length > 0;
+    const requestedMode = this._getRequestedMode();
+    const allowSubmittedShadowFill = explicitVisitIds && requestedMode === 'fill_evidence';
 
-    let query = this.supabase
-      .from('visits')
-      .select('*')
-      .eq('source', 'Clinic Assist')
-      .is('submitted_at', null); // Not yet submitted
+    let query = this.supabase.from('visits').select('*').eq('source', 'Clinic Assist');
+    if (!allowSubmittedShadowFill) {
+      query = query.is('submitted_at', null); // Not yet submitted
+    }
 
     if (payType) {
       query = query.eq('pay_type', payType);
@@ -250,7 +251,9 @@ export class ClaimSubmitter {
 
     let rows = data || [];
     rows = rows.filter(visit => {
-      if (!isFlow2EligibleVisit(visit?.extraction_metadata || null)) return false;
+      if (!allowSubmittedShadowFill && !isFlow2EligibleVisit(visit?.extraction_metadata || null)) {
+        return false;
+      }
       const candidate = classifyVisitForRpa(
         visit?.pay_type || null,
         visit?.patient_name || null,
@@ -258,7 +261,16 @@ export class ClaimSubmitter {
         visit?.extraction_metadata || null,
         visit?.submission_status || null
       );
-      if (candidate.status === 'not_claim_candidate') return false;
+      const alreadySubmittedOnly =
+        candidate.status === 'not_claim_candidate' &&
+        Array.isArray(candidate.reasons) &&
+        candidate.reasons.length === 1 &&
+        candidate.reasons[0] === 'already_submitted';
+      if (candidate.status === 'not_claim_candidate') {
+        if (!(allowSubmittedShadowFill && alreadySubmittedOnly && candidate.portalTarget)) {
+          return false;
+        }
+      }
       if (candidate.status === 'manual_review' && !candidate.portalTarget) return false;
       if (!explicitVisitIds) {
         const mode = String(visit?.submission_metadata?.mode || '').trim().toLowerCase();
