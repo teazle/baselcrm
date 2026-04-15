@@ -98,8 +98,10 @@ function contextHintForVisit(visit) {
   )
     .trim()
     .toLowerCase();
-  if (truthContext === 'aia' || truthContext === 'mhc' || truthContext === 'singlife') return truthContext;
-  if (/AIA|AIACLIENT/i.test(payType) || metadata?.routingOverride === 'AIA_CLINIC_DIALOG') return 'aia';
+  if (truthContext === 'aia' || truthContext === 'mhc' || truthContext === 'singlife')
+    return truthContext;
+  if (/AIA|AIACLIENT/i.test(payType) || metadata?.routingOverride === 'AIA_CLINIC_DIALOG')
+    return 'aia';
   if (/AVIVA|SINGLIFE/i.test(payType)) return 'singlife';
   return 'mhc';
 }
@@ -124,14 +126,44 @@ function buildReportMarkdown({ generatedAt, scope, rows }) {
   lines.push(`Visit IDs: ${scope.visitIds || '-'}`);
   lines.push(`Dry Run: ${String(scope.dryRun)}`);
   lines.push('');
-  lines.push('| visit_id | patient_name | visit_date | context | submitted_truth | flow2_vs_submitted | bot_vs_submitted | mismatch_categories | notes |');
-  lines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+  lines.push(
+    '| visit_id | patient_name | visit_date | context | submitted_truth | flow2_vs_submitted | bot_vs_submitted | diagnosis_drift | flow2_diag | bot_diag | submitted_diag | mismatch_categories | notes |'
+  );
+  lines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
   for (const row of rows) {
     lines.push(
-      `| ${row.visitId} | ${String(row.patientName || '').replace(/\|/g, '/')} | ${row.visitDate || ''} | ${row.context || ''} | ${row.submittedTruth || ''} | ${row.flow2VsSubmittedTruth || ''} | ${row.botVsSubmittedTruth || ''} | ${String(row.mismatchCategories || '').replace(/\|/g, '/')} | ${String(row.notes || '').replace(/\|/g, '/')} |`
+      `| ${row.visitId} | ${String(row.patientName || '').replace(/\|/g, '/')} | ${row.visitDate || ''} | ${row.context || ''} | ${row.submittedTruth || ''} | ${row.flow2VsSubmittedTruth || ''} | ${row.botVsSubmittedTruth || ''} | ${row.diagnosisDrift || ''} | ${String(row.flow2Diagnosis || '').replace(/\|/g, '/')} | ${String(row.botDiagnosis || '').replace(/\|/g, '/')} | ${String(row.submittedDiagnosis || '').replace(/\|/g, '/')} | ${String(row.mismatchCategories || '').replace(/\|/g, '/')} | ${String(row.notes || '').replace(/\|/g, '/')} |`
     );
   }
   return `${lines.join('\n')}\n`;
+}
+
+function formatDiagnosisLabel(code, text) {
+  const codeText = String(code || '').trim();
+  const descText = String(text || '').trim();
+  if (codeText && descText) return `${codeText} - ${descText}`;
+  return codeText || descText || '';
+}
+
+function buildDiagnosisAuditFields(comparison = null, submittedTruthCapture = null) {
+  const diagnosisDrift = comparison?.diagnosisDrift || null;
+  return {
+    diagnosisDrift: diagnosisDrift?.classification || null,
+    flow2Diagnosis: formatDiagnosisLabel(
+      diagnosisDrift?.flow2DiagnosisCode,
+      diagnosisDrift?.flow2Diagnosis
+    ),
+    botDiagnosis: formatDiagnosisLabel(
+      diagnosisDrift?.botDiagnosisCode,
+      diagnosisDrift?.botDiagnosis
+    ),
+    submittedDiagnosis: formatDiagnosisLabel(
+      diagnosisDrift?.submittedDiagnosisCode ||
+        submittedTruthCapture?.snapshot?.diagnosisCode ||
+        null,
+      diagnosisDrift?.submittedDiagnosis || submittedTruthCapture?.snapshot?.diagnosisText || null
+    ),
+  };
 }
 
 async function writeAuditReport(payload) {
@@ -175,7 +207,8 @@ async function main() {
 
   if (args.from) query = query.gte('visit_date', args.from);
   if (args.to) query = query.lte('visit_date', args.to);
-  if (Array.isArray(args.visitIds) && args.visitIds.length > 0) query = query.in('id', args.visitIds);
+  if (Array.isArray(args.visitIds) && args.visitIds.length > 0)
+    query = query.in('id', args.visitIds);
 
   const { data, error } = await query.limit(Math.max(args.limit * 4, args.limit));
   if (error) {
@@ -184,20 +217,23 @@ async function main() {
   }
 
   const rows = (data || [])
-    .filter(visit => resolveFlow3PortalTarget(
-      visit?.pay_type,
-      visit?.patient_name,
-      visit?.extraction_metadata || null
-    ) === 'MHC')
+    .filter(
+      visit =>
+        resolveFlow3PortalTarget(
+          visit?.pay_type,
+          visit?.patient_name,
+          visit?.extraction_metadata || null
+        ) === 'MHC'
+    )
     .filter(visit => {
       const md = visit?.submission_metadata || {};
       return Boolean(
         visit?.submission_status === 'submitted' ||
-          md?.submittedTruthSnapshot ||
-          md?.submittedTruthCapture ||
-          md?.botSnapshot ||
-          md?.draftVerification ||
-          md?.draftReference
+        md?.submittedTruthSnapshot ||
+        md?.submittedTruthCapture ||
+        md?.botSnapshot ||
+        md?.draftVerification ||
+        md?.draftReference
       );
     })
     .slice(0, args.limit);
@@ -212,7 +248,9 @@ async function main() {
     await mhc.ensureAtMhcHome();
   } catch (error) {
     if (error?.portalBlocked === true) {
-      portalBlockedReason = String(error?.code || error?.submissionMetadata?.reason || 'portal_blocked');
+      portalBlockedReason = String(
+        error?.code || error?.submissionMetadata?.reason || 'portal_blocked'
+      );
       logger.warn('[TRUTH AUDIT] Portal blocked before audit start', {
         reason: portalBlockedReason,
       });
@@ -244,6 +282,10 @@ async function main() {
         submittedTruth: 'skipped',
         flow2VsSubmittedTruth: '-',
         botVsSubmittedTruth: '-',
+        diagnosisDrift: '-',
+        flow2Diagnosis: '',
+        botDiagnosis: '',
+        submittedDiagnosis: '',
         mismatchCategories: '',
         notes: 'missing_nric',
       });
@@ -284,6 +326,7 @@ async function main() {
         submittedTruth: 'blocked',
         flow2VsSubmittedTruth: blockedComparison?.flow2VsSubmittedTruth?.state || 'unavailable',
         botVsSubmittedTruth: blockedComparison?.botVsSubmittedTruth?.state || 'unavailable',
+        ...buildDiagnosisAuditFields(blockedComparison, null),
         mismatchCategories: (blockedComparison?.mismatchCategories || []).join(','),
         notes: portalBlockedReason,
       });
@@ -310,7 +353,9 @@ async function main() {
       });
     } catch (error) {
       if (error?.portalBlocked === true) {
-        portalBlockedReason = String(error?.code || error?.submissionMetadata?.reason || 'portal_blocked');
+        portalBlockedReason = String(
+          error?.code || error?.submissionMetadata?.reason || 'portal_blocked'
+        );
         const blockedComparison = comparePortalTruthSnapshots({
           portalTarget: 'MHC',
           visit,
@@ -344,6 +389,7 @@ async function main() {
           submittedTruth: 'blocked',
           flow2VsSubmittedTruth: blockedComparison?.flow2VsSubmittedTruth?.state || 'unavailable',
           botVsSubmittedTruth: blockedComparison?.botVsSubmittedTruth?.state || 'unavailable',
+          ...buildDiagnosisAuditFields(blockedComparison, null),
           mismatchCategories: (blockedComparison?.mismatchCategories || []).join(','),
           notes: portalBlockedReason,
         });
@@ -393,6 +439,7 @@ async function main() {
         submittedTruth: 'unavailable',
         flow2VsSubmittedTruth: comparison?.flow2VsSubmittedTruth?.state || 'unavailable',
         botVsSubmittedTruth: comparison?.botVsSubmittedTruth?.state || 'unavailable',
+        ...buildDiagnosisAuditFields(comparison, submittedTruthCapture),
         mismatchCategories: (comparison?.mismatchCategories || []).join(','),
         notes: submittedTruthCapture?.reason || 'submitted_truth_unavailable',
       });
@@ -456,6 +503,7 @@ async function main() {
       submittedTruth: 'captured',
       flow2VsSubmittedTruth: comparison?.flow2VsSubmittedTruth?.state || 'unavailable',
       botVsSubmittedTruth: comparison?.botVsSubmittedTruth?.state || 'unavailable',
+      ...buildDiagnosisAuditFields(comparison, submittedTruthCapture),
       mismatchCategories: (comparison?.mismatchCategories || []).join(','),
       notes: submittedTruthCapture?.snapshot?.artifacts?.json || comparisonArtifacts?.json || '',
     });

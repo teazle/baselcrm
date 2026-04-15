@@ -1,0 +1,133 @@
+name: Flow2 Refresh
+
+on:
+  workflow_dispatch:
+    inputs:
+      from:
+        description: 'Start date (YYYY-MM-DD)'
+        required: false
+        type: string
+      to:
+        description: 'End date (YYYY-MM-DD)'
+        required: false
+        type: string
+      visit_ids:
+        description: 'Comma-separated visit IDs'
+        required: false
+        type: string
+      pay_type:
+        description: 'Optional pay type filter'
+        required: false
+        type: string
+      retry_failed:
+        description: 'Retry only failed Flow 2 visits'
+        required: false
+        default: false
+        type: boolean
+      force:
+        description: 'Force re-extraction even if already completed'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  refresh:
+    name: Run Flow 2 refresh on EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate EC2 SSH reachability
+        shell: bash
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_PORT: ${{ secrets.EC2_PORT || 22 }}
+        run: |
+          set -euo pipefail
+          connected=false
+          for attempt in 1 2 3; do
+            echo "Reachability check ${attempt}/3 to EC2 SSH port..."
+            if timeout 10 bash -c "cat < /dev/null > /dev/tcp/${EC2_HOST}/${EC2_PORT}" 2>/dev/null; then
+              connected=true
+              echo "EC2 SSH endpoint is reachable."
+              break
+            fi
+            sleep 15
+          done
+
+          if [ "${connected}" != "true" ]; then
+            echo "Cannot reach EC2 SSH endpoint (${EC2_HOST}:${EC2_PORT})."
+            exit 1
+          fi
+
+      - name: Run Flow 2 refresh on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          FLOW_FROM: ${{ inputs.from }}
+          FLOW_TO: ${{ inputs.to }}
+          FLOW_VISIT_IDS: ${{ inputs.visit_ids }}
+          FLOW_PAY_TYPE: ${{ inputs.pay_type }}
+          FLOW_RETRY_FAILED: ${{ inputs.retry_failed }}
+          FLOW_FORCE: ${{ inputs.force }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || 22 }}
+          timeout: 60s
+          command_timeout: 60m
+          envs: FLOW_FROM,FLOW_TO,FLOW_VISIT_IDS,FLOW_PAY_TYPE,FLOW_RETRY_FAILED,FLOW_FORCE
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            DEPLOY_PATH="${{ secrets.EC2_DEPLOY_PATH || '~/Baselrpacrm' }}"
+            DEPLOY_PATH="${DEPLOY_PATH/#\~/$HOME}"
+
+            echo "Deploy path: $DEPLOY_PATH"
+            cd "$DEPLOY_PATH"
+
+            if [ ! -d .git ]; then
+              echo "Not a git repository in $DEPLOY_PATH"
+              exit 1
+            fi
+
+            echo "Current commit on EC2:"
+            git log -1 --oneline || true
+
+            ARGS=()
+            if [ -n "${FLOW_FROM:-}" ]; then
+              ARGS+=(--from "$FLOW_FROM")
+            fi
+            if [ -n "${FLOW_TO:-}" ]; then
+              ARGS+=(--to "$FLOW_TO")
+            fi
+            if [ -n "${FLOW_VISIT_IDS:-}" ]; then
+              ARGS+=(--visit-ids "$FLOW_VISIT_IDS")
+            fi
+            if [ -n "${FLOW_PAY_TYPE:-}" ]; then
+              ARGS+=(--pay-type "$FLOW_PAY_TYPE")
+            fi
+            if [ "${FLOW_RETRY_FAILED:-false}" = "true" ]; then
+              ARGS+=(--retry-failed)
+            fi
+            if [ "${FLOW_FORCE:-true}" = "true" ]; then
+              ARGS+=(--force)
+            fi
+
+            if [ ${#ARGS[@]} -eq 0 ]; then
+              echo "No Flow 2 scope provided. Pass visit_ids and/or from/to/pay_type."
+              exit 1
+            fi
+
+            echo "Running Flow 2 refresh on EC2..."
+            echo "Browser mode: headless + non-persistent context + restored session state"
+            HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/extract-visit-details-batch.js "${ARGS[@]}" 2>&1
+
+            LATEST_JSON=$(ls -t output/run-reports/flow2_*.json | head -n 1)
+            if [ -z "${LATEST_JSON:-}" ]; then
+              echo "Flow 2 finished but no report was found."
+              exit 1
+            fi
+
+            echo "Latest Flow 2 report: $LATEST_JSON"
+            node -e 'const fs = require("fs"); const reportPath = process.argv[1]; const report = JSON.parse(fs.readFileSync(reportPath, "utf8")); const rows = Array.isArray(report.rows) ? report.rows : []; console.log("Flow 2 summary:"); console.log(JSON.stringify({ generatedAt: report.generatedAt || null, scope: report.scope || null, totals: report.totals || null, totalRows: rows.length }, null, 2)); for (const row of rows) { console.log(JSON.stringify({ date: row.date || null, patientName: row.patientName || null, nric: row.nric || null, payType: row.payType || null, portal: row.portal || null, status: row.status || null, diagnosisStatus: row.diagnosisStatus || null, notes: row.notes || null })); }' "$LATEST_JSON"

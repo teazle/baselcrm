@@ -4,26 +4,26 @@ on:
   workflow_dispatch:
     inputs:
       from:
-        description: "Start date (YYYY-MM-DD)"
+        description: 'Start date (YYYY-MM-DD)'
         required: false
         type: string
       to:
-        description: "End date (YYYY-MM-DD)"
+        description: 'End date (YYYY-MM-DD)'
         required: false
         type: string
       visit_ids:
-        description: "Comma-separated visit IDs"
+        description: 'Comma-separated visit IDs'
         required: false
         type: string
       limit:
-        description: "Max visits to audit"
+        description: 'Max visits to audit'
         required: false
-        default: "10"
+        default: '10'
         type: string
       dry_run:
-        description: "Do not persist audit results back to DB"
+        description: 'Do not persist audit results back to DB'
         required: false
-        default: true
+        default: false
         type: boolean
 
 jobs:
@@ -126,4 +126,4 @@ jobs:
             fi
 
             echo "Latest audit report: $LATEST_JSON"
-            node -e 'const fs = require("fs"); const reportPath = process.argv[1]; const report = JSON.parse(fs.readFileSync(reportPath, "utf8")); const rows = Array.isArray(report.rows) ? report.rows : []; console.log("Audit summary:"); console.log(JSON.stringify({ generatedAt: report.generatedAt || null, scope: report.scope || null, totalRows: rows.length }, null, 2)); for (const row of rows) { console.log(JSON.stringify({ visitId: row.visitId || null, patientName: row.patientName || null, visitDate: row.visitDate || null, context: row.context || null, submittedTruth: row.submittedTruth || null, flow2VsSubmittedTruth: row.flow2VsSubmittedTruth || null, botVsSubmittedTruth: row.botVsSubmittedTruth || null, mismatchCategories: row.mismatchCategories || null, notes: row.notes || null })); }' "$LATEST_JSON"
+            node -e 'const fs = require("fs"); const reportPath = process.argv[1]; const report = JSON.parse(fs.readFileSync(reportPath, "utf8")); const rows = Array.isArray(report.rows) ? report.rows : []; console.log("Audit summary:"); console.log(JSON.stringify({ generatedAt: report.generatedAt || null, scope: report.scope || null, totalRows: rows.length }, null, 2)); for (const row of rows) { console.log(JSON.stringify({ visitId: row.visitId || null, patientName: row.patientName || null, visitDate: row.visitDate || null, context: row.context || null, submittedTruth: row.submittedTruth || null, flow2VsSubmittedTruth: row.flow2VsSubmittedTruth || null, botVsSubmittedTruth: row.botVsSubmittedTruth || null, diagnosisDrift: row.diagnosisDrift || null, flow2Diagnosis: row.flow2Diagnosis || null, botDiagnosis: row.botDiagnosis || null, submittedDiagnosis: row.submittedDiagnosis || null, mismatchCategories: row.mismatchCategories || null, notes: row.notes || null })); }' "$LATEST_JSON"

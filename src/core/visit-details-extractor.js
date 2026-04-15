@@ -5,6 +5,36 @@ import { registerRunExitHandler, markRunFinalized } from '../utils/run-exit-hand
 import { ClinicAssistAutomation } from '../automations/clinic-assist.js';
 import { normalizePatientNameForSearch } from '../utils/patient-normalize.js';
 
+const NON_PORTABLE_DIAGNOSIS_RE =
+  /(?:\blab(?:oratory)?\b|\btest\b|\bscreen(?:ing)?\b|\bpanel\b|\bconsult(?:ation)?\b|\bprocedure\b|\btherapy\b)/i;
+const GENERIC_DIAGNOSIS_RE =
+  /(?:\billness\b|\bunspecified\b|\bunsp\b|\bother\b|\bregion\b|\bjoint\b|\bsite\b|\bpart\b|\bsymptom\b|\bproblem\b)/i;
+const BODY_PART_DIAGNOSIS_RE =
+  /\b(shoulder|knee|ankle|wrist|elbow|hip|back|neck|foot|heel|hand|finger|toe|leg|arm|thigh|calf|forearm|spine|lumbar|loin|cervical|thoracic|rib|chest|abdomen|stomach|head|eye|ear|nose|throat|acl|mcl|lcl|pcl|meniscus|patella|ligament)\b/i;
+const CONDITION_DIAGNOSIS_RE =
+  /\b(pain|ache|sprain|strain|fracture|dislocation|tear|rupture|injury|trauma|infection|inflammation|arthritis|laceration|wound|swelling|instability|laxity|bursitis|tendinitis|tendinopathy|contusion|capsulitis|impingement)\b/i;
+
+function looksReusableResolvedDiagnosis(description, diagnosisCanonical = null) {
+  const text = String(description || '').trim();
+  if (!text || /^missing diagnosis$/i.test(text)) return false;
+  if (NON_PORTABLE_DIAGNOSIS_RE.test(text)) return false;
+
+  const code = String(diagnosisCanonical?.code_normalized || diagnosisCanonical?.code_raw || '')
+    .trim()
+    .toUpperCase();
+  if (!code || code === 'R69' || code === 'NA') return false;
+
+  const hasCanonicalSpecificity = Boolean(
+    diagnosisCanonical?.body_part && diagnosisCanonical?.condition
+  );
+  const hasTextSpecificity = BODY_PART_DIAGNOSIS_RE.test(text) && CONDITION_DIAGNOSIS_RE.test(text);
+  const hasLaterality = /\b(left|right|lt|rt|bilateral)\b/i.test(text);
+  const looksGeneric = GENERIC_DIAGNOSIS_RE.test(text);
+
+  if (looksGeneric && !hasLaterality && !hasCanonicalSpecificity) return false;
+  return hasCanonicalSpecificity || hasTextSpecificity;
+}
+
 /**
  * Visit Details Extractor
  * Extracts diagnosis and services/drugs from Clinic Assist visit records
@@ -80,19 +110,26 @@ export class VisitDetailsExtractor {
       const usePatientNumber = pcno && /^\d{4,5}$/.test(String(pcno).trim()); // 4-5 digit number
       const cleanName = normalizePatientNameForSearch(visit.patient_name);
       const queueFallbackIdentifier =
-        (usePatientNumber ? String(pcno).trim() : null) || cleanName || visit.patient_name || '__AUTO_MHC_AIA__';
+        (usePatientNumber ? String(pcno).trim() : null) ||
+        cleanName ||
+        visit.patient_name ||
+        '__AUTO_MHC_AIA__';
       let patientContextOpened = false;
       let openContextError = null;
 
       // 3. Primary path: Patient Search page
-      logger.info(`[VisitDetails] Navigating to Patient Page for visit ${visit.id} (${visit.patient_name})`);
+      logger.info(
+        `[VisitDetails] Navigating to Patient Page for visit ${visit.id} (${visit.patient_name})`
+      );
       const patientPageOpened = await this.clinicAssist.navigateToPatientPage();
       if (!patientPageOpened) {
         openContextError = new Error('Failed to navigate to Patient Page');
       } else {
         try {
           if (usePatientNumber) {
-            logger.info(`[VisitDetails] Searching for patient by number: ${pcno} (${visit.patient_name})`);
+            logger.info(
+              `[VisitDetails] Searching for patient by number: ${pcno} (${visit.patient_name})`
+            );
             await this.clinicAssist.searchPatientByNumber(String(pcno).trim());
             await this.clinicAssist.page.waitForTimeout(2000);
             logger.info(`[VisitDetails] Opening patient record by number: ${pcno}`);
@@ -103,7 +140,9 @@ export class VisitDetailsExtractor {
             );
             await this.clinicAssist.searchPatientByName(cleanName || visit.patient_name);
             await this.clinicAssist.page.waitForTimeout(2000);
-            logger.info(`[VisitDetails] Opening patient record for: ${cleanName || visit.patient_name}`);
+            logger.info(
+              `[VisitDetails] Opening patient record for: ${cleanName || visit.patient_name}`
+            );
             await this.clinicAssist.openPatientFromSearchResults(cleanName || visit.patient_name);
           }
           patientContextOpened = true;
@@ -138,9 +177,9 @@ export class VisitDetailsExtractor {
           pcno: usePatientNumber ? String(pcno).trim() : null,
           error: openContextError?.message || null,
         });
-        const queueOpened = await this.clinicAssist.navigateToQueue(this.branchName, this.deptName).catch(
-          () => false
-        );
+        const queueOpened = await this.clinicAssist
+          .navigateToQueue(this.branchName, this.deptName)
+          .catch(() => false);
         if (!queueOpened) {
           throw new Error(
             `Failed to open patient context: Patient Search and Queue fallback failed (${openContextError?.message || 'unknown'})`
@@ -152,18 +191,22 @@ export class VisitDetailsExtractor {
 
       // Wait for biodata page to load
       await this.clinicAssist.page.waitForTimeout(2000);
-      
+
       // 4b. Extract NRIC from biodata page (before navigating to TX History)
       // This is the best place to get NRIC as it's displayed on the patient biodata/info page
       logger.info(`[VisitDetails] Extracting NRIC from biodata page for: ${visit.patient_name}`);
       const extractedNric = await this.clinicAssist.getPatientNRIC();
       const nricExtractionStatus = extractedNric ? 'found' : 'missing';
       if (extractedNric) {
-        logger.info(`[VisitDetails] Found NRIC: ${extractedNric} for patient: ${visit.patient_name}`);
+        logger.info(
+          `[VisitDetails] Found NRIC: ${extractedNric} for patient: ${visit.patient_name}`
+        );
         // Update visit with NRIC immediately
         await this._updateVisitWithNRIC(visit.id, extractedNric);
       } else {
-        logger.warn(`[VisitDetails] NRIC not found on biodata page for patient: ${visit.patient_name}`);
+        logger.warn(
+          `[VisitDetails] NRIC not found on biodata page for patient: ${visit.patient_name}`
+        );
       }
 
       // 5. Get charge type, diagnosis, and MC data for the visit date
@@ -172,15 +215,17 @@ export class VisitDetailsExtractor {
       // - diagnosis: { code, description }
       // - mcDays: number of MC days
       // - mcStartDate: MC start date in DD/MM/YYYY format
-      logger.info(`[VisitDetails] Extracting charge type, diagnosis, and MC data for visit ${visit.id} on ${visit.visit_date}`);
+      logger.info(
+        `[VisitDetails] Extracting charge type, diagnosis, and MC data for visit ${visit.id} on ${visit.visit_date}`
+      );
       const txData = await this.clinicAssist.getChargeTypeAndDiagnosis(visit.visit_date, {
         payType: visit.pay_type || null,
       });
-      
+
       const chargeType = txData.chargeType || 'follow';
       const mcDays = txData.mcDays || 0;
       const mcStartDate = txData.mcStartDate || null;
-      
+
       // Extract diagnosis from txData.
       // If Flow 2 does not find a diagnosis, we preserve any meaningful Flow 1 diagnosis in _updateVisitWithDetails.
       let finalDiagnosis = null;
@@ -194,12 +239,12 @@ export class VisitDetailsExtractor {
           diagnosisCode = txData.diagnosis.code.trim();
         }
       }
-      
+
       logger.info(`[VisitDetails] Extracted data for visit ${visit.id}:`, {
         chargeType,
         diagnosis: (finalDiagnosis || 'Missing diagnosis').substring(0, 50),
         mcDays,
-        mcStartDate
+        mcStartDate,
       });
 
       const diagnosisEvidenceArtifacts = await this._writeDiagnosisEvidenceArtifacts(visit, {
@@ -221,7 +266,7 @@ export class VisitDetailsExtractor {
       // Store medicines/services extracted from TX History Medicine tab (Flow 2).
       // Keep it both as a newline string (treatment_detail) and a structured array in extraction_metadata.
       const medicines = (txData.medicines || [])
-        .map((m) => {
+        .map(m => {
           if (!m) return null;
           if (typeof m === 'string') return { name: m, quantity: null };
           const name = (m.name || m.description || '').toString().trim();
@@ -234,7 +279,7 @@ export class VisitDetailsExtractor {
         })
         .filter(Boolean);
       const treatmentDetail = medicines.length
-        ? medicines.map((m) => (m.quantity ? `${m.name} x${m.quantity}` : m.name)).join('\n')
+        ? medicines.map(m => (m.quantity ? `${m.name} x${m.quantity}` : m.name)).join('\n')
         : null;
 
       await this._updateVisitWithDetails(visit.id, finalDiagnosis, diagnosisCode, treatmentDetail, {
@@ -270,7 +315,7 @@ export class VisitDetailsExtractor {
       logger.info(`[VisitDetails] Successfully extracted details for visit ${visit.id}`, {
         diagnosis: (finalDiagnosis || 'Missing diagnosis').substring(0, 100),
         chargeType,
-        mcDays
+        mcDays,
       });
 
       return {
@@ -286,13 +331,13 @@ export class VisitDetailsExtractor {
         diagnosisResolution: txData.diagnosisResolution || null,
         sources: {
           source: 'tx_history_combined',
-          extractionMethod: 'getChargeTypeAndDiagnosis'
+          extractionMethod: 'getChargeTypeAndDiagnosis',
         },
       };
     } catch (error) {
-      logger.error(`[VisitDetails] Failed to extract details for visit ${visit.id}`, { 
+      logger.error(`[VisitDetails] Failed to extract details for visit ${visit.id}`, {
         error: error.message,
-        patientName: visit.patient_name 
+        patientName: visit.patient_name,
       });
 
       // Mark as failed with error
@@ -348,13 +393,17 @@ export class VisitDetailsExtractor {
         }
 
         if (!force && status === 'failed' && attempts >= maxRetries) {
-          logger.info(`[VisitDetails] Skipping visit ${visit.id} - exceeded max retries (${attempts}/${maxRetries})`);
+          logger.info(
+            `[VisitDetails] Skipping visit ${visit.id} - exceeded max retries (${attempts}/${maxRetries})`
+          );
           results.skipped++;
           continue;
         }
 
         // Extract details for this visit
-        logger.info(`[VisitDetails] Processing visit ${i + 1}/${visits.length}: ${visit.patient_name} (${visit.visit_date})`);
+        logger.info(
+          `[VisitDetails] Processing visit ${i + 1}/${visits.length}: ${visit.patient_name} (${visit.visit_date})`
+        );
         const result = await this.extractForVisit(visit);
 
         results.details.push(result);
@@ -377,7 +426,9 @@ export class VisitDetailsExtractor {
         }
       }
 
-      logger.info(`[VisitDetails] Batch extraction complete: ${results.completed} completed, ${results.failed} failed, ${results.skipped} skipped`);
+      logger.info(
+        `[VisitDetails] Batch extraction complete: ${results.completed} completed, ${results.failed} failed, ${results.skipped} skipped`
+      );
 
       await this._updateRun(runId, {
         status: 'completed',
@@ -419,7 +470,9 @@ export class VisitDetailsExtractor {
         .single();
 
       if (fetchError) {
-        logger.error(`[VisitDetails] Failed to fetch current visit metadata: ${fetchError.message}`);
+        logger.error(
+          `[VisitDetails] Failed to fetch current visit metadata: ${fetchError.message}`
+        );
         return;
       }
 
@@ -502,7 +555,9 @@ export class VisitDetailsExtractor {
         .single();
 
       if (fetchError) {
-        logger.error(`[VisitDetails] Failed to fetch current visit metadata: ${fetchError.message}`);
+        logger.error(
+          `[VisitDetails] Failed to fetch current visit metadata: ${fetchError.message}`
+        );
         return;
       }
 
@@ -510,16 +565,17 @@ export class VisitDetailsExtractor {
       const existingDiagnosis = String(currentVisit?.diagnosis_description || '').trim();
       const hasExistingDiagnosis =
         existingDiagnosis.length > 0 && !/^missing diagnosis$/i.test(existingDiagnosis);
-      const existingResolutionStatus = String(
-        currentMetadata?.diagnosisResolution?.status || ''
-      )
+      const existingResolutionStatus = String(currentMetadata?.diagnosisResolution?.status || '')
         .trim()
         .toLowerCase();
-      const existingDiagnosisLooksNonPortable = /(?:\blab(?:oratory)?\b|\btest\b|\bscreen(?:ing)?\b|\bpanel\b|\bconsult(?:ation)?\b|\bprocedure\b|\btherapy\b)/i.test(
-        existingDiagnosis
+      const existingDiagnosisLooksNonPortable = NON_PORTABLE_DIAGNOSIS_RE.test(existingDiagnosis);
+      const existingDiagnosisLooksReusable = looksReusableResolvedDiagnosis(
+        existingDiagnosis,
+        currentMetadata?.diagnosisCanonical || null
       );
       const existingDiagnosisFallbackAllowed =
         hasExistingDiagnosis &&
+        existingDiagnosisLooksReusable &&
         !existingDiagnosisLooksNonPortable &&
         (!existingResolutionStatus || existingResolutionStatus === 'resolved');
       const incomingDiagnosis = String(diagnosisText || '').trim();
@@ -528,9 +584,10 @@ export class VisitDetailsExtractor {
       const incomingResolutionStatus = String(sources?.diagnosisResolution?.status || '')
         .trim()
         .toLowerCase();
-      const incomingDiagnosisLooksNonPortable = /(?:\blab(?:oratory)?\b|\btest\b|\bscreen(?:ing)?\b|\bpanel\b|\bconsult(?:ation)?\b|\bprocedure\b|\btherapy\b)/i.test(
-        incomingDiagnosis
-      );
+      const incomingDiagnosisLooksNonPortable =
+        /(?:\blab(?:oratory)?\b|\btest\b|\bscreen(?:ing)?\b|\bpanel\b|\bconsult(?:ation)?\b|\bprocedure\b|\btherapy\b)/i.test(
+          incomingDiagnosis
+        );
       const incomingDiagnosisUnresolved =
         !hasIncomingDiagnosis ||
         incomingResolutionStatus === 'missing' ||
@@ -542,15 +599,17 @@ export class VisitDetailsExtractor {
       const shouldUseIncomingDiagnosis = hasIncomingDiagnosis && !incomingDiagnosisUnresolved;
       const incomingCode = String(diagnosisCode || '').trim();
       const existingCode = String(currentMetadata?.diagnosisCode || '').trim();
-      const usedExistingDiagnosisFallback = incomingDiagnosisUnresolved && existingDiagnosisFallbackAllowed;
-      const genericFallback = incomingDiagnosisUnresolved && !usedExistingDiagnosisFallback
-        ? this._resolveGenericDiagnosisFallback({
-            diagnosisText,
-            diagnosisCode,
-            treatmentDetail,
-            sources,
-          })
-        : null;
+      const usedExistingDiagnosisFallback =
+        incomingDiagnosisUnresolved && existingDiagnosisFallbackAllowed;
+      const genericFallback =
+        incomingDiagnosisUnresolved && !usedExistingDiagnosisFallback
+          ? this._resolveGenericDiagnosisFallback({
+              diagnosisText,
+              diagnosisCode,
+              treatmentDetail,
+              sources,
+            })
+          : null;
       const usedGenericDiagnosisFallback = !!genericFallback;
 
       let diagnosisToStore = shouldUseIncomingDiagnosis
@@ -559,7 +618,7 @@ export class VisitDetailsExtractor {
           ? existingDiagnosis
           : 'Missing diagnosis';
       let diagnosisCodeToStore = shouldUseIncomingDiagnosis
-        ? (incomingCode || null)
+        ? incomingCode || null
         : (usedExistingDiagnosisFallback ? existingCode : '') || null;
       if (usedGenericDiagnosisFallback) {
         diagnosisToStore = genericFallback.description;
@@ -620,9 +679,7 @@ export class VisitDetailsExtractor {
               diagnosisResolution,
               diagnosisCandidates,
               sourceDate:
-                diagnosisCanonical?.source_date ||
-                sources?.diagnosisEvidence?.sourceDate ||
-                null,
+                diagnosisCanonical?.source_date || sources?.diagnosisEvidence?.sourceDate || null,
               confidence: diagnosisResolution?.confidence ?? null,
               rejectionReason: diagnosisResolution?.reason_if_unresolved || null,
             }
@@ -643,7 +700,11 @@ export class VisitDetailsExtractor {
             diagnosisFallbackFromExisting: usedExistingDiagnosisFallback,
             diagnosisGenericFallbackApplied: usedGenericDiagnosisFallback,
             diagnosisGenericFallback: genericFallback
-              ? { code: genericFallback.code, description: genericFallback.description, reason: genericFallback.reason }
+              ? {
+                  code: genericFallback.code,
+                  description: genericFallback.description,
+                  reason: genericFallback.reason,
+                }
               : null,
           },
           diagnosisCode: diagnosisCodeToStore,
@@ -652,10 +713,10 @@ export class VisitDetailsExtractor {
           diagnosisCandidates,
           diagnosisEvidence: mergedDiagnosisEvidence,
           // These fields are used by Flow 3 (ClaimSubmitter) for form filling
-          chargeType: chargeType,       // 'first' or 'follow'
-          mcDays: mcDays,               // Number of MC days
-          mcStartDate: mcStartDate,     // MC start date in DD/MM/YYYY format
-          medicines: medicines,         // [{name, quantity, unit, unitPrice, amount}] from TX History Medicine tab (optional)
+          chargeType: chargeType, // 'first' or 'follow'
+          mcDays: mcDays, // Number of MC days
+          mcStartDate: mcStartDate, // MC start date in DD/MM/YYYY format
+          medicines: medicines, // [{name, quantity, unit, unitPrice, amount}] from TX History Medicine tab (optional)
         },
       };
 
@@ -676,9 +737,34 @@ export class VisitDetailsExtractor {
     }
   }
 
-  _resolveGenericDiagnosisFallback({ diagnosisText, diagnosisCode, treatmentDetail, sources } = {}) {
+  _resolveGenericDiagnosisFallback({
+    diagnosisText,
+    diagnosisCode,
+    treatmentDetail,
+    sources,
+  } = {}) {
     const enabled = process.env.FLOW2_ENABLE_GENERIC_DIAG_FALLBACK === '1';
     if (!enabled) return null;
+
+    const respiratorySignal = [
+      diagnosisText,
+      diagnosisCode,
+      treatmentDetail,
+      sources?.diagnosisCanonical?.description_canonical,
+      sources?.diagnosisCanonical?.description_raw,
+    ]
+      .flatMap(value => (Array.isArray(value) ? value : [value]))
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+    if (
+      !/\b(cough|urti|uri|upper respiratory|lower respiratory|pharyngitis|tonsillitis|bronch|sore throat)\b/i.test(
+        respiratorySignal
+      )
+    ) {
+      return null;
+    }
 
     return {
       code: 'R05',
