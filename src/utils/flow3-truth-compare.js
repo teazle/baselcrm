@@ -77,9 +77,11 @@ function toDdMmYyyy(value) {
   const raw = String(value || '').trim();
   if (!raw) return '';
   const dmy = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (dmy) return `${String(Number(dmy[1])).padStart(2, '0')}/${String(Number(dmy[2])).padStart(2, '0')}/${dmy[3]}`;
+  if (dmy)
+    return `${String(Number(dmy[1])).padStart(2, '0')}/${String(Number(dmy[2])).padStart(2, '0')}/${dmy[3]}`;
   const ymd = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  if (ymd) return `${String(Number(ymd[3])).padStart(2, '0')}/${String(Number(ymd[2])).padStart(2, '0')}/${ymd[1]}`;
+  if (ymd)
+    return `${String(Number(ymd[3])).padStart(2, '0')}/${String(Number(ymd[2])).padStart(2, '0')}/${ymd[1]}`;
   return raw;
 }
 
@@ -136,7 +138,9 @@ function diagnosisSemanticMatch(expected, actual) {
 }
 
 function normalizeLineItemName(value) {
-  return normalizeText(value).replace(/\bx\d+\b/g, '').trim();
+  return normalizeText(value)
+    .replace(/\bx\d+\b/g, '')
+    .trim();
 }
 
 function normalizeLineItems(items) {
@@ -179,7 +183,12 @@ function compareLineItems(expectedItems, actualItems) {
   }
 
   return {
-    state: missing.length === 0 && unexpected.length === 0 ? 'match' : matched.length > 0 ? 'partial' : 'mismatch',
+    state:
+      missing.length === 0 && unexpected.length === 0
+        ? 'match'
+        : matched.length > 0
+          ? 'partial'
+          : 'mismatch',
     unavailableReason: null,
     matched,
     missing,
@@ -194,6 +203,7 @@ function classifyDiagnosisDrift({ visit, expectedSnapshot, botSnapshot, truthSna
   const flow2Matches = diagnosisSemanticMatch(flow2Diagnosis, truthDiagnosis);
   const botMatches = diagnosisSemanticMatch(botDiagnosis, truthDiagnosis);
   const flow2Resolution = visit?.extraction_metadata?.diagnosisResolution || {};
+  const flow2DateOk = flow2Resolution?.date_ok === true;
   const sourceAgeDays = Number.isFinite(Number(flow2Resolution?.fallback_age_days))
     ? Number(flow2Resolution.fallback_age_days)
     : Number.isFinite(Number(visit?.extraction_metadata?.diagnosisCanonical?.source_age_days))
@@ -205,6 +215,8 @@ function classifyDiagnosisDrift({ visit, expectedSnapshot, botSnapshot, truthSna
     classification = 'submitted_truth_unavailable';
   } else if (flow2Matches && botMatches) {
     classification = 'match';
+  } else if (flow2Matches && !flow2DateOk && sourceAgeDays !== null && sourceAgeDays > 30) {
+    classification = 'stale_diagnosis_chosen';
   } else if (flow2Matches && !botMatches) {
     classification = 'wrong_portal_mapping';
   } else if (!flow2Matches && sourceAgeDays !== null && sourceAgeDays > 0) {
@@ -254,7 +266,9 @@ function makeFieldRule(field) {
         matches: (expected, actual) => {
           const left = normalizeText(stripPortalTag(expected));
           const right = normalizeText(stripPortalTag(actual));
-          return !!left && !!right && (left === right || left.includes(right) || right.includes(left));
+          return (
+            !!left && !!right && (left === right || left.includes(right) || right.includes(left))
+          );
         },
       };
     case 'diagnosisText':
@@ -264,10 +278,17 @@ function makeFieldRule(field) {
       };
     case 'diagnosisCode':
       return {
-        normalize: value => String(value || '').trim().toUpperCase(),
+        normalize: value =>
+          String(value || '')
+            .trim()
+            .toUpperCase(),
         matches: (expected, actual) => {
-          const left = String(expected || '').trim().toUpperCase();
-          const right = String(actual || '').trim().toUpperCase();
+          const left = String(expected || '')
+            .trim()
+            .toUpperCase();
+          const right = String(actual || '')
+            .trim()
+            .toUpperCase();
           return !!left && !!right && left === right;
         },
       };
@@ -306,7 +327,9 @@ function makeFieldRule(field) {
         matches: (expected, actual) => {
           const left = normalizeText(expected);
           const right = normalizeText(actual);
-          return !!left && !!right && (left === right || left.includes(right) || right.includes(left));
+          return (
+            !!left && !!right && (left === right || left.includes(right) || right.includes(left))
+          );
         },
       };
   }
@@ -364,7 +387,9 @@ function compareField(field, expected, actual) {
 function summarizeComparison(details = {}) {
   const comparisons = Object.values(details).filter(Boolean);
   const comparable = comparisons.filter(entry => entry.status !== 'skipped');
-  const matchedFields = comparable.filter(entry => entry.status === 'match').map(entry => entry.field);
+  const matchedFields = comparable
+    .filter(entry => entry.status === 'match')
+    .map(entry => entry.field);
   const mismatchedFields = comparable
     .filter(entry => entry.status !== 'match')
     .map(entry => ({
@@ -589,7 +614,7 @@ export function comparePortalTruthSnapshots({
   visit,
   botSnapshot = null,
   submittedTruthSnapshot = null,
-  draftVerification = null,
+  draftVerification: _draftVerification = null,
   diagnosisMatch = null,
 } = {}) {
   const expectedSnapshot = buildExpectedPortalSnapshotFromVisit(visit, {
@@ -665,7 +690,11 @@ export function comparePortalTruthSnapshots({
   const flow2Details = {};
   const botDetails = {};
   for (const field of fields) {
-    flow2Details[field] = compareField(field, expectedSnapshot?.[field], submittedTruthSnapshot?.[field]);
+    flow2Details[field] = compareField(
+      field,
+      expectedSnapshot?.[field],
+      submittedTruthSnapshot?.[field]
+    );
     botDetails[field] = compareField(field, botSnapshot?.[field], submittedTruthSnapshot?.[field]);
   }
 
@@ -699,7 +728,8 @@ export function comparePortalTruthSnapshots({
     botLineItemsComparison.state === 'mismatch' ||
     botLineItemsComparison.state === 'partial'
   ) {
-    if (!mismatchCategories.includes('line_items_mismatch')) mismatchCategories.push('line_items_mismatch');
+    if (!mismatchCategories.includes('line_items_mismatch'))
+      mismatchCategories.push('line_items_mismatch');
   }
   if (diagnosisDrift.classification && diagnosisDrift.classification !== 'match') {
     if (!mismatchCategories.includes('diagnosis_semantic_mismatch')) {

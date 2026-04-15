@@ -141,6 +141,13 @@ function buildReportMarkdown({ generatedAt, scope, rows }) {
 function formatDiagnosisLabel(code, text) {
   const codeText = String(code || '').trim();
   const descText = String(text || '').trim();
+  const codeLower = codeText.toLowerCase();
+  const descLower = descText.toLowerCase();
+  if (codeText && descText) {
+    if (codeLower === descLower) return codeText;
+    if (codeLower.includes(descLower)) return codeText;
+    if (descLower.includes(codeLower)) return descText;
+  }
   if (codeText && descText) return `${codeText} - ${descText}`;
   return codeText || descText || '';
 }
