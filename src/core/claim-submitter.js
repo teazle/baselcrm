@@ -132,7 +132,9 @@ export class ClaimSubmitter {
   }
 
   _getRequestedMode() {
-    const raw = String(process.env.FLOW3_MODE || '').trim().toLowerCase();
+    const raw = String(process.env.FLOW3_MODE || '')
+      .trim()
+      .toLowerCase();
     if (raw === 'draft' || raw === 'submit' || raw === 'fill_evidence') return raw;
     if (process.env.WORKFLOW_SAVE_DRAFT === '1') return 'draft';
     if (process.env.ALLOW_LIVE_SUBMIT === '1') return 'submit';
@@ -142,7 +144,11 @@ export class ClaimSubmitter {
   _getDraftValidatedTargets() {
     const raw = String(process.env.FLOW3_DRAFT_VALIDATED_TARGETS || 'MHC,ALLIANCE_MEDINET')
       .split(',')
-      .map(value => String(value || '').trim().toUpperCase())
+      .map(value =>
+        String(value || '')
+          .trim()
+          .toUpperCase()
+      )
       .filter(Boolean);
     return new Set(raw);
   }
@@ -190,8 +196,7 @@ export class ClaimSubmitter {
       blocked_reason: patch.blocked_reason ?? existing.blocked_reason ?? null,
       submittedTruthSnapshot:
         patch.submittedTruthSnapshot ?? existing.submittedTruthSnapshot ?? null,
-      submittedTruthCapture:
-        patch.submittedTruthCapture ?? existing.submittedTruthCapture ?? null,
+      submittedTruthCapture: patch.submittedTruthCapture ?? existing.submittedTruthCapture ?? null,
       evidenceArtifacts: {
         ...(existing.evidenceArtifacts && typeof existing.evidenceArtifacts === 'object'
           ? existing.evidenceArtifacts
@@ -273,7 +278,9 @@ export class ClaimSubmitter {
       }
       if (candidate.status === 'manual_review' && !candidate.portalTarget) return false;
       if (!explicitVisitIds) {
-        const mode = String(visit?.submission_metadata?.mode || '').trim().toLowerCase();
+        const mode = String(visit?.submission_metadata?.mode || '')
+          .trim()
+          .toLowerCase();
         const success = visit?.submission_metadata?.success === true;
         if (mode === 'fill_evidence' && success && !visit?.submission_status) {
           return false;
@@ -357,7 +364,6 @@ export class ClaimSubmitter {
       mode: requestedMode,
     });
 
-    const isVerificationOnly = requestedMode === 'fill_evidence';
     const allowLiveSubmit =
       requestedMode === 'submit' && process.env.FLOW3_ENABLE_SUBMIT_MODE === '1';
     const shouldPersistErrors = true;
@@ -396,17 +402,21 @@ export class ClaimSubmitter {
         );
       }
       if (route === 'IHP' && process.env.FLOW3_SKIP_IHP === '1') {
-        return this._normalizePortalResult({
-          success: false,
-          reason: 'skipped_by_config',
-          blocked_reason: 'skipped_by_config',
-          detailReason: 'ihp_temporarily_skipped',
-          portal: 'IHP eClaim',
-          portalService: 'IHP',
-          submitted: false,
-          savedAsDraft: false,
-          error: 'IHP route skipped by FLOW3_SKIP_IHP=1',
-        }, visit, route);
+        return this._normalizePortalResult(
+          {
+            success: false,
+            reason: 'skipped_by_config',
+            blocked_reason: 'skipped_by_config',
+            detailReason: 'ihp_temporarily_skipped',
+            portal: 'IHP eClaim',
+            portalService: 'IHP',
+            submitted: false,
+            savedAsDraft: false,
+            error: 'IHP route skipped by FLOW3_SKIP_IHP=1',
+          },
+          visit,
+          route
+        );
       }
       switch (route) {
         case 'MHC':
@@ -444,7 +454,12 @@ export class ClaimSubmitter {
         default:
           logger.warn(`[SUBMIT] Unknown pay type: ${payTypeRaw}. Skipping submission.`);
           return this._normalizePortalResult(
-            { success: false, reason: 'unknown_pay_type', blocked_reason: 'portal_unknown', payType: payTypeRaw || null },
+            {
+              success: false,
+              reason: 'unknown_pay_type',
+              blocked_reason: 'portal_unknown',
+              payType: payTypeRaw || null,
+            },
             visit,
             route
           );
@@ -536,13 +551,9 @@ export class ClaimSubmitter {
         const failureResult = this._normalizePortalResult(
           {
             success: false,
-            reason:
-              failureMetadata?.reason ||
-              'portal_runtime_error',
+            reason: failureMetadata?.reason || 'portal_runtime_error',
             blocked_reason:
-              failureMetadata?.blocked_reason ||
-              failureMetadata?.reason ||
-              'portal_runtime_error',
+              failureMetadata?.blocked_reason || failureMetadata?.reason || 'portal_runtime_error',
             error: error.message,
             ...(failureMetadata && typeof failureMetadata === 'object' ? failureMetadata : {}),
           },
@@ -646,13 +657,23 @@ export class ClaimSubmitter {
     const diagnosisCode = metadata.diagnosisCode || null;
     const diagnosisCanonical = metadata.diagnosisCanonical || null;
     const diagnosisResolution = metadata.diagnosisResolution || null;
+    const requestedMode = this._getRequestedMode();
     const allowGenericDiagnosisFallback = process.env.FLOW2_ENABLE_GENERIC_DIAG_FALLBACK !== '0';
-    const saveDraftMode = process.env.WORKFLOW_SAVE_DRAFT !== '0';
+    const saveDraftMode = requestedMode === 'draft';
     const allowMissingDiagnosisDraftFallback =
       saveDraftMode && process.env.MHC_ALLOW_MISSING_DIAG_DRAFT_FALLBACK !== '0';
-    const genericDraftDiagnosisText =
-      String(process.env.MHC_GENERIC_DRAFT_DIAGNOSIS || 'General medical condition').trim() ||
-      'General medical condition';
+    const allowNonSubmitDiagnosisFallback =
+      requestedMode !== 'submit' && process.env.MHC_ALLOW_NON_SUBMIT_DIAG_FALLBACK !== '0';
+    const genericFallbackDiagnosisCode =
+      String(process.env.MHC_GENERIC_FALLBACK_CODE || 'R05')
+        .trim()
+        .toUpperCase() || 'R05';
+    const genericFallbackDiagnosisText =
+      String(
+        process.env.MHC_GENERIC_FALLBACK_DIAGNOSIS ||
+          process.env.MHC_GENERIC_DRAFT_DIAGNOSIS ||
+          'Cough'
+      ).trim() || 'Cough';
     let diagnosisMatch = metadata.diagnosisMatch || null;
     let portalDiagnosisOptions = Array.isArray(metadata.portalDiagnosisOptions)
       ? metadata.portalDiagnosisOptions
@@ -666,9 +687,11 @@ export class ClaimSubmitter {
       mcDays,
       mcStartDate,
       diagnosis: diagnosisDesc?.substring(0, 50),
+      requestedMode,
       diagnosisResolutionStatus: diagnosisResolution?.status || null,
       diagnosisCanonical: diagnosisCanonical?.description_canonical?.slice?.(0, 80) || null,
       allowMissingDiagnosisDraftFallback,
+      allowNonSubmitDiagnosisFallback,
       forceSinglife,
     });
 
@@ -942,6 +965,31 @@ export class ClaimSubmitter {
       await this.mhcAsia.fillMcStartDate(mcStartDate).catch(() => {});
     }
 
+    const buildGenericDiagnosisFallbackMode = ({
+      stage = 'pre_fill',
+      flow2Status = null,
+      reason = null,
+      variant = 'unresolved_diagnosis',
+      dateGatePassed = null,
+    } = {}) => ({
+      mode: `${requestedMode === 'draft' ? 'generic_draft' : 'generic_fill_evidence'}_${variant}`,
+      stage,
+      requestedMode,
+      code: genericFallbackDiagnosisCode || null,
+      text: genericFallbackDiagnosisText,
+      diagnosisHint: {
+        code: genericFallbackDiagnosisCode || null,
+        description: genericFallbackDiagnosisText,
+        side: null,
+        body_part: null,
+        condition: null,
+      },
+      flow2Status: flow2Status || null,
+      reason: reason || 'flow2_unresolved',
+      dateGatePassed,
+      portalStrategy: 'prefer_option_then_text_fallback',
+    });
+
     const assertFlow2DiagnosisReadyOrThrow = (stage = 'pre_fill') => {
       const flow2DiagnosisStatus = diagnosisResolution?.status || null;
       const flow2Resolved = flow2DiagnosisStatus === 'resolved';
@@ -961,54 +1009,39 @@ export class ClaimSubmitter {
         : null;
       const fallbackWithinLimit = fallbackAgeDays === null || fallbackAgeDays <= 30;
       const flow2DateGatePassed = flow2DateOk && fallbackWithinLimit;
-      if ((flow2Resolved && flow2DateGatePassed) || flow2FallbackLowConfidence) return;
-      if (allowMissingDiagnosisDraftFallback && flow2Missing) {
-        diagnosisFallbackMode = {
-          mode: 'generic_draft_missing_diagnosis',
+      if (flow2Resolved && flow2DateGatePassed) return;
+      const useGenericPortalFallback =
+        allowNonSubmitDiagnosisFallback &&
+        (flow2Missing || flow2FallbackLowConfidence || !flow2Resolved || !flow2DateGatePassed);
+      if (useGenericPortalFallback || (allowMissingDiagnosisDraftFallback && flow2Missing)) {
+        diagnosisFallbackMode = buildGenericDiagnosisFallbackMode({
           stage,
-          text: genericDraftDiagnosisText,
           flow2Status: flow2DiagnosisStatus || null,
           reason: diagnosisResolution?.reason_if_unresolved || null,
-        };
-        logger.warn(
-          '[SUBMIT] Flow 2 diagnosis unresolved; using draft-only generic diagnosis fallback',
-          {
-            visitId: visit.id,
-            nric: nric || null,
-            payType: payTypeRaw || null,
-            flow2Status: flow2DiagnosisStatus || null,
-            diagnosis: diagnosisDesc || null,
-            genericDraftDiagnosisText,
-          }
-        );
-        return;
-      }
-      const allowGenericDraftFallback = allowGenericDiagnosisFallback && saveDraftMode;
-      if (allowGenericDraftFallback) {
-        diagnosisFallbackMode = {
-          mode: flow2Missing
-            ? 'generic_draft_missing_diagnosis'
-            : 'generic_draft_unresolved_diagnosis',
-          stage,
-          text: genericDraftDiagnosisText,
-          flow2Status: flow2DiagnosisStatus || null,
-          reason: diagnosisResolution?.reason_if_unresolved || 'flow2_unresolved',
+          variant: flow2Missing
+            ? 'missing_diagnosis'
+            : flow2FallbackLowConfidence
+              ? 'low_confidence_diagnosis'
+              : 'unresolved_diagnosis',
           dateGatePassed: flow2DateGatePassed,
-        };
+        });
         logger.warn(
-          '[SUBMIT] Flow 2 diagnosis unresolved; using draft-only generic diagnosis fallback',
+          '[SUBMIT] Flow 2 diagnosis unresolved; using deterministic portal diagnosis fallback',
           {
             visitId: visit.id,
             nric: nric || null,
             payType: payTypeRaw || null,
+            requestedMode,
             flow2Status: flow2DiagnosisStatus || null,
             diagnosis: diagnosisDesc || null,
-            genericDraftDiagnosisText,
+            genericFallbackDiagnosisCode,
+            genericFallbackDiagnosisText,
             dateGatePassed: flow2DateGatePassed,
           }
         );
         return;
       }
+      if (flow2FallbackLowConfidence) return;
 
       const diagMeta = {
         stage,
@@ -1050,11 +1083,19 @@ export class ClaimSubmitter {
         ? 'aia'
         : 'mhc';
 
+    const diagnosisPortalHint = diagnosisFallbackMode?.diagnosisHint || {
+      code: diagnosisCanonical?.code_normalized || diagnosisCode || null,
+      description: diagnosisCanonical?.description_canonical || diagnosisDesc || null,
+      side: diagnosisCanonical?.side || null,
+      body_part: diagnosisCanonical?.body_part || null,
+      condition: diagnosisCanonical?.condition || null,
+    };
+
     const diagnosisPrefetch = await this.mhcAsia
       .prefetchDiagnosisOptions({
         diagnosisHint: {
-          code: diagnosisCanonical?.code_normalized || diagnosisCode || null,
-          description: diagnosisCanonical?.description_canonical || diagnosisDesc || null,
+          code: diagnosisPortalHint.code || null,
+          description: diagnosisPortalHint.description || null,
         },
         contextHint: portalContextHint,
         nric,
@@ -1067,13 +1108,7 @@ export class ClaimSubmitter {
 
     const diagnosisMinScore = Number(process.env.DIAGNOSIS_MATCH_MIN_SCORE || 90);
     diagnosisMatch = resolveDiagnosisAgainstPortalOptions({
-      diagnosis: {
-        code: diagnosisCanonical?.code_normalized || diagnosisCode || null,
-        description: diagnosisCanonical?.description_canonical || diagnosisDesc || null,
-        side: diagnosisCanonical?.side || null,
-        body_part: diagnosisCanonical?.body_part || null,
-        condition: diagnosisCanonical?.condition || null,
-      },
+      diagnosis: diagnosisPortalHint,
       portalOptions: portalDiagnosisOptions,
       minScore: Number.isFinite(diagnosisMinScore) ? diagnosisMinScore : 90,
       codeMode: 'secondary',
@@ -1081,9 +1116,12 @@ export class ClaimSubmitter {
 
     const diagnosisResolutionWithPortal = {
       ...(diagnosisResolution || {}),
-      portal_option_verified: !diagnosisFallbackMode && diagnosisMatch?.blocked === false,
-      draft_generic_fallback_used: !!diagnosisFallbackMode,
-      draft_generic_fallback_reason: diagnosisFallbackMode?.reason || null,
+      portal_option_verified: diagnosisMatch?.blocked === false,
+      portal_generic_fallback_used: !!diagnosisFallbackMode,
+      portal_generic_fallback_mode: diagnosisFallbackMode?.mode || null,
+      portal_generic_fallback_reason: diagnosisFallbackMode?.reason || null,
+      draft_generic_fallback_used: saveDraftMode && !!diagnosisFallbackMode,
+      draft_generic_fallback_reason: saveDraftMode ? diagnosisFallbackMode?.reason || null : null,
     };
     await this._mergeVisitExtractionMetadataPatch(visit.id, {
       portalDiagnosisOptions,
@@ -1094,10 +1132,11 @@ export class ClaimSubmitter {
     if (!diagnosisMatch || diagnosisMatch.blocked !== false) {
       const flow2FallbackLowConfidence =
         allowGenericDiagnosisFallback && diagnosisResolution?.status === 'fallback_low_confidence';
-      if (saveDraftMode && (flow2FallbackLowConfidence || diagnosisFallbackMode)) {
-        logger.warn('[SUBMIT] Draft-mode diagnosis bypass enabled', {
+      if (requestedMode !== 'submit' && (flow2FallbackLowConfidence || diagnosisFallbackMode)) {
+        logger.warn('[SUBMIT] Non-submit diagnosis bypass enabled', {
           visitId: visit.id,
           nric: nric || null,
+          requestedMode,
           diagnosis: diagnosisDesc || null,
           diagnosisCode: diagnosisCode || null,
           diagnosisMatch: diagnosisMatch || null,
@@ -1129,17 +1168,28 @@ export class ClaimSubmitter {
       }
     }
 
-    // Fill diagnosis (matched option first; draft-only missing diagnosis falls back to generic free text).
+    // Fill diagnosis. Non-submit fallback prefers a matched portal option, then falls back to text entry.
     if (diagnosisFallbackMode) {
-      const ok = await this.mhcAsia
-        .fillDiagnosisPrimary(
-          { code: null, description: diagnosisFallbackMode.text || genericDraftDiagnosisText },
-          { allowTextFallback: true }
-        )
-        .catch(() => false);
+      const fallbackDiagnosis = {
+        code: diagnosisMatch?.selected_code || diagnosisFallbackMode.code || null,
+        description:
+          diagnosisMatch?.selected_text ||
+          diagnosisFallbackMode.text ||
+          genericFallbackDiagnosisText,
+        value: diagnosisMatch?.selected_value || null,
+      };
+      let ok = false;
+      if (diagnosisMatch?.blocked === false) {
+        ok = await this.mhcAsia.selectDiagnosis(fallbackDiagnosis).catch(() => false);
+      }
+      if (!ok) {
+        ok = await this.mhcAsia
+          .fillDiagnosisPrimary(fallbackDiagnosis, { allowTextFallback: true })
+          .catch(() => false);
+      }
       if (!ok) {
         const err = new Error(
-          `diagnosis_mapping_failed: unable to apply generic draft diagnosis fallback (visitId=${visit.id}, nric=${nric})`
+          `diagnosis_mapping_failed: unable to apply generic portal diagnosis fallback (visitId=${visit.id}, nric=${nric})`
         );
         err.submissionMetadata = {
           success: false,
@@ -1204,8 +1254,14 @@ export class ClaimSubmitter {
       const flow2DateGatePassed = flow2DateOk && fallbackWithinLimit;
       const domResolved = !!domDiagnosisState?.resolved;
       const diagnosisMatchOk = diagnosisMatch?.blocked === false;
-      if (saveDraftMode && flow2FallbackLowConfidence) return;
-      if (saveDraftMode && diagnosisFallbackMode && domResolved) return;
+      if (
+        requestedMode !== 'submit' &&
+        flow2FallbackLowConfidence &&
+        diagnosisFallbackMode &&
+        domResolved
+      )
+        return;
+      if (requestedMode !== 'submit' && diagnosisFallbackMode && domResolved) return;
       if (
         ((flow2Resolved && flow2DateGatePassed) || flow2FallbackLowConfidence) &&
         domResolved &&
