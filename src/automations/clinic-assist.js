@@ -1,11 +1,15 @@
 import { logger } from '../utils/logger.js';
 import { PORTALS } from '../config/portals.js';
-import { validateDiagnosis, validateClaimDetails, logValidationResults } from '../utils/extraction-validator.js';
+import { validateClaimDetails, logValidationResults } from '../utils/extraction-validator.js';
 import { PDFParse } from 'pdf-parse';
 import XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
-import { normalizePcno, normalizeNric, normalizePatientNameForSearch } from '../utils/patient-normalize.js';
+import {
+  normalizePcno,
+  normalizeNric,
+  normalizePatientNameForSearch,
+} from '../utils/patient-normalize.js';
 
 const DIAG_BODY_PART_ALIASES = new Map([
   ['shoulder', ['shoulder']],
@@ -93,11 +97,13 @@ function normalizeDiagnosisTextForMatch(value) {
 function tokenizeDiagnosisTextForMatch(value) {
   return normalizeDiagnosisTextForMatch(value)
     .split(/\s+/)
-    .filter((t) => t.length >= 3 && !DIAG_STOP_WORDS.has(t));
+    .filter(t => t.length >= 3 && !DIAG_STOP_WORDS.has(t));
 }
 
 function pickDiagnosisSide(text, explicitSide = null) {
-  const side = String(explicitSide || '').trim().toLowerCase();
+  const side = String(explicitSide || '')
+    .trim()
+    .toLowerCase();
   if (side === 'left' || side === 'right' || side === 'bilateral') return side;
   const t = normalizeDiagnosisTextForMatch(text);
   if (/\bleft\b/.test(t)) return 'left';
@@ -109,7 +115,11 @@ function pickDiagnosisSide(text, explicitSide = null) {
 function normalizeDiagnosisBodyPart(text, explicit = null) {
   const probe = `${String(explicit || '')} ${String(text || '')}`.toLowerCase();
   for (const [canonical, aliases] of DIAG_BODY_PART_ALIASES.entries()) {
-    if (aliases.some((a) => new RegExp(`\\b${a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(probe))) {
+    if (
+      aliases.some(a =>
+        new RegExp(`\\b${a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(probe)
+      )
+    ) {
       return canonical;
     }
   }
@@ -119,7 +129,11 @@ function normalizeDiagnosisBodyPart(text, explicit = null) {
 function normalizeDiagnosisCondition(text, explicit = null) {
   const probe = `${String(explicit || '')} ${String(text || '')}`.toLowerCase();
   for (const [canonical, aliases] of DIAG_CONDITION_ALIASES.entries()) {
-    if (aliases.some((a) => new RegExp(`\\b${a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(probe))) {
+    if (
+      aliases.some(a =>
+        new RegExp(`\\b${a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(probe)
+      )
+    ) {
       return canonical;
     }
   }
@@ -280,7 +294,7 @@ export function resolveDiagnosisAgainstPortalOptions({
       blocked: true,
       blocked_reason: closeTie ? 'ambiguous_close_candidates' : 'score_below_threshold',
       min_score_required: effectiveMinScore,
-      considered: scored.slice(0, 8).map((s) => ({
+      considered: scored.slice(0, 8).map(s => ({
         code: s.optionCode,
         text: s.optionText,
         score: s.score,
@@ -299,7 +313,7 @@ export function resolveDiagnosisAgainstPortalOptions({
     blocked: false,
     blocked_reason: null,
     min_score_required: effectiveMinScore,
-    considered: scored.slice(0, 8).map((s) => ({
+    considered: scored.slice(0, 8).map(s => ({
       code: s.optionCode,
       text: s.optionText,
       score: s.score,
@@ -310,12 +324,12 @@ export function resolveDiagnosisAgainstPortalOptions({
 
 /**
  * Clinic Assist automation module
- * 
+ *
  * NAVIGATION RULE: Always use UI clicks for navigation, NEVER use direct URL navigation (page.goto).
  * Direct URLs cause "Access Denied" errors. This applies especially to:
  * - Patient page navigation
  * - Any page that requires authentication context
- * 
+ *
  * Use UI clicks (link.click(), button.click()) instead of page.goto() for all navigation.
  */
 export class ClinicAssistAutomation {
@@ -335,19 +349,21 @@ export class ClinicAssistAutomation {
     this._guardedPages.add(targetPage);
 
     // Set up route to block external protocol handlers (xdg-open, etc.)
-    targetPage.route('**/*', (route) => {
-      const url = route.request().url();
-      // Block any non-http/https URLs that might trigger xdg-open
-      if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('data:')) {
-        logger.info(`[Route Block] Blocking external URL: ${url}`);
-        route.abort();
-        return;
-      }
-      route.continue();
-    }).catch(() => {});
+    targetPage
+      .route('**/*', route => {
+        const url = route.request().url();
+        // Block any non-http/https URLs that might trigger xdg-open
+        if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('data:')) {
+          logger.info(`[Route Block] Blocking external URL: ${url}`);
+          route.abort();
+          return;
+        }
+        route.continue();
+      })
+      .catch(() => {});
 
     // Set up dialog handler to auto-dismiss xdg-open and other dialogs
-    targetPage.on('dialog', async (dialog) => {
+    targetPage.on('dialog', async dialog => {
       logger.info(`[Dialog] ${dialog.type()}: ${dialog.message()}`);
       try {
         await dialog.dismiss();
@@ -379,7 +395,7 @@ export class ClinicAssistAutomation {
         return true;
       }
       const context = this.page?.context?.();
-      const openPages = context?.pages?.().filter((p) => !p.isClosed()) || [];
+      const openPages = context?.pages?.().filter(p => !p.isClosed()) || [];
       if (openPages.length > 0) {
         const latest = openPages[openPages.length - 1];
         return this._setPage(latest, reason);
@@ -442,7 +458,7 @@ export class ClinicAssistAutomation {
   async _getQueueReportRoot() {
     // Prefer the Reports iframe if it contains Queue Report controls/content.
     const frame = await this._getReportsFrame();
-    const hasQueueReportSignals = async (root) => {
+    const hasQueueReportSignals = async root => {
       try {
         return await root.evaluate(() => {
           const sel = [
@@ -509,22 +525,25 @@ export class ClinicAssistAutomation {
         this.page.locator('[onclick*="cancel" i]').first(),
         this.page.locator('[onclick*="close" i]').first(),
       ];
-      
+
       let clicked = false;
       for (const c of cancelCandidates) {
         try {
           const count = await c.count().catch(() => 0);
           if (count === 0) continue;
-          
+
           // Check if visible
           const isVisible = await c.isVisible().catch(() => false);
           if (!isVisible) continue;
-          
+
           await c.click({ timeout: 3000 }).catch(async () => {
             // Fallback: use evaluate to click directly
-            await this.page.evaluate((el) => {
-              if (el) el.click();
-            }, await c.elementHandle().catch(() => null));
+            await this.page.evaluate(
+              el => {
+                if (el) el.click();
+              },
+              await c.elementHandle().catch(() => null)
+            );
           });
           clicked = true;
           break;
@@ -546,18 +565,21 @@ export class ClinicAssistAutomation {
           this.page.locator('[data-dismiss="modal"]').first(),
           this.page.locator('[data-bs-dismiss="modal"]').first(),
         ];
-        
+
         for (const closeBtn of closeCandidates) {
           try {
             const count = await closeBtn.count().catch(() => 0);
             if (count === 0) continue;
             const isVisible = await closeBtn.isVisible().catch(() => false);
             if (!isVisible) continue;
-            
+
             await closeBtn.click({ timeout: 3000 }).catch(async () => {
-              await this.page.evaluate((el) => {
-                if (el) el.click();
-              }, await closeBtn.elementHandle().catch(() => null));
+              await this.page.evaluate(
+                el => {
+                  if (el) el.click();
+                },
+                await closeBtn.elementHandle().catch(() => null)
+              );
             });
             clicked = true;
             break;
@@ -579,24 +601,40 @@ export class ClinicAssistAutomation {
           const clickedViaEval = await this.page.evaluate(() => {
             // Search entire document for Cancel button (not just within modal)
             // This is more reliable if modal structure is complex
-            const allButtons = Array.from(document.querySelectorAll('button, input[type="button"], input[type="submit"], a, span[onclick], div[onclick], [role="button"]'));
-            
+            const allButtons = Array.from(
+              document.querySelectorAll(
+                'button, input[type="button"], input[type="submit"], a, span[onclick], div[onclick], [role="button"]'
+              )
+            );
+
             // Find button with exact "Cancel" text
             for (const btn of allButtons) {
-              const text = (btn.textContent || btn.value || btn.innerText || btn.title || '').trim();
+              const text = (
+                btn.textContent ||
+                btn.value ||
+                btn.innerText ||
+                btn.title ||
+                ''
+              ).trim();
               if (text.toLowerCase() === 'cancel') {
                 // Check if it's visible (not hidden)
                 const style = window.getComputedStyle(btn);
-                if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+                if (
+                  style.display === 'none' ||
+                  style.visibility === 'hidden' ||
+                  style.opacity === '0'
+                ) {
                   continue;
                 }
-                
+
                 // Try to click it
                 try {
                   btn.focus();
                   btn.click();
                   // Also dispatch events to ensure it's triggered
-                  btn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+                  btn.dispatchEvent(
+                    new MouseEvent('mousedown', { bubbles: true, cancelable: true })
+                  );
                   btn.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
                   btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
                   return true;
@@ -614,14 +652,14 @@ export class ClinicAssistAutomation {
                 }
               }
             }
-            
+
             // Fallback: Find modal and search within it
             let modalContainer = null;
             const modalText = Array.from(document.querySelectorAll('*')).find(el => {
               const text = (el.textContent || '').trim();
               return /Update\s+User\s+Info/i.test(text);
             });
-            
+
             if (modalText) {
               // Walk up to find modal container
               let parent = modalText;
@@ -629,18 +667,27 @@ export class ClinicAssistAutomation {
                 if (!parent) break;
                 const classList = (parent.className || '').toLowerCase();
                 const id = (parent.id || '').toLowerCase();
-                if (classList.includes('modal') || classList.includes('dialog') || 
-                    classList.includes('popup') || id.includes('modal') || 
-                    id.includes('dialog') || parent.tagName === 'DIALOG') {
+                if (
+                  classList.includes('modal') ||
+                  classList.includes('dialog') ||
+                  classList.includes('popup') ||
+                  id.includes('modal') ||
+                  id.includes('dialog') ||
+                  parent.tagName === 'DIALOG'
+                ) {
                   modalContainer = parent;
                   break;
                 }
                 parent = parent.parentElement;
               }
             }
-            
+
             if (modalContainer) {
-              const modalButtons = Array.from(modalContainer.querySelectorAll('button, input[type="button"], input[type="submit"], a'));
+              const modalButtons = Array.from(
+                modalContainer.querySelectorAll(
+                  'button, input[type="button"], input[type="submit"], a'
+                )
+              );
               for (const btn of modalButtons) {
                 const text = (btn.textContent || btn.value || '').trim().toLowerCase();
                 if (text === 'cancel' || text.includes('cancel')) {
@@ -654,10 +701,10 @@ export class ClinicAssistAutomation {
                 }
               }
             }
-            
+
             return false;
           });
-          
+
           if (clickedViaEval) {
             clicked = true;
             await this.page.waitForTimeout(1500); // Give modal more time to close
@@ -670,7 +717,9 @@ export class ClinicAssistAutomation {
       // Strategy 5: Try clicking outside modal (backdrop)
       if (!clicked) {
         try {
-          const backdrop = this.page.locator('.modal-backdrop, .ui-widget-overlay, [class*="overlay"]').first();
+          const backdrop = this.page
+            .locator('.modal-backdrop, .ui-widget-overlay, [class*="overlay"]')
+            .first();
           const backdropCount = await backdrop.count().catch(() => 0);
           if (backdropCount > 0) {
             await backdrop.click({ timeout: 2000, force: true }).catch(() => {});
@@ -682,7 +731,7 @@ export class ClinicAssistAutomation {
 
       // Wait and check if modal is gone
       await this.page.waitForTimeout(1000);
-      
+
       modalFound = false;
       for (const loc of modalLocators) {
         const visible = await loc.isVisible().catch(() => false);
@@ -691,47 +740,53 @@ export class ClinicAssistAutomation {
           break;
         }
       }
-      
+
       if (!modalFound) {
         this._logStep('Update User Info modal dismissed successfully');
         await this.page
-          .screenshot({ path: 'screenshots/clinic-assist-dismissed-update-user-info.png', fullPage: true })
+          .screenshot({
+            path: 'screenshots/clinic-assist-dismissed-update-user-info.png',
+            fullPage: true,
+          })
           .catch(() => {});
         return true;
       }
-      
+
       this._logStep('Update User Info modal still present after attempt', { attempt });
     }
 
     // If still blocking, try one final aggressive approach: find and click Cancel using direct DOM query
     this._logStep('Update User Info modal could not be dismissed; trying final DOM-based approach');
-    
+
     try {
       const finalDismiss = await this.page.evaluate(() => {
         // Find all buttons/inputs with "Cancel" text anywhere in the document
         const allElements = Array.from(document.querySelectorAll('*'));
         for (const el of allElements) {
           const tag = el.tagName.toLowerCase();
-          if (tag !== 'button' && tag !== 'input' && tag !== 'a' && tag !== 'span' && tag !== 'div') continue;
-          
+          if (tag !== 'button' && tag !== 'input' && tag !== 'a' && tag !== 'span' && tag !== 'div')
+            continue;
+
           const text = (el.textContent || el.value || el.innerText || '').trim();
           if (text.toLowerCase() === 'cancel') {
             // Check visibility
             const rect = el.getBoundingClientRect();
             if (rect.width === 0 || rect.height === 0) continue;
-            
+
             // Try to click
             try {
               el.scrollIntoView({ behavior: 'instant', block: 'center' });
               el.focus();
               el.click();
-              
+
               // Also trigger events
               const events = ['mousedown', 'mouseup', 'click'];
               for (const eventType of events) {
-                el.dispatchEvent(new MouseEvent(eventType, { bubbles: true, cancelable: true, view: window }));
+                el.dispatchEvent(
+                  new MouseEvent(eventType, { bubbles: true, cancelable: true, view: window })
+                );
               }
-              
+
               return true;
             } catch (e) {
               // Try onclick if it exists
@@ -748,7 +803,7 @@ export class ClinicAssistAutomation {
         }
         return false;
       });
-      
+
       if (finalDismiss) {
         await this.page.waitForTimeout(2000);
         // Check if modal is gone
@@ -768,9 +823,14 @@ export class ClinicAssistAutomation {
     } catch (e) {
       // Ignore
     }
-    
-    await this.page.screenshot({ path: 'screenshots/clinic-assist-update-user-info-blocking.png', fullPage: true }).catch(() => {});
-    
+
+    await this.page
+      .screenshot({
+        path: 'screenshots/clinic-assist-update-user-info-blocking.png',
+        fullPage: true,
+      })
+      .catch(() => {});
+
     // Return false - extraction will proceed but may be limited
     return false;
   }
@@ -787,8 +847,12 @@ export class ClinicAssistAutomation {
     const jqGrid = this.page.locator('#queueLogGrid');
     if ((await jqGrid.count().catch(() => 0)) === 0) return null;
 
-    const mhcRow = jqGrid.locator('tr.jqgrow:has(td[aria-describedby$="_PayType"]:has-text("MHC"))').first();
-    const aiaRow = jqGrid.locator('tr.jqgrow:has(td[aria-describedby$="_PayType"]:has-text("AIA"))').first();
+    const mhcRow = jqGrid
+      .locator('tr.jqgrow:has(td[aria-describedby$="_PayType"]:has-text("MHC"))')
+      .first();
+    const aiaRow = jqGrid
+      .locator('tr.jqgrow:has(td[aria-describedby$="_PayType"]:has-text("AIA"))')
+      .first();
     const row = (await mhcRow.count().catch(() => 0)) > 0 ? mhcRow : aiaRow;
     if ((await row.count().catch(() => 0)) === 0) return null;
     return row;
@@ -798,10 +862,34 @@ export class ClinicAssistAutomation {
     // SIMPLIFIED: Just click the patient name directly to open the visit record
     // This is the most direct way and avoids unnecessary Action menu clicks
     const rowSummary = {
-      patientName: ((await row.locator('td[aria-describedby$="_PatientName"]').first().textContent().catch(() => '')) || '').trim(),
-      nric: ((await row.locator('td[aria-describedby$="_NRIC"]').first().textContent().catch(() => '')) || '').trim(),
-      payType: ((await row.locator('td[aria-describedby$="_PayType"]').first().textContent().catch(() => '')) || '').trim(),
-      visitType: ((await row.locator('td[aria-describedby$="_VisitType"]').first().textContent().catch(() => '')) || '').trim(),
+      patientName: (
+        (await row
+          .locator('td[aria-describedby$="_PatientName"]')
+          .first()
+          .textContent()
+          .catch(() => '')) || ''
+      ).trim(),
+      nric: (
+        (await row
+          .locator('td[aria-describedby$="_NRIC"]')
+          .first()
+          .textContent()
+          .catch(() => '')) || ''
+      ).trim(),
+      payType: (
+        (await row
+          .locator('td[aria-describedby$="_PayType"]')
+          .first()
+          .textContent()
+          .catch(() => '')) || ''
+      ).trim(),
+      visitType: (
+        (await row
+          .locator('td[aria-describedby$="_VisitType"]')
+          .first()
+          .textContent()
+          .catch(() => '')) || ''
+      ).trim(),
     };
     this._logStep('Opening visit by clicking patient name', rowSummary);
 
@@ -823,7 +911,7 @@ export class ClinicAssistAutomation {
     // In jqGrid, clicking anywhere on the row often opens the record
     // Dismiss any existing modals before clicking
     await this._dismissUpdateUserInfoIfPresent().catch(() => false);
-    
+
     // Try clicking patient name cell first, if found
     let clicked = false;
     const nameCell = row.locator('td[aria-describedby$="_PatientName"]').first();
@@ -836,7 +924,7 @@ export class ClinicAssistAutomation {
         // Continue to fallback
       }
     }
-    
+
     // Fallback: click any cell in the row (often works in jqGrid)
     if (!clicked) {
       this._logStep('Patient name cell not found; clicking first cell in row');
@@ -850,7 +938,7 @@ export class ClinicAssistAutomation {
         }
       }
     }
-    
+
     // Final fallback: click the row itself
     if (!clicked) {
       this._logStep('Clicking row directly to open visit record');
@@ -858,23 +946,27 @@ export class ClinicAssistAutomation {
         await row.click({ timeout: 10000, force: true });
       });
     }
-    
+
     await this.page.waitForTimeout(2000); // Wait for navigation
-    
+
     // Dismiss Update User Info modal if it appeared
-    const modalAppeared = (await this.page.locator('text=/Update\\s+User\\s+Info/i').count().catch(() => 0)) > 0;
+    const modalAppeared =
+      (await this.page
+        .locator('text=/Update\\s+User\\s+Info/i')
+        .count()
+        .catch(() => 0)) > 0;
     if (modalAppeared) {
       this._logStep('Update User Info modal appeared; dismissing');
       await this._dismissUpdateUserInfoIfPresent().catch(() => false);
       await this.page.waitForTimeout(1000);
     }
-    
+
     // Dismiss Edit Queue Record modal if it appeared (wrong page)
     if (await dismissQueueEditModalIfPresent()) {
       this._logStep('Edit Queue Record modal appeared; this is not the visit record');
       return false;
     }
-    
+
     // Check if we successfully navigated away from queue page
     const currentUrl = this.page.url();
     const stillOnQueue = currentUrl.includes('/QueueLog') || currentUrl.includes('/Queue');
@@ -882,11 +974,13 @@ export class ClinicAssistAutomation {
       this._logStep('Still on queue page after clicking patient name');
       return false;
     }
-    
+
     // Successfully navigated to visit record
     await this.page.waitForLoadState('domcontentloaded').catch(() => {});
     await this.page.waitForTimeout(1000);
-    await this.page.screenshot({ path: 'screenshots/clinic-assist-visit-opened.png', fullPage: true }).catch(() => {});
+    await this.page
+      .screenshot({ path: 'screenshots/clinic-assist-visit-opened.png', fullPage: true })
+      .catch(() => {});
     this._logStep('Successfully opened visit record');
     return true;
   }
@@ -919,12 +1013,14 @@ export class ClinicAssistAutomation {
   }
 
   async _selectFirstNonEmptyOption(selectLocator) {
-    const optionValues = await selectLocator.locator('option').evaluateAll((opts) =>
-      opts.map((o) => ({ value: o.value, label: (o.textContent || '').trim() }))
-    );
+    const optionValues = await selectLocator
+      .locator('option')
+      .evaluateAll(opts =>
+        opts.map(o => ({ value: o.value, label: (o.textContent || '').trim() }))
+      );
     const candidate =
-      optionValues.find((o) => o.value && o.value.trim().length > 0) ||
-      optionValues.find((o) => o.label && o.label.trim().length > 0);
+      optionValues.find(o => o.value && o.value.trim().length > 0) ||
+      optionValues.find(o => o.label && o.label.trim().length > 0);
     if (!candidate) return false;
 
     try {
@@ -941,14 +1037,18 @@ export class ClinicAssistAutomation {
   }
 
   async _extractLabeledValue(labelRegexSource) {
-    return await this.page.evaluate((labelRegexSource) => {
+    return await this.page.evaluate(labelRegexSource => {
       const labelRe = new RegExp(labelRegexSource, 'i');
-      const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
+      const norm = s => (s || '').replace(/\s+/g, ' ').trim();
 
       // Filter out modal content - exclude elements that are part of "Update User Info" modal
-      const isModalElement = (el) => {
+      const isModalElement = el => {
         const text = (el.textContent || '').trim();
-        if (/Update\s+User\s+Info|Please enter your login|User ID|Full Name|New Password|Retype Password|Email|Mobile|Confirm|Cancel/i.test(text)) {
+        if (
+          /Update\s+User\s+Info|Please enter your login|User ID|Full Name|New Password|Retype Password|Email|Mobile|Confirm|Cancel/i.test(
+            text
+          )
+        ) {
           // Check if this is actually the modal (not just text that happens to contain these words)
           const parent = el.closest('.modal, .ui-dialog, [class*="dialog"], [class*="popup"]');
           return !!parent;
@@ -956,11 +1056,13 @@ export class ClinicAssistAutomation {
         return false;
       };
 
-      const candidates = Array.from(document.querySelectorAll('label, div, span, td, th, strong, b'));
+      const candidates = Array.from(
+        document.querySelectorAll('label, div, span, td, th, strong, b')
+      );
       for (const el of candidates) {
         // Skip modal elements
         if (isModalElement(el)) continue;
-        
+
         const text = norm(el.textContent);
         if (!text) continue;
         if (!labelRe.test(text)) continue;
@@ -974,8 +1076,8 @@ export class ClinicAssistAutomation {
 
         const tr = el.closest('tr');
         if (tr) {
-          const cells = Array.from(tr.querySelectorAll('td, th')).map((c) => norm(c.textContent));
-          const idx = cells.findIndex((c) => labelRe.test(c));
+          const cells = Array.from(tr.querySelectorAll('td, th')).map(c => norm(c.textContent));
+          const idx = cells.findIndex(c => labelRe.test(c));
           if (idx >= 0 && cells[idx + 1]) {
             const value = cells[idx + 1];
             // Filter out modal text
@@ -988,7 +1090,9 @@ export class ClinicAssistAutomation {
           const full = norm(container.textContent);
           // Filter out modal text before matching
           if (!/Update\s+User\s+Info|Please enter your login/i.test(full)) {
-            const match = full.match(new RegExp(`${labelRegexSource}\\s*[:#-]?\\s*([A-Z]{1,2}\\d{7}[A-Z])`, 'i'));
+            const match = full.match(
+              new RegExp(`${labelRegexSource}\\s*[:#-]?\\s*([A-Z]{1,2}\\d{7}[A-Z])`, 'i')
+            );
             if (match?.[1]) return match[1];
           }
         }
@@ -1025,88 +1129,112 @@ export class ClinicAssistAutomation {
       } else {
         const queueTable = this.page.locator('table:has(th:has-text("QNo"))').first();
         const rows = queueTable.locator('tbody tr');
-        await rows.first().waitFor({ state: 'attached', timeout: 15000 }).catch(() => {});
+        await rows
+          .first()
+          .waitFor({ state: 'attached', timeout: 15000 })
+          .catch(() => {});
         row = rows.filter({ hasText: /(MHC|AIA|AIACLient)/i }).first();
       }
 
       const rowCount = row ? await row.count().catch(() => 0) : 0;
       if (rowCount === 0) {
         // Log available pay types for debugging
-        const availablePayTypes = await this.page.evaluate(() => {
-          const payTypeCells = Array.from(document.querySelectorAll('td[aria-describedby*="PayType"]'));
-          const payTypes = new Set();
-          payTypeCells.forEach(cell => {
-            const text = (cell.textContent || '').trim();
-            if (text) payTypes.add(text);
-          });
-          return Array.from(payTypes);
-        }).catch(() => []);
-        
+        const availablePayTypes = await this.page
+          .evaluate(() => {
+            const payTypeCells = Array.from(
+              document.querySelectorAll('td[aria-describedby*="PayType"]')
+            );
+            const payTypes = new Set();
+            payTypeCells.forEach(cell => {
+              const text = (cell.textContent || '').trim();
+              if (text) payTypes.add(text);
+            });
+            return Array.from(payTypes);
+          })
+          .catch(() => []);
+
         this._logStep('No MHC/AIA patients found in queue', { availablePayTypes });
-        throw new Error(`No queue row matched MHC/AIA keywords. Available pay types: ${availablePayTypes.join(', ') || 'none'}`);
+        throw new Error(
+          `No queue row matched MHC/AIA keywords. Available pay types: ${availablePayTypes.join(', ') || 'none'}`
+        );
       }
       this._logStep('Queue: opening visit by clicking matched row');
-      await row.click({ timeout: 10000 }).catch(async () => row.click({ timeout: 10000, force: true }));
+      await row
+        .click({ timeout: 10000 })
+        .catch(async () => row.click({ timeout: 10000, force: true }));
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
       await this.page.waitForTimeout(1500);
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-visit-opened.png', fullPage: true }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/clinic-assist-visit-opened.png', fullPage: true })
+        .catch(() => {});
       return;
     }
 
     const patientIdentifier = patientIdentifierOrKeywords;
-    
+
     // Check if identifier looks like a patient number (5 digits)
     const isPatientNumber = /^\d{4,5}$/.test(String(patientIdentifier).trim());
-    const normalizedPatientNumber = isPatientNumber ? String(patientIdentifier).trim().padStart(5, '0') : null;
-    
+    const normalizedPatientNumber = isPatientNumber
+      ? String(patientIdentifier).trim().padStart(5, '0')
+      : null;
+
     // Preferred: jqGrid table used by QueueLog
     const jqGrid = this.page.locator('#queueLogGrid');
     if ((await jqGrid.count().catch(() => 0)) > 0) {
       let row = null;
-      
+
       // If it's a patient number, search in PCNO column specifically
       if (isPatientNumber && normalizedPatientNumber) {
-        this._logStep('Queue: searching by patient number (PCNO)', { patientNumber: normalizedPatientNumber });
+        this._logStep('Queue: searching by patient number (PCNO)', {
+          patientNumber: normalizedPatientNumber,
+        });
         // Try to find row by PCNO column
         const pcnoRows = jqGrid.locator('tr.jqgrow');
         const rowCount = await pcnoRows.count().catch(() => 0);
-        
+
         for (let i = 0; i < rowCount; i++) {
           const testRow = pcnoRows.nth(i);
           const pcnoCell = testRow.locator('td[aria-describedby$="_PCNO"]').first();
           if ((await pcnoCell.count().catch(() => 0)) > 0) {
-            const pcnoText = (await pcnoCell.textContent().catch(() => '') || '').trim();
+            const pcnoText = ((await pcnoCell.textContent().catch(() => '')) || '').trim();
             const cellNormalized = pcnoText.padStart(5, '0');
             if (cellNormalized === normalizedPatientNumber || pcnoText === patientIdentifier) {
               row = testRow;
-              this._logStep('Queue: found patient by PCNO', { pcno: pcnoText, normalized: normalizedPatientNumber });
+              this._logStep('Queue: found patient by PCNO', {
+                pcno: pcnoText,
+                normalized: normalizedPatientNumber,
+              });
               break;
             }
           }
         }
-        
+
         // Also try searching in all cells of the row
         if (!row) {
           for (let i = 0; i < rowCount; i++) {
             const testRow = pcnoRows.nth(i);
-            const rowText = (await testRow.textContent().catch(() => '') || '').trim();
+            const rowText = ((await testRow.textContent().catch(() => '')) || '').trim();
             if (rowText.includes(normalizedPatientNumber) || rowText.includes(patientIdentifier)) {
               row = testRow;
-              this._logStep('Queue: found patient by number in row text', { patientNumber });
+              this._logStep('Queue: found patient by number in row text', {
+                patientNumber: normalizedPatientNumber,
+              });
               break;
             }
           }
         }
       }
-      
+
       // Fallback to general text search
       if (!row) {
         row = jqGrid.locator('tr').filter({ hasText: patientIdentifier }).first();
       }
-      
+
       if ((await row.count().catch(() => 0)) === 0) {
         // Take screenshot for debugging
-        await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-search-failed.png', fullPage: true }).catch(() => {});
+        await this.page
+          .screenshot({ path: 'screenshots/clinic-assist-queue-search-failed.png', fullPage: true })
+          .catch(() => {});
         throw new Error(`Patient not found in queue by identifier: ${patientIdentifier}`);
       }
       this._logStep('Queue: opening visit for specified patient (jqGrid)', { patientIdentifier });
@@ -1117,42 +1245,52 @@ export class ClinicAssistAutomation {
     // Fallback: regular table
     const queueTable = this.page.locator('table:has(th:has-text("QNo"))').first();
     let row = null;
-    
+
     // If patient number, search more carefully
     if (isPatientNumber && normalizedPatientNumber) {
       const rows = queueTable.locator('tbody tr');
       const rowCount = await rows.count().catch(() => 0);
-      
+
       for (let i = 0; i < rowCount; i++) {
         const testRow = rows.nth(i);
-        const rowText = (await testRow.textContent().catch(() => '') || '').trim();
+        const rowText = ((await testRow.textContent().catch(() => '')) || '').trim();
         // Check if row contains the patient number (with or without zero padding)
-        if (rowText.includes(normalizedPatientNumber) || 
-            rowText.includes(patientIdentifier) ||
-            rowText.match(new RegExp(`\\b${patientIdentifier}\\b`)) ||
-            rowText.match(new RegExp(`\\b${normalizedPatientNumber}\\b`))) {
+        if (
+          rowText.includes(normalizedPatientNumber) ||
+          rowText.includes(patientIdentifier) ||
+          rowText.match(new RegExp(`\\b${patientIdentifier}\\b`)) ||
+          rowText.match(new RegExp(`\\b${normalizedPatientNumber}\\b`))
+        ) {
           row = testRow;
-          this._logStep('Queue: found patient by number in table', { patientNumber });
+          this._logStep('Queue: found patient by number in table', {
+            patientNumber: normalizedPatientNumber,
+          });
           break;
         }
       }
     }
-    
+
     // Fallback to general text search
     if (!row) {
       row = queueTable.locator('tbody tr').filter({ hasText: patientIdentifier }).first();
     }
-    
+
     if ((await row.count().catch(() => 0)) === 0) {
       // Take screenshot for debugging
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-search-failed.png', fullPage: true }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/clinic-assist-queue-search-failed.png', fullPage: true })
+        .catch(() => {});
       throw new Error(`Patient not found in queue by identifier: ${patientIdentifier}`);
     }
     this._logStep('Queue: opening visit for specified patient (table)', { patientIdentifier });
-    await row.click({ timeout: 10000 }).catch(async () => row.click({ timeout: 10000, force: true }));
+    await row
+      .click({ timeout: 10000 })
+      .catch(async () => row.click({ timeout: 10000, force: true }));
     await this.page.waitForLoadState('domcontentloaded').catch(() => {});
     await this.page.waitForTimeout(1500);
-    await this.page.screenshot({ path: 'screenshots/clinic-assist-visit-opened.png', fullPage: true }).catch(() => {});
+    await this.page
+      .screenshot({ path: 'screenshots/clinic-assist-visit-opened.png', fullPage: true })
+      .catch(() => {});
   }
 
   /**
@@ -1161,151 +1299,156 @@ export class ClinicAssistAutomation {
    * @returns {Object} { isValid, text, reason }
    */
   async _extractDiagnosisWithValidation(context = 'visit_notes') {
-    return await this.page.evaluate((context) => {
-      const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
-      
-      // Patterns to exclude (modal text, UI elements, etc.)
-      const excludedPatterns = [
-        /Update\s+User\s+Info/i,
-        /Please enter your login/i,
-        /User ID|Full Name|New Password|Retype Password|Email|Mobile/i,
-        /Confirm|Cancel|Submit|Save|Close|OK/i,
-        /Please\s+(fill|select|choose)/i,
-        /^(Click|Select|Choose|Enter|Loading|Please wait)/i,
-        /^[\s\W]+$/, // Only whitespace/punctuation
-      ];
+    return await this.page
+      .evaluate(context => {
+        const norm = s => (s || '').replace(/\s+/g, ' ').trim();
 
-      // Medical keywords that suggest real diagnosis content
-      const medicalKeywords = [
-        /\b(fever|headache|pain|ache|sore|infection|flu|cough|cold|rash|swelling|injury|wound|fracture|sprain|strain|bruise|cut|burn|nausea|vomit|diarrhea|constipation|dizziness|fatigue|weakness|malaise|chills|sweating|itching|bleeding|discharge|inflammation|ulcer|lesion|abscess|infection|bacteria|virus|fungus|allergy|reaction|asthma|hypertension|diabetes|cholesterol|heart|lung|liver|kidney|stomach|intestine|muscle|bone|joint|skin|eye|ear|nose|throat|chest|back|neck|shoulder|knee|ankle|wrist|elbow|hand|foot)\b/i,
-        /\b(consult|review|follow|check|examine|assess|evaluate|diagnose|treat|prescribe|advise|recommend|refer|admit|discharge)\b/i,
-        /\b(cm|kg|mg|ml|days|weeks|months|years|times|doses|tablets|capsules|syrup|cream|ointment|injection|vaccine)\b/i,
-      ];
+        // Patterns to exclude (modal text, UI elements, etc.)
+        const excludedPatterns = [
+          /Update\s+User\s+Info/i,
+          /Please enter your login/i,
+          /User ID|Full Name|New Password|Retype Password|Email|Mobile/i,
+          /Confirm|Cancel|Submit|Save|Close|OK/i,
+          /Please\s+(fill|select|choose)/i,
+          /^(Click|Select|Choose|Enter|Loading|Please wait)/i,
+          /^[\s\W]+$/, // Only whitespace/punctuation
+        ];
 
-      // Helper: Check if element is in a modal or dialog
-      const isInModal = (el) => {
-        const modalParents = el.closest('.modal, .ui-dialog, [class*="dialog"], [class*="popup"], [class*="overlay"], [role="dialog"]');
-        return !!modalParents;
-      };
+        // Medical keywords that suggest real diagnosis content
+        const medicalKeywords = [
+          /\b(fever|headache|pain|ache|sore|infection|flu|cough|cold|rash|swelling|injury|wound|fracture|sprain|strain|bruise|cut|burn|nausea|vomit|diarrhea|constipation|dizziness|fatigue|weakness|malaise|chills|sweating|itching|bleeding|discharge|inflammation|ulcer|lesion|abscess|infection|bacteria|virus|fungus|allergy|reaction|asthma|hypertension|diabetes|cholesterol|heart|lung|liver|kidney|stomach|intestine|muscle|bone|joint|skin|eye|ear|nose|throat|chest|back|neck|shoulder|knee|ankle|wrist|elbow|hand|foot)\b/i,
+          /\b(consult|review|follow|check|examine|assess|evaluate|diagnose|treat|prescribe|advise|recommend|refer|admit|discharge)\b/i,
+          /\b(cm|kg|mg|ml|days|weeks|months|years|times|doses|tablets|capsules|syrup|cream|ointment|injection|vaccine)\b/i,
+        ];
 
-      // Helper: Check if text matches excluded patterns
-      const isExcluded = (text) => {
-        return excludedPatterns.some(pattern => pattern.test(text));
-      };
+        // Helper: Check if element is in a modal or dialog
+        const isInModal = el => {
+          const modalParents = el.closest(
+            '.modal, .ui-dialog, [class*="dialog"], [class*="popup"], [class*="overlay"], [role="dialog"]'
+          );
+          return !!modalParents;
+        };
 
-      // Helper: Score text for medical relevance
-      const scoreMedicalRelevance = (text) => {
-        let score = 0;
-        // Length score (moderate length is better - too short is suspicious, too long might be page text)
-        if (text.length >= 20 && text.length <= 2000) score += 10;
-        else if (text.length > 2000) score -= 5;
-        
-        // Medical keywords score
-        const keywordMatches = medicalKeywords.filter(kw => kw.test(text)).length;
-        score += keywordMatches * 5;
-        
-        // Penalize if looks like UI element
-        if (/^(OK|Yes|No|Cancel|Close|Submit|Save)$/i.test(text)) score -= 50;
-        if (isExcluded(text)) score -= 100;
-        
-        return score;
-      };
+        // Helper: Check if text matches excluded patterns
+        const isExcluded = text => {
+          return excludedPatterns.some(pattern => pattern.test(text));
+        };
 
-      // Selectors based on context
-      const selectors = context === 'visit_notes' 
-        ? [
-            // Preferred: Specific textarea/input fields
-            'textarea[name*="note" i]',
-            'textarea[name*="diagnosis" i]',
-            'textarea[name*="visit" i]',
-            'textarea[name*="consult" i]',
-            'textarea[id*="note" i]',
-            'textarea[id*="diagnosis" i]',
-            'textarea[id*="visit" i]',
-            'textarea[id*="consult" i]',
-            // Fallback: Divs with specific class names
-            'div[class*="visit-note" i]',
-            'div[class*="consultation-note" i]',
-            'div[class*="diagnosis" i]',
-            'div[class*="case-note" i]',
-            // Generic fallback
-            'textarea',
-            'div[class*="note" i]:not([class*="modal"]):not([class*="dialog"])',
-            'div[class*="visit" i]:not([class*="modal"]):not([class*="dialog"])',
-            'div[class*="consult" i]:not([class*="modal"]):not([class*="dialog"])',
-          ]
-        : [
-            // Dispense/payment specific
-            'textarea[name*="case" i]',
-            'textarea[name*="note" i]',
-            'div[class*="case-note" i]',
-            'td:has-text("Case") + td',
-            'td:has-text("Note") + td',
-            'textarea',
-            'div[class*="note" i]:not([class*="modal"]):not([class*="dialog"])',
-            'div[class*="case" i]:not([class*="modal"]):not([class*="dialog"])',
-          ];
+        // Helper: Score text for medical relevance
+        const scoreMedicalRelevance = text => {
+          let score = 0;
+          // Length score (moderate length is better - too short is suspicious, too long might be page text)
+          if (text.length >= 20 && text.length <= 2000) score += 10;
+          else if (text.length > 2000) score -= 5;
 
-      const candidates = [];
-      
-      // Try each selector
-      for (const selector of selectors) {
-        try {
-          const elements = Array.from(document.querySelectorAll(selector));
-          for (const el of elements) {
-            // Skip if in modal
-            if (isInModal(el)) continue;
-            
-            // Skip hidden elements
-            const style = window.getComputedStyle(el);
-            if (style.display === 'none' || style.visibility === 'hidden') continue;
-            
-            // Get text (prefer value for inputs/textarea, textContent for divs)
-            const text = norm(el.value !== undefined ? el.value : el.textContent || '');
-            
-            // Skip empty or too short
-            if (text.length < 10) continue;
-            
-            // Skip if matches excluded patterns
-            if (isExcluded(text)) continue;
-            
-            // Score the candidate
-            const score = scoreMedicalRelevance(text);
-            
-            // Only include candidates with positive score
-            if (score > 0) {
-              candidates.push({ text, score, len: text.length, selector });
+          // Medical keywords score
+          const keywordMatches = medicalKeywords.filter(kw => kw.test(text)).length;
+          score += keywordMatches * 5;
+
+          // Penalize if looks like UI element
+          if (/^(OK|Yes|No|Cancel|Close|Submit|Save)$/i.test(text)) score -= 50;
+          if (isExcluded(text)) score -= 100;
+
+          return score;
+        };
+
+        // Selectors based on context
+        const selectors =
+          context === 'visit_notes'
+            ? [
+                // Preferred: Specific textarea/input fields
+                'textarea[name*="note" i]',
+                'textarea[name*="diagnosis" i]',
+                'textarea[name*="visit" i]',
+                'textarea[name*="consult" i]',
+                'textarea[id*="note" i]',
+                'textarea[id*="diagnosis" i]',
+                'textarea[id*="visit" i]',
+                'textarea[id*="consult" i]',
+                // Fallback: Divs with specific class names
+                'div[class*="visit-note" i]',
+                'div[class*="consultation-note" i]',
+                'div[class*="diagnosis" i]',
+                'div[class*="case-note" i]',
+                // Generic fallback
+                'textarea',
+                'div[class*="note" i]:not([class*="modal"]):not([class*="dialog"])',
+                'div[class*="visit" i]:not([class*="modal"]):not([class*="dialog"])',
+                'div[class*="consult" i]:not([class*="modal"]):not([class*="dialog"])',
+              ]
+            : [
+                // Dispense/payment specific
+                'textarea[name*="case" i]',
+                'textarea[name*="note" i]',
+                'div[class*="case-note" i]',
+                'td:has-text("Case") + td',
+                'td:has-text("Note") + td',
+                'textarea',
+                'div[class*="note" i]:not([class*="modal"]):not([class*="dialog"])',
+                'div[class*="case" i]:not([class*="modal"]):not([class*="dialog"])',
+              ];
+
+        const candidates = [];
+
+        // Try each selector
+        for (const selector of selectors) {
+          try {
+            const elements = Array.from(document.querySelectorAll(selector));
+            for (const el of elements) {
+              // Skip if in modal
+              if (isInModal(el)) continue;
+
+              // Skip hidden elements
+              const style = window.getComputedStyle(el);
+              if (style.display === 'none' || style.visibility === 'hidden') continue;
+
+              // Get text (prefer value for inputs/textarea, textContent for divs)
+              const text = norm(el.value !== undefined ? el.value : el.textContent || '');
+
+              // Skip empty or too short
+              if (text.length < 10) continue;
+
+              // Skip if matches excluded patterns
+              if (isExcluded(text)) continue;
+
+              // Score the candidate
+              const score = scoreMedicalRelevance(text);
+
+              // Only include candidates with positive score
+              if (score > 0) {
+                candidates.push({ text, score, len: text.length, selector });
+              }
             }
+          } catch (e) {
+            // Continue to next selector
+            continue;
           }
-        } catch (e) {
-          // Continue to next selector
-          continue;
         }
-      }
 
-      // Sort by score (highest first), then by length
-      candidates.sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score;
-        return b.len - a.len;
-      });
+        // Sort by score (highest first), then by length
+        candidates.sort((a, b) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return b.len - a.len;
+        });
 
-      // Return best candidate if we have one
-      if (candidates.length > 0) {
-        const best = candidates[0];
-        // Final validation: minimum score threshold
-        if (best.score >= 5 && best.text.length >= 10 && best.text.length <= 5000) {
-          // Clean the text
-          const cleaned = best.text
-            .replace(/\s+/g, ' ')
-            .replace(/[\r\n]{3,}/g, '\n\n')
-            .trim();
-          
-          return { isValid: true, text: cleaned, reason: 'valid', source: context };
+        // Return best candidate if we have one
+        if (candidates.length > 0) {
+          const best = candidates[0];
+          // Final validation: minimum score threshold
+          if (best.score >= 5 && best.text.length >= 10 && best.text.length <= 5000) {
+            // Clean the text
+            const cleaned = best.text
+              .replace(/\s+/g, ' ')
+              .replace(/[\r\n]{3,}/g, '\n\n')
+              .trim();
+
+            return { isValid: true, text: cleaned, reason: 'valid', source: context };
+          }
         }
-      }
 
-      return { isValid: false, text: null, reason: 'no_valid_candidates', source: context };
-    }, context).catch(() => ({ isValid: false, text: null, reason: 'extraction_error', source: context }));
+        return { isValid: false, text: null, reason: 'no_valid_candidates', source: context };
+      }, context)
+      .catch(() => ({ isValid: false, text: null, reason: 'extraction_error', source: context }));
   }
 
   async extractClaimDetailsFromCurrentVisit() {
@@ -1326,43 +1469,73 @@ export class ClinicAssistAutomation {
 
     // Guardrail: if we're still on the Queue edit modal, abort extraction (it doesn't contain diagnosis/services)
     const isQueueEditModal =
-      (await this.page.locator('text=/Edit\\s+Queue\\s+Record/i').count().catch(() => 0)) > 0;
+      (await this.page
+        .locator('text=/Edit\\s+Queue\\s+Record/i')
+        .count()
+        .catch(() => 0)) > 0;
     if (isQueueEditModal) {
-      this._logStep('Extraction aborted: currently on Edit Queue Record modal (not clinical record)');
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-not-clinical-record.png', fullPage: true }).catch(() => {});
-      return { mcDays: 0, diagnosisText: null, notesText: null, referralClinic: null, items: [], sources: { reason: 'queue_edit_modal' } };
+      this._logStep(
+        'Extraction aborted: currently on Edit Queue Record modal (not clinical record)'
+      );
+      await this.page
+        .screenshot({ path: 'screenshots/clinic-assist-not-clinical-record.png', fullPage: true })
+        .catch(() => {});
+      return {
+        mcDays: 0,
+        diagnosisText: null,
+        notesText: null,
+        referralClinic: null,
+        items: [],
+        sources: { reason: 'queue_edit_modal' },
+      };
     }
 
     // Final check: if Update User Info is still present after all dismissal attempts, try one more aggressive dismissal
     const isUpdateUserInfo =
-      (await this.page.locator('text=/Update\\s+User\\s+Info/i').count().catch(() => 0)) > 0;
+      (await this.page
+        .locator('text=/Update\\s+User\\s+Info/i')
+        .count()
+        .catch(() => 0)) > 0;
     if (isUpdateUserInfo) {
       this._logStep('Update User Info modal still present; attempting final aggressive dismissal');
-      
+
       // Try clicking anywhere outside the modal (backdrop)
       try {
         await this.page.evaluate(() => {
-          const backdrop = document.querySelector('.modal-backdrop, .ui-widget-overlay, [class*="overlay" i]');
+          const backdrop = document.querySelector(
+            '.modal-backdrop, .ui-widget-overlay, [class*="overlay" i]'
+          );
           if (backdrop) backdrop.click();
         });
         await this.page.waitForTimeout(500);
       } catch (e) {
         // Ignore
       }
-      
+
       // Try Escape multiple times
       for (let i = 0; i < 3; i++) {
         await this.page.keyboard.press('Escape').catch(() => {});
         await this.page.waitForTimeout(300);
       }
-      
+
       await this.page.waitForTimeout(500);
-      
+
       // Final check
-      const stillThere = (await this.page.locator('text=/Update\\s+User\\s+Info/i').count().catch(() => 0)) > 0;
+      const stillThere =
+        (await this.page
+          .locator('text=/Update\\s+User\\s+Info/i')
+          .count()
+          .catch(() => 0)) > 0;
       if (stillThere) {
-        this._logStep('Extraction proceeding despite Update User Info modal (may affect data quality)');
-        await this.page.screenshot({ path: 'screenshots/clinic-assist-update-user-info-blocking.png', fullPage: true }).catch(() => {});
+        this._logStep(
+          'Extraction proceeding despite Update User Info modal (may affect data quality)'
+        );
+        await this.page
+          .screenshot({
+            path: 'screenshots/clinic-assist-update-user-info-blocking.png',
+            fullPage: true,
+          })
+          .catch(() => {});
         // Don't abort - try to extract what we can
       }
     }
@@ -1375,47 +1548,52 @@ export class ClinicAssistAutomation {
     // 2. Diagnosis: Try visit notes first, then fallback to case notes in dispense/payment
     let diagnosisText = null;
     let notesText = null;
-    
+
     // 3. Claim amount: Extract total fee/amount (we'll max it later in submission)
     let claimAmount = null;
 
     // Step 1: Try to extract from visit notes (current page) - IMPROVED VERSION
     this._logStep('Extracting diagnosis from visit notes');
     const visitNotesResult = await this._extractDiagnosisWithValidation('visit_notes');
-    
+
     if (visitNotesResult.isValid && visitNotesResult.text) {
       diagnosisText = visitNotesResult.text;
       notesText = visitNotesResult.text;
       sources.diagnosis = 'visit_notes';
       sources.diagnosisValidated = true;
-      this._logStep('Diagnosis found in visit notes (validated)', { 
+      this._logStep('Diagnosis found in visit notes (validated)', {
         sample: visitNotesResult.text.slice(0, 100),
-        length: visitNotesResult.text.length
+        length: visitNotesResult.text.length,
       });
     } else {
       // Step 2: Navigate to dispense/payment and extract from case notes there
-      this._logStep('Visit notes not found or invalid; navigating to dispense/payment for case notes');
+      this._logStep(
+        'Visit notes not found or invalid; navigating to dispense/payment for case notes'
+      );
       const navigated = await this._navigateToDispenseAndPayment();
       if (navigated) {
         await this.page.waitForTimeout(2000);
         const caseNotesResult = await this._extractDiagnosisWithValidation('dispense_payment');
-        
+
         if (caseNotesResult.isValid && caseNotesResult.text) {
           diagnosisText = caseNotesResult.text;
           notesText = caseNotesResult.text;
           sources.diagnosis = 'dispense_payment_case_notes';
           sources.diagnosisValidated = true;
-          this._logStep('Diagnosis found in dispense/payment case notes (validated)', { 
+          this._logStep('Diagnosis found in dispense/payment case notes (validated)', {
             sample: caseNotesResult.text.slice(0, 100),
-            length: caseNotesResult.text.length
+            length: caseNotesResult.text.length,
           });
         } else {
           sources.diagnosis = 'not_found';
           sources.diagnosisValidated = false;
           sources.diagnosisRejectionReason = caseNotesResult.reason;
-          this._logStep('Diagnosis not found or invalid in visit notes or dispense/payment case notes', {
-            reason: caseNotesResult.reason
-          });
+          this._logStep(
+            'Diagnosis not found or invalid in visit notes or dispense/payment case notes',
+            {
+              reason: caseNotesResult.reason,
+            }
+          );
         }
       } else {
         sources.diagnosis = 'dispense_payment_not_accessible';
@@ -1426,11 +1604,17 @@ export class ClinicAssistAutomation {
 
     // Referral clinic (needed for NEW VISIT). Best-effort label-based; may be null until we confirm exact UI location.
     let referralClinic =
-      (await this._extractLabeledValue('referral\\s*clinic|referred\\s*by|referral\\s*from|referring').catch(() => null)) ||
-      null;
-    
+      (await this._extractLabeledValue(
+        'referral\\s*clinic|referred\\s*by|referral\\s*from|referring'
+      ).catch(() => null)) || null;
+
     // Filter out modal text if it was mistakenly extracted
-    if (referralClinic && /Update\s+User\s+Info|Please enter your login|User ID|Full Name|New Password|Retype Password|Email|Mobile|Confirm|Cancel/i.test(referralClinic)) {
+    if (
+      referralClinic &&
+      /Update\s+User\s+Info|Please enter your login|User ID|Full Name|New Password|Retype Password|Email|Mobile|Confirm|Cancel/i.test(
+        referralClinic
+      )
+    ) {
       referralClinic = null;
       sources.referralClinic = 'filtered_modal_text';
     } else {
@@ -1441,12 +1625,13 @@ export class ClinicAssistAutomation {
     this._logStep('Extracting claim amount/total fee');
     claimAmount = await this.page
       .evaluate(() => {
-        const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
-        const parseAmount = (raw) => {
+        const norm = s => (s || '').replace(/\s+/g, ' ').trim();
+        const parseAmount = raw => {
           const n = Number(String(raw || '').replace(/[^0-9.]/g, ''));
           return Number.isFinite(n) ? n : null;
         };
-        const moneyRegex = /\$?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{1,2})?|[0-9]+(?:\.[0-9]{1,2})?)/g;
+        const moneyRegex =
+          /\$?\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{1,2})?|[0-9]+(?:\.[0-9]{1,2})?)/g;
         const candidates = [];
         const addCandidate = (amount, score, source) => {
           if (!Number.isFinite(amount) || amount <= 0) return;
@@ -1456,7 +1641,7 @@ export class ClinicAssistAutomation {
         const bodyText = String(document.body?.innerText || '');
         const lines = bodyText
           .split(/\r?\n/)
-          .map((line) => norm(line))
+          .map(line => norm(line))
           .filter(Boolean);
 
         for (const line of lines) {
@@ -1475,9 +1660,12 @@ export class ClinicAssistAutomation {
 
           let score = 0;
           if (/(grand|net)?\s*total\s*(amount|fee|charge|bill|claim)?/.test(lower)) score += 12;
-          if (/(total\s*claim|amount\s*payable|provider\s*total|final\s*amount)/.test(lower)) score += 10;
-          if (/(consultation|service|drug|procedure|x[-\s]*ray|lab)\s*(fee|amount)?/.test(lower)) score += 3;
-          if (/(co[-\s]*pay|co payment|cash|member|outstanding|balance|paid)/.test(lower)) score -= 9;
+          if (/(total\s*claim|amount\s*payable|provider\s*total|final\s*amount)/.test(lower))
+            score += 10;
+          if (/(consultation|service|drug|procedure|x[-\s]*ray|lab)\s*(fee|amount)?/.test(lower))
+            score += 3;
+          if (/(co[-\s]*pay|co payment|cash|member|outstanding|balance|paid)/.test(lower))
+            score -= 9;
           if (/(gst|tax)/.test(lower)) score -= 1;
           score += Math.min(3, Math.floor(maxAmount / 100));
 
@@ -1485,7 +1673,9 @@ export class ClinicAssistAutomation {
         }
 
         const inputCandidates = Array.from(
-          document.querySelectorAll('input[name], input[id], input[placeholder], textarea[name], textarea[id]')
+          document.querySelectorAll(
+            'input[name], input[id], input[placeholder], textarea[name], textarea[id]'
+          )
         );
         for (const el of inputCandidates) {
           const hint = norm(
@@ -1502,7 +1692,7 @@ export class ClinicAssistAutomation {
         return candidates[0].amount;
       })
       .catch(() => null);
-    
+
     sources.claimAmount = claimAmount ? 'extracted' : 'not_found';
     if (claimAmount) {
       this._logStep('Claim amount extracted', { amount: claimAmount });
@@ -1512,7 +1702,7 @@ export class ClinicAssistAutomation {
     // 5. Services/drugs: Extract from dispense and payment table
     this._logStep('Extracting services/drugs from dispense/payment table');
     let items = [];
-    
+
     // If we're not already on dispense/payment, navigate there
     const isOnDispensePayment = await this.page
       .evaluate(() => {
@@ -1528,26 +1718,33 @@ export class ClinicAssistAutomation {
 
     items = await this.page
       .evaluate(() => {
-        const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
+        const norm = s => (s || '').replace(/\s+/g, ' ').trim();
         const results = [];
 
         // Look for dispense/payment table specifically
         const tables = Array.from(document.querySelectorAll('table'));
         for (const table of tables) {
-          const headerText = norm(table.querySelector('thead')?.innerText || table.querySelector('tr')?.innerText || '');
+          const headerText = norm(
+            table.querySelector('thead')?.innerText || table.querySelector('tr')?.innerText || ''
+          );
           // Match dispense/payment table headers
-          const isDispensePaymentTable = /(drug|medicine|medication|item|description|qty|quantity|unit|price|amount)/i.test(headerText);
+          const isDispensePaymentTable =
+            /(drug|medicine|medication|item|description|qty|quantity|unit|price|amount)/i.test(
+              headerText
+            );
           if (!isDispensePaymentTable) continue;
 
           const rows = Array.from(table.querySelectorAll('tbody tr, tr:not(thead tr)'));
           for (const tr of rows) {
-            const tds = Array.from(tr.querySelectorAll('td')).map((td) => norm(td.innerText));
+            const tds = Array.from(tr.querySelectorAll('td')).map(td => norm(td.innerText));
             // Skip header rows and empty rows
             if (tds.length < 2) continue;
-            const joined = tds.filter((td) => td && td.length > 0).join(' | ');
+            const joined = tds.filter(td => td && td.length > 0).join(' | ');
             if (joined && joined.length > 3) {
               // Extract drug/service name (usually first or second column)
-              const name = tds.find((td) => td && td.length > 2 && !/^\d+$/.test(td) && !/^\$/.test(td)) || joined;
+              const name =
+                tds.find(td => td && td.length > 2 && !/^\d+$/.test(td) && !/^\$/.test(td)) ||
+                joined;
               if (name) results.push(name);
             }
           }
@@ -1582,7 +1779,7 @@ export class ClinicAssistAutomation {
 
     // Run validation
     const validationResult = validateClaimDetails(rawClaimDetails);
-    
+
     // Log validation results
     logValidationResults(validationResult, 'extraction');
 
@@ -1601,13 +1798,16 @@ export class ClinicAssistAutomation {
 
     // Use validated data, but keep original for reference if validation failed
     if (!validationResult.isValid) {
-      this._logStep('⚠️ Some extracted data failed validation; using validated data where possible', {
-        errors: validationResult.errors,
-        originalDiagnosisLength: diagnosisText?.length || 0,
-        validatedDiagnosisLength: validatedClaimDetails.diagnosisText?.length || 0,
-        originalItemsCount: items.length,
-        validatedItemsCount: validatedClaimDetails.items?.length || 0,
-      });
+      this._logStep(
+        '⚠️ Some extracted data failed validation; using validated data where possible',
+        {
+          errors: validationResult.errors,
+          originalDiagnosisLength: diagnosisText?.length || 0,
+          validatedDiagnosisLength: validatedClaimDetails.diagnosisText?.length || 0,
+          originalItemsCount: items.length,
+          validatedItemsCount: validatedClaimDetails.items?.length || 0,
+        }
+      );
     }
 
     return validatedClaimDetails;
@@ -1635,7 +1835,12 @@ export class ClinicAssistAutomation {
             await this.page.waitForLoadState('domcontentloaded').catch(() => {});
             await this.page.waitForTimeout(1500);
             this._logStep('Navigated to dispense/payment', { selector });
-            await this.page.screenshot({ path: 'screenshots/clinic-assist-dispense-payment.png', fullPage: true }).catch(() => {});
+            await this.page
+              .screenshot({
+                path: 'screenshots/clinic-assist-dispense-payment.png',
+                fullPage: true,
+              })
+              .catch(() => {});
             return true;
           }
         } catch (e) {
@@ -1667,8 +1872,8 @@ export class ClinicAssistAutomation {
       const nricPattern =
         /[STFGM]\s*\d{4}\s*\d{3}\s*[A-Z]|[STFGM]\d{7}\s*[A-Z]|[STFGM][\/\-]\d{7}[\/\-][A-Z]/i;
 
-      const normalizeNric = (s) => (s || '').toUpperCase().replace(/[\s\/\-]+/g, '');
-      
+      const normalizeNric = s => (s || '').toUpperCase().replace(/[\s\/\-]+/g, '');
+
       // Method 1: Look for labeled fields (most reliable)
       // Try common labels for NRIC/IC on biodata page
       const nricLabels = [
@@ -1680,9 +1885,9 @@ export class ClinicAssistAutomation {
         'identification number',
         'national id',
         'national registration',
-        'registration id'
+        'registration id',
       ];
-      
+
       for (const label of nricLabels) {
         const labeled = await this._extractLabeledValue(label);
         if (labeled) {
@@ -1724,7 +1929,10 @@ export class ClinicAssistAutomation {
             if ((await element.count().catch(() => 0)) > 0) {
               // Try to find the value in the next cell or sibling
               const row = element.locator('..').first(); // Get parent row
-              const cells = await row.locator('td, th').allTextContents().catch(() => []);
+              const cells = await row
+                .locator('td, th')
+                .allTextContents()
+                .catch(() => []);
               for (const cellText of cells) {
                 const m = cellText.match(nricPattern);
                 if (m) {
@@ -1733,7 +1941,7 @@ export class ClinicAssistAutomation {
                   return nric;
                 }
               }
-              
+
               // Also try the element's text content
               const text = await element.textContent().catch(() => '');
               const m = text.match(nricPattern);
@@ -1783,7 +1991,7 @@ export class ClinicAssistAutomation {
     } catch (error) {
       logger.error('Error extracting NRIC from patient info:', error);
       this._logStep('Error extracting NRIC', { error: error.message });
-    return null;
+      return null;
     }
   }
 
@@ -1795,15 +2003,17 @@ export class ClinicAssistAutomation {
   async getPatientNRIC() {
     try {
       this._logStep('Get patient NRIC');
-      
+
       // First try the existing extraction method
       const nric = await this.extractPatientNricFromPatientInfo();
       if (nric) {
         return nric;
       }
-      
+
       // Fallback: Try to find in Patient Basic Info tab
-      const basicInfoTab = this.page.locator('a:has-text("Basic Info"), [href*="BasicInfo"]').first();
+      const basicInfoTab = this.page
+        .locator('a:has-text("Basic Info"), [href*="BasicInfo"]')
+        .first();
       if ((await basicInfoTab.count().catch(() => 0)) > 0) {
         await basicInfoTab.click().catch(() => {});
         await this.page.waitForTimeout(500);
@@ -1812,7 +2022,7 @@ export class ClinicAssistAutomation {
           return nricFromBasicInfo;
         }
       }
-      
+
       logger.warn('Could not find patient NRIC');
       return null;
     } catch (error) {
@@ -1833,22 +2043,24 @@ export class ClinicAssistAutomation {
   async navigateDirectlyToQueueReport() {
     try {
       this._logStep('Navigating directly to QueueReport page');
-      
+
       // Get current URL to build the QueueReport URL
       const currentUrl = new URL(this.page.url());
       const queueReportUrl = new URL('/QueueLog/QueueReport', currentUrl.origin).toString();
-      
+
       this._logStep('Navigating to QueueReport URL', { url: queueReportUrl });
-      
+
       // Navigate directly
       await this.page.goto(queueReportUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
       await this.page.waitForTimeout(2000);
-      
+
       const finalUrl = this.page.url();
-      
+
       if (finalUrl.includes('QueueReport')) {
         this._logStep('Successfully navigated to QueueReport page', { url: finalUrl });
-        await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true }).catch(() => {});
+        await this.page
+          .screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true })
+          .catch(() => {});
         return true;
       } else if (finalUrl.includes('Error') || finalUrl.includes('Access Denied')) {
         this._logStep('Direct navigation failed - Access Denied', { url: finalUrl });
@@ -1866,7 +2078,7 @@ export class ClinicAssistAutomation {
   async navigateToReports() {
     try {
       this._logStep('Navigating to Reports section');
-      
+
       await this.page.waitForLoadState('networkidle');
       await this.page.waitForTimeout(1000);
 
@@ -1886,13 +2098,13 @@ export class ClinicAssistAutomation {
         await this.login().catch(() => false);
         await this.page.waitForTimeout(1500);
       }
-      
+
       // IMPORTANT: After login, we need to click Reception first before accessing Reports
       // Check if we're already in a room (URL contains /Home/)
       const currentUrl = this.page.url();
       if (!currentUrl.includes('/Home/')) {
         this._logStep('Need to select Reception/room first before accessing Reports');
-        
+
         // Look for Reception button/room (same logic as navigateToQueue)
         const roomSelectors = [
           'a:has-text("Reception")',
@@ -1903,7 +2115,7 @@ export class ClinicAssistAutomation {
           'a[href*="reception" i]',
           'div:has-text("Reception")',
         ];
-        
+
         let receptionClicked = false;
         for (const selector of roomSelectors) {
           try {
@@ -1926,12 +2138,14 @@ export class ClinicAssistAutomation {
             continue;
           }
         }
-        
+
         if (!receptionClicked) {
-          this._logStep('Could not find Reception/room button - may already be in a room or not needed');
+          this._logStep(
+            'Could not find Reception/room button - may already be in a room or not needed'
+          );
         }
       }
-      
+
       // FIRST: Try to open sidebar/hamburger menu if it exists (might be collapsed)
       this._logStep('Trying to open sidebar/hamburger menu');
       const menuToggleSelectors = [
@@ -1947,7 +2161,7 @@ export class ClinicAssistAutomation {
         'button:has(span:has-text("≡"))',
         '[class*="navbar"] button',
       ];
-      
+
       for (const selector of menuToggleSelectors) {
         try {
           const toggle = this.page.locator(selector).first();
@@ -1968,17 +2182,19 @@ export class ClinicAssistAutomation {
 
       // Now find the Reports sidebar link
       this._logStep('Looking for Reports link in sidebar');
-      
+
       // Wait a moment for sidebar animation to complete
       await this.page.waitForTimeout(500);
-      
+
       // Take screenshot to see sidebar state
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-sidebar-open.png', fullPage: true }).catch(() => {});
-      
+      await this.page
+        .screenshot({ path: 'screenshots/clinic-assist-sidebar-open.png', fullPage: true })
+        .catch(() => {});
+
       // Try multiple approaches to click Reports
       // Approach 1: Click the LI element with SidebarmenuReports id (triggers JavaScript navigation)
       const reportLi = this.page.locator('#SidebarmenuReports');
-      if (await reportLi.count().catch(() => 0) > 0) {
+      if ((await reportLi.count().catch(() => 0)) > 0) {
         this._logStep('Found SidebarmenuReports, trying to trigger click via JavaScript');
         try {
           // Some sidebar menus use JavaScript onclick handlers
@@ -1999,10 +2215,10 @@ export class ClinicAssistAutomation {
           });
           await this.page.waitForLoadState('domcontentloaded').catch(() => {});
           await this.page.waitForTimeout(3000); // Wait longer for navigation
-          
+
           const urlAfterClick = this.page.url();
           this._logStep('After JS click on SidebarmenuReports', { url: urlAfterClick });
-          
+
           if (urlAfterClick.includes('ReportsMenu') || urlAfterClick.includes('Report')) {
             this._logStep('Successfully navigated via SidebarmenuReports click');
             await this._dismissUpdateUserInfoIfPresent().catch(() => false);
@@ -2012,36 +2228,44 @@ export class ClinicAssistAutomation {
           this._logStep('JS click approach failed', { error: e.message });
         }
       }
-      
+
       // Approach 2: Try getByRole
       const reportsSidebarLink = this.page.getByRole('link', { name: /^Reports$/i });
       const reportsLinkCount = await reportsSidebarLink.count().catch(() => 0);
       this._logStep('Reports link count', { count: reportsLinkCount });
-      
+
       if (reportsLinkCount > 0) {
         const isVisible = await reportsSidebarLink.isVisible().catch(() => false);
         this._logStep('Reports link visibility', { isVisible });
         if (isVisible) {
           const urlBefore = this.page.url();
-          await reportsSidebarLink.click().catch(async () => reportsSidebarLink.click({ force: true }));
+          await reportsSidebarLink
+            .click()
+            .catch(async () => reportsSidebarLink.click({ force: true }));
           await this.page.waitForLoadState('domcontentloaded').catch(() => {});
           await this.page.waitForTimeout(2000);
           const newUrl = this.page.url();
           this._logStep('Clicked Reports link', { newUrl, urlBefore });
-          
+
           // Check if we actually navigated to ReportsMenu
           if (newUrl.includes('ReportsMenu') || newUrl.includes('Report')) {
-            await this.page.screenshot({ path: 'screenshots/clinic-assist-reports.png', fullPage: true }).catch(() => {});
+            await this.page
+              .screenshot({ path: 'screenshots/clinic-assist-reports.png', fullPage: true })
+              .catch(() => {});
             return true;
           }
-          
+
           // URL didn't change - Reports might be a sidebar toggle, try clicking again or look for submenu
           this._logStep('URL did not change after Reports click, trying to expand submenu');
-          
+
           // Look for expanded submenu with Queue Report
           await this.page.waitForTimeout(1000);
-          const queueReportInSubmenu = this.page.locator('a:has-text("Queue Report"), [class*="Queue_Report"], a.cls_Reports_Daily_Queue_Report').first();
-          if (await queueReportInSubmenu.count().catch(() => 0) > 0) {
+          const queueReportInSubmenu = this.page
+            .locator(
+              'a:has-text("Queue Report"), [class*="Queue_Report"], a.cls_Reports_Daily_Queue_Report'
+            )
+            .first();
+          if ((await queueReportInSubmenu.count().catch(() => 0)) > 0) {
             const isQrVisible = await queueReportInSubmenu.isVisible().catch(() => false);
             if (isQrVisible) {
               this._logStep('Found Queue Report in expanded submenu, clicking');
@@ -2051,22 +2275,24 @@ export class ClinicAssistAutomation {
               return true;
             }
           }
-          
+
           // Try clicking Reports link that might navigate (look for link with href)
           const reportsNavLink = this.page.locator('a[href*="ReportsMenu"]').first();
-          if (await reportsNavLink.count().catch(() => 0) > 0) {
+          if ((await reportsNavLink.count().catch(() => 0)) > 0) {
             this._logStep('Found Reports navigation link with href');
             await reportsNavLink.click();
             await this.page.waitForLoadState('domcontentloaded').catch(() => {});
             await this.page.waitForTimeout(2000);
             return true;
           }
-          
-          await this.page.screenshot({ path: 'screenshots/clinic-assist-reports.png', fullPage: true }).catch(() => {});
+
+          await this.page
+            .screenshot({ path: 'screenshots/clinic-assist-reports.png', fullPage: true })
+            .catch(() => {});
           return true; // Continue anyway, navigateToQueueListReport will handle finding the report
         }
       }
-      
+
       // Fallback: Try other selectors
       const reportsSelectors = [
         'a:has-text("Reports")',
@@ -2090,7 +2316,9 @@ export class ClinicAssistAutomation {
               await this.page.waitForLoadState('domcontentloaded').catch(() => {});
               await this.page.waitForTimeout(2000);
               this._logStep('Navigated to Reports', { selector });
-              await this.page.screenshot({ path: 'screenshots/clinic-assist-reports.png', fullPage: true }).catch(() => {});
+              await this.page
+                .screenshot({ path: 'screenshots/clinic-assist-reports.png', fullPage: true })
+                .catch(() => {});
               return true;
             }
           }
@@ -2100,34 +2328,41 @@ export class ClinicAssistAutomation {
       }
 
       // Take a screenshot to see current state
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-looking-for-reports.png', fullPage: true }).catch(() => {});
-      
+      await this.page
+        .screenshot({ path: 'screenshots/clinic-assist-looking-for-reports.png', fullPage: true })
+        .catch(() => {});
+
       // Last resort: List all links to see what's available
-      const allLinks = await this.page.evaluate(() => {
-        const links = Array.from(document.querySelectorAll('a, button, [role="link"], [role="button"], li, nav *'));
-        return links.slice(0, 60).map(el => ({
-          tag: el.tagName,
-          text: (el.textContent || el.innerText || '').trim().substring(0, 50),
-          href: el.href || '',
-          className: (el.className || '').substring(0, 50),
-          id: el.id || '',
-        }));
-      }).catch(() => []);
-      
+      const allLinks = await this.page
+        .evaluate(() => {
+          const links = Array.from(
+            document.querySelectorAll('a, button, [role="link"], [role="button"], li, nav *')
+          );
+          return links.slice(0, 60).map(el => ({
+            tag: el.tagName,
+            text: (el.textContent || el.innerText || '').trim().substring(0, 50),
+            href: el.href || '',
+            className: (el.className || '').substring(0, 50),
+            id: el.id || '',
+          }));
+        })
+        .catch(() => []);
+
       // Look for anything related to Reports/Queue
-      const reportsRelated = allLinks.filter(l => 
-        l.text.toLowerCase().includes('report') || 
-        l.text.toLowerCase().includes('queue') ||
-        l.href.toLowerCase().includes('report') ||
-        l.href.toLowerCase().includes('queue')
+      const reportsRelated = allLinks.filter(
+        l =>
+          l.text.toLowerCase().includes('report') ||
+          l.text.toLowerCase().includes('queue') ||
+          l.href.toLowerCase().includes('report') ||
+          l.href.toLowerCase().includes('queue')
       );
-      
-      this._logStep('Could not find Reports navigation link - available elements', { 
+
+      this._logStep('Could not find Reports navigation link - available elements', {
         currentUrl: this.page.url(),
         reportsRelated: reportsRelated,
-        allLinks: allLinks.filter(l => l.text.length > 0).slice(0, 30)
+        allLinks: allLinks.filter(l => l.text.length > 0).slice(0, 30),
       });
-      
+
       return false;
     } catch (error) {
       this._logStep('Error navigating to Reports', { error: error.message });
@@ -2149,30 +2384,32 @@ export class ClinicAssistAutomation {
         pageUrl: this.page.url(),
         frameUrl: kind === 'frame' ? root.url() : null,
       });
-      
+
       // Wait for submenu to expand after Reports was clicked
       await this.page.waitForTimeout(1000);
-      
+
       // Take screenshot to see current submenu state
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-reports-submenu.png', fullPage: true }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/clinic-assist-reports-submenu.png', fullPage: true })
+        .catch(() => {});
 
       // Important: do NOT click the global sidebar "Queue" item here (it navigates back to QueueLog/Index).
       // Queue list reports are accessed via the ReportsMenu section itself.
-      
+
       // First, try to find the specific Queue Report link by ID, class, or text
       // User provided: <a id="60017" class="cls_Reports_Daily_Queue_Report UnLocked">Queue Report</a>
       const specificSelectors = [
-        'a[id="60017"]',  // ID match (escaped for numeric ID)
-        'a.cls_Reports_Daily_Queue_Report',  // Class match
-        'a[class*="Queue_Report"]',  // Partial class match
-        'a:has-text("Queue Report")',  // Text match - exact
-        'text=Queue Report',  // Playwright text selector
-        'a:text("Queue Report")',  // Another text match
-        '[class*="Reports"] a:has-text("Queue")',  // Queue under Reports section
-        '.SideMenuList:has-text("Queue Report")',  // In SideMenuList
-        'li:has-text("Queue Report") > a',  // Li > a pattern
+        'a[id="60017"]', // ID match (escaped for numeric ID)
+        'a.cls_Reports_Daily_Queue_Report', // Class match
+        'a[class*="Queue_Report"]', // Partial class match
+        'a:has-text("Queue Report")', // Text match - exact
+        'text=Queue Report', // Playwright text selector
+        'a:text("Queue Report")', // Another text match
+        '[class*="Reports"] a:has-text("Queue")', // Queue under Reports section
+        '.SideMenuList:has-text("Queue Report")', // In SideMenuList
+        'li:has-text("Queue Report") > a', // Li > a pattern
       ];
-      
+
       // First try clicking the Queue Report link by ID=60017 using JavaScript
       // This link has empty href and no onclick attribute, so we need to trigger its event listener
       this._logStep('Trying to click Queue Report link by ID 60017');
@@ -2202,24 +2439,36 @@ export class ClinicAssistAutomation {
           return { found: false };
         });
         this._logStep('JS click result for Queue Report', clickResult);
-        
+
         if (clickResult.found) {
           await this.page.waitForTimeout(4000); // wait for either page or frame navigation
 
           const finalPageUrl = this.page.url();
           const finalFrameUrl = kind === 'frame' ? root.url() : null;
-          this._logStep('URL after JS click on Queue Report', { pageUrl: finalPageUrl, frameUrl: finalFrameUrl });
-          const ok = finalPageUrl.includes('QueueReport') || finalPageUrl.includes('QueueLog') || (finalFrameUrl && (finalFrameUrl.includes('QueueReport') || finalFrameUrl.includes('QueueLog')));
+          this._logStep('URL after JS click on Queue Report', {
+            pageUrl: finalPageUrl,
+            frameUrl: finalFrameUrl,
+          });
+          const ok =
+            finalPageUrl.includes('QueueReport') ||
+            finalPageUrl.includes('QueueLog') ||
+            (finalFrameUrl &&
+              (finalFrameUrl.includes('QueueReport') || finalFrameUrl.includes('QueueLog')));
           if (ok) {
-            this._logStep('Successfully navigated to QueueReport page via JS click', { pageUrl: finalPageUrl, frameUrl: finalFrameUrl });
-            await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true }).catch(() => {});
+            this._logStep('Successfully navigated to QueueReport page via JS click', {
+              pageUrl: finalPageUrl,
+              frameUrl: finalFrameUrl,
+            });
+            await this.page
+              .screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true })
+              .catch(() => {});
             return true;
           }
         }
       } catch (e) {
         this._logStep('JS click on Queue Report failed', { error: e.message });
       }
-      
+
       // Fallback: try Playwright selectors
       for (const selector of specificSelectors) {
         try {
@@ -2233,10 +2482,20 @@ export class ClinicAssistAutomation {
 
               const finalPageUrl = this.page.url();
               const finalFrameUrl = kind === 'frame' ? root.url() : null;
-              const ok = finalPageUrl.includes('QueueReport') || finalPageUrl.includes('QueueLog') || (finalFrameUrl && (finalFrameUrl.includes('QueueReport') || finalFrameUrl.includes('QueueLog')));
+              const ok =
+                finalPageUrl.includes('QueueReport') ||
+                finalPageUrl.includes('QueueLog') ||
+                (finalFrameUrl &&
+                  (finalFrameUrl.includes('QueueReport') || finalFrameUrl.includes('QueueLog')));
               if (ok) {
-                this._logStep('Successfully navigated to QueueReport page', { selector, pageUrl: finalPageUrl, frameUrl: finalFrameUrl });
-                await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true }).catch(() => {});
+                this._logStep('Successfully navigated to QueueReport page', {
+                  selector,
+                  pageUrl: finalPageUrl,
+                  frameUrl: finalFrameUrl,
+                });
+                await this.page
+                  .screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true })
+                  .catch(() => {});
                 return true;
               }
             }
@@ -2245,127 +2504,177 @@ export class ClinicAssistAutomation {
           continue;
         }
       }
-      
+
       // Fallback: Get all links on the page for debugging and finding
-      const allLinks = await root.evaluate(() => {
-        const links = Array.from(document.querySelectorAll('a, button, [role="menuitem"], li'));
-        return links.map(link => ({
-          id: link.id || '',
-          className: link.className || '',
-          href: link.href || link.getAttribute('href') || '',
-          text: (link.textContent || link.innerText || '').trim().substring(0, 60),
-          onclick: link.getAttribute('onclick') || '',
-          tag: link.tagName,
-        }));
-      }).catch(() => []);
-      
+      const allLinks = await root
+        .evaluate(() => {
+          const links = Array.from(document.querySelectorAll('a, button, [role="menuitem"], li'));
+          return links.map(link => ({
+            id: link.id || '',
+            className: link.className || '',
+            href: link.href || link.getAttribute('href') || '',
+            text: (link.textContent || link.innerText || '').trim().substring(0, 60),
+            onclick: link.getAttribute('onclick') || '',
+            tag: link.tagName,
+          }));
+        })
+        .catch(() => []);
+
       // Find all report-related links
-      const reportRelated = allLinks.filter(l => 
-        l.text.toLowerCase().includes('report') || 
-        l.text.toLowerCase().includes('queue') ||
-        l.className.toLowerCase().includes('report') ||
-        l.className.toLowerCase().includes('queue') ||
-        (l.href && l.href.toLowerCase().includes('report'))
+      const reportRelated = allLinks.filter(
+        l =>
+          l.text.toLowerCase().includes('report') ||
+          l.text.toLowerCase().includes('queue') ||
+          l.className.toLowerCase().includes('report') ||
+          l.className.toLowerCase().includes('queue') ||
+          (l.href && l.href.toLowerCase().includes('report'))
       );
-      
-      this._logStep('All links on Reports page', { 
-        count: allLinks.length, 
-        reportRelated: reportRelated.slice(0, 15)
+
+      this._logStep('All links on Reports page', {
+        count: allLinks.length,
+        reportRelated: reportRelated.slice(0, 15),
       });
 
       // Extra debug: list queue-related candidates (helps when the report label/id differs per deployment)
-      const queueCandidates = reportRelated.filter((l) => {
+      const queueCandidates = reportRelated.filter(l => {
         const t = (l.text || '').toLowerCase();
         const c = (l.className || '').toLowerCase();
         const id = (l.id || '').toLowerCase();
         const oc = (l.onclick || '').toLowerCase();
         const href = (l.href || '').toLowerCase();
-        return t.includes('queue') || c.includes('queue') || id.includes('queue') || oc.includes('queue') || href.includes('queue');
+        return (
+          t.includes('queue') ||
+          c.includes('queue') ||
+          id.includes('queue') ||
+          oc.includes('queue') ||
+          href.includes('queue')
+        );
       });
       if (queueCandidates.length > 0) {
-        this._logStep('Queue-related candidates on Reports page', { count: queueCandidates.length, candidates: queueCandidates.slice(0, 40) });
+        this._logStep('Queue-related candidates on Reports page', {
+          count: queueCandidates.length,
+          candidates: queueCandidates.slice(0, 40),
+        });
       }
-      
+
       // Look for QueueReport link by ID, class, or text
-      const queueReportLink = allLinks.find(link => 
-        link.id === '60017' || 
-        link.className.includes('Queue_Report') ||
-        (link.href && (link.href.toLowerCase().includes('queuereport') || link.href.includes('QueueLog/QueueReport')))
+      const queueReportLink = allLinks.find(
+        link =>
+          link.id === '60017' ||
+          link.className.includes('Queue_Report') ||
+          (link.href &&
+            (link.href.toLowerCase().includes('queuereport') ||
+              link.href.includes('QueueLog/QueueReport')))
       );
-      
+
       // Also try to find by text
       const queueReportByText = allLinks.find(link => {
         const text = link.text.toLowerCase();
-        return text === 'queue report' || text.includes('queue report') && 
-               !link.href.includes('ReportsMenu');
+        return (
+          text === 'queue report' ||
+          (text.includes('queue report') && !link.href.includes('ReportsMenu'))
+        );
       });
-      
+
       // If Queue link goes to ReportsMenu, try clicking it to see if it opens submenu or navigates
-      const queueMenuLink = allLinks.find(l => 
-        l.href.includes('ReportsMenu/ReportsMenu') && l.text.toLowerCase().includes('queue')
+      const queueMenuLink = allLinks.find(
+        l => l.href.includes('ReportsMenu/ReportsMenu') && l.text.toLowerCase().includes('queue')
       );
-      
+
       if (queueMenuLink && !queueReportLink && !queueReportByText) {
-        this._logStep('Found Queue menu link, clicking to navigate to ReportsMenu page', queueMenuLink);
+        this._logStep(
+          'Found Queue menu link, clicking to navigate to ReportsMenu page',
+          queueMenuLink
+        );
         try {
-          const menuLinkLocator = root.locator(`a[href*="ReportsMenu/ReportsMenu"]:has-text("Queue")`).first();
+          const menuLinkLocator = root
+            .locator(`a[href*="ReportsMenu/ReportsMenu"]:has-text("Queue")`)
+            .first();
           if ((await menuLinkLocator.count().catch(() => 0)) > 0) {
             await menuLinkLocator.click();
             await this.page.waitForTimeout(3000); // Wait longer for page to load
-            
+
             // Check current URL and page
             const menuPageUrl = this.page.url();
             this._logStep('After clicking Queue menu link', { url: menuPageUrl });
-            await this.page.screenshot({ path: 'screenshots/clinic-assist-after-queue-menu.png', fullPage: true }).catch(() => {});
-            
+            await this.page
+              .screenshot({
+                path: 'screenshots/clinic-assist-after-queue-menu.png',
+                fullPage: true,
+              })
+              .catch(() => {});
+
             // Now check for QueueReport link again (including all possible variations)
-            const newLinks = await root.evaluate(() => {
-              const links = Array.from(document.querySelectorAll('a[href], button[onclick], [onclick]'));
-              return links.map(link => {
-                const href = (link.href || link.getAttribute('href') || '').toLowerCase();
-                const text = (link.textContent || link.innerText || '').trim();
-                return {
-                  href: href,
-                  fullHref: link.href || link.getAttribute('href') || '',
-                  text: text,
-                  onclick: link.getAttribute('onclick') || '',
-                };
-              });
-            }).catch(() => []);
-            
-            this._logStep('Links after clicking Queue menu', { count: newLinks.length, queueRelated: newLinks.filter(l => 
-              l.href.includes('queue') || l.text.toLowerCase().includes('queue')
-            )});
-            
+            const newLinks = await root
+              .evaluate(() => {
+                const links = Array.from(
+                  document.querySelectorAll('a[href], button[onclick], [onclick]')
+                );
+                return links.map(link => {
+                  const href = (link.href || link.getAttribute('href') || '').toLowerCase();
+                  const text = (link.textContent || link.innerText || '').trim();
+                  return {
+                    href: href,
+                    fullHref: link.href || link.getAttribute('href') || '',
+                    text: text,
+                    onclick: link.getAttribute('onclick') || '',
+                  };
+                });
+              })
+              .catch(() => []);
+
+            this._logStep('Links after clicking Queue menu', {
+              count: newLinks.length,
+              queueRelated: newLinks.filter(
+                l => l.href.includes('queue') || l.text.toLowerCase().includes('queue')
+              ),
+            });
+
             // Look for QueueReport link - check for ID, class, text, or href
-            const newQueueReportLink = await root.evaluate(() => {
-              // Try ID first
-              const byId = document.querySelector('a#60017');
-              if (byId) {
-                return { type: 'id', id: '60017', text: byId.textContent?.trim() || '' };
-              }
-              
-              // Try class
-              const byClass = document.querySelector('a.cls_Reports_Daily_Queue_Report, a[class*="Queue_Report"]');
-              if (byClass) {
-                return { type: 'class', className: byClass.className, text: byClass.textContent?.trim() || '' };
-              }
-              
-              // Try text
-              const byText = Array.from(document.querySelectorAll('a')).find(a => 
-                (a.textContent || '').trim() === 'Queue Report' || 
-                (a.textContent || '').trim().includes('Queue Report')
-              );
-              if (byText) {
-                return { type: 'text', text: byText.textContent?.trim() || '', href: byText.href || '' };
-              }
-              
-              return null;
-            }).catch(() => null);
-            
+            const newQueueReportLink = await root
+              .evaluate(() => {
+                // Try ID first
+                const byId = document.querySelector('a#60017');
+                if (byId) {
+                  return { type: 'id', id: '60017', text: byId.textContent?.trim() || '' };
+                }
+
+                // Try class
+                const byClass = document.querySelector(
+                  'a.cls_Reports_Daily_Queue_Report, a[class*="Queue_Report"]'
+                );
+                if (byClass) {
+                  return {
+                    type: 'class',
+                    className: byClass.className,
+                    text: byClass.textContent?.trim() || '',
+                  };
+                }
+
+                // Try text
+                const byText = Array.from(document.querySelectorAll('a')).find(
+                  a =>
+                    (a.textContent || '').trim() === 'Queue Report' ||
+                    (a.textContent || '').trim().includes('Queue Report')
+                );
+                if (byText) {
+                  return {
+                    type: 'text',
+                    text: byText.textContent?.trim() || '',
+                    href: byText.href || '',
+                  };
+                }
+
+                return null;
+              })
+              .catch(() => null);
+
             if (newQueueReportLink) {
-              this._logStep('Found Queue Report link after clicking Queue menu', newQueueReportLink);
-              
+              this._logStep(
+                'Found Queue Report link after clicking Queue menu',
+                newQueueReportLink
+              );
+
               // Click based on type
               try {
                 let clicked = false;
@@ -2388,16 +2697,26 @@ export class ClinicAssistAutomation {
                     clicked = true;
                   }
                 }
-                
+
                 if (clicked) {
                   await this.page.waitForTimeout(2000);
-                  
+
                   const finalPageUrl = this.page.url();
                   const finalFrameUrl = kind === 'frame' ? root.url() : null;
-                  const ok = finalPageUrl.includes('QueueReport') || (finalFrameUrl && finalFrameUrl.includes('QueueReport'));
+                  const ok =
+                    finalPageUrl.includes('QueueReport') ||
+                    (finalFrameUrl && finalFrameUrl.includes('QueueReport'));
                   if (ok) {
-                    this._logStep('Successfully navigated to QueueReport page', { pageUrl: finalPageUrl, frameUrl: finalFrameUrl });
-                    await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true }).catch(() => {});
+                    this._logStep('Successfully navigated to QueueReport page', {
+                      pageUrl: finalPageUrl,
+                      frameUrl: finalFrameUrl,
+                    });
+                    await this.page
+                      .screenshot({
+                        path: 'screenshots/clinic-assist-queue-list.png',
+                        fullPage: true,
+                      })
+                      .catch(() => {});
                     return true;
                   }
                 }
@@ -2410,25 +2729,31 @@ export class ClinicAssistAutomation {
           this._logStep('Error clicking Queue menu link', { error: e.message });
         }
       }
-      
+
       const linkToUse = queueReportLink || queueReportByText;
-      
+
       if (linkToUse) {
         this._logStep('Found Queue Report link', linkToUse);
-        
+
         // Try to click by href first
         if (linkToUse.href) {
           try {
-            const linkLocator = this.page.locator(`a[href*="${linkToUse.href.split('/').pop()}"]`).first();
+            const linkLocator = this.page
+              .locator(`a[href*="${linkToUse.href.split('/').pop()}"]`)
+              .first();
             if ((await linkLocator.count().catch(() => 0)) > 0) {
               await linkLocator.click();
               await this.page.waitForLoadState('domcontentloaded').catch(() => {});
               await this.page.waitForTimeout(2000);
-              
+
               const finalUrl = this.page.url();
               if (finalUrl.includes('QueueReport')) {
-                this._logStep('Successfully navigated to Queue List report page via link', { url: finalUrl });
-                await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true }).catch(() => {});
+                this._logStep('Successfully navigated to Queue List report page via link', {
+                  url: finalUrl,
+                });
+                await this.page
+                  .screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true })
+                  .catch(() => {});
                 await this._dismissUpdateUserInfoIfPresent().catch(() => false);
                 return true;
               }
@@ -2437,7 +2762,7 @@ export class ClinicAssistAutomation {
             this._logStep('Error clicking link by href', { error: e.message });
           }
         }
-        
+
         // Try clicking by text
         if (linkToUse.text) {
           try {
@@ -2446,11 +2771,15 @@ export class ClinicAssistAutomation {
               await linkLocator.click();
               await this.page.waitForLoadState('domcontentloaded').catch(() => {});
               await this.page.waitForTimeout(2000);
-              
+
               const finalUrl = this.page.url();
               if (finalUrl.includes('QueueReport')) {
-                this._logStep('Successfully navigated to Queue List report page via text', { url: finalUrl });
-                await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true }).catch(() => {});
+                this._logStep('Successfully navigated to Queue List report page via text', {
+                  url: finalUrl,
+                });
+                await this.page
+                  .screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true })
+                  .catch(() => {});
                 await this._dismissUpdateUserInfoIfPresent().catch(() => false);
                 return true;
               }
@@ -2465,13 +2794,15 @@ export class ClinicAssistAutomation {
       // use id=60017. Try clicking any queue-related report item we can find.
       try {
         const patterns = [/queue\s*report/i, /queue\s*list/i, /queue\s*listing/i, /daily\s*queue/i];
-        const clickable = root.locator('a, button, [role="menuitem"], [onclick]').filter({ hasText: /queue/i });
+        const clickable = root
+          .locator('a, button, [role="menuitem"], [onclick]')
+          .filter({ hasText: /queue/i });
         const n = Math.min(await clickable.count().catch(() => 0), 60);
         for (let i = 0; i < n; i++) {
           const el = clickable.nth(i);
           const text = ((await el.textContent().catch(() => '')) || '').replace(/\s+/g, ' ').trim();
           if (!text) continue;
-          if (!patterns.some((re) => re.test(text))) continue;
+          if (!patterns.some(re => re.test(text))) continue;
           if (/^queue$/i.test(text)) continue; // likely category toggle, not a report
 
           this._logStep('Discovery click candidate for queue report', { text });
@@ -2483,9 +2814,19 @@ export class ClinicAssistAutomation {
           if (afterPage !== before) {
             this._logStep('After discovery click', { before, afterPage, afterFrame, text });
           }
-          if (afterPage.includes('QueueReport') || afterPage.includes('QueueLog') || (afterFrame && (afterFrame.includes('QueueReport') || afterFrame.includes('QueueLog')))) {
-            this._logStep('Successfully navigated to Queue report via discovery click', { pageUrl: afterPage, frameUrl: afterFrame, text });
-            await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true }).catch(() => {});
+          if (
+            afterPage.includes('QueueReport') ||
+            afterPage.includes('QueueLog') ||
+            (afterFrame && (afterFrame.includes('QueueReport') || afterFrame.includes('QueueLog')))
+          ) {
+            this._logStep('Successfully navigated to Queue report via discovery click', {
+              pageUrl: afterPage,
+              frameUrl: afterFrame,
+              text,
+            });
+            await this.page
+              .screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true })
+              .catch(() => {});
             await this._dismissUpdateUserInfoIfPresent().catch(() => false);
             return true;
           }
@@ -2493,41 +2834,60 @@ export class ClinicAssistAutomation {
       } catch (e) {
         // Non-fatal; continue to direct URL fallback.
       }
-      
+
       // NOTE: Direct URL navigation commonly triggers "Access Denied" in Clinic Assist.
       // If we reached here, keep it as a hard failure so we can fix the selectors/iframe path.
-      // Fallback: Try direct navigation to /QueueLog/QueueReport 
+      // Fallback: Try direct navigation to /QueueLog/QueueReport
       // Since we're already on Reports page, we should have the right session context
       this._logStep('Trying direct navigation to /QueueLog/QueueReport from Reports page context');
       const currentUrl = new URL(this.page.url());
       const queueReportUrl = new URL('/QueueLog/QueueReport', currentUrl.origin).toString();
-      
-      this._logStep('Navigating to QueueReport URL', { url: queueReportUrl, fromUrl: currentUrl.href });
-      
+
+      this._logStep('Navigating to QueueReport URL', {
+        url: queueReportUrl,
+        fromUrl: currentUrl.href,
+      });
+
       // Try navigating - from Reports page context this should work
       await this.page.goto(queueReportUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
       await this.page.waitForTimeout(2000);
-      
+
       const finalUrl = this.page.url();
-      
+
       if (finalUrl.includes('QueueReport')) {
-        this._logStep('Successfully navigated to Queue List report page via direct URL', { url: finalUrl });
-        await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true }).catch(() => {});
+        this._logStep('Successfully navigated to Queue List report page via direct URL', {
+          url: finalUrl,
+        });
+        await this.page
+          .screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true })
+          .catch(() => {});
         await this._dismissUpdateUserInfoIfPresent().catch(() => false);
         return true;
       } else if (finalUrl.includes('Error') || finalUrl.includes('Access Denied')) {
-        this._logStep('Navigation failed - Access Denied or Error page. May need to navigate from ReportsMenu first.', { url: finalUrl });
-        await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list-error.png', fullPage: true }).catch(() => {});
+        this._logStep(
+          'Navigation failed - Access Denied or Error page. May need to navigate from ReportsMenu first.',
+          { url: finalUrl }
+        );
+        await this.page
+          .screenshot({ path: 'screenshots/clinic-assist-queue-list-error.png', fullPage: true })
+          .catch(() => {});
         // Try navigating to ReportsMenu first, then to QueueReport
         try {
-          await this.page.goto(`${currentUrl.origin}/ReportsMenu/ReportsMenu`, { waitUntil: 'domcontentloaded', timeout: 10000 });
+          await this.page.goto(`${currentUrl.origin}/ReportsMenu/ReportsMenu`, {
+            waitUntil: 'domcontentloaded',
+            timeout: 10000,
+          });
           await this.page.waitForTimeout(2000);
           await this.page.goto(queueReportUrl, { waitUntil: 'domcontentloaded', timeout: 15000 });
           await this.page.waitForTimeout(2000);
           const retryUrl = this.page.url();
           if (retryUrl.includes('QueueReport')) {
-            this._logStep('Successfully navigated via ReportsMenu → QueueReport', { url: retryUrl });
-            await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true }).catch(() => {});
+            this._logStep('Successfully navigated via ReportsMenu → QueueReport', {
+              url: retryUrl,
+            });
+            await this.page
+              .screenshot({ path: 'screenshots/clinic-assist-queue-list.png', fullPage: true })
+              .catch(() => {});
             await this._dismissUpdateUserInfoIfPresent().catch(() => false);
             return true;
           }
@@ -2535,7 +2895,7 @@ export class ClinicAssistAutomation {
           this._logStep('Retry navigation also failed', { error: retryError.message });
         }
       }
-      
+
       this._logStep('Could not navigate to Queue Report page', { finalUrl });
       return false;
     } catch (error) {
@@ -2543,7 +2903,7 @@ export class ClinicAssistAutomation {
       return false;
     }
   }
-  
+
   /**
    * Search Queue List by date
    * @param {string} date - Date in YYYY-MM-DD format
@@ -2556,7 +2916,7 @@ export class ClinicAssistAutomation {
       // If the "Update User Info" modal is open, its "..._update" ids contain "date" and can confuse
       // date-input discovery (e.g., "txtUserID_update" includes "update" -> contains "date").
       await this._dismissUpdateUserInfoIfPresent().catch(() => false);
-      
+
       // Parse date to different formats that might be needed
       const dateParts = date.split('-');
       const dateFormats = {
@@ -2568,7 +2928,7 @@ export class ClinicAssistAutomation {
 
       // Try to find date input field - look for input near "Date" label
       // The date field is likely labeled "Date" on the QueueReport page
-      const dateInputSelectors = [
+      const _dateInputSelectors = [
         'input[name*="date" i]',
         'input[id*="date" i]',
         'input[placeholder*="date" i]',
@@ -2579,59 +2939,65 @@ export class ClinicAssistAutomation {
       ];
 
       let dateFilled = false;
-      
+
       // Try to find date input by looking for label "Date" and then the input next to it
-      const dateInput = await this.page.evaluate((dateFormats) => {
-        const norm = (s) => (s || '').trim().toLowerCase();
-        
-        // Find label with "Date" text
-        const labels = Array.from(document.querySelectorAll('label, td, th, div, span'));
-        let dateLabel = null;
-        for (const label of labels) {
-          const text = norm(label.textContent || label.innerText);
-          if (text === 'date' || text.startsWith('date ')) {
-            dateLabel = label;
-            break;
-          }
-        }
-        
-        if (dateLabel) {
-          // Find input near this label
-          const parent = dateLabel.closest('tr, div, form, fieldset');
-          if (parent) {
-            const inputs = parent.querySelectorAll('input[type="text"], input[type="date"], input:not([type="button"]):not([type="submit"]):not([type="hidden"])');
-            if (inputs.length > 0) {
-              return {
-                selector: null, // Will use direct reference
-                element: inputs[0],
-              };
+      const _dateInput = await this.page
+        .evaluate(_dateFormats => {
+          const norm = s => (s || '').trim().toLowerCase();
+
+          // Find label with "Date" text
+          const labels = Array.from(document.querySelectorAll('label, td, th, div, span'));
+          let dateLabel = null;
+          for (const label of labels) {
+            const text = norm(label.textContent || label.innerText);
+            if (text === 'date' || text.startsWith('date ')) {
+              dateLabel = label;
+              break;
             }
           }
-        }
-        
-        // Fallback: find first text input that might be date
-        const textInputs = document.querySelectorAll('input[type="text"], input[type="date"]');
-        for (const input of textInputs) {
-          const name = norm(input.name || '');
-          const id = norm(input.id || '');
-          if (name.includes('date') || id.includes('date')) {
-            return { selector: null, element: input };
+
+          if (dateLabel) {
+            // Find input near this label
+            const parent = dateLabel.closest('tr, div, form, fieldset');
+            if (parent) {
+              const inputs = parent.querySelectorAll(
+                'input[type="text"], input[type="date"], input:not([type="button"]):not([type="submit"]):not([type="hidden"])'
+              );
+              if (inputs.length > 0) {
+                return {
+                  selector: null, // Will use direct reference
+                  element: inputs[0],
+                };
+              }
+            }
           }
-        }
-        
-        return null;
-      }, dateFormats).catch(() => null);
+
+          // Fallback: find first text input that might be date
+          const textInputs = document.querySelectorAll('input[type="text"], input[type="date"]');
+          for (const input of textInputs) {
+            const name = norm(input.name || '');
+            const id = norm(input.id || '');
+            if (name.includes('date') || id.includes('date')) {
+              return { selector: null, element: input };
+            }
+          }
+
+          return null;
+        }, dateFormats)
+        .catch(() => null);
 
       // OLD CODE DISABLED - Using new datepicker interaction code below instead
       // The new code at lines 1659+ handles datepicker interaction more robustly
       // if (dateInput && dateInput.element) {
       //   ... old code disabled ...
       // }
-      
+
       // Find ALL date inputs on the page (there might be start and end date)
       const allDateInputs = await this.page.evaluate(() => {
-        const inputs = Array.from(document.querySelectorAll('input[type="text"], input[type="date"]'));
-        const hasDate = (s) => {
+        const inputs = Array.from(
+          document.querySelectorAll('input[type="text"], input[type="date"]')
+        );
+        const hasDate = s => {
           const t = (s || '').toLowerCase();
           // Avoid false positives like "..._update" which contains "date"
           if (t.includes('update')) return false;
@@ -2650,140 +3016,196 @@ export class ClinicAssistAutomation {
             value: input.value || '',
           }));
       });
-      
-      this._logStep('Found date inputs on page', { count: allDateInputs.length, inputs: allDateInputs });
-      
+
+      this._logStep('Found date inputs on page', {
+        count: allDateInputs.length,
+        inputs: allDateInputs,
+      });
+
       // IMPORTANT: Try datepicker calendar interaction FIRST (before direct fill)
       // This ensures we properly use the datepicker widget instead of direct input fill
-      
+
       // Try datepicker interaction FIRST - don't set dateFilled until we verify it worked
       if (allDateInputs.length > 0) {
         const targetDay = dateParts[2];
         const targetMonth = dateParts[1];
         const targetYear = dateParts[0];
         const expectedDate = `${targetDay}/${targetMonth}/${targetYear}`;
-        
+
         // Try the first date input with datepicker
         const firstDateInput = allDateInputs[0];
-        const selector = firstDateInput.id 
-          ? `#${firstDateInput.id}` 
-          : firstDateInput.name 
+        const selector = firstDateInput.id
+          ? `#${firstDateInput.id}`
+          : firstDateInput.name
             ? `input[name="${firstDateInput.name}"]`
             : 'input[name*="date" i]';
-        
+
         this._logStep('Attempting datepicker interaction', { selector, targetDate: expectedDate });
-        
+
         try {
           const dateInputLocator = this.page.locator(selector).first();
-          if (await dateInputLocator.count() > 0) {
+          if ((await dateInputLocator.count()) > 0) {
             // Click the date input first to open calendar picker
             await dateInputLocator.click();
             await this.page.waitForTimeout(2000); // Wait longer for calendar to appear
-            
+
             // Wait for calendar to appear
             await this.page.waitForTimeout(1000);
-                
-                // First, check if we need to navigate to the correct month/year
-                // Look for month/year navigation buttons or dropdowns
-                const currentMonthYear = await this.page.evaluate(() => {
-                  const cal = document.querySelector('.calendar, .datepicker, [class*="picker"], [class*="calendar"]');
-                  if (cal) {
-                    const text = cal.textContent || '';
-                    const monthMatch = text.match(/(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i);
-                    const yearMatch = text.match(/202[0-9]/);
-                    return { month: monthMatch ? monthMatch[0] : null, year: yearMatch ? yearMatch[0] : null };
-                  }
-                  return null;
-                });
-            
-            this._logStep('Calendar month/year check', { current: currentMonthYear, target: { month: targetMonth, year: targetYear } });
-            
+
+            // First, check if we need to navigate to the correct month/year
+            // Look for month/year navigation buttons or dropdowns
+            const currentMonthYear = await this.page.evaluate(() => {
+              const cal = document.querySelector(
+                '.calendar, .datepicker, [class*="picker"], [class*="calendar"]'
+              );
+              if (cal) {
+                const text = cal.textContent || '';
+                const monthMatch = text.match(
+                  /(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i
+                );
+                const yearMatch = text.match(/202[0-9]/);
+                return {
+                  month: monthMatch ? monthMatch[0] : null,
+                  year: yearMatch ? yearMatch[0] : null,
+                };
+              }
+              return null;
+            });
+
+            this._logStep('Calendar month/year check', {
+              current: currentMonthYear,
+              target: { month: targetMonth, year: targetYear },
+            });
+
             // Wait for datepicker calendar to appear and be visible
             await this.page.waitForTimeout(2000);
-            
+
             // Use JavaScript to set the date via datepicker API if available
             // Try multiple formats since Bootstrap Datepicker can accept different formats
-            const dateSetViaJS = await this.page.evaluate((selector, targetDate, day, month, year) => {
-              const input = document.querySelector(selector);
-              if (!input) return { success: false, reason: 'input not found' };
-              
-              // Try Bootstrap Datepicker API
-              if (typeof jQuery !== 'undefined' && jQuery(input).datepicker) {
-                try {
-                  // Try 1: Date object (most reliable - month is 0-indexed, so month-1)
-                  const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-                  jQuery(input).datepicker('setDate', dateObj);
-                  const value1 = input.value || '';
-                  if (value1 && (value1.includes(day) || value1.includes(year))) {
-                    return { success: true, method: 'jQuery datepicker setDate (Date object)', dateSet: value1 };
+            const dateSetViaJS = await this.page
+              .evaluate(
+                (selector, targetDate, day, month, year) => {
+                  const input = document.querySelector(selector);
+                  if (!input) return { success: false, reason: 'input not found' };
+
+                  // Try Bootstrap Datepicker API
+                  if (typeof jQuery !== 'undefined' && jQuery(input).datepicker) {
+                    try {
+                      // Try 1: Date object (most reliable - month is 0-indexed, so month-1)
+                      const dateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                      jQuery(input).datepicker('setDate', dateObj);
+                      const value1 = input.value || '';
+                      if (value1 && (value1.includes(day) || value1.includes(year))) {
+                        return {
+                          success: true,
+                          method: 'jQuery datepicker setDate (Date object)',
+                          dateSet: value1,
+                        };
+                      }
+
+                      // Try 2: DD/MM/YYYY string format (matches input field format)
+                      jQuery(input).datepicker('setDate', targetDate);
+                      const value2 = input.value || '';
+                      if (value2 && (value2.includes(day) || value2.includes(year))) {
+                        return {
+                          success: true,
+                          method: 'jQuery datepicker setDate (DD/MM/YYYY string)',
+                          dateSet: value2,
+                        };
+                      }
+
+                      // Try 3: MM/DD/YYYY format (US format)
+                      const usFormat = `${month}/${day}/${year}`;
+                      jQuery(input).datepicker('setDate', usFormat);
+                      const value3 = input.value || '';
+                      if (value3 && (value3.includes(day) || value3.includes(year))) {
+                        return {
+                          success: true,
+                          method: 'jQuery datepicker setDate (MM/DD/YYYY string)',
+                          dateSet: value3,
+                        };
+                      }
+
+                      return {
+                        success: false,
+                        reason: 'datepicker setDate did not update input value',
+                        values: { v1: value1, v2: value2, v3: value3 },
+                      };
+                    } catch (e) {
+                      return { success: false, reason: 'jQuery datepicker error: ' + e.message };
+                    }
                   }
-                  
-                  // Try 2: DD/MM/YYYY string format (matches input field format)
-                  jQuery(input).datepicker('setDate', targetDate);
-                  const value2 = input.value || '';
-                  if (value2 && (value2.includes(day) || value2.includes(year))) {
-                    return { success: true, method: 'jQuery datepicker setDate (DD/MM/YYYY string)', dateSet: value2 };
-                  }
-                  
-                  // Try 3: MM/DD/YYYY format (US format)
-                  const usFormat = `${month}/${day}/${year}`;
-                  jQuery(input).datepicker('setDate', usFormat);
-                  const value3 = input.value || '';
-                  if (value3 && (value3.includes(day) || value3.includes(year))) {
-                    return { success: true, method: 'jQuery datepicker setDate (MM/DD/YYYY string)', dateSet: value3 };
-                  }
-                  
-                  return { success: false, reason: 'datepicker setDate did not update input value', values: { v1: value1, v2: value2, v3: value3 } };
-                } catch (e) {
-                  return { success: false, reason: 'jQuery datepicker error: ' + e.message };
-                }
-              }
-              
-              return { success: false, reason: 'jQuery datepicker not available' };
-            }, selector, expectedDate, targetDay, targetMonth, targetYear).catch((e) => ({ success: false, reason: 'evaluate error: ' + e.message }));
-            
+
+                  return { success: false, reason: 'jQuery datepicker not available' };
+                },
+                selector,
+                expectedDate,
+                targetDay,
+                targetMonth,
+                targetYear
+              )
+              .catch(e => ({ success: false, reason: 'evaluate error: ' + e.message }));
+
             if (dateSetViaJS.success) {
               await this.page.waitForTimeout(500);
               const verifyValue = await dateInputLocator.inputValue().catch(() => '');
-              if (verifyValue && (verifyValue.includes(targetDay) || verifyValue.includes(targetMonth) || verifyValue.includes(targetYear))) {
+              if (
+                verifyValue &&
+                (verifyValue.includes(targetDay) ||
+                  verifyValue.includes(targetMonth) ||
+                  verifyValue.includes(targetYear))
+              ) {
                 dateFilled = true;
-                this._logStep('Date set via JavaScript datepicker API', { selector, dateSet: dateSetViaJS.dateSet, verifyValue });
+                this._logStep('Date set via JavaScript datepicker API', {
+                  selector,
+                  dateSet: dateSetViaJS.dateSet,
+                  verifyValue,
+                });
                 // Date successfully set via API
               } else {
-                this._logStep('Date set via JS but value not verified', { verifyValue, expected: expectedDate });
+                this._logStep('Date set via JS but value not verified', {
+                  verifyValue,
+                  expected: expectedDate,
+                });
               }
             } else {
-              this._logStep('JavaScript datepicker API not available, using manual calendar selection', { reason: dateSetViaJS.reason });
+              this._logStep(
+                'JavaScript datepicker API not available, using manual calendar selection',
+                { reason: dateSetViaJS.reason }
+              );
             }
-            
+
             // Manual calendar selection - check if datepicker is visible
             if (!dateFilled) {
               const datepickerState = await this.page.evaluate(() => {
-                  const datepicker = document.querySelector('.datepicker, [class*="datepicker"]');
-                  if (!datepicker) return { found: false };
-                  
-                  const rect = datepicker.getBoundingClientRect();
-                  const isVisible = rect.width > 0 && rect.height > 0 && datepicker.offsetParent !== null;
-                  const activeView = datepicker.querySelector('.datepicker-days:not(.hide), .datepicker-months:not(.hide), .datepicker-years:not(.hide)');
-                  const switchElement = datepicker.querySelector('.datepicker-switch');
-                  
-                  return {
-                    found: true,
-                    isVisible,
-                    visible: isVisible,
-                    position: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
-                    activeView: activeView ? activeView.className : null,
-                    currentMonth: switchElement?.textContent || '',
-                  };
-                });
-              
+                const datepicker = document.querySelector('.datepicker, [class*="datepicker"]');
+                if (!datepicker) return { found: false };
+
+                const rect = datepicker.getBoundingClientRect();
+                const isVisible =
+                  rect.width > 0 && rect.height > 0 && datepicker.offsetParent !== null;
+                const activeView = datepicker.querySelector(
+                  '.datepicker-days:not(.hide), .datepicker-months:not(.hide), .datepicker-years:not(.hide)'
+                );
+                const switchElement = datepicker.querySelector('.datepicker-switch');
+
+                return {
+                  found: true,
+                  isVisible,
+                  visible: isVisible,
+                  position: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+                  activeView: activeView ? activeView.className : null,
+                  currentMonth: switchElement?.textContent || '',
+                };
+              });
+
               this._logStep('Datepicker state after click', datepickerState);
-              
+
               // If datepicker is not visible, try clicking again or opening it via JavaScript
               if (datepickerState.found && !datepickerState.isVisible) {
                 this._logStep('Datepicker found but not visible, trying to show it');
                 // Try to trigger datepicker via JavaScript
-                await this.page.evaluate((selector) => {
+                await this.page.evaluate(selector => {
                   const input = document.querySelector(selector);
                   if (input) {
                     if (typeof jQuery !== 'undefined' && jQuery(input).datepicker) {
@@ -2795,47 +3217,75 @@ export class ClinicAssistAutomation {
                   }
                 }, selector);
                 await this.page.waitForTimeout(2000);
-                
+
                 // Re-check visibility
                 const recheck = await this.page.evaluate(() => {
                   const datepicker = document.querySelector('.datepicker, [class*="datepicker"]');
                   if (!datepicker) return { visible: false };
                   const rect = datepicker.getBoundingClientRect();
-                  return { visible: rect.width > 0 && rect.height > 0 && datepicker.offsetParent !== null };
+                  return {
+                    visible: rect.width > 0 && rect.height > 0 && datepicker.offsetParent !== null,
+                  };
                 });
-                
+
                 if (!recheck.visible) {
                   this._logStep('Datepicker still not visible after trying to show it');
                 }
               }
-              
+
               // Manual calendar selection using Playwright locators (more reliable than JavaScript clicks)
               if (datepickerState.found && datepickerState.isVisible) {
-                this._logStep('Attempting manual calendar selection with Playwright locators', { targetDate: expectedDate });
-                
+                this._logStep('Attempting manual calendar selection with Playwright locators', {
+                  targetDate: expectedDate,
+                });
+
                 try {
                   // Get current month/year text from the switch
-                  const currentText = await this.page.locator('.datepicker-switch').textContent().catch(() => '');
-                  this._logStep('Current datepicker view', { currentText, targetYear, targetMonth });
-                  
-                  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                  const currentText = await this.page
+                    .locator('.datepicker-switch')
+                    .textContent()
+                    .catch(() => '');
+                  this._logStep('Current datepicker view', {
+                    currentText,
+                    targetYear,
+                    targetMonth,
+                  });
+
+                  const monthNames = [
+                    'January',
+                    'February',
+                    'March',
+                    'April',
+                    'May',
+                    'June',
+                    'July',
+                    'August',
+                    'September',
+                    'October',
+                    'November',
+                    'December',
+                  ];
                   const targetMonthName = monthNames[parseInt(targetMonth) - 1];
                   const monthIndex = parseInt(targetMonth) - 1;
-                  
+
                   // Navigate to year if needed
                   if (!currentText.includes(targetYear)) {
                     this._logStep('Navigating to year view', { targetYear });
                     await this.page.locator('.datepicker-switch').click();
-                    await this.page.locator('.datepicker-years').waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+                    await this.page
+                      .locator('.datepicker-years')
+                      .waitFor({ state: 'visible', timeout: 5000 })
+                      .catch(() => {});
                     await this.page.waitForTimeout(500);
-                    
+
                     // Click the target year
-                    const yearLocator = this.page.locator('.datepicker-years span, .datepicker-years .year')
+                    const yearLocator = this.page
+                      .locator('.datepicker-years span, .datepicker-years .year')
                       .filter({ hasText: new RegExp(`^${targetYear}$`) })
                       .filter({ hasNotClass: 'disabled' })
                       .first();
-                    
-                    if (await yearLocator.count() > 0) {
+
+                    if ((await yearLocator.count()) > 0) {
                       await yearLocator.click();
                       await this.page.waitForTimeout(500);
                       this._logStep('Year selected', { targetYear });
@@ -2843,30 +3293,50 @@ export class ClinicAssistAutomation {
                       this._logStep('Year not found or disabled', { targetYear });
                     }
                   }
-                  
+
                   // Navigate to month if needed
                   // After year selection, we should be in months view, so get text from months view switch or days view
-                  const currentTextAfterYear = await this.page.locator('.datepicker-months .datepicker-switch, .datepicker-days .datepicker-switch').first().textContent().catch(() => '');
-                  if (!currentTextAfterYear.includes(targetMonthName) && !currentTextAfterYear.includes(targetMonth)) {
+                  const currentTextAfterYear = await this.page
+                    .locator(
+                      '.datepicker-months .datepicker-switch, .datepicker-days .datepicker-switch'
+                    )
+                    .first()
+                    .textContent()
+                    .catch(() => '');
+                  if (
+                    !currentTextAfterYear.includes(targetMonthName) &&
+                    !currentTextAfterYear.includes(targetMonth)
+                  ) {
                     this._logStep('Navigating to month view', { targetMonthName });
                     // Click the switch in the current view (could be years or days view)
-                    const switchInCurrentView = this.page.locator('.datepicker-years .datepicker-switch, .datepicker-days .datepicker-switch').first();
-                    if (await switchInCurrentView.count() > 0) {
+                    const switchInCurrentView = this.page
+                      .locator(
+                        '.datepicker-years .datepicker-switch, .datepicker-days .datepicker-switch'
+                      )
+                      .first();
+                    if ((await switchInCurrentView.count()) > 0) {
                       await switchInCurrentView.click();
-                      await this.page.locator('.datepicker-months').waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+                      await this.page
+                        .locator('.datepicker-months')
+                        .waitFor({ state: 'visible', timeout: 5000 })
+                        .catch(() => {});
                       await this.page.waitForTimeout(500);
                     }
-                    
+
                     // Click the target month using data-month attribute or text
-                    const monthLocator = this.page.locator(`.datepicker-months span[data-month="${monthIndex}"], .datepicker-months .month[data-month="${monthIndex}"]`)
+                    const monthLocator = this.page
+                      .locator(
+                        `.datepicker-months span[data-month="${monthIndex}"], .datepicker-months .month[data-month="${monthIndex}"]`
+                      )
                       .first();
-                    
-                    if (await monthLocator.count() === 0) {
+
+                    if ((await monthLocator.count()) === 0) {
                       // Fallback: try by text
-                      const monthTextLocator = this.page.locator('.datepicker-months span, .datepicker-months .month')
+                      const monthTextLocator = this.page
+                        .locator('.datepicker-months span, .datepicker-months .month')
                         .filter({ hasText: new RegExp(targetMonthName, 'i') })
                         .first();
-                      if (await monthTextLocator.count() > 0) {
+                      if ((await monthTextLocator.count()) > 0) {
                         await monthTextLocator.click();
                         await this.page.waitForTimeout(500);
                         this._logStep('Month selected by text', { targetMonthName });
@@ -2877,103 +3347,148 @@ export class ClinicAssistAutomation {
                       this._logStep('Month selected by data-month', { monthIndex });
                     }
                   }
-                  
+
                   // Wait for days view to be visible
-                  await this.page.locator('.datepicker-days').waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+                  await this.page
+                    .locator('.datepicker-days')
+                    .waitFor({ state: 'visible', timeout: 5000 })
+                    .catch(() => {});
                   await this.page.waitForTimeout(500);
-                  
+
                   // Click the target day
                   this._logStep('Selecting day', { targetDay });
-                  const dayLocator = this.page.locator('.datepicker-days td.day')
+                  const dayLocator = this.page
+                    .locator('.datepicker-days td.day')
                     .filter({ hasText: new RegExp(`^${targetDay}$`) })
                     .filter({ hasNotClass: 'disabled' })
                     .filter({ hasNotClass: 'old' })
                     .filter({ hasNotClass: 'new' })
                     .first();
-                  
-                  if (await dayLocator.count() > 0) {
+
+                  if ((await dayLocator.count()) > 0) {
                     await dayLocator.click();
                     await this.page.waitForTimeout(500);
-                    
+
                     // Verify date was set
                     const verifyValue = await dateInputLocator.inputValue().catch(() => '');
-                    if (verifyValue && (verifyValue.includes(targetDay) || verifyValue.includes(targetMonth) || verifyValue.includes(targetYear))) {
+                    if (
+                      verifyValue &&
+                      (verifyValue.includes(targetDay) ||
+                        verifyValue.includes(targetMonth) ||
+                        verifyValue.includes(targetYear))
+                    ) {
                       dateFilled = true;
-                      this._logStep('Date selected from datepicker via Playwright locators', { selector, finalValue: verifyValue, targetDate: expectedDate });
+                      this._logStep('Date selected from datepicker via Playwright locators', {
+                        selector,
+                        finalValue: verifyValue,
+                        targetDate: expectedDate,
+                      });
                     } else {
-                      this._logStep('Day clicked but date not updated in input', { verifyValue, targetDate: expectedDate });
+                      this._logStep('Day clicked but date not updated in input', {
+                        verifyValue,
+                        targetDate: expectedDate,
+                      });
                     }
                   } else {
-                    this._logStep('Day not found or disabled', { targetDay, reason: 'day locator count is 0' });
-                    
+                    this._logStep('Day not found or disabled', {
+                      targetDay,
+                      reason: 'day locator count is 0',
+                    });
+
                     // Log available days for debugging
-                    const availableDays = await this.page.locator('.datepicker-days td.day:not(.disabled):not(.old):not(.new)').allTextContents().catch(() => []);
-                    this._logStep('Available days in calendar', { days: availableDays.slice(0, 15) });
+                    const availableDays = await this.page
+                      .locator('.datepicker-days td.day:not(.disabled):not(.old):not(.new)')
+                      .allTextContents()
+                      .catch(() => []);
+                    this._logStep('Available days in calendar', {
+                      days: availableDays.slice(0, 15),
+                    });
                   }
                 } catch (e) {
-                  this._logStep('Error during manual calendar selection', { error: e.message, stack: e.stack });
+                  this._logStep('Error during manual calendar selection', {
+                    error: e.message,
+                    stack: e.stack,
+                  });
                 }
               } else if (datepickerState.found && !datepickerState.isVisible) {
                 this._logStep('Datepicker not visible, cannot select date manually');
               }
             }
-            
+
             // LAST RESORT: fill directly with comprehensive event triggering
             // Only use if datepicker API and calendar clicks both failed
             // This should rarely be needed, but kept as fallback
             if (!dateFilled) {
-              this._logStep('All datepicker methods failed, using direct fill as last resort', { warning: 'This may not work correctly as it bypasses the datepicker widget' });
-              
+              this._logStep('All datepicker methods failed, using direct fill as last resort', {
+                warning: 'This may not work correctly as it bypasses the datepicker widget',
+              });
+
               const ddmmyyyy = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
               await dateInputLocator.clear();
               await dateInputLocator.fill(ddmmyyyy);
               await this.page.waitForTimeout(300);
-              
+
               // Trigger comprehensive events that datepicker widgets typically listen to
-              await this.page.evaluate((selector, dateValue) => {
-                const input = document.querySelector(selector);
-                if (input) {
-                  // Set value programmatically
-                  input.value = dateValue;
-                  
-                  // Trigger all possible events
-                  ['focus', 'input', 'change', 'blur'].forEach(eventType => {
-                    input.dispatchEvent(new Event(eventType, { bubbles: true, cancelable: true }));
-                  });
-                  
-                  // Try to trigger datepicker-specific events if jQuery is available
-                  if (typeof jQuery !== 'undefined') {
-                    const $input = jQuery(input);
-                    // Try to update datepicker if it exists
-                    if ($input.data('datepicker')) {
-                      try {
-                        $input.trigger('changeDate');
-                        $input.trigger('change');
-                      } catch (e) {
-                        // Ignore errors
+              await this.page
+                .evaluate(
+                  (selector, dateValue) => {
+                    const input = document.querySelector(selector);
+                    if (input) {
+                      // Set value programmatically
+                      input.value = dateValue;
+
+                      // Trigger all possible events
+                      ['focus', 'input', 'change', 'blur'].forEach(eventType => {
+                        input.dispatchEvent(
+                          new Event(eventType, { bubbles: true, cancelable: true })
+                        );
+                      });
+
+                      // Try to trigger datepicker-specific events if jQuery is available
+                      if (typeof jQuery !== 'undefined') {
+                        const $input = jQuery(input);
+                        // Try to update datepicker if it exists
+                        if ($input.data('datepicker')) {
+                          try {
+                            $input.trigger('changeDate');
+                            $input.trigger('change');
+                          } catch (e) {
+                            // Ignore errors
+                          }
+                        }
                       }
                     }
-                  }
-                }
-              }, selector, ddmmyyyy).catch(() => {});
-              
+                  },
+                  selector,
+                  ddmmyyyy
+                )
+                .catch(() => {});
+
               await dateInputLocator.press('Tab'); // Tab out to trigger change
               await this.page.waitForTimeout(500);
-              
+
               // Verify date was set
               const value = await dateInputLocator.inputValue().catch(() => '');
               if (value && (value.includes(dateParts[2]) || value.includes(dateParts[0]))) {
                 dateFilled = true;
-                this._logStep('Date filled via direct fill (last resort)', { format: 'DD/MM/YYYY', selector, value, warning: 'This bypasses datepicker widget - form may not recognize it' });
+                this._logStep('Date filled via direct fill (last resort)', {
+                  format: 'DD/MM/YYYY',
+                  selector,
+                  value,
+                  warning: 'This bypasses datepicker widget - form may not recognize it',
+                });
               } else {
-                this._logStep('Direct fill also failed - date may not be recognized by form', { value, expected: ddmmyyyy });
+                this._logStep('Direct fill also failed - date may not be recognized by form', {
+                  value,
+                  expected: ddmmyyyy,
+                });
               }
             }
           }
         } catch (e) {
           this._logStep('Error in datepicker interaction', { error: e.message });
         }
-        
+
         // If date was filled successfully via datepicker, we're done
         if (dateFilled) {
           this._logStep('Date successfully set via datepicker', { date: expectedDate });
@@ -2982,7 +3497,7 @@ export class ClinicAssistAutomation {
 
       // Click Generate button - prioritize "Generate" button (green button on QueueReport page)
       const searchSelectors = [
-        'button:has-text("Generate")',  // Primary - this is the green Generate button
+        'button:has-text("Generate")', // Primary - this is the green Generate button
         'button:has-text("Generate Report")',
         'input[type="button"][value*="Generate" i]',
         'input[type="submit"][value*="Generate" i]',
@@ -3006,44 +3521,66 @@ export class ClinicAssistAutomation {
               await this.page.waitForLoadState('networkidle').catch(() => {});
               // Wait longer for the report to generate - tables may take time to populate
               await this.page.waitForTimeout(5000);
-              
+
               // After Generate, check if there are Excel/PDF export buttons
               // The report might be displayed as PDF or we need to click Excel to download
-              const exportInfo = await this.page.evaluate(() => {
-                const buttons = Array.from(document.querySelectorAll('button, a, input[type="button"]'));
-                const exports = buttons.map(btn => ({
-                  text: (btn.textContent || btn.value || '').trim(),
-                  href: btn.href || '',
-                  onclick: btn.getAttribute('onclick') || '',
-                  className: btn.className || '',
-                  id: btn.id || '',
-                })).filter(btn => {
-                  const text = btn.text.toLowerCase();
-                  return text.includes('excel') || text.includes('pdf') || text.includes('export') ||
-                         text.includes('download') || btn.href.includes('.xlsx') || btn.href.includes('.pdf') ||
-                         btn.href.includes('.xls');
-                });
-                return exports;
-              }).catch(() => []);
-              
+              const exportInfo = await this.page
+                .evaluate(() => {
+                  const buttons = Array.from(
+                    document.querySelectorAll('button, a, input[type="button"]')
+                  );
+                  const exports = buttons
+                    .map(btn => ({
+                      text: (btn.textContent || btn.value || '').trim(),
+                      href: btn.href || '',
+                      onclick: btn.getAttribute('onclick') || '',
+                      className: btn.className || '',
+                      id: btn.id || '',
+                    }))
+                    .filter(btn => {
+                      const text = btn.text.toLowerCase();
+                      return (
+                        text.includes('excel') ||
+                        text.includes('pdf') ||
+                        text.includes('export') ||
+                        text.includes('download') ||
+                        btn.href.includes('.xlsx') ||
+                        btn.href.includes('.pdf') ||
+                        btn.href.includes('.xls')
+                      );
+                    });
+                  return exports;
+                })
+                .catch(() => []);
+
               if (exportInfo.length > 0) {
                 this._logStep('Found export buttons after Generate', { exports: exportInfo });
               }
-              
+
               // Wait for table, grid, PDF viewer, or export buttons to appear
               // Also check if page navigates to a new URL (some reports open in new page)
               await Promise.race([
-                this.page.waitForSelector('table, #queueLogGrid, iframe[src*="pdf"], embed[type*="pdf"], button:has-text("Excel"), a:has-text("Excel"), button:has-text("PDF"), a:has-text("PDF"), button:has-text("Export"), a:has-text("Export"), img[alt*="Excel"], img[alt*="PDF"]', { timeout: 15000 }).catch(() => {}),
+                this.page
+                  .waitForSelector(
+                    'table, #queueLogGrid, iframe[src*="pdf"], embed[type*="pdf"], button:has-text("Excel"), a:has-text("Excel"), button:has-text("PDF"), a:has-text("PDF"), button:has-text("Export"), a:has-text("Export"), img[alt*="Excel"], img[alt*="PDF"]',
+                    { timeout: 15000 }
+                  )
+                  .catch(() => {}),
                 this.page.waitForNavigation({ timeout: 15000 }).catch(() => {}),
               ]);
-              
+
               // Wait longer for report iframe to load
               await this.page.waitForTimeout(10000);
-              
+
               // Check if URL changed (might have navigated to report page)
               const currentUrl = this.page.url();
               this._logStep('Search/Generate executed', { selector, url: currentUrl });
-              await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list-results.png', fullPage: true }).catch(() => {});
+              await this.page
+                .screenshot({
+                  path: 'screenshots/clinic-assist-queue-list-results.png',
+                  fullPage: true,
+                })
+                .catch(() => {});
               searchClicked = true;
               break;
             }
@@ -3056,21 +3593,39 @@ export class ClinicAssistAutomation {
       if (!searchClicked) {
         this._logStep('Could not find search/generate button', { dateFilled });
         // Take screenshot to see what's on the page
-        await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list-no-button.png', fullPage: true }).catch(() => {});
+        await this.page
+          .screenshot({
+            path: 'screenshots/clinic-assist-queue-list-no-button.png',
+            fullPage: true,
+          })
+          .catch(() => {});
       }
-      
+
       return dateFilled || searchClicked; // Return true if date was filled OR search was clicked
     } catch (error) {
       this._logStep('Error searching queue list by date', { error: error.message });
       return false;
     }
   }
-  
+
   /**
    * Helper: Get month name from month number
    */
   _getMonthName(monthNum) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return months[parseInt(monthNum) - 1] || 'Jan';
   }
 
@@ -3084,32 +3639,40 @@ export class ClinicAssistAutomation {
       this._logStep('Extracting queue list results');
 
       const { root, kind } = await this._getQueueReportRoot();
-      const rootFrameLocator = typeof root.frameLocator === 'function'
-        ? root.frameLocator.bind(root)
-        : this.page.frameLocator.bind(this.page);
-      const evalInRoot = root.evaluate.bind(root);
-      const locInRoot = root.locator.bind(root);
+      const _rootFrameLocator =
+        typeof root.frameLocator === 'function'
+          ? root.frameLocator.bind(root)
+          : this.page.frameLocator.bind(this.page);
+      const _evalInRoot = root.evaluate.bind(root);
+      const _locInRoot = root.locator.bind(root);
 
       this._logStep('QueueReport extraction context', {
         kind,
         pageUrl: this.page.url(),
         frameUrl: kind === 'frame' ? root.url() : null,
       });
-      
+
       // Take a screenshot for debugging
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list-extraction.png', fullPage: true }).catch(() => {});
-      
+      await this.page
+        .screenshot({ path: 'screenshots/clinic-assist-queue-list-extraction.png', fullPage: true })
+        .catch(() => {});
+
       // Wait longer for iframe/PDF to load - report might take time to generate
       await this.page.waitForTimeout(8000);
-      
+
       // First, let's check what's actually on the page
       const pageInfo = await this.page.evaluate(() => {
         const iframes = Array.from(document.querySelectorAll('iframe'));
         const pdfIframes = iframes.filter(f => {
           const src = (f.src || '').toLowerCase();
-          return src.includes('reportviewer') || src.includes('pdf') || src.includes('queuelisting') || src.includes('report');
+          return (
+            src.includes('reportviewer') ||
+            src.includes('pdf') ||
+            src.includes('queuelisting') ||
+            src.includes('report')
+          );
         });
-        
+
         // Also check all table cells for any patient data
         const allTables = Array.from(document.querySelectorAll('table'));
         const tableRowsWithData = [];
@@ -3125,7 +3688,7 @@ export class ClinicAssistAutomation {
             tableRowsWithData.push({ tableIndex: idx, rowCount: dataRows.length });
           }
         });
-        
+
         return {
           url: window.location.href,
           title: document.title,
@@ -3141,12 +3704,12 @@ export class ClinicAssistAutomation {
           bodyText: document.body?.innerText?.substring(0, 1000) || '',
         };
       });
-      
+
       this._logStep('Page info', pageInfo);
-      
+
       // ALWAYS try to extract from iframe FIRST - the report is shown in iframe
       this._logStep('Checking for ReportViewer iframe...');
-      
+
       const iframeCheck = await this.page.evaluate(() => {
         const iframes = Array.from(document.querySelectorAll('iframe'));
         const reportViewerIframes = iframes.filter(f => {
@@ -3159,17 +3722,22 @@ export class ClinicAssistAutomation {
           srcs: reportViewerIframes.map(f => f.src),
         };
       });
-      
+
       this._logStep('Iframe check result', iframeCheck);
-      
+
       if (iframeCheck.reportViewerCount > 0) {
-        this._logStep('PDF iframe detected, waiting for it to load', { iframeCount: iframeCheck.reportViewerCount, srcs: iframeCheck.srcs });
+        this._logStep('PDF iframe detected, waiting for it to load', {
+          iframeCount: iframeCheck.reportViewerCount,
+          srcs: iframeCheck.srcs,
+        });
         await this.page.waitForTimeout(5000);
-        
+
         // Try to check if iframe has loaded content
         try {
-          const iframe = this.page.locator('iframe[src*="ReportViewer"], iframe[src*="queueListing"]').first();
-          if (await iframe.count() > 0) {
+          const iframe = this.page
+            .locator('iframe[src*="ReportViewer"], iframe[src*="queueListing"]')
+            .first();
+          if ((await iframe.count()) > 0) {
             // Wait for iframe to load
             await this.page.waitForTimeout(3000);
             this._logStep('ReportViewer iframe found, attempting to extract data');
@@ -3178,11 +3746,11 @@ export class ClinicAssistAutomation {
           this._logStep('Could not access iframe', { error: e.message });
         }
       }
-      
+
       // If we're on QueueReport page and jqGrid exists but is empty, try to find and use date filter
       if (pageInfo.url.includes('QueueReport') && pageInfo.hasJqGrid && pageInfo.jqGridRows === 0) {
         this._logStep('QueueReport page is empty, trying to find date filter');
-        
+
         // Look for date filter inputs or buttons
         const dateFilterSelectors = [
           'input[type="date"]',
@@ -3193,7 +3761,7 @@ export class ClinicAssistAutomation {
           'button:has-text("Search")',
           'a:has-text("Filter")',
         ];
-        
+
         for (const selector of dateFilterSelectors) {
           const element = this.page.locator(selector).first();
           if ((await element.count().catch(() => 0)) > 0) {
@@ -3211,29 +3779,35 @@ export class ClinicAssistAutomation {
           }
         }
       }
-      
+
       // Extract from iframe if it exists (already checked above)
       if (iframeCheck.reportViewerCount > 0) {
-        this._logStep('Attempting to extract data from ReportViewer iframe', { iframeCount: iframeCheck.reportViewerCount });
+        this._logStep('Attempting to extract data from ReportViewer iframe', {
+          iframeCount: iframeCheck.reportViewerCount,
+        });
         try {
           // Access iframe content - it's same-origin so we can access it!
           const iframeData = await this.page.evaluate(() => {
-            const iframe = document.querySelector('iframe[src*="ReportViewer"], iframe[src*="queueListing"]');
+            const iframe = document.querySelector(
+              'iframe[src*="ReportViewer"], iframe[src*="queueListing"]'
+            );
             if (!iframe) return null;
-            
+
             try {
               const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
               if (!iframeDoc) return null;
-              
+
               // Extract all text content
               const bodyText = iframeDoc.body?.innerText || '';
-              
+
               // Look for tables in iframe
               const tables = Array.from(iframeDoc.querySelectorAll('table'));
-              
+
               // Look for buttons/links in iframe (export buttons might be here)
-              const buttons = Array.from(iframeDoc.querySelectorAll('button, a, input[type="button"]'));
-              
+              const buttons = Array.from(
+                iframeDoc.querySelectorAll('button, a, input[type="button"]')
+              );
+
               // Extract table data
               const tableData = tables.map((table, idx) => {
                 const rows = Array.from(table.querySelectorAll('tr'));
@@ -3243,7 +3817,7 @@ export class ClinicAssistAutomation {
                 });
                 return { index: idx, rows: data, rowCount: rows.length };
               });
-              
+
               return {
                 bodyText: bodyText.substring(0, 5000), // Limit text size
                 tableCount: tables.length,
@@ -3260,51 +3834,53 @@ export class ClinicAssistAutomation {
               return { error: e.message };
             }
           });
-          
+
           if (iframeData && !iframeData.error) {
-            this._logStep('Successfully accessed iframe content', { 
-              tableCount: iframeData.tableCount, 
+            this._logStep('Successfully accessed iframe content', {
+              tableCount: iframeData.tableCount,
               buttonCount: iframeData.buttonCount,
-              bodyTextLength: iframeData.bodyText.length 
+              bodyTextLength: iframeData.bodyText.length,
             });
-            
+
             // Check for export buttons in iframe
             if (iframeData.buttonCount > 0) {
               this._logStep('Found buttons in iframe', { buttons: iframeData.buttons });
             }
-            
+
             // Extract data from tables in iframe
             if (iframeData.tableCount > 0) {
               this._logStep('Found tables in iframe', { tableCount: iframeData.tableCount });
-              
+
               // Parse tables to extract queue items
               const items = [];
               for (const table of iframeData.tables) {
                 // Look for rows with patient data (NRIC patterns, names, etc.)
                 for (const row of table.rows) {
                   if (row.length < 3) continue;
-                  
+
                   const rowText = row.join(' ').toLowerCase();
-                  
+
                   // Look for NRIC pattern
                   const nricMatch = rowText.match(/[stfg]\d{7}[a-z]/i);
                   if (nricMatch) {
                     const nric = nricMatch[0].toUpperCase();
-                    
+
                     // Find patient name (usually before NRIC or in first column)
                     let patientName = null;
                     for (const cell of row) {
                       const cellText = (cell || '').trim();
-                      if (cellText.length > 3 && 
-                          !/^\d+$/.test(cellText) && 
-                          !/[stfg]\d{7}[a-z]/i.test(cellText) &&
-                          !cellText.includes('$') &&
-                          !cellText.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
+                      if (
+                        cellText.length > 3 &&
+                        !/^\d+$/.test(cellText) &&
+                        !/[stfg]\d{7}[a-z]/i.test(cellText) &&
+                        !cellText.includes('$') &&
+                        !cellText.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)
+                      ) {
                         patientName = cellText;
                         break;
                       }
                     }
-                    
+
                     if (patientName || nric) {
                       items.push({
                         nric,
@@ -3316,20 +3892,22 @@ export class ClinicAssistAutomation {
                   }
                 }
               }
-              
+
               if (items.length > 0) {
                 this._logStep('Extracted items from iframe tables', { count: items.length });
                 return items;
               }
             }
-            
+
             // If no tables, try extracting from body text
             if (iframeData.bodyText) {
-              this._logStep('Extracting from iframe body text', { textLength: iframeData.bodyText.length });
-              
+              this._logStep('Extracting from iframe body text', {
+                textLength: iframeData.bodyText.length,
+              });
+
               const lines = iframeData.bodyText.split('\n');
               const items = [];
-              
+
               for (const line of lines) {
                 const nricMatch = line.match(/[STFGM]\d{7}[A-Z]/i);
                 if (nricMatch) {
@@ -3337,19 +3915,25 @@ export class ClinicAssistAutomation {
                   // Try to find patient name nearby
                   const lineIndex = lines.indexOf(line);
                   let patientName = null;
-                  
-                  for (let i = Math.max(0, lineIndex - 2); i <= Math.min(lines.length - 1, lineIndex + 2); i++) {
+
+                  for (
+                    let i = Math.max(0, lineIndex - 2);
+                    i <= Math.min(lines.length - 1, lineIndex + 2);
+                    i++
+                  ) {
                     const nearbyLine = lines[i].trim();
-                    if (nearbyLine.length > 3 && 
-                        !nric.includes(nearbyLine) &&
-                        !/^\d+$/.test(nearbyLine) &&
-                        !nearbyLine.includes('$') &&
-                        !nearbyLine.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
+                    if (
+                      nearbyLine.length > 3 &&
+                      !nric.includes(nearbyLine) &&
+                      !/^\d+$/.test(nearbyLine) &&
+                      !nearbyLine.includes('$') &&
+                      !nearbyLine.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)
+                    ) {
                       patientName = nearbyLine;
                       break;
                     }
                   }
-                  
+
                   items.push({
                     nric,
                     patientName,
@@ -3357,7 +3941,7 @@ export class ClinicAssistAutomation {
                   });
                 }
               }
-              
+
               if (items.length > 0) {
                 this._logStep('Extracted items from iframe text', { count: items.length });
                 return items;
@@ -3370,16 +3954,18 @@ export class ClinicAssistAutomation {
           this._logStep('Error extracting from iframe', { error: e.message });
         }
       }
-      
+
       // Fallback: Try old method if iframe extraction didn't work
       if (pageInfo.hasPDFIframes > 0 && pageInfo.jqGridRows === 0 && pageInfo.hasTables === 0) {
         this._logStep('Attempting to extract text from PDF iframe (fallback method)');
         try {
           // Try to get iframe content
           const iframeText = await this.page.evaluate(() => {
-            const iframe = document.querySelector('iframe[src*="ReportViewer"], iframe[src*="queueListing"]');
+            const iframe = document.querySelector(
+              'iframe[src*="ReportViewer"], iframe[src*="queueListing"]'
+            );
             if (!iframe) return null;
-            
+
             // Try to access iframe content (might fail if cross-origin)
             try {
               const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
@@ -3392,14 +3978,17 @@ export class ClinicAssistAutomation {
             }
             return null;
           });
-          
+
           if (iframeText) {
-            this._logStep('Extracted text from iframe', { textLength: iframeText.length, preview: iframeText.substring(0, 200) });
+            this._logStep('Extracted text from iframe', {
+              textLength: iframeText.length,
+              preview: iframeText.substring(0, 200),
+            });
             // Parse text from PDF - look for NRIC patterns and patient names
             const items = [];
             const lines = iframeText.split('\n');
-            let currentPatient = null;
-            
+            const _currentPatient = null;
+
             for (const line of lines) {
               // Look for NRIC pattern
               const nricMatch = line.match(/[STFGM]\d{7}[A-Z]/i);
@@ -3408,15 +3997,24 @@ export class ClinicAssistAutomation {
                 // Try to find patient name in nearby lines
                 let patientName = null;
                 const lineIndex = lines.indexOf(line);
-                for (let i = Math.max(0, lineIndex - 3); i <= Math.min(lines.length - 1, lineIndex + 3); i++) {
+                for (
+                  let i = Math.max(0, lineIndex - 3);
+                  i <= Math.min(lines.length - 1, lineIndex + 3);
+                  i++
+                ) {
                   const nearbyLine = lines[i].trim();
-                  if (nearbyLine.length > 3 && !nricMatch[0].toUpperCase().includes(nearbyLine) && 
-                      !nearbyLine.match(/^\d+$/) && !nearbyLine.includes('$') && !nearbyLine.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
+                  if (
+                    nearbyLine.length > 3 &&
+                    !nricMatch[0].toUpperCase().includes(nearbyLine) &&
+                    !nearbyLine.match(/^\d+$/) &&
+                    !nearbyLine.includes('$') &&
+                    !nearbyLine.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)
+                  ) {
                     patientName = nearbyLine;
                     break;
                   }
                 }
-                
+
                 items.push({
                   nric,
                   patientName,
@@ -3425,7 +4023,7 @@ export class ClinicAssistAutomation {
                 });
               }
             }
-            
+
             if (items.length > 0) {
               this._logStep('Extracted items from PDF text', { count: items.length });
               return items;
@@ -3435,106 +4033,119 @@ export class ClinicAssistAutomation {
           this._logStep('Error extracting from PDF iframe', { error: e.message });
         }
       }
-      
+
       // Continue with extraction logic below...
-      
-      return await this.page.evaluate(() => {
-        const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
-        const items = [];
 
-        // Try jqGrid format first (same as queue page)
-        const jqGrid = document.querySelector('#queueLogGrid');
-        if (jqGrid) {
-          const rows = jqGrid.querySelectorAll('tr.jqgrow');
-          for (const row of rows) {
-            const getCellValue = (ariaDesc) => {
-              const cell = row.querySelector(`td[aria-describedby$="${ariaDesc}"]`);
-              return cell ? norm(cell.textContent) : null;
-            };
+      return await this.page
+        .evaluate(() => {
+          const norm = s => (s || '').replace(/\s+/g, ' ').trim();
+          const items = [];
 
-            const patientName = getCellValue('_PatientName');
-            const nric = getCellValue('_NRIC');
-            const qno = getCellValue('_QNo');
-            const payType = getCellValue('_PayType');
-            const visitType = getCellValue('_VisitType');
-            const fee = getCellValue('_Fee');
-            const inTime = getCellValue('_In');
-            const outTime = getCellValue('_Out');
-            const status = getCellValue('_Status');
-
-            if (patientName || nric) {
-              items.push({
-                qno,
-                status,
-                patientName,
-                nric,
-                payType,
-                visitType,
-                fee,
-                inTime,
-                outTime,
-                source: 'reports_queue_list',
-              });
-            }
-          }
-        } else {
-          // Try regular table format
-          const tables = Array.from(document.querySelectorAll('table'));
-          for (const table of tables) {
-            const rows = table.querySelectorAll('tbody tr, tr:not(:first-child)');
+          // Try jqGrid format first (same as queue page)
+          const jqGrid = document.querySelector('#queueLogGrid');
+          if (jqGrid) {
+            const rows = jqGrid.querySelectorAll('tr.jqgrow');
             for (const row of rows) {
-              const cells = Array.from(row.querySelectorAll('td'));
-              if (cells.length < 5) continue;
+              const getCellValue = ariaDesc => {
+                const cell = row.querySelector(`td[aria-describedby$="${ariaDesc}"]`);
+                return cell ? norm(cell.textContent) : null;
+              };
 
-              // Try to identify columns by header or content
-              const rowText = norm(row.textContent);
-              
-              // Look for NRIC pattern
-              const nricMatch = rowText.match(/[STFGM]\s*\d{4}\s*\d{3}\s*[A-Z]/i);
-              const nric = nricMatch ? nricMatch[0].replace(/\s+/g, '').toUpperCase() : null;
-
-              // Extract patient name (usually text before NRIC or in name column)
-              let patientName = null;
-              for (const cell of cells) {
-                const text = norm(cell.textContent);
-                if (text && text.length > 3 && !/^\d+$/.test(text) && !/^[STFGM]\d{7}[A-Z]$/i.test(text) && !text.includes('$')) {
-                  patientName = text;
-                  break;
-                }
-              }
+              const patientName = getCellValue('_PatientName');
+              const nric = getCellValue('_NRIC');
+              const qno = getCellValue('_QNo');
+              const payType = getCellValue('_PayType');
+              const visitType = getCellValue('_VisitType');
+              const fee = getCellValue('_Fee');
+              const inTime = getCellValue('_In');
+              const outTime = getCellValue('_Out');
+              const status = getCellValue('_Status');
 
               if (patientName || nric) {
                 items.push({
-                  qno: cells[0] ? norm(cells[0].textContent) : null,
-                  status: cells[1] ? norm(cells[1].textContent) : null,
+                  qno,
+                  status,
                   patientName,
                   nric,
-                  payType: cells.find(c => /MHC|AIA|Cash|Insurance/i.test(norm(c.textContent))) ? norm(cells.find(c => /MHC|AIA|Cash|Insurance/i.test(norm(c.textContent))).textContent) : null,
-                  visitType: null,
-                  fee: null,
-                  inTime: null,
-                  outTime: null,
+                  payType,
+                  visitType,
+                  fee,
+                  inTime,
+                  outTime,
                   source: 'reports_queue_list',
                 });
               }
             }
-          }
-        }
+          } else {
+            // Try regular table format
+            const tables = Array.from(document.querySelectorAll('table'));
+            for (const table of tables) {
+              const rows = table.querySelectorAll('tbody tr, tr:not(:first-child)');
+              for (const row of rows) {
+                const cells = Array.from(row.querySelectorAll('td'));
+                if (cells.length < 5) continue;
 
-        return items;
-      }).then((result) => {
-        // Handle both old format (array) and new format (object with items and debug)
-        if (Array.isArray(result)) {
-          this._logStep('Extracted items (legacy format)', { count: result.length });
-          return result;
-        }
-        if (result && result.items) {
-          this._logStep('Extraction debug info', result.debug);
-          this._logStep('Extracted items', { count: result.items.length });
-          return result.items;
-        }
-        return [];
-      });
+                // Try to identify columns by header or content
+                const rowText = norm(row.textContent);
+
+                // Look for NRIC pattern
+                const nricMatch = rowText.match(/[STFGM]\s*\d{4}\s*\d{3}\s*[A-Z]/i);
+                const nric = nricMatch ? nricMatch[0].replace(/\s+/g, '').toUpperCase() : null;
+
+                // Extract patient name (usually text before NRIC or in name column)
+                let patientName = null;
+                for (const cell of cells) {
+                  const text = norm(cell.textContent);
+                  if (
+                    text &&
+                    text.length > 3 &&
+                    !/^\d+$/.test(text) &&
+                    !/^[STFGM]\d{7}[A-Z]$/i.test(text) &&
+                    !text.includes('$')
+                  ) {
+                    patientName = text;
+                    break;
+                  }
+                }
+
+                if (patientName || nric) {
+                  items.push({
+                    qno: cells[0] ? norm(cells[0].textContent) : null,
+                    status: cells[1] ? norm(cells[1].textContent) : null,
+                    patientName,
+                    nric,
+                    payType: cells.find(c => /MHC|AIA|Cash|Insurance/i.test(norm(c.textContent)))
+                      ? norm(
+                          cells.find(c => /MHC|AIA|Cash|Insurance/i.test(norm(c.textContent)))
+                            .textContent
+                        )
+                      : null,
+                    visitType: null,
+                    fee: null,
+                    inTime: null,
+                    outTime: null,
+                    source: 'reports_queue_list',
+                  });
+                }
+              }
+            }
+          }
+
+          return items;
+        })
+        .then(result => {
+          // Handle both old format (array) and new format (object with items and debug)
+          if (Array.isArray(result)) {
+            this._logStep('Extracted items (legacy format)', { count: result.length });
+            return result;
+          }
+          if (result && result.items) {
+            this._logStep('Extraction debug info', result.debug);
+            this._logStep('Extracted items', { count: result.items.length });
+            return result.items;
+          }
+          return [];
+        });
     } catch (error) {
       this._logStep('Error extracting queue list results', { error: error.message });
       return [];
@@ -3561,28 +4172,32 @@ export class ClinicAssistAutomation {
         frameUrl: kind === 'frame' ? root.url() : null,
       });
 
-      const m = String(date || '').trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      const m = String(date || '')
+        .trim()
+        .match(/^(\d{4})-(\d{2})-(\d{2})$/);
       if (!m) throw new Error(`Invalid date format (expected YYYY-MM-DD): ${date}`);
       const ddmmyyyy = `${m[3]}/${m[2]}/${m[1]}`;
 
       // Discover date inputs inside the Queue Report root.
       const dateFields = await root
         .evaluate(() => {
-          const inputs = Array.from(document.querySelectorAll('input[type="text"], input[type="date"]'));
-          const hasDate = (s) => {
+          const inputs = Array.from(
+            document.querySelectorAll('input[type="text"], input[type="date"]')
+          );
+          const hasDate = s => {
             const t = (s || '').toLowerCase();
             if (t.includes('update')) return false;
             return t.includes('date');
           };
           const candidates = inputs
-            .filter((el) => {
+            .filter(el => {
               const name = el.getAttribute('name') || '';
               const id = el.getAttribute('id') || '';
               const placeholder = el.getAttribute('placeholder') || '';
               return hasDate(name) || hasDate(id) || hasDate(placeholder);
             })
             .slice(0, 4)
-            .map((el) => ({
+            .map(el => ({
               id: el.getAttribute('id') || '',
               name: el.getAttribute('name') || '',
               value: el.value || '',
@@ -3593,7 +4208,10 @@ export class ClinicAssistAutomation {
         })
         .catch(() => []);
 
-      this._logStep('QueueReport date field candidates', { count: dateFields.length, fields: dateFields });
+      this._logStep('QueueReport date field candidates', {
+        count: dateFields.length,
+        fields: dateFields,
+      });
 
       // Fill up to two date inputs (some reports have From/To).
       let dateFilled = false;
@@ -3620,18 +4238,21 @@ export class ClinicAssistAutomation {
 
           // If bootstrap-datepicker is used, set via API too (best-effort).
           await root
-            .evaluate(({ selector, dd, mm, yyyy }) => {
-              const el = document.querySelector(selector);
-              if (!el) return;
-              try {
-                if (typeof jQuery !== 'undefined' && jQuery(el).datepicker) {
-                  const d = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd));
-                  jQuery(el).datepicker('setDate', d);
+            .evaluate(
+              ({ selector, dd, mm, yyyy }) => {
+                const el = document.querySelector(selector);
+                if (!el) return;
+                try {
+                  if (typeof jQuery !== 'undefined' && jQuery(el).datepicker) {
+                    const d = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd));
+                    jQuery(el).datepicker('setDate', d);
+                  }
+                } catch {
+                  // ignore
                 }
-              } catch {
-                // ignore
-              }
-            }, { selector, dd: m[3], mm: m[2], yyyy: m[1] })
+              },
+              { selector, dd: m[3], mm: m[2], yyyy: m[1] }
+            )
             .catch(() => {});
 
           const v = await loc.inputValue().catch(() => '');
@@ -3645,20 +4266,24 @@ export class ClinicAssistAutomation {
       // Click Generate (btnOK) inside the root.
       let searchClicked = false;
       try {
-        const jsClick = await root.evaluate(() => {
-          const btn = document.getElementById('btnOK');
-          if (btn) {
-            btn.click();
-            btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-            return { found: true, via: 'btnOK' };
-          }
-          const any = document.querySelector('button:contains("Generate"), input[value*="Generate" i], button:has-text("Generate")');
-          if (any) {
-            any.click();
-            return { found: true, via: 'generic' };
-          }
-          return { found: false };
-        }).catch(() => ({ found: false }));
+        const jsClick = await root
+          .evaluate(() => {
+            const btn = document.getElementById('btnOK');
+            if (btn) {
+              btn.click();
+              btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+              return { found: true, via: 'btnOK' };
+            }
+            const any = document.querySelector(
+              'button:contains("Generate"), input[value*="Generate" i], button:has-text("Generate")'
+            );
+            if (any) {
+              any.click();
+              return { found: true, via: 'generic' };
+            }
+            return { found: false };
+          })
+          .catch(() => ({ found: false }));
         if (jsClick.found) {
           searchClicked = true;
           this._logStep('QueueReport generate clicked via JS', jsClick);
@@ -3668,7 +4293,9 @@ export class ClinicAssistAutomation {
       }
 
       if (!searchClicked) {
-        const btn = root.locator('#btnOK, button:has-text("Generate"), input[value*="Generate" i]').first();
+        const btn = root
+          .locator('#btnOK, button:has-text("Generate"), input[value*="Generate" i]')
+          .first();
         if ((await btn.count().catch(() => 0)) > 0) {
           await btn.click({ force: true }).catch(() => {});
           searchClicked = true;
@@ -3679,9 +4306,16 @@ export class ClinicAssistAutomation {
       if (searchClicked) {
         // Give the report viewer time to render/export controls.
         await this.page.waitForTimeout(8000);
-        await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list-results.png', fullPage: true }).catch(() => {});
+        await this.page
+          .screenshot({ path: 'screenshots/clinic-assist-queue-list-results.png', fullPage: true })
+          .catch(() => {});
       } else {
-        await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list-no-button.png', fullPage: true }).catch(() => {});
+        await this.page
+          .screenshot({
+            path: 'screenshots/clinic-assist-queue-list-no-button.png',
+            fullPage: true,
+          })
+          .catch(() => {});
       }
 
       return dateFilled || searchClicked;
@@ -3695,7 +4329,20 @@ export class ClinicAssistAutomation {
    * Helper: Get month name from month number
    */
   _getMonthName(monthNum) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return months[parseInt(monthNum) - 1] || 'Jan';
   }
 
@@ -3707,18 +4354,32 @@ export class ClinicAssistAutomation {
   async extractQueueListResults() {
     try {
       this._logStep('Extracting queue list results');
-      
+
+      const { root } = await this._getQueueReportRoot();
+      const rootFrameLocator =
+        typeof root.frameLocator === 'function'
+          ? root.frameLocator.bind(root)
+          : this.page.frameLocator.bind(this.page);
+      const evalInRoot = root.evaluate.bind(root);
+      const locInRoot = root.locator.bind(root);
+
       // Take a screenshot for debugging
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list-extraction.png', fullPage: true }).catch(() => {});
-      
+      await this.page
+        .screenshot({ path: 'screenshots/clinic-assist-queue-list-extraction.png', fullPage: true })
+        .catch(() => {});
+
       // Check for Excel/PDF export buttons - data might be shown as PDF or need Excel export
       // Also check in iframes that might contain PDF viewer or export controls
       // First check inside the ReportViewer iframe for export buttons
-      let exportButtons = [];
+      const exportButtons = [];
       try {
-        const outerFrame = rootFrameLocator('iframe[src*="ReportViewer"], iframe[src*="queueListing"]');
-        const iframeExportButtons = await outerFrame.locator('button, a, input[type="button"], [onclick]').all();
-        
+        const outerFrame = rootFrameLocator(
+          'iframe[src*="ReportViewer"], iframe[src*="queueListing"]'
+        );
+        const iframeExportButtons = await outerFrame
+          .locator('button, a, input[type="button"], [onclick]')
+          .all();
+
         for (const btn of iframeExportButtons) {
           try {
             const text = await btn.textContent().catch(() => '');
@@ -3727,14 +4388,21 @@ export class ClinicAssistAutomation {
             const className = await btn.getAttribute('class').catch(() => '');
             const id = await btn.getAttribute('id').catch(() => '');
             const tag = await btn.evaluate(el => el.tagName.toLowerCase()).catch(() => '');
-            
+
             const lowerText = text.toLowerCase();
             const lowerOnclick = onclick.toLowerCase();
             const lowerHref = href.toLowerCase();
-            
-            if (lowerText.includes('excel') || lowerText.includes('export') || lowerText.includes('download') ||
-                lowerText.includes('xls') || lowerOnclick.includes('excel') || lowerOnclick.includes('export') ||
-                lowerHref.includes('.xlsx') || lowerHref.includes('.xls')) {
+
+            if (
+              lowerText.includes('excel') ||
+              lowerText.includes('export') ||
+              lowerText.includes('download') ||
+              lowerText.includes('xls') ||
+              lowerOnclick.includes('excel') ||
+              lowerOnclick.includes('export') ||
+              lowerHref.includes('.xlsx') ||
+              lowerHref.includes('.xls')
+            ) {
               exportButtons.push({
                 text: text.trim(),
                 href: href,
@@ -3742,7 +4410,7 @@ export class ClinicAssistAutomation {
                 className: className,
                 id: id,
                 tag: tag,
-                location: 'iframe'
+                location: 'iframe',
               });
             }
           } catch (e) {
@@ -3752,41 +4420,69 @@ export class ClinicAssistAutomation {
       } catch (e) {
         this._logStep('Error searching for export buttons in iframe', { error: e.message });
       }
-      
+
       // Also check in the main page
-      const mainPageButtons = await evalInRoot(() => {
-        const buttons = Array.from(document.querySelectorAll('button, a, input[type="button"], input[type="submit"], span[onclick], div[onclick], img[alt], img[title]'));
-        const results = buttons.map(btn => ({
-          text: (btn.textContent || btn.value || btn.innerText || btn.alt || btn.title || '').trim(),
-          href: btn.href || '',
-          onclick: btn.getAttribute('onclick') || '',
-          className: btn.className || '',
-          id: btn.id || '',
-          tag: btn.tagName.toLowerCase(),
-          src: btn.src || '',
-        })).filter(btn => {
-          const text = btn.text.toLowerCase();
-          const src = (btn.src || '').toLowerCase();
-          return text.includes('excel') || text.includes('pdf') || text.includes('export') ||
-                 text.includes('download') || text.includes('xls') || 
-                 btn.href.includes('.xlsx') || btn.href.includes('.pdf') || btn.href.includes('.xls') ||
-                 btn.onclick.toLowerCase().includes('excel') || btn.onclick.toLowerCase().includes('pdf') || 
-                 btn.onclick.toLowerCase().includes('export') || btn.onclick.toLowerCase().includes('download') ||
-                 src.includes('excel') || src.includes('export') || src.includes('download');
-        });
-        
+      const _mainPageButtons = await evalInRoot(() => {
+        const buttons = Array.from(
+          document.querySelectorAll(
+            'button, a, input[type="button"], input[type="submit"], span[onclick], div[onclick], img[alt], img[title]'
+          )
+        );
+        const results = buttons
+          .map(btn => ({
+            text: (
+              btn.textContent ||
+              btn.value ||
+              btn.innerText ||
+              btn.alt ||
+              btn.title ||
+              ''
+            ).trim(),
+            href: btn.href || '',
+            onclick: btn.getAttribute('onclick') || '',
+            className: btn.className || '',
+            id: btn.id || '',
+            tag: btn.tagName.toLowerCase(),
+            src: btn.src || '',
+          }))
+          .filter(btn => {
+            const text = btn.text.toLowerCase();
+            const src = (btn.src || '').toLowerCase();
+            return (
+              text.includes('excel') ||
+              text.includes('pdf') ||
+              text.includes('export') ||
+              text.includes('download') ||
+              text.includes('xls') ||
+              btn.href.includes('.xlsx') ||
+              btn.href.includes('.pdf') ||
+              btn.href.includes('.xls') ||
+              btn.onclick.toLowerCase().includes('excel') ||
+              btn.onclick.toLowerCase().includes('pdf') ||
+              btn.onclick.toLowerCase().includes('export') ||
+              btn.onclick.toLowerCase().includes('download') ||
+              src.includes('excel') ||
+              src.includes('export') ||
+              src.includes('download')
+            );
+          });
+
         // Also check all buttons/links for any that might be export-related by position or context
-        const allClickable = Array.from(document.querySelectorAll('button, a, input[type="button"], input[type="submit"], [onclick]'));
-        const potentialExports = allClickable
+        const allClickable = Array.from(
+          document.querySelectorAll(
+            'button, a, input[type="button"], input[type="submit"], [onclick]'
+          )
+        );
+        const _potentialExports = allClickable
           .filter(el => {
             const rect = el.getBoundingClientRect();
             return rect.width > 0 && rect.height > 0; // Visible
           })
           .slice(0, 20); // Limit to first 20 visible buttons to check
-          
+
         return results;
       }).catch(() => []);
-      
+
       // Wait a bit more and check again - buttons might appear after page fully loads
       if (exportButtons.length === 0) {
         await this.page.waitForTimeout(3000);
@@ -3794,18 +4490,42 @@ export class ClinicAssistAutomation {
           const buttons = Array.from(document.querySelectorAll('*'));
           return buttons
             .filter(btn => {
-              const text = (btn.textContent || btn.value || btn.innerText || btn.alt || btn.title || '').toLowerCase();
+              const text = (
+                btn.textContent ||
+                btn.value ||
+                btn.innerText ||
+                btn.alt ||
+                btn.title ||
+                ''
+              ).toLowerCase();
               const onclick = (btn.getAttribute('onclick') || '').toLowerCase();
               const href = (btn.href || '').toLowerCase();
-              return (text.includes('excel') || text.includes('pdf') || text.includes('export') ||
-                     onclick.includes('excel') || onclick.includes('pdf') || onclick.includes('export') ||
-                     href.includes('.xls') || href.includes('.pdf')) &&
-                     (btn.tagName.toLowerCase() === 'button' || btn.tagName.toLowerCase() === 'a' ||
-                      btn.tagName.toLowerCase() === 'input' || btn.onclick || btn.href);
+              return (
+                (text.includes('excel') ||
+                  text.includes('pdf') ||
+                  text.includes('export') ||
+                  onclick.includes('excel') ||
+                  onclick.includes('pdf') ||
+                  onclick.includes('export') ||
+                  href.includes('.xls') ||
+                  href.includes('.pdf')) &&
+                (btn.tagName.toLowerCase() === 'button' ||
+                  btn.tagName.toLowerCase() === 'a' ||
+                  btn.tagName.toLowerCase() === 'input' ||
+                  btn.onclick ||
+                  btn.href)
+              );
             })
             .slice(0, 10)
             .map(btn => ({
-              text: (btn.textContent || btn.value || btn.innerText || btn.alt || btn.title || '').trim(),
+              text: (
+                btn.textContent ||
+                btn.value ||
+                btn.innerText ||
+                btn.alt ||
+                btn.title ||
+                ''
+              ).trim(),
               href: btn.href || '',
               onclick: btn.getAttribute('onclick') || '',
               className: btn.className || '',
@@ -3817,82 +4537,108 @@ export class ClinicAssistAutomation {
           exportButtons.push(...exportButtons2);
         }
       }
-      
-      this._logStep('Export buttons found', { count: exportButtons.length, buttons: exportButtons.map(b => ({ text: b.text, id: b.id, location: b.location })) });
-      
+
+      this._logStep('Export buttons found', {
+        count: exportButtons.length,
+        buttons: exportButtons.map(b => ({ text: b.text, id: b.id, location: b.location })),
+      });
+
       // PRIORITY 1: Try to export as Excel from nested iframe (more accurate than PDF parsing)
       try {
         this._logStep('Attempting to export as Excel from nested iframe (preferred method)');
-        const outerFrame = rootFrameLocator('iframe[src*="ReportViewer"], iframe[src*="queueListing"]');
+        const outerFrame = rootFrameLocator(
+          'iframe[src*="ReportViewer"], iframe[src*="queueListing"]'
+        );
         const nestedFrame = outerFrame.frameLocator('iframe').first();
-        
+
         // Wait for nested iframe to be ready
-        await nestedFrame.locator('body').waitFor({ timeout: 10000 }).catch(() => {});
+        await nestedFrame
+          .locator('body')
+          .waitFor({ timeout: 10000 })
+          .catch(() => {});
         // Wait for report viewer controls to load. In some sessions the Crystal toolbar appears late.
         // Poll for up to ~30s for any export-related controls.
         const pollDeadline = Date.now() + 30000;
         while (Date.now() < pollDeadline) {
-          const btnCount = await nestedFrame.locator('#Button2, #Button4').count().catch(() => 0);
+          const btnCount = await nestedFrame
+            .locator('#Button2, #Button4')
+            .count()
+            .catch(() => 0);
           const excelTextCount = await nestedFrame
             .locator('input[value*="Excel" i], button:has-text("Excel"), a:has-text("Excel")')
             .count()
             .catch(() => 0);
-          const selectCount = await nestedFrame.locator('select').count().catch(() => 0);
-          const radioCount = await nestedFrame.locator('input[type="radio"]').count().catch(() => 0);
+          const selectCount = await nestedFrame
+            .locator('select')
+            .count()
+            .catch(() => 0);
+          const radioCount = await nestedFrame
+            .locator('input[type="radio"]')
+            .count()
+            .catch(() => 0);
           if (btnCount > 0 || excelTextCount > 0 || selectCount > 0 || radioCount > 0) break;
           await this.page.waitForTimeout(1000);
         }
         await this.page.waitForTimeout(1000); // small settle after controls appear
-        
+
         // Look for format selector (dropdown or radio buttons)
         // Crystal Reports viewer typically has a format selector
         const selectCount = await nestedFrame.locator('select').count();
         const radioCount = await nestedFrame.locator('input[type="radio"]').count();
-        
+
         this._logStep('Checking for format selector', { selectCount, radioCount });
-        
+
         // Try dropdown select first
         if (selectCount > 0) {
           const formatSelect = nestedFrame.locator('select').first();
           const options = await formatSelect.locator('option').allTextContents();
           this._logStep('Found format dropdown', { options });
-          
+
           // Find Excel option
-          const excelOption = options.find(opt => 
-            opt.toLowerCase().includes('excel') || 
-            opt.toLowerCase().includes('xls') ||
-            opt.toLowerCase().includes('xlsx')
+          const excelOption = options.find(
+            opt =>
+              opt.toLowerCase().includes('excel') ||
+              opt.toLowerCase().includes('xls') ||
+              opt.toLowerCase().includes('xlsx')
           );
-          
+
           if (excelOption) {
             this._logStep('Selecting Excel format from dropdown', { option: excelOption });
             await formatSelect.selectOption({ label: excelOption });
             await this.page.waitForTimeout(2000);
-            
+
             // Look for submit/apply/export button after selecting format
             const submitButtons = ['Submit', 'Apply', 'Export', 'View', 'Show', 'Generate', 'OK'];
             for (const btnText of submitButtons) {
               try {
-                const btn = nestedFrame.locator(`button:has-text("${btnText}"), input[value*="${btnText}" i], a:has-text("${btnText}")`).first();
-                if (await btn.count() > 0) {
+                const btn = nestedFrame
+                  .locator(
+                    `button:has-text("${btnText}"), input[value*="${btnText}" i], a:has-text("${btnText}")`
+                  )
+                  .first();
+                if ((await btn.count()) > 0) {
                   this._logStep(`Clicking ${btnText} button to apply format selection`);
-                  
+
                   // Set up download listener BEFORE clicking
                   const downloadPromise = this.page.waitForEvent('download', { timeout: 30000 });
-                  
+
                   await btn.click();
                   await this.page.waitForTimeout(3000);
-                  
+
                   try {
                     const download = await downloadPromise;
                     const filename = download.suggestedFilename();
                     this._logStep('Excel file download started', { filename });
-                    
-                    const excelPath = path.join(process.cwd(), 'downloads', filename || `queue-report-${Date.now()}.xlsx`);
+
+                    const excelPath = path.join(
+                      process.cwd(),
+                      'downloads',
+                      filename || `queue-report-${Date.now()}.xlsx`
+                    );
                     fs.mkdirSync(path.dirname(excelPath), { recursive: true });
                     await download.saveAs(excelPath);
                     this._logStep('Excel file downloaded', { path: excelPath });
-                    
+
                     // Parse Excel file
                     const items = await this._parseExcelFile(excelPath);
                     if (items.length > 0) {
@@ -3900,7 +4646,9 @@ export class ClinicAssistAutomation {
                       return items;
                     }
                   } catch (downloadError) {
-                    this._logStep('Download did not start, trying next button', { error: downloadError.message });
+                    this._logStep('Download did not start, trying next button', {
+                      error: downloadError.message,
+                    });
                   }
                 }
               } catch (e) {
@@ -3909,46 +4657,61 @@ export class ClinicAssistAutomation {
             }
           }
         }
-        
+
         // Try radio buttons if no dropdown found
         if (radioCount > 0 && selectCount === 0) {
           this._logStep('Checking radio buttons for Excel format');
           const radios = await nestedFrame.locator('input[type="radio"]').all();
-          
+
           for (const radio of radios) {
             try {
               const value = await radio.getAttribute('value');
               const name = await radio.getAttribute('name');
               const checked = await radio.isChecked();
-              
-              if (value && (value.toLowerCase().includes('excel') || value.toLowerCase().includes('xls'))) {
+
+              if (
+                value &&
+                (value.toLowerCase().includes('excel') || value.toLowerCase().includes('xls'))
+              ) {
                 this._logStep('Found Excel radio button', { value, name, checked });
-                
+
                 if (!checked) {
                   await radio.check();
                   await this.page.waitForTimeout(2000);
                 }
-                
+
                 // Look for submit button
                 const submitButtons = ['Submit', 'Apply', 'Export', 'View', 'Show'];
                 for (const btnText of submitButtons) {
                   try {
-                    const btn = nestedFrame.locator(`button:has-text("${btnText}"), input[value*="${btnText}" i], input[name*="${name}" i]`).first();
-                    if (await btn.count() > 0) {
+                    const btn = nestedFrame
+                      .locator(
+                        `button:has-text("${btnText}"), input[value*="${btnText}" i], input[name*="${name}" i]`
+                      )
+                      .first();
+                    if ((await btn.count()) > 0) {
                       this._logStep(`Clicking ${btnText} button after selecting Excel radio`);
-                      
-                      const downloadPromise = this.page.waitForEvent('download', { timeout: 30000 });
+
+                      const downloadPromise = this.page.waitForEvent('download', {
+                        timeout: 30000,
+                      });
                       await btn.click();
                       await this.page.waitForTimeout(3000);
-                      
+
                       try {
                         const download = await downloadPromise;
                         const filename = download.suggestedFilename();
-                        const excelPath = path.join(process.cwd(), 'downloads', filename || `queue-report-${Date.now()}.xlsx`);
+                        const excelPath = path.join(
+                          process.cwd(),
+                          'downloads',
+                          filename || `queue-report-${Date.now()}.xlsx`
+                        );
                         fs.mkdirSync(path.dirname(excelPath), { recursive: true });
                         await download.saveAs(excelPath);
-                        this._logStep('Excel file downloaded via radio button', { path: excelPath });
-                        
+                        this._logStep('Excel file downloaded via radio button', {
+                          path: excelPath,
+                        });
+
                         const items = await this._parseExcelFile(excelPath);
                         if (items.length > 0) {
                           this._logStep('Extracted items from Excel file', { count: items.length });
@@ -3968,44 +4731,56 @@ export class ClinicAssistAutomation {
             }
           }
         }
-        
+
         // Try direct Excel export buttons in nested iframe (these are input buttons with IDs)
         this._logStep('Looking for direct Excel export buttons in nested iframe');
-        
+
         // Try Button2 ("Excel") first, then Button4 ("Excel (Data-Only)")
         const excelButtonIds = ['Button2', 'Button4']; // Button2 = "Excel", Button4 = "Excel (Data-Only)"
-        
+
         for (const buttonId of excelButtonIds) {
           try {
             const excelButton = nestedFrame.locator(`#${buttonId}`).first();
-            const buttonExists = await excelButton.count() > 0;
-            
+            const buttonExists = (await excelButton.count()) > 0;
+
             if (buttonExists) {
               const buttonText = await excelButton.getAttribute('value').catch(() => '');
               this._logStep(`Found Excel export button: ${buttonId}`, { text: buttonText });
-              
+
               // Set up download listener BEFORE clicking
-              const downloadPromise = this.page.waitForEvent('download', { timeout: 30000 }).catch(() => null);
-              
+              const downloadPromise = this.page
+                .waitForEvent('download', { timeout: 30000 })
+                .catch(() => null);
+
               // Click the button
               await excelButton.click();
               await this.page.waitForTimeout(3000); // Wait for download to start
-              
+
               try {
                 const download = await downloadPromise;
                 if (download) {
                   const filename = download.suggestedFilename();
                   this._logStep('Excel file download started', { filename, buttonId });
-                  
-                  const excelPath = path.join(process.cwd(), 'downloads', filename || `queue-report-${Date.now()}.xlsx`);
+
+                  const excelPath = path.join(
+                    process.cwd(),
+                    'downloads',
+                    filename || `queue-report-${Date.now()}.xlsx`
+                  );
                   fs.mkdirSync(path.dirname(excelPath), { recursive: true });
                   await download.saveAs(excelPath);
-                  this._logStep('Excel file downloaded successfully', { path: excelPath, size: fs.statSync(excelPath).size });
-                  
+                  this._logStep('Excel file downloaded successfully', {
+                    path: excelPath,
+                    size: fs.statSync(excelPath).size,
+                  });
+
                   // Parse Excel file
                   const items = await this._parseExcelFile(excelPath);
                   if (items.length > 0) {
-                    this._logStep('Extracted items from Excel file', { count: items.length, buttonId });
+                    this._logStep('Extracted items from Excel file', {
+                      count: items.length,
+                      buttonId,
+                    });
                     return items;
                   } else {
                     this._logStep('Excel file parsed but no items extracted', { buttonId });
@@ -4014,7 +4789,10 @@ export class ClinicAssistAutomation {
                   this._logStep('Download did not start, trying next button', { buttonId });
                 }
               } catch (downloadError) {
-                this._logStep('Error downloading Excel file', { error: downloadError.message, buttonId });
+                this._logStep('Error downloading Excel file', {
+                  error: downloadError.message,
+                  buttonId,
+                });
                 // Continue to next button
               }
             }
@@ -4029,8 +4807,8 @@ export class ClinicAssistAutomation {
         try {
           const availableButtons = await nestedFrame
             .locator('input[id^="Button"], button[id^="Button"]')
-            .evaluateAll((els) =>
-              els.slice(0, 20).map((el) => ({
+            .evaluateAll(els =>
+              els.slice(0, 20).map(el => ({
                 tag: el.tagName,
                 id: el.id || null,
                 value: (el.value || '').trim(),
@@ -4042,19 +4820,31 @@ export class ClinicAssistAutomation {
             this._logStep('Nested iframe Button* controls (sample)', { availableButtons });
           }
 
-          const excelLike = nestedFrame.locator('input[value*="Excel" i], button:has-text("Excel"), a:has-text("Excel")').first();
+          const excelLike = nestedFrame
+            .locator('input[value*="Excel" i], button:has-text("Excel"), a:has-text("Excel")')
+            .first();
           if ((await excelLike.count().catch(() => 0)) > 0) {
             this._logStep('Found Excel-like export control (generic), attempting download');
-            const downloadPromise = this.page.waitForEvent('download', { timeout: 30000 }).catch(() => null);
-            await excelLike.click().catch(async () => excelLike.click({ force: true }).catch(() => {}));
+            const downloadPromise = this.page
+              .waitForEvent('download', { timeout: 30000 })
+              .catch(() => null);
+            await excelLike
+              .click()
+              .catch(async () => excelLike.click({ force: true }).catch(() => {}));
             await this.page.waitForTimeout(3000);
             const download = await downloadPromise;
             if (download) {
               const filename = download.suggestedFilename();
-              const excelPath = path.join(process.cwd(), 'downloads', filename || `queue-report-${Date.now()}.xlsx`);
+              const excelPath = path.join(
+                process.cwd(),
+                'downloads',
+                filename || `queue-report-${Date.now()}.xlsx`
+              );
               fs.mkdirSync(path.dirname(excelPath), { recursive: true });
               await download.saveAs(excelPath);
-              this._logStep('Excel file downloaded via generic export control', { path: excelPath });
+              this._logStep('Excel file downloaded via generic export control', {
+                path: excelPath,
+              });
               const items = await this._parseExcelFile(excelPath);
               if (items.length > 0) {
                 this._logStep('Extracted items from Excel file', { count: items.length });
@@ -4065,13 +4855,15 @@ export class ClinicAssistAutomation {
         } catch (e) {
           this._logStep('Error probing generic Excel export controls', { error: e.message });
         }
-        
+
         // Fallback: Try to find Excel buttons by text/value
         try {
           const excelButtons = await nestedFrame
-            .locator('input[type="button"][value*="Excel" i], input[type="submit"][value*="Excel" i], button:has-text("Excel")')
+            .locator(
+              'input[type="button"][value*="Excel" i], input[type="submit"][value*="Excel" i], button:has-text("Excel")'
+            )
             .all();
-          
+
           if (excelButtons.length > 0) {
             this._logStep(`Found ${excelButtons.length} Excel buttons by text filter`);
             for (const btn of excelButtons) {
@@ -4079,19 +4871,25 @@ export class ClinicAssistAutomation {
                 const valueAttr = await btn.getAttribute('value').catch(() => null);
                 const text = valueAttr || (await btn.textContent().catch(() => ''));
                 this._logStep('Trying Excel button by text', { text });
-                
-                const downloadPromise = this.page.waitForEvent('download', { timeout: 30000 }).catch(() => null);
+
+                const downloadPromise = this.page
+                  .waitForEvent('download', { timeout: 30000 })
+                  .catch(() => null);
                 await btn.click();
                 await this.page.waitForTimeout(3000);
-                
+
                 const download = await downloadPromise;
                 if (download) {
                   const filename = download.suggestedFilename();
-                  const excelPath = path.join(process.cwd(), 'downloads', filename || `queue-report-${Date.now()}.xlsx`);
+                  const excelPath = path.join(
+                    process.cwd(),
+                    'downloads',
+                    filename || `queue-report-${Date.now()}.xlsx`
+                  );
                   fs.mkdirSync(path.dirname(excelPath), { recursive: true });
                   await download.saveAs(excelPath);
                   this._logStep('Excel file downloaded via text filter', { path: excelPath });
-                  
+
                   const items = await this._parseExcelFile(excelPath);
                   if (items.length > 0) {
                     this._logStep('Extracted items from Excel file', { count: items.length });
@@ -4108,98 +4906,124 @@ export class ClinicAssistAutomation {
           // Fallback failed
         }
       } catch (excelError) {
-        this._logStep('Excel extraction failed, will try PDF as fallback', { error: excelError.message });
+        this._logStep('Excel extraction failed, will try PDF as fallback', {
+          error: excelError.message,
+        });
       }
-      
+
       // PRIORITY 2: Try PDF extraction as fallback
       try {
         this._logStep('Attempting to extract PDF from nested iframe (fallback)');
-        const outerFrame = rootFrameLocator('iframe[src*="ReportViewer"], iframe[src*="queueListing"]');
+        const outerFrame = rootFrameLocator(
+          'iframe[src*="ReportViewer"], iframe[src*="queueListing"]'
+        );
         const nestedFrame = outerFrame.frameLocator('iframe').first();
-        
+
         // Wait for nested iframe to be ready
-        await nestedFrame.locator('body').waitFor({ timeout: 10000 }).catch(() => {});
+        await nestedFrame
+          .locator('body')
+          .waitFor({ timeout: 10000 })
+          .catch(() => {});
         await this.page.waitForTimeout(3000); // Additional wait for PDF to load
-        
+
         // Try to get PDF URL directly from ReportViewer URL
         // The ReportViewer iframe URL contains parameters that might give us the PDF URL
         const reportViewerUrl = await evalInRoot(() => {
           const iframes = Array.from(document.querySelectorAll('iframe'));
-          const reportIframe = iframes.find(f => 
+          const reportIframe = iframes.find(f =>
             (f.src || '').toLowerCase().includes('reportviewer')
           );
           return reportIframe ? reportIframe.src : null;
         });
-        
+
         if (reportViewerUrl) {
           this._logStep('Found ReportViewer URL', { url: reportViewerUrl });
-          
+
           // Try to access the nested iframe URL which should contain the PDF
           try {
             const nestedUrl = await evalInRoot(() => {
               const iframes = Array.from(document.querySelectorAll('iframe'));
-              const reportIframe = iframes.find(f => 
+              const reportIframe = iframes.find(f =>
                 (f.src || '').toLowerCase().includes('reportviewer')
               );
-              
+
               if (reportIframe && reportIframe.contentDocument) {
-                const nestedIframes = Array.from(reportIframe.contentDocument.querySelectorAll('iframe'));
+                const nestedIframes = Array.from(
+                  reportIframe.contentDocument.querySelectorAll('iframe')
+                );
                 if (nestedIframes.length > 0) {
                   return nestedIframes[0].src || null;
                 }
               }
               return null;
             }).catch(() => null);
-            
-            if (nestedUrl && (nestedUrl.includes('.pdf') || nestedUrl.includes('ReportViewer.aspx'))) {
+
+            if (
+              nestedUrl &&
+              (nestedUrl.includes('.pdf') || nestedUrl.includes('ReportViewer.aspx'))
+            ) {
               this._logStep('Found nested iframe URL', { nestedUrl });
-              
+
               // Use APIRequestContext to download with authentication cookies
               try {
                 // Get cookies from the page context
                 const cookies = await this.page.context().cookies();
                 const context = this.page.context().request;
-                
-                const response = await context.get(nestedUrl, {
-                  timeout: 30000,
-                  headers: {
-                    'Cookie': cookies.map(c => `${c.name}=${c.value}`).join('; ')
-                  }
-                }).catch(() => null);
-                
+
+                const response = await context
+                  .get(nestedUrl, {
+                    timeout: 30000,
+                    headers: {
+                      Cookie: cookies.map(c => `${c.name}=${c.value}`).join('; '),
+                    },
+                  })
+                  .catch(() => null);
+
                 if (response && response.ok()) {
                   const buffer = await response.body();
                   const contentType = response.headers()['content-type'] || '';
-                  
+
                   // Check if it's a PDF (PDF files start with %PDF)
-                  const isPDF = contentType.includes('pdf') || 
-                                (buffer.length > 4 && buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46);
-                  
+                  const isPDF =
+                    contentType.includes('pdf') ||
+                    (buffer.length > 4 &&
+                      buffer[0] === 0x25 &&
+                      buffer[1] === 0x50 &&
+                      buffer[2] === 0x44 &&
+                      buffer[3] === 0x46);
+
                   if (isPDF) {
-                    const pdfPath = path.join(process.cwd(), 'downloads', `queue-report-${Date.now()}.pdf`);
+                    const pdfPath = path.join(
+                      process.cwd(),
+                      'downloads',
+                      `queue-report-${Date.now()}.pdf`
+                    );
                     fs.mkdirSync(path.dirname(pdfPath), { recursive: true });
                     fs.writeFileSync(pdfPath, buffer);
-                    this._logStep('PDF downloaded via APIRequestContext', { path: pdfPath, size: buffer.length });
-                    
+                    this._logStep('PDF downloaded via APIRequestContext', {
+                      path: pdfPath,
+                      size: buffer.length,
+                    });
+
                     // Parse PDF using pdf-parse
                     try {
                       const parser = new PDFParse({ data: buffer });
                       const result = await parser.getText();
                       await parser.destroy();
-                      
-                      this._logStep('PDF parsed successfully', { 
-                        textLength: result.text.length, 
-                        pages: result.total 
+
+                      this._logStep('PDF parsed successfully', {
+                        textLength: result.text.length,
+                        pages: result.total,
                       });
-                      
+
                       // Extract patient data from PDF text
                       const items = this._extractItemsFromPDFText(result.text);
                       if (items.length > 0) {
                         this._logStep('Extracted items from PDF', { count: items.length });
                         return items;
                       } else {
-                        this._logStep('No items extracted from PDF text', { 
-                          textPreview: result.text.substring(0, 500) 
+                        this._logStep('No items extracted from PDF text', {
+                          textPreview: result.text.substring(0, 500),
                         });
                       }
                     } catch (parseError) {
@@ -4208,56 +5032,67 @@ export class ClinicAssistAutomation {
                   } else {
                     // Try to parse as HTML to see what we got
                     const text = buffer.toString('utf-8');
-                    this._logStep('Response is not a PDF', { 
-                      contentType, 
+                    this._logStep('Response is not a PDF', {
+                      contentType,
                       firstBytes: Array.from(buffer.slice(0, 20)),
-                      textPreview: text.substring(0, 500)
+                      textPreview: text.substring(0, 500),
                     });
                   }
                 } else {
-                  this._logStep('Failed to download PDF', { 
-                    status: response?.status(), 
-                    statusText: response?.statusText() 
+                  this._logStep('Failed to download PDF', {
+                    status: response?.status(),
+                    statusText: response?.statusText(),
                   });
                 }
               } catch (reqError) {
-                this._logStep('Error downloading via APIRequestContext', { error: reqError.message });
+                this._logStep('Error downloading via APIRequestContext', {
+                  error: reqError.message,
+                });
               }
             }
           } catch (e) {
             this._logStep('Error accessing nested iframe URL', { error: e.message });
           }
         }
-        
+
         // Alternative: Try to find PDF viewer toolbar buttons and trigger download
         try {
-          const downloadPromise = this.page.waitForEvent('download', { timeout: 10000 }).catch(() => null);
-          
+          const downloadPromise = this.page
+            .waitForEvent('download', { timeout: 10000 })
+            .catch(() => null);
+
           // Look for download/export buttons in nested iframe
-          const pdfButtons = await nestedFrame.locator('a, button, input[type="button"]')
+          const pdfButtons = await nestedFrame
+            .locator('a, button, input[type="button"]')
             .filter({ hasText: /download|export|save|pdf/i })
             .all();
-          
+
           if (pdfButtons.length > 0) {
-            this._logStep('Found PDF viewer buttons, attempting download', { count: pdfButtons.length });
+            this._logStep('Found PDF viewer buttons, attempting download', {
+              count: pdfButtons.length,
+            });
             for (const btn of pdfButtons) {
               try {
                 await btn.click();
                 await this.page.waitForTimeout(2000);
-                
+
                 const download = await downloadPromise;
                 if (download) {
-                  const pdfPath = path.join(process.cwd(), 'downloads', download.suggestedFilename());
+                  const pdfPath = path.join(
+                    process.cwd(),
+                    'downloads',
+                    download.suggestedFilename()
+                  );
                   fs.mkdirSync(path.dirname(pdfPath), { recursive: true });
                   await download.saveAs(pdfPath);
                   this._logStep('PDF downloaded via button click', { path: pdfPath });
-                  
+
                   // Parse the downloaded PDF
                   const buffer = fs.readFileSync(pdfPath);
                   const parser = new PDFParse({ data: buffer });
                   const result = await parser.getText();
                   await parser.destroy();
-                  
+
                   const items = this._extractItemsFromPDFText(result.text);
                   if (items.length > 0) {
                     this._logStep('Extracted items from downloaded PDF', { count: items.length });
@@ -4276,33 +5111,43 @@ export class ClinicAssistAutomation {
       } catch (pdfError) {
         this._logStep('PDF extraction attempt failed', { error: pdfError.message });
       }
-      
+
       // If Excel export button found, click it and wait for download
       if (exportButtons.length > 0) {
-        const excelButton = exportButtons.find(b => 
-          b.text.toLowerCase().includes('excel') || 
-          b.onclick.toLowerCase().includes('excel') ||
-          b.href.includes('.xlsx') || b.href.includes('.xls')
+        const excelButton = exportButtons.find(
+          b =>
+            b.text.toLowerCase().includes('excel') ||
+            b.onclick.toLowerCase().includes('excel') ||
+            b.href.includes('.xlsx') ||
+            b.href.includes('.xls')
         );
-        
+
         if (excelButton) {
-          this._logStep('Found Excel export button, attempting to click and download', { 
-            text: excelButton.text, 
+          this._logStep('Found Excel export button, attempting to click and download', {
+            text: excelButton.text,
             id: excelButton.id,
-            location: excelButton.location
+            location: excelButton.location,
           });
-          
+
           try {
             // Set up download listener
-            const downloadPromise = this.page.waitForEvent('download', { timeout: 30000 }).catch(() => null);
-            
+            const downloadPromise = this.page
+              .waitForEvent('download', { timeout: 30000 })
+              .catch(() => null);
+
             // Click the export button
             if (excelButton.location === 'iframe') {
-              const outerFrame = rootFrameLocator('iframe[src*="ReportViewer"], iframe[src*="queueListing"]');
+              const outerFrame = rootFrameLocator(
+                'iframe[src*="ReportViewer"], iframe[src*="queueListing"]'
+              );
               if (excelButton.id) {
                 await outerFrame.locator(`#${excelButton.id}`).click();
               } else if (excelButton.className) {
-                await outerFrame.locator(`.${excelButton.className.split(' ')[0]}`).filter({ hasText: excelButton.text }).first().click();
+                await outerFrame
+                  .locator(`.${excelButton.className.split(' ')[0]}`)
+                  .filter({ hasText: excelButton.text })
+                  .first()
+                  .click();
               } else {
                 await outerFrame.locator('button, a').filter({ hasText: /excel/i }).first().click();
               }
@@ -4310,16 +5155,21 @@ export class ClinicAssistAutomation {
               if (excelButton.id) {
                 await locInRoot(`#${excelButton.id}`).click();
               } else if (excelButton.className) {
-                await locInRoot(`.${excelButton.className.split(' ')[0]}`).filter({ hasText: excelButton.text }).first().click();
+                await locInRoot(`.${excelButton.className.split(' ')[0]}`)
+                  .filter({ hasText: excelButton.text })
+                  .first()
+                  .click();
               } else {
                 await locInRoot('button, a').filter({ hasText: /excel/i }).first().click();
               }
             }
-            
+
             // Wait for download
             const download = await downloadPromise;
             if (download) {
-              this._logStep('Excel file downloaded, saving and parsing', { filename: download.suggestedFilename() });
+              this._logStep('Excel file downloaded, saving and parsing', {
+                filename: download.suggestedFilename(),
+              });
               const path = await download.path();
               // TODO: Parse Excel file and extract data
               // For now, log that we got the file
@@ -4330,11 +5180,15 @@ export class ClinicAssistAutomation {
           }
         }
       }
-      
+
       // Log all buttons/links on page for debugging
       if (exportButtons.length === 0) {
         const allButtons = await evalInRoot(() => {
-          const buttons = Array.from(document.querySelectorAll('button, a, input[type="button"], input[type="submit"], [onclick]'));
+          const buttons = Array.from(
+            document.querySelectorAll(
+              'button, a, input[type="button"], input[type="submit"], [onclick]'
+            )
+          );
           return buttons
             .filter(btn => {
               const rect = btn.getBoundingClientRect();
@@ -4348,19 +5202,22 @@ export class ClinicAssistAutomation {
               tag: btn.tagName.toLowerCase(),
             }));
         }).catch(() => []);
-        this._logStep('All visible buttons/links on page (for debugging)', { count: allButtons.length, buttons: allButtons });
+        this._logStep('All visible buttons/links on page (for debugging)', {
+          count: allButtons.length,
+          buttons: allButtons,
+        });
       }
-      
+
       // First, let's check what's actually on the page
       await this.page.waitForTimeout(3000); // Wait for iframe to load
-      
+
       const pageInfo = await evalInRoot(() => {
         const iframes = Array.from(document.querySelectorAll('iframe'));
         const reportViewerIframes = iframes.filter(f => {
           const src = (f.src || '').toLowerCase();
           return src.includes('reportviewer') || src.includes('queuelisting');
         });
-        
+
         return {
           url: window.location.href,
           title: document.title,
@@ -4368,41 +5225,45 @@ export class ClinicAssistAutomation {
           jqGridRows: document.querySelectorAll('#queueLogGrid tr.jqgrow').length,
           hasTables: document.querySelectorAll('table').length,
           hasInputs: document.querySelectorAll('input').length,
-          hasPDFViewer: !!document.querySelector('iframe[src*="pdf"], embed[type="application/pdf"], object[data*="pdf"]'),
+          hasPDFViewer: !!document.querySelector(
+            'iframe[src*="pdf"], embed[type="application/pdf"], object[data*="pdf"]'
+          ),
           hasIframes: iframes.length,
           hasReportViewerIframes: reportViewerIframes.length,
           iframeSrcs: reportViewerIframes.map(f => f.src),
           bodyText: document.body?.innerText?.substring(0, 500) || '',
         };
       });
-      
+
       this._logStep('Page info', pageInfo);
-      
+
       // IMPORTANT: Try to extract from iframe FIRST - report is shown in iframe
       if (pageInfo.hasReportViewerIframes > 0) {
-        this._logStep('ReportViewer iframe detected, attempting to extract data', { 
-          iframeCount: pageInfo.hasReportViewerIframes, 
-          srcs: pageInfo.iframeSrcs 
+        this._logStep('ReportViewer iframe detected, attempting to extract data', {
+          iframeCount: pageInfo.hasReportViewerIframes,
+          srcs: pageInfo.iframeSrcs,
         });
-        
+
         // Wait longer for iframe content to load - PDF reports can take time
         await this.page.waitForTimeout(10000);
-        
+
         // Wait for nested iframe to load - the actual report is in the nested iframe
         // Check multiple times for nested iframe content
         let attempts = 0;
         let nestedIframeReady = false;
         let nestedContentData = null; // Store nested content for extraction - declared at function scope
-        
+
         while (attempts < 6 && !nestedIframeReady) {
           await this.page.waitForTimeout(3000);
           attempts++;
-          
+
           try {
             const nestedCheck = await evalInRoot(() => {
-              const iframe = document.querySelector('iframe[src*="ReportViewer"], iframe[src*="queueListing"]');
+              const iframe = document.querySelector(
+                'iframe[src*="ReportViewer"], iframe[src*="queueListing"]'
+              );
               if (!iframe) return { found: false };
-              
+
               try {
                 const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
                 if (iframeDoc) {
@@ -4410,16 +5271,19 @@ export class ClinicAssistAutomation {
                   if (nestedIframes.length > 0) {
                     const nestedIframe = nestedIframes[0];
                     try {
-                      const nestedDoc = nestedIframe.contentDocument || nestedIframe.contentWindow?.document;
+                      const nestedDoc =
+                        nestedIframe.contentDocument || nestedIframe.contentWindow?.document;
                       if (nestedDoc && nestedDoc.body) {
                         const bodyText = nestedDoc.body?.textContent || '';
                         const bodyInnerText = nestedDoc.body?.innerText || '';
-                        const allText = bodyInnerText.length > bodyText.length ? bodyInnerText : bodyText;
+                        const allText =
+                          bodyInnerText.length > bodyText.length ? bodyInnerText : bodyText;
                         const hasTables = nestedDoc.querySelectorAll('table').length > 0;
-                        const hasRealContent = allText.length > 500 && 
-                          !allText.includes('$(document).ready') && 
+                        const hasRealContent =
+                          allText.length > 500 &&
+                          !allText.includes('$(document).ready') &&
                           !allText.includes('__doPostBack');
-                        
+
                         // Extract tables if available
                         const tables = Array.from(nestedDoc.querySelectorAll('table'));
                         const tableData = tables.map((table, idx) => {
@@ -4430,7 +5294,7 @@ export class ClinicAssistAutomation {
                           });
                           return { index: idx, rows: data, rowCount: rows.length };
                         });
-                        
+
                         return {
                           found: true,
                           nestedFound: true,
@@ -4445,85 +5309,126 @@ export class ClinicAssistAutomation {
                         };
                       }
                     } catch (e) {
-                      return { found: true, nestedFound: true, nestedAccessible: false, error: e.message };
+                      return {
+                        found: true,
+                        nestedFound: true,
+                        nestedAccessible: false,
+                        error: e.message,
+                      };
                     }
                   }
-                  
+
                   return { found: true, nestedFound: false };
                 }
               } catch (e) {
                 return { found: true, error: e.message };
               }
-              
+
               return { found: true, noAccess: true };
             });
-            
+
             if (nestedCheck.nestedFound && nestedCheck.nestedAccessible) {
               // Store nested content data for direct extraction
               if (nestedCheck.bodyText && nestedCheck.bodyText.length > 100) {
                 nestedContentData = nestedCheck;
               }
-              
+
               // Even if hasRealContent is false, we should still try to extract - the content might be there
               if (nestedCheck.hasRealContent) {
                 nestedIframeReady = true;
-                this._logStep('Nested iframe content loaded', { attempt: attempts, bodyTextLength: nestedCheck.bodyTextLength });
+                this._logStep('Nested iframe content loaded', {
+                  attempt: attempts,
+                  bodyTextLength: nestedCheck.bodyTextLength,
+                });
               } else if (nestedCheck.bodyTextLength > 100) {
                 // If we have some text content (even if it looks like JS), still try to extract
                 nestedIframeReady = true;
-                this._logStep('Nested iframe accessible with content (may contain report)', { attempt: attempts, bodyTextLength: nestedCheck.bodyTextLength });
+                this._logStep('Nested iframe accessible with content (may contain report)', {
+                  attempt: attempts,
+                  bodyTextLength: nestedCheck.bodyTextLength,
+                });
               } else {
-                this._logStep('Nested iframe found but content not ready', { attempt: attempts, ...nestedCheck });
+                this._logStep('Nested iframe found but content not ready', {
+                  attempt: attempts,
+                  ...nestedCheck,
+                });
               }
             } else {
-              this._logStep('Waiting for nested iframe to appear', { attempt: attempts, ...nestedCheck });
+              this._logStep('Waiting for nested iframe to appear', {
+                attempt: attempts,
+                ...nestedCheck,
+              });
             }
           } catch (e) {
             this._logStep('Error checking nested iframe', { attempt: attempts, error: e.message });
           }
         }
-        
+
         // Additional wait for nested iframe content to fully load
         if (nestedIframeReady) {
           await this.page.waitForTimeout(3000);
         }
-        
+
         // Use Playwright's frameLocator() API for more reliable iframe access
         try {
           // Try to access outer iframe using frameLocator
-          const outerFrame = rootFrameLocator('iframe[src*="ReportViewer"], iframe[src*="queueListing"]');
-          
+          const outerFrame = rootFrameLocator(
+            'iframe[src*="ReportViewer"], iframe[src*="queueListing"]'
+          );
+
           // Try to access nested iframe using chained frameLocator
           let nestedFrame = null;
           try {
             // Check if there's a nested iframe inside the outer iframe
-            const nestedFrameCount = await outerFrame.frameLocator('iframe').first().locator('body').count().catch(() => 0);
+            const nestedFrameCount = await outerFrame
+              .frameLocator('iframe')
+              .first()
+              .locator('body')
+              .count()
+              .catch(() => 0);
             if (nestedFrameCount > 0) {
               nestedFrame = outerFrame.frameLocator('iframe').first();
-              this._logStep('Found nested iframe via frameLocator', { nestedFrameAccessible: true });
+              this._logStep('Found nested iframe via frameLocator', {
+                nestedFrameAccessible: true,
+              });
             }
           } catch (e) {
             this._logStep('Could not access nested iframe via frameLocator', { error: e.message });
           }
-          
+
           // Extract data from nested iframe using frameLocator (preferred method)
           if (nestedFrame) {
             try {
               // Extract text content from nested iframe
-              const bodyText = await nestedFrame.locator('body').textContent().catch(() => '');
-              const bodyInnerText = await nestedFrame.locator('body').innerText().catch(() => '');
+              const bodyText = await nestedFrame
+                .locator('body')
+                .textContent()
+                .catch(() => '');
+              const bodyInnerText = await nestedFrame
+                .locator('body')
+                .innerText()
+                .catch(() => '');
               const allText = bodyInnerText.length > bodyText.length ? bodyInnerText : bodyText;
-              
+
               // Extract tables from nested iframe
-              const tableLocators = await nestedFrame.locator('table').all().catch(() => []);
+              const tableLocators = await nestedFrame
+                .locator('table')
+                .all()
+                .catch(() => []);
               const tables = [];
-              
+
               for (const tableLoc of tableLocators) {
-                const rowLocators = await tableLoc.locator('tr').all().catch(() => []);
+                const rowLocators = await tableLoc
+                  .locator('tr')
+                  .all()
+                  .catch(() => []);
                 const rows = [];
-                
+
                 for (const rowLoc of rowLocators) {
-                  const cellLocators = await rowLoc.locator('td, th').all().catch(() => []);
+                  const cellLocators = await rowLoc
+                    .locator('td, th')
+                    .all()
+                    .catch(() => []);
                   const cells = [];
                   for (const cellLoc of cellLocators) {
                     const cellText = await cellLoc.textContent().catch(() => '');
@@ -4533,30 +5438,32 @@ export class ClinicAssistAutomation {
                     rows.push(cells);
                   }
                 }
-                
+
                 // Filter out small/layout tables
                 if (rows.length >= 2) {
                   const tableText = rows.map(r => r.join(' ')).join(' ');
-                  if (tableText.length >= 100 && 
-                      !tableText.includes('__doPostBack') && 
-                      !tableText.includes('crv_config')) {
+                  if (
+                    tableText.length >= 100 &&
+                    !tableText.includes('__doPostBack') &&
+                    !tableText.includes('crv_config')
+                  ) {
                     // Check for NRIC or patient data indicators
                     const hasNRIC = /[STFGM]\d{7}[A-Z]/i.test(tableText);
                     const hasPatientData = /\b(patient|name|nric|qno|queue)\b/i.test(tableText);
-                    
+
                     if (hasNRIC || hasPatientData || rows.length > 5) {
                       tables.push({ rows, rowCount: rows.length });
                     }
                   }
                 }
               }
-              
+
               this._logStep('Extracted data from nested iframe via frameLocator', {
                 textLength: allText.length,
                 tableCount: tables.length,
-                preview: allText.substring(0, 300)
+                preview: allText.substring(0, 300),
               });
-              
+
               // Extract items from tables
               if (tables.length > 0) {
                 const items = [];
@@ -4565,22 +5472,26 @@ export class ClinicAssistAutomation {
                     if (row.length < 3) continue;
                     const rowText = row.join(' ').toLowerCase();
                     // Match NRIC patterns: S1234567A, S 1234 567 A, S1234567 A, etc.
-                    const nricMatch = rowText.match(/[stfg]\s*\d{4}\s*\d{3}\s*[a-z]|[stfg]\d{7}[a-z]|[stfg]\d{4}\s*\d{3}\s*[a-z]/i);
-                    
+                    const nricMatch = rowText.match(
+                      /[stfg]\s*\d{4}\s*\d{3}\s*[a-z]|[stfg]\d{7}[a-z]|[stfg]\d{4}\s*\d{3}\s*[a-z]/i
+                    );
+
                     if (nricMatch) {
                       const nric = nricMatch[0].replace(/\s+/g, '').toUpperCase();
                       let patientName = null;
                       let qno = null;
                       let status = null;
-                      
+
                       // Extract patient name and other fields from row
                       for (const cell of row) {
                         const cellText = (cell || '').trim();
-                        if (cellText.length > 3 && 
-                            !/^\d+$/.test(cellText) && 
-                            !/[stfg]\d{7}[a-z]/i.test(cellText) &&
-                            !cellText.includes('$') &&
-                            !cellText.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
+                        if (
+                          cellText.length > 3 &&
+                          !/^\d+$/.test(cellText) &&
+                          !/[stfg]\d{7}[a-z]/i.test(cellText) &&
+                          !cellText.includes('$') &&
+                          !cellText.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)
+                        ) {
                           if (!patientName && /^[A-Za-z\s]+$/.test(cellText)) {
                             patientName = cellText;
                           }
@@ -4590,72 +5501,86 @@ export class ClinicAssistAutomation {
                           qno = cellText;
                         }
                       }
-                      
+
                       // Get status from row (often near the end)
                       if (row.length > 1) {
                         const lastCells = row.slice(-3);
                         for (const cell of lastCells) {
                           const cellText = (cell || '').trim().toLowerCase();
-                          if (['pending', 'completed', 'served', 'cancelled', 'waiting'].some(s => cellText.includes(s))) {
+                          if (
+                            ['pending', 'completed', 'served', 'cancelled', 'waiting'].some(s =>
+                              cellText.includes(s)
+                            )
+                          ) {
                             status = (cell || '').trim();
                             break;
                           }
                         }
                       }
-                      
-                      items.push({ 
-                        nric, 
+
+                      items.push({
+                        nric,
                         patientName,
                         qno,
                         status,
-                        source: 'reports_queue_list_nested_iframe_frameLocator', 
-                        rawRow: row 
+                        source: 'reports_queue_list_nested_iframe_frameLocator',
+                        rawRow: row,
                       });
                     }
                   }
                 }
-                
+
                 if (items.length > 0) {
-                  this._logStep('Extracted items from nested iframe tables (frameLocator)', { count: items.length });
+                  this._logStep('Extracted items from nested iframe tables (frameLocator)', {
+                    count: items.length,
+                  });
                   return items;
                 }
               }
-              
+
               // If no tables but we have text content, extract from text
               if (allText.length > 500) {
                 this._logStep('Extracting from nested iframe text via frameLocator', {
-                  textLength: allText.length
+                  textLength: allText.length,
                 });
-                
+
                 const lines = allText.split(/[\n\r]+/);
                 const items = [];
-                
+
                 for (const line of lines) {
                   const trimmedLine = line.trim();
                   if (trimmedLine.length < 5) continue;
-                  
+
                   // Look for NRIC pattern
-                  const nricMatch = trimmedLine.match(/[STFGM]\s*\d{4}\s*\d{3}\s*[A-Z]|[STFGM]\d{7}[A-Z]|[STFGM]\d{4}\s*\d{3}\s*[A-Z]/i);
+                  const nricMatch = trimmedLine.match(
+                    /[STFGM]\s*\d{4}\s*\d{3}\s*[A-Z]|[STFGM]\d{7}[A-Z]|[STFGM]\d{4}\s*\d{3}\s*[A-Z]/i
+                  );
                   if (nricMatch) {
                     const nric = nricMatch[0].replace(/\s+/g, '').toUpperCase();
                     const lineIndex = lines.indexOf(line);
                     let patientName = null;
-                    
+
                     // Look for patient name in nearby lines
-                    for (let i = Math.max(0, lineIndex - 3); i <= Math.min(lines.length - 1, lineIndex + 3); i++) {
+                    for (
+                      let i = Math.max(0, lineIndex - 3);
+                      i <= Math.min(lines.length - 1, lineIndex + 3);
+                      i++
+                    ) {
                       const nearbyLine = lines[i].trim();
-                      if (nearbyLine.length > 3 && 
-                          nearbyLine.length < 50 &&
-                          !nric.includes(nearbyLine) &&
-                          !/^\d+$/.test(nearbyLine) &&
-                          !nearbyLine.includes('$') &&
-                          !nearbyLine.match(/^\d{1,2}\/\d{1,2}\/\d{4}/) &&
-                          /^[A-Za-z\s,.'-]+$/.test(nearbyLine)) {
+                      if (
+                        nearbyLine.length > 3 &&
+                        nearbyLine.length < 50 &&
+                        !nric.includes(nearbyLine) &&
+                        !/^\d+$/.test(nearbyLine) &&
+                        !nearbyLine.includes('$') &&
+                        !nearbyLine.match(/^\d{1,2}\/\d{1,2}\/\d{4}/) &&
+                        /^[A-Za-z\s,.'-]+$/.test(nearbyLine)
+                      ) {
                         patientName = nearbyLine;
                         break;
                       }
                     }
-                    
+
                     items.push({
                       nric,
                       patientName,
@@ -4664,89 +5589,120 @@ export class ClinicAssistAutomation {
                     });
                   }
                 }
-                
+
                 if (items.length > 0) {
-                  this._logStep('Extracted items from nested iframe text (frameLocator)', { count: items.length });
+                  this._logStep('Extracted items from nested iframe text (frameLocator)', {
+                    count: items.length,
+                  });
                   return items;
                 }
               }
             } catch (e) {
-              this._logStep('Error extracting from nested iframe via frameLocator', { error: e.message });
+              this._logStep('Error extracting from nested iframe via frameLocator', {
+                error: e.message,
+              });
             }
           }
-          
+
           // Fallback: Try to extract from outer iframe if nested extraction failed
           try {
-            const outerText = await outerFrame.locator('body').textContent().catch(() => '');
-            const outerTables = await outerFrame.locator('table').all().catch(() => []);
-            
+            const outerText = await outerFrame
+              .locator('body')
+              .textContent()
+              .catch(() => '');
+            const outerTables = await outerFrame
+              .locator('table')
+              .all()
+              .catch(() => []);
+
             if (outerTables.length > 0 || outerText.length > 100) {
               this._logStep('Trying to extract from outer iframe via frameLocator', {
                 textLength: outerText.length,
-                tableCount: outerTables.length
+                tableCount: outerTables.length,
               });
-              
+
               // Extract from outer iframe tables
               const items = [];
               for (const tableLoc of outerTables) {
-                const rowLocators = await tableLoc.locator('tr').all().catch(() => []);
+                const rowLocators = await tableLoc
+                  .locator('tr')
+                  .all()
+                  .catch(() => []);
                 for (const rowLoc of rowLocators) {
-                  const cellLocators = await rowLoc.locator('td, th').all().catch(() => []);
+                  const cellLocators = await rowLoc
+                    .locator('td, th')
+                    .all()
+                    .catch(() => []);
                   const cells = [];
                   for (const cellLoc of cellLocators) {
                     const cellText = await cellLoc.textContent().catch(() => '');
                     cells.push((cellText || '').trim());
                   }
-                  
+
                   if (cells.length >= 3) {
                     const rowText = cells.join(' ').toLowerCase();
                     const nricMatch = rowText.match(/[stfg]\d{7}[a-z]/i);
-                    
+
                     if (nricMatch) {
                       const nric = nricMatch[0].toUpperCase();
                       let patientName = null;
-                      
+
                       for (const cell of cells) {
                         const cellText = (cell || '').trim();
-                        if (cellText.length > 3 && 
-                            !/^\d+$/.test(cellText) && 
-                            !/[stfg]\d{7}[a-z]/i.test(cellText) &&
-                            !cellText.includes('$') &&
-                            !cellText.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
+                        if (
+                          cellText.length > 3 &&
+                          !/^\d+$/.test(cellText) &&
+                          !/[stfg]\d{7}[a-z]/i.test(cellText) &&
+                          !cellText.includes('$') &&
+                          !cellText.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)
+                        ) {
                           patientName = cellText;
                           break;
                         }
                       }
-                      
-                      items.push({ nric, patientName, source: 'reports_queue_list_outer_iframe_frameLocator', rawRow: cells });
+
+                      items.push({
+                        nric,
+                        patientName,
+                        source: 'reports_queue_list_outer_iframe_frameLocator',
+                        rawRow: cells,
+                      });
                     }
                   }
                 }
               }
-              
+
               if (items.length > 0) {
-                this._logStep('Extracted items from outer iframe (frameLocator)', { count: items.length });
+                this._logStep('Extracted items from outer iframe (frameLocator)', {
+                  count: items.length,
+                });
                 return items;
               }
             }
           } catch (e) {
-            this._logStep('Error extracting from outer iframe via frameLocator', { error: e.message });
+            this._logStep('Error extracting from outer iframe via frameLocator', {
+              error: e.message,
+            });
           }
-          
+
           // Fallback: Use evaluate method if frameLocator didn't extract items
           // This should only run if we didn't already return items from frameLocator
-          this._logStep('frameLocator extraction completed but no items found, trying evaluate method');
+          this._logStep(
+            'frameLocator extraction completed but no items found, trying evaluate method'
+          );
           const iframeData = await evalInRoot(() => {
-              const iframe = document.querySelector('iframe[src*="ReportViewer"], iframe[src*="queueListing"]');
-              if (!iframe) return { error: 'No iframe found' };
-              
-              try {
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+            const iframe = document.querySelector(
+              'iframe[src*="ReportViewer"], iframe[src*="queueListing"]'
+            );
+            if (!iframe) return { error: 'No iframe found' };
+
+            try {
+              const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
               if (!iframeDoc) return { error: 'Cannot access iframe document' };
-              
+
               const bodyText = iframeDoc.body?.innerText || '';
               const tables = Array.from(iframeDoc.querySelectorAll('table'));
-              
+
               const tableData = tables.map((table, idx) => {
                 const rows = Array.from(table.querySelectorAll('tr'));
                 const data = rows.map(row => {
@@ -4755,44 +5711,51 @@ export class ClinicAssistAutomation {
                 });
                 return { index: idx, rows: data, rowCount: rows.length };
               });
-              
+
               // Check for nested iframes (the actual report might be in a nested iframe)
               const nestedIframes = Array.from(iframeDoc.querySelectorAll('iframe, embed, object'));
-              
+
               // Check for PDF viewer elements
-              const pdfViewers = iframeDoc.querySelectorAll('embed[type*="pdf"], object[type*="pdf"], iframe[src*="pdf"]');
-              
+              const pdfViewers = iframeDoc.querySelectorAll(
+                'embed[type*="pdf"], object[type*="pdf"], iframe[src*="pdf"]'
+              );
+
               // Check all text nodes for patient data
               const allText = iframeDoc.body?.textContent || '';
-              
+
               // Get nested iframe info
               const nestedIframeInfo = nestedIframes.map(f => ({
                 tag: f.tagName.toLowerCase(),
                 src: f.src || f.data || '',
                 id: f.id || '',
               }));
-              
+
               // Try to access nested iframe if it exists - THIS IS WHERE THE ACTUAL REPORT IS
               let nestedContent = null;
               if (nestedIframes.length > 0) {
                 try {
                   const nestedIframe = nestedIframes[0];
-                  
+
                   // Wait a bit for iframe to load
                   if (!nestedIframe.contentDocument && !nestedIframe.contentWindow) {
                     // Iframe not loaded yet - skip for now
                   } else {
-                    const nestedDoc = nestedIframe.contentDocument || nestedIframe.contentWindow?.document;
+                    const nestedDoc =
+                      nestedIframe.contentDocument || nestedIframe.contentWindow?.document;
                     if (nestedDoc && nestedDoc.body) {
                       // Check for even deeper nested iframes (third level)
-                      const deepNestedIframes = Array.from(nestedDoc.querySelectorAll('iframe, embed'));
-                      
+                      const deepNestedIframes = Array.from(
+                        nestedDoc.querySelectorAll('iframe, embed')
+                      );
+
                       // Check for tables in nested iframe (or deep nested)
                       let targetDoc = nestedDoc;
                       if (deepNestedIframes.length > 0) {
                         try {
                           const deepNestedIframe = deepNestedIframes[0];
-                          const deepDoc = deepNestedIframe.contentDocument || deepNestedIframe.contentWindow?.document;
+                          const deepDoc =
+                            deepNestedIframe.contentDocument ||
+                            deepNestedIframe.contentWindow?.document;
                           if (deepDoc && deepDoc.body) {
                             targetDoc = deepDoc;
                           }
@@ -4800,26 +5763,29 @@ export class ClinicAssistAutomation {
                           // Deep nested iframe might be cross-origin, use nested iframe instead
                         }
                       }
-                      
+
                       const nestedTables = Array.from(targetDoc.querySelectorAll('table'));
-                      
+
                       // Filter out tables that are just layout/wrapper tables
                       const dataTables = nestedTables.filter(table => {
                         const rows = table.querySelectorAll('tr');
                         if (rows.length < 2) return false; // Need at least header + data row
-                        
+
                         // Check if table has actual data (not just JavaScript/HTML structure)
                         const tableText = table.textContent || '';
                         if (tableText.length < 100) return false; // Too small to be a report
-                        if (tableText.includes('__doPostBack') || tableText.includes('crv_config')) return false;
-                        
+                        if (tableText.includes('__doPostBack') || tableText.includes('crv_config'))
+                          return false;
+
                         // Look for NRIC patterns or patient data indicators
                         const hasNRIC = /[STFGM]\d{7}[A-Z]/i.test(tableText);
-                        const hasPatientData = tableText.match(/\b(patient|name|nric|qno|queue)\b/i);
-                        
+                        const hasPatientData = tableText.match(
+                          /\b(patient|name|nric|qno|queue)\b/i
+                        );
+
                         return hasNRIC || hasPatientData || rows.length > 5; // Likely has real data
                       });
-                      
+
                       const nestedTableData = dataTables.map((table, idx) => {
                         const rows = Array.from(table.querySelectorAll('tr'));
                         const data = rows.map(row => {
@@ -4828,7 +5794,7 @@ export class ClinicAssistAutomation {
                         });
                         return { index: idx, rows: data, rowCount: rows.length };
                       });
-                      
+
                       // Extract all text - try multiple methods
                       const bodyInnerText = targetDoc.body?.innerText || '';
                       const bodyTextContent = targetDoc.body?.textContent || '';
@@ -4838,14 +5804,13 @@ export class ClinicAssistAutomation {
                         .map(el => el.textContent || '')
                         .filter(t => t.trim().length > 0)
                         .join('\n');
-                      
+
                       // Use the longest text source available
-                      const allText = [
-                        bodyInnerText,
-                        bodyTextContent,
-                        allElementsText
-                      ].reduce((a, b) => a.length > b.length ? a : b, '');
-                      
+                      const allText = [bodyInnerText, bodyTextContent, allElementsText].reduce(
+                        (a, b) => (a.length > b.length ? a : b),
+                        ''
+                      );
+
                       nestedContent = {
                         bodyText: bodyInnerText,
                         allText: allText,
@@ -4862,10 +5827,14 @@ export class ClinicAssistAutomation {
                   // Return error only if this is critical
                 }
               }
-              
+
               const html = iframeDoc.body?.innerHTML || '';
-              const hasContent = bodyText.length > 100 || tables.length > 0 || html.length > 1000 || (nestedContent && nestedContent.bodyText.length > 0);
-              
+              const hasContent =
+                bodyText.length > 100 ||
+                tables.length > 0 ||
+                html.length > 1000 ||
+                (nestedContent && nestedContent.bodyText.length > 0);
+
               return {
                 bodyText: bodyText.substring(0, 50000),
                 allText: allText.substring(0, 50000),
@@ -4877,26 +5846,28 @@ export class ClinicAssistAutomation {
                 pdfViewerCount: pdfViewers.length,
                 nestedIframeCount: nestedIframes.length,
                 nestedIframeInfo: nestedIframeInfo.slice(0, 3),
-                nestedContent: nestedContent ? {
-                  bodyText: nestedContent.bodyText.substring(0, 20000),
-                  allText: nestedContent.allText.substring(0, 20000),
-                  tables: nestedContent.tables,
-                  tableCount: nestedContent.tableCount || 0,
-                  totalTableCount: nestedContent.totalTableCount || 0,
-                  html: nestedContent.html.substring(0, 10000),
-                } : null,
+                nestedContent: nestedContent
+                  ? {
+                      bodyText: nestedContent.bodyText.substring(0, 20000),
+                      allText: nestedContent.allText.substring(0, 20000),
+                      tables: nestedContent.tables,
+                      tableCount: nestedContent.tableCount || 0,
+                      totalTableCount: nestedContent.totalTableCount || 0,
+                      html: nestedContent.html.substring(0, 10000),
+                    }
+                  : null,
                 url: iframeDoc.location?.href || iframeDoc.URL || '',
               };
             } catch (e) {
               return { error: e.message };
             }
-          }).catch((evalError) => {
+          }).catch(evalError => {
             return { error: evalError.message };
           });
-          
+
           // Process iframeData from evaluate fallback - all inside try block
           if (iframeData && !iframeData.error) {
-            this._logStep('Successfully accessed iframe content via evaluate fallback', { 
+            this._logStep('Successfully accessed iframe content via evaluate fallback', {
               tableCount: iframeData.tableCount,
               bodyTextLength: iframeData.bodyText.length,
               allTextLength: iframeData.allText?.length || 0,
@@ -4909,18 +5880,19 @@ export class ClinicAssistAutomation {
               nestedTotalTableCount: iframeData.nestedContent?.totalTableCount || 0,
               hasDeepNested: iframeData.nestedContent?.hasDeepNested || false,
             });
-            
+
             // PRIORITY: Extract from nested iframe first (this is where the actual report data is)
             // Use nestedContentData from the check if available (more reliable than iframeData.nestedContent)
-            const nestedContentToUse = nestedContentData && nestedContentData.bodyText 
-              ? { 
-                  bodyText: nestedContentData.bodyText,
-                  allText: nestedContentData.bodyText,
-                  tables: nestedContentData.tables || [],
-                  tableCount: nestedContentData.tableCount || 0,
-                }
-              : iframeData.nestedContent;
-            
+            const nestedContentToUse =
+              nestedContentData && nestedContentData.bodyText
+                ? {
+                    bodyText: nestedContentData.bodyText,
+                    allText: nestedContentData.bodyText,
+                    tables: nestedContentData.tables || [],
+                    tableCount: nestedContentData.tableCount || 0,
+                  }
+                : iframeData.nestedContent;
+
             if (nestedContentToUse) {
               // Try tables first if available
               if (nestedContentToUse.tableCount > 0) {
@@ -4928,220 +5900,268 @@ export class ClinicAssistAutomation {
                   tableCount: nestedContentToUse.tableCount,
                   source: nestedContentData ? 'nestedCheck' : 'iframeData',
                 });
-              
-              const items = [];
-              for (const table of nestedContentToUse.tables) {
-                for (const row of table.rows) {
-                  if (row.length < 3) continue;
-                  const rowText = row.join(' ').toLowerCase();
-                  // Match NRIC patterns: S1234567A, S 1234 567 A, S1234567 A, etc.
-                  const nricMatch = rowText.match(/[stfg]\s*\d{4}\s*\d{3}\s*[a-z]|[stfg]\d{7}[a-z]|[stfg]\d{4}\s*\d{3}\s*[a-z]/i);
-                  
-                  if (nricMatch) {
-                    const nric = nricMatch[0].replace(/\s+/g, '').toUpperCase();
-                    let patientName = null;
-                    let qno = null;
-                    let status = null;
-                    
-                    // Extract patient name and other fields from row
-                    for (const cell of row) {
-                      const cellText = (cell || '').trim();
-                      if (cellText.length > 3 && 
-                          !/^\d+$/.test(cellText) && 
+
+                const items = [];
+                for (const table of nestedContentToUse.tables) {
+                  for (const row of table.rows) {
+                    if (row.length < 3) continue;
+                    const rowText = row.join(' ').toLowerCase();
+                    // Match NRIC patterns: S1234567A, S 1234 567 A, S1234567 A, etc.
+                    const nricMatch = rowText.match(
+                      /[stfg]\s*\d{4}\s*\d{3}\s*[a-z]|[stfg]\d{7}[a-z]|[stfg]\d{4}\s*\d{3}\s*[a-z]/i
+                    );
+
+                    if (nricMatch) {
+                      const nric = nricMatch[0].replace(/\s+/g, '').toUpperCase();
+                      let patientName = null;
+                      let qno = null;
+                      let status = null;
+
+                      // Extract patient name and other fields from row
+                      for (const cell of row) {
+                        const cellText = (cell || '').trim();
+                        if (
+                          cellText.length > 3 &&
+                          !/^\d+$/.test(cellText) &&
                           !/[stfg]\d{7}[a-z]/i.test(cellText) &&
                           !cellText.includes('$') &&
-                          !cellText.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
-                        if (!patientName && /^[A-Za-z\s]+$/.test(cellText)) {
-                          patientName = cellText;
+                          !cellText.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)
+                        ) {
+                          if (!patientName && /^[A-Za-z\s]+$/.test(cellText)) {
+                            patientName = cellText;
+                          }
+                        }
+                        // First column might be QNo
+                        if (!qno && /^Q?\d+$/.test(cellText)) {
+                          qno = cellText;
                         }
                       }
-                      // First column might be QNo
-                      if (!qno && /^Q?\d+$/.test(cellText)) {
-                        qno = cellText;
-                      }
-                    }
-                    
-                    // Get status from row (often near the end)
-                    if (row.length > 1) {
-                      const lastCells = row.slice(-3);
-                      for (const cell of lastCells) {
-                        const cellText = (cell || '').trim().toLowerCase();
-                        if (['pending', 'completed', 'served', 'cancelled', 'waiting'].some(s => cellText.includes(s))) {
-                          status = (cell || '').trim();
-                          break;
+
+                      // Get status from row (often near the end)
+                      if (row.length > 1) {
+                        const lastCells = row.slice(-3);
+                        for (const cell of lastCells) {
+                          const cellText = (cell || '').trim().toLowerCase();
+                          if (
+                            ['pending', 'completed', 'served', 'cancelled', 'waiting'].some(s =>
+                              cellText.includes(s)
+                            )
+                          ) {
+                            status = (cell || '').trim();
+                            break;
+                          }
                         }
                       }
+
+                      items.push({
+                        nric,
+                        patientName,
+                        qno,
+                        status,
+                        source: 'reports_queue_list_nested_iframe',
+                        rawRow: row,
+                      });
                     }
-                    
-                    items.push({ 
-                      nric, 
-                      patientName,
-                      qno,
-                      status,
-                      source: 'reports_queue_list_nested_iframe', 
-                      rawRow: row 
-                    });
                   }
                 }
-              }
-              
-              if (items.length > 0) {
-                this._logStep('Extracted items from nested iframe tables', { count: items.length });
-                return items;
-              }
-              
-              // If no tables but we have text content, extract from text
-              const nestedText = nestedContentToUse.allText || nestedContentToUse.bodyText || '';
-              if (nestedText.length > 500) {
-                this._logStep('Extracting from nested iframe text (no tables found)', {
-                  textLength: nestedText.length,
-                  source: nestedContentData ? 'nestedCheck' : 'iframeData',
-                });
-                
-                const lines = nestedText.split(/[\n\r]+/);
-                const items = [];
-                
-                for (const line of lines) {
-                  const trimmedLine = line.trim();
-                  if (trimmedLine.length < 5) continue;
-                  
-                  // Look for NRIC pattern
-                  const nricMatch = trimmedLine.match(/[STFGM]\s*\d{4}\s*\d{3}\s*[A-Z]|[STFGM]\d{7}[A-Z]|[STFGM]\d{4}\s*\d{3}\s*[A-Z]/i);
-                  if (nricMatch) {
-                    const nric = nricMatch[0].replace(/\s+/g, '').toUpperCase();
-                    const lineIndex = lines.indexOf(line);
-                    let patientName = null;
-                    
-                    // Look for patient name in nearby lines
-                    for (let i = Math.max(0, lineIndex - 3); i <= Math.min(lines.length - 1, lineIndex + 3); i++) {
-                      const nearbyLine = lines[i].trim();
-                      if (nearbyLine.length > 3 && 
+
+                if (items.length > 0) {
+                  this._logStep('Extracted items from nested iframe tables', {
+                    count: items.length,
+                  });
+                  return items;
+                }
+
+                // If no tables but we have text content, extract from text
+                const nestedText = nestedContentToUse.allText || nestedContentToUse.bodyText || '';
+                if (nestedText.length > 500) {
+                  this._logStep('Extracting from nested iframe text (no tables found)', {
+                    textLength: nestedText.length,
+                    source: nestedContentData ? 'nestedCheck' : 'iframeData',
+                  });
+
+                  const lines = nestedText.split(/[\n\r]+/);
+                  const items = [];
+
+                  for (const line of lines) {
+                    const trimmedLine = line.trim();
+                    if (trimmedLine.length < 5) continue;
+
+                    // Look for NRIC pattern
+                    const nricMatch = trimmedLine.match(
+                      /[STFGM]\s*\d{4}\s*\d{3}\s*[A-Z]|[STFGM]\d{7}[A-Z]|[STFGM]\d{4}\s*\d{3}\s*[A-Z]/i
+                    );
+                    if (nricMatch) {
+                      const nric = nricMatch[0].replace(/\s+/g, '').toUpperCase();
+                      const lineIndex = lines.indexOf(line);
+                      let patientName = null;
+
+                      // Look for patient name in nearby lines
+                      for (
+                        let i = Math.max(0, lineIndex - 3);
+                        i <= Math.min(lines.length - 1, lineIndex + 3);
+                        i++
+                      ) {
+                        const nearbyLine = lines[i].trim();
+                        if (
+                          nearbyLine.length > 3 &&
                           nearbyLine.length < 50 &&
                           !nric.includes(nearbyLine) &&
                           !/^\d+$/.test(nearbyLine) &&
                           !nearbyLine.includes('$') &&
                           !nearbyLine.match(/^\d{1,2}\/\d{1,2}\/\d{4}/) &&
-                          /^[A-Za-z\s,.'-]+$/.test(nearbyLine)) {
-                        patientName = nearbyLine;
-                        break;
+                          /^[A-Za-z\s,.'-]+$/.test(nearbyLine)
+                        ) {
+                          patientName = nearbyLine;
+                          break;
+                        }
                       }
+
+                      items.push({
+                        nric,
+                        patientName,
+                        source: 'reports_queue_list_nested_iframe_text',
+                        rawLine: trimmedLine,
+                      });
                     }
-                    
-                    items.push({
-                      nric,
-                      patientName,
-                      source: 'reports_queue_list_nested_iframe_text',
-                      rawLine: trimmedLine,
+                  }
+
+                  if (items.length > 0) {
+                    this._logStep('Extracted items from nested iframe text', {
+                      count: items.length,
                     });
+                    return items;
                   }
                 }
-                
+              } // End of if (nestedContentToUse) block
+
+              // If nested content exists, use that; otherwise use iframe content
+              // Note: This code is still inside the if (iframeData && !iframeData.error) block
+              const textToExtract =
+                nestedContentToUse &&
+                nestedContentToUse.allText &&
+                nestedContentToUse.allText.length > 0
+                  ? nestedContentToUse.allText
+                  : iframeData.allText && iframeData.allText.length > iframeData.bodyText.length
+                    ? iframeData.allText
+                    : iframeData.bodyText;
+
+              // Extract from tables in main iframe (only if we didn't already extract from nested content)
+              if (iframeData.tableCount > 0) {
+                const items = [];
+                for (const table of iframeData.tables) {
+                  for (const row of table.rows) {
+                    if (row.length < 3) continue;
+                    const rowText = row.join(' ').toLowerCase();
+                    const nricMatch = rowText.match(/[stfg]\d{7}[a-z]/i);
+
+                    if (nricMatch) {
+                      const nric = nricMatch[0].toUpperCase();
+                      let patientName = null;
+
+                      for (const cell of row) {
+                        const cellText = (cell || '').trim();
+                        if (
+                          cellText.length > 3 &&
+                          !/^\d+$/.test(cellText) &&
+                          !/[stfg]\d{7}[a-z]/i.test(cellText) &&
+                          !cellText.includes('$') &&
+                          !cellText.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)
+                        ) {
+                          patientName = cellText;
+                          break;
+                        }
+                      }
+
+                      items.push({
+                        nric,
+                        patientName,
+                        source: 'reports_queue_list_iframe',
+                        rawRow: row,
+                      });
+                    }
+                  }
+                }
+
                 if (items.length > 0) {
-                  this._logStep('Extracted items from nested iframe text', { count: items.length });
+                  this._logStep('Extracted items from iframe tables', { count: items.length });
                   return items;
                 }
               }
-            } // End of if (nestedContentToUse) block
-            
-            // If nested content exists, use that; otherwise use iframe content  
-            // Note: This code is still inside the if (iframeData && !iframeData.error) block
-            const textToExtract = nestedContentToUse && nestedContentToUse.allText && nestedContentToUse.allText.length > 0
-              ? nestedContentToUse.allText
-              : (iframeData.allText && iframeData.allText.length > iframeData.bodyText.length 
-                  ? iframeData.allText 
-                  : iframeData.bodyText);
-            
-            // Extract from tables in main iframe (only if we didn't already extract from nested content)
-            if (iframeData.tableCount > 0) {
-              const items = [];
-              for (const table of iframeData.tables) {
-                for (const row of table.rows) {
-                  if (row.length < 3) continue;
-                  const rowText = row.join(' ').toLowerCase();
-                  const nricMatch = rowText.match(/[stfg]\d{7}[a-z]/i);
-                  
+
+              // Extract from text if no tables (textToExtract already defined above)
+              if (textToExtract && textToExtract.length > 0) {
+                this._logStep('Extracting from iframe text content', {
+                  textLength: textToExtract.length,
+                });
+
+                const lines = textToExtract.split(/[\n\r]+/);
+                const items = [];
+
+                this._logStep('Parsing lines from iframe text', {
+                  lineCount: lines.length,
+                  preview: textToExtract.substring(0, 500),
+                });
+
+                for (const line of lines) {
+                  const trimmedLine = line.trim();
+                  if (trimmedLine.length < 5) continue;
+
+                  // Look for NRIC pattern (various formats: S1234567A or S 1234 567 A)
+                  const nricMatch = trimmedLine.match(
+                    /[STFGM]\s*\d{4}\s*\d{3}\s*[A-Z]|[STFGM]\d{7}[A-Z]|[STFGM]\d{4}\s*\d{3}\s*[A-Z]/i
+                  );
                   if (nricMatch) {
-                    const nric = nricMatch[0].toUpperCase();
+                    const nric = nricMatch[0].replace(/\s+/g, '').toUpperCase();
+                    const lineIndex = lines.indexOf(line);
                     let patientName = null;
-                    
-                    for (const cell of row) {
-                      const cellText = (cell || '').trim();
-                      if (cellText.length > 3 && 
-                          !/^\d+$/.test(cellText) && 
-                          !/[stfg]\d{7}[a-z]/i.test(cellText) &&
-                          !cellText.includes('$') &&
-                          !cellText.match(/^\d{1,2}\/\d{1,2}\/\d{4}/)) {
-                        patientName = cellText;
-                        break;
-                      }
-                    }
-                    
-                    items.push({ nric, patientName, source: 'reports_queue_list_iframe', rawRow: row });
-                  }
-                }
-              }
-              
-              if (items.length > 0) {
-                this._logStep('Extracted items from iframe tables', { count: items.length });
-                return items;
-              }
-            }
-            
-            // Extract from text if no tables (textToExtract already defined above)
-            if (textToExtract && textToExtract.length > 0) {
-              this._logStep('Extracting from iframe text content', { textLength: textToExtract.length });
-              
-              const lines = textToExtract.split(/[\n\r]+/);
-              const items = [];
-              
-              this._logStep('Parsing lines from iframe text', { lineCount: lines.length, preview: textToExtract.substring(0, 500) });
-              
-              for (const line of lines) {
-                const trimmedLine = line.trim();
-                if (trimmedLine.length < 5) continue;
-                
-                // Look for NRIC pattern (various formats: S1234567A or S 1234 567 A)
-                const nricMatch = trimmedLine.match(/[STFGM]\s*\d{4}\s*\d{3}\s*[A-Z]|[STFGM]\d{7}[A-Z]|[STFGM]\d{4}\s*\d{3}\s*[A-Z]/i);
-                if (nricMatch) {
-                  const nric = nricMatch[0].replace(/\s+/g, '').toUpperCase();
-                  const lineIndex = lines.indexOf(line);
-                  let patientName = null;
-                  
-                  // Look for patient name in nearby lines
-                  for (let i = Math.max(0, lineIndex - 3); i <= Math.min(lines.length - 1, lineIndex + 3); i++) {
-                    const nearbyLine = lines[i].trim();
-                    if (nearbyLine.length > 3 && 
+
+                    // Look for patient name in nearby lines
+                    for (
+                      let i = Math.max(0, lineIndex - 3);
+                      i <= Math.min(lines.length - 1, lineIndex + 3);
+                      i++
+                    ) {
+                      const nearbyLine = lines[i].trim();
+                      if (
+                        nearbyLine.length > 3 &&
                         nearbyLine.length < 50 &&
                         !nric.includes(nearbyLine) &&
                         !/^\d+$/.test(nearbyLine) &&
                         !nearbyLine.includes('$') &&
                         !nearbyLine.match(/^\d{1,2}\/\d{1,2}\/\d{4}/) &&
                         !/[STFGM]\d{7}[A-Z]/i.test(nearbyLine) &&
-                        /^[A-Za-z\s]+$/.test(nearbyLine)) {
-                      patientName = nearbyLine;
-                      break;
+                        /^[A-Za-z\s]+$/.test(nearbyLine)
+                      ) {
+                        patientName = nearbyLine;
+                        break;
+                      }
                     }
+
+                    items.push({
+                      nric,
+                      patientName,
+                      source: 'reports_queue_list_iframe_text',
+                      rawLine: trimmedLine.substring(0, 200),
+                    });
                   }
-                  
-                  items.push({ 
-                    nric, 
-                    patientName, 
-                    source: 'reports_queue_list_iframe_text',
-                    rawLine: trimmedLine.substring(0, 200),
+                }
+
+                if (items.length > 0) {
+                  this._logStep('Extracted items from iframe text', {
+                    count: items.length,
+                    items: items.map(i => ({ nric: i.nric, name: i.patientName })),
+                  });
+                  return items;
+                } else {
+                  this._logStep('No NRIC patterns found in iframe text', {
+                    textPreview: textToExtract.substring(0, 500),
                   });
                 }
-              }
-              
-              if (items.length > 0) {
-                this._logStep('Extracted items from iframe text', { count: items.length, items: items.map(i => ({ nric: i.nric, name: i.patientName })) });
-                return items;
-              } else {
-                this._logStep('No NRIC patterns found in iframe text', { textPreview: textToExtract.substring(0, 500) });
-              }
-            } // This closes if (textToExtract...) at 3836
-          } // This closes if (nestedContentToUse) at 3669
+              } // This closes if (textToExtract...) at 3836
+            } // This closes if (nestedContentToUse) at 3669
           } // End of if (iframeData && !iframeData.error) - closes if at 3643
-          
+
           // This should be at same level as the if above (inside try, outside the if block)
           if (iframeData && iframeData.error) {
             this._logStep('Error accessing iframe', { error: iframeData.error });
@@ -5150,27 +6170,52 @@ export class ClinicAssistAutomation {
           this._logStep('Error extracting from iframe', { error: e.message });
         }
       } // End of if (pageInfo.hasReportViewerIframes > 0)
-      
+
       // Scroll page to check if export buttons are below the fold
       await evalInRoot(() => {
         window.scrollTo(0, document.body.scrollHeight);
       });
       await this.page.waitForTimeout(1000);
-      
+
       // Check again after scrolling
       const exportButtonsAfterScroll = await evalInRoot(() => {
-        const buttons = Array.from(document.querySelectorAll('button, a, input[type="button"], input[type="submit"], span[onclick], div[onclick], img[onclick]'));
+        const buttons = Array.from(
+          document.querySelectorAll(
+            'button, a, input[type="button"], input[type="submit"], span[onclick], div[onclick], img[onclick]'
+          )
+        );
         return buttons
           .filter(btn => {
-            const text = (btn.textContent || btn.value || btn.innerText || btn.alt || btn.title || '').toLowerCase();
+            const text = (
+              btn.textContent ||
+              btn.value ||
+              btn.innerText ||
+              btn.alt ||
+              btn.title ||
+              ''
+            ).toLowerCase();
             const onclick = (btn.getAttribute('onclick') || '').toLowerCase();
             const href = (btn.href || '').toLowerCase();
-            return (text.includes('excel') || text.includes('pdf') || text.includes('export') ||
-                   onclick.includes('excel') || onclick.includes('pdf') || onclick.includes('export') ||
-                   href.includes('.xls') || href.includes('.pdf'));
+            return (
+              text.includes('excel') ||
+              text.includes('pdf') ||
+              text.includes('export') ||
+              onclick.includes('excel') ||
+              onclick.includes('pdf') ||
+              onclick.includes('export') ||
+              href.includes('.xls') ||
+              href.includes('.pdf')
+            );
           })
           .map(btn => ({
-            text: (btn.textContent || btn.value || btn.innerText || btn.alt || btn.title || '').trim(),
+            text: (
+              btn.textContent ||
+              btn.value ||
+              btn.innerText ||
+              btn.alt ||
+              btn.title ||
+              ''
+            ).trim(),
             href: btn.href || '',
             onclick: btn.getAttribute('onclick') || '',
             className: btn.className || '',
@@ -5178,63 +6223,79 @@ export class ClinicAssistAutomation {
             tag: btn.tagName.toLowerCase(),
           }));
       }).catch(() => []);
-      
+
       if (exportButtonsAfterScroll.length > 0) {
         exportButtons.push(...exportButtonsAfterScroll);
       }
-      
+
       // If PDF viewer detected or export buttons found, click Excel button
       if (pageInfo.hasPDFViewer || exportButtons.length > 0) {
         // Prefer Excel over PDF (easier to parse)
-        const excelBtn = exportButtons.find(b => 
-          b.text.toLowerCase().includes('excel') || 
-          b.href.includes('.xls') || 
-          b.onclick.toLowerCase().includes('excel')
+        const excelBtn = exportButtons.find(
+          b =>
+            b.text.toLowerCase().includes('excel') ||
+            b.href.includes('.xls') ||
+            b.onclick.toLowerCase().includes('excel')
         );
-        const exportBtn = excelBtn || exportButtons.find(b => b.text.toLowerCase().includes('pdf')) || exportButtons[0];
-        
+        const exportBtn =
+          excelBtn ||
+          exportButtons.find(b => b.text.toLowerCase().includes('pdf')) ||
+          exportButtons[0];
+
         if (exportBtn) {
-          this._logStep('Clicking export button to download', { button: exportBtn.text || exportBtn.id });
-          
+          this._logStep('Clicking export button to download', {
+            button: exportBtn.text || exportBtn.id,
+          });
+
           try {
             // Set up download listener before clicking
-            const downloadPromise = this.page.waitForEvent('download', { timeout: 30000 }).catch(() => null);
-            
+            const downloadPromise = this.page
+              .waitForEvent('download', { timeout: 30000 })
+              .catch(() => null);
+
             // Click the export button
             let clicked = false;
             if (exportBtn.id) {
               const btn = locInRoot(`#${exportBtn.id}`).first();
-              if (await btn.count().catch(() => 0) > 0) {
+              if ((await btn.count().catch(() => 0)) > 0) {
                 await btn.click();
                 clicked = true;
               }
             }
             if (!clicked && exportBtn.text) {
-              const btn = locInRoot(`button:has-text("${exportBtn.text}"), a:has-text("${exportBtn.text}"), span:has-text("${exportBtn.text}"), div:has-text("${exportBtn.text}")`).first();
-              if (await btn.count().catch(() => 0) > 0) {
+              const btn = locInRoot(
+                `button:has-text("${exportBtn.text}"), a:has-text("${exportBtn.text}"), span:has-text("${exportBtn.text}"), div:has-text("${exportBtn.text}")`
+              ).first();
+              if ((await btn.count().catch(() => 0)) > 0) {
                 await btn.click();
                 clicked = true;
               }
             }
             if (!clicked && exportBtn.href && !exportBtn.href.includes('javascript:')) {
-              await this.page.goto(exportBtn.href, { waitUntil: 'networkidle', timeout: 30000 }).catch(() => {});
+              await this.page
+                .goto(exportBtn.href, { waitUntil: 'networkidle', timeout: 30000 })
+                .catch(() => {});
               clicked = true;
             }
-            
+
             if (clicked) {
               await this.page.waitForTimeout(2000);
               const download = await downloadPromise;
               if (download) {
-                const fileName = download.suggestedFilename() || `queue-report-${Date.now()}.${exportBtn.text.toLowerCase().includes('excel') || exportBtn.onclick.toLowerCase().includes('excel') ? 'xlsx' : 'pdf'}`;
+                const fileName =
+                  download.suggestedFilename() ||
+                  `queue-report-${Date.now()}.${exportBtn.text.toLowerCase().includes('excel') || exportBtn.onclick.toLowerCase().includes('excel') ? 'xlsx' : 'pdf'}`;
                 const filePath = `downloads/${fileName}`;
                 await download.saveAs(filePath);
                 this._logStep('Downloaded export file', { filePath, fileName });
-                
+
                 // TODO: Parse Excel/PDF file to extract queue items
                 // For now, return empty - we'll implement parsing next
                 return [];
               } else {
-                this._logStep('No download event triggered, might be opening in new window/tab or direct navigation');
+                this._logStep(
+                  'No download event triggered, might be opening in new window/tab or direct navigation'
+                );
               }
             }
           } catch (e) {
@@ -5242,11 +6303,11 @@ export class ClinicAssistAutomation {
           }
         }
       }
-      
+
       // If we're on QueueLog/Index and jqGrid exists but is empty, try to find and use date filter
       if (pageInfo.url.includes('/QueueLog') && pageInfo.hasJqGrid && pageInfo.jqGridRows === 0) {
         this._logStep('Queue page is empty, trying to find date filter');
-        
+
         // Look for date filter inputs or buttons
         const dateFilterSelectors = [
           'input[type="date"]',
@@ -5257,7 +6318,7 @@ export class ClinicAssistAutomation {
           'button:has-text("Search")',
           'a:has-text("Filter")',
         ];
-        
+
         for (const selector of dateFilterSelectors) {
           const element = locInRoot(selector).first();
           if ((await element.count().catch(() => 0)) > 0) {
@@ -5275,9 +6336,9 @@ export class ClinicAssistAutomation {
           }
         }
       }
-      
+
       return await evalInRoot(() => {
-        const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
+        const norm = s => (s || '').replace(/\s+/g, ' ').trim();
         const items = [];
 
         // Try jqGrid format first (same as queue page)
@@ -5285,7 +6346,7 @@ export class ClinicAssistAutomation {
         if (jqGrid) {
           const rows = jqGrid.querySelectorAll('tr.jqgrow');
           for (const row of rows) {
-            const getCellValue = (ariaDesc) => {
+            const getCellValue = ariaDesc => {
               const cell = row.querySelector(`td[aria-describedby$="${ariaDesc}"]`);
               return cell ? norm(cell.textContent) : null;
             };
@@ -5326,7 +6387,7 @@ export class ClinicAssistAutomation {
 
               // Try to identify columns by header or content
               const rowText = norm(row.textContent);
-              
+
               // Look for NRIC pattern
               const nricMatch = rowText.match(/[STFGM]\s*\d{4}\s*\d{3}\s*[A-Z]/i);
               const nric = nricMatch ? nricMatch[0].replace(/\s+/g, '').toUpperCase() : null;
@@ -5335,7 +6396,13 @@ export class ClinicAssistAutomation {
               let patientName = null;
               for (const cell of cells) {
                 const text = norm(cell.textContent);
-                if (text && text.length > 3 && !/^\d+$/.test(text) && !/^[STFGM]\d{7}[A-Z]$/i.test(text) && !text.includes('$')) {
+                if (
+                  text &&
+                  text.length > 3 &&
+                  !/^\d+$/.test(text) &&
+                  !/^[STFGM]\d{7}[A-Z]$/i.test(text) &&
+                  !text.includes('$')
+                ) {
                   patientName = text;
                   break;
                 }
@@ -5347,7 +6414,12 @@ export class ClinicAssistAutomation {
                   status: cells[1] ? norm(cells[1].textContent) : null,
                   patientName,
                   nric,
-                  payType: cells.find(c => /MHC|AIA|Cash|Insurance/i.test(norm(c.textContent))) ? norm(cells.find(c => /MHC|AIA|Cash|Insurance/i.test(norm(c.textContent))).textContent) : null,
+                  payType: cells.find(c => /MHC|AIA|Cash|Insurance/i.test(norm(c.textContent)))
+                    ? norm(
+                        cells.find(c => /MHC|AIA|Cash|Insurance/i.test(norm(c.textContent)))
+                          .textContent
+                      )
+                    : null,
                   visitType: null,
                   fee: null,
                   inTime: null,
@@ -5365,26 +6437,26 @@ export class ClinicAssistAutomation {
       this._logStep('Error extracting queue list results', { error: error.message });
       // Try a more aggressive extraction - look for any patient-like data
       try {
-        const fallbackItems = await evalInRoot(() => {
-          const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
+        const fallbackItems = await this.page.evaluate(() => {
+          const _norm = s => (s || '').replace(/\s+/g, ' ').trim();
           const items = [];
           const bodyText = document.body?.innerText || '';
-          
+
           // Look for NRIC patterns in the entire page
           const nricPattern = /([STFGM]\s*\d{4}\s*\d{3}\s*[A-Z])/gi;
           const nricMatches = [...bodyText.matchAll(nricPattern)];
-          
+
           for (const match of nricMatches) {
             const nric = match[1].replace(/\s+/g, '').toUpperCase();
             // Try to find patient name near the NRIC (within 200 chars)
             const contextStart = Math.max(0, match.index - 100);
             const contextEnd = Math.min(bodyText.length, match.index + 100);
             const context = bodyText.substring(contextStart, contextEnd);
-            
+
             // Look for name-like text (2-4 words, capitalized)
             const nameMatch = context.match(/([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})/);
             const patientName = nameMatch ? nameMatch[1] : null;
-            
+
             if (nric && !items.find(item => item.nric === nric)) {
               items.push({
                 nric,
@@ -5393,10 +6465,10 @@ export class ClinicAssistAutomation {
               });
             }
           }
-          
+
           return items;
         });
-        
+
         if (fallbackItems && fallbackItems.length > 0) {
           this._logStep('Fallback extraction found items', { count: fallbackItems.length });
           return fallbackItems;
@@ -5404,7 +6476,7 @@ export class ClinicAssistAutomation {
       } catch (fallbackError) {
         this._logStep('Fallback extraction also failed', { error: fallbackError.message });
       }
-      
+
       return [];
     }
   }
@@ -5416,14 +6488,17 @@ export class ClinicAssistAutomation {
     try {
       this._logStep('Login start', { url: this.config.url, clinicGroup: this.config.clinicGroup });
       logger.info(`Logging into ${this.config.name}...`);
-      
+
       // Avoid 'networkidle' here; Clinic Assist keeps background connections open.
       await this.page.goto(this.config.url, { waitUntil: 'domcontentloaded', timeout: 60000 });
       await this.page.waitForTimeout(2000); // Wait for page to fully render
-      
+
       // Take initial screenshot
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-login-page.png', fullPage: true });
-      
+      await this.page.screenshot({
+        path: 'screenshots/clinic-assist-login-page.png',
+        fullPage: true,
+      });
+
       // Use exact selectors found from browser inspection
       // Username field: input[name="txtLoginID"] or input[id="txtLoginID"]
       const usernameSelectors = [
@@ -5470,41 +6545,44 @@ export class ClinicAssistAutomation {
 
       if (!passwordFilled) {
         // Last-resort DOM fallback when selectors are unstable.
-        const domFill = await this.page.evaluate(({ selectors, value }) => {
-          const trySet = (field) => {
-            if (!field) return false;
-            field.value = value;
-            field.dispatchEvent(new Event('input', { bubbles: true }));
-            field.dispatchEvent(new Event('change', { bubbles: true }));
-            return true;
-          };
+        const domFill = await this.page.evaluate(
+          ({ selectors, value }) => {
+            const trySet = field => {
+              if (!field) return false;
+              field.value = value;
+              field.dispatchEvent(new Event('input', { bubbles: true }));
+              field.dispatchEvent(new Event('change', { bubbles: true }));
+              return true;
+            };
 
-          for (const selector of selectors) {
-            const field = document.querySelector(selector);
-            if (trySet(field)) return { ok: true, selector };
-          }
+            for (const selector of selectors) {
+              const field = document.querySelector(selector);
+              if (trySet(field)) return { ok: true, selector };
+            }
 
-          const fallback = Array.from(document.querySelectorAll('input')).find((input) => {
-            const name = (input.getAttribute('name') || '').toLowerCase();
-            const id = (input.getAttribute('id') || '').toLowerCase();
-            const ph = (input.getAttribute('placeholder') || '').toLowerCase();
-            const type = (input.getAttribute('type') || '').toLowerCase();
-            return (
-              type === 'password' ||
-              name.includes('password') ||
-              id.includes('password') ||
-              ph.includes('password')
-            );
-          });
-          if (trySet(fallback)) return { ok: true, selector: 'input(password-fallback)' };
-          return { ok: false };
-        }, { selectors: passwordSelectors, value: this.config.password });
+            const fallback = Array.from(document.querySelectorAll('input')).find(input => {
+              const name = (input.getAttribute('name') || '').toLowerCase();
+              const id = (input.getAttribute('id') || '').toLowerCase();
+              const ph = (input.getAttribute('placeholder') || '').toLowerCase();
+              const type = (input.getAttribute('type') || '').toLowerCase();
+              return (
+                type === 'password' ||
+                name.includes('password') ||
+                id.includes('password') ||
+                ph.includes('password')
+              );
+            });
+            if (trySet(fallback)) return { ok: true, selector: 'input(password-fallback)' };
+            return { ok: false };
+          },
+          { selectors: passwordSelectors, value: this.config.password }
+        );
         passwordFilled = !!domFill?.ok;
       }
 
       if (!passwordFilled) {
         const inputDiagnostics = await this.page.evaluate(() =>
-          Array.from(document.querySelectorAll('input')).map((input) => ({
+          Array.from(document.querySelectorAll('input')).map(input => ({
             id: input.id || null,
             name: input.name || null,
             type: input.type || null,
@@ -5529,7 +6607,7 @@ export class ClinicAssistAutomation {
       for (const selector of clinicGroupSelectors) {
         try {
           const locator = this.page.locator(selector);
-          if (await locator.count() > 0) {
+          if ((await locator.count()) > 0) {
             clinicGroupLocator = locator;
             break;
           }
@@ -5547,24 +6625,23 @@ export class ClinicAssistAutomation {
         await clinicGroupLocator.fill(this.config.clinicGroup, { force: true });
       } catch (e) {
         // Fallback: use evaluate to set value directly
-        await this.page.evaluate(({ selector, value }) => {
-          const field = document.querySelector(selector);
-          if (field) {
-            field.value = value;
-            field.dispatchEvent(new Event('input', { bubbles: true }));
-            field.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-        }, { selector: 'input[name="txtClinic"]', value: this.config.clinicGroup });
+        await this.page.evaluate(
+          ({ selector, value }) => {
+            const field = document.querySelector(selector);
+            if (field) {
+              field.value = value;
+              field.dispatchEvent(new Event('input', { bubbles: true }));
+              field.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          },
+          { selector: 'input[name="txtClinic"]', value: this.config.clinicGroup }
+        );
       }
       logger.info(`Clinic Group filled: ${this.config.clinicGroup}`);
       this._logStep('Clinic Group filled', { clinicGroup: this.config.clinicGroup });
 
       // Login button: button with text "Login"
-      const loginButtonSelectors = [
-        'button:has-text("Login")',
-        'button[type="submit"]',
-        'button',
-      ];
+      const loginButtonSelectors = ['button:has-text("Login")', 'button[type="submit"]', 'button'];
 
       let loginButton = null;
       for (const selector of loginButtonSelectors) {
@@ -5600,14 +6677,15 @@ export class ClinicAssistAutomation {
 
       // Wait for navigation or check for 2FA
       await this.page.waitForTimeout(3000);
-      
+
       // Clinic Assist login page always shows a "2 Factor Authentication" section,
       // but the verification code inputs are disabled when 2FA is not required.
       // Only treat 2FA as required if those inputs become enabled.
-      const twoFaHeaderPresent = (await this.page
-        .locator('text=/2\\s*Factor\\s*Authentication/i')
-        .count()
-        .catch(() => 0)) > 0;
+      const twoFaHeaderPresent =
+        (await this.page
+          .locator('text=/2\\s*Factor\\s*Authentication/i')
+          .count()
+          .catch(() => 0)) > 0;
       if (twoFaHeaderPresent) {
         const enabledCodeInputs = await this.page
           .locator('text=/Enter Your Verification Code/i')
@@ -5616,7 +6694,9 @@ export class ClinicAssistAutomation {
           .count()
           .catch(() => 0);
         if (enabledCodeInputs > 0) {
-          logger.warn('Clinic Assist 2FA required (verification inputs enabled) - manual intervention needed');
+          logger.warn(
+            'Clinic Assist 2FA required (verification inputs enabled) - manual intervention needed'
+          );
           await this.page.screenshot({ path: 'screenshots/clinic-assist-2fa.png', fullPage: true });
           const waitMs = process.env.CLINIC_ASSIST_2FA_WAIT_MS
             ? Number(process.env.CLINIC_ASSIST_2FA_WAIT_MS)
@@ -5627,22 +6707,27 @@ export class ClinicAssistAutomation {
           logger.info('Clinic Assist 2FA not required (verification inputs disabled)');
         }
       }
-      
+
       // Wait for DOM to be ready (don't wait for networkidle - it's too slow)
       await this.page.waitForLoadState('domcontentloaded');
-      
+
       // Take screenshot after login
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-after-login.png', fullPage: true }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/clinic-assist-after-login.png', fullPage: true })
+        .catch(() => {});
 
       // Some accounts are forced to a profile update modal; dismiss so it doesn't break downstream extraction.
       await this._dismissUpdateUserInfoIfPresent().catch(() => false);
-      
+
       logger.info(`Successfully logged into ${this.config.name}`);
       this._logStep('Login ok');
       return true;
     } catch (error) {
       logger.error(`Login failed for ${this.config.name}:`, error);
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-login-error.png', fullPage: true });
+      await this.page.screenshot({
+        path: 'screenshots/clinic-assist-login-error.png',
+        fullPage: true,
+      });
       throw error;
     }
   }
@@ -5656,10 +6741,10 @@ export class ClinicAssistAutomation {
     try {
       this._logStep('Navigate to Queue', { branchName, deptName });
       logger.info(`Navigating to Queue: Branch=${branchName}, Dept=${deptName}...`);
-      
+
       await this.page.waitForLoadState('networkidle');
       await this.page.waitForTimeout(2000);
-      
+
       // Step 1: Select Branch
       const branchSelectors = [
         `select:has-text("${branchName}")`,
@@ -5667,12 +6752,12 @@ export class ClinicAssistAutomation {
         'select[id*="branch" i]',
         'select:first-of-type',
       ];
-      
+
       let branchSelected = false;
       for (const selector of branchSelectors) {
         try {
           const branchSelect = this.page.locator(selector).first();
-          if (await branchSelect.count() > 0) {
+          if ((await branchSelect.count()) > 0) {
             if (!branchName || branchName === '__FIRST__') {
               branchSelected = await this._selectFirstNonEmptyOption(branchSelect);
             } else {
@@ -5687,18 +6772,20 @@ export class ClinicAssistAutomation {
           continue;
         }
       }
-      
+
       if (!branchSelected) {
         logger.warn('Could not find branch selector, trying alternative methods...');
         // Try clicking on branch link/button
-        const branchLinks = await this.page.$$(`a:has-text("${branchName}"), button:has-text("${branchName}")`);
+        const branchLinks = await this.page.$$(
+          `a:has-text("${branchName}"), button:has-text("${branchName}")`
+        );
         if (branchLinks.length > 0) {
           await branchLinks[0].click();
           await this.page.waitForTimeout(1000);
           branchSelected = true;
         }
       }
-      
+
       // Step 2: Select Department
       await this.page.waitForTimeout(1000);
       const deptSelectors = [
@@ -5707,17 +6794,17 @@ export class ClinicAssistAutomation {
         'select[name*="department" i]',
         'select[id*="dept" i]',
       ];
-      
-      let deptSelected = false;
+
+      let _deptSelected = false;
       for (const selector of deptSelectors) {
         try {
           const deptSelect = this.page.locator(selector).first();
-          if (await deptSelect.count() > 0) {
+          if ((await deptSelect.count()) > 0) {
             if (!deptName || deptName === '__FIRST__') {
-              deptSelected = await this._selectFirstNonEmptyOption(deptSelect);
+              _deptSelected = await this._selectFirstNonEmptyOption(deptSelect);
             } else {
               await deptSelect.selectOption({ label: deptName });
-              deptSelected = true;
+              _deptSelected = true;
             }
             await this.page.waitForTimeout(1000);
             logger.info(`Department selected: ${deptName}`);
@@ -5755,7 +6842,7 @@ export class ClinicAssistAutomation {
 
       // After clicking room (Reception), wait for navigation into the room page (e.g. /Home/Reception)
       await this.page.waitForURL(/\/Home\//, { timeout: 15000 }).catch(() => {});
-      
+
       // Step 3: Navigate to Queue immediately after room loads (reduced wait)
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
       await this.page.waitForTimeout(500); // Reduced from 1000ms to 500ms
@@ -5767,7 +6854,11 @@ export class ClinicAssistAutomation {
         await this.page.waitForTimeout(1500);
         logger.info('Navigated to Queue');
         await this.page
-          .screenshot({ path: 'screenshots/clinic-assist-queue.png', fullPage: true, timeout: 5000 })
+          .screenshot({
+            path: 'screenshots/clinic-assist-queue.png',
+            fullPage: true,
+            timeout: 5000,
+          })
           .catch(() => {});
         return true;
       }
@@ -5781,7 +6872,11 @@ export class ClinicAssistAutomation {
         await this.page.waitForTimeout(1500);
         logger.info(`Navigated to Queue (direct): ${directQueueUrl}`);
         await this.page
-          .screenshot({ path: 'screenshots/clinic-assist-queue.png', fullPage: true, timeout: 5000 })
+          .screenshot({
+            path: 'screenshots/clinic-assist-queue.png',
+            fullPage: true,
+            timeout: 5000,
+          })
           .catch(() => {});
         return true;
       } catch {
@@ -5789,7 +6884,11 @@ export class ClinicAssistAutomation {
       }
 
       // Fallback: generic selectors
-      const queueSelectors = ['a:has-text("Queue")', 'button:has-text("Queue")', '[href*="Queue" i]'];
+      const queueSelectors = [
+        'a:has-text("Queue")',
+        'button:has-text("Queue")',
+        '[href*="Queue" i]',
+      ];
       for (const selector of queueSelectors) {
         try {
           const el = this.page.locator(selector).first();
@@ -5799,7 +6898,11 @@ export class ClinicAssistAutomation {
             await this.page.waitForTimeout(1500);
             logger.info('Navigated to Queue (fallback)');
             await this.page
-              .screenshot({ path: 'screenshots/clinic-assist-queue.png', fullPage: true, timeout: 5000 })
+              .screenshot({
+                path: 'screenshots/clinic-assist-queue.png',
+                fullPage: true,
+                timeout: 5000,
+              })
               .catch(() => {});
             return true;
           }
@@ -5807,30 +6910,36 @@ export class ClinicAssistAutomation {
           continue;
         }
       }
-      
+
       logger.warn('Could not find Queue navigation');
       return false;
     } catch (error) {
       logger.error('Failed to navigate to Queue:', error);
       await this.page
-        .screenshot({ path: 'screenshots/clinic-assist-queue-error.png', fullPage: true, timeout: 5000 })
+        .screenshot({
+          path: 'screenshots/clinic-assist-queue-error.png',
+          fullPage: true,
+          timeout: 5000,
+        })
         .catch(() => {});
       throw error;
     }
   }
 
   async _pickFirstQueueRowByKeywords(keywords) {
-    return await this.page.evaluate((keywordsLower) => {
-      const norm = (s) => (s || '').toLowerCase();
-      const kw = keywordsLower.map((k) => k.toLowerCase());
+    return await this.page.evaluate(keywordsLower => {
+      const norm = s => (s || '').toLowerCase();
+      const kw = keywordsLower.map(k => k.toLowerCase());
 
       // Prefer table rows if present
       const rows = Array.from(document.querySelectorAll('table tr'));
-      const candidates = rows.length ? rows : Array.from(document.querySelectorAll('tr, li, .row, .card, div'));
+      const candidates = rows.length
+        ? rows
+        : Array.from(document.querySelectorAll('tr, li, .row, .card, div'));
       for (const el of candidates) {
         const text = norm(el.textContent);
         if (!text || text.length < 5) continue;
-        if (kw.some((k) => text.includes(k))) {
+        if (kw.some(k => text.includes(k))) {
           // Return a minimal selector hint by index if possible
           return { text: el.textContent || '' };
         }
@@ -5853,7 +6962,7 @@ export class ClinicAssistAutomation {
     try {
       this._logStep('Extract patient from Queue', { patientIdentifier });
       logger.info(`Extracting patient information for: ${patientIdentifier}`);
-      
+
       await this.page.waitForLoadState('networkidle');
       await this.page.waitForTimeout(2000);
 
@@ -5867,16 +6976,43 @@ export class ClinicAssistAutomation {
         const jqGrid = this.page.locator('#queueLogGrid');
         if ((await jqGrid.count().catch(() => 0)) > 0) {
           const jqRows = jqGrid.locator('tr.jqgrow');
-          await jqRows.first().waitFor({ state: 'attached', timeout: 15000 }).catch(() => {});
-          const mhcRow = jqGrid.locator('tr.jqgrow:has(td[aria-describedby$=\"_PayType\"]:has-text(\"MHC\"))').first();
-          const aiaRow = jqGrid.locator('tr.jqgrow:has(td[aria-describedby$=\"_PayType\"]:has-text(\"AIA\"))').first();
+          await jqRows
+            .first()
+            .waitFor({ state: 'attached', timeout: 15000 })
+            .catch(() => {});
+          const mhcRow = jqGrid
+            .locator('tr.jqgrow:has(td[aria-describedby$=\"_PayType\"]:has-text(\"MHC\"))')
+            .first();
+          const aiaRow = jqGrid
+            .locator('tr.jqgrow:has(td[aria-describedby$=\"_PayType\"]:has-text(\"AIA\"))')
+            .first();
           const row = (await mhcRow.count().catch(() => 0)) > 0 ? mhcRow : aiaRow;
           if ((await row.count().catch(() => 0)) > 0) {
             // Read NRIC and Patient Name from their columns
-            const nricCellText = ((await row.locator('td[aria-describedby$="_NRIC"]').first().textContent().catch(() => '')) || '').trim();
-            const nameCellText = ((await row.locator('td[aria-describedby$="_PatientName"]').first().textContent().catch(() => '')) || '').trim();
-            const visitTypeText = ((await row.locator('td[aria-describedby$="_VisitType"]').first().textContent().catch(() => '')) || '').trim();
-            const nricMatch = nricCellText.match(/[STFGM]\s*\d{4}\s*\d{3}\s*[A-Z]/i) || nricCellText.match(/[STFGM]\d{7}[A-Z]/i);
+            const nricCellText = (
+              (await row
+                .locator('td[aria-describedby$="_NRIC"]')
+                .first()
+                .textContent()
+                .catch(() => '')) || ''
+            ).trim();
+            const nameCellText = (
+              (await row
+                .locator('td[aria-describedby$="_PatientName"]')
+                .first()
+                .textContent()
+                .catch(() => '')) || ''
+            ).trim();
+            const visitTypeText = (
+              (await row
+                .locator('td[aria-describedby$="_VisitType"]')
+                .first()
+                .textContent()
+                .catch(() => '')) || ''
+            ).trim();
+            const nricMatch =
+              nricCellText.match(/[STFGM]\s*\d{4}\s*\d{3}\s*[A-Z]/i) ||
+              nricCellText.match(/[STFGM]\d{7}[A-Z]/i);
             if (nricMatch) nric = nricMatch[0].replace(/\s+/g, '').toUpperCase();
             if (nameCellText) patientName = nameCellText;
             if (visitTypeText) visitType = this._normalizeVisitType(visitTypeText);
@@ -5903,14 +7039,23 @@ export class ClinicAssistAutomation {
         let row = null;
         if (roleRowCount > 1) {
           const dataRows = roleRows.filter({ hasText: /\b(Paid|Seen|New)\b/i });
-          const mhcCount = await dataRows.filter({ hasText: /MHC/i }).count().catch(() => 0);
-          const aiaCount = await dataRows.filter({ hasText: /AIA/i }).count().catch(() => 0);
+          const mhcCount = await dataRows
+            .filter({ hasText: /MHC/i })
+            .count()
+            .catch(() => 0);
+          const aiaCount = await dataRows
+            .filter({ hasText: /AIA/i })
+            .count()
+            .catch(() => 0);
           logger.info(`Queue debug: MHC rows=${mhcCount}, AIA rows=${aiaCount}`);
           row = dataRows.filter({ hasText: /(MHC|AIA|AIACLient)/i }).first();
         } else {
           const queueTable = this.page.locator('table:has(th:has-text("QNo"))').first();
           const rows = queueTable.locator('tbody tr');
-          await rows.first().waitFor({ state: 'attached', timeout: 15000 }).catch(() => {});
+          await rows
+            .first()
+            .waitFor({ state: 'attached', timeout: 15000 })
+            .catch(() => {});
           row = rows.filter({ hasText: /(MHC|AIA|AIACLient)/i }).first();
         }
 
@@ -5926,7 +7071,9 @@ export class ClinicAssistAutomation {
 
       // Fallback: open the queued patient/visit first, then extract NRIC from the patient info screen.
       if (!nric) {
-        this._logStep('Queue: NRIC not found in row; opening visit to extract NRIC from patient info');
+        this._logStep(
+          'Queue: NRIC not found in row; opening visit to extract NRIC from patient info'
+        );
         await this.openQueuedPatientForExtraction(patientIdentifier || '__AUTO_MHC_AIA__');
         nric = await this.extractPatientNricFromPatientInfo();
       }
@@ -5938,7 +7085,7 @@ export class ClinicAssistAutomation {
         patientName,
         visitType,
       };
-      
+
       logger.info(`Patient extracted: NRIC=${nric}`);
       this._logStep('Queue: patient info extracted', { nric, patientName, visitType });
       return patientInfo;
@@ -5957,18 +7104,18 @@ export class ClinicAssistAutomation {
     try {
       this._logStep('Extract charge type + remarks (legacy)', { patientIdentifier });
       logger.info(`Extracting charge type and remarks for: ${patientIdentifier}`);
-      
+
       // Click on patient to open their record
       const patientSelectors = [
         `tr:has-text("${patientIdentifier}")`,
         `div:has-text("${patientIdentifier}")`,
         `a:has-text("${patientIdentifier}")`,
       ];
-      
+
       for (const selector of patientSelectors) {
         try {
           const patientLink = this.page.locator(selector).first();
-          if (await patientLink.count() > 0) {
+          if ((await patientLink.count()) > 0) {
             await patientLink.click();
             await this.page.waitForLoadState('networkidle');
             await this.page.waitForTimeout(2000);
@@ -5978,9 +7125,12 @@ export class ClinicAssistAutomation {
           continue;
         }
       }
-      
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-patient-record.png', fullPage: true });
-      
+
+      await this.page.screenshot({
+        path: 'screenshots/clinic-assist-patient-record.png',
+        fullPage: true,
+      });
+
       // Extract charge type
       const chargeTypeSelectors = [
         'select[name*="charge" i]',
@@ -5988,22 +7138,22 @@ export class ClinicAssistAutomation {
         'input[name*="charge" i]',
         '[data-charge-type]',
       ];
-      
+
       let chargeType = null;
       for (const selector of chargeTypeSelectors) {
         try {
           const element = this.page.locator(selector).first();
-          if (await element.count() > 0) {
-            chargeType = await element.inputValue().catch(() => 
-              element.evaluate(el => el.value || el.textContent)
-            );
+          if ((await element.count()) > 0) {
+            chargeType = await element
+              .inputValue()
+              .catch(() => element.evaluate(el => el.value || el.textContent));
             if (chargeType) break;
           }
         } catch (e) {
           continue;
         }
       }
-      
+
       // Extract special remarks
       const remarksSelectors = [
         'textarea[name*="remark" i]',
@@ -6012,27 +7162,25 @@ export class ClinicAssistAutomation {
         'div[class*="remark" i]',
         '[data-remarks]',
       ];
-      
+
       let specialRemarks = null;
       for (const selector of remarksSelectors) {
         try {
           const element = this.page.locator(selector).first();
-          if (await element.count() > 0) {
-            specialRemarks = await element.inputValue().catch(() =>
-              element.textContent()
-            );
+          if ((await element.count()) > 0) {
+            specialRemarks = await element.inputValue().catch(() => element.textContent());
             if (specialRemarks) break;
           }
         } catch (e) {
           continue;
         }
       }
-      
+
       const result = {
         chargeType: chargeType?.trim() || null,
         specialRemarks: specialRemarks?.trim() || null,
       };
-      
+
       logger.info(`Charge type: ${chargeType}, Remarks: ${specialRemarks?.substring(0, 50)}...`);
       this._logStep('Extracted charge/remarks (legacy)', {
         chargeType: result.chargeType,
@@ -6057,12 +7205,13 @@ export class ClinicAssistAutomation {
       // Safety: the current extractor is heuristic and can pick up lots of non-medicine UI labels.
       // Only enable this when we're ready to refine selectors for the actual dispense table.
       const enabled =
-        process.env.ENABLE_MEDICINE_EXTRACTION === 'true' || process.env.ENABLE_MEDICINE_EXTRACTION === '1';
+        process.env.ENABLE_MEDICINE_EXTRACTION === 'true' ||
+        process.env.ENABLE_MEDICINE_EXTRACTION === '1';
       if (!enabled) {
         logger.warn('Medicine extraction disabled (set ENABLE_MEDICINE_EXTRACTION=1 to enable)');
         return [];
       }
-      
+
       // Navigate to dispense and payment section
       const dispenseSelectors = [
         'a:has-text("Dispense")',
@@ -6071,11 +7220,11 @@ export class ClinicAssistAutomation {
         '[href*="dispense" i]',
         '[href*="payment" i]',
       ];
-      
+
       for (const selector of dispenseSelectors) {
         try {
           const link = this.page.locator(selector).first();
-          if (await link.count() > 0) {
+          if ((await link.count()) > 0) {
             await link.click();
             await this.page.waitForLoadState('networkidle');
             await this.page.waitForTimeout(2000);
@@ -6085,14 +7234,19 @@ export class ClinicAssistAutomation {
           continue;
         }
       }
-      
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-medicines.png', fullPage: true });
-      
+
+      await this.page.screenshot({
+        path: 'screenshots/clinic-assist-medicines.png',
+        fullPage: true,
+      });
+
       // Extract medicine names from table/list
       const medicineNames = await this.page.evaluate(() => {
         const medicines = [];
         // Look for medicine names in tables, lists, or specific elements
-        const rows = document.querySelectorAll('tr, li, div[class*="medicine"], div[class*="drug"]');
+        const rows = document.querySelectorAll(
+          'tr, li, div[class*="medicine"], div[class*="drug"]'
+        );
         rows.forEach(row => {
           const text = row.textContent || '';
           // Common medicine name patterns (adjust based on actual UI)
@@ -6102,7 +7256,7 @@ export class ClinicAssistAutomation {
         });
         return medicines.filter((m, i, arr) => arr.indexOf(m) === i); // Remove duplicates
       });
-      
+
       logger.info(`Extracted ${medicineNames.length} medicines`);
       this._logStep('Medicines extracted (legacy)', { count: medicineNames.length });
       return medicineNames;
@@ -6119,19 +7273,22 @@ export class ClinicAssistAutomation {
   async processClaim(claimData) {
     try {
       logger.info(`Processing claim: ${JSON.stringify(claimData)}`);
-      
+
       // Navigate to claims if not already there
       await this.navigateToClaims();
-      
+
       // Wait a bit for page to load
       await this.page.waitForTimeout(2000);
-      
+
       // Take screenshot
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-claims-page.png', fullPage: true });
-      
+      await this.page.screenshot({
+        path: 'screenshots/clinic-assist-claims-page.png',
+        fullPage: true,
+      });
+
       // TODO: Implement specific claim processing logic based on Clinic Assist UI
       // This will need to be customized based on the actual interface
-      
+
       logger.info('Claim processing completed');
       return { success: true, claimData };
     } catch (error) {
@@ -6146,7 +7303,7 @@ export class ClinicAssistAutomation {
   async logout() {
     try {
       logger.info('Logging out...');
-      
+
       const logoutSelectors = [
         'a:has-text("Logout")',
         'a:has-text("Log Out")',
@@ -6184,24 +7341,24 @@ export class ClinicAssistAutomation {
    */
   async _parseExcelFile(excelPath) {
     const items = [];
-    
+
     try {
       // Read Excel file using XLSX (supports both .xls and .xlsx)
       const workbook = XLSX.readFile(excelPath);
-      
+
       // Get the first worksheet
       const sheetNames = workbook.SheetNames;
       if (sheetNames.length === 0) {
         this._logStep('No worksheets found in Excel file');
         return items;
       }
-      
+
       const worksheetName = sheetNames[0];
       const worksheet = workbook.Sheets[worksheetName];
-      
+
       // Convert worksheet to array of arrays (raw format) to handle files without proper headers
       const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: null, raw: false });
-      
+
       // Find header row - this report often has blank spacer rows, so scan a bit further.
       // We look for a row that contains at least: PCNO + NAME (+ INV or TIME/CASH).
       let headerRowIndex = -1;
@@ -6209,7 +7366,7 @@ export class ClinicAssistAutomation {
       for (let i = 0; i < scanMax; i++) {
         const row = rawData[i] || [];
         const rowText = row
-          .map((c) => (c === null || c === undefined ? '' : String(c)))
+          .map(c => (c === null || c === undefined ? '' : String(c)))
           .join(' ')
           .replace(/\s+/g, ' ')
           .trim()
@@ -6219,7 +7376,8 @@ export class ClinicAssistAutomation {
         const hasPcno = rowText.includes('pcno');
         const hasName = rowText.includes('name');
         const hasInv = rowText.includes('inv');
-        const hasTime = rowText.includes('time in') || rowText.includes('timeout') || rowText.includes('time');
+        const hasTime =
+          rowText.includes('time in') || rowText.includes('timeout') || rowText.includes('time');
         const hasCash = rowText.includes('cash trans') || rowText.includes('cash');
         const hasQno = rowText.includes('qno');
 
@@ -6228,22 +7386,22 @@ export class ClinicAssistAutomation {
           break;
         }
       }
-      
+
       if (headerRowIndex < 0) {
         this._logStep('No header row found in Excel file');
         return items;
       }
-      
+
       // Keep both:
       // - headerRowRaw: preserves original column positions (indices)
       // - headerRow: compacted for logging/display
-      const headerRowRaw = (rawData[headerRowIndex] || []).map((h) =>
+      const headerRowRaw = (rawData[headerRowIndex] || []).map(h =>
         h === null || h === undefined ? '' : String(h).trim()
       );
-      const headerRow = headerRowRaw.filter((h) => h);
+      const headerRow = headerRowRaw.filter(h => h);
       this._logStep('Found header row', { rowIndex: headerRowIndex, headers: headerRow });
 
-      const normHeader = (s) =>
+      const normHeader = s =>
         String(s || '')
           .replace(/\s+/g, ' ')
           .trim()
@@ -6257,18 +7415,24 @@ export class ClinicAssistAutomation {
         return -1;
       };
 
-      const qnoColPos = getColIndex(headerRowRaw, (h) => h.includes('qno'));
-      const pcnoColPos = getColIndex(headerRowRaw, (h) => h.includes('pcno'));
-      const nameColPos = getColIndex(headerRowRaw, (h) => h === 'name' || h.startsWith('name '));
-      const sexColPos = getColIndex(headerRowRaw, (h) => h === 'sex' || h.includes('sex'));
-      const spCodeColPos = getColIndex(headerRowRaw, (h) => h.includes('sp') && h.includes('code'));
-      const timeInColPos = getColIndex(headerRowRaw, (h) => h.includes('time in'));
-      const timeOutColPos = getColIndex(headerRowRaw, (h) => h.includes('timeout'));
-      const invNoColPos = getColIndex(headerRowRaw, (h) => h.includes('inv'));
-      const cashTransColPos = getColIndex(headerRowRaw, (h) => h.includes('cash') && h.includes('trans'));
+      const qnoColPos = getColIndex(headerRowRaw, h => h.includes('qno'));
+      const pcnoColPos = getColIndex(headerRowRaw, h => h.includes('pcno'));
+      const nameColPos = getColIndex(headerRowRaw, h => h === 'name' || h.startsWith('name '));
+      const sexColPos = getColIndex(headerRowRaw, h => h === 'sex' || h.includes('sex'));
+      const spCodeColPos = getColIndex(headerRowRaw, h => h.includes('sp') && h.includes('code'));
+      const timeInColPos = getColIndex(headerRowRaw, h => h.includes('time in'));
+      const timeOutColPos = getColIndex(headerRowRaw, h => h.includes('timeout'));
+      const invNoColPos = getColIndex(headerRowRaw, h => h.includes('inv'));
+      const cashTransColPos = getColIndex(
+        headerRowRaw,
+        h => h.includes('cash') && h.includes('trans')
+      );
 
       // CONTRACT can appear in the header row itself or a subsequent secondary header row.
-      let contractColPos = getColIndex(headerRowRaw, (h) => h === 'contract' || h.includes('contract'));
+      let contractColPos = getColIndex(
+        headerRowRaw,
+        h => h === 'contract' || h.includes('contract')
+      );
       if (contractColPos < 0) {
         for (let i = headerRowIndex + 1; i < Math.min(headerRowIndex + 12, rawData.length); i++) {
           const row = rawData[i] || [];
@@ -6302,7 +7466,11 @@ export class ClinicAssistAutomation {
         headerCount: headerRow.length,
       });
 
-      const stopSectionMatchers = [/patient account payment/i, /account settlement/i, /patient account settlement/i];
+      const stopSectionMatchers = [
+        /patient account payment/i,
+        /account settlement/i,
+        /patient account settlement/i,
+      ];
       const knownContractsExact = new Set([
         'MHC',
         'MHCAXA',
@@ -6329,19 +7497,24 @@ export class ClinicAssistAutomation {
       for (let i = headerRowIndex + 1; i < rawData.length; i++) {
         const row = rawData[i] || [];
         const rowText = row
-          .map((c) => (c === null || c === undefined ? '' : String(c)))
+          .map(c => (c === null || c === undefined ? '' : String(c)))
           .join(' ')
           .replace(/\s+/g, ' ')
           .trim();
 
-        if (rowText && stopSectionMatchers.some((re) => re.test(rowText))) {
-          this._logStep('Stopping Queue Listing parse at non-visit section', { rowIndex: i, rowText: rowText.slice(0, 120) });
+        if (rowText && stopSectionMatchers.some(re => re.test(rowText))) {
+          this._logStep('Stopping Queue Listing parse at non-visit section', {
+            rowIndex: i,
+            rowText: rowText.slice(0, 120),
+          });
           break;
         }
 
         const pcno = pcnoColPos >= 0 ? normalizePcno(row[pcnoColPos]) : null;
-        const patientName = nameColPos >= 0 && row[nameColPos] ? String(row[nameColPos]).trim() : null;
-        const invNoRaw = invNoColPos >= 0 && row[invNoColPos] ? String(row[invNoColPos]).trim() : '';
+        const patientName =
+          nameColPos >= 0 && row[nameColPos] ? String(row[nameColPos]).trim() : null;
+        const invNoRaw =
+          invNoColPos >= 0 && row[invNoColPos] ? String(row[invNoColPos]).trim() : '';
 
         // Only keep "visit" rows. This report can contain additional non-visit sections after the listing,
         // and those sections use different headers/columns.
@@ -6350,11 +7523,14 @@ export class ClinicAssistAutomation {
 
         const qnoRaw = qnoColPos >= 0 && row[qnoColPos] ? String(row[qnoColPos]).trim() : null;
         const sexRaw = sexColPos >= 0 && row[sexColPos] ? String(row[sexColPos]).trim() : null;
-        const spCodeRaw = spCodeColPos >= 0 && row[spCodeColPos] ? String(row[spCodeColPos]).trim() : null;
-        const timeInRaw = timeInColPos >= 0 && row[timeInColPos] ? String(row[timeInColPos]).trim() : null;
-        const timeOutRaw = timeOutColPos >= 0 && row[timeOutColPos] ? String(row[timeOutColPos]).trim() : null;
+        const spCodeRaw =
+          spCodeColPos >= 0 && row[spCodeColPos] ? String(row[spCodeColPos]).trim() : null;
+        const timeInRaw =
+          timeInColPos >= 0 && row[timeInColPos] ? String(row[timeInColPos]).trim() : null;
+        const timeOutRaw =
+          timeOutColPos >= 0 && row[timeOutColPos] ? String(row[timeOutColPos]).trim() : null;
 
-        const parseAmount = (value) => {
+        const parseAmount = value => {
           if (value === null || value === undefined) return null;
           const cleaned = String(value).replace(/[^0-9.-]/g, '');
           if (!cleaned || cleaned === '-' || cleaned === '.' || cleaned === '-.') return null;
@@ -6366,11 +7542,9 @@ export class ClinicAssistAutomation {
           cashTransColPos >= 0 && row[cashTransColPos] ? String(row[cashTransColPos]).trim() : null;
         const cashTransAmount = parseAmount(cashTransRaw);
 
-        const totalColPos = getColIndex(
-          headerRowRaw,
-          (h) => h === 'total' || h.startsWith('total ')
-        );
-        const totalRaw = totalColPos >= 0 && row[totalColPos] ? String(row[totalColPos]).trim() : null;
+        const totalColPos = getColIndex(headerRowRaw, h => h === 'total' || h.startsWith('total '));
+        const totalRaw =
+          totalColPos >= 0 && row[totalColPos] ? String(row[totalColPos]).trim() : null;
         const totalAmount = parseAmount(totalRaw);
 
         // Queue Listing rows consistently end with base + GST + adjustment values.
@@ -6394,7 +7568,10 @@ export class ClinicAssistAutomation {
         }
         if (!payType) {
           for (let j = row.length - 1; j >= 0; j--) {
-            const cellStr = String(row[j] || '').replace(/\s+/g, ' ').trim().toUpperCase();
+            const cellStr = String(row[j] || '')
+              .replace(/\s+/g, ' ')
+              .trim()
+              .toUpperCase();
             if (!cellStr) continue;
             if (knownContractsExact.has(cellStr)) {
               payType = cellStr;
@@ -6433,8 +7610,7 @@ export class ClinicAssistAutomation {
         // In the Queue Listing Excel export, QNO is frequently exported as ".0" for all rows.
         // Use INV NO as the stable unique record number for deduplication/claim workflows.
         const visitRecordNo =
-          invNoRaw ||
-          (qnoRaw && qnoRaw !== '.0' && qnoRaw !== '0' ? qnoRaw : null);
+          invNoRaw || (qnoRaw && qnoRaw !== '.0' && qnoRaw !== '0' ? qnoRaw : null);
 
         items.push({
           nric: nric || null,
@@ -6451,17 +7627,16 @@ export class ClinicAssistAutomation {
           timeOut: timeOutRaw || null,
           invNo: invNoRaw || null,
           source: 'reports_queue_list_excel_extraction',
-          rawRow: row.filter((v) => v !== null && v !== undefined).map((v) => String(v)),
+          rawRow: row.filter(v => v !== null && v !== undefined).map(v => String(v)),
           rawRowIndex: i,
         });
       }
-      
+
       this._logStep('Excel parsing complete', { itemsFound: items.length });
-      
     } catch (error) {
       this._logStep('Error parsing Excel file', { error: error.message });
     }
-    
+
     return items;
   }
 
@@ -6472,34 +7647,34 @@ export class ClinicAssistAutomation {
    */
   _extractItemsFromPDFText(text) {
     const items = [];
-    
+
     if (!text || text.length < 100) {
       return items;
     }
-    
+
     // Split text into lines for processing
-    const lines = text.split(/[\n\r]+/);
-    
+    const _lines = text.split(/[\n\r]+/);
+
     // Look for NRIC patterns in the text
     const nricPattern = /[STFGM]\s*\d{4}\s*\d{3}\s*[A-Z]|[STFGM]\d{7}[A-Z]/gi;
     const nricMatches = [...text.matchAll(nricPattern)];
-    
+
     for (const match of nricMatches) {
       const nric = match[0].replace(/\s+/g, '').toUpperCase();
       const matchIndex = match.index;
-      
+
       // Extract context around the NRIC (200 chars before and after)
       const contextStart = Math.max(0, matchIndex - 200);
       const contextEnd = Math.min(text.length, matchIndex + 200);
       const context = text.substring(contextStart, contextEnd);
-      
+
       // Extract patient name (typically appears before NRIC or on same line)
       let patientName = null;
       const namePatterns = [
         /([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,3})\s+[STFGM]\s*\d{4}\s*\d{3}\s*[A-Z]/i, // Name before NRIC
         /([A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3})/g, // Any capitalized name in context
       ];
-      
+
       for (const pattern of namePatterns) {
         const nameMatch = context.match(pattern);
         if (nameMatch) {
@@ -6510,30 +7685,32 @@ export class ClinicAssistAutomation {
           }
         }
       }
-      
+
       // Extract other fields from context (QNo, status, etc.)
       let qno = null;
       let status = null;
       let fee = null;
-      
+
       // Look for queue number (Q followed by digits or just digits at start of line)
       const qnoMatch = context.match(/\bQ?\s*\d{1,4}\b/i);
       if (qnoMatch) {
         qno = qnoMatch[0].replace(/\s+/g, '');
       }
-      
+
       // Look for status keywords
-      const statusMatch = context.match(/\b(pending|completed|served|cancelled|waiting|active|done)\b/i);
+      const statusMatch = context.match(
+        /\b(pending|completed|served|cancelled|waiting|active|done)\b/i
+      );
       if (statusMatch) {
         status = statusMatch[1];
       }
-      
+
       // Look for fee amounts ($XX.XX)
       const feeMatch = context.match(/\$\s*(\d+(?:\.\d{2})?)/);
       if (feeMatch) {
         fee = feeMatch[1];
       }
-      
+
       // Avoid duplicates
       if (!items.find(item => item.nric === nric)) {
         items.push({
@@ -6543,11 +7720,11 @@ export class ClinicAssistAutomation {
           status,
           fee,
           source: 'reports_queue_list_pdf_extraction',
-          rawContext: context.substring(0, 200)
+          rawContext: context.substring(0, 200),
         });
       }
     }
-    
+
     return items;
   }
 
@@ -6564,7 +7741,9 @@ export class ClinicAssistAutomation {
   async extractQueueListResults() {
     try {
       this._logStep('Extracting queue list results (root-aware)');
-      await this.page.screenshot({ path: 'screenshots/clinic-assist-queue-list-extraction.png', fullPage: true }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/clinic-assist-queue-list-extraction.png', fullPage: true })
+        .catch(() => {});
 
       const { root, kind } = await this._getQueueReportRoot();
       this._logStep('QueueReport extract context', {
@@ -6576,23 +7755,36 @@ export class ClinicAssistAutomation {
       // Give the report viewer time to render after Generate.
       await this.page.waitForTimeout(6000);
 
-      const reportIframe = root.locator('iframe[src*="ReportViewer"], iframe[src*="queueListing"]').first();
+      const reportIframe = root
+        .locator('iframe[src*="ReportViewer"], iframe[src*="queueListing"]')
+        .first();
       const reportIframeCount = await reportIframe.count().catch(() => 0);
 
       const tryDownloadAndParse = async (frameLocator, label) => {
         // Wait for some content in the viewer.
-        await frameLocator.locator('body').waitFor({ timeout: 15000 }).catch(() => {});
+        await frameLocator
+          .locator('body')
+          .waitFor({ timeout: 15000 })
+          .catch(() => {});
         await this.page.waitForTimeout(800);
 
         const downloadAndParse = async (clickTarget, why) => {
-          const downloadPromise = this.page.waitForEvent('download', { timeout: 30000 }).catch(() => null);
-          await clickTarget.click({ force: true }).catch(async () => clickTarget.click().catch(() => {}));
+          const downloadPromise = this.page
+            .waitForEvent('download', { timeout: 30000 })
+            .catch(() => null);
+          await clickTarget
+            .click({ force: true })
+            .catch(async () => clickTarget.click().catch(() => {}));
           await this.page.waitForTimeout(2500);
           const download = await downloadPromise;
           if (!download) return null;
 
           const filename = download.suggestedFilename();
-          const excelPath = path.join(process.cwd(), 'downloads', filename || `queue-report-${Date.now()}.xlsx`);
+          const excelPath = path.join(
+            process.cwd(),
+            'downloads',
+            filename || `queue-report-${Date.now()}.xlsx`
+          );
           fs.mkdirSync(path.dirname(excelPath), { recursive: true });
           await download.saveAs(excelPath);
           this._logStep('Queue report Excel downloaded', { label, why, excelPath });
@@ -6615,23 +7807,36 @@ export class ClinicAssistAutomation {
         }
 
         // 2) Generic Excel-like controls.
-        const excelLike = frameLocator.locator('input[value*="Excel" i], button:has-text("Excel"), a:has-text("Excel")').first();
+        const excelLike = frameLocator
+          .locator('input[value*="Excel" i], button:has-text("Excel"), a:has-text("Excel")')
+          .first();
         if ((await excelLike.count().catch(() => 0)) > 0) {
-          const items = await downloadAndParse(excelLike, 'click excel-like control').catch(() => null);
+          const items = await downloadAndParse(excelLike, 'click excel-like control').catch(
+            () => null
+          );
           if (items && items.length) return items;
         }
 
         // 3) Format dropdown (choose Excel) + confirm/export.
         const select = frameLocator.locator('select').first();
         if ((await select.count().catch(() => 0)) > 0) {
-          const opts = await select.locator('option').allTextContents().catch(() => []);
-          const excelOpt = opts.find((o) => /excel|xls/i.test(o));
+          const opts = await select
+            .locator('option')
+            .allTextContents()
+            .catch(() => []);
+          const excelOpt = opts.find(o => /excel|xls/i.test(o));
           if (excelOpt) {
             await select.selectOption({ label: excelOpt }).catch(() => {});
             await this.page.waitForTimeout(500);
-            const okBtn = frameLocator.locator('input[value*="Export" i], input[value*="OK" i], input[value*="Submit" i], button:has-text("Export"), button:has-text("OK"), button:has-text("Submit")').first();
+            const okBtn = frameLocator
+              .locator(
+                'input[value*="Export" i], input[value*="OK" i], input[value*="Submit" i], button:has-text("Export"), button:has-text("OK"), button:has-text("Submit")'
+              )
+              .first();
             if ((await okBtn.count().catch(() => 0)) > 0) {
-              const items = await downloadAndParse(okBtn, `select(${excelOpt}) + confirm`).catch(() => null);
+              const items = await downloadAndParse(okBtn, `select(${excelOpt}) + confirm`).catch(
+                () => null
+              );
               if (items && items.length) return items;
             }
           }
@@ -6651,7 +7856,9 @@ export class ClinicAssistAutomation {
         const itemsFromOuter = await tryDownloadAndParse(outer, 'outer').catch(() => null);
         if (itemsFromOuter && itemsFromOuter.length) return itemsFromOuter;
 
-        this._logStep('Excel export not available or produced no items; falling back to DOM table parsing');
+        this._logStep(
+          'Excel export not available or produced no items; falling back to DOM table parsing'
+        );
       } else {
         this._logStep('ReportViewer iframe not found; falling back to DOM table parsing');
       }
@@ -6659,13 +7866,13 @@ export class ClinicAssistAutomation {
       // Fallback: parse jqGrid/table on the current root (may not exist for Crystal viewer).
       const fallbackItems = await root
         .evaluate(() => {
-          const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
+          const norm = s => (s || '').replace(/\s+/g, ' ').trim();
           const items = [];
           const jqGrid = document.querySelector('#queueLogGrid');
           if (jqGrid) {
             const rows = jqGrid.querySelectorAll('tr.jqgrow');
             for (const row of rows) {
-              const getCellValue = (ariaDesc) => {
+              const getCellValue = ariaDesc => {
                 const cell = row.querySelector(`td[aria-describedby$="${ariaDesc}"]`);
                 return cell ? norm(cell.textContent) : null;
               };
@@ -6678,7 +7885,17 @@ export class ClinicAssistAutomation {
               const inTime = getCellValue('_In');
               const outTime = getCellValue('_Out');
               if (patientName || nric) {
-                items.push({ qno, patientName, nric, payType, visitType, fee, inTime, outTime, source: 'reports_queue_list_dom' });
+                items.push({
+                  qno,
+                  patientName,
+                  nric,
+                  payType,
+                  visitType,
+                  fee,
+                  inTime,
+                  outTime,
+                  source: 'reports_queue_list_dom',
+                });
               }
             }
           }
@@ -6701,27 +7918,29 @@ export class ClinicAssistAutomation {
    */
   /**
    * Navigate to Patient Page
-   * 
+   *
    * RULE: NEVER use direct URL navigation (page.goto) for Patient page.
    * Must always use UI clicks to navigate. Direct URLs cause access denied errors.
    */
-	  async navigateToPatientPage() {
-	    try {
+  async navigateToPatientPage() {
+    try {
       const recoveredAtStart = await this._recoverOpenPage('navigateToPatientPage:start');
       if (!recoveredAtStart) {
         this._logStep('Initial page recovery failed, attempting re-login');
         await this.login().catch(() => {});
-        const recoveredAfterLogin = await this._recoverOpenPage('navigateToPatientPage:after-login');
+        const recoveredAfterLogin = await this._recoverOpenPage(
+          'navigateToPatientPage:after-login'
+        );
         if (!recoveredAfterLogin) {
           this._logStep('Recovery failed after re-login');
           return false;
         }
       }
-	      const navStart = Date.now();
-	      this._logStep('Navigate to Patient Page - START');
-	      
-	      let currentUrl = this.page.url();
-	      this._logStep('Current URL before navigation', { url: currentUrl });
+      const navStart = Date.now();
+      this._logStep('Navigate to Patient Page - START');
+
+      let currentUrl = this.page.url();
+      this._logStep('Current URL before navigation', { url: currentUrl });
       await this._clearBlockingHistoryOverlays().catch(() => false);
 
       if (!currentUrl || currentUrl === 'about:blank') {
@@ -6739,50 +7958,55 @@ export class ClinicAssistAutomation {
         this._logStep('URL after re-login', { url: currentUrl });
       }
 
-	      // If we're already on the Patient Search page, we're done.
-	      if (/\/Patient\/PatientSearch/i.test(currentUrl)) {
-	        this._logStep('Already on PatientSearch', { currentUrl });
-	        this._logStep('Navigate to Patient Page - COMPLETE', { totalTime: Date.now() - navStart });
-	        return true;
-	      }
+      // If we're already on the Patient Search page, we're done.
+      if (/\/Patient\/PatientSearch/i.test(currentUrl)) {
+        this._logStep('Already on PatientSearch', { currentUrl });
+        this._logStep('Navigate to Patient Page - COMPLETE', { totalTime: Date.now() - navStart });
+        return true;
+      }
 
-	      // If we're on QueueLog/PatientVisit pages, Home -> Patient is the most reliable path.
-	      // Trying to click a "Patient" link inside the QueueLog nav sometimes doesn't transition.
-	      if (/\/QueueLog\//i.test(currentUrl)) {
-	        try {
-	          const homeLink = this.page
-	            .locator(
-	              [
-	                'a:has-text("Home")',
-	                '[role="link"]:has-text("Home")',
-	                'a[href*="/Home/" i]',
-	                'a[href*="Home/Reception" i]',
-	                'a[href*="Home" i]',
-	              ].join(', ')
-	            )
-	            .first();
-	          if ((await homeLink.count().catch(() => 0)) > 0 && (await homeLink.isVisible().catch(() => false))) {
-	            await homeLink.click({ timeout: 3000 }).catch(async () => homeLink.click({ timeout: 3000, force: true }));
-	            await this.page.waitForLoadState('domcontentloaded', { timeout: 8000 }).catch(() => {});
-	            await this.page.waitForTimeout(300);
-	            currentUrl = this.page.url();
-	            this._logStep('QueueLog: navigated Home before Patient search', { currentUrl });
-	          }
-	        } catch (e) {
-	          this._logStep('QueueLog: Home click failed', { error: e.message });
-	        }
-	      }
+      // If we're on QueueLog/PatientVisit pages, Home -> Patient is the most reliable path.
+      // Trying to click a "Patient" link inside the QueueLog nav sometimes doesn't transition.
+      if (/\/QueueLog\//i.test(currentUrl)) {
+        try {
+          const homeLink = this.page
+            .locator(
+              [
+                'a:has-text("Home")',
+                '[role="link"]:has-text("Home")',
+                'a[href*="/Home/" i]',
+                'a[href*="Home/Reception" i]',
+                'a[href*="Home" i]',
+              ].join(', ')
+            )
+            .first();
+          if (
+            (await homeLink.count().catch(() => 0)) > 0 &&
+            (await homeLink.isVisible().catch(() => false))
+          ) {
+            await homeLink
+              .click({ timeout: 3000 })
+              .catch(async () => homeLink.click({ timeout: 3000, force: true }));
+            await this.page.waitForLoadState('domcontentloaded', { timeout: 8000 }).catch(() => {});
+            await this.page.waitForTimeout(300);
+            currentUrl = this.page.url();
+            this._logStep('QueueLog: navigated Home before Patient search', { currentUrl });
+          }
+        } catch (e) {
+          this._logStep('QueueLog: Home click failed', { error: e.message });
+        }
+      }
 
-	      // NOTE: Direct navigation to PatientSearch is not stable from QueueLog/PatientVisit pages
-	      // (it can bounce to Authenticate/ErrorPage). We rely on UI navigation (Home -> Patient) below.
-	      
-	      // STEP 1: Ensure we're in a room (click Reception) IF we are on the room-selection page.
-	      // Do not attempt room selection clicks while already inside QueueLog/PatientVisit pages.
-	      const isRoomSelectionPage = await this.page
-	        .locator('text=/\\bRooms\\b/i')
-	        .count()
-	        .then((c) => c > 0)
-	        .catch(() => false);
+      // NOTE: Direct navigation to PatientSearch is not stable from QueueLog/PatientVisit pages
+      // (it can bounce to Authenticate/ErrorPage). We rely on UI navigation (Home -> Patient) below.
+
+      // STEP 1: Ensure we're in a room (click Reception) IF we are on the room-selection page.
+      // Do not attempt room selection clicks while already inside QueueLog/PatientVisit pages.
+      const isRoomSelectionPage = await this.page
+        .locator('text=/\\bRooms\\b/i')
+        .count()
+        .then(c => c > 0)
+        .catch(() => false);
 
       if (
         isRoomSelectionPage &&
@@ -6791,24 +8015,29 @@ export class ClinicAssistAutomation {
       ) {
         const receptionStart = Date.now();
         this._logStep('Need to select Reception/room first before accessing Patient Page');
-        
+
         // Wait 50ms before attempting to click Reception room
         await this.page.waitForTimeout(50);
 
         // Prefer clicking a room item scoped under the Rooms list to avoid sidebar/header matches.
         const roomListClick = await this.page
           .evaluate(() => {
-            const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim();
-            const label = Array.from(document.querySelectorAll('*')).find((el) => /\bRooms\b/i.test(norm(el.textContent)));
+            const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim();
+            const label = Array.from(document.querySelectorAll('*')).find(el =>
+              /\bRooms\b/i.test(norm(el.textContent))
+            );
             const container =
-              label?.closest('section, div, td, th, form') ||
-              label?.parentElement ||
-              document.body;
+              label?.closest('section, div, td, th, form') || label?.parentElement || document.body;
             if (!container) return false;
-            const candidates = Array.from(container.querySelectorAll('li, [role="option"], tr, div, button, a'))
-              .map((el) => ({ el, text: norm(el.textContent || '') }))
-              .filter((x) => x.text && !/^(rooms|branch|back)$/i.test(x.text));
-            const prefer = candidates.find((c) => /reception/i.test(c.text)) || candidates.find((c) => /rm|room/i.test(c.text)) || candidates[0];
+            const candidates = Array.from(
+              container.querySelectorAll('li, [role="option"], tr, div, button, a')
+            )
+              .map(el => ({ el, text: norm(el.textContent || '') }))
+              .filter(x => x.text && !/^(rooms|branch|back)$/i.test(x.text));
+            const prefer =
+              candidates.find(c => /reception/i.test(c.text)) ||
+              candidates.find(c => /rm|room/i.test(c.text)) ||
+              candidates[0];
             if (!prefer?.el) return false;
             try {
               prefer.el.scrollIntoView({ block: 'center' });
@@ -6825,14 +8054,20 @@ export class ClinicAssistAutomation {
           await this.page.waitForTimeout(500);
           const newUrl = this.page.url();
           const hasPatientNav =
-            (await this.page.locator('a[href*="/Patient/PatientSearch" i], a:has-text("Patient")').count().catch(() => 0)) > 0;
+            (await this.page
+              .locator('a[href*="/Patient/PatientSearch" i], a:has-text("Patient")')
+              .count()
+              .catch(() => 0)) > 0;
           if (newUrl.includes('/Home/') || hasPatientNav) {
-            this._logStep('Entered room via Rooms list click', { newUrl, timeTaken: Date.now() - receptionStart });
+            this._logStep('Entered room via Rooms list click', {
+              newUrl,
+              timeTaken: Date.now() - receptionStart,
+            });
             // Skip the generic selector loop if we already entered a room.
             currentUrl = newUrl;
           }
         }
-        
+
         // Look for Reception room. Clinic Assist often shows a "Rooms" list (no buttons), so
         // prefer exact row/list-item matches over generic "div contains Reception".
         const roomSelectors = [
@@ -6860,42 +8095,61 @@ export class ClinicAssistAutomation {
           'tr:has-text("RM")',
           '[role="listitem"]:has-text("RM")',
         ];
-	        
-	        let receptionClicked = false;
-	        for (const selector of roomSelectors) {
-	          try {
-	            // Prefer clicking an element that is actually clickable.
-	            const roomLink = this.page.locator(selector).first();
-	            const count = await roomLink.count().catch(() => 0);
-	            if (count > 0) {
-	              const isVisible = await roomLink.isVisible().catch(() => false);
-	              if (isVisible) {
-	                this._logStep('Clicking Reception/room to access system', { selector });
-                
+
+        let receptionClicked = false;
+        for (const selector of roomSelectors) {
+          try {
+            // Prefer clicking an element that is actually clickable.
+            const roomLink = this.page.locator(selector).first();
+            const count = await roomLink.count().catch(() => 0);
+            if (count > 0) {
+              const isVisible = await roomLink.isVisible().catch(() => false);
+              if (isVisible) {
+                this._logStep('Clicking Reception/room to access system', { selector });
+
                 // Dismiss any dialogs that might appear
-                this.page.on('dialog', async (dialog) => {
-                  this._logStep('Dialog appeared, dismissing', { type: dialog.type(), message: dialog.message() });
-                  await dialog.dismiss().catch(() => dialog.accept()).catch(() => {});
+                this.page.on('dialog', async dialog => {
+                  this._logStep('Dialog appeared, dismissing', {
+                    type: dialog.type(),
+                    message: dialog.message(),
+                  });
+                  await dialog
+                    .dismiss()
+                    .catch(() => dialog.accept())
+                    .catch(() => {});
                 });
-                
+
                 // Wait a moment before clicking for stability
-	                await this.page.waitForTimeout(50);
-	                // Some rooms are list rows; force-click helps.
-	                await roomLink.click({ timeout: 3000 }).catch(async () => roomLink.click({ timeout: 3000, force: true }));
-	                
-	                // Use auto wait - let Playwright handle the page load
-	                await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
-	                await this.page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
-	                await this.page.waitForTimeout(500);
-                
+                await this.page.waitForTimeout(50);
+                // Some rooms are list rows; force-click helps.
+                await roomLink
+                  .click({ timeout: 3000 })
+                  .catch(async () => roomLink.click({ timeout: 3000, force: true }));
+
+                // Use auto wait - let Playwright handle the page load
+                await this.page
+                  .waitForLoadState('domcontentloaded', { timeout: 5000 })
+                  .catch(() => {});
+                await this.page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+                await this.page.waitForTimeout(500);
+
                 const newUrl = this.page.url();
-                this._logStep('Reception clicked, checking URL', { newUrl, timeTaken: Date.now() - receptionStart });
-                
+                this._logStep('Reception clicked, checking URL', {
+                  newUrl,
+                  timeTaken: Date.now() - receptionStart,
+                });
+
                 // Success if URL transitions into Home/* or Patient nav becomes available.
                 const hasPatientNav =
-                  (await this.page.locator('a[href*="/Patient/PatientSearch" i], a:has-text("Patient")').count().catch(() => 0)) > 0;
+                  (await this.page
+                    .locator('a[href*="/Patient/PatientSearch" i], a:has-text("Patient")')
+                    .count()
+                    .catch(() => 0)) > 0;
                 if (newUrl.includes('/Home/') || hasPatientNav) {
-                  this._logStep('Successfully entered Reception room', { newUrl, timeTaken: Date.now() - receptionStart });
+                  this._logStep('Successfully entered Reception room', {
+                    newUrl,
+                    timeTaken: Date.now() - receptionStart,
+                  });
                   receptionClicked = true;
                   break;
                 }
@@ -6906,53 +8160,68 @@ export class ClinicAssistAutomation {
             continue;
           }
         }
-        
+
         if (!receptionClicked) {
           // DOM-based fallback: click the first visible room item under the Rooms section.
-          const domFallback = await this.page.evaluate(() => {
-            const norm = (s) => (s || '').toString().replace(/\\s+/g, ' ').trim();
-            const label = Array.from(document.querySelectorAll('*')).find((el) => /\\bRooms\\b/i.test(norm(el.textContent)));
-            const container =
-              label?.closest('section, div, td, th') ||
-              label?.parentElement ||
-              document.body;
-            const candidates = Array.from(container.querySelectorAll('li, [role=\"option\"], tr, div, button, a'))
-              .map((el) => ({ el, text: norm(el.textContent || '') }))
-              .filter((x) => x.text && !/^rooms$/i.test(x.text) && !/^branch$/i.test(x.text));
-            const prefer = candidates.find((c) => /reception/i.test(c.text)) || candidates.find((c) => /rm|room/i.test(c.text)) || candidates[0];
-            if (!prefer?.el) return false;
-            try {
-              prefer.el.click();
-              return true;
-            } catch {
-              return false;
-            }
-          }).catch(() => false);
+          const domFallback = await this.page
+            .evaluate(() => {
+              const norm = s => (s || '').toString().replace(/\\s+/g, ' ').trim();
+              const label = Array.from(document.querySelectorAll('*')).find(el =>
+                /\\bRooms\\b/i.test(norm(el.textContent))
+              );
+              const container =
+                label?.closest('section, div, td, th') || label?.parentElement || document.body;
+              const candidates = Array.from(
+                container.querySelectorAll('li, [role=\"option\"], tr, div, button, a')
+              )
+                .map(el => ({ el, text: norm(el.textContent || '') }))
+                .filter(x => x.text && !/^rooms$/i.test(x.text) && !/^branch$/i.test(x.text));
+              const prefer =
+                candidates.find(c => /reception/i.test(c.text)) ||
+                candidates.find(c => /rm|room/i.test(c.text)) ||
+                candidates[0];
+              if (!prefer?.el) return false;
+              try {
+                prefer.el.click();
+                return true;
+              } catch {
+                return false;
+              }
+            })
+            .catch(() => false);
 
           if (domFallback) {
             await this.page.waitForLoadState('domcontentloaded', { timeout: 5000 }).catch(() => {});
             await this.page.waitForTimeout(500);
             const newUrl = this.page.url();
             const hasPatientNav =
-              (await this.page.locator('a[href*=\"/Patient/PatientSearch\" i], a:has-text(\"Patient\")').count().catch(() => 0)) > 0;
+              (await this.page
+                .locator('a[href*=\"/Patient/PatientSearch\" i], a:has-text(\"Patient\")')
+                .count()
+                .catch(() => 0)) > 0;
             if (newUrl.includes('/Home/') || hasPatientNav) {
-              this._logStep('Entered room via DOM fallback', { newUrl, timeTaken: Date.now() - receptionStart });
+              this._logStep('Entered room via DOM fallback', {
+                newUrl,
+                timeTaken: Date.now() - receptionStart,
+              });
               receptionClicked = true;
             }
           }
         }
 
         if (!receptionClicked) {
-          this._logStep('Could not click Reception/room, continuing anyway', { timeTaken: Date.now() - receptionStart });
+          this._logStep('Could not click Reception/room, continuing anyway', {
+            timeTaken: Date.now() - receptionStart,
+          });
         }
       } else {
         this._logStep('Already in Reception or Patient page, proceeding', { currentUrl });
       }
-      
-	      // STEP 2: Click Patient sidebar link - UI NAVIGATION ONLY, NO DIRECT URLS
-	      const patientNavStart = Date.now();
-	      this._logStep('Looking for sidebar/hamburger menu');
-      
+
+      // STEP 2: Click Patient sidebar link - UI NAVIGATION ONLY, NO DIRECT URLS
+      const patientNavStart = Date.now();
+      this._logStep('Looking for sidebar/hamburger menu');
+
       // Open sidebar/hamburger menu if it exists
       const menuSelectors = [
         '[class*="nav-toggle"]',
@@ -6961,7 +8230,7 @@ export class ClinicAssistAutomation {
         'button[class*="sidebar"]',
         '.sidebar-toggle',
       ];
-      
+
       for (const selector of menuSelectors) {
         try {
           const menuBtn = this.page.locator(selector).first();
@@ -6979,128 +8248,154 @@ export class ClinicAssistAutomation {
           continue;
         }
       }
-      
-	      // Find and click Patient sidebar link - MUST USE UI CLICKS, NEVER DIRECT URL
-	      this._logStep('Looking for Patient sidebar link');
+
+      // Find and click Patient sidebar link - MUST USE UI CLICKS, NEVER DIRECT URL
+      this._logStep('Looking for Patient sidebar link');
       await this._clearBlockingHistoryOverlays().catch(() => false);
-	      const patientLinkSelectors = [
-          'a.SideMenuList[cat="Patient"]',
-          'a[cat="Patient"]',
-          'a[title="Patient"]',
-	        'a[href*="/Patient/PatientSearch" i]',
-	        'a[href*="PatientSearch" i]',
-	        // Icon-only sidebar items frequently have no text but do have an href with "Patient".
-	        'a[href*="/Patient/" i]:not([href^="#"])',
-	        'a[href*="Patient" i]:not([href^="#"])',
-	        '[href*="/Patient/" i]:not([href^="#"])',
-	        '[href*="Patient" i]:not([href^="#"])',
-	        'a:has-text("Patient")',
-	        '[role="link"]:has-text("Patient")',
-	        'nav a:has-text("Patient")',
-	        '.menu a:has-text("Patient")',
-	      ];
-      
-	      let patientClicked = false;
-	      for (const selector of patientLinkSelectors) {
-	        try {
-            if (this.page.isClosed()) {
-              const recovered = await this._recoverOpenPage('patient-nav:selector-loop');
-              if (!recovered) break;
-            }
-	          const clickStart = Date.now();
-	          const link = this.page.locator(selector).first();
+      const patientLinkSelectors = [
+        'a.SideMenuList[cat="Patient"]',
+        'a[cat="Patient"]',
+        'a[title="Patient"]',
+        'a[href*="/Patient/PatientSearch" i]',
+        'a[href*="PatientSearch" i]',
+        // Icon-only sidebar items frequently have no text but do have an href with "Patient".
+        'a[href*="/Patient/" i]:not([href^="#"])',
+        'a[href*="Patient" i]:not([href^="#"])',
+        '[href*="/Patient/" i]:not([href^="#"])',
+        '[href*="Patient" i]:not([href^="#"])',
+        'a:has-text("Patient")',
+        '[role="link"]:has-text("Patient")',
+        'nav a:has-text("Patient")',
+        '.menu a:has-text("Patient")',
+      ];
+
+      let patientClicked = false;
+      for (const selector of patientLinkSelectors) {
+        try {
+          if (this.page.isClosed()) {
+            const recovered = await this._recoverOpenPage('patient-nav:selector-loop');
+            if (!recovered) break;
+          }
+          const clickStart = Date.now();
+          const link = this.page.locator(selector).first();
           const count = await link.count().catch(() => 0);
           if (count > 0) {
             await this._clearBlockingHistoryOverlays().catch(() => false);
             const isVisible = await link.isVisible().catch(() => false);
             this._logStep('Patient link status', { selector, count, isVisible });
-            
-	            if (isVisible) {
-	              this._logStep('Clicking Patient sidebar link via UI', { selector });
+
+            if (isVisible) {
+              this._logStep('Clicking Patient sidebar link via UI', { selector });
               const context = this.page.context();
               const popupPagePromise = context
                 .waitForEvent('page', { timeout: 1500 })
                 .catch(() => null);
-              
+
               // Try multiple click methods - UI navigation only
               let clicked = false;
-              
+
               // Method 1: Playwright click
               try {
                 await link.click({ timeout: 3000 });
                 clicked = true;
-                this._logStep('Patient link clicked via Playwright', { timeTaken: Date.now() - clickStart });
+                this._logStep('Patient link clicked via Playwright', {
+                  timeTaken: Date.now() - clickStart,
+                });
               } catch (e) {
-                this._logStep('Playwright click failed, trying JavaScript click', { error: e.message });
+                this._logStep('Playwright click failed, trying JavaScript click', {
+                  error: e.message,
+                });
               }
-              
+
               // Method 2: JavaScript click if Playwright failed
               if (!clicked) {
-                clicked = await link.evaluate(el => {
-                  try {
-                    el.click();
-                    return true;
-                  } catch (e) {
-                    return false;
-                  }
-                }).catch(() => false);
-                
+                clicked = await link
+                  .evaluate(el => {
+                    try {
+                      el.click();
+                      return true;
+                    } catch (e) {
+                      return false;
+                    }
+                  })
+                  .catch(() => false);
+
                 if (clicked) {
-                  this._logStep('Patient link clicked via JavaScript', { timeTaken: Date.now() - clickStart });
+                  this._logStep('Patient link clicked via JavaScript', {
+                    timeTaken: Date.now() - clickStart,
+                  });
                 }
               }
-              
+
               // Method 3: Force click if both failed
               if (!clicked) {
                 try {
                   await link.click({ force: true, timeout: 3000 });
                   clicked = true;
-                  this._logStep('Patient link clicked via force click', { timeTaken: Date.now() - clickStart });
+                  this._logStep('Patient link clicked via force click', {
+                    timeTaken: Date.now() - clickStart,
+                  });
                 } catch (e) {
                   this._logStep('Force click also failed', { error: e.message });
                 }
               }
-              
-	              if (clicked) {
-                  const popupPage = await popupPagePromise;
-                  if (popupPage && !popupPage.isClosed()) {
-                    await popupPage.waitForLoadState('domcontentloaded', { timeout: 8000 }).catch(() => {});
-                    this._setPage(popupPage, 'patient-nav-popup');
+
+              if (clicked) {
+                const popupPage = await popupPagePromise;
+                if (popupPage && !popupPage.isClosed()) {
+                  await popupPage
+                    .waitForLoadState('domcontentloaded', { timeout: 8000 })
+                    .catch(() => {});
+                  this._setPage(popupPage, 'patient-nav-popup');
+                }
+
+                if (this.page.isClosed()) {
+                  const recovered = await this._recoverOpenPage('patient-nav:closed-after-click');
+                  if (!recovered) {
+                    throw new Error('Patient navigation closed page and no replacement page found');
                   }
+                }
 
-                  if (this.page.isClosed()) {
-                    const recovered = await this._recoverOpenPage('patient-nav:closed-after-click');
-                    if (!recovered) {
-                      throw new Error('Patient navigation closed page and no replacement page found');
-                    }
-                  }
+                // Some Clinic Assist navigations are async and can take a few seconds; wait for URL.
+                await this.page
+                  .waitForLoadState('domcontentloaded', { timeout: 8000 })
+                  .catch(() => {});
+                await this.page
+                  .waitForURL(/\/Patient\/PatientSearch/i, { timeout: 8000 })
+                  .catch(() => {});
+                await this.page.waitForTimeout(300);
 
-	                // Some Clinic Assist navigations are async and can take a few seconds; wait for URL.
-	                await this.page.waitForLoadState('domcontentloaded', { timeout: 8000 }).catch(() => {});
-	                await this.page
-	                  .waitForURL(/\/Patient\/PatientSearch/i, { timeout: 8000 })
-	                  .catch(() => {});
-	                await this.page.waitForTimeout(300);
+                const finalUrl = this.page.url();
+                this._logStep('After Patient click, checking URL', {
+                  finalUrl,
+                  totalTime: Date.now() - patientNavStart,
+                });
 
-	                const finalUrl = this.page.url();
-	                this._logStep('After Patient click, checking URL', { finalUrl, totalTime: Date.now() - patientNavStart });
-
-	                if (/\/Patient\/PatientSearch/i.test(finalUrl)) {
-	                  this._logStep('Successfully navigated to Patient Page via UI click', { finalUrl, totalTime: Date.now() - navStart });
-	                  patientClicked = true;
-	                  break;
-	                } else {
-	                  await this.page
-	                    .screenshot({ path: 'screenshots/clinic-assist-patient-nav-unexpected-url.png', fullPage: true })
-	                    .catch(() => {});
-	                  this._logStep('Click succeeded but URL not as expected, retrying', { finalUrl });
-	                  // Wait longer and also wait for URL (some pages are slow to transition)
-	                  await this.page
-	                    .waitForURL(/\/Patient\/PatientSearch/i, { timeout: 6000 })
-	                    .catch(() => {});
+                if (/\/Patient\/PatientSearch/i.test(finalUrl)) {
+                  this._logStep('Successfully navigated to Patient Page via UI click', {
+                    finalUrl,
+                    totalTime: Date.now() - navStart,
+                  });
+                  patientClicked = true;
+                  break;
+                } else {
+                  await this.page
+                    .screenshot({
+                      path: 'screenshots/clinic-assist-patient-nav-unexpected-url.png',
+                      fullPage: true,
+                    })
+                    .catch(() => {});
+                  this._logStep('Click succeeded but URL not as expected, retrying', { finalUrl });
+                  // Wait longer and also wait for URL (some pages are slow to transition)
+                  await this.page
+                    .waitForURL(/\/Patient\/PatientSearch/i, { timeout: 6000 })
+                    .catch(() => {});
                   const retryUrl = this.page.url();
                   if (/\/Patient\/PatientSearch/i.test(retryUrl)) {
-                    this._logStep('Successfully navigated to Patient Page after retry', { retryUrl, totalTime: Date.now() - navStart });
+                    this._logStep('Successfully navigated to Patient Page after retry', {
+                      retryUrl,
+                      totalTime: Date.now() - navStart,
+                    });
                     patientClicked = true;
                     break;
                   }
@@ -7116,12 +8411,14 @@ export class ClinicAssistAutomation {
           continue;
         }
       }
-      
-	      if (!patientClicked) {
-	        this._logStep('Could not click Patient link via UI; trying Home -> Patient fallback', { totalTime: Date.now() - navStart });
-	        await this.page
-	          .screenshot({ path: 'screenshots/clinic-assist-patient-nav-missing.png', fullPage: true })
-	          .catch(() => {});
+
+      if (!patientClicked) {
+        this._logStep('Could not click Patient link via UI; trying Home -> Patient fallback', {
+          totalTime: Date.now() - navStart,
+        });
+        await this.page
+          .screenshot({ path: 'screenshots/clinic-assist-patient-nav-missing.png', fullPage: true })
+          .catch(() => {});
 
         // Some pages (notably QueueLog/PatientVisit) sometimes ignore the Patient click.
         // A reliable workaround is to go back to Home first, then click Patient again.
@@ -7137,8 +8434,13 @@ export class ClinicAssistAutomation {
               ].join(', ')
             )
             .first();
-          if ((await homeLink.count().catch(() => 0)) > 0 && (await homeLink.isVisible().catch(() => false))) {
-            await homeLink.click({ timeout: 3000 }).catch(async () => homeLink.click({ timeout: 3000, force: true }));
+          if (
+            (await homeLink.count().catch(() => 0)) > 0 &&
+            (await homeLink.isVisible().catch(() => false))
+          ) {
+            await homeLink
+              .click({ timeout: 3000 })
+              .catch(async () => homeLink.click({ timeout: 3000, force: true }));
             await this.page.waitForLoadState('domcontentloaded', { timeout: 8000 }).catch(() => {});
             await this.page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
             await this.page.waitForTimeout(300);
@@ -7174,8 +8476,13 @@ export class ClinicAssistAutomation {
               ].join(', ')
             )
             .first();
-          if ((await retryPatient.count().catch(() => 0)) > 0 && (await retryPatient.isVisible().catch(() => false))) {
-            await retryPatient.click({ timeout: 3000 }).catch(async () => retryPatient.click({ timeout: 3000, force: true }));
+          if (
+            (await retryPatient.count().catch(() => 0)) > 0 &&
+            (await retryPatient.isVisible().catch(() => false))
+          ) {
+            await retryPatient
+              .click({ timeout: 3000 })
+              .catch(async () => retryPatient.click({ timeout: 3000, force: true }));
             await this.page.waitForLoadState('domcontentloaded', { timeout: 8000 }).catch(() => {});
             await this.page
               .waitForURL(/\/Patient\/PatientSearch/i, { timeout: 8000 })
@@ -7184,7 +8491,9 @@ export class ClinicAssistAutomation {
             const finalUrl = this.page.url();
             this._logStep('Home->Patient retry URL', { finalUrl });
             if (/\/Patient\/PatientSearch/i.test(finalUrl)) {
-              this._logStep('Navigate to Patient Page - COMPLETE', { totalTime: Date.now() - navStart });
+              this._logStep('Navigate to Patient Page - COMPLETE', {
+                totalTime: Date.now() - navStart,
+              });
               return true;
             }
           }
@@ -7202,7 +8511,9 @@ export class ClinicAssistAutomation {
                   'a.SideMenuList[cat="Patient"], a[cat="Patient"], a[href*="/Patient/PatientSearch" i], a[href*="PatientSearch" i], a[href*="/Patient/" i]:not([href^="#"])'
                 )
               );
-              const target = anchors.find((a) => (a.getAttribute('href') || '').toLowerCase().includes('patient'));
+              const target = anchors.find(a =>
+                (a.getAttribute('href') || '').toLowerCase().includes('patient')
+              );
               if (!target) return false;
               try {
                 target.click();
@@ -7215,12 +8526,16 @@ export class ClinicAssistAutomation {
 
           if (domClickPatient) {
             await this.page.waitForLoadState('domcontentloaded', { timeout: 8000 }).catch(() => {});
-            await this.page.waitForURL(/\/Patient\/PatientSearch/i, { timeout: 8000 }).catch(() => {});
+            await this.page
+              .waitForURL(/\/Patient\/PatientSearch/i, { timeout: 8000 })
+              .catch(() => {});
             await this.page.waitForTimeout(300);
             const finalUrl = this.page.url();
             this._logStep('DOM fallback patient click URL', { finalUrl });
             if (/\/Patient\/PatientSearch/i.test(finalUrl)) {
-              this._logStep('Navigate to Patient Page - COMPLETE', { totalTime: Date.now() - navStart });
+              this._logStep('Navigate to Patient Page - COMPLETE', {
+                totalTime: Date.now() - navStart,
+              });
               return true;
             }
           }
@@ -7243,26 +8558,36 @@ export class ClinicAssistAutomation {
             .catch(() => false);
           if (locationFallback) {
             await this.page.waitForLoadState('domcontentloaded', { timeout: 8000 }).catch(() => {});
-            await this.page.waitForURL(/\/Patient\/PatientSearch/i, { timeout: 8000 }).catch(() => {});
+            await this.page
+              .waitForURL(/\/Patient\/PatientSearch/i, { timeout: 8000 })
+              .catch(() => {});
             const finalUrl = this.page.url();
             this._logStep('Location fallback patient URL', { finalUrl });
             if (/\/Patient\/PatientSearch/i.test(finalUrl)) {
-              this._logStep('Navigate to Patient Page - COMPLETE', { totalTime: Date.now() - navStart });
+              this._logStep('Navigate to Patient Page - COMPLETE', {
+                totalTime: Date.now() - navStart,
+              });
               return true;
             }
           }
         }
 
         // Project rule: no direct URL navigation in Clinic Assist.
-        this._logStep('Could not click Patient link via UI - direct URL navigation disabled by rule', { totalTime: Date.now() - navStart });
+        this._logStep(
+          'Could not click Patient link via UI - direct URL navigation disabled by rule',
+          { totalTime: Date.now() - navStart }
+        );
         return false;
       }
-      
+
       this._logStep('Navigate to Patient Page - COMPLETE', { totalTime: Date.now() - navStart });
       return true;
     } catch (error) {
       logger.error('Failed to navigate to Patient Page:', error);
-      this._logStep('Exception in navigateToPatientPage', { error: error.message, stack: error.stack });
+      this._logStep('Exception in navigateToPatientPage', {
+        error: error.message,
+        stack: error.stack,
+      });
       return false;
     }
   }
@@ -7275,7 +8600,7 @@ export class ClinicAssistAutomation {
   async searchPatientByName(patientName) {
     try {
       this._logStep('Search patient by name', { patientName });
-      
+
       await this.page.waitForLoadState('networkidle');
       await this.page.waitForTimeout(1000);
 
@@ -7353,7 +8678,7 @@ export class ClinicAssistAutomation {
   async searchPatientByNumber(patientNumber) {
     try {
       this._logStep('Search patient by number', { patientNumber });
-      
+
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
       await this.page.waitForTimeout(200);
 
@@ -7397,9 +8722,10 @@ export class ClinicAssistAutomation {
       } catch (error) {
         // Fallback: Use JavaScript to set value directly
         this._logStep('Normal fill failed, using JavaScript fallback');
-        await this.page.evaluate((number) => {
-          const input = document.querySelector('input[id*="search" i]') || 
-                       document.querySelector('#txtMainSearchPatient');
+        await this.page.evaluate(number => {
+          const input =
+            document.querySelector('input[id*="search" i]') ||
+            document.querySelector('#txtMainSearchPatient');
           if (input) {
             input.value = number;
             input.dispatchEvent(new Event('input', { bubbles: true }));
@@ -7437,11 +8763,11 @@ export class ClinicAssistAutomation {
       this._logStep('Pressing Enter to execute search (may need to dismiss dialog first)');
       await this.page.keyboard.press('Enter');
       await this.page.waitForTimeout(300);
-      
+
       // Press Enter again to ensure search executes (in case first Enter dismissed a dialog)
       await this.page.keyboard.press('Enter');
       await this.page.waitForTimeout(300);
-      
+
       // Wait for search results to load
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
       await this.page.waitForTimeout(500);
@@ -7510,52 +8836,59 @@ export class ClinicAssistAutomation {
       await this.page.waitForTimeout(2000); // Wait longer for search results to load
 
       // Method 1: Use page.evaluate to find the cell with patient number, then click the row directly
-      const rowInfo = await this.page.evaluate((pNumber) => {
-        // Normalize patient number (handle zero-padding)
-        const normalized = String(pNumber).trim();
-        const normalizedZeroPad = normalized.padStart(5, '0');
-        
-        // Find all table cells
-        const allCells = Array.from(document.querySelectorAll('td, th'));
-        
-        // Find cells that match the patient number (exact match)
-        const matchingCells = allCells.filter(cell => {
-          const cellText = (cell.textContent || '').trim();
-          return cellText === normalized || 
-                 cellText === normalizedZeroPad ||
-                 cellText === `0${normalized}`; // Handle zero-padding
-        });
+      const rowInfo = await this.page
+        .evaluate(pNumber => {
+          // Normalize patient number (handle zero-padding)
+          const normalized = String(pNumber).trim();
+          const normalizedZeroPad = normalized.padStart(5, '0');
 
-        if (matchingCells.length === 0) {
-          return null;
-        }
+          // Find all table cells
+          const allCells = Array.from(document.querySelectorAll('td, th'));
 
-        // Get the row containing the matching cell
-        const matchingCell = matchingCells[0];
-        const row = matchingCell.closest('tr');
-        
-        if (!row) {
-          return null;
-        }
+          // Find cells that match the patient number (exact match)
+          const matchingCells = allCells.filter(cell => {
+            const cellText = (cell.textContent || '').trim();
+            return (
+              cellText === normalized ||
+              cellText === normalizedZeroPad ||
+              cellText === `0${normalized}`
+            ); // Handle zero-padding
+          });
 
-        // Check if row has a link
-        const link = row.querySelector('a');
-        const hasLink = !!link;
+          if (matchingCells.length === 0) {
+            return null;
+          }
 
-        // Get unique identifier for the row (use row index or data attributes)
-        const parent = row.parentElement;
-        const siblings = parent ? Array.from(parent.children) : [];
-        const rowIndex = siblings.indexOf(row);
+          // Get the row containing the matching cell
+          const matchingCell = matchingCells[0];
+          const row = matchingCell.closest('tr');
 
-        return {
-          hasLink: hasLink,
-          rowIndex: rowIndex,
-          rowText: (row.textContent || '').trim().substring(0, 100), // For logging
-        };
-      }, String(patientNumber).trim()).catch(() => null);
+          if (!row) {
+            return null;
+          }
+
+          // Check if row has a link
+          const link = row.querySelector('a');
+          const hasLink = !!link;
+
+          // Get unique identifier for the row (use row index or data attributes)
+          const parent = row.parentElement;
+          const siblings = parent ? Array.from(parent.children) : [];
+          const rowIndex = siblings.indexOf(row);
+
+          return {
+            hasLink: hasLink,
+            rowIndex: rowIndex,
+            rowText: (row.textContent || '').trim().substring(0, 100), // For logging
+          };
+        }, String(patientNumber).trim())
+        .catch(() => null);
 
       if (rowInfo) {
-        this._logStep('Found patient row by number', { rowIndex: rowInfo.rowIndex, hasLink: rowInfo.hasLink });
+        this._logStep('Found patient row by number', {
+          rowIndex: rowInfo.rowIndex,
+          hasLink: rowInfo.hasLink,
+        });
 
         // Wait for table to be visible
         await this.page.waitForSelector('tr, [role="row"]', { timeout: 5000 }).catch(() => {});
@@ -7565,7 +8898,10 @@ export class ClinicAssistAutomation {
 
         // Approach 1: Use filter to find row containing the patient number
         try {
-          const rowByFilter = this.page.locator('tr').filter({ hasText: new RegExp(`^.*${patientNumber}.*$`, 'i') }).first();
+          const rowByFilter = this.page
+            .locator('tr')
+            .filter({ hasText: new RegExp(`^.*${patientNumber}.*$`, 'i') })
+            .first();
           if ((await rowByFilter.count().catch(() => 0)) > 0) {
             const isVisible = await rowByFilter.isVisible().catch(() => false);
             if (isVisible) {
@@ -7593,11 +8929,11 @@ export class ClinicAssistAutomation {
             // Get all rows (skip header rows if present)
             const allRows = this.page.locator('tr:not([role="columnheader"]):not(thead tr)');
             const rowCount = await allRows.count().catch(() => 0);
-            
+
             if (rowInfo.rowIndex < rowCount) {
               const targetRow = allRows.nth(rowInfo.rowIndex);
               const isVisible = await targetRow.isVisible().catch(() => false);
-              
+
               if (isVisible) {
                 // Try link first
                 if (rowInfo.hasLink) {
@@ -7608,7 +8944,7 @@ export class ClinicAssistAutomation {
                     this._logStep('Clicked patient link via row index');
                   }
                 }
-                
+
                 // If no link or link click failed, click row
                 if (!clicked) {
                   await targetRow.click({ timeout: 5000 });
@@ -7625,14 +8961,14 @@ export class ClinicAssistAutomation {
         // Approach 3: Direct DOM manipulation (last resort)
         if (!clicked) {
           try {
-            await this.page.evaluate((pNumber) => {
+            await this.page.evaluate(pNumber => {
               const normalized = String(pNumber).trim();
               const allCells = Array.from(document.querySelectorAll('td'));
               const matchingCell = allCells.find(cell => {
                 const cellText = (cell.textContent || '').trim();
                 return cellText === normalized || cellText === normalized.padStart(5, '0');
               });
-              
+
               if (matchingCell) {
                 const row = matchingCell.closest('tr');
                 if (row) {
@@ -7647,7 +8983,7 @@ export class ClinicAssistAutomation {
               }
               return false;
             }, String(patientNumber).trim());
-            
+
             clicked = true;
             this._logStep('Clicked patient via DOM manipulation');
           } catch (e) {
@@ -7780,7 +9116,10 @@ export class ClinicAssistAutomation {
                     ].join(', ')
                   )
                   .first();
-                if ((await showBtn.count().catch(() => 0)) > 0 && (await showBtn.isVisible().catch(() => false))) {
+                if (
+                  (await showBtn.count().catch(() => 0)) > 0 &&
+                  (await showBtn.isVisible().catch(() => false))
+                ) {
                   await showBtn.click().catch(() => {});
                   await this.page.waitForTimeout(1500);
                 }
@@ -7804,7 +9143,7 @@ export class ClinicAssistAutomation {
                       }
                     }
 
-                    const hasDiagnosisTable = (root) => {
+                    const hasDiagnosisTable = root => {
                       const tables = Array.from(root.querySelectorAll('table'));
                       for (const table of tables) {
                         const rows = Array.from(table.querySelectorAll('tr'));
@@ -7812,7 +9151,14 @@ export class ClinicAssistAutomation {
                         const header = rows[0].textContent || '';
                         const h = header.toLowerCase();
                         if (!h.includes('date')) continue;
-                        if (!(h.includes('code') || h.includes('description') || h.includes('diagnosis'))) continue;
+                        if (
+                          !(
+                            h.includes('code') ||
+                            h.includes('description') ||
+                            h.includes('diagnosis')
+                          )
+                        )
+                          continue;
 
                         // Require at least one data row with a date-like token.
                         for (const r of rows.slice(1, 6)) {
@@ -7902,7 +9248,10 @@ export class ClinicAssistAutomation {
                 ].join(', ')
               )
               .first();
-            if ((await showBtn.count().catch(() => 0)) > 0 && (await showBtn.isVisible().catch(() => false))) {
+            if (
+              (await showBtn.count().catch(() => 0)) > 0 &&
+              (await showBtn.isVisible().catch(() => false))
+            ) {
               await showBtn.click().catch(() => {});
               await this.page.waitForTimeout(1500);
             }
@@ -7935,8 +9284,8 @@ export class ClinicAssistAutomation {
       await this.openVisitTab().catch(() => false);
       await this.page.waitForTimeout(800);
 
-      const record = await this.page.evaluate((targetDateStr) => {
-        const parseDate = (dateStr) => {
+      const record = await this.page.evaluate(targetDateStr => {
+        const parseDate = dateStr => {
           if (!dateStr) return null;
           const patterns = [
             /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,
@@ -7970,7 +9319,7 @@ export class ClinicAssistAutomation {
           }
         }
 
-        const isLikelyDiagnosisText = (text) => {
+        const isLikelyDiagnosisText = text => {
           const t = String(text || '').trim();
           if (t.length < 5) return false;
           const lower = t.toLowerCase();
@@ -7984,16 +9333,26 @@ export class ClinicAssistAutomation {
           return true;
         };
 
-        const conditionKeywords = /(pain|sprain|strain|fracture|injur|infection|fever|cough|cold|headache|migraine|asthma|diabetes|hypertension|arthritis|osteoarthritis|tendinitis|tendinopathy|bursitis|synovitis|dislocation|contusion|laceration|wound|ulcer|eczema|allergy|syndrome|influenza|tonsillitis|otitis|conjunctivitis|pneumonia|bronch|respiratory|gastro|dermat|sinus)/i;
-        const procedureKeywords = /(physiotherapy|x[- ]?ray|ultrasound|mri|ct|consultation|therapy|injection|radiolog|procedure|rehab|exercise|follow\s*up|brace|splint|cast|wrap|orthosis|support|sling|crutch|bandage|tape|\bpack\b|hot\s*\/\s*cold|cold\s*pack|hot\s*pack)/i;
+        const conditionKeywords =
+          /(pain|sprain|strain|fracture|injur|infection|fever|cough|cold|headache|migraine|asthma|diabetes|hypertension|arthritis|osteoarthritis|tendinitis|tendinopathy|bursitis|synovitis|dislocation|contusion|laceration|wound|ulcer|eczema|allergy|syndrome|influenza|tonsillitis|otitis|conjunctivitis|pneumonia|bronch|respiratory|gastro|dermat|sinus)/i;
+        const procedureKeywords =
+          /(physiotherapy|x[- ]?ray|ultrasound|mri|ct|consultation|therapy|injection|radiolog|procedure|rehab|exercise|follow\s*up|brace|splint|cast|wrap|orthosis|support|sling|crutch|bandage|tape|\bpack\b|hot\s*\/\s*cold|cold\s*pack|hot\s*pack)/i;
 
-        const rowsToRecords = (table) => {
+        const rowsToRecords = table => {
           const rows = Array.from(table.querySelectorAll('tr'));
           if (rows.length < 2) return [];
 
-          const headerCells = Array.from(rows[0].querySelectorAll('th, td')).map((c) => (c.textContent || '').trim().toLowerCase());
-          const dateCol = headerCells.findIndex((h) => h.includes('date'));
-          const diagCol = headerCells.findIndex((h) => h.includes('diagnosis') || h.includes('diag') || h.includes('assessment') || h.includes('complaint'));
+          const headerCells = Array.from(rows[0].querySelectorAll('th, td')).map(c =>
+            (c.textContent || '').trim().toLowerCase()
+          );
+          const dateCol = headerCells.findIndex(h => h.includes('date'));
+          const diagCol = headerCells.findIndex(
+            h =>
+              h.includes('diagnosis') ||
+              h.includes('diag') ||
+              h.includes('assessment') ||
+              h.includes('complaint')
+          );
 
           const out = [];
           for (const r of rows.slice(1)) {
@@ -8001,11 +9360,15 @@ export class ClinicAssistAutomation {
             if (cells.length < 2) continue;
 
             let dateStr = '';
-            if (dateCol >= 0 && dateCol < cells.length) dateStr = (cells[dateCol].textContent || '').trim();
+            if (dateCol >= 0 && dateCol < cells.length)
+              dateStr = (cells[dateCol].textContent || '').trim();
             if (!dateStr) {
               for (const c of cells) {
                 const txt = (c.textContent || '').trim();
-                if (/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(txt) || /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(txt)) {
+                if (
+                  /\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(txt) ||
+                  /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(txt)
+                ) {
                   dateStr = txt;
                   break;
                 }
@@ -8041,7 +9404,8 @@ export class ClinicAssistAutomation {
             // Heuristic filter: only accept if we see either a diagnosis/ICD code, or a condition keyword.
             // This avoids misclassifying medicines/services as diagnosis.
             const lower = desc.toLowerCase();
-            const ok = Boolean(code) || (conditionKeywords.test(lower) && !procedureKeywords.test(lower));
+            const ok =
+              Boolean(code) || (conditionKeywords.test(lower) && !procedureKeywords.test(lower));
             if (!ok) continue;
 
             out.push({ date: dateStr, dateObj, code, description: desc });
@@ -8061,11 +9425,13 @@ export class ClinicAssistAutomation {
         records.sort((a, b) => b.dateObj - a.dateObj);
 
         if (targetDate) {
-          const exact = records.filter((r) => sameDay(r.dateObj, targetDate));
+          const exact = records.filter(r => sameDay(r.dateObj, targetDate));
           if (exact.length) return exact[0];
 
           const targetTs = new Date(targetDate).setHours(0, 0, 0, 0);
-          const onOrBefore = records.find((r) => new Date(r.dateObj).setHours(0, 0, 0, 0) <= targetTs);
+          const onOrBefore = records.find(
+            r => new Date(r.dateObj).setHours(0, 0, 0, 0) <= targetTs
+          );
           if (onOrBefore) return onOrBefore;
         }
 
@@ -8078,7 +9444,11 @@ export class ClinicAssistAutomation {
           code: record.code,
           description: String(record.description).substring(0, 80),
         });
-        return { code: record.code || null, description: record.description, date: record.date || null };
+        return {
+          code: record.code || null,
+          description: record.description,
+          date: record.date || null,
+        };
       }
 
       this._logStep('No diagnosis found in Visit tab');
@@ -8122,9 +9492,9 @@ export class ClinicAssistAutomation {
         try {
           const element = this.page.locator(selector).first();
           if ((await element.count().catch(() => 0)) > 0) {
-            const text = await element.inputValue().catch(() => 
-              element.textContent().catch(() => '')
-            );
+            const text = await element
+              .inputValue()
+              .catch(() => element.textContent().catch(() => ''));
             if (text && text.trim()) {
               rawDiagnosisText = text.trim();
               break;
@@ -8140,55 +9510,63 @@ export class ClinicAssistAutomation {
       // Try this even if we have rawDiagnosisText, as table extraction is more reliable
       try {
         // Extract table data - look for any table with Code/Description columns
-        const tableData = await this.page.evaluate(() => {
-          const tables = Array.from(document.querySelectorAll('table'));
-          for (const table of tables) {
-            const rows = Array.from(table.querySelectorAll('tr'));
-            if (rows.length < 2) continue; // Need at least header + data row
-            
-            // Check if this looks like a diagnosis table (has Code and Description columns)
-            const headerRow = rows[0];
-            if (headerRow) {
-              const headerCells = Array.from(headerRow.querySelectorAll('td, th'));
-              const headerText = headerCells.map(c => (c.textContent || '').toLowerCase().trim()).join(' ');
-              
-              // Check if table has Code and Description columns
-              const hasCode = headerText.includes('code');
-              const hasDescription = headerText.includes('description') || headerText.includes('diagnosis');
-              
-              if (hasCode && hasDescription) {
-                // Extract data rows (skip header)
-                const dataRows = rows.slice(1).map(row => {
-                  const cells = Array.from(row.querySelectorAll('td, th'));
-                  return cells.map(cell => (cell.textContent || '').trim());
-                }).filter(row => row.length > 0 && row.some(cell => cell.length > 0));
-                
-                if (dataRows.length > 0) {
-                  return { 
-                    headers: headerCells.map(c => (c.textContent || '').trim()), 
-                    dataRows 
-                  };
+        const tableData = await this.page
+          .evaluate(() => {
+            const tables = Array.from(document.querySelectorAll('table'));
+            for (const table of tables) {
+              const rows = Array.from(table.querySelectorAll('tr'));
+              if (rows.length < 2) continue; // Need at least header + data row
+
+              // Check if this looks like a diagnosis table (has Code and Description columns)
+              const headerRow = rows[0];
+              if (headerRow) {
+                const headerCells = Array.from(headerRow.querySelectorAll('td, th'));
+                const headerText = headerCells
+                  .map(c => (c.textContent || '').toLowerCase().trim())
+                  .join(' ');
+
+                // Check if table has Code and Description columns
+                const hasCode = headerText.includes('code');
+                const hasDescription =
+                  headerText.includes('description') || headerText.includes('diagnosis');
+
+                if (hasCode && hasDescription) {
+                  // Extract data rows (skip header)
+                  const dataRows = rows
+                    .slice(1)
+                    .map(row => {
+                      const cells = Array.from(row.querySelectorAll('td, th'));
+                      return cells.map(cell => (cell.textContent || '').trim());
+                    })
+                    .filter(row => row.length > 0 && row.some(cell => cell.length > 0));
+
+                  if (dataRows.length > 0) {
+                    return {
+                      headers: headerCells.map(c => (c.textContent || '').trim()),
+                      dataRows,
+                    };
+                  }
                 }
               }
             }
-          }
-          return null;
-        }).catch(() => null);
+            return null;
+          })
+          .catch(() => null);
 
         if (tableData && tableData.dataRows && tableData.dataRows.length > 0) {
           // Find Code and Description column indices
-          const codeColIdx = tableData.headers.findIndex(h => 
-            /code/i.test(h)
-          );
-          const descColIdx = tableData.headers.findIndex(h => 
-            /description/i.test(h) || /diagnosis/i.test(h)
+          const codeColIdx = tableData.headers.findIndex(h => /code/i.test(h));
+          const descColIdx = tableData.headers.findIndex(
+            h => /description/i.test(h) || /diagnosis/i.test(h)
           );
 
           // Get the most recent diagnosis (last row typically has the latest)
           // Also check for rows with actual code/description values
           let dataRow = tableData.dataRows.find(row => {
-            if (codeColIdx >= 0 && row[codeColIdx] && row[codeColIdx].trim().length > 0) return true;
-            if (descColIdx >= 0 && row[descColIdx] && row[descColIdx].trim().length > 0) return true;
+            if (codeColIdx >= 0 && row[codeColIdx] && row[codeColIdx].trim().length > 0)
+              return true;
+            if (descColIdx >= 0 && row[descColIdx] && row[descColIdx].trim().length > 0)
+              return true;
             return false;
           });
 
@@ -8198,14 +9576,15 @@ export class ClinicAssistAutomation {
           }
 
           if (dataRow) {
-            const code = (codeColIdx >= 0 && dataRow[codeColIdx]) ? dataRow[codeColIdx].trim() : null;
-            const description = (descColIdx >= 0 && dataRow[descColIdx]) ? dataRow[descColIdx].trim() : null;
-            
+            const code = codeColIdx >= 0 && dataRow[codeColIdx] ? dataRow[codeColIdx].trim() : null;
+            const description =
+              descColIdx >= 0 && dataRow[descColIdx] ? dataRow[descColIdx].trim() : null;
+
             if (code || description) {
-              this._logStep('Diagnosis extracted from TX History table', { 
+              this._logStep('Diagnosis extracted from TX History table', {
                 code,
                 description: description?.substring(0, 100),
-                tableRowCount: tableData.dataRows.length
+                tableRowCount: tableData.dataRows.length,
               });
               return { code: code || null, description: description || null };
             }
@@ -8225,63 +9604,69 @@ export class ClinicAssistAutomation {
         // Note: Use non-word-boundary patterns because codes can be attached to text (e.g., "S83.6Sprain")
         const icd10Pattern = /([A-Z]\d{2,3}(?:\.\d+)?)/g;
         const icd10Matches = [...rawDiagnosisText.matchAll(icd10Pattern)];
-        
+
         // 2. SNOMED or numeric codes: 128196005, 3723001 (6+ digit numbers, not dates)
         // Exclude numbers that look like dates (YYYYMMDD format like 20260114)
         const numericCodePattern = /(\d{6,})(?=[A-Z][a-z]|\s|SSOC|Branch|HQ|$)/g;
-        const numericMatches = [...rawDiagnosisText.matchAll(numericCodePattern)]
-          .filter(m => {
-            const num = m[1];
-            // Exclude dates: YYYYMMDD format (starts with 19 or 20, 8 digits)
-            if (num.length === 8 && /^(19|20)\d{6}$/.test(num)) return false;
-            // Exclude dates in other formats that might be 6 digits
-            return true;
-          });
+        const numericMatches = [...rawDiagnosisText.matchAll(numericCodePattern)].filter(m => {
+          const num = m[1];
+          // Exclude dates: YYYYMMDD format (starts with 19 or 20, 8 digits)
+          if (num.length === 8 && /^(19|20)\d{6}$/.test(num)) return false;
+          // Exclude dates in other formats that might be 6 digits
+          return true;
+        });
 
         // Collect all code matches with their positions
         const allCodes = [];
-        
+
         // Add ICD-10 codes
         icd10Matches.forEach(match => {
           // Verify it's not part of a date or other text
           const before = rawDiagnosisText.substring(Math.max(0, match.index - 10), match.index);
-          const after = rawDiagnosisText.substring(match.index + match[0].length, Math.min(rawDiagnosisText.length, match.index + match[0].length + 10));
-          
+          const after = rawDiagnosisText.substring(
+            match.index + match[0].length,
+            Math.min(rawDiagnosisText.length, match.index + match[0].length + 10)
+          );
+
           // Exclude false positives:
           // - Not part of "Date", "State", "Code", "Description", "Branch" headers
           // - Not preceded by date (YYYY format)
           // - Not part of "HQ23" or similar (check if followed by "/" which indicates date)
           // - Should be followed by text starting with capital letter (diagnosis description)
-          const isFalsePositive = 
+          const isFalsePositive =
             /Date|State|Code|Description|Branch/i.test(before) || // Part of header
             /^\d{4}/.test(before) || // Preceded by year
             /HQ\d{2}$/.test(before) || // Part of "HQ23" pattern
             (match[0].length <= 4 && /\/\d{2}\/\d{4}$/.test(after)); // Short code followed by date pattern
-          
+
           // Valid code should be followed by text (capital letter) or space
-          const isValidCode = /^[A-Z][a-z]/.test(after) || /^ /.test(after) || /^SSOC/i.test(after) || /^Branch/i.test(after);
-          
+          const isValidCode =
+            /^[A-Z][a-z]/.test(after) ||
+            /^ /.test(after) ||
+            /^SSOC/i.test(after) ||
+            /^Branch/i.test(after);
+
           if (!isFalsePositive && isValidCode) {
             allCodes.push({
               code: match[1],
               index: match.index,
-              type: 'icd10'
+              type: 'icd10',
             });
           }
         });
-        
+
         // Add numeric codes
         numericMatches.forEach(match => {
           allCodes.push({
             code: match[1],
             index: match.index,
-            type: 'numeric'
+            type: 'numeric',
           });
         });
 
         // Sort by position (most recent/last code in text)
         allCodes.sort((a, b) => b.index - a.index);
-        
+
         // Take the most recent code, prioritizing ICD-10 over numeric if both exist at similar positions
         if (allCodes.length > 0) {
           // If we have multiple codes, prefer ICD-10 codes
@@ -8313,7 +9698,7 @@ export class ClinicAssistAutomation {
           // Create regex patterns for code removal
           const icd10Pattern = /([A-Z]\d{2,3}(?:\.\d+)?)/g;
           const numericCodePattern = /(\d{6,})(?=[A-Z][a-z]|\s|SSOC|Branch|HQ|$)/g;
-          
+
           description = description
             .replace(new RegExp(escapedCode, 'gi'), '')
             .replace(icd10Pattern, '')
@@ -8350,16 +9735,18 @@ export class ClinicAssistAutomation {
           // Try to find the actual description part (skip numeric codes, dates, etc.)
           const words = description.split(/\s+/).filter(w => {
             const word = w.trim();
-            return word.length > 2 && 
-                   !/^\d+$/.test(word) && // Not just numbers
-                   !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(word) && // Not dates
-                   !/^\d{4}\/\d{2}\/\d{2}$/.test(word) && // Not YYYY/MM/DD dates
-                   !/^[A-Z]\d{2,3}\.?\d*$/.test(word) && // Not ICD codes
-                   !/^\d{6,}$/.test(word); // Not numeric codes
+            return (
+              word.length > 2 &&
+              !/^\d+$/.test(word) && // Not just numbers
+              !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(word) && // Not dates
+              !/^\d{4}\/\d{2}\/\d{2}$/.test(word) && // Not YYYY/MM/DD dates
+              !/^[A-Z]\d{2,3}\.?\d*$/.test(word) && // Not ICD codes
+              !/^\d{6,}$/.test(word)
+            ); // Not numeric codes
           });
-          
+
           description = words.join(' ').trim();
-          
+
           // If we have multiple diagnoses concatenated, try to extract the first/latest one
           // Common pattern: "CodeDescriptionCodeDescription" or repeated text
           if (description.length > 150) {
@@ -8379,18 +9766,20 @@ export class ClinicAssistAutomation {
               }
             }
           }
-          
+
           // Final cleanup: remove repeated phrases
           // Check if description has repeated phrases (e.g., "Pain joint shoulder regionHQ" repeated)
           const sentences = description.split(/HQ|SSOC|Branch/i);
           if (sentences.length > 1) {
             // Take unique sentences
-            const uniqueSentences = [...new Set(sentences.map(s => s.trim()).filter(s => s.length > 5))];
+            const uniqueSentences = [
+              ...new Set(sentences.map(s => s.trim()).filter(s => s.length > 5)),
+            ];
             if (uniqueSentences.length > 0) {
               description = uniqueSentences[0]; // Take first unique diagnosis
             }
           }
-          
+
           description = description.trim();
         }
 
@@ -8413,10 +9802,10 @@ export class ClinicAssistAutomation {
 
         // Final validation
         if (description && description.length > 0) {
-          this._logStep('Diagnosis extracted from TX History', { 
+          this._logStep('Diagnosis extracted from TX History', {
             code,
             description: description.substring(0, 100),
-            rawText: rawDiagnosisText.substring(0, 150)
+            rawText: rawDiagnosisText.substring(0, 150),
           });
           return { code: code || null, description: description || null };
         }
@@ -8434,19 +9823,19 @@ export class ClinicAssistAutomation {
   /**
    * Extract medicines from TX History Medicine Tab for a specific visit date
    * This should be called after navigating to TX History
-   * @param {string} visitDate - Visit date in YYYY-MM-DD format  
+   * @param {string} visitDate - Visit date in YYYY-MM-DD format
    * @returns {Promise<Array>} Array of medicine objects with name and quantity
    */
   async extractMedicinesFromTXHistory(visitDate) {
     try {
       this._logStep('Extracting medicines for visit date', { visitDate });
-      
+
       // Open Medicine tab
       await this.openMedicineTab();
-      
+
       // Extract medicines filtered by date
       const medicines = await this.extractMedicinesForDate(visitDate);
-      
+
       return medicines;
     } catch (error) {
       logger.error('Failed to extract medicines from TX History:', error);
@@ -8464,9 +9853,9 @@ export class ClinicAssistAutomation {
     try {
       this._logStep('Extract diagnosis for visit date', { visitDate });
       await this.page.waitForTimeout(1000);
-      
+
       // Extract all diagnoses with dates (support same-origin iframes)
-      const diagnoses = await this.page.evaluate((targetDateStr) => {
+      const diagnoses = await this.page.evaluate(targetDateStr => {
         const results = [];
         const tableRoots = [document];
         const iframes = Array.from(document.querySelectorAll('iframe'));
@@ -8478,15 +9867,15 @@ export class ClinicAssistAutomation {
             // Cross-origin or inaccessible iframe; ignore.
           }
         }
-        
+
         // Helper to parse dates
-        const parseDate = (dateStr) => {
+        const parseDate = dateStr => {
           if (!dateStr) return null;
           const patterns = [
-            /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,  // DD/MM/YYYY or DD-MM-YYYY
-            /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/,  // YYYY-MM-DD
+            /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/, // DD/MM/YYYY or DD-MM-YYYY
+            /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/, // YYYY-MM-DD
           ];
-          
+
           for (const pattern of patterns) {
             const match = dateStr.match(pattern);
             if (match) {
@@ -8499,25 +9888,29 @@ export class ClinicAssistAutomation {
           }
           return null;
         };
-        
+
         const targetDate = parseDate(targetDateStr);
-        
+
         // Look for diagnosis tables in all accessible roots
-        tableRoots.forEach((root) => {
+        tableRoots.forEach(root => {
           const tables = Array.from(root.querySelectorAll('table'));
           tables.forEach(table => {
             const rows = Array.from(table.querySelectorAll('tbody tr, tr'));
-            
+
             // Prefer tables that have a header row with Date/Code/Description.
             let headerCells = [];
             const headerRow = table.querySelector('thead tr') || table.querySelector('tr');
             if (headerRow) {
-              headerCells = Array.from(headerRow.querySelectorAll('th, td')).map((c) => (c.textContent || '').trim().toLowerCase());
+              headerCells = Array.from(headerRow.querySelectorAll('th, td')).map(c =>
+                (c.textContent || '').trim().toLowerCase()
+              );
             }
 
-            const dateIdx = headerCells.findIndex((h) => h === 'date' || h.includes('date'));
-            const codeIdx = headerCells.findIndex((h) => h === 'code' || h.includes('code'));
-            const descIdx = headerCells.findIndex((h) => h.includes('description') || h.includes('diagnosis'));
+            const dateIdx = headerCells.findIndex(h => h === 'date' || h.includes('date'));
+            const codeIdx = headerCells.findIndex(h => h === 'code' || h.includes('code'));
+            const descIdx = headerCells.findIndex(
+              h => h.includes('description') || h.includes('diagnosis')
+            );
 
             const looksLikeDiagnosisTable = dateIdx >= 0 && (codeIdx >= 0 || descIdx >= 0);
             const dataRows = looksLikeDiagnosisTable ? rows.slice(1) : rows;
@@ -8531,9 +9924,12 @@ export class ClinicAssistAutomation {
               let diagnosisDesc = '';
 
               if (looksLikeDiagnosisTable) {
-                if (dateIdx >= 0 && dateIdx < cells.length) dateStr = (cells[dateIdx].textContent || '').trim();
-                if (codeIdx >= 0 && codeIdx < cells.length) diagnosisCode = (cells[codeIdx].textContent || '').trim();
-                if (descIdx >= 0 && descIdx < cells.length) diagnosisDesc = (cells[descIdx].textContent || '').trim();
+                if (dateIdx >= 0 && dateIdx < cells.length)
+                  dateStr = (cells[dateIdx].textContent || '').trim();
+                if (codeIdx >= 0 && codeIdx < cells.length)
+                  diagnosisCode = (cells[codeIdx].textContent || '').trim();
+                if (descIdx >= 0 && descIdx < cells.length)
+                  diagnosisDesc = (cells[descIdx].textContent || '').trim();
               }
 
               // Fallback: guess based on content (for non-standard tables)
@@ -8543,12 +9939,18 @@ export class ClinicAssistAutomation {
                   const text = (cells[i].textContent || '').trim();
 
                   if (!dateStr && /\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text)) dateStr = text;
-                  if (!diagnosisCode && (/^[A-Z]\d{2,3}(?:\.\d+)?$/.test(text) || /^\d{6,8}$/.test(text))) diagnosisCode = text;
-                  if (text.length > diagnosisDesc.length &&
-                      !/loading/i.test(text) &&
-                      !/date|state|branch/i.test(text) &&
-                      !/^\d+$/.test(text) &&
-                      !/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text)) {
+                  if (
+                    !diagnosisCode &&
+                    (/^[A-Z]\d{2,3}(?:\.\d+)?$/.test(text) || /^\d{6,8}$/.test(text))
+                  )
+                    diagnosisCode = text;
+                  if (
+                    text.length > diagnosisDesc.length &&
+                    !/loading/i.test(text) &&
+                    !/date|state|branch/i.test(text) &&
+                    !/^\d+$/.test(text) &&
+                    !/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text)
+                  ) {
                     diagnosisDesc = text;
                   }
                 }
@@ -8560,18 +9962,23 @@ export class ClinicAssistAutomation {
               if (!recordDate) return;
 
               // Normalize diagnosis code: sometimes code is embedded in a longer string, or in the description.
-              const pickCode = (s) => {
-                const m = String(s || '').toUpperCase().match(/([A-Z]\d{2,3}(?:\.\d+)?|\d{6,10})/);
+              const pickCode = s => {
+                const m = String(s || '')
+                  .toUpperCase()
+                  .match(/([A-Z]\d{2,3}(?:\.\d+)?|\d{6,10})/);
                 return m ? m[1] : null;
               };
-              let normalizedCode = pickCode(diagnosisCode) || pickCode(diagnosisDesc);
+              const normalizedCode = pickCode(diagnosisCode) || pickCode(diagnosisDesc);
               if (normalizedCode) diagnosisCode = normalizedCode;
 
               // If description starts with the code, strip it to keep clean diagnosis text.
               if (normalizedCode && diagnosisDesc) {
                 const upper = diagnosisDesc.toUpperCase();
                 if (upper.startsWith(normalizedCode)) {
-                  diagnosisDesc = diagnosisDesc.slice(normalizedCode.length).replace(/^\s*[-–:]\s*/, '').trim();
+                  diagnosisDesc = diagnosisDesc
+                    .slice(normalizedCode.length)
+                    .replace(/^\s*[-–:]\s*/, '')
+                    .trim();
                 }
               }
 
@@ -8581,17 +9988,23 @@ export class ClinicAssistAutomation {
 
               // Require a *condition* signal (not just a body-part signal) unless a code is present.
               // This avoids treating devices/procedures like "GEL WRAP SHOULDER BREG" as diagnosis.
-              const conditionKeywords = /(pain|sprain|strain|fracture|injur|infection|fever|cough|cold|headache|migraine|asthma|diabetes|hypertension|arthritis|osteoarthritis|tendinitis|tendinopathy|tendinosis|bursitis|synovitis|dislocation|contusion|laceration|wound|ulcer|eczema|allergy|syndrome|influenza|tonsillitis|otitis|conjunctivitis|pneumonia|bronch|respiratory|gastro|dermat|sinus|chondromalacia|radiculopathy|spondylosis|cervicalgia|lumbago|myalgia|neuralgia|neuropathy|meniscus|ligament|fasciitis|impingement|capsulitis)/i;
-              const procedureKeywords = /(physiotherapy|x[- ]?ray|ultrasound|mri|ct|consultation|therapy|injection|radiolog|procedure|rehab|exercise|clinic|treatment|follow\s*up|brace|splint|cast|wrap|orthosis|support|sling|crutch|bandage|tape|pack|heat|cold|hot|breg)/i;
+              const conditionKeywords =
+                /(pain|sprain|strain|fracture|injur|infection|fever|cough|cold|headache|migraine|asthma|diabetes|hypertension|arthritis|osteoarthritis|tendinitis|tendinopathy|tendinosis|bursitis|synovitis|dislocation|contusion|laceration|wound|ulcer|eczema|allergy|syndrome|influenza|tonsillitis|otitis|conjunctivitis|pneumonia|bronch|respiratory|gastro|dermat|sinus|chondromalacia|radiculopathy|spondylosis|cervicalgia|lumbago|myalgia|neuralgia|neuropathy|meniscus|ligament|fasciitis|impingement|capsulitis)/i;
+              const procedureKeywords =
+                /(physiotherapy|x[- ]?ray|ultrasound|mri|ct|consultation|therapy|injection|radiolog|procedure|rehab|exercise|clinic|treatment|follow\s*up|brace|splint|cast|wrap|orthosis|support|sling|crutch|bandage|tape|pack|heat|cold|hot|breg)/i;
               const descHasCondition = conditionKeywords.test(descLower);
               const descLooksLikeProcedure = procedureKeywords.test(descLower);
 
               // Diagnosis tab entries often have a diagnosis code, but some rows only have text.
-              const codeOk = diagnosisCode && (
-                /^\d{6,10}$/.test(diagnosisCode) || // SNOMED-ish numeric
-                /^[A-Z]\d{2,3}(?:\.\d+)?$/.test(diagnosisCode) // ICD-10-ish
-              );
-              const descOk = !!diagnosisDesc && diagnosisDesc.trim().length >= 5 && descHasCondition && !descLooksLikeProcedure;
+              const codeOk =
+                diagnosisCode &&
+                (/^\d{6,10}$/.test(diagnosisCode) || // SNOMED-ish numeric
+                  /^[A-Z]\d{2,3}(?:\.\d+)?$/.test(diagnosisCode)); // ICD-10-ish
+              const descOk =
+                !!diagnosisDesc &&
+                diagnosisDesc.trim().length >= 5 &&
+                descHasCondition &&
+                !descLooksLikeProcedure;
               if (!codeOk && !descOk) return;
 
               results.push({
@@ -8600,18 +10013,20 @@ export class ClinicAssistAutomation {
                 dateObj: recordDate,
                 code: codeOk ? diagnosisCode : null,
                 description: diagnosisDesc || null,
-                isTargetDate: recordDate && targetDate &&
+                isTargetDate:
+                  recordDate &&
+                  targetDate &&
                   recordDate.getDate() === targetDate.getDate() &&
                   recordDate.getMonth() === targetDate.getMonth() &&
-                  recordDate.getFullYear() === targetDate.getFullYear()
+                  recordDate.getFullYear() === targetDate.getFullYear(),
               });
             });
           });
         });
-        
+
         return results;
       }, visitDate);
-      
+
       if (!diagnoses || diagnoses.length === 0) {
         this._logStep('No diagnosis rows found in Diagnosis tab tables');
         return null;
@@ -8625,51 +10040,55 @@ export class ClinicAssistAutomation {
       });
 
       // Try to find diagnosis for exact date
-      let matchingDiagnosis = diagnoses.find(d => d.isTargetDate);
-      
+      const matchingDiagnosis = diagnoses.find(d => d.isTargetDate);
+
       if (matchingDiagnosis) {
-        this._logStep('Found diagnosis for visit date', { 
+        this._logStep('Found diagnosis for visit date', {
           date: matchingDiagnosis.date,
           code: matchingDiagnosis.code,
-          description: matchingDiagnosis.description.substring(0, 60)
+          description: matchingDiagnosis.description.substring(0, 60),
         });
-        
+
         return {
           code: matchingDiagnosis.code,
           description: matchingDiagnosis.description,
-          date: matchingDiagnosis.date
+          date: matchingDiagnosis.date,
         };
       }
-      
+
       // Fallback: pick the most recent diagnosis on/before the visit date.
       // This avoids accidentally using a later diagnosis (future visit) for an earlier claim date.
       if (diagnoses.length > 0) {
         const targetTs = new Date(visitDate).setHours(0, 0, 0, 0);
-        const onOrBefore = diagnoses.find((d) => {
+        const onOrBefore = diagnoses.find(d => {
           if (!d?.dateObj) return false;
           const ts = new Date(d.dateObj).setHours(0, 0, 0, 0);
           return Number.isFinite(ts) && ts <= targetTs;
         });
 
         const chosen = onOrBefore || diagnoses[0]; // diagnoses[0] is most recent overall (date desc)
-        this._logStep(onOrBefore ? 'No exact diagnosis date match; using most recent on/before visit date' : 'No diagnosis on/before visit date; using most recent overall', {
-          date: chosen.date,
-          code: chosen.code,
-          description: chosen.description.substring(0, 60),
-          visitDate
-        });
+        this._logStep(
+          onOrBefore
+            ? 'No exact diagnosis date match; using most recent on/before visit date'
+            : 'No diagnosis on/before visit date; using most recent overall',
+          {
+            date: chosen.date,
+            code: chosen.code,
+            description: chosen.description.substring(0, 60),
+            visitDate,
+          }
+        );
 
         return {
           code: chosen.code,
           description: chosen.description,
-          date: chosen.date
+          date: chosen.date,
         };
       }
-      
+
       // No diagnosis found at all
       this._logStep('No diagnosis found in TX History');
       return null;
-      
     } catch (error) {
       logger.error('Failed to extract diagnosis for date:', error);
       return null;
@@ -8684,7 +10103,7 @@ export class ClinicAssistAutomation {
     try {
       this._logStep('Extract latest diagnosis from Diagnosis tab');
       await this.page.waitForTimeout(1000);
-      
+
       // Extract all diagnoses with dates (support same-origin iframes)
       const diagnoses = await this.page.evaluate(() => {
         const results = [];
@@ -8698,15 +10117,15 @@ export class ClinicAssistAutomation {
             // Cross-origin or inaccessible iframe; ignore.
           }
         }
-        
+
         // Helper to parse dates
-        const parseDate = (dateStr) => {
+        const parseDate = dateStr => {
           if (!dateStr) return null;
           const patterns = [
-            /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,  // DD/MM/YYYY or DD-MM-YYYY
-            /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/,  // YYYY-MM-DD
+            /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/, // DD/MM/YYYY or DD-MM-YYYY
+            /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/, // YYYY-MM-DD
           ];
-          
+
           for (const pattern of patterns) {
             const match = dateStr.match(pattern);
             if (match) {
@@ -8719,75 +10138,83 @@ export class ClinicAssistAutomation {
           }
           return null;
         };
-        
+
         // Look for diagnosis tables in all accessible roots
-        tableRoots.forEach((root) => {
+        tableRoots.forEach(root => {
           const tables = Array.from(root.querySelectorAll('table'));
           tables.forEach(table => {
             const rows = Array.from(table.querySelectorAll('tbody tr, tr'));
-            
+
             rows.forEach(row => {
               const cells = Array.from(row.querySelectorAll('td, th'));
               if (cells.length < 2) return;
-              
+
               // Extract date (usually first column)
               let dateStr = '';
               let diagnosisCode = '';
               let diagnosisDesc = '';
-              
+
               for (let i = 0; i < Math.min(cells.length, 5); i++) {
                 const text = cells[i].textContent.trim();
-                
+
                 // Check for date (first column usually)
                 if (/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text) && !dateStr) {
                   dateStr = text;
                 }
-                
+
                 // Check for diagnosis code (short alphanumeric, usually 6-8 digits)
                 if (/^\d{6,8}$/.test(text) || /^[A-Z]\d{2}\.?\d*$/.test(text)) {
                   diagnosisCode = text;
                 }
-                
+
                 // Description is usually the longest text that's not a date or code
-                if (text.length > diagnosisDesc.length && 
-                    !/loading/i.test(text) && 
-                    !/date/i.test(text) &&
-                    !/^\d+$/.test(text) &&
-                    !/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text)) {
+                if (
+                  text.length > diagnosisDesc.length &&
+                  !/loading/i.test(text) &&
+                  !/date/i.test(text) &&
+                  !/^\d+$/.test(text) &&
+                  !/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text)
+                ) {
                   diagnosisDesc = text;
                 }
               }
-              
+
               if (dateStr && diagnosisDesc.length > 5) {
                 const recordDate = parseDate(dateStr);
                 const descLower = (diagnosisDesc || '').toLowerCase();
                 if (descLower.includes('unfit for duty')) return;
                 if (descLower.includes('medical certificate') || /\bmc\b/.test(descLower)) return;
 
-                const conditionKeywords = /(pain|sprain|strain|fracture|injur|infection|fever|cough|cold|headache|migraine|asthma|diabetes|hypertension|arthritis|osteoarthritis|tendinitis|tendinopathy|bursitis|synovitis|dislocation|contusion|laceration|wound|ulcer|eczema|allergy|syndrome|influenza|tonsillitis|otitis|conjunctivitis|pneumonia|bronch|respiratory|gastro|dermat|sinus)/i;
-                const procedureKeywords = /(physiotherapy|x[- ]?ray|ultrasound|mri|ct|consultation|therapy|injection|radiolog|procedure|rehab|exercise|clinic|treatment|follow\s*up|brace|splint|cast|wrap|orthosis|support|sling|crutch|bandage|tape|pack|heat|cold|hot|breg)/i;
+                const conditionKeywords =
+                  /(pain|sprain|strain|fracture|injur|infection|fever|cough|cold|headache|migraine|asthma|diabetes|hypertension|arthritis|osteoarthritis|tendinitis|tendinopathy|bursitis|synovitis|dislocation|contusion|laceration|wound|ulcer|eczema|allergy|syndrome|influenza|tonsillitis|otitis|conjunctivitis|pneumonia|bronch|respiratory|gastro|dermat|sinus)/i;
+                const procedureKeywords =
+                  /(physiotherapy|x[- ]?ray|ultrasound|mri|ct|consultation|therapy|injection|radiolog|procedure|rehab|exercise|clinic|treatment|follow\s*up|brace|splint|cast|wrap|orthosis|support|sling|crutch|bandage|tape|pack|heat|cold|hot|breg)/i;
                 const descHasCondition = conditionKeywords.test(descLower);
                 const descLooksLikeProcedure = procedureKeywords.test(descLower);
 
                 // Allow ICD codes or numeric codes; if missing, accept diagnosis text as a fallback.
-                const codeOk = diagnosisCode && (
-                  /^\d{6,10}$/.test(diagnosisCode) ||
-                  /^[A-Z]\d{2,3}(?:\.\d+)?$/.test(diagnosisCode)
-                );
-                const descOk = diagnosisDesc && diagnosisDesc.trim().length >= 5 && descHasCondition && !descLooksLikeProcedure;
+                const codeOk =
+                  diagnosisCode &&
+                  (/^\d{6,10}$/.test(diagnosisCode) ||
+                    /^[A-Z]\d{2,3}(?:\.\d+)?$/.test(diagnosisCode));
+                const descOk =
+                  diagnosisDesc &&
+                  diagnosisDesc.trim().length >= 5 &&
+                  descHasCondition &&
+                  !descLooksLikeProcedure;
                 if (!codeOk && !descOk) return;
 
                 results.push({
                   date: dateStr,
                   dateObj: recordDate,
                   code: codeOk ? diagnosisCode : null,
-                  description: diagnosisDesc
+                  description: diagnosisDesc,
                 });
               }
             });
           });
         });
-        
+
         // Sort by date descending (most recent first)
         results.sort((a, b) => {
           if (!a.dateObj && !b.dateObj) return 0;
@@ -8795,30 +10222,29 @@ export class ClinicAssistAutomation {
           if (!b.dateObj) return -1;
           return b.dateObj - a.dateObj;
         });
-        
+
         return results;
       });
-      
+
       // Get the latest (first) diagnosis
       if (diagnoses.length > 0) {
         const latest = diagnoses[0];
-        this._logStep('Found latest diagnosis', { 
+        this._logStep('Found latest diagnosis', {
           date: latest.date,
           code: latest.code,
-          description: latest.description.substring(0, 60)
+          description: latest.description.substring(0, 60),
         });
-        
+
         return {
           code: latest.code,
           description: latest.description,
-          date: latest.date
+          date: latest.date,
         };
       }
-      
+
       // No diagnosis found
       this._logStep('No diagnosis found in Diagnosis tab');
       return null;
-      
     } catch (error) {
       logger.error('Failed to extract latest diagnosis:', error);
       return null;
@@ -8839,7 +10265,9 @@ export class ClinicAssistAutomation {
       // Do this via Playwright locators first (more reliable than page.evaluate for framework handlers),
       // then fallback to page.evaluate heuristics.
 
-      const tabStripBase = this.page.locator('ul, nav, [role="tablist"], .nav-tabs, .nav-pills, .tabs, .tab-strip, div');
+      const tabStripBase = this.page.locator(
+        'ul, nav, [role="tablist"], .nav-tabs, .nav-pills, .tabs, .tab-strip, div'
+      );
       const tabStripCandidates = tabStripBase
         .filter({ hasText: 'Medicine' })
         .filter({ hasText: 'Procedure' })
@@ -8851,15 +10279,24 @@ export class ClinicAssistAutomation {
         const n = await tabStripCandidates.count().catch(() => 0);
         if (n > 0) {
           // Pick the smallest candidate (least text) to avoid grabbing the whole page container.
-          const bestIdx = await tabStripCandidates.evaluateAll((els) => {
-            const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+          const bestIdx = await tabStripCandidates.evaluateAll(els => {
+            const norm = s =>
+              String(s || '')
+                .replace(/\s+/g, ' ')
+                .trim();
             let best = -1;
             let bestLen = Infinity;
             for (let i = 0; i < els.length; i++) {
               const el = els[i];
               const t = norm(el.textContent);
               // Must contain our pill labels; otherwise it's too broad.
-              if (!t.includes('Medicine') || !t.includes('Diagnosis') || !t.includes('Visit') || !t.includes('Procedure')) continue;
+              if (
+                !t.includes('Medicine') ||
+                !t.includes('Diagnosis') ||
+                !t.includes('Visit') ||
+                !t.includes('Procedure')
+              )
+                continue;
               if (t.length < bestLen) {
                 bestLen = t.length;
                 best = i;
@@ -8869,9 +10306,15 @@ export class ClinicAssistAutomation {
           });
 
           const strip = bestIdx >= 0 ? tabStripCandidates.nth(bestIdx) : tabStripCandidates.first();
-          const allPill = strip.locator('a, button, li, [role="tab"], span, div').filter({ hasText: /^All$/ }).first();
+          const allPill = strip
+            .locator('a, button, li, [role="tab"], span, div')
+            .filter({ hasText: /^All$/ })
+            .first();
 
-          if ((await allPill.count().catch(() => 0)) > 0 && (await allPill.isVisible().catch(() => false))) {
+          if (
+            (await allPill.count().catch(() => 0)) > 0 &&
+            (await allPill.isVisible().catch(() => false))
+          ) {
             await allPill.click({ timeout: 5000 }).catch(async () => {
               await allPill.click({ timeout: 5000, force: true });
             });
@@ -8880,7 +10323,9 @@ export class ClinicAssistAutomation {
             // Best-effort verify: active tab text becomes "All" (common patterns).
             await this.page
               .waitForFunction(() => {
-                const active = document.querySelector('.nav .active, .nav-tabs .active, .nav-pills .active, [role="tab"][aria-selected="true"]');
+                const active = document.querySelector(
+                  '.nav .active, .nav-tabs .active, .nav-pills .active, [role="tab"][aria-selected="true"]'
+                );
                 const t = (active?.textContent || '').replace(/\s+/g, ' ').trim();
                 return t === 'All';
               })
@@ -8894,18 +10339,27 @@ export class ClinicAssistAutomation {
       if (!clicked) {
         clicked = await this.page
           .evaluate(() => {
-            const TAB_LABELS = ['All', 'Medicine', 'Investigation', 'Procedure', 'Diagnosis', 'Visit'];
+            const _TAB_LABELS = [
+              'All',
+              'Medicine',
+              'Investigation',
+              'Procedure',
+              'Diagnosis',
+              'Visit',
+            ];
 
             const textEq = (el, s) => (el?.textContent || '').replace(/\s+/g, ' ').trim() === s;
             const containsAll = (el, labels) => {
               const t = (el?.textContent || '').replace(/\s+/g, ' ').trim();
-              return labels.every((l) => t.includes(l));
+              return labels.every(l => t.includes(l));
             };
 
-            const clickWithin = (container) => {
+            const clickWithin = container => {
               if (!container) return false;
-              const clickables = Array.from(container.querySelectorAll('a, button, li, span, div, [role="tab"]'));
-              const all = clickables.find((el) => textEq(el, 'All'));
+              const clickables = Array.from(
+                container.querySelectorAll('a, button, li, span, div, [role="tab"]')
+              );
+              const all = clickables.find(el => textEq(el, 'All'));
               if (!all) return false;
               const r = all.getBoundingClientRect();
               if (r.width === 0 || r.height === 0) return false;
@@ -8916,14 +10370,18 @@ export class ClinicAssistAutomation {
               return true;
             };
 
-            const candidates = Array.from(document.querySelectorAll('ul, nav, [role="tablist"], .nav-tabs, .nav-pills, div'))
-              .filter((el) => containsAll(el, ['Medicine', 'Diagnosis', 'Visit', 'Procedure', 'All']))
+            const candidates = Array.from(
+              document.querySelectorAll('ul, nav, [role="tablist"], .nav-tabs, .nav-pills, div')
+            )
+              .filter(el => containsAll(el, ['Medicine', 'Diagnosis', 'Visit', 'Procedure', 'All']))
               .sort((a, b) => (a.textContent || '').length - (b.textContent || '').length);
             for (const c of candidates.slice(0, 10)) {
               if (clickWithin(c)) return true;
             }
 
-            const allEls = Array.from(document.querySelectorAll('a, button, li, span, div, [role="tab"]')).filter((el) => textEq(el, 'All'));
+            const allEls = Array.from(
+              document.querySelectorAll('a, button, li, span, div, [role="tab"]')
+            ).filter(el => textEq(el, 'All'));
             for (const el of allEls) {
               const r = el.getBoundingClientRect();
               if (r.width === 0 || r.height === 0) continue;
@@ -8963,7 +10421,10 @@ export class ClinicAssistAutomation {
             ].join(', ')
           )
           .first();
-        if ((await showBtn.count().catch(() => 0)) > 0 && (await showBtn.isVisible().catch(() => false))) {
+        if (
+          (await showBtn.count().catch(() => 0)) > 0 &&
+          (await showBtn.isVisible().catch(() => false))
+        ) {
           await showBtn.click().catch(() => {});
           await this.page.waitForTimeout(1500);
         }
@@ -8973,30 +10434,36 @@ export class ClinicAssistAutomation {
 
       // Wait briefly for rows to appear (best effort).
       await this.page
-        .waitForFunction(() => {
-          const roots = [document];
-          for (const iframe of Array.from(document.querySelectorAll('iframe'))) {
-            try {
-              const doc = iframe.contentDocument || iframe.contentWindow?.document;
-              if (doc) roots.push(doc);
-            } catch {
-              // ignore
+        .waitForFunction(
+          () => {
+            const roots = [document];
+            for (const iframe of Array.from(document.querySelectorAll('iframe'))) {
+              try {
+                const doc = iframe.contentDocument || iframe.contentWindow?.document;
+                if (doc) roots.push(doc);
+              } catch {
+                // ignore
+              }
             }
-          }
-          for (const root of roots) {
-            const rows = Array.from(root.querySelectorAll('table tr, [role="row"], tbody tr'));
-            for (const r of rows.slice(0, 80)) {
-              const t = r.textContent || '';
-              if (/\d{1,2}[\/-]\d{1,2}[\/-]\d{4}/.test(t) || /\d{4}[\/-]\d{1,2}[\/-]\d{1,2}/.test(t)) return true;
+            for (const root of roots) {
+              const rows = Array.from(root.querySelectorAll('table tr, [role="row"], tbody tr'));
+              for (const r of rows.slice(0, 80)) {
+                const t = r.textContent || '';
+                if (
+                  /\d{1,2}[\/-]\d{1,2}[\/-]\d{4}/.test(t) ||
+                  /\d{4}[\/-]\d{1,2}[\/-]\d{1,2}/.test(t)
+                )
+                  return true;
+              }
             }
-          }
-          return false;
-        }, { timeout: 5000 })
+            return false;
+          },
+          { timeout: 5000 }
+        )
         .catch(() => {});
 
       this._logStep('All Tab opened');
       return true;
-
     } catch (error) {
       logger.error('Failed to open All Tab:', error);
       return false;
@@ -9015,12 +10482,12 @@ export class ClinicAssistAutomation {
       await this.openAllTab();
       await this.page.waitForTimeout(1500);
 
-      const result = await this.page.evaluate((targetDateStr) => {
-        const parseDate = (dateStr) => {
+      const result = await this.page.evaluate(targetDateStr => {
+        const parseDate = dateStr => {
           if (!dateStr) return null;
           const patterns = [
-            /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/,  // DD/MM/YYYY or DD-MM-YYYY
-            /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/,  // YYYY-MM-DD
+            /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/, // DD/MM/YYYY or DD-MM-YYYY
+            /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/, // YYYY-MM-DD
           ];
           for (const pattern of patterns) {
             const match = dateStr.match(pattern);
@@ -9042,10 +10509,14 @@ export class ClinicAssistAutomation {
           a.getDate() === b.getDate();
 
         const targetDate = parseDate(targetDateStr);
-        const diagnosisKeywords = /(pain|sprain|strain|fracture|injur|infection|fever|cough|cold|headache|migraine|asthma|diabetes|hypertension|arthritis|osteoarthritis|tendinitis|tendinopathy|tendinosis|bursitis|synovitis|dislocation|contusion|laceration|wound|ulcer|eczema|allergy|syndrome|influenza|tonsillitis|otitis|conjunctivitis|pneumonia|bronch|respiratory|gastro|dermat|sinus|chondromalacia|radiculopathy|spondylosis|cervicalgia|lumbago|myalgia|neuralgia|neuropathy|meniscus|ligament|fasciitis|impingement|capsulitis|backache|back pain|neck pain|knee pain|shoulder pain)/i;
-        const procedureKeywords = /(physiotherapy|x[- ]?ray|ultrasound|mri|ct|consultation|therapy|injection|radiolog|procedure|rehab|exercise|clinic|treatment|follow\s*up|brace|splint|cast|wrap|orthosis|support|sling|crutch|bandage|tape|pack|heat|cold|hot|breg|referral|medical report|certificate)/i;
-        const medicationKeywords = /(?:\bmed(?:icine|ication)?\b|\bmed[a-z0-9+\-]{2,}\b|\bdrug(?:s)?\b|\bpharmacy\b|\btablet?s?\b|\btab(?:s)?\b|\bcaps?(?:ule)?s?\b|\bmg\b|\bmcg\b|\bml\b|\bsyrup\b|\boin?tment\b|\bcream\b|\blotion\b|\bdrops?\b|\bgel\b|\bpatch\b|\bamp(?:oule)?\b|\bvial\b|\bbott(?:le)?\b|\bdose\b|\bdosage\b|\bqty\b|\bquantity\b|\bunit price\b|\bdispense\b|\btake\s+\d+\b|\bpo\b|\bbd\b|\btds\b|\bqds\b|\bod\b|\bnocte\b|\bprn\b|\bbefore food\b|\bafter food\b)/i;
-        const labKeywords = /(?:\blab(?:oratory)?\b|\btest\b|\bscreen(?:ing)?\b|\bpanel\b|\bprofile\b|\bthyroid\b|\bhba1c\b|\bcbc\b|\blipid\b|\blft\b|\brft\b|\burinalysis\b|\bblood\b)/i;
+        const diagnosisKeywords =
+          /(pain|sprain|strain|fracture|injur|infection|fever|cough|cold|headache|migraine|asthma|diabetes|hypertension|arthritis|osteoarthritis|tendinitis|tendinopathy|tendinosis|bursitis|synovitis|dislocation|contusion|laceration|wound|ulcer|eczema|allergy|syndrome|influenza|tonsillitis|otitis|conjunctivitis|pneumonia|bronch|respiratory|gastro|dermat|sinus|chondromalacia|radiculopathy|spondylosis|cervicalgia|lumbago|myalgia|neuralgia|neuropathy|meniscus|ligament|fasciitis|impingement|capsulitis|backache|back pain|neck pain|knee pain|shoulder pain)/i;
+        const procedureKeywords =
+          /(physiotherapy|x[- ]?ray|ultrasound|mri|ct|consultation|therapy|injection|radiolog|procedure|rehab|exercise|clinic|treatment|follow\s*up|brace|splint|cast|wrap|orthosis|support|sling|crutch|bandage|tape|pack|heat|cold|hot|breg|referral|medical report|certificate)/i;
+        const medicationKeywords =
+          /(?:\bmed(?:icine|ication)?\b|\bmed[a-z0-9+\-]{2,}\b|\bdrug(?:s)?\b|\bpharmacy\b|\btablet?s?\b|\btab(?:s)?\b|\bcaps?(?:ule)?s?\b|\bmg\b|\bmcg\b|\bml\b|\bsyrup\b|\boin?tment\b|\bcream\b|\blotion\b|\bdrops?\b|\bgel\b|\bpatch\b|\bamp(?:oule)?\b|\bvial\b|\bbott(?:le)?\b|\bdose\b|\bdosage\b|\bqty\b|\bquantity\b|\bunit price\b|\bdispense\b|\btake\s+\d+\b|\bpo\b|\bbd\b|\btds\b|\bqds\b|\bod\b|\bnocte\b|\bprn\b|\bbefore food\b|\bafter food\b)/i;
+        const labKeywords =
+          /(?:\blab(?:oratory)?\b|\btest\b|\bscreen(?:ing)?\b|\bpanel\b|\bprofile\b|\bthyroid\b|\bhba1c\b|\bcbc\b|\blipid\b|\blft\b|\brft\b|\burinalysis\b|\bblood\b)/i;
         const icdPattern = /\b([A-TV-Z]\d{2,3}(?:\.[0-9A-Z]{1,4})?)\b/;
 
         const candidates = [];
@@ -9073,7 +10544,12 @@ export class ClinicAssistAutomation {
           const text = String(rowText || '').trim();
           if (!text) return;
           const lower = text.toLowerCase();
-          if (lower.includes('unfit for duty') || lower.includes('medical certificate') || /\bmc\b/.test(lower)) return;
+          if (
+            lower.includes('unfit for duty') ||
+            lower.includes('medical certificate') ||
+            /\bmc\b/.test(lower)
+          )
+            return;
           const hasDxLabel = /\bdiagnos(?:is|es)?\b|\bdx\b|\bicd\b/i.test(text);
 
           let code = null;
@@ -9084,13 +10560,17 @@ export class ClinicAssistAutomation {
           const descLower = desc.toLowerCase();
           const looksLikeDiagnosis = diagnosisKeywords.test(descLower);
           const looksLikeProcedure = procedureKeywords.test(descLower);
-          const looksLikeMedication = medicationKeywords.test(descLower) || medicationKeywords.test(text);
+          const looksLikeMedication =
+            medicationKeywords.test(descLower) || medicationKeywords.test(text);
           const looksLikeLab = labKeywords.test(descLower) || labKeywords.test(text);
           const looksLikeMedicine = /\bmed\b|\bmedicine\b|\bdrug\b|\bpharmacy\b/i.test(text);
 
           // Reject ICD-like tokens that are likely currency/unit artifacts unless explicit diagnosis labeling exists.
           if (code && !hasDxLabel) {
-            if (/\bsgd\b/i.test(text) || /\b(?:mg|ml|tab|tabs|cap|caps|qty|unit|pcs?)\b/i.test(text)) {
+            if (
+              /\bsgd\b/i.test(text) ||
+              /\b(?:mg|ml|tab|tabs|cap|caps|qty|unit|pcs?)\b/i.test(text)
+            ) {
               code = null;
             }
           }
@@ -9121,15 +10601,15 @@ export class ClinicAssistAutomation {
             description: desc,
             dateObj: rowDateObj,
             date: rowDateStr,
-            score
+            score,
           });
         };
 
-        tables.forEach((table) => {
+        tables.forEach(table => {
           const rows = Array.from(table.querySelectorAll('tbody tr, tr'));
           if (!rows.length) return;
 
-          rows.forEach((row) => {
+          rows.forEach(row => {
             const cells = Array.from(row.querySelectorAll('td, th'));
             if (cells.length < 2) return;
             const rowText = row.textContent || '';
@@ -9138,13 +10618,18 @@ export class ClinicAssistAutomation {
             let dateStr = '';
             for (const cell of cells) {
               const text = (cell.textContent || '').trim();
-              if (/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text) || /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(text)) {
+              if (
+                /\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text) ||
+                /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(text)
+              ) {
                 dateStr = text;
                 break;
               }
             }
             if (!dateStr) {
-              const m = rowText.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}|\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})/);
+              const m = rowText.match(
+                /(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}|\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2})/
+              );
               if (m) dateStr = m[1];
             }
             const dateObj = parseDate(dateStr);
@@ -9164,26 +10649,30 @@ export class ClinicAssistAutomation {
 
         let chosen = null;
         if (targetDate) {
-          const exact = sorted.filter((c) => sameDay(c.dateObj, targetDate));
+          const exact = sorted.filter(c => sameDay(c.dateObj, targetDate));
           if (exact.length) {
             chosen = exact.sort((a, b) => b.score - a.score)[0];
           } else {
             const targetTs = new Date(targetDate).setHours(0, 0, 0, 0);
-            const onOrBefore = sorted.find((c) => new Date(c.dateObj).setHours(0, 0, 0, 0) <= targetTs);
+            const onOrBefore = sorted.find(
+              c => new Date(c.dateObj).setHours(0, 0, 0, 0) <= targetTs
+            );
             chosen = onOrBefore || sorted[0];
           }
         } else {
           chosen = sorted[0];
         }
 
-        return chosen ? { code: chosen.code, description: chosen.description, date: chosen.date } : null;
+        return chosen
+          ? { code: chosen.code, description: chosen.description, date: chosen.date }
+          : null;
       }, visitDate);
 
       if (result && result.description) {
         this._logStep('Diagnosis extracted from All tab', {
           code: result.code,
           description: result.description.substring(0, 100),
-          date: result.date
+          date: result.date,
         });
         return result;
       }
@@ -9204,7 +10693,7 @@ export class ClinicAssistAutomation {
   async hasFirstConsultOnDate(visitDate) {
     try {
       this._logStep('Check for First Consult on visit date', { visitDate });
-      
+
       // Navigate to TX History if not already there
       await this.navigateToTXHistory().catch(() => {});
       await this.openAllTab();
@@ -9212,52 +10701,65 @@ export class ClinicAssistAutomation {
 
       // Parse target date
       const targetDate = new Date(visitDate);
-      const targetDateStr = targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }); // DD/MM/YYYY
-      const targetDateStrAlt = targetDate.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' }); // MM/DD/YYYY
+      const targetDateStr = targetDate.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      }); // DD/MM/YYYY
+      const targetDateStrAlt = targetDate.toLocaleDateString('en-US', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      }); // MM/DD/YYYY
 
-      const found = await this.page.evaluate(({ targetDateStr, targetDateStrAlt }) => {
-        // Look for tables with visit history
-        const tables = Array.from(document.querySelectorAll('table'));
-        
-        for (const table of tables) {
-          const rows = Array.from(table.querySelectorAll('tbody tr, tr'));
-          
-          for (const row of rows) {
-            const cells = Array.from(row.querySelectorAll('td, th'));
-            if (cells.length < 2) continue;
-            
-            const rowText = row.textContent || '';
-            
-            // Check if row contains the target date
-            const hasTargetDate = rowText.includes(targetDateStr) || rowText.includes(targetDateStrAlt);
-            
-            // Check if row contains "First Consult" or similar
-            const hasFirstConsult = /first\s+consult|first\s+visit|new\s+visit|initial\s+consult/i.test(rowText);
-            
-            if (hasTargetDate && hasFirstConsult) {
-              return true;
+      const found = await this.page.evaluate(
+        ({ targetDateStr, targetDateStrAlt }) => {
+          // Look for tables with visit history
+          const tables = Array.from(document.querySelectorAll('table'));
+
+          for (const table of tables) {
+            const rows = Array.from(table.querySelectorAll('tbody tr, tr'));
+
+            for (const row of rows) {
+              const cells = Array.from(row.querySelectorAll('td, th'));
+              if (cells.length < 2) continue;
+
+              const rowText = row.textContent || '';
+
+              // Check if row contains the target date
+              const hasTargetDate =
+                rowText.includes(targetDateStr) || rowText.includes(targetDateStrAlt);
+
+              // Check if row contains "First Consult" or similar
+              const hasFirstConsult =
+                /first\s+consult|first\s+visit|new\s+visit|initial\s+consult/i.test(rowText);
+
+              if (hasTargetDate && hasFirstConsult) {
+                return true;
+              }
             }
           }
-        }
-        
-        // Also check for text content that might contain the date and "First Consult"
-        const bodyText = document.body.textContent || '';
-        const datePattern = new RegExp(`(${targetDateStr}|${targetDateStrAlt})`, 'i');
-        if (datePattern.test(bodyText)) {
-          const dateMatch = bodyText.match(datePattern);
-          if (dateMatch) {
-            const context = bodyText.substring(
-              Math.max(0, bodyText.indexOf(dateMatch[0]) - 100),
-              Math.min(bodyText.length, bodyText.indexOf(dateMatch[0]) + 200)
-            );
-            if (/first\s+consult|first\s+visit|new\s+visit|initial\s+consult/i.test(context)) {
-              return true;
+
+          // Also check for text content that might contain the date and "First Consult"
+          const bodyText = document.body.textContent || '';
+          const datePattern = new RegExp(`(${targetDateStr}|${targetDateStrAlt})`, 'i');
+          if (datePattern.test(bodyText)) {
+            const dateMatch = bodyText.match(datePattern);
+            if (dateMatch) {
+              const context = bodyText.substring(
+                Math.max(0, bodyText.indexOf(dateMatch[0]) - 100),
+                Math.min(bodyText.length, bodyText.indexOf(dateMatch[0]) + 200)
+              );
+              if (/first\s+consult|first\s+visit|new\s+visit|initial\s+consult/i.test(context)) {
+                return true;
+              }
             }
           }
-        }
-        
-        return false;
-      }, { targetDateStr, targetDateStrAlt });
+
+          return false;
+        },
+        { targetDateStr, targetDateStrAlt }
+      );
 
       this._logStep('First Consult check result', { visitDate, found });
       return found;
@@ -9313,7 +10815,9 @@ export class ClinicAssistAutomation {
             return (
               /\bvisit\s*notes?\b/.test(txt) ||
               /\bpast\b/.test(txt) ||
-              !!pane.querySelector('#pastCaseNoteGrid, #tabPastCaseNote, #tab_Past, #btnPast, #divVisitNoteList')
+              !!pane.querySelector(
+                '#pastCaseNoteGrid, #tabPastCaseNote, #tab_Past, #btnPast, #divVisitNoteList'
+              )
             );
           })
           .catch(() => false);
@@ -9325,15 +10829,13 @@ export class ClinicAssistAutomation {
             const txt = txtRaw.toLowerCase();
             const lines = txtRaw
               .split(/\r?\n/)
-              .map((l) => String(l || '').trim())
+              .map(l => String(l || '').trim())
               .filter(Boolean)
               .slice(0, 1500);
             // IMPORTANT: /QueueLog/PatientVisit is shared by multiple TX sub-tabs.
             // Do not use URL-only checks; require concrete Past Notes signals.
             const hasCaseHeaders =
-              /case\s*note/.test(txt) &&
-              /visit\s*no/.test(txt) &&
-              /management/.test(txt);
+              /case\s*note/.test(txt) && /visit\s*no/.test(txt) && /management/.test(txt);
             const hasVisitNotesHeader = /\bvisit\s*notes?\b/.test(txt);
             const hasAppendControl = /\bappend\b/.test(txt);
             const hasPastDateRow =
@@ -9343,7 +10845,7 @@ export class ClinicAssistAutomation {
             const hasExpandedEvidence =
               /\bcasenote\b/i.test(txt) ||
               /<\d{2}-[a-z]{3}-\d{4}\s+\d{1,2}:\d{2}\s*(am|pm)>/i.test(txt);
-            const hasDateAppendLine = lines.some((line) => {
+            const hasDateAppendLine = lines.some(line => {
               const l = line.toLowerCase();
               if (!/(append|expand|collapse)/.test(l)) return false;
               return (
@@ -9358,7 +10860,10 @@ export class ClinicAssistAutomation {
             const hasCollapsedPastNotes =
               hasVisitNotesHeader && hasPastDateRow && hasAppendControl && hasDateAppendLine;
             return (
-              (hasCaseHeaders && hasPastDateRow && (hasExpandedEvidence || hasDateAppendLine) && !looksLikeAllTab) ||
+              (hasCaseHeaders &&
+                hasPastDateRow &&
+                (hasExpandedEvidence || hasDateAppendLine) &&
+                !looksLikeAllTab) ||
               hasCollapsedPastNotes
             );
           })
@@ -9470,13 +10975,23 @@ export class ClinicAssistAutomation {
   async expandPastNotesEntries(visitDate) {
     const targetDate = new Date(visitDate);
     const targetDateStr = Number.isFinite(targetDate.getTime())
-      ? targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      ? targetDate.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        })
       : '';
     const targetDateStrAlt = Number.isFinite(targetDate.getTime())
-      ? targetDate.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      ? targetDate.toLocaleDateString('en-US', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        })
       : '';
     const targetDateStrMon = Number.isFinite(targetDate.getTime())
-      ? targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/\s+/g, '-')
+      ? targetDate
+          .toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+          .replace(/\s+/g, '-')
       : '';
 
     let clicked = 0;
@@ -9503,51 +11018,69 @@ export class ClinicAssistAutomation {
     }
 
     const targetedClicks = await this.page
-      .evaluate(({ targetDateStr, targetDateStrAlt, targetDateStrMon }) => {
-        const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
-        const hasTargetDate = (s) => {
-          const t = String(s || '');
-          return t.includes(targetDateStr) || t.includes(targetDateStrAlt) || t.includes(targetDateStrMon);
-        };
+      .evaluate(
+        ({ targetDateStr, targetDateStrAlt, targetDateStrMon }) => {
+          const norm = s =>
+            String(s || '')
+              .replace(/\s+/g, ' ')
+              .trim()
+              .toLowerCase();
+          const hasTargetDate = s => {
+            const t = String(s || '');
+            return (
+              t.includes(targetDateStr) ||
+              t.includes(targetDateStrAlt) ||
+              t.includes(targetDateStrMon)
+            );
+          };
 
-        let localClicks = 0;
-        const seenControls = new WeakSet();
-        const rows = Array.from(document.querySelectorAll('tr, li, div, section')).slice(0, 1200);
-        for (const row of rows) {
-          if (localClicks >= 20) break;
-          const txt = row.textContent || '';
-          if (!hasTargetDate(txt)) continue;
-          const controls = Array.from(
-            row.querySelectorAll('a,button,span,[role="button"],input[type="button"],input[type="submit"]')
-          );
-          for (const control of controls) {
+          let localClicks = 0;
+          const seenControls = new WeakSet();
+          const rows = Array.from(document.querySelectorAll('tr, li, div, section')).slice(0, 1200);
+          for (const row of rows) {
             if (localClicks >= 20) break;
-            if (seenControls.has(control)) continue;
-            const label = norm(control.textContent || control.getAttribute?.('value') || '');
-            if (!label) continue;
-            if (!/(expand|show more|view|details)/.test(label)) continue;
-            const onClick = String(control.getAttribute?.('onclick') || '').toLowerCase();
-            const className = String(control.className || '').toLowerCase();
-            const controlId = String(control.id || '').toLowerCase();
-            if (onClick.includes('appendcasenote(')) continue;
-            if (className.includes('btn-append-casenote')) continue;
-            if (controlId.includes('dropdowncasenotemenubutton')) continue;
-            try {
-              seenControls.add(control);
-              control.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-              control.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
-              control.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-              localClicks += 1;
-            } catch {
-              // ignore
+            const txt = row.textContent || '';
+            if (!hasTargetDate(txt)) continue;
+            const controls = Array.from(
+              row.querySelectorAll(
+                'a,button,span,[role="button"],input[type="button"],input[type="submit"]'
+              )
+            );
+            for (const control of controls) {
+              if (localClicks >= 20) break;
+              if (seenControls.has(control)) continue;
+              const label = norm(control.textContent || control.getAttribute?.('value') || '');
+              if (!label) continue;
+              if (!/(expand|show more|view|details)/.test(label)) continue;
+              const onClick = String(control.getAttribute?.('onclick') || '').toLowerCase();
+              const className = String(control.className || '').toLowerCase();
+              const controlId = String(control.id || '').toLowerCase();
+              if (onClick.includes('appendcasenote(')) continue;
+              if (className.includes('btn-append-casenote')) continue;
+              if (controlId.includes('dropdowncasenotemenubutton')) continue;
+              try {
+                seenControls.add(control);
+                control.dispatchEvent(
+                  new MouseEvent('mousedown', { bubbles: true, cancelable: true })
+                );
+                control.dispatchEvent(
+                  new MouseEvent('mouseup', { bubbles: true, cancelable: true })
+                );
+                control.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+                localClicks += 1;
+              } catch {
+                // ignore
+              }
             }
           }
-        }
-        return localClicks;
-      }, { targetDateStr, targetDateStrAlt, targetDateStrMon })
+          return localClicks;
+        },
+        { targetDateStr, targetDateStrAlt, targetDateStrMon }
+      )
       .catch(() => 0);
 
-    const totalClicked = clicked + (Number.isFinite(Number(targetedClicks)) ? Number(targetedClicks) : 0);
+    const totalClicked =
+      clicked + (Number.isFinite(Number(targetedClicks)) ? Number(targetedClicks) : 0);
     if (totalClicked > 0) {
       this._logStep('Past Notes entries expanded', {
         visitDate,
@@ -9565,8 +11098,13 @@ export class ClinicAssistAutomation {
           const modal = document.querySelector('#queueHisCaseNoteModal');
           if (!modal) return false;
           const style = window.getComputedStyle(modal);
-          const visible = style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
-          return visible || modal.classList.contains('in') || modal.getAttribute('aria-hidden') === 'false';
+          const visible =
+            style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+          return (
+            visible ||
+            modal.classList.contains('in') ||
+            modal.getAttribute('aria-hidden') === 'false'
+          );
         })
         .catch(() => false);
       if (!modalVisible) return false;
@@ -9610,7 +11148,9 @@ export class ClinicAssistAutomation {
             modal.style.display = 'none';
             changed += 1;
           }
-          const overlays = Array.from(document.querySelectorAll('.modal-backdrop, .blockUI, .blockUI.blockOverlay'));
+          const overlays = Array.from(
+            document.querySelectorAll('.modal-backdrop, .blockUI, .blockUI.blockOverlay')
+          );
           for (const overlay of overlays) {
             try {
               overlay.remove();
@@ -9648,7 +11188,7 @@ export class ClinicAssistAutomation {
   async extractDiagnosisFromPastNotes(visitDate) {
     try {
       this._logStep('Extract diagnosis from Past Notes', { visitDate });
-      
+
       // Navigate to TX History and open Past Notes tab
       await this.navigateToTXHistory().catch(() => {});
       const pastNotesOpened = await this.openPastNotesTab();
@@ -9661,137 +11201,187 @@ export class ClinicAssistAutomation {
 
       // Parse target date
       const targetDate = new Date(visitDate);
-      const targetDateStr = targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }); // DD/MM/YYYY
-      const targetDateStrAlt = targetDate.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' }); // MM/DD/YYYY
-      const targetDateStrMon = targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/\s+/g, '-'); // DD-MMM-YYYY
+      const targetDateStr = targetDate.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      }); // DD/MM/YYYY
+      const targetDateStrAlt = targetDate.toLocaleDateString('en-US', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      }); // MM/DD/YYYY
+      const targetDateStrMon = targetDate
+        .toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+        .replace(/\s+/g, '-'); // DD-MMM-YYYY
 
-      const result = await this.page.evaluate(({ targetDateStr, targetDateStrAlt, targetDateStrMon, visitDateIso }) => {
-        const parseDate = (text) => {
-          const s = String(text || '').trim();
-          if (!s) return null;
+      const result = await this.page.evaluate(
+        ({ targetDateStr, targetDateStrAlt, targetDateStrMon, visitDateIso }) => {
+          const parseDate = text => {
+            const s = String(text || '').trim();
+            if (!s) return null;
 
-          const iso = s.match(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/);
-          if (iso) return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+            const iso = s.match(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/);
+            if (iso) return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
 
-          const dmy = s.match(/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})\b/);
-          if (dmy) return new Date(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1]));
+            const dmy = s.match(/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})\b/);
+            if (dmy) return new Date(Number(dmy[3]), Number(dmy[2]) - 1, Number(dmy[1]));
 
-          const monMap = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
-          const dMonY = s.match(/\b(\d{1,2})[-/\s]([a-z]{3,9})[-/\s](\d{4})\b/i);
-          if (dMonY) {
-            const m = monMap[String(dMonY[2]).slice(0, 3).toLowerCase()] || 0;
-            if (m) return new Date(Number(dMonY[3]), m - 1, Number(dMonY[1]));
+            const monMap = {
+              jan: 1,
+              feb: 2,
+              mar: 3,
+              apr: 4,
+              may: 5,
+              jun: 6,
+              jul: 7,
+              aug: 8,
+              sep: 9,
+              oct: 10,
+              nov: 11,
+              dec: 12,
+            };
+            const dMonY = s.match(/\b(\d{1,2})[-/\s]([a-z]{3,9})[-/\s](\d{4})\b/i);
+            if (dMonY) {
+              const m = monMap[String(dMonY[2]).slice(0, 3).toLowerCase()] || 0;
+              if (m) return new Date(Number(dMonY[3]), m - 1, Number(dMonY[1]));
+            }
+            return null;
+          };
+          const sameDay = (a, b) =>
+            !!a &&
+            !!b &&
+            a.getFullYear() === b.getFullYear() &&
+            a.getMonth() === b.getMonth() &&
+            a.getDate() === b.getDate();
+          const targetDateObj =
+            parseDate(visitDateIso) ||
+            parseDate(targetDateStr) ||
+            parseDate(targetDateStrAlt) ||
+            parseDate(targetDateStrMon);
+          const compactDiagnosisText = sentence => {
+            const raw = String(sentence || '')
+              .replace(/^[\-\u2022]\s*/, '')
+              .replace(/\s+/g, ' ')
+              .trim();
+            if (!raw) return '';
+            const lower = raw.toLowerCase();
+            const bodyPartRegex =
+              /(shoulder|knee|ankle|wrist|elbow|hip|back|neck|foot|heel|hand|finger|toe|leg|arm|thigh|calf|forearm|spine|lumbar|cervical|thoracic)/i;
+            const condRegex =
+              /(pain|ache|sprain|strain|fracture|injury|contusion|dislocation|swelling|inflammation|arthritis|osteoarthritis|capsulitis|impingement)/i;
+            const sideRegex = /\b(right|left|rt|lt)\b/i;
+            const bodyMatch = raw.match(bodyPartRegex);
+            const condMatch = raw.match(condRegex);
+            const sideMatch = raw.match(sideRegex);
+            if (bodyMatch && condMatch) {
+              const body = String(bodyMatch[1] || '').toLowerCase();
+              const cond = String(condMatch[1] || '').toLowerCase();
+              const sideRaw = String(sideMatch?.[1] || '').toLowerCase();
+              const side = sideRaw === 'rt' ? 'right' : sideRaw === 'lt' ? 'left' : sideRaw;
+              if (cond === 'pain' || cond === 'ache') {
+                return `Pain in ${side ? `${side} ` : ''}${body}`.trim();
+              }
+              return `${cond} of ${side ? `${side} ` : ''}${body}`.trim();
+            }
+            if (lower.includes('pain in')) {
+              const m = raw.match(/(pain in [^.,;\n\r]{3,120})/i);
+              if (m?.[1]) return m[1].replace(/\s+/g, ' ').trim();
+            }
+            return raw.slice(0, 180);
+          };
+          const hasTargetDate = text => {
+            const raw = String(text || '');
+            if (
+              raw.includes(targetDateStr) ||
+              raw.includes(targetDateStrAlt) ||
+              raw.includes(targetDateStrMon)
+            )
+              return true;
+            if (!targetDateObj) return false;
+            return sameDay(parseDate(raw), targetDateObj);
+          };
+
+          // Look for notes/entries matching the visit date
+          const tables = Array.from(document.querySelectorAll('table'));
+          const textAreas = Array.from(document.querySelectorAll('textarea, div[contenteditable]'));
+          const noteDivs = Array.from(
+            document.querySelectorAll('div[class*="note"], div[class*="entry"]')
+          );
+          const modalNotes = Array.from(
+            document.querySelectorAll(
+              '#queueHisCaseNoteModal, #queueHisCaseNoteModal .modal-body, .modal .pastnote-card-body'
+            )
+          );
+
+          // Combine all potential note containers
+          const allContainers = [...tables, ...textAreas, ...noteDivs, ...modalNotes];
+
+          for (const container of allContainers) {
+            const text = container.textContent || '';
+
+            // Check if this container has the target date
+            if (hasTargetDate(text)) {
+              // Look for diagnosis patterns in the text
+              const diagnosisPatterns = [
+                /diagnosis[:\s]+([^\n\r;]{10,200})/i,
+                /dx[:\s]+([^\n\r;]{10,200})/i,
+                /impression[:\s]+([^\n\r;]{10,200})/i,
+                /assessment[:\s]+([^\n\r;]{10,200})/i,
+              ];
+
+              for (const pattern of diagnosisPatterns) {
+                const match = text.match(pattern);
+                if (match && match[1]) {
+                  const diagnosisText = match[1].trim();
+                  if (diagnosisText.length > 5) {
+                    // Try to extract ICD code if present
+                    const codeMatch = diagnosisText.match(/\b([A-Z]\d{2,3}(?:\.\d+)?)\b/);
+                    const code = codeMatch ? codeMatch[1] : null;
+                    const description = diagnosisText
+                      .replace(codeMatch ? codeMatch[0] : '', '')
+                      .trim();
+
+                    return {
+                      code,
+                      description: compactDiagnosisText(description || diagnosisText),
+                      date: visitDateIso || null,
+                    };
+                  }
+                }
+              }
+
+              // If no explicit diagnosis pattern, try to extract meaningful medical text
+              const sentences = text.split(/[.\n\r]/).filter(s => s.trim().length > 10);
+              for (const sentence of sentences) {
+                if (sentence.length > 20 && sentence.length < 200) {
+                  // Check if it looks like a diagnosis (contains medical keywords)
+                  if (
+                    /pain|ache|infection|injury|sprain|strain|fracture|disorder|disease|syndrome|chondromalacia|radiculopathy|spondylosis|myalgia|neuralgia|neuropathy|fasciitis|impingement|capsulitis/i.test(
+                      sentence
+                    )
+                  ) {
+                    const compact = compactDiagnosisText(sentence.trim());
+                    const looksPortable =
+                      /(pain in|sprain of|strain of|fracture of|injury of)/i.test(compact) ||
+                      /(?:shoulder|knee|ankle|wrist|elbow|hip|back|neck|foot|heel|hand|finger|toe|leg|arm|thigh|calf|forearm|spine|lumbar|cervical|thoracic)/i.test(
+                        compact
+                      );
+                    if (!looksPortable) continue;
+                    return { code: null, description: compact, date: visitDateIso || null };
+                  }
+                }
+              }
+            }
           }
+
           return null;
-        };
-        const sameDay = (a, b) =>
-          !!a &&
-          !!b &&
-          a.getFullYear() === b.getFullYear() &&
-          a.getMonth() === b.getMonth() &&
-          a.getDate() === b.getDate();
-        const targetDateObj = parseDate(visitDateIso) || parseDate(targetDateStr) || parseDate(targetDateStrAlt) || parseDate(targetDateStrMon);
-        const compactDiagnosisText = (sentence) => {
-          const raw = String(sentence || '')
-            .replace(/^[\-\u2022]\s*/, '')
-            .replace(/\s+/g, ' ')
-            .trim();
-          if (!raw) return '';
-          const lower = raw.toLowerCase();
-          const bodyPartRegex =
-            /(shoulder|knee|ankle|wrist|elbow|hip|back|neck|foot|heel|hand|finger|toe|leg|arm|thigh|calf|forearm|spine|lumbar|cervical|thoracic)/i;
-          const condRegex = /(pain|ache|sprain|strain|fracture|injury|contusion|dislocation|swelling|inflammation|arthritis|osteoarthritis|capsulitis|impingement)/i;
-          const sideRegex = /\b(right|left|rt|lt)\b/i;
-          const bodyMatch = raw.match(bodyPartRegex);
-          const condMatch = raw.match(condRegex);
-          const sideMatch = raw.match(sideRegex);
-          if (bodyMatch && condMatch) {
-            const body = String(bodyMatch[1] || '').toLowerCase();
-            const cond = String(condMatch[1] || '').toLowerCase();
-            const sideRaw = String(sideMatch?.[1] || '').toLowerCase();
-            const side = sideRaw === 'rt' ? 'right' : sideRaw === 'lt' ? 'left' : sideRaw;
-            if (cond === 'pain' || cond === 'ache') {
-              return `Pain in ${side ? `${side} ` : ''}${body}`.trim();
-            }
-            return `${cond} of ${side ? `${side} ` : ''}${body}`.trim();
-          }
-          if (lower.includes('pain in')) {
-            const m = raw.match(/(pain in [^.,;\n\r]{3,120})/i);
-            if (m?.[1]) return m[1].replace(/\s+/g, ' ').trim();
-          }
-          return raw.slice(0, 180);
-        };
-        const hasTargetDate = (text) => {
-          const raw = String(text || '');
-          if (raw.includes(targetDateStr) || raw.includes(targetDateStrAlt) || raw.includes(targetDateStrMon)) return true;
-          if (!targetDateObj) return false;
-          return sameDay(parseDate(raw), targetDateObj);
-        };
-
-        // Look for notes/entries matching the visit date
-        const tables = Array.from(document.querySelectorAll('table'));
-        const textAreas = Array.from(document.querySelectorAll('textarea, div[contenteditable]'));
-        const noteDivs = Array.from(document.querySelectorAll('div[class*="note"], div[class*="entry"]'));
-        const modalNotes = Array.from(
-          document.querySelectorAll('#queueHisCaseNoteModal, #queueHisCaseNoteModal .modal-body, .modal .pastnote-card-body')
-        );
-        
-        // Combine all potential note containers
-        const allContainers = [...tables, ...textAreas, ...noteDivs, ...modalNotes];
-        
-        for (const container of allContainers) {
-          const text = container.textContent || '';
-          
-          // Check if this container has the target date
-          if (hasTargetDate(text)) {
-            // Look for diagnosis patterns in the text
-            const diagnosisPatterns = [
-              /diagnosis[:\s]+([^\n\r;]{10,200})/i,
-              /dx[:\s]+([^\n\r;]{10,200})/i,
-              /impression[:\s]+([^\n\r;]{10,200})/i,
-              /assessment[:\s]+([^\n\r;]{10,200})/i,
-            ];
-            
-            for (const pattern of diagnosisPatterns) {
-              const match = text.match(pattern);
-              if (match && match[1]) {
-                const diagnosisText = match[1].trim();
-                if (diagnosisText.length > 5) {
-                  // Try to extract ICD code if present
-                  const codeMatch = diagnosisText.match(/\b([A-Z]\d{2,3}(?:\.\d+)?)\b/);
-                  const code = codeMatch ? codeMatch[1] : null;
-                  const description = diagnosisText.replace(codeMatch ? codeMatch[0] : '', '').trim();
-                  
-                  return { code, description: compactDiagnosisText(description || diagnosisText), date: visitDateIso || null };
-                }
-              }
-            }
-            
-            // If no explicit diagnosis pattern, try to extract meaningful medical text
-            const sentences = text.split(/[.\n\r]/).filter(s => s.trim().length > 10);
-            for (const sentence of sentences) {
-              if (sentence.length > 20 && sentence.length < 200) {
-                // Check if it looks like a diagnosis (contains medical keywords)
-                if (/pain|ache|infection|injury|sprain|strain|fracture|disorder|disease|syndrome|chondromalacia|radiculopathy|spondylosis|myalgia|neuralgia|neuropathy|fasciitis|impingement|capsulitis/i.test(sentence)) {
-                  const compact = compactDiagnosisText(sentence.trim());
-                  const looksPortable =
-                    /(pain in|sprain of|strain of|fracture of|injury of)/i.test(compact) ||
-                    /(?:shoulder|knee|ankle|wrist|elbow|hip|back|neck|foot|heel|hand|finger|toe|leg|arm|thigh|calf|forearm|spine|lumbar|cervical|thoracic)/i.test(
-                      compact
-                    );
-                  if (!looksPortable) continue;
-                  return { code: null, description: compact, date: visitDateIso || null };
-                }
-              }
-            }
-          }
-        }
-        
-        return null;
-      }, { targetDateStr, targetDateStrAlt, targetDateStrMon, visitDateIso: visitDate });
+        },
+        { targetDateStr, targetDateStrAlt, targetDateStrMon, visitDateIso: visitDate }
+      );
 
       if (result) {
-        this._logStep('Diagnosis extracted from Past Notes', { 
+        this._logStep('Diagnosis extracted from Past Notes', {
           code: result.code,
           description: result.description?.substring(0, 100),
           date: result.date || null,
@@ -9834,350 +11424,402 @@ export class ClinicAssistAutomation {
       await this.page.waitForTimeout(1500);
 
       const targetDate = new Date(visitDate);
-      const targetDateStr = targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-      const targetDateStrAlt = targetDate.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' });
-      const targetDateStrMon = targetDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).replace(/\s+/g, '-');
+      const targetDateStr = targetDate.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+      const targetDateStrAlt = targetDate.toLocaleDateString('en-US', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+      const targetDateStrMon = targetDate
+        .toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+        .replace(/\s+/g, '-');
 
       const evalIntent = async () =>
-        this.page.evaluate(({ targetDateStr, targetDateStrAlt, targetDateStrMon, visitDateIso, baseDescription }) => {
-        const norm = (s) =>
-          String(s || '')
-            .replace(/diagnosis\s*(rt|lt|right|left)/gi, 'diagnosis $1')
-            .replace(/([a-z])(rt|lt)(?=\s*(acj|shoulder|knee|ankle|wrist|elbow|hip|back|neck))/gi, '$1 $2')
-            .replace(/([a-z])([A-Z])/g, '$1 $2')
-            .toLowerCase();
-        const base = norm(baseDescription);
-        const bodyPartMatchers = [
-          { canonical: 'shoulder', regex: /\b(shoulder|shldr|acj|ac\s*joint|acromio[-\s]*clavicular)\b/i },
-          { canonical: 'knee', regex: /\b(knee|patella|patellar)\b/i },
-          { canonical: 'ankle', regex: /\b(ankle)\b/i },
-          { canonical: 'wrist', regex: /\b(wrist)\b/i },
-          { canonical: 'elbow', regex: /\b(elbow)\b/i },
-          { canonical: 'hip', regex: /\b(hip)\b/i },
-          { canonical: 'back', regex: /\b(back|upperback|lowerback|mid\s*back)\b/i },
-          { canonical: 'neck', regex: /\b(neck)\b/i },
-          { canonical: 'foot', regex: /\b(foot)\b/i },
-          { canonical: 'hand', regex: /\b(hand)\b/i },
-          { canonical: 'finger', regex: /\b(finger)\b/i },
-          { canonical: 'toe', regex: /\b(toe)\b/i },
-          { canonical: 'leg', regex: /\b(leg)\b/i },
-          { canonical: 'arm', regex: /\b(arm)\b/i },
-          { canonical: 'thigh', regex: /\b(thigh)\b/i },
-          { canonical: 'calf', regex: /\b(calf)\b/i },
-          { canonical: 'forearm', regex: /\b(forearm)\b/i },
-          { canonical: 'spine', regex: /\b(spine|lumbar|cervical|thoracic)\b/i },
-          { canonical: 'rib', regex: /\b(rib)\b/i },
-          { canonical: 'chest', regex: /\b(chest)\b/i },
-          { canonical: 'abdomen', regex: /\b(abdomen|abdominal|stomach)\b/i },
-          { canonical: 'head', regex: /\b(head)\b/i },
-          { canonical: 'eye', regex: /\b(eye)\b/i },
-          { canonical: 'ear', regex: /\b(ear)\b/i },
-          { canonical: 'nose', regex: /\b(nose)\b/i },
-          { canonical: 'throat', regex: /\b(throat)\b/i },
-        ];
+        this.page.evaluate(
+          ({
+            targetDateStr,
+            targetDateStrAlt,
+            targetDateStrMon,
+            visitDateIso,
+            baseDescription,
+          }) => {
+            const norm = s =>
+              String(s || '')
+                .replace(/diagnosis\s*(rt|lt|right|left)/gi, 'diagnosis $1')
+                .replace(
+                  /([a-z])(rt|lt)(?=\s*(acj|shoulder|knee|ankle|wrist|elbow|hip|back|neck))/gi,
+                  '$1 $2'
+                )
+                .replace(/([a-z])([A-Z])/g, '$1 $2')
+                .toLowerCase();
+            const base = norm(baseDescription);
+            const bodyPartMatchers = [
+              {
+                canonical: 'shoulder',
+                regex: /\b(shoulder|shldr|acj|ac\s*joint|acromio[-\s]*clavicular)\b/i,
+              },
+              { canonical: 'knee', regex: /\b(knee|patella|patellar)\b/i },
+              { canonical: 'ankle', regex: /\b(ankle)\b/i },
+              { canonical: 'wrist', regex: /\b(wrist)\b/i },
+              { canonical: 'elbow', regex: /\b(elbow)\b/i },
+              { canonical: 'hip', regex: /\b(hip)\b/i },
+              { canonical: 'back', regex: /\b(back|upperback|lowerback|mid\s*back)\b/i },
+              { canonical: 'neck', regex: /\b(neck)\b/i },
+              { canonical: 'foot', regex: /\b(foot)\b/i },
+              { canonical: 'hand', regex: /\b(hand)\b/i },
+              { canonical: 'finger', regex: /\b(finger)\b/i },
+              { canonical: 'toe', regex: /\b(toe)\b/i },
+              { canonical: 'leg', regex: /\b(leg)\b/i },
+              { canonical: 'arm', regex: /\b(arm)\b/i },
+              { canonical: 'thigh', regex: /\b(thigh)\b/i },
+              { canonical: 'calf', regex: /\b(calf)\b/i },
+              { canonical: 'forearm', regex: /\b(forearm)\b/i },
+              { canonical: 'spine', regex: /\b(spine|lumbar|cervical|thoracic)\b/i },
+              { canonical: 'rib', regex: /\b(rib)\b/i },
+              { canonical: 'chest', regex: /\b(chest)\b/i },
+              { canonical: 'abdomen', regex: /\b(abdomen|abdominal|stomach)\b/i },
+              { canonical: 'head', regex: /\b(head)\b/i },
+              { canonical: 'eye', regex: /\b(eye)\b/i },
+              { canonical: 'ear', regex: /\b(ear)\b/i },
+              { canonical: 'nose', regex: /\b(nose)\b/i },
+              { canonical: 'throat', regex: /\b(throat)\b/i },
+            ];
 
-        const conditions = [
-          'pain',
-          'ache',
-          'sprain',
-          'strain',
-          'degeneration',
-          'degenerative',
-          'tendinitis',
-          'tendinopathy',
-          'bursitis',
-          'fracture',
-          'contusion',
-          'dislocation',
-          'laceration',
-          'wound',
-          'swelling',
-          'infection',
-          'inflammation',
-          'arthritis',
-          'osteoarthritis',
-          'capsulitis',
-          'impingement',
-          'tear',
-          'rupture',
-        ];
+            const conditions = [
+              'pain',
+              'ache',
+              'sprain',
+              'strain',
+              'degeneration',
+              'degenerative',
+              'tendinitis',
+              'tendinopathy',
+              'bursitis',
+              'fracture',
+              'contusion',
+              'dislocation',
+              'laceration',
+              'wound',
+              'swelling',
+              'infection',
+              'inflammation',
+              'arthritis',
+              'osteoarthritis',
+              'capsulitis',
+              'impingement',
+              'tear',
+              'rupture',
+            ];
 
-        const detectBodyPart = (text) => {
-          for (const m of bodyPartMatchers) {
-            if (m.regex.test(text)) return m.canonical;
-          }
-          return null;
-        };
-        const detectCondition = (text) => conditions.find((c) => text.includes(c)) || null;
-        const detectSide = (text) => {
-          if (/\b(right|rt)\b/i.test(text)) return 'right';
-          if (/\b(left|lt)\b/i.test(text)) return 'left';
-          if (/(right|rt)\s*(acj|shoulder|knee|ankle|wrist|elbow|hip|back|neck)\b/i.test(text)) return 'right';
-          if (/(left|lt)\s*(acj|shoulder|knee|ankle|wrist|elbow|hip|back|neck)\b/i.test(text)) return 'left';
-          if (/\b(r)\b/i.test(text) && text.includes('shoulder')) return 'right';
-          if (/\b(l)\b/i.test(text) && text.includes('shoulder')) return 'left';
-          return null;
-        };
+            const detectBodyPart = text => {
+              for (const m of bodyPartMatchers) {
+                if (m.regex.test(text)) return m.canonical;
+              }
+              return null;
+            };
+            const detectCondition = text => conditions.find(c => text.includes(c)) || null;
+            const detectSide = text => {
+              if (/\b(right|rt)\b/i.test(text)) return 'right';
+              if (/\b(left|lt)\b/i.test(text)) return 'left';
+              if (/(right|rt)\s*(acj|shoulder|knee|ankle|wrist|elbow|hip|back|neck)\b/i.test(text))
+                return 'right';
+              if (/(left|lt)\s*(acj|shoulder|knee|ankle|wrist|elbow|hip|back|neck)\b/i.test(text))
+                return 'left';
+              if (/\b(r)\b/i.test(text) && text.includes('shoulder')) return 'right';
+              if (/\b(l)\b/i.test(text) && text.includes('shoulder')) return 'left';
+              return null;
+            };
 
-        const parseDate = (text) => {
-          const monthMap = {
-            jan: 1,
-            feb: 2,
-            mar: 3,
-            apr: 4,
-            may: 5,
-            jun: 6,
-            jul: 7,
-            aug: 8,
-            sep: 9,
-            oct: 10,
-            nov: 11,
-            dec: 12,
-          };
-          const iso = text.match(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/);
-          if (iso) {
-            const y = parseInt(iso[1], 10);
-            const m = parseInt(iso[2], 10);
-            const d = parseInt(iso[3], 10);
-            if (y && m && d) return new Date(y, m - 1, d);
-            return null;
-          }
-          const m = text.match(/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})\b/);
-          if (m) {
-            const a = parseInt(m[1], 10);
-            const b = parseInt(m[2], 10);
-            const y = parseInt(m[3], 10);
-            // Prefer DD/MM/YYYY when ambiguous.
-            const day = a > 12 ? a : b;
-            const month = a > 12 ? b : a;
-            if (!day || !month || !y) return null;
-            return new Date(y, month - 1, day);
-          }
-          const m2 = text.match(/\b(\d{1,2})[\/\-\s]([A-Za-z]{3,9})[\/\-\s](\d{4})\b/);
-          if (!m2) return null;
-          const day = parseInt(m2[1], 10);
-          const mon = String(m2[2] || '').slice(0, 3).toLowerCase();
-          const month = monthMap[mon] || 0;
-          const y = parseInt(m2[3], 10);
-          if (!day || !month || !y) return null;
-          return new Date(y, month - 1, day);
-        };
+            const parseDate = text => {
+              const monthMap = {
+                jan: 1,
+                feb: 2,
+                mar: 3,
+                apr: 4,
+                may: 5,
+                jun: 6,
+                jul: 7,
+                aug: 8,
+                sep: 9,
+                oct: 10,
+                nov: 11,
+                dec: 12,
+              };
+              const iso = text.match(/\b(\d{4})-(\d{1,2})-(\d{1,2})\b/);
+              if (iso) {
+                const y = parseInt(iso[1], 10);
+                const m = parseInt(iso[2], 10);
+                const d = parseInt(iso[3], 10);
+                if (y && m && d) return new Date(y, m - 1, d);
+                return null;
+              }
+              const m = text.match(/\b(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})\b/);
+              if (m) {
+                const a = parseInt(m[1], 10);
+                const b = parseInt(m[2], 10);
+                const y = parseInt(m[3], 10);
+                // Prefer DD/MM/YYYY when ambiguous.
+                const day = a > 12 ? a : b;
+                const month = a > 12 ? b : a;
+                if (!day || !month || !y) return null;
+                return new Date(y, month - 1, day);
+              }
+              const m2 = text.match(/\b(\d{1,2})[\/\-\s]([A-Za-z]{3,9})[\/\-\s](\d{4})\b/);
+              if (!m2) return null;
+              const day = parseInt(m2[1], 10);
+              const mon = String(m2[2] || '')
+                .slice(0, 3)
+                .toLowerCase();
+              const month = monthMap[mon] || 0;
+              const y = parseInt(m2[3], 10);
+              if (!day || !month || !y) return null;
+              return new Date(y, month - 1, day);
+            };
 
-        const sameDay = (a, b) =>
-          !!a &&
-          !!b &&
-          a.getFullYear() === b.getFullYear() &&
-          a.getMonth() === b.getMonth() &&
-          a.getDate() === b.getDate();
-        const targetDate =
-          parseDate(visitDateIso) ||
-          parseDate(targetDateStr) ||
-          parseDate(targetDateStrAlt) ||
-          parseDate(targetDateStrMon);
-        const hasTargetDate = (text) => {
-          const raw = String(text || '');
-          if (raw.includes(targetDateStr) || raw.includes(targetDateStrAlt) || raw.includes(targetDateStrMon)) return true;
-          if (!targetDate) return false;
-          return sameDay(parseDate(raw), targetDate);
-        };
-        const baseBodyPart = detectBodyPart(base);
-        const baseCondition = detectCondition(base);
+            const sameDay = (a, b) =>
+              !!a &&
+              !!b &&
+              a.getFullYear() === b.getFullYear() &&
+              a.getMonth() === b.getMonth() &&
+              a.getDate() === b.getDate();
+            const targetDate =
+              parseDate(visitDateIso) ||
+              parseDate(targetDateStr) ||
+              parseDate(targetDateStrAlt) ||
+              parseDate(targetDateStrMon);
+            const hasTargetDate = text => {
+              const raw = String(text || '');
+              if (
+                raw.includes(targetDateStr) ||
+                raw.includes(targetDateStrAlt) ||
+                raw.includes(targetDateStrMon)
+              )
+                return true;
+              if (!targetDate) return false;
+              return sameDay(parseDate(raw), targetDate);
+            };
+            const baseBodyPart = detectBodyPart(base);
+            const baseCondition = detectCondition(base);
 
-        const best = { score: 0, bodyPart: null, condition: null, side: null, sentence: null };
-        const bestAligned = { score: 0, bodyPart: null, condition: null, side: null, sentence: null };
+            const best = { score: 0, bodyPart: null, condition: null, side: null, sentence: null };
+            const bestAligned = {
+              score: 0,
+              bodyPart: null,
+              condition: null,
+              side: null,
+              sentence: null,
+            };
 
-        const scoreSentence = (sentence) => {
-          const s = norm(sentence);
-          const bp = detectBodyPart(s);
-          if (!bp) return null;
-          const cond = detectCondition(s);
-          const side = detectSide(s);
-          let score = 0;
-          if (bp) score += 3;
-          if (cond) score += 3;
-          if (side) score += 2;
-          if (baseBodyPart && bp === baseBodyPart) score += 6;
-          if (baseBodyPart && bp !== baseBodyPart) score -= 3;
-          if (baseCondition && cond && baseCondition === cond) score += 1;
-          if (base && bp && base.includes(bp)) score += 1;
-          return { score, bp, cond, side, sentence: sentence.trim() };
-        };
+            const scoreSentence = sentence => {
+              const s = norm(sentence);
+              const bp = detectBodyPart(s);
+              if (!bp) return null;
+              const cond = detectCondition(s);
+              const side = detectSide(s);
+              let score = 0;
+              if (bp) score += 3;
+              if (cond) score += 3;
+              if (side) score += 2;
+              if (baseBodyPart && bp === baseBodyPart) score += 6;
+              if (baseBodyPart && bp !== baseBodyPart) score -= 3;
+              if (baseCondition && cond && baseCondition === cond) score += 1;
+              if (base && bp && base.includes(bp)) score += 1;
+              return { score, bp, cond, side, sentence: sentence.trim() };
+            };
 
-        const containers = [
-          ...Array.from(document.querySelectorAll('table')),
-          ...Array.from(document.querySelectorAll('textarea, div[contenteditable]')),
-          ...Array.from(document.querySelectorAll('div[class*="note"], div[class*="entry"]')),
-          ...Array.from(
-            document.querySelectorAll('#queueHisCaseNoteModal, #queueHisCaseNoteModal .modal-body, .modal .pastnote-card-body')
-          ),
-        ];
+            const containers = [
+              ...Array.from(document.querySelectorAll('table')),
+              ...Array.from(document.querySelectorAll('textarea, div[contenteditable]')),
+              ...Array.from(document.querySelectorAll('div[class*="note"], div[class*="entry"]')),
+              ...Array.from(
+                document.querySelectorAll(
+                  '#queueHisCaseNoteModal, #queueHisCaseNoteModal .modal-body, .modal .pastnote-card-body'
+                )
+              ),
+            ];
 
-        const pickText = (c) => norm(c.textContent || '');
-        const candidates = containers.filter((c) => {
-          const text = pickText(c);
-          return hasTargetDate(text);
-        });
-        const pool = candidates.length ? candidates : [];
-        if (!pool.length) {
-          return {
-            __no_intent: true,
-            debug: {
-              url: location.href,
-              title: document.title || '',
-              poolSize: 0,
-              targetDateStr,
-              targetDateStrAlt,
-              baseBodyPart,
-              evidence: [],
-              reason: 'no_target_date_note_container',
-            },
-          };
-        }
-
-        const splitSentences = (text) =>
-          text
-            .split(/[.\n\r;]|(?=\b(?:history|aggravating|relieving|rx\)|mplan|diagnosis|medicine|procedure)\b)/i)
-            .map((s) => String(s || '').trim())
-            .filter((s) => s.length > 5);
-
-        // First pass: structured Past Notes tables with Date/Notes columns.
-        const tables = Array.from(document.querySelectorAll('table'));
-        let bestRowText = null;
-        let bestRowDate = null;
-        for (const table of tables) {
-          const header = Array.from(table.querySelectorAll('th, td')).map((c) => norm(c.textContent || ''));
-          if (!header.some((h) => h.includes('date'))) continue;
-          if (!header.some((h) => h.includes('note'))) continue;
-          const rows = Array.from(table.querySelectorAll('tbody tr, tr'));
-          for (const row of rows) {
-            const cells = Array.from(row.querySelectorAll('td, th'));
-            if (cells.length < 2) continue;
-            const rowText = norm(row.textContent || '');
-            const rowDate = parseDate(rowText);
-            if (!rowDate) continue;
-            if (targetDate && rowDate.getTime() > targetDate.getTime()) continue;
-            if (!bestRowDate || rowDate.getTime() > bestRowDate.getTime()) {
-              bestRowDate = rowDate;
-              bestRowText = rowText;
+            const pickText = c => norm(c.textContent || '');
+            const candidates = containers.filter(c => {
+              const text = pickText(c);
+              return hasTargetDate(text);
+            });
+            const pool = candidates.length ? candidates : [];
+            if (!pool.length) {
+              return {
+                __no_intent: true,
+                debug: {
+                  url: location.href,
+                  title: document.title || '',
+                  poolSize: 0,
+                  targetDateStr,
+                  targetDateStrAlt,
+                  baseBodyPart,
+                  evidence: [],
+                  reason: 'no_target_date_note_container',
+                },
+              };
             }
-          }
-        }
 
-        if (bestRowText) {
-          const sentences = splitSentences(bestRowText);
-          for (const sentence of sentences) {
-            const scored = scoreSentence(sentence);
-            if (scored && scored.score > best.score) {
-              best.score = scored.score;
-              best.bodyPart = scored.bp;
-              best.condition = scored.cond;
-              best.side = scored.side;
-              best.sentence = scored.sentence;
+            const splitSentences = text =>
+              text
+                .split(
+                  /[.\n\r;]|(?=\b(?:history|aggravating|relieving|rx\)|mplan|diagnosis|medicine|procedure)\b)/i
+                )
+                .map(s => String(s || '').trim())
+                .filter(s => s.length > 5);
+
+            // First pass: structured Past Notes tables with Date/Notes columns.
+            const tables = Array.from(document.querySelectorAll('table'));
+            let bestRowText = null;
+            let bestRowDate = null;
+            for (const table of tables) {
+              const header = Array.from(table.querySelectorAll('th, td')).map(c =>
+                norm(c.textContent || '')
+              );
+              if (!header.some(h => h.includes('date'))) continue;
+              if (!header.some(h => h.includes('note'))) continue;
+              const rows = Array.from(table.querySelectorAll('tbody tr, tr'));
+              for (const row of rows) {
+                const cells = Array.from(row.querySelectorAll('td, th'));
+                if (cells.length < 2) continue;
+                const rowText = norm(row.textContent || '');
+                const rowDate = parseDate(rowText);
+                if (!rowDate) continue;
+                if (targetDate && rowDate.getTime() > targetDate.getTime()) continue;
+                if (!bestRowDate || rowDate.getTime() > bestRowDate.getTime()) {
+                  bestRowDate = rowDate;
+                  bestRowText = rowText;
+                }
+              }
             }
-            if (
-              baseBodyPart &&
-              scored &&
-              scored.bp === baseBodyPart &&
-              scored.score > bestAligned.score
-            ) {
-              bestAligned.score = scored.score;
-              bestAligned.bodyPart = scored.bp;
-              bestAligned.condition = scored.cond;
-              bestAligned.side = scored.side;
-              bestAligned.sentence = scored.sentence;
+
+            if (bestRowText) {
+              const sentences = splitSentences(bestRowText);
+              for (const sentence of sentences) {
+                const scored = scoreSentence(sentence);
+                if (scored && scored.score > best.score) {
+                  best.score = scored.score;
+                  best.bodyPart = scored.bp;
+                  best.condition = scored.cond;
+                  best.side = scored.side;
+                  best.sentence = scored.sentence;
+                }
+                if (
+                  baseBodyPart &&
+                  scored &&
+                  scored.bp === baseBodyPart &&
+                  scored.score > bestAligned.score
+                ) {
+                  bestAligned.score = scored.score;
+                  bestAligned.bodyPart = scored.bp;
+                  bestAligned.condition = scored.cond;
+                  bestAligned.side = scored.side;
+                  bestAligned.sentence = scored.sentence;
+                }
+              }
             }
-          }
-        }
 
-        // Second pass: scan all containers.
-        for (const container of pool) {
-          const text = pickText(container);
-          const sentences = splitSentences(text);
-          for (const sentence of sentences) {
-            const scored = scoreSentence(sentence);
-            if (scored && scored.score > best.score) {
-              best.score = scored.score;
-              best.bodyPart = scored.bp;
-              best.condition = scored.cond;
-              best.side = scored.side;
-              best.sentence = scored.sentence;
+            // Second pass: scan all containers.
+            for (const container of pool) {
+              const text = pickText(container);
+              const sentences = splitSentences(text);
+              for (const sentence of sentences) {
+                const scored = scoreSentence(sentence);
+                if (scored && scored.score > best.score) {
+                  best.score = scored.score;
+                  best.bodyPart = scored.bp;
+                  best.condition = scored.cond;
+                  best.side = scored.side;
+                  best.sentence = scored.sentence;
+                }
+                if (
+                  baseBodyPart &&
+                  scored &&
+                  scored.bp === baseBodyPart &&
+                  scored.score > bestAligned.score
+                ) {
+                  bestAligned.score = scored.score;
+                  bestAligned.bodyPart = scored.bp;
+                  bestAligned.condition = scored.cond;
+                  bestAligned.side = scored.side;
+                  bestAligned.sentence = scored.sentence;
+                }
+              }
             }
-            if (
-              baseBodyPart &&
-              scored &&
-              scored.bp === baseBodyPart &&
-              scored.score > bestAligned.score
-            ) {
-              bestAligned.score = scored.score;
-              bestAligned.bodyPart = scored.bp;
-              bestAligned.condition = scored.cond;
-              bestAligned.side = scored.side;
-              bestAligned.sentence = scored.sentence;
+
+            // Do not score whole-page text. It can include non-clinical scripts/markup and produce false intents.
+
+            const chosen = baseBodyPart && bestAligned.bodyPart ? bestAligned : best;
+
+            const evidencePattern = /(shoulder|acj|right|left|rt|lt|pain|diagnosis)/i;
+            const evidence = [];
+            for (const container of pool) {
+              const text = pickText(container);
+              const sentences = splitSentences(text);
+              for (const sentence of sentences) {
+                if (!evidencePattern.test(sentence)) continue;
+                evidence.push(sentence.slice(0, 220));
+                if (evidence.length >= 10) break;
+              }
+              if (evidence.length >= 10) break;
             }
-          }
-        }
-
-        // Do not score whole-page text. It can include non-clinical scripts/markup and produce false intents.
-
-        const chosen = baseBodyPart && bestAligned.bodyPart ? bestAligned : best;
-
-        const evidencePattern = /(shoulder|acj|right|left|rt|lt|pain|diagnosis)/i;
-        const evidence = [];
-        for (const container of pool) {
-          const text = pickText(container);
-          const sentences = splitSentences(text);
-          for (const sentence of sentences) {
-            if (!evidencePattern.test(sentence)) continue;
-            evidence.push(sentence.slice(0, 220));
-            if (evidence.length >= 10) break;
-          }
-          if (evidence.length >= 10) break;
-        }
-        // If no structured match, return debug payload for tuning.
-        if (!chosen.bodyPart) {
-          return {
-            __no_intent: true,
-            debug: {
-              url: location.href,
-              title: document.title || '',
-              poolSize: pool.length,
-              targetDateStr,
-              targetDateStrAlt,
-              baseBodyPart,
-              evidence,
-            },
-          };
-        }
-
-        const baseCond = baseCondition;
-        // Preserve base diagnosis condition (e.g. "pain") and enrich with laterality/body-part from notes.
-        const condition = baseCond || chosen.condition || null;
-        const side = chosen.side || null;
-        const bodyPart = chosen.bodyPart;
-
-        const isPain = condition && /pain|ache|soreness/.test(condition);
-        let description = null;
-        if (condition && bodyPart) {
-          if (isPain) {
-            description = `Pain in ${side ? `${side} ` : ''}${bodyPart}`.trim();
-          } else {
-            description = `${condition} of ${side ? `${side} ` : ''}${bodyPart}`.trim();
-          }
-        }
-
-        return description
-          ? {
-              description,
-              side,
-              bodyPart,
-              condition,
-              score: Number(chosen.score || 0),
-              source_date: visitDateIso || null,
+            // If no structured match, return debug payload for tuning.
+            if (!chosen.bodyPart) {
+              return {
+                __no_intent: true,
+                debug: {
+                  url: location.href,
+                  title: document.title || '',
+                  poolSize: pool.length,
+                  targetDateStr,
+                  targetDateStrAlt,
+                  baseBodyPart,
+                  evidence,
+                },
+              };
             }
-          : null;
-      }, { targetDateStr, targetDateStrAlt, targetDateStrMon, visitDateIso: visitDate, baseDescription });
 
-      let intentEval = await evalIntent().catch(() => null);
+            const baseCond = baseCondition;
+            // Preserve base diagnosis condition (e.g. "pain") and enrich with laterality/body-part from notes.
+            const condition = baseCond || chosen.condition || null;
+            const side = chosen.side || null;
+            const bodyPart = chosen.bodyPart;
+
+            const isPain = condition && /pain|ache|soreness/.test(condition);
+            let description = null;
+            if (condition && bodyPart) {
+              if (isPain) {
+                description = `Pain in ${side ? `${side} ` : ''}${bodyPart}`.trim();
+              } else {
+                description = `${condition} of ${side ? `${side} ` : ''}${bodyPart}`.trim();
+              }
+            }
+
+            return description
+              ? {
+                  description,
+                  side,
+                  bodyPart,
+                  condition,
+                  score: Number(chosen.score || 0),
+                  source_date: visitDateIso || null,
+                }
+              : null;
+          },
+          {
+            targetDateStr,
+            targetDateStrAlt,
+            targetDateStrMon,
+            visitDateIso: visitDate,
+            baseDescription,
+          }
+        );
+
+      const intentEval = await evalIntent().catch(() => null);
 
       // Do not perform broad "click everything expandable" retries here.
       // They can open unrelated modal dialogs and destabilize subsequent extraction/navigation.
@@ -10208,17 +11850,23 @@ export class ClinicAssistAutomation {
   }
 
   _isDiagnosisGeneric(description) {
-    const d = String(description || '').trim().toLowerCase();
+    const d = String(description || '')
+      .trim()
+      .toLowerCase();
     if (!d) return true;
     if (d.length < 6) return true;
     // Narrative note lines are not portal-ready diagnosis labels.
     if (/^[\-\u2022]\s*/.test(d) || d.split(/\s+/).length >= 12) return true;
-    const hasBodyPart = /(shoulder|knee|ankle|wrist|elbow|hip|back|neck|foot|heel|hand|finger|toe|leg|arm|thigh|calf|forearm|spine|lumbar|loin|cervical|thoracic|rib|chest|abdomen|stomach|head|eye|ear|nose|throat|acl|mcl|lcl|pcl|meniscus|patella|ligament)/i.test(
-      d
-    );
+    const hasBodyPart =
+      /(shoulder|knee|ankle|wrist|elbow|hip|back|neck|foot|heel|hand|finger|toe|leg|arm|thigh|calf|forearm|spine|lumbar|loin|cervical|thoracic|rib|chest|abdomen|stomach|head|eye|ear|nose|throat|acl|mcl|lcl|pcl|meniscus|patella|ligament)/i.test(
+        d
+      );
     if (!hasBodyPart) return true;
     // Generic/ambiguous phrases
-    if (/unspecified|region|joint|site|part|other|oth|unsp/i.test(d) && !/(left|right|lt|rt)\b/i.test(d)) {
+    if (
+      /unspecified|region|joint|site|part|other|oth|unsp/i.test(d) &&
+      !/(left|right|lt|rt)\b/i.test(d)
+    ) {
       return true;
     }
     return false;
@@ -10331,16 +11979,24 @@ export class ClinicAssistAutomation {
       : /\b(left|lt)\b/i.test(text)
         ? 'left'
         : null;
-    let body_part = bodyParts.find((bp) => new RegExp(`\\b${bp}\\b`, 'i').test(text)) || null;
+    let body_part = bodyParts.find(bp => new RegExp(`\\b${bp}\\b`, 'i').test(text)) || null;
     if (!body_part && /\b(acl|mcl|lcl|pcl|meniscus|patella)\b/i.test(text)) body_part = 'knee';
     if (body_part === 'heel') body_part = 'foot';
     if (body_part === 'backache') body_part = 'back';
-    const condition = conditions.find((c) => new RegExp(`\\b${c}\\b`, 'i').test(text)) || null;
+    const condition = conditions.find(c => new RegExp(`\\b${c}\\b`, 'i').test(text)) || null;
 
     return { side, body_part, condition };
   }
 
-  _canonicalizeDiagnosis({ code, description, diagnosisSource, side, body_part, condition, support_text }) {
+  _canonicalizeDiagnosis({
+    code,
+    description,
+    diagnosisSource,
+    side,
+    body_part,
+    condition,
+    support_text,
+  }) {
     const text = String(description || '').trim();
     const lower = text.toLowerCase();
     const supportLower = String(support_text || '').toLowerCase();
@@ -10350,8 +12006,7 @@ export class ClinicAssistAutomation {
 
     const sideLabel = side ? `${side} ` : '';
     const hasGenericS836Code =
-      mappedCode === 'S83.6' ||
-      /\bs83\.?6\b/.test(String(code || '').toLowerCase());
+      mappedCode === 'S83.6' || /\bs83\.?6\b/.test(String(code || '').toLowerCase());
     const hasSpecificKneeSignal =
       /\b(left|right|lt|rt)\b/.test(lower) ||
       /\b(anterior cruciate ligament|acl|mcl|lcl|pcl|meniscus|deficiency|tear|rupture|instability|laxity)\b/.test(
@@ -10363,8 +12018,7 @@ export class ClinicAssistAutomation {
         `${lower} ${supportLower}`
       );
     const isKneeSprain =
-      (/\bknee\b/.test(lower) && /\b(sprain|strain)\b/.test(lower)) ||
-      hasGenericS836Code;
+      (/\bknee\b/.test(lower) && /\b(sprain|strain)\b/.test(lower)) || hasGenericS836Code;
     if (isKneeSprain) {
       if (hasGenericS836Code && !hasSpecificKneeSignal && !hasAclKneeSupport) {
         mappedDescription = 'Sprain & strain oth & unsp parts knee';
@@ -10375,7 +12029,11 @@ export class ClinicAssistAutomation {
         // but only when we have supporting specificity signal.
         if (!mappedCode || hasGenericS836Code) mappedCode = 'S83.411A';
       }
-      return { code_normalized: mappedCode, description_canonical: mappedDescription, mapped: true };
+      return {
+        code_normalized: mappedCode,
+        description_canonical: mappedDescription,
+        mapped: true,
+      };
     }
 
     const aclKneeInjury =
@@ -10384,31 +12042,47 @@ export class ClinicAssistAutomation {
     if (aclKneeInjury) {
       mappedDescription = 'Sprain of the knee';
       mappedCode = 'S83.411A';
-      return { code_normalized: mappedCode, description_canonical: mappedDescription, mapped: true };
+      return {
+        code_normalized: mappedCode,
+        description_canonical: mappedDescription,
+        mapped: true,
+      };
     }
 
     const genericKneeInjury =
-      /\bknee\b/.test(lower) &&
-      /\b(injury|trauma|twist|twisting)\b/.test(lower);
+      /\bknee\b/.test(lower) && /\b(injury|trauma|twist|twisting)\b/.test(lower);
     if (genericKneeInjury) {
       mappedDescription = 'Sprain and strain of other and unspecified parts of knee';
       if (!mappedCode) mappedCode = 'S83.6';
-      return { code_normalized: mappedCode, description_canonical: mappedDescription, mapped: true };
+      return {
+        code_normalized: mappedCode,
+        description_canonical: mappedDescription,
+        mapped: true,
+      };
     }
 
     if (/\bwrist\b/.test(lower) && /\b(sprain|strain)\b/.test(lower)) {
       mappedDescription = 'Sprain and strain of wrist';
       if (!mappedCode || /\bS63\.5\d*\b/i.test(String(mappedCode))) mappedCode = 'S63.5';
-      return { code_normalized: mappedCode, description_canonical: mappedDescription, mapped: true };
+      return {
+        code_normalized: mappedCode,
+        description_canonical: mappedDescription,
+        mapped: true,
+      };
     }
 
     if (
       /\b(low back|lumbago|loin|backache)\b/.test(lower) ||
-      ((body_part === 'back' || body_part === 'lumbar' || body_part === 'loin') && /pain|ache|strain/.test(lower))
+      ((body_part === 'back' || body_part === 'lumbar' || body_part === 'loin') &&
+        /pain|ache|strain/.test(lower))
     ) {
       mappedDescription = 'Low back pain';
       if (!mappedCode) mappedCode = 'M54.5';
-      return { code_normalized: mappedCode, description_canonical: mappedDescription, mapped: true };
+      return {
+        code_normalized: mappedCode,
+        description_canonical: mappedDescription,
+        mapped: true,
+      };
     }
 
     const footHeelPain =
@@ -10419,23 +12093,42 @@ export class ClinicAssistAutomation {
       const normalizedSide = /\bleft\b/.test(lower) || side === 'left' ? 'left' : 'right';
       mappedDescription = `${normalizedSide[0].toUpperCase() + normalizedSide.slice(1)} foot/heel pain`;
       if (!mappedCode) mappedCode = normalizedSide === 'left' ? 'M79.672' : 'M79.671';
-      return { code_normalized: mappedCode, description_canonical: mappedDescription, mapped: true };
+      return {
+        code_normalized: mappedCode,
+        description_canonical: mappedDescription,
+        mapped: true,
+      };
     }
 
     // Past-notes-only knee pain is commonly charted as a sprain in answer sheets.
-    if (!mappedCode && source === 'past_notes' && /\bpain\b/.test(lower) && /\bknee\b/.test(lower)) {
+    if (
+      !mappedCode &&
+      source === 'past_notes' &&
+      /\bpain\b/.test(lower) &&
+      /\bknee\b/.test(lower)
+    ) {
       mappedDescription = 'Sprain of the knee';
       mappedCode = 'S83.411A';
-      return { code_normalized: mappedCode, description_canonical: mappedDescription, mapped: true };
+      return {
+        code_normalized: mappedCode,
+        description_canonical: mappedDescription,
+        mapped: true,
+      };
     }
 
     if (!mappedDescription && (condition || body_part)) {
       mappedDescription = condition
-        ? `${condition} of the ${sideLabel}${body_part || 'affected area'}`.replace(/\s+/g, ' ').trim()
+        ? `${condition} of the ${sideLabel}${body_part || 'affected area'}`
+            .replace(/\s+/g, ' ')
+            .trim()
         : null;
     }
 
-    return { code_normalized: mappedCode, description_canonical: mappedDescription || null, mapped: false };
+    return {
+      code_normalized: mappedCode,
+      description_canonical: mappedDescription || null,
+      mapped: false,
+    };
   }
 
   _buildDiagnosisCanonicalPayload({
@@ -10446,7 +12139,7 @@ export class ClinicAssistAutomation {
     visitDate,
     payType = null,
   }) {
-    const toIsoDate = (value) => {
+    const toIsoDate = value => {
       const raw = String(value || '').trim();
       if (!raw) return null;
       if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
@@ -10483,12 +12176,17 @@ export class ClinicAssistAutomation {
     let condition = diagnosisIntent?.condition || attrsFromDesc.condition || null;
 
     const supportText = (Array.isArray(diagnosisAttempts) ? diagnosisAttempts : [])
-      .filter((a) => a?.found && (a?.description || a?.code))
-      .filter((a) => {
+      .filter(a => a?.found && (a?.description || a?.code))
+      .filter(a => {
         const src = String(a?.source || '').toLowerCase();
-        return src && src !== 'diagnosis_tab' && src !== 'diagnosis_tab_latest' && src !== 'diagnosis_tab_raw';
+        return (
+          src &&
+          src !== 'diagnosis_tab' &&
+          src !== 'diagnosis_tab_latest' &&
+          src !== 'diagnosis_tab_raw'
+        );
       })
-      .map((a) => String(a?.description || a?.code || '').trim())
+      .map(a => String(a?.description || a?.code || '').trim())
       .filter(Boolean)
       .join(' ');
 
@@ -10501,7 +12199,7 @@ export class ClinicAssistAutomation {
       condition,
       support_text: [supportText, diagnosisIntent?.description || ''].filter(Boolean).join(' '),
     });
-    let code_normalized =
+    const code_normalized =
       canonicalMap?.code_normalized ||
       this._normalizeDiagnosisCode(code_raw) ||
       this._normalizeDiagnosisCode(description_raw) ||
@@ -10533,10 +12231,11 @@ export class ClinicAssistAutomation {
       }
       description_canonical = description_canonical
         .replace(/\s+/g, ' ')
-        .replace(/\b([a-z])/g, (m) => m.toUpperCase());
+        .replace(/\b([a-z])/g, m => m.toUpperCase());
     }
 
-    const source_age_days = sourceDateIso && visitDateIso ? ageDays(sourceDateIso, visitDateIso) : null;
+    const source_age_days =
+      sourceDateIso && visitDateIso ? ageDays(sourceDateIso, visitDateIso) : null;
     let source_date_match_type = 'latest';
     if (sourceDateIso && visitDateIso) {
       if (sourceDateIso === visitDateIso) source_date_match_type = 'exact';
@@ -10567,7 +12266,7 @@ export class ClinicAssistAutomation {
     let status = 'resolved';
     let reason_if_unresolved = null;
     const foundAttempts = (Array.isArray(diagnosisAttempts) ? diagnosisAttempts : []).filter(
-      (a) => !!a?.found
+      a => !!a?.found
     );
     if (!description_raw) {
       status = foundAttempts.length > 0 ? 'found_but_invalid' : 'missing_in_source';
@@ -10585,9 +12284,14 @@ export class ClinicAssistAutomation {
       status = 'ambiguous';
       reason_if_unresolved = dateReason || 'diagnosis_date_policy_not_satisfied';
     }
-    const hasNonPrimarySupport = foundAttempts.some((a) => {
+    const hasNonPrimarySupport = foundAttempts.some(a => {
       const src = String(a?.source || '').toLowerCase();
-      return src && src !== 'diagnosis_tab' && src !== 'diagnosis_tab_latest' && src !== 'diagnosis_tab_raw';
+      return (
+        src &&
+        src !== 'diagnosis_tab' &&
+        src !== 'diagnosis_tab_latest' &&
+        src !== 'diagnosis_tab_raw'
+      );
     });
     const codeForRule = String(code_normalized || '')
       .toUpperCase()
@@ -10622,12 +12326,14 @@ export class ClinicAssistAutomation {
     confidence = Number(Math.max(0, Math.min(1, confidence)).toFixed(2));
 
     const source_chain = Array.isArray(diagnosisAttempts)
-      ? diagnosisAttempts.map((a) => ({
+      ? diagnosisAttempts.map(a => ({
           source: a?.source || 'unknown',
           found: !!a?.found,
           source_date: a?.source_date || null,
           source_age_days:
-            a?.source_age_days === null || a?.source_age_days === undefined || a?.source_age_days === ''
+            a?.source_age_days === null ||
+            a?.source_age_days === undefined ||
+            a?.source_age_days === ''
               ? null
               : Number.isFinite(Number(a?.source_age_days))
                 ? Number(a.source_age_days)
@@ -10636,14 +12342,18 @@ export class ClinicAssistAutomation {
       : [];
 
     const diagnosisCandidates = (Array.isArray(diagnosisAttempts) ? diagnosisAttempts : [])
-      .filter((a) => a?.found && (a?.description || a?.code))
+      .filter(a => a?.found && (a?.description || a?.code))
       .map((a, idx) => {
         const candCodeRaw = String(a?.code || '').trim() || null;
         const candDescRaw = String(a?.description || '').trim() || null;
-        const candCodeNorm = this._normalizeDiagnosisCode(candCodeRaw) || this._normalizeDiagnosisCode(candDescRaw) || null;
+        const candCodeNorm =
+          this._normalizeDiagnosisCode(candCodeRaw) ||
+          this._normalizeDiagnosisCode(candDescRaw) ||
+          null;
         const candAttrs = this._extractDiagnosisAttributes(candDescRaw || '');
         const candSourceDate = toIsoDate(a?.source_date || null);
-        const candSourceAge = candSourceDate && visitDateIso ? ageDays(candSourceDate, visitDateIso) : null;
+        const candSourceAge =
+          candSourceDate && visitDateIso ? ageDays(candSourceDate, visitDateIso) : null;
         let score = 0;
         if (candDescRaw) score += 0.35;
         if (candCodeNorm) score += 0.2;
@@ -10692,7 +12402,7 @@ export class ClinicAssistAutomation {
       seen.add(key);
       dedupedCandidates.push({ ...cand, rank: dedupedCandidates.length + 1 });
     }
-    if (!dedupedCandidates.some((c) => c.selected) && dedupedCandidates.length) {
+    if (!dedupedCandidates.some(c => c.selected) && dedupedCandidates.length) {
       dedupedCandidates[0].selected = true;
     }
 
@@ -10732,44 +12442,47 @@ export class ClinicAssistAutomation {
     try {
       this._logStep('Get charge type, diagnosis, and MC data for visit date', { visitDate });
       const payType = String(options?.payType || '').trim() || null;
-      
+
       // Step 1: Check charge type from TX History All tab
       const hasFirstConsult = await this.hasFirstConsultOnDate(visitDate);
       const chargeType = hasFirstConsult ? 'first' : 'follow';
-      
+
       this._logStep('Charge type determined', { visitDate, chargeType, hasFirstConsult });
-      
+
       // Step 2: Navigate to TX History and extract MC days from All tab
       // Default behavior keeps MC at 0 unless explicitly enabled via env.
       let mcDays = 0;
       let mcStartDate = null;
       const enableTxHistoryMcExtraction = process.env.FLOW2_ENABLE_TX_HISTORY_MC === '1';
       if (!enableTxHistoryMcExtraction) {
-        this._logStep('MC extraction from TX History disabled; using defaults', { mcDays, mcStartDate });
+        this._logStep('MC extraction from TX History disabled; using defaults', {
+          mcDays,
+          mcStartDate,
+        });
       } else {
         try {
           await this.navigateToTXHistory().catch(() => {});
           // Ensure we're on the All tab (default tab)
           await this.page.waitForTimeout(1000);
-          
+
           // Extract MC days and MC start date from All tab
           // Look for rows like: "23/01/2026\tMC\tUnfit for Duty\t1.00 day\t$0.00\tSSOC"
-          const mcData = await this.page.evaluate((targetDate) => {
+          const mcData = await this.page.evaluate(targetDate => {
             // Try multiple date formats
             const dateFormats = [
               targetDate.replace(/-/g, '/'), // 2026-01-23 -> 2026/01/23
               targetDate.split('-').reverse().join('/'), // 2026-01-23 -> 23/01/2026
               targetDate.split('-').reverse().join('-'), // 2026-01-23 -> 23-01-2026
             ];
-            
+
             const rows = Array.from(document.querySelectorAll('table tr, [role="row"], tbody tr'));
             for (const row of rows) {
               const text = row.textContent || '';
-              
+
               // Check if row contains "MC" and any of the date formats
               const hasMC = /MC/i.test(text);
               const hasDate = dateFormats.some(format => text.includes(format));
-              
+
               if (hasMC && hasDate) {
                 // Extract MC days - look for patterns like "1.00 day", "1 day", "2 days", etc.
                 const mcMatch = text.match(/(\d+(?:\.\d+)?)\s*day/i);
@@ -10791,7 +12504,7 @@ export class ClinicAssistAutomation {
             }
             return { mcDays: 0, mcStartDate: null };
           }, visitDate);
-          
+
           mcDays = mcData.mcDays;
           mcStartDate = mcData.mcStartDate;
           this._logStep('MC data extracted from All tab', { mcDays, mcStartDate, visitDate });
@@ -10799,11 +12512,11 @@ export class ClinicAssistAutomation {
           this._logStep('Could not extract MC data, using defaults', { error: e.message });
         }
       }
-      
+
       // Step 3: Diagnosis (prefer matching the visit date; fallback to latest)
       let diagnosisSource = null;
       const diagnosisAttempts = [];
-      const toIsoDate = (value) => {
+      const toIsoDate = value => {
         const raw = String(value || '').trim();
         if (!raw) return null;
         if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
@@ -10832,7 +12545,7 @@ export class ClinicAssistAutomation {
         }
         return null;
       };
-      const getSourceAgeDays = (sourceDateIso) => {
+      const getSourceAgeDays = sourceDateIso => {
         if (!sourceDateIso || !visitDate) return null;
         const sourceTs = Date.parse(`${sourceDateIso}T00:00:00Z`);
         const visitTs = Date.parse(`${visitDate}T00:00:00Z`);
@@ -10856,15 +12569,18 @@ export class ClinicAssistAutomation {
       const scoreDiagnosisCandidate = (source, candidate) => {
         const description = String(candidate?.description || '').trim();
         if (!description) return -Infinity;
-        const looksLikeMedication = /(?:\bmed(?:icine|ication)?\b|\bmed[a-z0-9+\-]{2,}\b|\bdrug\b|\btab(?:s)?\b|\bcap(?:s)?\b|\bmg\b|\bml\b|\boin?tment\b|\bcream\b|\bsyrup\b|\bbott(?:le)?\b|\binjection\b)/i.test(
-          description
-        );
-        const looksLikeService = /(?:consultation|physiotherapy|x[- ]?ray|ultrasound|mri|ct|procedure|therapy)/i.test(
-          description
-        );
-        const looksLikeLabOrScreening = /(?:\blab(?:oratory)?\b|\btest\b|\bscreen(?:ing)?\b|\bpanel\b|\bprofile\b|\bthyroid\b|\bhba1c\b|\bcbc\b|\blipid\b|\blft\b|\brft\b)/i.test(
-          description
-        );
+        const looksLikeMedication =
+          /(?:\bmed(?:icine|ication)?\b|\bmed[a-z0-9+\-]{2,}\b|\bdrug\b|\btab(?:s)?\b|\bcap(?:s)?\b|\bmg\b|\bml\b|\boin?tment\b|\bcream\b|\bsyrup\b|\bbott(?:le)?\b|\binjection\b)/i.test(
+            description
+          );
+        const looksLikeService =
+          /(?:consultation|physiotherapy|x[- ]?ray|ultrasound|mri|ct|procedure|therapy)/i.test(
+            description
+          );
+        const looksLikeLabOrScreening =
+          /(?:\blab(?:oratory)?\b|\btest\b|\bscreen(?:ing)?\b|\bpanel\b|\bprofile\b|\bthyroid\b|\bhba1c\b|\bcbc\b|\blipid\b|\blft\b|\brft\b)/i.test(
+            description
+          );
         const hasExplicitDxSignal =
           /\b(dx|diagnos(?:is|es)|assessment|impression|icd)\b/i.test(description) ||
           !!(candidate?.code && this._normalizeDiagnosisCode(candidate.code));
@@ -10878,7 +12594,9 @@ export class ClinicAssistAutomation {
         }
 
         const codeNorm =
-          this._normalizeDiagnosisCode(candidate?.code) || this._normalizeDiagnosisCode(description) || null;
+          this._normalizeDiagnosisCode(candidate?.code) ||
+          this._normalizeDiagnosisCode(description) ||
+          null;
         const attrs = this._extractDiagnosisAttributes(description);
         const isGeneric = this._isDiagnosisGeneric(description);
         const sourceDateIso = toIsoDate(candidate?.date || null);
@@ -10907,7 +12625,8 @@ export class ClinicAssistAutomation {
         if (attrs?.body_part) score += 8;
         if (attrs?.side) score += 5;
         if (!isGeneric) score += 6;
-        if (/\b(acl|mcl|lcl|pcl|ligament|meniscus|tear|rupture|deficiency)\b/i.test(description)) score += 6;
+        if (/\b(acl|mcl|lcl|pcl|ligament|meniscus|tear|rupture|deficiency)\b/i.test(description))
+          score += 6;
         if (looksLikeMedication) score -= 28;
         if (looksLikeService) score -= 14;
         // Lab/screening labels are not portable diagnosis labels for claim portals.
@@ -10961,7 +12680,7 @@ export class ClinicAssistAutomation {
         }
         return false;
       };
-      const diagnosisNeedsBroadenedSearch = (candidate) => {
+      const diagnosisNeedsBroadenedSearch = candidate => {
         if (!candidate || !candidate.description) return true;
         const isGeneric = this._isDiagnosisGeneric(candidate.description);
         const sourceDateIso = toIsoDate(candidate?.date || null);
@@ -10988,7 +12707,7 @@ export class ClinicAssistAutomation {
           rawCandidate = {
             code: rawDiagnosis.code || null,
             description: rawDiagnosis.description,
-            date: rawDiagnosis.date || null
+            date: rawDiagnosis.date || null,
           };
         }
         markAttempt('diagnosis_tab_raw', rawCandidate);
@@ -11034,10 +12753,12 @@ export class ClinicAssistAutomation {
       // This uses only strong intent (condition + body part) and never runs when Past Notes context is unavailable.
       if (!diagnosis || !diagnosis.description) {
         const missingIntent = await this.extractDiagnosisIntentFromPastNotes(visitDate, '');
-        const missingIntentAttrs = this._extractDiagnosisAttributes(missingIntent?.description || '');
+        const missingIntentAttrs = this._extractDiagnosisAttributes(
+          missingIntent?.description || ''
+        );
         const hasStrongMissingIntent = Boolean(
           (missingIntent?.bodyPart || missingIntentAttrs?.body_part) &&
-            (missingIntent?.condition || missingIntentAttrs?.condition)
+          (missingIntent?.condition || missingIntentAttrs?.condition)
         );
         if (missingIntent?.description && hasStrongMissingIntent) {
           diagnosisIntent = missingIntent;
@@ -11055,19 +12776,21 @@ export class ClinicAssistAutomation {
 
       // Step 6b: If diagnosis is generic/ambiguous, try to enrich from Past Notes.
       if (diagnosis && diagnosis.description && this._isDiagnosisGeneric(diagnosis.description)) {
-        diagnosisIntent = await this.extractDiagnosisIntentFromPastNotes(visitDate, diagnosis.description);
+        diagnosisIntent = await this.extractDiagnosisIntentFromPastNotes(
+          visitDate,
+          diagnosis.description
+        );
         if (diagnosisIntent?.description) {
           const baseAttrs = this._extractDiagnosisAttributes(diagnosis.description);
           const intentAttrs = this._extractDiagnosisAttributes(diagnosisIntent.description);
           const baseDateIso = toIsoDate(diagnosis?.date || null);
           const baseIsExact = !!(baseDateIso && visitDate && baseDateIso === visitDate);
           const baseText = String(diagnosis.description || '');
-          const baseExplicitlyUnspecified = /unspecified|unsp|other|parts?|region/i.test(
-            baseText
-          );
-          const baseSpecificClinicalSignal = /\b(acl|mcl|lcl|pcl|ligament|meniscus|deficiency|tear|rupture|fracture|dislocation|sprain|strain)\b/i.test(
-            baseText
-          );
+          const baseExplicitlyUnspecified = /unspecified|unsp|other|parts?|region/i.test(baseText);
+          const baseSpecificClinicalSignal =
+            /\b(acl|mcl|lcl|pcl|ligament|meniscus|deficiency|tear|rupture|fracture|dislocation|sprain|strain)\b/i.test(
+              baseText
+            );
           const intentScore = Number(diagnosisIntent?.score || 0);
           const bodyAligned =
             !baseAttrs?.body_part ||
@@ -11075,17 +12798,19 @@ export class ClinicAssistAutomation {
             baseAttrs.body_part === intentAttrs.body_part;
           const strongIntent = Boolean(
             diagnosisIntent?.side &&
-              (diagnosisIntent?.bodyPart || intentAttrs?.body_part) &&
-              (diagnosisIntent?.condition || intentAttrs?.condition)
+            (diagnosisIntent?.bodyPart || intentAttrs?.body_part) &&
+            (diagnosisIntent?.condition || intentAttrs?.condition)
           );
           const allowCrossBodyOverride =
             strongIntent &&
             !bodyAligned &&
-            ((!baseIsExact && intentScore >= 7) || (baseIsExact && baseExplicitlyUnspecified && intentScore >= 9));
+            ((!baseIsExact && intentScore >= 7) ||
+              (baseIsExact && baseExplicitlyUnspecified && intentScore >= 9));
           const intentIsPainLike = /^(pain|ache|soreness)$/i.test(
             String(diagnosisIntent?.condition || intentAttrs?.condition || '')
           );
-          const suppressPainDowngrade = baseSpecificClinicalSignal && intentIsPainLike && !baseExplicitlyUnspecified;
+          const suppressPainDowngrade =
+            baseSpecificClinicalSignal && intentIsPainLike && !baseExplicitlyUnspecified;
 
           if (((strongIntent && bodyAligned) || allowCrossBodyOverride) && !suppressPainDowngrade) {
             diagnosis = {
@@ -11129,10 +12854,13 @@ export class ClinicAssistAutomation {
         diagnosisIntentSuppressedReason &&
         canonicalPayload?.diagnosisResolution?.status === 'resolved'
       ) {
-        const resolvedCode = String(canonicalPayload?.diagnosisCanonical?.code_normalized || '').trim();
+        const resolvedCode = String(
+          canonicalPayload?.diagnosisCanonical?.code_normalized || ''
+        ).trim();
         if (!resolvedCode) {
           canonicalPayload.diagnosisResolution.status = 'ambiguous';
-          canonicalPayload.diagnosisResolution.reason_if_unresolved = diagnosisIntentSuppressedReason;
+          canonicalPayload.diagnosisResolution.reason_if_unresolved =
+            diagnosisIntentSuppressedReason;
         }
       }
 
@@ -11146,17 +12874,20 @@ export class ClinicAssistAutomation {
         }
         medicines = await this.extractMedicinesFromTXHistory(visitDate);
       } catch (e) {
-        this._logStep('Could not extract medicines from TX History (non-fatal)', { error: e.message });
+        this._logStep('Could not extract medicines from TX History (non-fatal)', {
+          error: e.message,
+        });
       }
 
       // Clean up common junk/instruction lines that sometimes leak into Medicine exports.
-      const isJunkMedicineName = (name) => {
+      const isJunkMedicineName = name => {
         const n = String(name || '').trim();
         if (!n) return true;
         const lower = n.toLowerCase();
         if (lower === 'medicine') return true;
         if (lower.startsWith('unfit for ')) return true;
-        if (lower.startsWith('take ') || lower.startsWith('apply ') || lower.startsWith('use ')) return true;
+        if (lower.startsWith('take ') || lower.startsWith('apply ') || lower.startsWith('use '))
+          return true;
         if (lower.startsWith('for ')) return true;
         if (lower.startsWith('after food ') || lower.includes(' after food ')) return true;
         if (lower.includes('when required')) return true;
@@ -11165,14 +12896,22 @@ export class ClinicAssistAutomation {
         if (lower.includes('for pain relieve') || lower.includes('for pain relief')) return true;
         if (lower.includes('for nerve regeneration')) return true;
         if (lower.includes('may cause')) return true;
-        if (lower.includes('complete the whole course') || lower.includes('complete whole course')) return true;
+        if (lower.includes('complete the whole course') || lower.includes('complete whole course'))
+          return true;
         if (lower.includes('course of medicine') || lower.includes('course of med')) return true;
         if (/^[\d.,]+$/.test(lower)) return true;
         if (/^\$?\s*\d+(?:\.\d+)?\s*(?:sgd)?\s*$/i.test(n)) return true;
-        if (/^\d+(?:\.\d+)?\s*(?:tabs?|tab|caps?|cap|pcs?|pc|sachets?|pkt|packs?|vials?|ampoules?)\b/i.test(lower))
+        if (
+          /^\d+(?:\.\d+)?\s*(?:tabs?|tab|caps?|cap|pcs?|pc|sachets?|pkt|packs?|vials?|ampoules?)\b/i.test(
+            lower
+          )
+        )
           return true;
         if (/^\d+(?:\.\d+)?\s*(?:mg|g|ml|mcg|iu)\b/i.test(lower)) return true;
-        if (/(tab\/s|tablet|capsule|cap\/s)\b/i.test(n) && /(daily|once|twice|bd|tds|after\s+food|before\s+food)\b/i.test(n))
+        if (
+          /(tab\/s|tablet|capsule|cap\/s)\b/i.test(n) &&
+          /(daily|once|twice|bd|tds|after\s+food|before\s+food)\b/i.test(n)
+        )
           return true;
         if (/^to be taken\b/i.test(lower) || /\bto be taken\b/i.test(lower)) return true;
         return false;
@@ -11181,17 +12920,19 @@ export class ClinicAssistAutomation {
       const medicinesBeforeFilter = Array.isArray(medicines) ? medicines.length : 0;
       const seenMed = new Set();
       medicines = (Array.isArray(medicines) ? medicines : [])
-        .map((m) => {
+        .map(m => {
           if (!m) return null;
           if (typeof m === 'string') return { name: m, quantity: null };
-          const name = String(m.name || m.description || '').trim().replace(/\s+/g, ' ');
+          const name = String(m.name || m.description || '')
+            .trim()
+            .replace(/\s+/g, ' ');
           if (!name) return null;
           const quantity = m.quantity ?? null;
           return { ...m, name, quantity };
         })
         .filter(Boolean)
-        .filter((m) => !isJunkMedicineName(m.name))
-        .filter((m) => {
+        .filter(m => !isJunkMedicineName(m.name))
+        .filter(m => {
           const key = String(m.name || '').toUpperCase();
           if (!key) return false;
           if (seenMed.has(key)) return false;
@@ -11204,7 +12945,7 @@ export class ClinicAssistAutomation {
       this._logStep('TX History: extracted medicines summary', {
         count: medicinesAfterFilter,
         filteredOut: medicinesFilteredOut,
-        sample: (medicines || []).slice(0, 5).map((m) => ({
+        sample: (medicines || []).slice(0, 5).map(m => ({
           name: String(m?.name || '').slice(0, 60),
           quantity: m?.quantity,
           unitPrice: m?.unitPrice ?? null,
@@ -11222,7 +12963,7 @@ export class ClinicAssistAutomation {
         diagnosisMissingReason =
           canonicalPayload?.diagnosisResolution?.reason_if_unresolved || 'diagnosis_unresolved';
       }
-      
+
       return {
         chargeType,
         diagnosis,
@@ -11318,7 +13059,10 @@ export class ClinicAssistAutomation {
                     ].join(', ')
                   )
                   .first();
-                if ((await showBtn.count().catch(() => 0)) > 0 && (await showBtn.isVisible().catch(() => false))) {
+                if (
+                  (await showBtn.count().catch(() => 0)) > 0 &&
+                  (await showBtn.isVisible().catch(() => false))
+                ) {
                   await showBtn.click().catch(() => {});
                   await this.page.waitForTimeout(1500);
                 }
@@ -11353,11 +13097,11 @@ export class ClinicAssistAutomation {
       await this.page.waitForTimeout(1000);
 
       // Extract medicine records from table; prefer exact date match, else most recent on/before visitDate.
-      const extraction = await this.page.evaluate((targetDateStr) => {
+      const extraction = await this.page.evaluate(targetDateStr => {
         const records = [];
         const tables = Array.from(document.querySelectorAll('table'));
 
-        const parseDate = (dateStr) => {
+        const parseDate = dateStr => {
           if (!dateStr) return null;
           const patterns = [
             /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/, // DD/MM/YYYY or DD-MM-YYYY
@@ -11373,15 +13117,23 @@ export class ClinicAssistAutomation {
           return null;
         };
 
-        const parseQty = (text) => {
+        const parseQty = text => {
           const raw = String(text || '').trim();
           if (!raw) return null;
           const lower = raw.toLowerCase();
           if (/\$/.test(raw)) return null;
-          if (/(mg|ml|mcg|iu)\b/i.test(lower) && !/(tabs?|tablets?|caps?|capsules?|pcs?|units?|packs?|sachets?|vials?|ampoules?|bottles?)\b/i.test(lower)) {
+          if (
+            /(mg|ml|mcg|iu)\b/i.test(lower) &&
+            !/(tabs?|tablets?|caps?|capsules?|pcs?|units?|packs?|sachets?|vials?|ampoules?|bottles?)\b/i.test(
+              lower
+            )
+          ) {
             return null;
           }
-          if (/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(raw) || /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(raw)) {
+          if (
+            /\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(raw) ||
+            /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(raw)
+          ) {
             return null;
           }
           const m = raw.match(/(\d+(?:\.\d+)?)/);
@@ -11392,12 +13144,21 @@ export class ClinicAssistAutomation {
           return Number(num.toFixed(2));
         };
 
-        const parseMoney = (text) => {
+        const parseMoney = text => {
           const raw = String(text || '').trim();
           if (!raw) return null;
           const lower = raw.toLowerCase();
-          if (/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(raw) || /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(raw)) return null;
-          if (/(tabs?|tablets?|caps?|capsules?|pcs?|units?|packs?|sachets?|vials?|ampoules?|bottles?|mg|ml|mcg|iu)\b/i.test(lower)) return null;
+          if (
+            /\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/.test(raw) ||
+            /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(raw)
+          )
+            return null;
+          if (
+            /(tabs?|tablets?|caps?|capsules?|pcs?|units?|packs?|sachets?|vials?|ampoules?|bottles?|mg|ml|mcg|iu)\b/i.test(
+              lower
+            )
+          )
+            return null;
           const cleaned = raw.replace(/,/g, '');
           if (!/\$|sgd/i.test(cleaned) && !/\d+\.\d+/.test(cleaned)) return null;
           const m = cleaned.match(/(?:\$|sgd\s*)?(-?\d+(?:\.\d+)?)/i);
@@ -11408,7 +13169,7 @@ export class ClinicAssistAutomation {
           return Number(num.toFixed(4));
         };
 
-        const parseUnit = (text) => {
+        const parseUnit = text => {
           const raw = String(text || '').trim();
           if (!raw) return null;
           const lower = raw.toLowerCase();
@@ -11433,7 +13194,10 @@ export class ClinicAssistAutomation {
 
         const targetDate = parseDate(targetDateStr);
 
-        const extractRow = (cells, { dateCol, nameCol, qtyCol, unitCol, unitPriceCol, amountCol }) => {
+        const extractRow = (
+          cells,
+          { dateCol, nameCol, qtyCol, unitCol, unitPriceCol, amountCol }
+        ) => {
           if (!cells || cells.length === 0) return null;
 
           // Date
@@ -11443,7 +13207,10 @@ export class ClinicAssistAutomation {
           } else {
             for (const cell of cells) {
               const text = (cell.textContent || '').trim();
-              if (/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text) || /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(text)) {
+              if (
+                /\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text) ||
+                /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(text)
+              ) {
                 dateStr = text;
                 break;
               }
@@ -11464,7 +13231,10 @@ export class ClinicAssistAutomation {
               const text = (cell.textContent || '').trim();
               if (!text) continue;
               if (/^\d+$/.test(text)) continue;
-              if (/\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text) || /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(text))
+              if (
+                /\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}/.test(text) ||
+                /\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}/.test(text)
+              )
                 continue;
               if (text.length > name.length) {
                 name = text;
@@ -11484,20 +13254,21 @@ export class ClinicAssistAutomation {
             if (qtyNum !== null) quantity = qtyNum;
           } else {
             // Prefer medicine-like quantity cells first (e.g., "40.00 Tabs").
-            qtyHintCell = cells.find((cell, idx) =>
-              idx !== resolvedNameCol &&
-              /(tabs?|tablets?|caps?|capsules?|pcs?|units?|packs?|sachets?|vials?|ampoules?|bottles?)\b/i.test(
-                (cell.textContent || '').trim()
-              )
+            qtyHintCell = cells.find(
+              (cell, idx) =>
+                idx !== resolvedNameCol &&
+                /(tabs?|tablets?|caps?|capsules?|pcs?|units?|packs?|sachets?|vials?|ampoules?|bottles?)\b/i.test(
+                  (cell.textContent || '').trim()
+                )
             );
             const hintedQty = parseQty(qtyHintCell?.textContent || '');
             if (hintedQty !== null) {
               quantity = hintedQty;
             } else {
-            for (let i = 0; i < cells.length; i++) {
-              if (i === resolvedNameCol) continue;
-              const cell = cells[i];
-              const text = (cell.textContent || '').trim();
+              for (let i = 0; i < cells.length; i++) {
+                if (i === resolvedNameCol) continue;
+                const cell = cells[i];
+                const text = (cell.textContent || '').trim();
                 const num = parseQty(text);
                 if (num !== null) {
                   quantity = num;
@@ -11531,10 +13302,16 @@ export class ClinicAssistAutomation {
             moneyCandidates.push({ idx: i, money });
           }
           if (amount === null && moneyCandidates.length) {
-            amount = moneyCandidates.reduce((best, cur) => (cur.money > best ? cur.money : best), moneyCandidates[0].money);
+            amount = moneyCandidates.reduce(
+              (best, cur) => (cur.money > best ? cur.money : best),
+              moneyCandidates[0].money
+            );
           }
           if (unitPrice === null && moneyCandidates.length) {
-            const smallest = moneyCandidates.reduce((best, cur) => (cur.money < best ? cur.money : best), moneyCandidates[0].money);
+            const smallest = moneyCandidates.reduce(
+              (best, cur) => (cur.money < best ? cur.money : best),
+              moneyCandidates[0].money
+            );
             if (moneyCandidates.length > 1) {
               unitPrice = smallest;
             } else if (amount !== null && quantity > 1) {
@@ -11557,68 +13334,87 @@ export class ClinicAssistAutomation {
           return { name, quantity, unit, unitPrice, amount, date: dateStr, dateObj };
         };
 
-        tables.forEach((table) => {
+        tables.forEach(table => {
           const rows = Array.from(table.querySelectorAll('tbody tr, tr'));
           if (rows.length === 0) return;
 
           const headerRow = table.querySelector('thead tr') || rows[0];
           const headers = headerRow
-            ? Array.from(headerRow.querySelectorAll('th, td')).map((h) => (h.textContent || '').trim().toLowerCase())
+            ? Array.from(headerRow.querySelectorAll('th, td')).map(h =>
+                (h.textContent || '').trim().toLowerCase()
+              )
             : [];
 
-          const dateCol = headers.findIndex((h) => h.includes('date') || h.includes('visit'));
-          const nameCol = headers.findIndex((h) => h.includes('medicine') || h.includes('drug') || h.includes('item') || h.includes('description'));
-          const qtyCol = headers.findIndex((h) => /\bqty\b|\bquantity\b/.test(h));
-          const unitCol = headers.findIndex((h) => /\bunit\b/.test(h) && !/\bprice\b/.test(h));
-          const unitPriceCol = headers.findIndex(
-            (h) =>
-              (/\bunit\s*price\b|\bprice\s*\/?\s*unit\b|\bu\/?price\b|\bprice\b/.test(h)) &&
-              !(/\bamount\b|\btotal\b/.test(h))
+          const dateCol = headers.findIndex(h => h.includes('date') || h.includes('visit'));
+          const nameCol = headers.findIndex(
+            h =>
+              h.includes('medicine') ||
+              h.includes('drug') ||
+              h.includes('item') ||
+              h.includes('description')
           );
-          const amountCol = headers.findIndex((h) => /\bamount\b|\btotal\b|\bfee\b|\bcharge\b/.test(h));
+          const qtyCol = headers.findIndex(h => /\bqty\b|\bquantity\b/.test(h));
+          const unitCol = headers.findIndex(h => /\bunit\b/.test(h) && !/\bprice\b/.test(h));
+          const unitPriceCol = headers.findIndex(
+            h =>
+              /\bunit\s*price\b|\bprice\s*\/?\s*unit\b|\bu\/?price\b|\bprice\b/.test(h) &&
+              !/\bamount\b|\btotal\b/.test(h)
+          );
+          const amountCol = headers.findIndex(h =>
+            /\bamount\b|\btotal\b|\bfee\b|\bcharge\b/.test(h)
+          );
 
           // If we used rows[0] as headerRow, skip it for data when headers exist.
           const dataRows = headers.length ? rows.slice(1) : rows;
 
-          dataRows.forEach((row) => {
+          dataRows.forEach(row => {
             const cells = Array.from(row.querySelectorAll('td, th'));
-            const rec = extractRow(cells, { dateCol, nameCol, qtyCol, unitCol, unitPriceCol, amountCol });
+            const rec = extractRow(cells, {
+              dateCol,
+              nameCol,
+              qtyCol,
+              unitCol,
+              unitPriceCol,
+              amountCol,
+            });
             if (rec) records.push(rec);
           });
         });
 
         // Choose which date bucket to return.
         const sorted = records
-          .filter((r) => r?.dateObj)
+          .filter(r => r?.dateObj)
           .sort((a, b) => b.dateObj.getTime() - a.dateObj.getTime());
 
         let chosenDateObj = null;
         let chosen = [];
 
         if (targetDate) {
-          const exact = sorted.filter((r) => sameDay(r.dateObj, targetDate));
+          const exact = sorted.filter(r => sameDay(r.dateObj, targetDate));
           if (exact.length) {
             chosenDateObj = targetDate;
             chosen = exact;
           } else {
             // Most recent on/before visit date.
             const targetTs = new Date(targetDate).setHours(0, 0, 0, 0);
-            const onOrBefore = sorted.find((r) => new Date(r.dateObj).setHours(0, 0, 0, 0) <= targetTs);
+            const onOrBefore = sorted.find(
+              r => new Date(r.dateObj).setHours(0, 0, 0, 0) <= targetTs
+            );
             if (onOrBefore) {
               chosenDateObj = onOrBefore.dateObj;
-              chosen = sorted.filter((r) => sameDay(r.dateObj, chosenDateObj));
+              chosen = sorted.filter(r => sameDay(r.dateObj, chosenDateObj));
             } else if (sorted.length) {
               // Unusual: no records on/before target; fall back to most recent overall.
               chosenDateObj = sorted[0].dateObj;
-              chosen = sorted.filter((r) => sameDay(r.dateObj, chosenDateObj));
+              chosen = sorted.filter(r => sameDay(r.dateObj, chosenDateObj));
             }
           }
         } else if (sorted.length) {
           chosenDateObj = sorted[0].dateObj;
-          chosen = sorted.filter((r) => sameDay(r.dateObj, chosenDateObj));
+          chosen = sorted.filter(r => sameDay(r.dateObj, chosenDateObj));
         }
 
-        const toLocalIsoDate = (d) => {
+        const toLocalIsoDate = d => {
           if (!d) return null;
           const y = d.getFullYear();
           const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -11630,7 +13426,7 @@ export class ClinicAssistAutomation {
           // Use local date components; toISOString() would shift the day in SGT.
           chosenDateIso: chosenDateObj ? toLocalIsoDate(chosenDateObj) : null,
           totalRecords: sorted.length,
-          medicines: chosen.map((r) => ({
+          medicines: chosen.map(r => ({
             name: r.name,
             quantity: r.quantity,
             unit: r.unit ?? null,
@@ -11644,40 +13440,55 @@ export class ClinicAssistAutomation {
       let medicines = Array.isArray(extraction?.medicines) ? extraction.medicines : [];
       // Post-filter: remove obvious instruction/placeholder rows that are not billable items.
       // These frequently appear in TX History -> Medicine as free-text directions.
-	      const isJunkMedicineName = (name) => {
-	        const n = String(name || '').trim();
-	        if (!n) return true;
-	        const lower = n.toLowerCase();
-	        if (lower === 'medicine') return true;
+      const isJunkMedicineName = name => {
+        const n = String(name || '').trim();
+        if (!n) return true;
+        const lower = n.toLowerCase();
+        if (lower === 'medicine') return true;
         // Price/quantity-only lines commonly appear and should never be treated as a billable item name.
         if (/^[\d.,]+$/.test(lower)) return true;
         if (/^\$?\s*\d+(?:\.\d+)?\s*(?:sgd)?\s*$/i.test(n)) return true;
-        if (/^\d+(?:\.\d+)?\s*(?:tabs?|tab|caps?|cap|pcs?|pc|sachets?|pkt|packs?|vials?|ampoules?)\b/i.test(lower)) return true;
+        if (
+          /^\d+(?:\.\d+)?\s*(?:tabs?|tab|caps?|cap|pcs?|pc|sachets?|pkt|packs?|vials?|ampoules?)\b/i.test(
+            lower
+          )
+        )
+          return true;
         if (/^\d+(?:\.\d+)?\s*(?:mg|g|ml|mcg|iu)\b/i.test(lower)) return true;
-	        if (lower.startsWith('unfit for ')) return true;
-	        // Common instruction lines that leak into Medicine tab exports.
-	        if (lower.startsWith('for ')) return true;
-	        if (lower.startsWith('after food ') || lower.includes(' after food ')) return true;
-	        if (lower.includes('when required')) return true;
-	        if (lower.includes('maximum') || lower.includes('max ')) return true;
-	        if (lower.includes('do not drive') || lower.includes('operate machinery')) return true;
-	        if (lower.includes('for pain relieve') || lower.includes('for pain relief')) return true;
-	        if (lower.includes('for nerve regeneration')) return true;
-	        if (lower.includes('may cause')) return true;
-	        if (lower.includes('complete whole course')) return true;
-	        if (lower.includes('complete the whole course')) return true;
-	        if (lower.includes('course of medicine') || lower.includes('course of med')) return true;
-	        if (lower.startsWith('take ') || lower.startsWith('apply ') || lower.startsWith('use ')) return true;
-	        if (/(tab\/s|tablet|capsule|cap\/s)\b/i.test(n) && /(daily|once|twice|bd|tds|after\s+food|before\s+food)\b/i.test(n)) return true;
-	        if (/^to be taken\b/i.test(lower) || /\bto be taken\b/i.test(lower)) return true;
-	        return false;
-	      };
+        if (lower.startsWith('unfit for ')) return true;
+        // Common instruction lines that leak into Medicine tab exports.
+        if (lower.startsWith('for ')) return true;
+        if (lower.startsWith('after food ') || lower.includes(' after food ')) return true;
+        if (lower.includes('when required')) return true;
+        if (lower.includes('maximum') || lower.includes('max ')) return true;
+        if (lower.includes('do not drive') || lower.includes('operate machinery')) return true;
+        if (lower.includes('for pain relieve') || lower.includes('for pain relief')) return true;
+        if (lower.includes('for nerve regeneration')) return true;
+        if (lower.includes('may cause')) return true;
+        if (lower.includes('complete whole course')) return true;
+        if (lower.includes('complete the whole course')) return true;
+        if (lower.includes('course of medicine') || lower.includes('course of med')) return true;
+        if (lower.startsWith('take ') || lower.startsWith('apply ') || lower.startsWith('use '))
+          return true;
+        if (
+          /(tab\/s|tablet|capsule|cap\/s)\b/i.test(n) &&
+          /(daily|once|twice|bd|tds|after\s+food|before\s+food)\b/i.test(n)
+        )
+          return true;
+        if (/^to be taken\b/i.test(lower) || /\bto be taken\b/i.test(lower)) return true;
+        return false;
+      };
       // De-dupe by name (case-insensitive) to avoid filling the same service repeatedly.
       const seen = new Set();
       medicines = medicines
-        .map((m) => ({ ...m, name: String(m?.name || '').trim().replace(/\s+/g, ' ') }))
-        .filter((m) => !isJunkMedicineName(m.name))
-        .filter((m) => {
+        .map(m => ({
+          ...m,
+          name: String(m?.name || '')
+            .trim()
+            .replace(/\s+/g, ' '),
+        }))
+        .filter(m => !isJunkMedicineName(m.name))
+        .filter(m => {
           const key = String(m.name || '').toUpperCase();
           if (!key) return false;
           if (seen.has(key)) return false;
@@ -11690,7 +13501,7 @@ export class ClinicAssistAutomation {
         visitDate,
         chosenDateIso: extraction?.chosenDateIso || null,
         totalRecords: extraction?.totalRecords ?? null,
-        medicines: medicines.slice(0, 5).map((m) => ({
+        medicines: medicines.slice(0, 5).map(m => ({
           name: String(m.name || '').substring(0, 50),
           quantity: m.quantity,
           unitPrice: m.unitPrice ?? null,
