@@ -24,6 +24,118 @@ import {
   resolveFlow3PortalTarget,
 } from '../../apps/crm/src/lib/rpa/portals.shared.js';
 
+// Common body-part → ICD-10 code mappings for the diagnosis fallback ladder.
+const BODY_PART_ICD_MAP = {
+  knee: { code: 'M25.56', text: 'Knee pain' },
+  back: { code: 'M54.5', text: 'Low back pain' },
+  'low back': { code: 'M54.5', text: 'Low back pain' },
+  'lower back': { code: 'M54.5', text: 'Low back pain' },
+  'upper back': { code: 'M54.6', text: 'Upper back pain' },
+  shoulder: { code: 'M25.51', text: 'Shoulder pain' },
+  neck: { code: 'M54.2', text: 'Neck pain' },
+  ankle: { code: 'M25.57', text: 'Ankle pain' },
+  wrist: { code: 'M25.53', text: 'Wrist pain' },
+  hip: { code: 'M25.55', text: 'Hip pain' },
+  elbow: { code: 'M25.52', text: 'Elbow pain' },
+  foot: { code: 'M79.67', text: 'Foot pain' },
+  hand: { code: 'M79.64', text: 'Hand pain' },
+  chest: { code: 'R07.9', text: 'Chest pain' },
+  head: { code: 'R51', text: 'Headache' },
+  throat: { code: 'J02.9', text: 'Sore throat' },
+  abdomen: { code: 'R10.9', text: 'Abdominal pain' },
+  eye: { code: 'H57.1', text: 'Eye pain' },
+  ear: { code: 'H92.0', text: 'Ear pain' },
+};
+
+// Common condition → ICD-10 code mappings when no body-part is available.
+const CONDITION_ICD_MAP = {
+  sprain: { code: 'T14.3', text: 'Sprain, unspecified' },
+  strain: { code: 'T14.3', text: 'Strain, unspecified' },
+  fracture: { code: 'T14.8', text: 'Fracture, unspecified' },
+  pain: { code: 'R52', text: 'Pain, unspecified' },
+  fever: { code: 'R50.9', text: 'Fever' },
+  cough: { code: 'R05', text: 'Cough' },
+  infection: { code: 'B99', text: 'Infection, unspecified' },
+  allergy: { code: 'T78.4', text: 'Allergy, unspecified' },
+  diarrhea: { code: 'R19.7', text: 'Diarrhea' },
+  headache: { code: 'R51', text: 'Headache' },
+  migraine: { code: 'G43.9', text: 'Migraine' },
+};
+
+/**
+ * Build a tiered diagnosis fallback, preferring canonical/extracted data over generic "Cough".
+ * Returns { code, text, source } where source describes which tier was used.
+ */
+function buildDiagnosisFallbackLadder(diagnosisCanonical, diagnosisDesc, diagnosisCode) {
+  const envCode = String(process.env.MHC_GENERIC_FALLBACK_CODE || '')
+    .trim()
+    .toUpperCase();
+  const envText = String(
+    process.env.MHC_GENERIC_FALLBACK_DIAGNOSIS || process.env.MHC_GENERIC_DRAFT_DIAGNOSIS || ''
+  ).trim();
+  const lastResortCode = envCode || 'R05';
+  const lastResortText = envText || 'Cough';
+
+  // Tier 1: canonical description from Flow 2 enrichment
+  const canonicalDesc = String(diagnosisCanonical?.description_canonical || '').trim();
+  const canonicalCode = String(diagnosisCanonical?.code_normalized || '')
+    .trim()
+    .toUpperCase();
+  if (canonicalDesc && !/^missing\s+diagnosis$/i.test(canonicalDesc)) {
+    return {
+      code: canonicalCode || diagnosisCode || lastResortCode,
+      text: canonicalDesc,
+      source: 'canonical_description',
+    };
+  }
+
+  // Tier 2: body-part + condition inference from canonical metadata
+  const bodyPart = String(diagnosisCanonical?.body_part || '')
+    .trim()
+    .toLowerCase();
+  const condition = String(diagnosisCanonical?.condition || '')
+    .trim()
+    .toLowerCase();
+  if (bodyPart && BODY_PART_ICD_MAP[bodyPart]) {
+    const mapping = BODY_PART_ICD_MAP[bodyPart];
+    // If we have a condition too, combine them (e.g. "Knee sprain" instead of "Knee pain")
+    const combinedText =
+      condition && condition !== 'pain'
+        ? `${bodyPart.charAt(0).toUpperCase() + bodyPart.slice(1)} ${condition}`
+        : mapping.text;
+    return {
+      code: canonicalCode || mapping.code,
+      text: combinedText,
+      source: 'body_part_inference',
+    };
+  }
+  if (condition && CONDITION_ICD_MAP[condition]) {
+    const mapping = CONDITION_ICD_MAP[condition];
+    return {
+      code: canonicalCode || mapping.code,
+      text: mapping.text,
+      source: 'condition_inference',
+    };
+  }
+
+  // Tier 3: raw extracted diagnosis text from Flow 2 (even if it didn't resolve against portal options)
+  const rawDesc = String(diagnosisDesc || '').trim();
+  if (rawDesc && !/^missing\s+diagnosis$/i.test(rawDesc) && rawDesc.length >= 3) {
+    return {
+      code: diagnosisCode || canonicalCode || lastResortCode,
+      text: rawDesc,
+      source: 'raw_extraction',
+    };
+  }
+
+  // Tier 4: last resort — generic Cough / R05
+  return {
+    code: lastResortCode,
+    text: lastResortText,
+    source: 'generic_last_resort',
+  };
+}
+
 /**
  * Claim Submitter: Routes claims to appropriate portals based on pay type
  */
@@ -664,16 +776,18 @@ export class ClaimSubmitter {
       saveDraftMode && process.env.MHC_ALLOW_MISSING_DIAG_DRAFT_FALLBACK !== '0';
     const allowNonSubmitDiagnosisFallback =
       requestedMode !== 'submit' && process.env.MHC_ALLOW_NON_SUBMIT_DIAG_FALLBACK !== '0';
-    const genericFallbackDiagnosisCode =
-      String(process.env.MHC_GENERIC_FALLBACK_CODE || 'R05')
-        .trim()
-        .toUpperCase() || 'R05';
-    const genericFallbackDiagnosisText =
-      String(
-        process.env.MHC_GENERIC_FALLBACK_DIAGNOSIS ||
-          process.env.MHC_GENERIC_DRAFT_DIAGNOSIS ||
-          'Cough'
-      ).trim() || 'Cough';
+    // Diagnosis fallback ladder: try increasingly generic options before landing on Cough.
+    // 1. Canonical description (e.g. "Low back pain", "Knee sprain")
+    // 2. Body-part + condition inference (e.g. knee + pain → "Knee pain" / M79.5)
+    // 3. Raw extracted text (even if unresolved, it's better than Cough)
+    // 4. Last resort: generic Cough / R05
+    const fallbackLadder = buildDiagnosisFallbackLadder(
+      diagnosisCanonical,
+      diagnosisDesc,
+      diagnosisCode
+    );
+    const genericFallbackDiagnosisCode = fallbackLadder.code;
+    const genericFallbackDiagnosisText = fallbackLadder.text;
     let diagnosisMatch = metadata.diagnosisMatch || null;
     let portalDiagnosisOptions = Array.isArray(metadata.portalDiagnosisOptions)
       ? metadata.portalDiagnosisOptions
@@ -977,12 +1091,13 @@ export class ClaimSubmitter {
       requestedMode,
       code: genericFallbackDiagnosisCode || null,
       text: genericFallbackDiagnosisText,
+      fallbackSource: fallbackLadder.source,
       diagnosisHint: {
         code: genericFallbackDiagnosisCode || null,
         description: genericFallbackDiagnosisText,
-        side: null,
-        body_part: null,
-        condition: null,
+        side: diagnosisCanonical?.side || null,
+        body_part: diagnosisCanonical?.body_part || null,
+        condition: diagnosisCanonical?.condition || null,
       },
       flow2Status: flow2Status || null,
       reason: reason || 'flow2_unresolved',
@@ -1026,7 +1141,7 @@ export class ClaimSubmitter {
           dateGatePassed: flow2DateGatePassed,
         });
         logger.warn(
-          '[SUBMIT] Flow 2 diagnosis unresolved; using deterministic portal diagnosis fallback',
+          '[SUBMIT] Flow 2 diagnosis unresolved; using tiered portal diagnosis fallback',
           {
             visitId: visit.id,
             nric: nric || null,
@@ -1034,8 +1149,9 @@ export class ClaimSubmitter {
             requestedMode,
             flow2Status: flow2DiagnosisStatus || null,
             diagnosis: diagnosisDesc || null,
-            genericFallbackDiagnosisCode,
-            genericFallbackDiagnosisText,
+            fallbackCode: genericFallbackDiagnosisCode,
+            fallbackText: genericFallbackDiagnosisText,
+            fallbackSource: fallbackLadder.source,
             dateGatePassed: flow2DateGatePassed,
           }
         );
@@ -1132,16 +1248,49 @@ export class ClaimSubmitter {
     if (!diagnosisMatch || diagnosisMatch.blocked !== false) {
       const flow2FallbackLowConfidence =
         allowGenericDiagnosisFallback && diagnosisResolution?.status === 'fallback_low_confidence';
-      if (requestedMode !== 'submit' && (flow2FallbackLowConfidence || diagnosisFallbackMode)) {
-        logger.warn('[SUBMIT] Non-submit diagnosis bypass enabled', {
-          visitId: visit.id,
-          nric: nric || null,
-          requestedMode,
-          diagnosis: diagnosisDesc || null,
-          diagnosisCode: diagnosisCode || null,
-          diagnosisMatch: diagnosisMatch || null,
-          diagnosisFallbackMode: diagnosisFallbackMode || null,
-        });
+      // When Flow 2 resolved the diagnosis but the portal ICD match is blocked
+      // (e.g. ambiguous_close_candidates), in non-submit mode we can still attempt
+      // to fill via M-button search using the canonical description.
+      const flow2ResolvedButPortalBlocked =
+        requestedMode !== 'submit' &&
+        diagnosisResolution?.status === 'resolved' &&
+        diagnosisMatch?.blocked === true &&
+        diagnosisDesc;
+      if (
+        requestedMode !== 'submit' &&
+        (flow2FallbackLowConfidence || diagnosisFallbackMode || flow2ResolvedButPortalBlocked)
+      ) {
+        if (flow2ResolvedButPortalBlocked && !diagnosisFallbackMode) {
+          // Set up a fallback mode that will use M-button search with the original diagnosis text
+          diagnosisFallbackMode = buildGenericDiagnosisFallbackMode({
+            stage: 'portal_match_blocked',
+            flow2Status: diagnosisResolution?.status,
+            reason: diagnosisMatch?.blocked_reason || 'portal_match_blocked',
+            variant: 'unresolved_diagnosis',
+            dateGatePassed: true,
+          });
+          logger.warn(
+            '[SUBMIT] Flow 2 resolved but portal match blocked; using M-button fallback',
+            {
+              visitId: visit.id,
+              nric: nric || null,
+              diagnosis: diagnosisDesc,
+              blockedReason: diagnosisMatch?.blocked_reason,
+              canonicalCondition: diagnosisCanonical?.condition,
+              canonicalBodyPart: diagnosisCanonical?.body_part,
+            }
+          );
+        } else {
+          logger.warn('[SUBMIT] Non-submit diagnosis bypass enabled', {
+            visitId: visit.id,
+            nric: nric || null,
+            requestedMode,
+            diagnosis: diagnosisDesc || null,
+            diagnosisCode: diagnosisCode || null,
+            diagnosisMatch: diagnosisMatch || null,
+            diagnosisFallbackMode: diagnosisFallbackMode || null,
+          });
+        }
       } else {
         const err = new Error(
           `diagnosis_mapping_failed: no safe portal diagnosis option match (visitId=${visit.id}, nric=${nric})`
@@ -1169,7 +1318,31 @@ export class ClaimSubmitter {
     }
 
     // Fill diagnosis. Non-submit fallback prefers a matched portal option, then falls back to text entry.
-    if (diagnosisFallbackMode) {
+    // When Flow 2 has no diagnosis (missing_in_source) and the portal already has a valid
+    // diagnosis (admin-entered), preserve it instead of overwriting with a generic fallback.
+    let portalDiagnosisPreserved = false;
+    if (
+      diagnosisFallbackMode &&
+      diagnosisResolution?.status === 'missing_in_source' &&
+      requestedMode !== 'submit'
+    ) {
+      const existingDiag = await this.mhcAsia
+        .getDiagnosisResolutionState({ waitMs: 300 })
+        .catch(() => null);
+      if (existingDiag?.resolved && existingDiag?.diagnosisPriDesc) {
+        logger.info('[SUBMIT] Preserving portal existing diagnosis (admin-entered)', {
+          visitId: visit.id,
+          nric: nric || null,
+          existingDiagnosis: existingDiag.diagnosisPriDesc,
+          wouldHaveFilled: genericFallbackDiagnosisText,
+          fallbackSource: fallbackLadder.source,
+        });
+        portalDiagnosisPreserved = true;
+        diagnosisFallbackMode.portalPreserved = true;
+        diagnosisFallbackMode.portalExistingDiagnosis = existingDiag.diagnosisPriDesc;
+      }
+    }
+    if (diagnosisFallbackMode && !portalDiagnosisPreserved) {
       const fallbackDiagnosis = {
         code: diagnosisMatch?.selected_code || diagnosisFallbackMode.code || null,
         description:
@@ -1330,6 +1503,60 @@ export class ClaimSubmitter {
       if (/^to be taken\b/i.test(lower) || /\bto be taken\b/i.test(lower)) return true;
       return false;
     };
+    // Filter items that are actually diagnoses, consultations, or procedures — not drugs
+    const isDiagnosisOrProcedure = name => {
+      const lower = String(name || '')
+        .trim()
+        .toLowerCase();
+      if (!lower) return false;
+      // Consultation / procedure / radiology / brace items
+      if (
+        /\bconsultation\b|\bconsult\b|\bphysiotherapy\b|\bradiology\b|\bx-ray\b|\bmri\b|\bultrasound\b|\bbrace\b/i.test(
+          lower
+        )
+      )
+        return true;
+      // Check against diagnosis text — diagnosis contamination in medicines list.
+      // Compare against BOTH the resolved portal diagnosis AND the original Flow 2
+      // diagnosis_description, because they can differ (e.g. fallback resolution).
+      const diagTexts = [
+        String(diagnosisCanonical?.description_canonical || '')
+          .trim()
+          .toLowerCase(),
+        String(diagnosisDesc || '')
+          .trim()
+          .toLowerCase(),
+        String(visit?.diagnosis_description || '')
+          .trim()
+          .toLowerCase(),
+      ].filter(t => t.length >= 5);
+      const nameTokens = lower
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .split(/\s+/)
+        .filter(t => t.length >= 3);
+      if (nameTokens.length >= 2) {
+        for (const diagText of diagTexts) {
+          const diagTokens = diagText
+            .replace(/[^a-z0-9\s]/g, ' ')
+            .split(/\s+/)
+            .filter(t => t.length >= 3);
+          if (diagTokens.length >= 2) {
+            const diagSet = new Set(diagTokens);
+            const overlap = nameTokens.filter(t => diagSet.has(t)).length;
+            if (overlap / Math.max(nameTokens.length, diagTokens.length) >= 0.5) return true;
+          }
+        }
+      }
+      // Catch common medical condition patterns that are clearly not drugs
+      if (
+        /\b(?:deficiency|tear|rupture|fracture|dislocation|subluxation|contusion|laceration)\b/i.test(
+          lower
+        ) &&
+        !/\b(?:mg|ml|mcg|tab|cap|cream|gel|ointment|syrup|drops)\b/i.test(lower)
+      )
+        return true;
+      return false;
+    };
     const seenItems = new Set();
     const normalizeQty = value => {
       if (value === null || value === undefined) return null;
@@ -1365,7 +1592,7 @@ export class ClaimSubmitter {
           .trim()
           .replace(/\s+/g, ' '),
       }))
-      .filter(m => m.name && !isJunkItem(m.name))
+      .filter(m => m.name && !isJunkItem(m.name) && !isDiagnosisOrProcedure(m.name))
       .filter(m => {
         const key = m.name.toUpperCase();
         if (!key) return false;
@@ -1400,11 +1627,18 @@ export class ClaimSubmitter {
       const lines = String(visit.treatment_detail)
         .split(/\r?\n/)
         .map(s => s.trim())
-        .filter(Boolean);
+        .filter(Boolean)
+        .filter(line => !isJunkItem(line) && !isDiagnosisOrProcedure(line));
       if (lines.length) {
         const saveDraftMode = process.env.WORKFLOW_SAVE_DRAFT !== '0';
         const skipProceduresForDraft = process.env.MHC_SKIP_PROCEDURES_FOR_DRAFT !== '0';
         const skipProcedures = saveDraftMode && skipProceduresForDraft;
+        logger.info('[SUBMIT] treatment_detail fallback items (filtered)', {
+          visitId: visit.id,
+          original: String(visit.treatment_detail).split(/\r?\n/).filter(Boolean).length,
+          filtered: lines.length,
+          sample: lines.slice(0, 5),
+        });
         await this.mhcAsia.fillServicesAndDrugs(lines, { skipProcedures }).catch(() => {});
       }
     }
@@ -1639,6 +1873,38 @@ export class ClaimSubmitter {
     return '';
   }
 
+  /**
+   * Pick a normalized DOB (YYYY-MM-DD) for a visit. Looks at direct visit fields and
+   * extraction_metadata.flow1 (where Flow 1 ClinicAssist extraction stores DOB).
+   * Returns '' when no DOB is available.
+   */
+  _pickDobForVisit(visit, metadata = null) {
+    const md = metadata || visit?.extraction_metadata || {};
+    const candidates = [
+      visit?.dob,
+      visit?.date_of_birth,
+      visit?.patient_dob,
+      md?.dob,
+      md?.date_of_birth,
+      md?.flow1?.dob,
+      md?.flow2?.dob,
+    ].filter(Boolean);
+    for (const cand of candidates) {
+      const s = String(cand).trim();
+      // Already-ISO YYYY-MM-DD wins immediately.
+      const iso = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (iso) {
+        const yyyy = parseInt(iso[1], 10);
+        const mm = parseInt(iso[2], 10);
+        const dd = parseInt(iso[3], 10);
+        if (yyyy >= 1900 && yyyy <= 2100 && mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) {
+          return `${iso[1]}-${iso[2]}-${iso[3]}`;
+        }
+      }
+    }
+    return '';
+  }
+
   async submitToAllianceMedinet(visit) {
     await this._applyRuntimeCredential('ALLIANCE_MEDINET', this.allianceMedinet?.config);
     try {
@@ -1717,22 +1983,51 @@ export class ClaimSubmitter {
 
   async submitToAllianz(visit) {
     const runtimeCredential = await this._getPortalCredential('ALLIANZ');
-    return this.allianzSubmitter.submit(visit, runtimeCredential);
+    // Allianz AMOS portal requires DOB to enable the SEARCH button. We attach
+    // a normalized visit.dob (YYYY-MM-DD) sourced from extraction_metadata.flow1.dob
+    // so the submitter's searchAttemptBuilder can fill the DOB field.
+    const dob = this._pickDobForVisit(visit);
+    const enrichedVisit = dob ? { ...visit, dob } : visit;
+    return this._withIsolatedContext(AllianzSubmitter, enrichedVisit, runtimeCredential);
+  }
+
+  /**
+   * Create an isolated browser context for portal submissions to prevent
+   * session/cookie cross-contamination between portals sharing the same page.
+   */
+  async _withIsolatedContext(SubmitterClass, visit, runtimeCredential) {
+    const mainPage = this.mhcAsia.page;
+    const browser = mainPage.context().browser();
+    let isolatedContext = null;
+    let isolatedPage = null;
+    try {
+      isolatedContext = await browser.newContext({
+        viewport: { width: 1280, height: 900 },
+        ignoreHTTPSErrors: true,
+      });
+      isolatedPage = await isolatedContext.newPage();
+      const isolatedSubmitter = new SubmitterClass(isolatedPage, this.steps);
+      const result = await isolatedSubmitter.submit(visit, runtimeCredential);
+      return result;
+    } finally {
+      if (isolatedPage) await isolatedPage.close().catch(() => {});
+      if (isolatedContext) await isolatedContext.close().catch(() => {});
+    }
   }
 
   async submitToFullerton(visit) {
     const runtimeCredential = await this._getPortalCredential('FULLERTON');
-    return this.fullertonSubmitter.submit(visit, runtimeCredential);
+    return this._withIsolatedContext(FullertonSubmitter, visit, runtimeCredential);
   }
 
   async submitToIHP(visit) {
     const runtimeCredential = await this._getPortalCredential('IHP');
-    return this.ihpSubmitter.submit(visit, runtimeCredential);
+    return this._withIsolatedContext(IHPSubmitter, visit, runtimeCredential);
   }
 
   async submitToIXChange(visit) {
     const runtimeCredential = await this._getPortalCredential('IXCHANGE');
-    return this.ixchangeSubmitter.submit(visit, runtimeCredential);
+    return this._withIsolatedContext(IXChangeSubmitter, visit, runtimeCredential);
   }
 
   async submitToGENtuc(visit) {

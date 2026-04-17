@@ -347,6 +347,32 @@ export class BatchExtraction {
         });
       }
 
+      // Extract patient DOB (best-effort). Required by Allianz AMOS portal
+      // (Surname + DOB search); useful for several other TPAs that may need DOB.
+      // We extract once during Flow 1 and persist to extraction_metadata.flow1.dob
+      // so downstream submitters can read it without re-opening ClinicAssist.
+      let dobInfo = null;
+      try {
+        dobInfo = await this.clinicAssist.extractPatientDobFromPatientInfo();
+      } catch (e) {
+        logger.warn(`[BATCH] DOB extraction threw for ${queueItem.patientName}`, {
+          error: e?.message || String(e),
+        });
+      }
+      if (dobInfo?.iso) {
+        logger.info(`[BATCH] DOB extracted for ${queueItem.patientName}`, {
+          iso: dobInfo.iso,
+          source: dobInfo.source,
+        });
+      } else if (dobInfo?.raw) {
+        logger.warn(`[BATCH] DOB found but could not normalize for ${queueItem.patientName}`, {
+          raw: dobInfo.raw,
+          source: dobInfo.source,
+        });
+      } else {
+        logger.info(`[BATCH] DOB not found for ${queueItem.patientName}`);
+      }
+
       // Validate claim details (already done in extractClaimDetailsFromCurrentVisit, but log again for batch context)
       if (claimDetails) {
         const validationResult = validateClaimDetails(claimDetails);
@@ -356,12 +382,16 @@ export class BatchExtraction {
       return {
         ...queueItem,
         nric: validatedNric,
+        dob: dobInfo?.iso || null,
+        dobRaw: dobInfo?.raw || null,
+        dobSource: dobInfo?.source || null,
         claimDetails,
         extracted: true,
         extractedAt: new Date().toISOString(),
         validation: {
           nricValid: nricValidation.isValid,
           nricValidationReason: nricValidation.reason,
+          dobFound: Boolean(dobInfo?.iso),
         },
       };
     } catch (error) {
@@ -528,10 +558,10 @@ export class BatchExtraction {
   _normalizeQueueListingRows(items) {
     if (!Array.isArray(items) || items.length === 0) return items;
 
-    const normalized = items.map((item) => ({ ...item }));
+    const normalized = items.map(item => ({ ...item }));
     const consumedIndexes = new Set();
 
-    const isLikelyQueueListingRow = (item) =>
+    const isLikelyQueueListingRow = item =>
       String(item?.source || '').includes('reports_queue_list');
 
     for (let i = 0; i < normalized.length; i++) {
@@ -574,7 +604,8 @@ export class BatchExtraction {
             : 0;
 
         const closeByRows = rowDistance <= 3;
-        const nearbyInvoicePair = Number.isFinite(invDistance) && invDistance <= 2 && rowDistance <= 20;
+        const nearbyInvoicePair =
+          Number.isFinite(invDistance) && invDistance <= 2 && rowDistance <= 20;
         if (!closeByRows && !nearbyInvoicePair) continue;
 
         if (rowDistance < bestDistance) {
@@ -678,7 +709,7 @@ export class BatchExtraction {
         let existingMetadata = {};
         let existingSubmissionStatus = null;
         let existingSubmittedAt = null;
-        let existingVisitId = null;
+        let _existingVisitId = null;
 
         // Deduplication:
         // Use visit_record_no + visit_date when possible (invoice/record number is unique per visit/claim).
@@ -724,12 +755,13 @@ export class BatchExtraction {
         }
 
         existingMetadata =
-          existingRecord?.extraction_metadata && typeof existingRecord.extraction_metadata === 'object'
+          existingRecord?.extraction_metadata &&
+          typeof existingRecord.extraction_metadata === 'object'
             ? existingRecord.extraction_metadata
             : {};
         existingSubmissionStatus = existingRecord?.submission_status || null;
         existingSubmittedAt = existingRecord?.submitted_at || null;
-        existingVisitId = existingRecord?.id || null;
+        _existingVisitId = existingRecord?.id || null;
 
         const candidate = classifyVisitForRpa(
           item.payType || null,
@@ -738,11 +770,15 @@ export class BatchExtraction {
           existingMetadata,
           existingSubmissionStatus
         );
-        const claimCandidateReasons = [...new Set([
-          ...(Array.isArray(candidate.reasons) ? candidate.reasons : []),
-          existingRecord ? 'duplicate_visit' : null,
-          existingSubmittedAt ? 'already_submitted' : null,
-        ].filter(Boolean))];
+        const claimCandidateReasons = [
+          ...new Set(
+            [
+              ...(Array.isArray(candidate.reasons) ? candidate.reasons : []),
+              existingRecord ? 'duplicate_visit' : null,
+              existingSubmittedAt ? 'already_submitted' : null,
+            ].filter(Boolean)
+          ),
+        ];
 
         const mergedExtractionMetadata = this._mergeExtractionMetadata(existingMetadata, {
           extracted: item.extracted,
@@ -753,10 +789,7 @@ export class BatchExtraction {
           claimCandidateStatus: candidate.status,
           claimCandidateReasons,
           claimCandidateEvaluatedAt: new Date().toISOString(),
-          flow3PortalRoute:
-            candidate.portalTarget ||
-            existingMetadata?.flow3PortalRoute ||
-            null,
+          flow3PortalRoute: candidate.portalTarget || existingMetadata?.flow3PortalRoute || null,
           flow1: {
             lastIngestedAt: new Date().toISOString(),
             source: item.source || existingMetadata?.flow1?.source || null,
@@ -764,6 +797,11 @@ export class BatchExtraction {
             rowIndex: item.rowIndex ?? existingMetadata?.flow1?.rowIndex ?? null,
             dedupeDisposition: existingRecord ? 'updated_existing' : 'inserted_new',
             visitRecordNo: visitRecordNo || existingMetadata?.flow1?.visitRecordNo || null,
+            // DOB is required by Allianz AMOS portal (Surname + DOB search) and
+            // useful for several other TPAs. Stored in metadata to avoid a schema change.
+            dob: item.dob || existingMetadata?.flow1?.dob || null,
+            dobRaw: item.dobRaw || existingMetadata?.flow1?.dobRaw || null,
+            dobSource: item.dobSource || existingMetadata?.flow1?.dobSource || null,
           },
         });
 

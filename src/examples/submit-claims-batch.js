@@ -113,14 +113,22 @@ function parseCliArgs(argv) {
       opts.portalTargets = arg
         .split('=')[1]
         ?.split(',')
-        .map(v => String(v || '').trim().toUpperCase())
+        .map(v =>
+          String(v || '')
+            .trim()
+            .toUpperCase()
+        )
         .filter(Boolean);
       continue;
     }
     if (arg === '--portal-targets') {
       opts.portalTargets = readValue(i)
         .split(',')
-        .map(v => String(v || '').trim().toUpperCase())
+        .map(v =>
+          String(v || '')
+            .trim()
+            .toUpperCase()
+        )
         .filter(Boolean);
       i++;
       continue;
@@ -154,9 +162,13 @@ function parseCliArgs(argv) {
     throw new Error(`Invalid --to date format: ${opts.to} (expected YYYY-MM-DD)`);
   }
 
-  const normalizedMode = String(opts.mode || 'fill_evidence').trim().toLowerCase();
+  const normalizedMode = String(opts.mode || 'fill_evidence')
+    .trim()
+    .toLowerCase();
   if (!['fill_evidence', 'draft', 'submit'].includes(normalizedMode)) {
-    throw new Error(`Invalid --mode value: ${opts.mode} (expected fill_evidence, draft, or submit)`);
+    throw new Error(
+      `Invalid --mode value: ${opts.mode} (expected fill_evidence, draft, or submit)`
+    );
   }
   opts.mode = normalizedMode;
 
@@ -188,11 +200,16 @@ async function submitClaimsBatch() {
     return;
   }
 
-  const { visitIds, payType, portalTargets, mode, from, to, portalOnly, leaveOpen, allPending } = parsed;
+  const { visitIds, payType, portalTargets, mode, from, to, portalOnly, leaveOpen, allPending } =
+    parsed;
   const normalizedPortalTargets = Array.isArray(portalTargets)
     ? [...new Set(portalTargets.map(v => normalizeFlow3PortalTarget(v)).filter(Boolean))]
     : undefined;
-  if (Array.isArray(portalTargets) && portalTargets.length > 0 && (!normalizedPortalTargets || normalizedPortalTargets.length === 0)) {
+  if (
+    Array.isArray(portalTargets) &&
+    portalTargets.length > 0 &&
+    (!normalizedPortalTargets || normalizedPortalTargets.length === 0)
+  ) {
     throw new Error(
       `Invalid --portal-targets value. Allowed: ${getFlow3PortalTargets().join(', ')}`
     );
@@ -204,11 +221,11 @@ async function submitClaimsBatch() {
 
   const hasScope = Boolean(
     (Array.isArray(visitIds) && visitIds.length > 0) ||
-      payType ||
-      from ||
-      to ||
-      portalOnly ||
-      (Array.isArray(normalizedPortalTargets) && normalizedPortalTargets.length > 0)
+    payType ||
+    from ||
+    to ||
+    portalOnly ||
+    (Array.isArray(normalizedPortalTargets) && normalizedPortalTargets.length > 0)
   );
   if (!hasScope && !allPending) {
     logger.error(
@@ -273,16 +290,21 @@ async function submitClaimsBatch() {
     to: to || null,
     date: null,
     payType: payType || 'All',
-    portalTargets: normalizedPortalTargets?.join(',') || (portalOnly ? 'Portal scope' : 'All routes'),
+    portalTargets:
+      normalizedPortalTargets?.join(',') || (portalOnly ? 'Portal scope' : 'All routes'),
     visitIds: visitIds?.join(',') || null,
   };
 
   const buildDiagnosisStatus = (visit, result = null) => {
-    const flow2Status = String(visit?.extraction_metadata?.diagnosisResolution?.status || '').trim();
+    const flow2Status = String(
+      visit?.extraction_metadata?.diagnosisResolution?.status || ''
+    ).trim();
     const portalMatch = result?.diagnosisPortalMatch || null;
     const fallbackMode = String(result?.diagnosisFallbackMode?.mode || '').trim();
     if (fallbackMode) {
-      return flow2Status ? `${flow2Status}; portal_fallback:${fallbackMode}` : `portal_fallback:${fallbackMode}`;
+      return flow2Status
+        ? `${flow2Status}; portal_fallback:${fallbackMode}`
+        : `portal_fallback:${fallbackMode}`;
     }
     if (portalMatch?.blocked === false) {
       return flow2Status ? `${flow2Status}; portal_matched` : 'portal_matched';
@@ -317,9 +339,10 @@ async function submitClaimsBatch() {
     if (!result || typeof result !== 'object') return '';
     const bits = [];
 
-    const verification = result.fillVerification && typeof result.fillVerification === 'object'
-      ? result.fillVerification
-      : null;
+    const verification =
+      result.fillVerification && typeof result.fillVerification === 'object'
+        ? result.fillVerification
+        : null;
     if (verification) {
       const summary = ['visitDate', 'diagnosis', 'fee']
         .map(field => `${field}:${String(verification?.[field]?.status || 'n/a')}`)
@@ -333,7 +356,8 @@ async function submitClaimsBatch() {
       }
     }
 
-    const comparison = result.comparison && typeof result.comparison === 'object' ? result.comparison : null;
+    const comparison =
+      result.comparison && typeof result.comparison === 'object' ? result.comparison : null;
     if (comparison) {
       const state = String(comparison.state || 'unavailable');
       bits.push(`compare=${state}`);
@@ -375,32 +399,33 @@ async function submitClaimsBatch() {
     if (!result || typeof result !== 'object') {
       return { fillVerification: '-', comparison: '-', evidence: '-' };
     }
-    const verification = result.fillVerification && typeof result.fillVerification === 'object'
-      ? result.fillVerification
-      : null;
+    const verification =
+      result.fillVerification && typeof result.fillVerification === 'object'
+        ? result.fillVerification
+        : null;
     const fillVerification = verification
       ? ['visitDate', 'diagnosis', 'fee']
           .map(field => `${field}:${String(verification?.[field]?.status || 'n/a')}`)
           .join(', ')
       : '-';
 
-    const comparison = result.comparison && typeof result.comparison === 'object'
-      ? (() => {
-          const state = String(result.comparison.state || 'unavailable');
-          const mismatched = Array.isArray(result.comparison.mismatchedFields)
-            ? result.comparison.mismatchedFields
-                .map(item => (typeof item === 'string' ? item : item?.field))
-                .filter(Boolean)
-            : [];
-          return mismatched.length > 0
-            ? `${state} (${mismatched.join('|')})`
-            : state;
-        })()
-      : '-';
+    const comparison =
+      result.comparison && typeof result.comparison === 'object'
+        ? (() => {
+            const state = String(result.comparison.state || 'unavailable');
+            const mismatched = Array.isArray(result.comparison.mismatchedFields)
+              ? result.comparison.mismatchedFields
+                  .map(item => (typeof item === 'string' ? item : item?.field))
+                  .filter(Boolean)
+              : [];
+            return mismatched.length > 0 ? `${state} (${mismatched.join('|')})` : state;
+          })()
+        : '-';
     const evidence = result.evidence ? String(result.evidence) : '-';
-    const mismatchCategories = Array.isArray(result.mismatchCategories) && result.mismatchCategories.length
-      ? result.mismatchCategories.join('|')
-      : '-';
+    const mismatchCategories =
+      Array.isArray(result.mismatchCategories) && result.mismatchCategories.length
+        ? result.mismatchCategories.join('|')
+        : '-';
 
     return {
       fillVerification,
@@ -516,7 +541,7 @@ async function submitClaimsBatch() {
     logger.info(`Total: ${totalRecords}`);
     logger.info(`Submitted: ${submittedCount}`);
     logger.info(`Drafts: ${draftCount}`);
-      logger.info(`Filled + evidence: ${filledOnlyCount}`);
+    logger.info(`Filled + evidence: ${filledOnlyCount}`);
     logger.info(`Errors: ${errorCount}`);
     logger.info(`Not Started (unsupported): ${notStartedCount}`);
 
@@ -553,10 +578,10 @@ async function submitClaimsBatch() {
       status: 'completed',
       finished_at: new Date().toISOString(),
       total_records: totalRecords,
-        completed_count: submittedCount + draftCount + filledOnlyCount,
-        failed_count: errorCount,
-        metadata: {
-          ...runMetadata,
+      completed_count: submittedCount + draftCount + filledOnlyCount,
+      failed_count: errorCount,
+      metadata: {
+        ...runMetadata,
         submittedCount,
         draftCount,
         filledOnlyCount,
@@ -601,6 +626,10 @@ async function submitClaimsBatch() {
       error_message: error.message || String(error),
     });
     markRunFinalized();
+    // Close browser before exiting to prevent orphaned Chromium processes on VPS
+    await browserManager.close().catch(closeErr => {
+      logger.warn('[BATCH] Failed to close browser on error path', { error: closeErr?.message });
+    });
     process.exit(1);
   } finally {
     if (leaveOpen) {
@@ -609,7 +638,7 @@ async function submitClaimsBatch() {
       // (The run was already finalized above; this is strictly for human inspection.)
       await new Promise(() => {});
     } else {
-      await browserManager.close();
+      await browserManager.close().catch(() => {});
     }
   }
 }

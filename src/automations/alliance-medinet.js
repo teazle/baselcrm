@@ -10,6 +10,10 @@ export class AllianceMedinetAutomation {
     this.lastAction = 'init';
     this.lastGePopupPage = null;
     this.lastGePopupUrl = null;
+    // NRIC the last captured popup was opened for. The GE/NTUC submitter
+    // uses this to avoid reusing a popup that was captured for a different
+    // patient during a prior visit in the same batch run.
+    this.lastGePopupNric = null;
     this.lastDiagnosisPortalMatch = null;
   }
 
@@ -103,7 +107,10 @@ export class AllianceMedinetAutomation {
   }
 
   async _extractTraceId() {
-    const bodyText = await this.page.locator('body').innerText().catch(() => '');
+    const bodyText = await this.page
+      .locator('body')
+      .innerText()
+      .catch(() => '');
     const match = String(bodyText || '').match(/Trace\s*Id\s*:\s*([a-z0-9-]{8,})/i);
     return match ? match[1] : null;
   }
@@ -166,7 +173,9 @@ export class AllianceMedinetAutomation {
 
   async _closeDatePickerOverlay() {
     // Angular datepicker overlay can block Search Others clicks.
-    const backdrop = this.page.locator('.cdk-overlay-backdrop.cdk-overlay-backdrop-showing').first();
+    const backdrop = this.page
+      .locator('.cdk-overlay-backdrop.cdk-overlay-backdrop-showing')
+      .first();
     const hasBackdrop = (await backdrop.count().catch(() => 0)) > 0;
     if (!hasBackdrop) return false;
     await this.page.keyboard.press('Escape').catch(() => {});
@@ -323,7 +332,9 @@ export class AllianceMedinetAutomation {
     }
     this._setLastAction('nav.create-panel-claim.direct');
     await this.page.goto(target, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await this.page.waitForTimeout(600);
+    await this.page.waitForLoadState('networkidle').catch(() => {});
+    // Angular hydration requires extra time on VPS
+    await this.page.waitForTimeout(3000);
     logger.info('[ALLIANCE] Navigated directly to Create Panel Claim', { target });
   }
 
@@ -423,13 +434,18 @@ export class AllianceMedinetAutomation {
           .locator('text=/Panel\\s*Service/i')
           .count()
           .catch(() => 0)) > 0;
-      const hasCreatePanelClaimBeforeLogin = await this._isCreatePanelClaimPageVisible().catch(() => false);
+      const hasCreatePanelClaimBeforeLogin = await this._isCreatePanelClaimPageVisible().catch(
+        () => false
+      );
       const hasLoginInputBeforeLogin =
         (await this.page
           .locator('input[placeholder*="login id" i], input[name*="user" i], input[id*="user" i]')
           .count()
           .catch(() => 0)) > 0;
-      if ((hasPanelServiceBeforeLogin || hasCreatePanelClaimBeforeLogin) && !hasLoginInputBeforeLogin) {
+      if (
+        (hasPanelServiceBeforeLogin || hasCreatePanelClaimBeforeLogin) &&
+        !hasLoginInputBeforeLogin
+      ) {
         this._setLastAction('login.already-authenticated');
         this.loggedIn = true;
         logger.info('[ALLIANCE] Already logged in (active session detected)');
@@ -467,7 +483,9 @@ export class AllianceMedinetAutomation {
             .locator('text=/Panel\\s*Service/i')
             .count()
             .catch(() => 0)) > 0;
-        const hasCreatePanelClaimWithoutInputs = await this._isCreatePanelClaimPageVisible().catch(() => false);
+        const hasCreatePanelClaimWithoutInputs = await this._isCreatePanelClaimPageVisible().catch(
+          () => false
+        );
         if (hasPanelServiceWithoutInputs || hasCreatePanelClaimWithoutInputs) {
           this._setLastAction('login.already-authenticated-no-inputs');
           this.loggedIn = true;
@@ -616,34 +634,105 @@ export class AllianceMedinetAutomation {
         createPanelClaimClicked || (await this._clickSidebarLink('Create Panel Claim'));
       if (!createPanelClaimClickedRetry) throw new Error('Could not find Create Panel Claim menu');
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
-      await this.page.waitForTimeout(600);
+      await this.page.waitForLoadState('networkidle').catch(() => {});
+      // Extra wait for Angular component hydration (VPS can be slow)
+      await this.page.waitForTimeout(3000);
       const onCreatePanelClaim = await this._isCreatePanelClaimPageVisible();
       if (!onCreatePanelClaim) {
         await this._navigateToCreatePanelClaimDirect();
       }
 
       let openedSearchMemberDialog = false;
-      for (let attempt = 1; attempt <= 4; attempt++) {
+
+      // Wait for Angular hydration — the Medical Treatment button can take 5-15s on slow VPS
+      const medTreatmentSelectors = [
+        'div.main-panel button.action-btn:has-text("Medical Treatment")',
+        'button.action-btn:has-text("Medical Treatment")',
+        'button:has-text("Medical Treatment")',
+        '[role="tab"]:has-text("Medical Treatment")',
+        '[role="button"]:has-text("Medical Treatment")',
+        'a:has-text("Medical Treatment")',
+      ];
+      const medTreatmentCombined = medTreatmentSelectors.join(', ');
+
+      // First: give initial page load a generous wait for Angular components to hydrate
+      try {
+        await this.page.waitForSelector(medTreatmentCombined, { timeout: 12000, state: 'visible' });
+        logger.info('[ALLIANCE] Medical Treatment button visible after initial load');
+      } catch {
+        logger.info(
+          '[ALLIANCE] Medical Treatment button not yet visible after 12s — entering retry loop'
+        );
+      }
+
+      for (let attempt = 1; attempt <= 5; attempt++) {
         const hasDataError = await this._hasCreatePanelDataError();
         const hasMedicalTreatmentControl = await this._isMedicalTreatmentControlVisible();
         if (!hasDataError && hasMedicalTreatmentControl) break;
         this._setLastAction(`nav.create-panel-claim.recover-${attempt}`);
+        const currentUrl = this.page.url();
+        logger.info(`[ALLIANCE] Medical Treatment not visible — retry ${attempt}/5`, {
+          hasDataError,
+          url: currentUrl,
+        });
+        // Session-dirty recovery: if a prior claim attempt left us bounced back to /login,
+        // clicking "Create Panel Claim" in the sidebar is a no-op. Force a fresh login
+        // before re-trying the navigation.
+        if (/\/login(?:[?#]|$)/i.test(String(currentUrl || ''))) {
+          logger.warn('[ALLIANCE] Session expired mid-flow — re-authenticating');
+          this.loggedIn = false;
+          try {
+            await this.login();
+          } catch (error) {
+            logger.error('[ALLIANCE] Re-login after session expiry failed', {
+              error: error?.message || String(error),
+            });
+          }
+        }
         await this._dismissUnsavedChangesDialog(true).catch(() => false);
         const clicked = await this._clickSidebarLink('Create Panel Claim');
         if (!clicked) {
           await this._navigateToCreatePanelClaimDirect();
         }
         await this.page.waitForLoadState('domcontentloaded').catch(() => {});
-        await this.page.waitForTimeout(900);
-        if (attempt === 4) {
+        await this.page.waitForLoadState('networkidle').catch(() => {});
+        // Longer wait for Angular hydration on VPS — 4s per attempt
+        await this.page.waitForTimeout(4000);
+        // Try explicit waitForSelector again
+        try {
+          await this.page.waitForSelector(medTreatmentCombined, {
+            timeout: 8000,
+            state: 'visible',
+          });
+          logger.info(`[ALLIANCE] Medical Treatment button appeared on retry ${attempt}`);
+          break;
+        } catch {
+          // Continue to next attempt
+        }
+        if (attempt === 5) {
           // Final fallback: control visibility can lag while click still works.
           openedSearchMemberDialog = await this._openMedicalTreatmentAndWaitSearchMemberDialog();
           if (openedSearchMemberDialog) break;
 
           const finalHasError = await this._hasCreatePanelDataError();
           if (finalHasError) {
-            throw new Error('Create Panel Claim page shows "Unable to retrieve data" and cannot continue');
+            throw new Error(
+              'Create Panel Claim page shows "Unable to retrieve data" and cannot continue'
+            );
           }
+          // Capture page text for debugging
+          const bodyText = await this.page
+            .evaluate(() => String(globalThis.document?.body?.innerText || '').substring(0, 2000))
+            .catch(() => '');
+          logger.error('[ALLIANCE] Medical Treatment controls not found', {
+            bodyTextPreview: bodyText.substring(0, 500),
+          });
+          await this.page
+            .screenshot({
+              path: `screenshots/alliance-medinet-no-medical-treatment-${Date.now()}.png`,
+              fullPage: true,
+            })
+            .catch(() => {});
           throw new Error('Create Panel Claim did not render Medical Treatment controls');
         }
       }
@@ -658,7 +747,9 @@ export class AllianceMedinetAutomation {
         await this.page.waitForTimeout(500);
       }
       if (!openedSearchMemberDialog) {
-        throw new Error(`Could not open Search Member after Medical Treatment click (url=${this.page.url()})`);
+        throw new Error(
+          `Could not open Search Member after Medical Treatment click (url=${this.page.url()})`
+        );
       }
 
       await this.page.waitForTimeout(1500);
@@ -679,6 +770,10 @@ export class AllianceMedinetAutomation {
       if (!normalizedNric) {
         throw new Error(`Invalid NRIC/Member ID for Alliance Medinet search: "${nric}"`);
       }
+      // Track who we're currently searching for so downstream popup capture
+      // can tag the popup with an NRIC. Prevents the GE/NTUC submitter from
+      // reusing a prior patient's popup in a multi-visit batch run.
+      this._lastSearchedNric = normalizedNric;
 
       const nricFilled = await this._fillFirstVisible(
         [
@@ -716,7 +811,10 @@ export class AllianceMedinetAutomation {
         await this.page.keyboard.press('Escape').catch(() => {});
       }
 
-      const runSearchAttempt = async ({ visitDateValue = null, attemptLabel = 'with-date' } = {}) => {
+      const runSearchAttempt = async ({
+        visitDateValue = null,
+        attemptLabel = 'with-date',
+      } = {}) => {
         if (visitDateValue) {
           await this._setInputValue(
             [
@@ -791,7 +889,9 @@ export class AllianceMedinetAutomation {
             }
 
             const noResultText = await dialog
-              .locator('text=/no\\s*records|0\\s*-\\s*0\\s*of\\s*0\\s*records|member\\s+not\\s+found/i')
+              .locator(
+                'text=/no\\s*records|0\\s*-\\s*0\\s*of\\s*0\\s*records|member\\s+not\\s+found/i'
+              )
               .count()
               .catch(() => 0);
             if (noResultText > 0) {
@@ -922,7 +1022,12 @@ export class AllianceMedinetAutomation {
         if (!deduped.includes(cand)) deduped.push(cand);
       }
 
-      let fallback = { found: false, rowCount: 0, memberNotFound: true, noCoverageOnVisitDate: false };
+      let fallback = {
+        found: false,
+        rowCount: 0,
+        memberNotFound: true,
+        noCoverageOnVisitDate: false,
+      };
       for (let i = 0; i < deduped.length; i++) {
         const candidate = deduped[i];
         if (i > 0) {
@@ -1027,7 +1132,9 @@ export class AllianceMedinetAutomation {
           )
           .first(),
         rowCheckbox
-          .locator('xpath=ancestor::*[contains(@class,"mdc-checkbox")][1]//*[contains(@class,"mdc-checkbox__ripple")]')
+          .locator(
+            'xpath=ancestor::*[contains(@class,"mdc-checkbox")][1]//*[contains(@class,"mdc-checkbox__ripple")]'
+          )
           .first(),
         row.locator('[role="cell"], td').first(),
       ];
@@ -1059,23 +1166,44 @@ export class AllianceMedinetAutomation {
         throw new Error('Member row could not be selected (Add button remained disabled)');
       }
 
-      const popupPromise = this.page.context().waitForEvent('page', { timeout: 6000 }).catch(() => null);
+      // Start listening for popup BEFORE clicking Add — some portals open a new tab/window
+      const popupPromise = this.page
+        .context()
+        .waitForEvent('page', { timeout: 20000 })
+        .catch(() => null);
       await addButton.click({ timeout: 8000 }).catch(async () => {
         await addButton.click({ timeout: 8000, force: true });
       });
       this._setLastAction('select-member.clicked-add');
+
+      // Wait briefly for any popup to materialize, then check
       const popupPage = await popupPromise;
       if (popupPage) {
+        // Give the popup time to navigate to its final URL
         await popupPage.waitForLoadState('domcontentloaded').catch(() => {});
+        await popupPage.waitForTimeout(1500).catch(() => {});
         const popupUrl = popupPage.url() || null;
-        const isGePopup = /greateasternlife\.com/i.test(String(popupUrl || ''));
+        logger.info('[ALLIANCE] Popup detected after Add click', { popupUrl });
+        // The GE/NTUC_IM panel-claim popup is hosted on pcube.com.sg's
+        // MakePanelClaim.aspx (the ASP.NET WebForms shell identified by
+        // ctl00_MainContent_uc_MakeClaim_*). Great Eastern's own
+        // greateasternlife.com host is an older alias; in current rollouts
+        // Alliance Medinet emits popups pointing at pcube.com.sg for the
+        // same underlying MakeClaim form, and the GE submitter can drive
+        // either. Treat both as the GE/NTUC popup so the member-add flow
+        // yields to GENtucSubmitter rather than attempting to render the
+        // Alliance claim form (which fails with a portal runtime error).
+        const isGePopup = /(?:greateasternlife|pcube)\.com/i.test(String(popupUrl || ''));
         if (isGePopup) {
           this.lastGePopupPage = popupPage;
           this.lastGePopupUrl = popupUrl;
+          // Tag the popup with the NRIC it was opened for. GENtucSubmitter
+          // checks this before reusing the popup on the next visit.
+          this.lastGePopupNric = this._lastSearchedNric || null;
           this.page.off('console', onConsole);
           throw this._buildAllianceError(
             'ge_popup_redirect',
-            'Alliance Medinet redirected this member to GE portal popup',
+            'Alliance Medinet redirected this member to GE/NTUC portal popup',
             {
               networkCode: networkCode || null,
               gePopupUrl: popupUrl,
@@ -1083,6 +1211,8 @@ export class AllianceMedinetAutomation {
             }
           );
         }
+        // Non-GE popup — might be another portal's popup, store for debugging
+        logger.info('[ALLIANCE] Non-GE popup captured', { popupUrl });
       }
 
       let formOpened = false;
@@ -1096,7 +1226,9 @@ export class AllianceMedinetAutomation {
       this.page.off('console', onConsole);
       if (!formOpened) {
         const portalRuntimeError = runtimeErrors.find(text =>
-          /cannot\s+read\s+properties\s+of\s+undefined\s*\(reading\s*'res'\)/i.test(String(text || ''))
+          /cannot\s+read\s+properties\s+of\s+undefined\s*\(reading\s*'res'\)/i.test(
+            String(text || '')
+          )
         );
         const blankCreateShell =
           (await this.page
@@ -1196,17 +1328,17 @@ export class AllianceMedinetAutomation {
     }
     if (!opened) {
       opened = await this._clickFirstVisible(
-      [
-        '[role="combobox"][aria-label*="Doctor" i]',
-        '[role="combobox"][aria-labelledby*="doctor" i]',
-        '[role="combobox"][name*="doctor" i]',
-        '[role="combobox"][id*="doctor" i]',
-        'mat-select[formcontrolname*="doctor" i]',
-        'mat-select[formcontrolname*="provider" i]',
-        'input[name*="doctor" i]',
-        'input[id*="doctor" i]',
-      ],
-      'Doctor dropdown'
+        [
+          '[role="combobox"][aria-label*="Doctor" i]',
+          '[role="combobox"][aria-labelledby*="doctor" i]',
+          '[role="combobox"][name*="doctor" i]',
+          '[role="combobox"][id*="doctor" i]',
+          'mat-select[formcontrolname*="doctor" i]',
+          'mat-select[formcontrolname*="provider" i]',
+          'input[name*="doctor" i]',
+          'input[id*="doctor" i]',
+        ],
+        'Doctor dropdown'
       );
     }
     if (!opened) return false;
@@ -1267,11 +1399,19 @@ export class AllianceMedinetAutomation {
     }
 
     const dialog = this.page
-      .locator('[role="dialog"]:has-text("Search Diagnosis"), mat-dialog-container:has-text("Search Diagnosis")')
+      .locator(
+        '[role="dialog"]:has-text("Search Diagnosis"), mat-dialog-container:has-text("Search Diagnosis")'
+      )
       .first();
     await dialog.waitFor({ state: 'visible', timeout: 10000 });
 
     const draftMode = process.env.WORKFLOW_SAVE_DRAFT !== '0';
+    const fillEvidenceMode =
+      String(process.env.FLOW3_MODE || '')
+        .trim()
+        .toLowerCase() === 'fill_evidence';
+    // In fill_evidence mode, allow lenient matching to maximize form fill coverage
+    const effectiveDraftMode = draftMode || fillEvidenceMode;
     const allowGenericFallback = process.env.ALLIANCE_DIAG_ALLOW_GENERIC_FALLBACK !== '0';
     const baseTokens = [
       diagnosisName,
@@ -1306,8 +1446,18 @@ export class AllianceMedinetAutomation {
         let code = null;
         let desc = null;
         if (cellCount >= 2) {
-          code = String((await cells.nth(0).innerText().catch(() => '')) || '').trim();
-          desc = String((await cells.nth(1).innerText().catch(() => '')) || '').trim();
+          code = String(
+            (await cells
+              .nth(0)
+              .innerText()
+              .catch(() => '')) || ''
+          ).trim();
+          desc = String(
+            (await cells
+              .nth(1)
+              .innerText()
+              .catch(() => '')) || ''
+          ).trim();
         }
         const optionText = desc || rowText;
         options.push({
@@ -1353,14 +1503,18 @@ export class AllianceMedinetAutomation {
       });
 
       if (!match || match.blocked !== false) {
-        if (draftMode && allowGenericFallback) {
+        if (effectiveDraftMode && allowGenericFallback) {
           const bestCandidate = match?.considered?.[0] || null;
           let fallback = null;
           if (bestCandidate?.text) {
             const idx = options.findIndex(
               opt =>
-                String(opt?.text || '').toLowerCase().trim() ===
-                String(bestCandidate.text || '').toLowerCase().trim()
+                String(opt?.text || '')
+                  .toLowerCase()
+                  .trim() ===
+                String(bestCandidate.text || '')
+                  .toLowerCase()
+                  .trim()
             );
             if (idx >= 0) {
               fallback = {
@@ -1416,7 +1570,7 @@ export class AllianceMedinetAutomation {
       };
       break;
     }
-    if (!selected && draftMode && allowGenericFallback && bestFallback) {
+    if (!selected && effectiveDraftMode && allowGenericFallback && bestFallback) {
       const fallbackRows = dialog.locator('tbody tr, mat-row, .mat-mdc-row, .mat-row');
       const row = fallbackRows.nth(Number(bestFallback.rowIndex || 0));
       const checkbox = row
@@ -1469,11 +1623,17 @@ export class AllianceMedinetAutomation {
     });
 
     await dialog.waitFor({ state: 'hidden', timeout: 10000 }).catch(async () => {
-      await this._clickFirstVisible(['[role="dialog"] button:has-text("Close")'], 'Diagnosis Close');
+      await this._clickFirstVisible(
+        ['[role="dialog"] button:has-text("Close")'],
+        'Diagnosis Close'
+      );
       await dialog.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
     });
 
-    const notAdded = await this.page.locator('text=/Diagnosis\\s+not\\s+added/i').count().catch(() => 0);
+    const notAdded = await this.page
+      .locator('text=/Diagnosis\\s+not\\s+added/i')
+      .count()
+      .catch(() => 0);
     if (notAdded > 0) {
       throw new Error('Diagnosis was not added to claim form');
     }
@@ -1482,7 +1642,11 @@ export class AllianceMedinetAutomation {
   async _setConsultationFeeType(chargeTypeRaw) {
     const targetType = this._resolveConsultationFeeType(chargeTypeRaw);
     this._setLastAction('fill.consultation-type.open');
-    await this.page.locator('text=/Consultation\\s+Fee/i').first().scrollIntoViewIfNeeded().catch(() => {});
+    await this.page
+      .locator('text=/Consultation\\s+Fee/i')
+      .first()
+      .scrollIntoViewIfNeeded()
+      .catch(() => {});
     await this.page.waitForTimeout(200).catch(() => {});
 
     const primary = this.page
@@ -1529,6 +1693,7 @@ export class AllianceMedinetAutomation {
     let selected = false;
     const preferredOption = options.filter({ hasText: new RegExp(targetType, 'i') }).first();
     if ((await preferredOption.count().catch(() => 0)) > 0) {
+      await preferredOption.scrollIntoViewIfNeeded().catch(() => {});
       await preferredOption.click({ timeout: 5000 }).catch(async () => {
         await preferredOption.click({ timeout: 5000, force: true });
       });
@@ -1659,7 +1824,9 @@ export class AllianceMedinetAutomation {
             await preferredType.click({ timeout: 5000, force: true });
           });
         } else {
-          const fallbackType = this.page.locator('[role="option"], mat-option, .mat-mdc-option').first();
+          const fallbackType = this.page
+            .locator('[role="option"], mat-option, .mat-mdc-option')
+            .first();
           if ((await fallbackType.count().catch(() => 0)) > 0) {
             await fallbackType.click({ timeout: 5000 }).catch(async () => {
               await fallbackType.click({ timeout: 5000, force: true });
@@ -1700,9 +1867,7 @@ export class AllianceMedinetAutomation {
       const normalized = String(candidate || '')
         .trim()
         .toLowerCase();
-      const escaped = normalized
-        .slice(0, 18)
-        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const escaped = normalized.slice(0, 18).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       let option = options.filter({ hasText: new RegExp(escaped, 'i') }).first();
       if ((await option.count().catch(() => 0)) === 0) {
         option = options.first();
@@ -1739,8 +1904,9 @@ export class AllianceMedinetAutomation {
     let retriedConsultationType = false;
     let adjustedConsultationFee = false;
     const start = Date.now();
-    const timeoutMs = 15000;
+    const timeoutMs = 30000;
     while (Date.now() - start < timeoutMs) {
+      // Check for Save button — indicates Calculate Claim succeeded
       const saveVisible =
         (await this.page
           .locator('button:has-text("Save")')
@@ -1748,15 +1914,34 @@ export class AllianceMedinetAutomation {
           .catch(() => 0)) > 0;
       if (saveVisible) return true;
 
-      const invalidMsg = await this.page
-        .locator('text=/Invalid\\s+field:/i')
-        .first()
+      // Also check for Save Draft or Submit buttons (portal may use different wording)
+      const saveDraftVisible =
+        (await this.page
+          .locator('button:has-text("Save as Draft"), button:has-text("Submit")')
+          .count()
+          .catch(() => 0)) > 0;
+      if (saveDraftVisible) return true;
+
+      // Check for validation errors — use broad text search since Angular may format differently
+      const bodyText = await this.page
+        .locator('body')
         .innerText()
         .catch(() => '');
-      if (invalidMsg) {
-        const bodyText = await this.page.locator('body').innerText().catch(() => '');
+      const hasInvalidField = /Invalid\s+field:/i.test(bodyText);
+      const invalidMsg = hasInvalidField
+        ? await this.page
+            .locator('text=/Invalid\\s+field:/i')
+            .first()
+            .innerText()
+            .catch(() => bodyText.match(/Invalid\s+field:[^\n]*/i)?.[0] || '')
+        : '';
+
+      if (invalidMsg || hasInvalidField) {
         const combined = `${invalidMsg}\n${bodyText}`;
-        if (!retriedConsultationType && /claimPanelOutpatientConsultations|consultation\s+fee\s+type/i.test(combined)) {
+        if (
+          !retriedConsultationType &&
+          /claimPanelOutpatientConsultations|consultation\s+fee\s+type/i.test(combined)
+        ) {
           retriedConsultationType = true;
           await this._setConsultationFeeType('follow').catch(() => false);
           await this._clickFirstVisible(
@@ -1769,7 +1954,7 @@ export class AllianceMedinetAutomation {
 
         if (!adjustedConsultationFee) {
           const feeLimitMatch = String(bodyText || '').match(
-            /Consultation\\s*Fee\\s*should\\s*be\\s*below[^0-9]*(\\d+)/i
+            /Consultation\s*Fee\s*should\s*be\s*below[^0-9]*(\d+)/i
           );
           const feeLimit = feeLimitMatch ? Number(feeLimitMatch[1]) : null;
           if (Number.isFinite(feeLimit) && feeLimit > 1) {
@@ -1787,10 +1972,24 @@ export class AllianceMedinetAutomation {
 
         throw new Error(`Calculate Claim validation failed: ${invalidMsg}`);
       }
-      await this.page.waitForTimeout(250);
+      await this.page.waitForTimeout(300);
     }
 
-    throw new Error('Calculate Claim did not reach summary state');
+    // Capture screenshot before throwing timeout error for debugging
+    await this.page
+      .screenshot({
+        path: `screenshots/alliance-medinet-calculate-timeout-${Date.now()}.png`,
+        fullPage: true,
+      })
+      .catch(() => {});
+    const finalBodyText = await this.page
+      .locator('body')
+      .innerText()
+      .catch(() => '');
+    const truncatedBody = String(finalBodyText || '').slice(0, 500);
+    throw new Error(
+      `Calculate Claim did not reach summary state (30s timeout). Page content: ${truncatedBody}`
+    );
   }
 
   async _fillOptionalTextField(label, value, selectors = []) {
@@ -1858,6 +2057,10 @@ export class AllianceMedinetAutomation {
   async fillClaimForm(visit, mappedDoctorName) {
     try {
       const draftMode = process.env.WORKFLOW_SAVE_DRAFT !== '0';
+      const fillEvidenceMode =
+        String(process.env.FLOW3_MODE || '')
+          .trim()
+          .toLowerCase() === 'fill_evidence';
       const doctorSelected = await this._selectDoctorByName(mappedDoctorName);
       if (!doctorSelected) {
         throw new Error(`Could not select doctor "${mappedDoctorName}" in Allianz Medinet form`);
@@ -1866,7 +2069,9 @@ export class AllianceMedinetAutomation {
       await this._fillMcDetails(visit);
       await this._addDiagnosis(visit);
       await this._fillReferralDetails(visit).catch(() => false);
-      await this._setConsultationFeeType(visit?.extraction_metadata?.chargeType || visit?.charge_type || null);
+      await this._setConsultationFeeType(
+        visit?.extraction_metadata?.chargeType || visit?.charge_type || null
+      );
       await this._fillConsultationFeeAmount(visit?.total_amount).catch(() => false);
       await this._fillOptionalTextField('treatment', visit?.treatment_detail, [
         'textarea[name*="treatment" i]',
@@ -1876,7 +2081,9 @@ export class AllianceMedinetAutomation {
         'textarea[name*="remark" i]',
       ]);
 
-      if (!draftMode) {
+      if (fillEvidenceMode) {
+        logger.info('[ALLIANCE] Fill-evidence mode: skipping Calculate Claim — form fill only');
+      } else if (!draftMode) {
         await this.validateRequiredFields({
           nric: visit?.nric || visit?.extraction_metadata?.nric || null,
           doctorName: mappedDoctorName,
@@ -1893,7 +2100,10 @@ export class AllianceMedinetAutomation {
           fullPage: true,
         })
         .catch(() => {});
-      return { doctorName: mappedDoctorName, diagnosisPortalMatch: this.lastDiagnosisPortalMatch || null };
+      return {
+        doctorName: mappedDoctorName,
+        diagnosisPortalMatch: this.lastDiagnosisPortalMatch || null,
+      };
     } catch (error) {
       await this.page
         .screenshot({ path: 'screenshots/alliance-medinet-fill-error.png', fullPage: true })
@@ -1984,10 +2194,7 @@ export class AllianceMedinetAutomation {
             (await candidate.innerText().catch(() => null)) ??
             (await candidate.getAttribute('value').catch(() => null)) ??
             '';
-          const text = String(rawText)
-            .replace(/\s+/g, ' ')
-            .trim()
-            .toLowerCase();
+          const text = String(rawText).replace(/\s+/g, ' ').trim().toLowerCase();
           if (!text.includes('save') || text.includes('draft')) continue;
           await candidate.click({ timeout: 7000 }).catch(async () => {
             await candidate.click({ timeout: 7000, force: true });

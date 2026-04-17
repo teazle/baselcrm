@@ -63,6 +63,18 @@ function normalizeNric(value) {
   return raw.replace(/[\s/-]+/g, '');
 }
 
+function normalizeIcdCode(value) {
+  const raw = String(value || '')
+    .trim()
+    .toUpperCase();
+  if (!raw) return '';
+  const match = raw.match(/([A-Z]\d{2})\.?(\d{0,5})/);
+  if (!match) return raw;
+  const base = match[1];
+  const sub = (match[2] || '').replace(/0+$/, '');
+  return sub ? `${base}.${sub}` : base;
+}
+
 function stripPortalTag(value) {
   return String(value || '')
     .trim()
@@ -155,6 +167,28 @@ function normalizeLineItems(items) {
     .sort((a, b) => `${a.kind}:${a.name}`.localeCompare(`${b.kind}:${b.name}`));
 }
 
+function drugNameFuzzyMatch(nameA, nameB) {
+  const a = normalizeText(nameA);
+  const b = normalizeText(nameB);
+  if (!a || !b) return false;
+  if (a === b) return true;
+  if (a.includes(b) || b.includes(a)) return true;
+  // Extract brand name (first word) and dosage for fuzzy comparison
+  const brandA = a.split(/[\s(]+/)[0];
+  const brandB = b.split(/[\s(]+/)[0];
+  if (!brandA || !brandB || brandA.length < 3 || brandB.length < 3) return false;
+  if (brandA !== brandB) return false;
+  // Same brand — check dosage overlap
+  const dosagePattern = /(\d+(?:\.\d+)?)\s*(?:mg|ml|mcg|g|iu|%)/gi;
+  const dosagesA = [...a.matchAll(dosagePattern)].map(m => m[1]);
+  const dosagesB = [...b.matchAll(dosagePattern)].map(m => m[1]);
+  if (dosagesA.length && dosagesB.length) {
+    return dosagesA.some(d => dosagesB.includes(d));
+  }
+  // Same brand, no dosage to compare — treat as match
+  return true;
+}
+
 function compareLineItems(expectedItems, actualItems) {
   const expected = normalizeLineItems(expectedItems);
   const actual = normalizeLineItems(actualItems);
@@ -174,12 +208,28 @@ function compareLineItems(expectedItems, actualItems) {
   const missing = [];
   const unexpected = [];
 
+  const matchedActualKeys = new Set();
   for (const [key, item] of expectedKeys.entries()) {
-    if (actualKeys.has(key)) matched.push(item);
-    else missing.push(item);
+    if (actualKeys.has(key)) {
+      matched.push(item);
+      matchedActualKeys.add(key);
+    } else {
+      // Fuzzy match: try to find an actual item with same kind and similar name
+      let fuzzyFound = false;
+      for (const [actKey, actItem] of actualKeys.entries()) {
+        if (matchedActualKeys.has(actKey)) continue;
+        if (item.kind === actItem.kind && drugNameFuzzyMatch(item.name, actItem.name)) {
+          matched.push(item);
+          matchedActualKeys.add(actKey);
+          fuzzyFound = true;
+          break;
+        }
+      }
+      if (!fuzzyFound) missing.push(item);
+    }
   }
   for (const [key, item] of actualKeys.entries()) {
-    if (!expectedKeys.has(key)) unexpected.push(item);
+    if (!matchedActualKeys.has(key) && !expectedKeys.has(key)) unexpected.push(item);
   }
 
   return {
@@ -266,9 +316,17 @@ function makeFieldRule(field) {
         matches: (expected, actual) => {
           const left = normalizeText(stripPortalTag(expected));
           const right = normalizeText(stripPortalTag(actual));
-          return (
-            !!left && !!right && (left === right || left.includes(right) || right.includes(left))
+          if (!left || !right) return false;
+          if (left === right) return true;
+          if (left.includes(right) || right.includes(left)) return true;
+          // Token-level match: all tokens of the shorter name must appear in the longer name
+          const leftTokens = left.split(/\s+/).filter(t => t.length >= 2);
+          const rightTokens = right.split(/\s+/).filter(t => t.length >= 2);
+          const shorter = leftTokens.length <= rightTokens.length ? leftTokens : rightTokens;
+          const longerSet = new Set(
+            leftTokens.length <= rightTokens.length ? rightTokens : leftTokens
           );
+          return shorter.length >= 2 && shorter.every(token => longerSet.has(token));
         },
       };
     case 'diagnosisText':
@@ -278,17 +336,10 @@ function makeFieldRule(field) {
       };
     case 'diagnosisCode':
       return {
-        normalize: value =>
-          String(value || '')
-            .trim()
-            .toUpperCase(),
+        normalize: normalizeIcdCode,
         matches: (expected, actual) => {
-          const left = String(expected || '')
-            .trim()
-            .toUpperCase();
-          const right = String(actual || '')
-            .trim()
-            .toUpperCase();
+          const left = normalizeIcdCode(expected);
+          const right = normalizeIcdCode(actual);
           return !!left && !!right && left === right;
         },
       };
@@ -448,14 +499,30 @@ function deriveMismatchCategories({
     if (value) categories.add(value);
   };
 
+  // Check whether NRIC matches across both comparisons — if so, a name-only
+  // difference is a benign variant (married/maiden name, alias) not an identity problem.
+  const nricMatchesInComparison = comparison => {
+    const nricEntry = comparison?.details?.patientNric;
+    return nricEntry?.status === 'match';
+  };
+  const nricConfirmed =
+    nricMatchesInComparison(flow2VsSubmittedTruth) || nricMatchesInComparison(botVsSubmittedTruth);
+
   const checkEntries = comparison => {
     for (const item of comparison?.mismatchedFields || []) {
       const field = String(item?.field || '');
       if (item?.status === 'missing_actual') {
         push('missing_portal_field');
       }
-      if (field === 'patientNric' || field === 'patientName') {
+      if (field === 'patientNric') {
         push('patient_identity_mismatch');
+      }
+      if (field === 'patientName') {
+        if (nricConfirmed) {
+          push('patient_name_variant');
+        } else {
+          push('patient_identity_mismatch');
+        }
       }
       if (field === 'diagnosisText') {
         push('diagnosis_semantic_mismatch');
@@ -486,6 +553,30 @@ function deriveMismatchCategories({
   return Array.from(categories);
 }
 
+const CONSULTATION_NAME_PATTERN =
+  /\bconsultation\b|\bconsult\b|\bphysiotherapy\b|\bradiology\b|\bx-ray\b|\bmri\b|\bultrasound\b|\bwrist brace\b|\bknee brace\b|\bbrace\b/i;
+
+function classifyMedicineItem(item, diagnosisText) {
+  const name = String(item?.name || '');
+  if (CONSULTATION_NAME_PATTERN.test(name)) return 'procedure';
+  // Detect diagnosis text contamination: medicine name matches diagnosis description
+  if (diagnosisText && name) {
+    if (hasStrongTokenOverlap(name, diagnosisText)) return 'diagnosis_contamination';
+    if (hasEquivalentBodyConditionClass(name, diagnosisText)) return 'diagnosis_contamination';
+  }
+  return 'drug';
+}
+
+function deriveConsultationFee(medicines) {
+  if (!Array.isArray(medicines)) return '';
+  const consultItem = medicines.find(
+    item =>
+      /\bconsultation\b|\bconsult\b/i.test(String(item?.name || '')) &&
+      Number.isFinite(Number(item?.amount))
+  );
+  return consultItem ? String(consultItem.amount) : '';
+}
+
 export function buildExpectedPortalSnapshotFromVisit(visit, opts = {}) {
   const metadata = visit?.extraction_metadata || {};
   const diagnosisCanonical = metadata?.diagnosisCanonical || {};
@@ -504,6 +595,8 @@ export function buildExpectedPortalSnapshotFromVisit(visit, opts = {}) {
     diagnosisCanonical?.code ||
     metadata?.diagnosisCode ||
     '';
+
+  const consultFeeFromMedicines = deriveConsultationFee(metadata?.medicines);
 
   return {
     portalTarget: String(opts?.portalTarget || 'MHC'),
@@ -540,26 +633,22 @@ export function buildExpectedPortalSnapshotFromVisit(visit, opts = {}) {
       visit?.charge_amount ??
       metadata?.consultationAmount ??
       '',
-    consultationFee:
-      visit?.total_amount ??
-      visit?.totalAmount ??
-      visit?.consultation_fee ??
-      visit?.charge_amount ??
-      metadata?.consultationAmount ??
-      '',
+    consultationFee: consultFeeFromMedicines || (metadata?.consultationAmount ?? ''),
     diagnosisResolution: {
       status: diagnosisResolution?.status || null,
       reason: diagnosisResolution?.reason_if_unresolved || null,
       confidence: diagnosisResolution?.confidence ?? null,
     },
     lineItems: Array.isArray(metadata?.medicines)
-      ? metadata.medicines.map(item => ({
-          kind: 'drug',
-          name: item?.name || '',
-          quantity: item?.quantity ?? '',
-          unitPrice: item?.unitPrice ?? '',
-          amount: item?.amount ?? '',
-        }))
+      ? metadata.medicines
+          .filter(item => classifyMedicineItem(item, diagnosisText) === 'drug')
+          .map(item => ({
+            kind: 'drug',
+            name: item?.name || '',
+            quantity: item?.quantity ?? '',
+            unitPrice: item?.unitPrice ?? '',
+            amount: item?.amount ?? '',
+          }))
       : [],
   };
 }
@@ -698,14 +787,31 @@ export function comparePortalTruthSnapshots({
     botDetails[field] = compareField(field, botSnapshot?.[field], submittedTruthSnapshot?.[field]);
   }
 
+  // When NRIC matches, a patientName mismatch is just a name variant (married/maiden)
+  // — promote it to match so it doesn't drag the overall state to "partial".
+  const promoteNameIfNricMatches = details => {
+    if (details.patientNric?.status === 'match' && details.patientName?.status === 'mismatch') {
+      details.patientName = {
+        ...details.patientName,
+        status: 'match',
+        reason: 'nric_confirmed_name_variant',
+      };
+    }
+  };
+  promoteNameIfNricMatches(flow2Details);
+  promoteNameIfNricMatches(botDetails);
+
   const flow2VsSubmittedTruth = summarizeComparison(flow2Details);
   const botVsSubmittedTruth = summarizeComparison(botDetails);
   const flow2LineItemsComparison = compareLineItems(
     expectedSnapshot?.lineItems || [],
     submittedTruthSnapshot?.lineItems || []
   );
+  const botDrugItems = (botSnapshot?.lineItems || []).filter(
+    item => normalizeText(item?.kind || 'drug') === 'drug'
+  );
   const botLineItemsComparison = compareLineItems(
-    botSnapshot?.lineItems || [],
+    botDrugItems,
     submittedTruthSnapshot?.lineItems || []
   );
   const diagnosisDrift = classifyDiagnosisDrift({

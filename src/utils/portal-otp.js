@@ -5,9 +5,12 @@ import { logger } from './logger.js';
 const DEFAULT_IMAP_HOST = 'imap.gmail.com';
 const DEFAULT_IMAP_PORT = 993;
 const DEFAULT_IMAP_SECURE = true;
-const DEFAULT_LOOKBACK_MINUTES = 15;
+// Lookback covers email-arrival skew; 30min is safe for portals with delayed delivery.
+const DEFAULT_LOOKBACK_MINUTES = 30;
 const DEFAULT_POLL_INTERVAL_MS = 3000;
-const DEFAULT_TIMEOUT_MS = 120000;
+// Total timeout: must be long enough for slow portals (Fullerton, Allianz can take >2min
+// to send the OTP email when their backend is loaded). 180s gives adequate headroom.
+const DEFAULT_TIMEOUT_MS = 180000;
 
 const PORTAL_MATCHERS = {
   ALLIANZ: {
@@ -19,8 +22,8 @@ const PORTAL_MATCHERS = {
     from: [/fullerton/i, /fhn/i],
   },
   IHP: {
-    labels: [/\bihp\b/i, /eclaim/i],
-    from: [/\bihp\b/i, /eclaim/i],
+    labels: [/\bihp\b/i, /eclaim/i, /doctoranywhere/i, /2xsecure/i],
+    from: [/\bihp\b/i, /eclaim/i, /doctoranywhere/i, /2xsecure/i],
   },
   IXCHANGE: {
     labels: [/ixchange/i, /\bspos\b/i, /o2ixchange/i],
@@ -160,6 +163,17 @@ export async function getOtpCode(options = {}) {
   const pollIntervalMs = Number(
     options.pollIntervalMs || config.pollIntervalMs || DEFAULT_POLL_INTERVAL_MS
   );
+  // STALENESS GUARD: caller can pass `triggeredAfter` (epoch ms or Date) to
+  // filter out OTP emails that arrived before the current login submit. This
+  // prevents back-to-back visits from reading the PREVIOUS visit's OTP (which
+  // the portal has already consumed and will reject). If not provided, the
+  // rolling `lookbackMinutes` window is used as before.
+  let triggeredAfterMs = null;
+  if (options.triggeredAfter !== undefined && options.triggeredAfter !== null) {
+    const raw = options.triggeredAfter;
+    const ts = raw instanceof Date ? raw.getTime() : Number(raw);
+    if (Number.isFinite(ts) && ts > 0) triggeredAfterMs = ts;
+  }
 
   if (!config.email || !config.appPassword) {
     return {
@@ -188,15 +202,57 @@ export async function getOtpCode(options = {}) {
   try {
     await client.connect();
     lock = await client.getMailboxLock('INBOX');
-    logger.info('[OTP] Connected to Gmail IMAP', { portal, email: config.email });
+    logger.info('[OTP] Connected to Gmail IMAP', {
+      portal,
+      email: config.email,
+      lookbackMinutes,
+      timeoutMs,
+      triggeredAfter: triggeredAfterMs ? new Date(triggeredAfterMs).toISOString() : null,
+    });
 
+    let pollCount = 0;
     while (Date.now() < deadline) {
+      pollCount += 1;
       const sinceDate = new Date(Date.now() - lookbackMinutes * 60 * 1000);
       const messages = await readRecentMessages(client, sinceDate);
+
+      // Log a summary of ALL emails found on first poll and every 10th poll for debugging
+      if (pollCount === 1 || pollCount % 10 === 0) {
+        const emailSummary = messages.slice(0, 20).map(msg => {
+          const fromAddr = msg.envelope?.from?.[0]?.address || '';
+          const fromName = msg.envelope?.from?.[0]?.name || '';
+          const subj = String(msg.envelope?.subject || '').slice(0, 80);
+          const date = msg.internalDate ? new Date(msg.internalDate).toISOString() : '';
+          return { from: `${fromName} <${fromAddr}>`, subject: subj, date };
+        });
+        logger.info('[OTP] Inbox scan summary', {
+          portal,
+          poll: pollCount,
+          totalMessages: messages.length,
+          sinceDate: sinceDate.toISOString(),
+          emails: emailSummary,
+        });
+      }
 
       for (const message of messages) {
         const msgTime = new Date(message.internalDate || 0).getTime();
         if (!Number.isFinite(msgTime) || msgTime < sinceDate.getTime()) continue;
+        // STALENESS GUARD: if caller anchored the polling window to the OTP
+        // trigger timestamp, reject any email that pre-dates the trigger.
+        // Protects against back-to-back visits reading the PREVIOUS visit's
+        // (already-consumed) OTP email.
+        if (triggeredAfterMs !== null && msgTime < triggeredAfterMs) {
+          const fromAddr = message.envelope?.from?.[0]?.address || '';
+          const subj = String(message.envelope?.subject || '').slice(0, 60);
+          logger.debug('[OTP] Skipping stale email (pre-trigger)', {
+            portal,
+            from: fromAddr,
+            subject: subj,
+            msgTime: new Date(msgTime).toISOString(),
+            triggeredAfter: new Date(triggeredAfterMs).toISOString(),
+          });
+          continue;
+        }
 
         let parsed = null;
         try {
@@ -211,6 +267,14 @@ export async function getOtpCode(options = {}) {
         }
 
         if (!shouldConsiderMessage(portal, message.envelope, parsed)) {
+          const fromAddr = message.envelope?.from?.[0]?.address || '';
+          const fromName = message.envelope?.from?.[0]?.name || '';
+          const subj = String(message.envelope?.subject || '').slice(0, 60);
+          logger.debug('[OTP] Skipping non-matching email', {
+            portal,
+            from: `${fromName} <${fromAddr}>`,
+            subject: subj,
+          });
           continue;
         }
 
@@ -225,6 +289,11 @@ export async function getOtpCode(options = {}) {
 
         const match = extractCodeFromText(`${subject}\n${textBody}`, portal);
         if (!match) {
+          logger.debug('[OTP] Matching email found but no OTP code extracted', {
+            portal,
+            subject: subject.slice(0, 80),
+            bodyPreview: textBody.slice(0, 200),
+          });
           continue;
         }
 
@@ -247,7 +316,7 @@ export async function getOtpCode(options = {}) {
       ok: false,
       status: 'timeout',
       portal,
-      error: `Timed out waiting for OTP email after ${timeoutMs}ms`,
+      error: `Timed out waiting for OTP email after ${timeoutMs}ms (${pollCount} polls, checked ${lookbackMinutes}min window${triggeredAfterMs ? `, triggered-after ${new Date(triggeredAfterMs).toISOString()}` : ''})`,
     };
   } catch (error) {
     const details = [

@@ -19,7 +19,18 @@ function buildSelectors() {
       'button:has-text("Login")',
       'input[type="submit"]',
     ],
-    otpInputs: ['input[name*="otp" i]', 'input[name*="verification" i]', 'input[id*="otp" i]'],
+    otpInputs: [
+      'input[name*="otp" i]',
+      'input[name*="verification" i]',
+      'input[id*="otp" i]',
+      'input[id*="verification" i]',
+      'input[name*="token" i]',
+      'input[id*="token" i]',
+      // IHP 2-step verification page uses a generic text input
+      'input[type="text"][name*="code" i]',
+      'input[type="tel"]',
+      'input[type="number"]',
+    ],
     searchInput: ['input[name*="nric" i]', 'input[id*="nric" i]', 'input[name*="member" i]'],
     searchSubmit: ['input[name*="btnSearch" i]', 'button:has-text("Search")'],
     searchResultRow: [

@@ -72,9 +72,13 @@ export class GENtucSubmitter {
     if (!this._isTraumaLikeDiagnosis(base) && this._isTraumaLikeDiagnosis(candidate)) return true;
     // Body-part guardrails for common mismatches observed in portal list fallbacks.
     if (/\b(back|lumbar|lumbago)\b/.test(base)) {
-      if (/\b(abdominal|pelvic|micturition|genital|menstrual|throat|chest)\b/.test(candidate)) return true;
+      if (/\b(abdominal|pelvic|micturition|genital|menstrual|throat|chest)\b/.test(candidate))
+        return true;
     }
-    if (/\b(throat)\b/.test(base) && /\b(abdominal|pelvic|micturition|genital|menstrual)\b/.test(candidate)) {
+    if (
+      /\b(throat)\b/.test(base) &&
+      /\b(abdominal|pelvic|micturition|genital|menstrual)\b/.test(candidate)
+    ) {
       return true;
     }
     return false;
@@ -196,21 +200,16 @@ export class GENtucSubmitter {
   }
 
   _deriveDiagnosisSearchTerms(visit, diagnosisText) {
-    const canonical = String(visit?.extraction_metadata?.diagnosisCanonical?.description_canonical || '').trim();
+    const canonical = String(
+      visit?.extraction_metadata?.diagnosisCanonical?.description_canonical || ''
+    ).trim();
     const text = String(diagnosisText || '').trim();
-    const firstTwo = text
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .join(' ');
-    const firstThree = text
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 3)
-      .join(' ');
+    const firstTwo = text.split(/\s+/).filter(Boolean).slice(0, 2).join(' ');
+    const firstThree = text.split(/\s+/).filter(Boolean).slice(0, 3).join(' ');
     const normalized = this._normalizeDiagnosisText(`${text} ${canonical}`);
     const generic = ['pain'];
-    if (/back|lumbar|lumbago/.test(normalized)) generic.push('lower back pain', 'back pain', 'backache');
+    if (/back|lumbar|lumbago/.test(normalized))
+      generic.push('lower back pain', 'back pain', 'backache');
     if (/headache/.test(normalized)) generic.push('headache');
     if (/fever/.test(normalized)) generic.push('fever');
     if (!/back|lumbar|lumbago|headache|fever|pain/.test(normalized)) {
@@ -224,7 +223,9 @@ export class GENtucSubmitter {
     for (const term of searchTerms || []) {
       const tokens = this._tokenizeDiagnosisText(term);
       for (const token of tokens) {
-        const first = String(token || '').charAt(0).toUpperCase();
+        const first = String(token || '')
+          .charAt(0)
+          .toUpperCase();
         if (/^[A-Z]$/.test(first)) letters.push(first);
       }
     }
@@ -268,13 +269,21 @@ export class GENtucSubmitter {
           if (!el || !el.options) return false;
           const wants = values.map(v => v.toLowerCase());
           const exact = option => {
-            const value = String(option.value || '').trim().toLowerCase();
-            const label = String(option.textContent || '').trim().toLowerCase();
+            const value = String(option.value || '')
+              .trim()
+              .toLowerCase();
+            const label = String(option.textContent || '')
+              .trim()
+              .toLowerCase();
             return wants.includes(value) || wants.includes(label);
           };
           const loose = option => {
-            const value = String(option.value || '').trim().toLowerCase();
-            const label = String(option.textContent || '').trim().toLowerCase();
+            const value = String(option.value || '')
+              .trim()
+              .toLowerCase();
+            const label = String(option.textContent || '')
+              .trim()
+              .toLowerCase();
             return wants.some(w => value.includes(w) || label.includes(w));
           };
 
@@ -339,10 +348,18 @@ export class GENtucSubmitter {
         ({ selector: s, values }) => {
           const el = document.querySelector(s);
           if (!el || !el.options) return false;
-          const wants = values.map(v => String(v || '').trim().toLowerCase());
+          const wants = values.map(v =>
+            String(v || '')
+              .trim()
+              .toLowerCase()
+          );
           for (const option of Array.from(el.options || [])) {
-            const value = String(option.value || '').trim().toLowerCase();
-            const label = String(option.textContent || '').trim().toLowerCase();
+            const value = String(option.value || '')
+              .trim()
+              .toLowerCase();
+            const label = String(option.textContent || '')
+              .trim()
+              .toLowerCase();
             if (wants.includes(value) || wants.includes(label)) {
               el.value = option.value;
               el.dispatchEvent(new Event('change', { bubbles: true }));
@@ -394,8 +411,14 @@ export class GENtucSubmitter {
     }
 
     const selectedByFallback =
-      (await this._selectByValueOrLabel(page, selector, [fallbackOption.value, fallbackOption.text])) ||
-      (await this._setSelectValueNoPostback(page, selector, [fallbackOption.value, fallbackOption.text]));
+      (await this._selectByValueOrLabel(page, selector, [
+        fallbackOption.value,
+        fallbackOption.text,
+      ])) ||
+      (await this._setSelectValueNoPostback(page, selector, [
+        fallbackOption.value,
+        fallbackOption.text,
+      ]));
     if (!selectedByFallback) {
       return { selected: false, value: '', by: 'none' };
     }
@@ -419,7 +442,7 @@ export class GENtucSubmitter {
   async _openDiagnosisPopup(page) {
     const diagHref = await page
       .evaluate(() => {
-        const link = Array.from(document.querySelectorAll('a')).find((a) => {
+        const link = Array.from(document.querySelectorAll('a')).find(a => {
           const href = a.getAttribute('href') || '';
           const title = a.getAttribute('title') || '';
           return href.includes('SearchDiagnosis.aspx') || /primary diagnosis/i.test(title);
@@ -441,7 +464,7 @@ export class GENtucSubmitter {
           show('', href);
           return;
         }
-        const link = Array.from(document.querySelectorAll('a')).find((a) => {
+        const link = Array.from(document.querySelectorAll('a')).find(a => {
           const rawHref = a.getAttribute('href') || '';
           const title = a.getAttribute('title') || '';
           return rawHref.includes('SearchDiagnosis.aspx') || /primary diagnosis/i.test(title);
@@ -452,11 +475,15 @@ export class GENtucSubmitter {
 
     await attemptOpen();
     await page.waitForTimeout(500);
-    let frameReady = await page.waitForSelector('#TB_iframeContent', { timeout: 5000 }).catch(() => null);
+    let frameReady = await page
+      .waitForSelector('#TB_iframeContent', { timeout: 5000 })
+      .catch(() => null);
     if (!frameReady) {
       await attemptOpen();
       await page.waitForTimeout(800);
-      frameReady = await page.waitForSelector('#TB_iframeContent', { timeout: 5000 }).catch(() => null);
+      frameReady = await page
+        .waitForSelector('#TB_iframeContent', { timeout: 5000 })
+        .catch(() => null);
     }
     return Boolean(frameReady);
   }
@@ -478,7 +505,12 @@ export class GENtucSubmitter {
       const cellCount = await cells.count().catch(() => 0);
       let code = '';
       for (let c = 0; c < cellCount; c++) {
-        const text = String((await cells.nth(c).innerText().catch(() => '')) || '').trim();
+        const text = String(
+          (await cells
+            .nth(c)
+            .innerText()
+            .catch(() => '')) || ''
+        ).trim();
         const normalized = this._normalizeDiagnosisCode(text);
         if (normalized) {
           code = normalized;
@@ -643,7 +675,11 @@ export class GENtucSubmitter {
     const minScore = Number(process.env.DIAGNOSIS_MATCH_MIN_SCORE || 90);
     const softMin = Number(process.env.DIAGNOSIS_SOFT_MIN_SCORE || 0.12);
 
-    await frame.locator('body').first().waitFor({ timeout: 8000 }).catch(() => {});
+    await frame
+      .locator('body')
+      .first()
+      .waitFor({ timeout: 8000 })
+      .catch(() => {});
 
     const maybeTrackSoftFallback = (options, term) => {
       for (const option of options) {
@@ -672,7 +708,8 @@ export class GENtucSubmitter {
         ) ||
         options.find(
           opt =>
-            String(opt.text || '').trim() === selectedText && this._normalizeDiagnosisCode(opt.code || '')
+            String(opt.text || '').trim() === selectedText &&
+            this._normalizeDiagnosisCode(opt.code || '')
         ) ||
         options.find(opt => String(opt.text || '').trim() === selectedText) ||
         null;
@@ -790,7 +827,8 @@ export class GENtucSubmitter {
         const refreshed = options.find(
           opt =>
             String(opt?.text || '').trim() === String(selectedOption?.text || '').trim() &&
-            this._normalizeDiagnosisCode(opt?.code || '') === this._normalizeDiagnosisCode(selectedOption?.code || '')
+            this._normalizeDiagnosisCode(opt?.code || '') ===
+              this._normalizeDiagnosisCode(selectedOption?.code || '')
         );
         if (refreshed) selectedOption = refreshed;
       }
@@ -824,9 +862,15 @@ export class GENtucSubmitter {
       });
       if (!allowGenericFallback) return { success: false, portalMatch: null };
 
-      await page.locator('#TB_closeAjaxWindow').first().click({ timeout: 2000 }).catch(() => {});
+      await page
+        .locator('#TB_closeAjaxWindow')
+        .first()
+        .click({ timeout: 2000 })
+        .catch(() => {});
       await page.keyboard.press('Escape').catch(() => {});
-      await page.waitForSelector('#TB_iframeContent', { state: 'detached', timeout: 3000 }).catch(() => {});
+      await page
+        .waitForSelector('#TB_iframeContent', { state: 'detached', timeout: 3000 })
+        .catch(() => {});
 
       const genericOption = {
         code: process.env.GE_GENERIC_DRAFT_DIAGNOSIS_CODE || 'R52',
@@ -853,7 +897,9 @@ export class GENtucSubmitter {
     }
 
     await page.waitForTimeout(1200);
-    await page.waitForSelector('#TB_iframeContent', { state: 'detached', timeout: 8000 }).catch(() => {});
+    await page
+      .waitForSelector('#TB_iframeContent', { state: 'detached', timeout: 8000 })
+      .catch(() => {});
     await page.waitForLoadState('domcontentloaded').catch(() => {});
 
     let state = await this._readPrimaryDiagnosisState(page);
@@ -888,14 +934,20 @@ export class GENtucSubmitter {
       .first()
       .innerText()
       .catch(() => '');
-    const normalizedLabel = String(labelMessage || '').replace(/\s+/g, ' ').trim();
+    const normalizedLabel = String(labelMessage || '')
+      .replace(/\s+/g, ' ')
+      .trim();
     if (normalizedLabel) return normalizedLabel;
     const bannerMessage = await page
-      .locator('text=/Please\\s+select\\s+valid|select\\s+a\\s+valid\\s+referral\\s+clinic|Please\\s+select\\s+either/i')
+      .locator(
+        'text=/Please\\s+select\\s+valid|select\\s+a\\s+valid\\s+referral\\s+clinic|Please\\s+select\\s+either/i'
+      )
       .first()
       .innerText()
       .catch(() => '');
-    return String(bannerMessage || '').replace(/\s+/g, ' ').trim();
+    return String(bannerMessage || '')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   async _readReferralState(page) {
@@ -916,7 +968,9 @@ export class GENtucSubmitter {
           oldRefType,
           clinicId,
           parentClinicId,
-          hasValidIdentity: Boolean(refValue && (refType || oldRefType || clinicId || parentClinicId)),
+          hasValidIdentity: Boolean(
+            refValue && (refType || oldRefType || clinicId || parentClinicId)
+          ),
         };
       })
       .catch(() => ({
@@ -1053,9 +1107,15 @@ export class GENtucSubmitter {
 
       await this._setReferralHiddenFields(page);
       const state = await this._readReferralState(page);
-      const normalizedValue = String(state?.refValue || '').trim().toLowerCase();
-      const normalizedExpected = String(resolvedLabel || '').trim().toLowerCase();
-      const looksLikeExactClinic = Boolean(normalizedExpected && normalizedValue === normalizedExpected);
+      const normalizedValue = String(state?.refValue || '')
+        .trim()
+        .toLowerCase();
+      const normalizedExpected = String(resolvedLabel || '')
+        .trim()
+        .toLowerCase();
+      const looksLikeExactClinic = Boolean(
+        normalizedExpected && normalizedValue === normalizedExpected
+      );
       if (state.hasValidIdentity && (looksLikeExactClinic || normalizedValue.length >= 12)) {
         return true;
       }
@@ -1079,7 +1139,8 @@ export class GENtucSubmitter {
       const id = (await el.getAttribute('id').catch(() => '')) || '';
       const blob = `${text} ${value} ${id}`.toLowerCase();
       if (!blob.trim()) continue;
-      if (blob.includes('cancel') || blob.includes('reload') || blob.includes('calculate')) continue;
+      if (blob.includes('cancel') || blob.includes('reload') || blob.includes('calculate'))
+        continue;
       if (blob.includes('save') || blob.includes('draft')) {
         return { locator: el, label: blob };
       }
@@ -1165,7 +1226,10 @@ export class GENtucSubmitter {
         continue;
       }
 
-      if (lower.includes('valid diagnosis') || lower.includes('select either a chronic diagnosis')) {
+      if (
+        lower.includes('valid diagnosis') ||
+        lower.includes('select either a chronic diagnosis')
+      ) {
         return { saveBtn: null, message: message || 'Diagnosis not accepted by portal state' };
       }
 
@@ -1174,7 +1238,10 @@ export class GENtucSubmitter {
       }
       await page.waitForTimeout(600);
     }
-    return { saveBtn: await this._detectSaveButton(page), message: 'Calculate Claim did not reach save-ready state' };
+    return {
+      saveBtn: await this._detectSaveButton(page),
+      message: 'Calculate Claim did not reach save-ready state',
+    };
   }
 
   async submit(visit, runtimeCredential = null) {
@@ -1211,8 +1278,10 @@ export class GENtucSubmitter {
     }
 
     const visitDate = visit?.visit_date || visit?.visitDate || null;
-    const formattedDate = this._formatDateForGE(visitDate);
-    const mcDays = Number.isFinite(Number(metadata?.mcDays)) ? String(Number(metadata.mcDays)) : '0';
+    const _formattedDate = this._formatDateForGE(visitDate);
+    const mcDays = Number.isFinite(Number(metadata?.mcDays))
+      ? String(Number(metadata.mcDays))
+      : '0';
     const mcReason = this._deriveMcReason(visit);
     const diagnosisText = this._deriveDiagnosisText(visit);
     const diagnosisCode = this._deriveDiagnosisCode(visit);
@@ -1222,63 +1291,107 @@ export class GENtucSubmitter {
     const saveDraftEnabled = process.env.WORKFLOW_SAVE_DRAFT !== '0';
 
     try {
-      await this.allianceAutomation.login();
-      const dateCandidates = this._buildAllianceSearchDateCandidates(visitDate);
-      let found = null;
-      let lastAddError = null;
-      for (let i = 0; i < dateCandidates.length; i++) {
-        const dateCandidate = dateCandidates[i];
-        await this.allianceAutomation.navigateToMedicalTreatmentClaim();
-        found = await this.allianceAutomation.searchMemberByNric(nric, dateCandidate || null);
-        if (!found?.found) continue;
+      // Check if the GE/NTUC panel-claim popup was already captured during a prior
+      // Alliance Medinet reroute for THIS visit. If so, skip the redundant
+      // login→search→selectMember flow and go straight to the popup. The
+      // popup must be tagged with the current NRIC; otherwise it belongs to
+      // a previous visit in the batch and must be discarded.
+      let popup = this.allianceAutomation.lastGePopupPage;
+      const popupNric = this.allianceAutomation.lastGePopupNric || null;
+      const popupAlreadyCaptured = popup && !popup.isClosed() && popupNric === nric;
+      if (popup && !popup.isClosed() && popupNric && popupNric !== nric) {
+        logger.warn('[GE] Discarding stale GE/NTUC popup captured for a different NRIC', {
+          capturedFor: popupNric,
+          currentNric: nric,
+        });
         try {
-          await this.allianceAutomation.selectMemberAndAdd();
-          lastAddError = null;
-          break;
-        } catch (error) {
-          const code = error?.allianceError?.code || null;
-          if (code === 'ge_popup_redirect') {
+          await popup.close();
+        } catch {
+          // ignore
+        }
+        this.allianceAutomation.lastGePopupPage = null;
+        this.allianceAutomation.lastGePopupUrl = null;
+        this.allianceAutomation.lastGePopupNric = null;
+      }
+
+      if (popupAlreadyCaptured) {
+        logger.info(
+          '[GE] GE/NTUC popup already captured from prior Alliance Medinet reroute — skipping redundant search',
+          { nric }
+        );
+      } else {
+        // Clear stale popup reference
+        this.allianceAutomation.lastGePopupPage = null;
+        this.allianceAutomation.lastGePopupUrl = null;
+        this.allianceAutomation.lastGePopupNric = null;
+
+        await this.allianceAutomation.login();
+        const dateCandidates = this._buildAllianceSearchDateCandidates(visitDate);
+        let found = null;
+        let lastAddError = null;
+        for (let i = 0; i < dateCandidates.length; i++) {
+          const dateCandidate = dateCandidates[i];
+          await this.allianceAutomation.navigateToMedicalTreatmentClaim();
+          found = await this.allianceAutomation.searchMemberByNric(nric, dateCandidate || null);
+          if (!found?.found) continue;
+          try {
+            await this.allianceAutomation.selectMemberAndAdd();
             lastAddError = null;
             break;
+          } catch (error) {
+            const code = error?.allianceError?.code || null;
+            if (code === 'ge_popup_redirect') {
+              lastAddError = null;
+              break;
+            }
+            lastAddError = error;
+            const canRetryAlternateDate =
+              /portal runtime state|claim form did not render/i.test(
+                String(error?.message || '')
+              ) && i < dateCandidates.length - 1;
+            if (!canRetryAlternateDate) throw error;
+            logger.warn(
+              '[GE] Alliance member add failed for date candidate; retrying alternate date',
+              {
+                nric,
+                visitDateCandidate: dateCandidate,
+                nextDateCandidate: dateCandidates[i + 1],
+                error: error?.message || String(error),
+              }
+            );
           }
-          lastAddError = error;
-          const canRetryAlternateDate =
-            /portal runtime state|claim form did not render/i.test(String(error?.message || '')) &&
-            i < dateCandidates.length - 1;
-          if (!canRetryAlternateDate) throw error;
-          logger.warn('[GE] Alliance member add failed for date candidate; retrying alternate date', {
-            nric,
-            visitDateCandidate: dateCandidate,
-            nextDateCandidate: dateCandidates[i + 1],
-            error: error?.message || String(error),
-          });
         }
-      }
 
-      if (!found?.found) {
-        return {
-          success: false,
-          reason: 'not_found',
-          error: `Member not found in Alliance Medinet for GE route: ${nric}`,
-          portal: 'GE_NTUC',
-          portalService: 'GE_NTUC',
-          portalUrl: runtimeCredential?.url || PORTALS.GE_NTUC?.url || null,
-          savedAsDraft: false,
-          submitted: false,
-        };
-      }
+        if (!found?.found) {
+          return {
+            success: false,
+            reason: 'not_found',
+            error: `Member not found in Alliance Medinet for GE route: ${nric}`,
+            portal: 'GE_NTUC',
+            portalService: 'GE_NTUC',
+            portalUrl: runtimeCredential?.url || PORTALS.GE_NTUC?.url || null,
+            savedAsDraft: false,
+            submitted: false,
+          };
+        }
 
-      const popup = this.allianceAutomation.lastGePopupPage;
-      if (!popup) {
-        if (lastAddError) throw lastAddError;
-        throw new Error('GE popup not captured after Alliance Medinet reroute');
+        popup = this.allianceAutomation.lastGePopupPage;
+        if (!popup) {
+          if (lastAddError) throw lastAddError;
+          throw new Error('GE popup not captured after Alliance Medinet reroute');
+        }
       }
 
       await popup.waitForLoadState('domcontentloaded').catch(() => {});
       await popup.bringToFront().catch(() => {});
       await popup.waitForTimeout(800);
 
-      const diagnosisResult = await this._setDiagnosisViaPopup(popup, visit, diagnosisText, diagnosisCode);
+      const diagnosisResult = await this._setDiagnosisViaPopup(
+        popup,
+        visit,
+        diagnosisText,
+        diagnosisCode
+      );
       const diagnosisPortalMatch = diagnosisResult?.portalMatch || null;
       logger.info('[GE DX] resolved diagnosis state', {
         state: diagnosisResult?.diagnosisState || null,
@@ -1331,7 +1444,11 @@ export class GENtucSubmitter {
         mcDays,
         Number.isFinite(Number(mcDays)) ? Number(mcDays).toFixed(1) : null,
       ]);
-      await this._setInputValueNoPostback(popup, '#ctl00_MainContent_uc_MakeClaim_txtMcDays', mcDays);
+      await this._setInputValueNoPostback(
+        popup,
+        '#ctl00_MainContent_uc_MakeClaim_txtMcDays',
+        mcDays
+      );
       await this._setSelectValueNoPostback(
         popup,
         '#ctl00_MainContent_uc_MakeClaim_ddlMcReasons',
@@ -1350,7 +1467,11 @@ export class GENtucSubmitter {
         mcDays,
         Number.isFinite(Number(mcDays)) ? Number(mcDays).toFixed(1) : null,
       ]);
-      await this._setInputValueNoPostback(popup, '#ctl00_MainContent_uc_MakeClaim_txtMcDays', mcDays);
+      await this._setInputValueNoPostback(
+        popup,
+        '#ctl00_MainContent_uc_MakeClaim_txtMcDays',
+        mcDays
+      );
       await this._setSelectValueNoPostback(
         popup,
         '#ctl00_MainContent_uc_MakeClaim_ddlMcReasons',
@@ -1359,10 +1480,18 @@ export class GENtucSubmitter {
       );
 
       if (feeAmount) {
-        await this._setInputValueNoPostback(popup, '#ctl00_MainContent_uc_MakeClaim_txtFeeAmount', feeAmount);
+        await this._setInputValueNoPostback(
+          popup,
+          '#ctl00_MainContent_uc_MakeClaim_txtFeeAmount',
+          feeAmount
+        );
       }
       if (remarks) {
-        await this._setInputValueNoPostback(popup, '#ctl00_MainContent_uc_MakeClaim_txtClaimRemarks', remarks);
+        await this._setInputValueNoPostback(
+          popup,
+          '#ctl00_MainContent_uc_MakeClaim_txtClaimRemarks',
+          remarks
+        );
       }
       await this._ensureReferralClinic(popup, visit).catch(() => false);
       await this._ensureCalculateButtonReady(popup).catch(() => false);

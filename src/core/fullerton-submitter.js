@@ -21,7 +21,9 @@ async function extractFullertonFeeEvidence(page) {
           .replace(/\s+/g, ' ')
           .trim();
       const parseAmount = value => {
-        const m = norm(value).replace(/,/g, '').match(/\d+(?:\.\d{1,2})?/);
+        const m = norm(value)
+          .replace(/,/g, '')
+          .match(/\d+(?:\.\d{1,2})?/);
         return m ? Number(m[0]).toFixed(2) : '';
       };
 
@@ -88,7 +90,9 @@ async function extractFullertonVisitDateEvidence(page) {
       if (visitDateCell) return { ok: true, value: visitDateCell, source: 'row:visit_date' };
 
       const body = norm(globalThis.document?.body?.innerText || '');
-      const m = body.match(/visit date[^0-9A-Za-z]{0,10}([0-9]{1,2}\s+[A-Za-z]{3,9}\s+[0-9]{4}|[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{2,4}|[0-9]{4}-[0-9]{1,2}-[0-9]{1,2})/i);
+      const m = body.match(
+        /visit date[^0-9A-Za-z]{0,10}([0-9]{1,2}\s+[A-Za-z]{3,9}\s+[0-9]{4}|[0-9]{1,2}\/[0-9]{1,2}\/[0-9]{2,4}|[0-9]{4}-[0-9]{1,2}-[0-9]{1,2})/i
+      );
       if (m?.[1]) return { ok: true, value: norm(m[1]), source: 'body:visit_date' };
 
       return { ok: false, value: '', source: null };
@@ -97,6 +101,11 @@ async function extractFullertonVisitDateEvidence(page) {
 }
 
 async function ensureFullertonVisitForm({ page, state, helpers }) {
+  const GLOBAL_TIMEOUT_MS = 60000;
+  const globalDeadline = Date.now() + GLOBAL_TIMEOUT_MS;
+
+  const isExpired = () => Date.now() >= globalDeadline;
+
   const isEditPage = () =>
     page
       .evaluate(() => {
@@ -110,10 +119,19 @@ async function ensureFullertonVisitForm({ page, state, helpers }) {
       })
       .catch(() => false);
 
+  const isSessionExpired = () =>
+    page
+      .evaluate(() => {
+        const body = String(globalThis.document?.body?.innerText || '');
+        return /session.*expired|session.*timeout|please login again|login has expired/i.test(body);
+      })
+      .catch(() => false);
+
   const waitForEditPage = async timeoutMs => {
-    const deadline = Date.now() + timeoutMs;
+    const deadline = Math.min(Date.now() + timeoutMs, globalDeadline);
     while (Date.now() < deadline) {
       if (await isEditPage()) return true;
+      if (isExpired()) return false;
       await page.waitForTimeout(700);
     }
     return false;
@@ -164,15 +182,27 @@ async function ensureFullertonVisitForm({ page, state, helpers }) {
     return;
   }
 
+  // Check for expired session before attempting registration loop.
+  if (await isSessionExpired()) {
+    state.form_navigation = {
+      mode: 'session_expired',
+      url: String(page.url() || ''),
+    };
+    return;
+  }
+
   for (let i = 0; i < 5; i += 1) {
+    if (isExpired()) break;
+
     await clickDuplicateOk();
-    if (await waitForEditPage(8000)) {
+    if (await waitForEditPage(6000)) {
       state.form_navigation = {
         mode: 'popup_resolved_to_edit',
         url: String(page.url() || ''),
       };
       return;
     }
+    if (isExpired()) break;
 
     const clickedRegister = await helpers.clickFirst(
       [
@@ -191,13 +221,24 @@ async function ensureFullertonVisitForm({ page, state, helpers }) {
       if (submitted) state.register_click_selector = 'form.requestSubmit(visitRegister_0)';
     }
 
-    await page.waitForTimeout(1200);
+    await page.waitForTimeout(1000);
     await clickDuplicateOk();
-    await page.waitForTimeout(1200);
+    await page.waitForTimeout(1000);
 
-    if (await waitForEditPage(12000)) {
+    if (isExpired()) break;
+
+    if (await waitForEditPage(8000)) {
       state.form_navigation = {
         mode: 'register_to_edit',
+        url: String(page.url() || ''),
+      };
+      return;
+    }
+
+    // Check for session expiry mid-loop to avoid further futile retries.
+    if (await isSessionExpired()) {
+      state.form_navigation = {
+        mode: 'session_expired',
         url: String(page.url() || ''),
       };
       return;
@@ -205,8 +246,9 @@ async function ensureFullertonVisitForm({ page, state, helpers }) {
   }
 
   state.form_navigation = {
-    mode: 'register_not_advanced',
+    mode: isExpired() ? 'global_timeout' : 'register_not_advanced',
     url: String(page.url() || ''),
+    timeoutMs: GLOBAL_TIMEOUT_MS,
   };
 }
 
@@ -339,6 +381,12 @@ export class FullertonSubmitter {
       defaultUsername: PORTALS.FULLERTON?.username || '',
       defaultPassword: PORTALS.FULLERTON?.password || '',
       supportsOtp: true,
+      // Clear Fullerton + 2xSecure cookies before each login. Persisted
+      // session cookies from prior runs cause the portal to skip issuing a
+      // fresh OTP email, which makes the Gmail poll time out even though
+      // credentials are valid. By wiping the cookies we force a clean
+      // authentication + OTP challenge every run.
+      clearCookiesOnLogin: ['fhn3.com', 'fullertonhealth.com', '2xsecure'],
       selectors: buildSelectors(),
       beforeForm: async ({ page: runPage, state, helpers }) => {
         await ensureFullertonVisitForm({ page: runPage, state, helpers });

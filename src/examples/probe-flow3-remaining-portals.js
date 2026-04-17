@@ -8,20 +8,9 @@ import { IXChangeSubmitter } from '../core/ixchange-submitter.js';
 import { logger } from '../utils/logger.js';
 
 function buildProbeVisits() {
+  // IHP probe is intentionally skipped per operator request — pending OTP-email
+  // sample diagnosis. Re-enable by adding the IHP entry back to this list.
   return [
-    {
-      target: 'IHP',
-      visit: {
-        id: 'probe-ihp',
-        patient_name: 'PROBE IHP PATIENT',
-        pay_type: 'IHP',
-        visit_date: '2026-02-13',
-        nric: 'S2569642E',
-        diagnosis_description: 'Upper respiratory tract infection',
-        total_amount: 35,
-        extraction_metadata: { nric: 'S2569642E' },
-      },
-    },
     {
       target: 'FULLERTON',
       visit: {
@@ -43,9 +32,13 @@ function buildProbeVisits() {
         pay_type: 'ALLIANZ',
         visit_date: '2026-02-13',
         nric: 'S1234567A',
+        // DOB attached so the AMOS Surname+DOB attempt fires; with a placeholder
+        // value the search will return "no member found" but the disabled-SEARCH
+        // gate will be cleared, exercising the wiring end-to-end.
+        dob: '1980-01-15',
         diagnosis_description: 'Cough',
         total_amount: 30,
-        extraction_metadata: { nric: 'S1234567A' },
+        extraction_metadata: { nric: 'S1234567A', flow1: { dob: '1980-01-15' } },
       },
     },
     {

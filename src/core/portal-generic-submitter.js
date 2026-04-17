@@ -82,15 +82,62 @@ function extractNric(visit) {
   return '';
 }
 
+// Body-part → readable diagnosis text for non-MHC portals that accept free-text diagnosis.
+const BODY_PART_TEXT_MAP = {
+  knee: 'Knee pain',
+  back: 'Low back pain',
+  'low back': 'Low back pain',
+  'lower back': 'Low back pain',
+  'upper back': 'Upper back pain',
+  shoulder: 'Shoulder pain',
+  neck: 'Neck pain',
+  ankle: 'Ankle pain',
+  wrist: 'Wrist pain',
+  hip: 'Hip pain',
+  elbow: 'Elbow pain',
+  foot: 'Foot pain',
+  hand: 'Hand pain',
+  chest: 'Chest pain',
+  head: 'Headache',
+  throat: 'Sore throat',
+  abdomen: 'Abdominal pain',
+  eye: 'Eye pain',
+  ear: 'Ear pain',
+};
+
 function extractDiagnosisText(visit) {
   const metadata = visit?.extraction_metadata || {};
-  const value =
+  const canonical = metadata?.diagnosisCanonical || {};
+
+  // Tier 1: direct diagnosis fields
+  const direct =
     visit?.diagnosis_description ||
     visit?.diagnosis_desc ||
-    metadata?.diagnosisCanonical?.description_canonical ||
+    canonical?.description_canonical ||
     metadata?.diagnosis?.description ||
-    'General medical condition';
-  return String(value || 'General medical condition').trim();
+    '';
+  const directText = String(direct || '').trim();
+  if (directText && !/^missing\s+diagnosis$/i.test(directText)) return directText;
+
+  // Tier 2: body-part + condition inference
+  const bodyPart = String(canonical?.body_part || '')
+    .trim()
+    .toLowerCase();
+  const condition = String(canonical?.condition || '')
+    .trim()
+    .toLowerCase();
+  if (bodyPart && BODY_PART_TEXT_MAP[bodyPart]) {
+    if (condition && condition !== 'pain') {
+      return `${bodyPart.charAt(0).toUpperCase() + bodyPart.slice(1)} ${condition}`;
+    }
+    return BODY_PART_TEXT_MAP[bodyPart];
+  }
+  if (condition) {
+    return condition.charAt(0).toUpperCase() + condition.slice(1);
+  }
+
+  // Tier 3: last resort
+  return 'General medical condition';
 }
 
 function extractAmount(visit) {
@@ -203,8 +250,16 @@ export class GenericPortalSubmitter {
     this.supportsOtp = config?.supportsOtp === true;
     this.selectors = config?.selectors || {};
     this.steps = config?.steps || null;
+    this.beforeLogin = typeof config?.beforeLogin === 'function' ? config.beforeLogin : null;
     this.beforeSearch = typeof config?.beforeSearch === 'function' ? config.beforeSearch : null;
     this.beforeForm = typeof config?.beforeForm === 'function' ? config.beforeForm : null;
+    // Optional list of cookie-domain substrings to clear before navigating to the
+    // login URL. Used by Fullerton (and potentially others) to ensure a fresh
+    // OTP challenge each run — when the 2xsecure session cookie is persisted,
+    // the portal skips issuing a new OTP email and our Gmail poll times out.
+    this.clearCookiesOnLogin = Array.isArray(config?.clearCookiesOnLogin)
+      ? config.clearCookiesOnLogin.filter(Boolean).map(v => String(v))
+      : null;
     this.searchIdentifierExtractor =
       typeof config?.searchIdentifierExtractor === 'function'
         ? config.searchIdentifierExtractor
@@ -338,23 +393,27 @@ export class GenericPortalSubmitter {
       .evaluate(el => {
         if (!el) return { value: '', readonly: false, disabled: false };
         const tag = String(el.tagName || '').toLowerCase();
-        const input = /** @type {HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement} */ (el);
+        const input = /** @type {HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement} */ (
+          el
+        );
         const value =
           'value' in input && typeof input.value === 'string' && input.value.trim()
             ? input.value
             : String(el.textContent || '');
         const readonly = Boolean(
           input.hasAttribute?.('readonly') ||
-            input.getAttribute?.('aria-readonly') === 'true' ||
-            input.getAttribute?.('readonly') === 'readonly'
+          input.getAttribute?.('aria-readonly') === 'true' ||
+          input.getAttribute?.('readonly') === 'readonly'
         );
         const disabled = Boolean(
           input.hasAttribute?.('disabled') ||
-            input.getAttribute?.('aria-disabled') === 'true' ||
-            input.getAttribute?.('disabled') === 'disabled'
+          input.getAttribute?.('aria-disabled') === 'true' ||
+          input.getAttribute?.('disabled') === 'disabled'
         );
         return {
-          value: String(value || '').replace(/\s+/g, ' ').trim(),
+          value: String(value || '')
+            .replace(/\s+/g, ' ')
+            .trim(),
           readonly,
           disabled,
           tag,
@@ -448,13 +507,15 @@ export class GenericPortalSubmitter {
   async _isOtpVisible() {
     const otpInputs = Array.isArray(this.selectors.otpInputs) ? this.selectors.otpInputs : [];
     if (!otpInputs.length) return false;
-    const found = await this._waitForFirst(otpInputs, { timeout: 1200 }).catch(() => null);
+    const found = await this._waitForFirst(otpInputs, { timeout: 3000 }).catch(() => null);
     if (found) return true;
 
     const bodyText = await this.page
       .evaluate(() => String(globalThis.document?.body?.innerText || ''))
       .catch(() => '');
-    return /otp|one[-\s]?time password|verification code|security code/i.test(bodyText);
+    return /otp|one[-\s]?time password|verification code|security code|2-step verification|validate otp|resend otp/i.test(
+      bodyText
+    );
   }
 
   async _waitForOtpToClear(timeoutMs = 300000) {
@@ -468,7 +529,10 @@ export class GenericPortalSubmitter {
   }
 
   _buildResult(base, overrides = {}) {
-    const requestedMode = String(process.env.FLOW3_MODE || '').trim().toLowerCase() || 'fill_evidence';
+    const requestedMode =
+      String(process.env.FLOW3_MODE || '')
+        .trim()
+        .toLowerCase() || 'fill_evidence';
     return {
       success: false,
       portal: this.portalName,
@@ -484,51 +548,176 @@ export class GenericPortalSubmitter {
 
   async _login(url, username, password, state, visit) {
     const page = this.page;
+
+    // Optional cookie reset before login. We clear all cookies in the browser
+    // context, then filter in only the ones not matching the configured
+    // domain substrings. This avoids wiping unrelated portal sessions while
+    // still forcing the target portal to re-authenticate (and, for portals
+    // that use cookie-based 2FA like Fullerton's 2xsecure, re-issue an OTP).
+    if (this.clearCookiesOnLogin && this.clearCookiesOnLogin.length) {
+      try {
+        const context = page.context?.();
+        if (context && typeof context.cookies === 'function') {
+          const allCookies = await context.cookies().catch(() => []);
+          const toDrop = [];
+          const toKeep = [];
+          for (const cookie of allCookies) {
+            const domain = String(cookie?.domain || '').toLowerCase();
+            const matches = this.clearCookiesOnLogin.some(hint =>
+              domain.includes(String(hint).toLowerCase())
+            );
+            (matches ? toDrop : toKeep).push(cookie);
+          }
+          if (toDrop.length) {
+            // Playwright does not expose a per-cookie removal API, so we
+            // clear everything and re-add the non-matching cookies.
+            await context.clearCookies().catch(() => {});
+            if (toKeep.length) {
+              await context.addCookies(toKeep).catch(error => {
+                logger.warn(
+                  `[${this.portalTarget}] Failed to re-add unrelated cookies after clear`,
+                  { error: error?.message || String(error) }
+                );
+              });
+            }
+            state.clearedCookiesOnLogin = toDrop.length;
+            logger.info(`[${this.portalTarget}] Cleared portal cookies to force fresh login/OTP`, {
+              cleared: toDrop.length,
+              kept: toKeep.length,
+              domains: this.clearCookiesOnLogin,
+            });
+          }
+        }
+      } catch (error) {
+        logger.warn(`[${this.portalTarget}] Cookie reset before login failed (continuing)`, {
+          error: error?.message || String(error),
+        });
+      }
+    }
+
+    if (this.beforeLogin) {
+      try {
+        await this.beforeLogin({
+          page,
+          state,
+          visit,
+          helpers: {
+            _fillFirst: (...a) => this._fillFirst(...a),
+            _clickFirst: (...a) => this._clickFirst(...a),
+          },
+        });
+      } catch (error) {
+        logger.warn(`[${this.portalTarget}] beforeLogin hook failed`, {
+          error: error?.message || String(error),
+        });
+      }
+    }
+
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(1200);
 
-    // Some legacy portals (notably Allianz) show a single-session guard page
-    // requiring an explicit "click here to login again" action.
+    // Session-conflict guard: portals (Allianz, IXCHANGE, Fullerton, IHP) may show
+    // a single-session page, expired-session redirect, or access-denied interstitial
+    // that blocks the login form from rendering.
     const bodyBeforeLogin = await page
       .evaluate(() => String(globalThis.document?.body?.innerText || ''))
       .catch(() => '');
-    if (/only one browser window.*can be open/i.test(bodyBeforeLogin)) {
-      await this._clickFirst(['a:has-text("here")', 'a:has-text("login again")'], {
-        timeout: 2500,
-      });
+    const sessionConflictPatterns =
+      /only one browser window.*can be open|click here to login again|session has expired|session timeout|your session.*expired|access denied|please login again|already logged in/i;
+    if (sessionConflictPatterns.test(bodyBeforeLogin)) {
+      state.session_conflict_detected = true;
+      await this._clickFirst(
+        [
+          'a:has-text("here")',
+          'a:has-text("login again")',
+          'a:has-text("Login")',
+          'button:has-text("Login")',
+          'a:has-text("Go Back")',
+          'button:has-text("Go Back")',
+          'a:has-text("OK")',
+          'button:has-text("OK")',
+        ],
+        { timeout: 2500 }
+      );
       await page.waitForTimeout(1500);
       await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => null);
       await page.waitForTimeout(1000);
     }
 
+    // Wait for page to stabilize (table-based portals like Allianz may load slowly)
+    await page.waitForLoadState('networkidle').catch(() => {});
+
     const usernameSelector = await this._fillFirst(this.selectors.loginUsername, username, {
-      timeout: 7000,
+      timeout: 10000,
     });
     const passwordSelector = await this._fillFirst(this.selectors.loginPassword, password, {
       timeout: 7000,
     });
+    // Diagnostic: if login inputs not found, log what inputs exist on the page
+    if (!usernameSelector || !passwordSelector) {
+      const pageInputs = await page
+        .evaluate(() => {
+          const inputs = Array.from(globalThis.document?.querySelectorAll?.('input') || []);
+          return inputs.slice(0, 15).map(inp => ({
+            type: inp.type,
+            name: inp.name,
+            id: inp.id,
+            placeholder: inp.placeholder,
+            visible: inp.offsetParent !== null,
+            inFrame: inp.ownerDocument !== globalThis.document,
+          }));
+        })
+        .catch(() => []);
+      const frameCount = page.frames().length;
+      logger.warn(`[${this.portalTarget}] Login inputs not found`, {
+        usernameFound: !!usernameSelector,
+        passwordFound: !!passwordSelector,
+        pageInputs,
+        frameCount,
+        url: page.url(),
+      });
+    }
 
     if (!usernameSelector || !passwordSelector) {
-      const looksAuthenticated = await this.page
+      const pageAnalysis = await this.page
         .evaluate(() => {
           const t = String(globalThis.document?.body?.innerText || '');
-          return /logout|policy search|user type|dashboard|welcome/i.test(t);
+          const hasLogout = /logout|sign\s*out|log\s*out/i.test(t);
+          const hasDashboard =
+            /policy search|user type|dashboard|my claims|member search|search patient/i.test(t);
+          const hasLoginForm = /username|password|log\s*in|sign\s*in/i.test(t);
+          return { hasLogout, hasDashboard, hasLoginForm };
         })
-        .catch(() => false);
+        .catch(() => ({ hasLogout: false, hasDashboard: false, hasLoginForm: false }));
+
+      const looksAuthenticated =
+        pageAnalysis.hasLogout ||
+        pageAnalysis.hasDashboard ||
+        (!pageAnalysis.hasLoginForm &&
+          (await this.page
+            .evaluate(() => /welcome/i.test(String(globalThis.document?.body?.innerText || '')))
+            .catch(() => false)));
+
       if (looksAuthenticated) {
         state.login_state = 'already_authenticated';
         return true;
       }
-      const alreadyAuthenticated = !(await this._waitForFirst(this.selectors.loginSubmit, {
-        timeout: 1200,
-      }));
-      if (alreadyAuthenticated) {
-        state.login_state = 'already_authenticated';
-        return true;
+      // Only use the "no submit button found → already authenticated" heuristic
+      // when the page does NOT look like a login form. If the page has login form
+      // text (Username, Password, Login), the submit button might just not match
+      // our selectors — that's a selector problem, not proof of being authenticated.
+      if (!pageAnalysis.hasLoginForm) {
+        const alreadyAuthenticated = !(await this._waitForFirst(this.selectors.loginSubmit, {
+          timeout: 2000,
+        }));
+        if (alreadyAuthenticated) {
+          state.login_state = 'already_authenticated';
+          return true;
+        }
       }
       const hasSessionConflict = await this.page
         .evaluate(() =>
-          /only one browser window.*can be open|click here to login again/i.test(
+          /only one browser window.*can be open|click here to login again|session has expired|session timeout|your session.*expired|access denied|please login again|already logged in/i.test(
             String(globalThis.document?.body?.innerText || '')
           )
         )
@@ -549,14 +738,21 @@ export class GenericPortalSubmitter {
       state.evidence = await this._safeScreenshot(visit, 'login-submit-missing');
       return false;
     }
-    await page.waitForTimeout(2500);
+    logger.info(`[${this.portalTarget}] Login submitted`, { submitSelector, url: page.url() });
+    // Wait for post-login page transition (OTP pages may take 3-4s to load)
+    await page.waitForTimeout(3500);
+    // Wait for page to stabilize after potential reload/redirect
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
+    await page.waitForLoadState('networkidle').catch(() => {});
+    // Extra settle time for slow table-based portals
+    await page.waitForTimeout(1500);
 
     const hasLoginUser = await this._waitForFirst(this.selectors.loginUsername, {
-      timeout: 1000,
+      timeout: 2500,
       visibleOnly: true,
     }).catch(() => null);
     const hasLoginPassword = await this._waitForFirst(this.selectors.loginPassword, {
-      timeout: 1000,
+      timeout: 1500,
       visibleOnly: true,
     }).catch(() => null);
     const otpVisible = await this._isOtpVisible();
@@ -576,12 +772,19 @@ export class GenericPortalSubmitter {
         hasAuthError || hasCredentialDecryptError
           ? 'login_invalid_credentials'
           : 'login_not_advanced';
+      logger.warn(`[${this.portalTarget}] Login did not advance`, {
+        loginState: state.login_state,
+        hasAuthError,
+        hasCredentialDecryptError,
+        url: page.url(),
+      });
       state.evidence = await this._safeScreenshot(visit, 'login-not-advanced');
       return false;
     }
 
     state.login_state = 'ok';
     state.loginSubmitSelector = submitSelector;
+    logger.info(`[${this.portalTarget}] Login OK`, { url: page.url() });
     return true;
   }
 
@@ -598,7 +801,17 @@ export class GenericPortalSubmitter {
     }
 
     state.otp_state = 'required';
-    const otpResult = await getOtpCode({ portal: this.portalTarget });
+    // Anchor the OTP lookup to ~5s before now so we only accept OTP emails
+    // that arrived AFTER the current login-submit. This prevents back-to-back
+    // visits (same portal, same mailbox) from reading the PREVIOUS visit's
+    // already-consumed OTP — which the portal would reject, burning the run.
+    // The 5s backdate absorbs clock skew between this host and Gmail.
+    const otpTriggeredAt = Date.now() - 5000;
+    state.otp_triggered_at = otpTriggeredAt;
+    const otpResult = await getOtpCode({
+      portal: this.portalTarget,
+      triggeredAfter: otpTriggeredAt,
+    });
     state.otp = otpResult;
 
     if (otpResult?.ok && otpResult?.code) {
@@ -615,6 +828,25 @@ export class GenericPortalSubmitter {
       }
     } else {
       state.otp_state = otpResult?.status || 'timeout';
+    }
+
+    // In headless / cloud mode there is no operator to enter the code manually.
+    // Fail fast so the visit is tagged as OTP-blocked rather than burning 5 minutes.
+    const isHeadless =
+      toBoolean(process.env.HEADLESS, false) ||
+      toBoolean(process.env.CI, false) ||
+      toBoolean(process.env.CLOUD_RUN, false);
+
+    if (isHeadless) {
+      logger.warn(
+        `[${this.portalTarget}] OTP auto-read failed in headless mode; skipping manual wait`,
+        {
+          otpState: state.otp_state,
+        }
+      );
+      state.evidence = await this._safeScreenshot(visit, 'otp-headless-skip');
+      state.otp_state = 'skipped_headless';
+      return false;
     }
 
     // Manual fallback: pause on OTP screen and wait for operator to enter code.
@@ -678,7 +910,10 @@ export class GenericPortalSubmitter {
         .catch(() => null);
     }
 
-    if (this.selectors.requireSearchProgramType === true && state.search_program_type_verified !== true) {
+    if (
+      this.selectors.requireSearchProgramType === true &&
+      state.search_program_type_verified !== true
+    ) {
       state.search_state = 'program_type_unverified';
       state.search_debug = await this._captureSearchDebug();
       return { ok: false, reason: 'program_type_unverified', nric: null };
@@ -725,6 +960,11 @@ export class GenericPortalSubmitter {
                 value,
                 inputSelectors,
                 label: String(item?.label || '').trim() || null,
+                // Preserve extraInputs so multi-field attempts (e.g. Allianz
+                // AMOS Surname + DOB) actually fill the secondary field.
+                // Stripping this during normalization silently collapsed the
+                // surname_and_dob attempt to surname-only.
+                extraInputs: Array.isArray(item?.extraInputs) ? item.extraInputs : undefined,
               };
             })
             .filter(Boolean);
@@ -791,9 +1031,48 @@ export class GenericPortalSubmitter {
         }
       );
       if (!filled) {
+        // If this attempt's input selectors don't match, try the next attempt
+        if (idx < attempts.length - 1) {
+          logger.info(
+            `[${this.portalTarget}] Search attempt ${idx + 1} input not found (${attempt.label || 'default'}), trying next attempt`
+          );
+          continue;
+        }
         state.search_state = 'search_input_missing';
         state.search_debug = await this._captureSearchDebug();
         return { ok: false, reason: 'search_input_missing', nric: identifier || nric || null };
+      }
+
+      // Multi-field attempts: portals like Allianz AMOS need Surname + DOB.
+      // searchAttemptBuilder may include `extraInputs: [{ value, inputSelectors, label }]`.
+      // Each extra input is filled in order; if none match, the attempt continues
+      // (the primary identifier is the main signal).
+      const extraInputs = Array.isArray(attempt.extraInputs) ? attempt.extraInputs : [];
+      const extraFillResults = [];
+      for (const extra of extraInputs) {
+        if (!extra || !extra.value) continue;
+        const extraFilled = await this._fillFirst(extra.inputSelectors || [], extra.value, {
+          timeout: 2500,
+        });
+        extraFillResults.push({ label: extra.label || 'extra', filled: Boolean(extraFilled) });
+        if (!extraFilled) {
+          logger.info(`[${this.portalTarget}] Extra input not filled (${extra.label || 'extra'})`, {
+            attemptLabel: attempt.label || null,
+          });
+          continue;
+        }
+        // Some legacy portals (Allianz AMOS) wire their "enable SEARCH" logic to
+        // the field's onblur/onchange/onkeyup. Playwright's .fill() dispatches
+        // `input` + `change`, which is not enough for validators that run only on
+        // blur. Opt-in via `blurAfterFill:true` to press Tab so the client-side
+        // validator fires and un-disables the search button before we click it.
+        if (extra.blurAfterFill) {
+          await this.page.keyboard.press('Tab').catch(() => null);
+          await this.page.waitForTimeout(250);
+        }
+      }
+      if (extraFillResults.length) {
+        state.searchExtraFills = extraFillResults;
       }
 
       if (searchVisitDateSelectors.length > 0) {
@@ -818,19 +1097,146 @@ export class GenericPortalSubmitter {
       const postSubmitWaitMs = Number(this.selectors.searchPostSubmitWaitMs || 2500);
       await this.page.waitForTimeout(postSubmitWaitMs);
 
+      // Some portals (notably AMOS / Allianz) return from click() before the
+      // navigation has even committed — so postSubmitWaitMs elapses on the
+      // OLD page, then the results page finally loads. Poll until the page
+      // finishes parsing AND the result-row selectors appear in the DOM.
+      // Doing the row check inside page.evaluate avoids Playwright locators
+      // short-circuiting when a navigation transition happens mid-wait.
+      const navigateUrlPattern = this.selectors.searchResultUrlPattern
+        ? new RegExp(this.selectors.searchResultUrlPattern, 'i')
+        : null;
+      const rowSelectors = Array.isArray(this.selectors.searchResultRow)
+        ? this.selectors.searchResultRow
+        : [];
+      const navigateTimeoutMs = Number(this.selectors.searchNavigateTimeoutMs || 15000);
+      let rowsAppeared = false;
+      let urlChanged = false;
+      let pollsCompleted = 0;
+      let lastEvalError = null;
+      // Direct-poll strategy: AMOS's results page never fires the 'load' or
+      // 'domcontentloaded' events Playwright's waitForURL / waitForLoadState
+      // rely on — they block the full timeout even though the page content
+      // renders. Instead, poll page.url() (cheap, non-blocking) and use
+      // locator.count() (also non-blocking, returns 0 for attached-but-invisible
+      // or not-yet-present elements). Races nicely around navigation commits.
+      const deadline = Date.now() + navigateTimeoutMs;
+      const countRows = async () => {
+        for (const sel of rowSelectors) {
+          try {
+            const n = await this.page.locator(sel).count();
+            if (n > 0) return true;
+          } catch {
+            // Ignore selector errors (unsupported syntax, detached frame, etc.)
+          }
+        }
+        return false;
+      };
+      while (Date.now() < deadline) {
+        pollsCompleted += 1;
+        const curUrl = this.page.url();
+        const urlOk = !navigateUrlPattern || navigateUrlPattern.test(curUrl);
+        if (urlOk) urlChanged = true;
+        // Poll for rows on EVERY iteration — page.url() is unreliable during
+        // AMOS navigation (returns the old URL while the new context is still
+        // being attached). locator.count() re-binds across navigations and
+        // correctly returns > 0 once rows render, regardless of URL state.
+        const found = await countRows().catch(e => {
+          lastEvalError = e?.message || String(e);
+          return false;
+        });
+        if (found) {
+          rowsAppeared = true;
+          break;
+        }
+        await this.page.waitForTimeout(400).catch(() => null);
+      }
+      logger.info(`[${this.portalTarget}] Navigate-poll summary`, {
+        rowsAppeared,
+        urlChanged,
+        pollsCompleted,
+        lastEvalError,
+        finalUrl: this.page.url(),
+      });
+
       const bodyText = normalizeText(
         await this.page
           .evaluate(() => String(globalThis.document?.body?.innerText || ''))
           .catch(() => '')
       );
-      const resultMarkerVisible = this.selectors.searchResultRow?.length
-        ? Boolean(
-            await this._waitForFirst(this.selectors.searchResultRow, {
-              timeout: Number(this.selectors.searchResultPresenceTimeoutMs || 1200),
-              visibleOnly: false,
-            }).catch(() => null)
-          )
-        : false;
+
+      logger.info(`[${this.portalTarget}] Post-search state`, {
+        url: this.page.url(),
+        searchSubmitSelector: searchSubmitSelector || 'Enter-key',
+        bodySnippet: bodyText.substring(0, 200),
+        attemptLabel: attempt.label || null,
+      });
+
+      // Akamai edge-block detection — portals fronted by Akamai (e.g. AMOS)
+      // occasionally serve an error reference page that looks like a normal
+      // navigation but contains no portal content. When we see #NNN.xxxxxxxx
+      // ref numbers, bail out of the whole attempt chain so we fail fast
+      // with a clear reason instead of burning time on every attempt.
+      const akamaiBlocked =
+        /an error occurred while processing your request.*reference #\d+\.[a-z0-9]+/i.test(
+          bodyText
+        ) || /errors\.edgesuite\.net/i.test(bodyText);
+      if (akamaiBlocked) {
+        logger.warn(`[${this.portalTarget}] Edge (Akamai) blocked the search request`, {
+          bodySnippet: bodyText.substring(0, 200),
+        });
+        state.search_state = 'edge_blocked';
+        state.search_debug = await this._captureSearchDebug();
+        return { ok: false, reason: 'edge_blocked', nric: identifier || nric || null };
+      }
+
+      // Prefer the evaluate-based signal from the navigate-poll above, since
+      // Playwright's waitFor can return early during navigation races. Fall
+      // back to waitForFirst only if navigate-poll didn't conclude rows are
+      // present (gives the DOM a final chance on a stable page).
+      let resultMarkerVisible = Boolean(rowsAppeared);
+      if (!resultMarkerVisible && this.selectors.searchResultRow?.length) {
+        resultMarkerVisible = Boolean(
+          await this._waitForFirst(this.selectors.searchResultRow, {
+            timeout: Number(this.selectors.searchResultPresenceTimeoutMs || 1200),
+            visibleOnly: false,
+          }).catch(() => null)
+        );
+      }
+      // DEBUG: dump DOM match counts when the presence check fails, so we can
+      // distinguish "page hasn't rendered yet" from "selector didn't match".
+      if (!resultMarkerVisible && this.selectors.searchResultRow?.length) {
+        try {
+          const diag = await this.page
+            .evaluate(sels => {
+              const doc = globalThis.document;
+              const out = { url: globalThis.location.href, readyState: doc.readyState };
+              out.selectorCounts = {};
+              for (const s of sels || []) {
+                try {
+                  out.selectorCounts[s] = doc.querySelectorAll(s).length;
+                } catch (e) {
+                  out.selectorCounts[s] = `err:${e?.message || e}`;
+                }
+              }
+              const rows = Array.from(doc.querySelectorAll('tr[id^="policies_tr_"]'));
+              out.policyRowCount = rows.length;
+              out.firstRowAttrs = rows[0]
+                ? {
+                    id: rows[0].id,
+                    onclick: rows[0].getAttribute('onclick'),
+                    textSample: (rows[0].textContent || '').replace(/\s+/g, ' ').slice(0, 120),
+                  }
+                : null;
+              out.frameCount = globalThis.frames?.length ?? null;
+              return out;
+            }, this.selectors.searchResultRow)
+            .catch(e => ({ error: e?.message || String(e) }));
+          logger.info(`[${this.portalTarget}] Search result presence diag`, diag);
+        } catch {
+          // best-effort
+        }
+      }
       const hasNoResult = !resultMarkerVisible && noResultPatterns.some(re => re.test(bodyText));
       if (hasNoResult && idx < attempts.length - 1) {
         continue;
@@ -841,10 +1247,26 @@ export class GenericPortalSubmitter {
         return { ok: false, reason: 'not_found', nric: identifier || nric || null };
       }
 
+      logger.info(`[${this.portalTarget}] Search result check`, {
+        resultMarkerVisible,
+        hasNoResult,
+        attemptLabel: attempt.label || null,
+      });
+
       const rowSelector = await this._clickFirst(this.selectors.searchResultRow, {
         timeout: Number(this.selectors.searchResultTimeoutMs || 5000),
         clickTimeout: Number(this.selectors.searchResultClickTimeoutMs || 2500),
         force: this.selectors.searchResultForceClick === true,
+        // Some portals (AMOS) render results inside tables laid out with
+        // absolute positioning / zero-height wrappers; Playwright's default
+        // `visible` wait can time out even though the row is clickable. Opt
+        // in to `attached`-only matching via selectors.searchResultVisibleOnly=false.
+        visibleOnly: this.selectors.searchResultVisibleOnly !== false,
+      });
+
+      logger.info(`[${this.portalTarget}] Search result row click`, {
+        rowSelector: rowSelector || null,
+        urlAfterClick: this.page.url(),
       });
 
       if (!rowSelector && this.selectors.searchResultRow?.length) {
@@ -927,6 +1349,26 @@ export class GenericPortalSubmitter {
           error: error?.message || String(error),
         });
       }
+    }
+
+    // If the beforeForm hook signaled that the portal has no structured claim
+    // form (e.g. Allianz AMOS TPA is read-only), skip the form-fill step
+    // entirely and return success with a diagnostic marker. The caller will
+    // classify this via state.form_state + state.portal_submission_mode.
+    if (state.form_state === 'portal_read_only') {
+      logger.info(`[${this.portalTarget}] portal is read-only — skipping form-fill`, {
+        portal_submission_mode: state.portal_submission_mode,
+        detailReason: state.detailReason,
+      });
+      state.fillVerification = null;
+      state.formSelectors = { visitDate: null, diagnosis: null, amount: null, remarks: null };
+      state.requiredFieldGate = {
+        required: [],
+        passed: true,
+        failed: [],
+        note: 'skipped_portal_read_only',
+      };
+      return { ok: true, filledCount: 0, portalReadOnly: true };
     }
 
     const diagnosis = extractDiagnosisText(visit);
@@ -1185,6 +1627,25 @@ export class GenericPortalSubmitter {
           detailReason: state.form_detail_reason || state.form_state || 'form_failed',
           error: `Claim form fields were not found in ${this.portalName}`,
           portalUrl: url,
+        });
+      }
+
+      // Portal-read-only success path (e.g. Allianz AMOS TPA): we verified
+      // member coverage + extracted policy evidence, but no claim form
+      // exists. Return success with a distinctive reason so downstream can
+      // route the visit to a manual / alternative submission channel.
+      if (formFill?.portalReadOnly) {
+        const evidence =
+          state.allianz_policy_evidence_screenshot ||
+          (await this._safeScreenshot(visit, 'policy-verified'));
+        return this._buildResult(state, {
+          success: true,
+          reason: 'policy_verified_no_claim_form',
+          detailReason: state.detailReason || 'portal_read_only',
+          error: null,
+          portalUrl: url,
+          nric: search.nric || null,
+          evidence,
         });
       }
 

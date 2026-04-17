@@ -360,7 +360,9 @@ export class BrowserManager {
       ? path.resolve(configuredUserDataDir)
       : path.join(os.homedir(), '.playwright-browser-data');
     this.baseUserDataDir = this.userDataDir;
-    const configuredSessionStatePath = String(process.env.PLAYWRIGHT_SESSION_STATE_PATH || '').trim();
+    const configuredSessionStatePath = String(
+      process.env.PLAYWRIGHT_SESSION_STATE_PATH || ''
+    ).trim();
     this.sessionStatePath = configuredSessionStatePath
       ? path.resolve(configuredSessionStatePath)
       : path.join(this.baseUserDataDir, 'session-state.json');
@@ -418,7 +420,9 @@ export class BrowserManager {
 
       this.persistedOriginState = Object.fromEntries(
         origins
-          .filter(entry => entry && typeof entry.origin === 'string' && Array.isArray(entry.localStorage))
+          .filter(
+            entry => entry && typeof entry.origin === 'string' && Array.isArray(entry.localStorage)
+          )
           .map(entry => [entry.origin, entry.localStorage])
       );
 
@@ -946,6 +950,18 @@ export class BrowserManager {
    * Close browser
    */
   async close() {
+    // Close any extra isolated contexts first
+    if (this.extraContexts?.length) {
+      for (const ctx of this.extraContexts) {
+        try {
+          await ctx.close();
+        } catch {
+          // context may already be closed
+        }
+      }
+      this.extraContexts = [];
+    }
+
     if (this.context) {
       await this._persistSessionState(this.context);
       await this.context.close();
