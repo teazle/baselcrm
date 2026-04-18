@@ -1,0 +1,88 @@
+name: Flow1 Extract Date Range
+
+on:
+  workflow_dispatch:
+    inputs:
+      from:
+        description: 'Start date (YYYY-MM-DD)'
+        required: true
+        type: string
+      to:
+        description: 'End date (YYYY-MM-DD)'
+        required: true
+        type: string
+      force:
+        description: 'Force re-extract dates that already exist'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  extract:
+    name: Run Phase 1 extractor on EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate EC2 SSH reachability
+        shell: bash
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_PORT: ${{ secrets.EC2_PORT || 22 }}
+        run: |
+          set -euo pipefail
+          connected=false
+          for attempt in 1 2 3; do
+            echo "Reachability check ${attempt}/3 to EC2 SSH port..."
+            if timeout 10 bash -c "cat < /dev/null > /dev/tcp/${EC2_HOST}/${EC2_PORT}" 2>/dev/null; then
+              connected=true
+              echo "EC2 SSH endpoint is reachable."
+              break
+            fi
+            sleep 15
+          done
+
+          if [ "${connected}" != "true" ]; then
+            echo "Cannot reach EC2 SSH endpoint (${EC2_HOST}:${EC2_PORT})."
+            exit 1
+          fi
+
+      - name: Run extract-date-range on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          FLOW_FROM: ${{ inputs.from }}
+          FLOW_TO: ${{ inputs.to }}
+          FLOW_FORCE: ${{ inputs.force }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || 22 }}
+          timeout: 60s
+          command_timeout: 120m
+          envs: FLOW_FROM,FLOW_TO,FLOW_FORCE
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            DEPLOY_PATH="${{ secrets.EC2_DEPLOY_PATH || '~/Baselrpacrm' }}"
+            DEPLOY_PATH="${DEPLOY_PATH/#\~/$HOME}"
+
+            echo "Deploy path: $DEPLOY_PATH"
+            cd "$DEPLOY_PATH"
+
+            if [ ! -d .git ]; then
+              echo "Not a git repository in $DEPLOY_PATH"
+              exit 1
+            fi
+
+            echo "Current commit on EC2:"
+            git log -1 --oneline || true
+
+            ARGS=("$FLOW_FROM" "$FLOW_TO")
+            if [ "${FLOW_FORCE:-false}" = "true" ]; then
+              ARGS+=(--force)
+            fi
+
+            echo "Running Phase 1 extractor on EC2 for ${FLOW_FROM} → ${FLOW_TO} (force=${FLOW_FORCE:-false})"
+            echo "Browser mode: headless + non-persistent context"
+            HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/extract-date-range.js "${ARGS[@]}" 2>&1
