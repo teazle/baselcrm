@@ -126,9 +126,7 @@ export class MHCAsiaAutomation {
     this._logStep('Ensure at MHC home');
 
     const currentUrl = this.page.url() || '';
-    const onMhc =
-      /\/mhc\//i.test(currentUrl) &&
-      !/aiaclinic|pcpcare|singlife/i.test(currentUrl);
+    const onMhc = /\/mhc\//i.test(currentUrl) && !/aiaclinic|pcpcare|singlife/i.test(currentUrl);
     const logoutVisibleNow = await this.page
       .locator('text=/Log\\s*Out/i')
       .first()
@@ -145,13 +143,17 @@ export class MHCAsiaAutomation {
       .isVisible()
       .catch(() => false);
     const loginBtnVisibleNow = await this.page
-      .locator('button:has-text("SIGN IN"), input[type="submit"][value*="SIGN" i], button:has-text("LOGIN")')
+      .locator(
+        'button:has-text("SIGN IN"), input[type="submit"][value*="SIGN" i], button:has-text("LOGIN")'
+      )
       .first()
       .isVisible()
       .catch(() => false);
     const loginVisibleNow = passwordVisibleNow && (userVisibleNow || loginBtnVisibleNow);
     const navVisibleNow = await this.page
-      .locator('a:has-text("Normal Visit"), a:has-text("Add Normal Visit"), a:has-text("Add AIA Visit")')
+      .locator(
+        'a:has-text("Normal Visit"), a:has-text("Add Normal Visit"), a:has-text("Add AIA Visit")'
+      )
       .first()
       .isVisible()
       .catch(() => false);
@@ -232,14 +234,18 @@ export class MHCAsiaAutomation {
       .isVisible()
       .catch(() => false);
     const loginBtnVisible = await this.page
-      .locator('button:has-text("SIGN IN"), input[type="submit"][value*="SIGN" i], button:has-text("LOGIN")')
+      .locator(
+        'button:has-text("SIGN IN"), input[type="submit"][value*="SIGN" i], button:has-text("LOGIN")'
+      )
       .first()
       .isVisible()
       .catch(() => false);
     const loginVisible = passwordVisible && (userVisible || loginBtnVisible);
     const gateState = await this._detectPortalGateState();
     if (gateState?.captchaBlocked) {
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-home-captcha-blocked.png', fullPage: true }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/mhc-asia-home-captcha-blocked.png', fullPage: true })
+        .catch(() => {});
       throw this._buildPortalBlockedError('portal_captcha_blocked', {
         gateState,
       });
@@ -267,7 +273,7 @@ export class MHCAsiaAutomation {
             .replace(/\s+/g, ' ')
             .trim();
         const bodyText = clean(document.body?.innerText || '');
-        const lower = bodyText.toLowerCase();
+        const _lower = bodyText.toLowerCase();
         return {
           url: location.href,
           title: document.title,
@@ -366,7 +372,9 @@ export class MHCAsiaAutomation {
   _shouldRetryLoginError(error, attempt, maxAttempts) {
     if (!error || attempt >= maxAttempts) return false;
     if (error.portalBlocked === true) return false;
-    const code = String(error.code || '').trim().toLowerCase();
+    const code = String(error.code || '')
+      .trim()
+      .toLowerCase();
     if (code === 'csrf_detected') return true;
     if (code === 'login_navigation_timeout') return true;
     return false;
@@ -406,7 +414,9 @@ export class MHCAsiaAutomation {
 
         const preLoginState = await this._detectPortalGateState();
         if (preLoginState?.captchaBlocked) {
-          await this.page.screenshot({ path: 'screenshots/mhc-asia-login-captcha-blocked.png', fullPage: true }).catch(() => {});
+          await this.page
+            .screenshot({ path: 'screenshots/mhc-asia-login-captcha-blocked.png', fullPage: true })
+            .catch(() => {});
           throw this._buildPortalBlockedError('portal_captcha_blocked', {
             gateState: preLoginState,
           });
@@ -441,11 +451,15 @@ export class MHCAsiaAutomation {
             const sel = selects.nth(i);
             const options = await sel
               .locator('option')
-              .evaluateAll((opts) => opts.map((o) => ({ value: o.value, label: (o.textContent || '').trim() })))
+              .evaluateAll(opts =>
+                opts.map(o => ({ value: o.value, label: (o.textContent || '').trim() }))
+              )
               .catch(() => []);
-            const match = options.find((o) => /singapore/i.test(o.label));
+            const match = options.find(o => /singapore/i.test(o.label));
             if (!match) continue;
-            await sel.selectOption({ value: match.value }).catch(async () => sel.selectOption({ label: match.label }));
+            await sel
+              .selectOption({ value: match.value })
+              .catch(async () => sel.selectOption({ label: match.label }));
             await this.page.waitForTimeout(250);
             this._logStep('Country selected (best-effort)', { label: match.label });
             break;
@@ -455,9 +469,12 @@ export class MHCAsiaAutomation {
         }
 
         // Wait for login form
-        await this.page.waitForSelector('input[type="text"], input[name*="username"], input[id*="username"]', {
-          timeout: 10000,
-        });
+        await this.page.waitForSelector(
+          'input[type="text"], input[name*="username"], input[id*="username"]',
+          {
+            timeout: 10000,
+          }
+        );
 
         // Find username field
         const usernameSelectors = [
@@ -481,7 +498,10 @@ export class MHCAsiaAutomation {
         }
 
         if (!usernameField) {
-          await this.page.screenshot({ path: 'screenshots/mhc-asia-login-page.png', fullPage: true });
+          await this.page.screenshot({
+            path: 'screenshots/mhc-asia-login-page.png',
+            fullPage: true,
+          });
           throw new Error('Could not find username field');
         }
 
@@ -489,7 +509,11 @@ export class MHCAsiaAutomation {
         logger.info('Username filled');
 
         // Find password field
-        const passwordSelectors = ['input[type="password"]', 'input[name*="password"]', 'input[id*="password"]'];
+        const passwordSelectors = [
+          'input[type="password"]',
+          'input[name*="password"]',
+          'input[id*="password"]',
+        ];
 
         let passwordField = null;
         for (const selector of passwordSelectors) {
@@ -543,19 +567,27 @@ export class MHCAsiaAutomation {
 
         // Wait for navigation - ultra minimal wait times
         await this.page.waitForLoadState('domcontentloaded').catch(() => {});
-        await this.page.locator('text=/Log\\s*Out/i').first().waitFor({ state: 'attached', timeout: 1500 }).catch(() => {});
+        await this.page
+          .locator('text=/Log\\s*Out/i')
+          .first()
+          .waitFor({ state: 'attached', timeout: 1500 })
+          .catch(() => {});
 
         const postLoginState = await this._detectPortalGateState();
         if (postLoginState?.captchaBlocked) {
           logger.error(`Login challenge detected: ${postLoginState.bodyText}`);
-          await this.page.screenshot({ path: 'screenshots/mhc-asia-login-captcha-blocked.png', fullPage: true }).catch(() => {});
+          await this.page
+            .screenshot({ path: 'screenshots/mhc-asia-login-captcha-blocked.png', fullPage: true })
+            .catch(() => {});
           throw this._buildPortalBlockedError('portal_captcha_blocked', {
             gateState: postLoginState,
           });
         }
         if (postLoginState?.csrfDetected) {
           logger.warn('[MHC] CSRF detected after login submit');
-          await this.page.screenshot({ path: 'screenshots/mhc-asia-login-csrf.png', fullPage: true }).catch(() => {});
+          await this.page
+            .screenshot({ path: 'screenshots/mhc-asia-login-csrf.png', fullPage: true })
+            .catch(() => {});
           await this._resetMhcSession('csrf-after-login').catch(() => {});
           const csrfError = new Error('csrf_detected');
           csrfError.code = 'csrf_detected';
@@ -564,7 +596,9 @@ export class MHCAsiaAutomation {
 
         if (postLoginState?.authFailure && !postLoginState?.logoutVisible) {
           logger.error(`Login error detected: ${postLoginState.bodyText}`);
-          await this.page.screenshot({ path: 'screenshots/mhc-asia-login-error.png', fullPage: true }).catch(() => {});
+          await this.page
+            .screenshot({ path: 'screenshots/mhc-asia-login-error.png', fullPage: true })
+            .catch(() => {});
           const authError = new Error('Authentication failed');
           authError.code = 'auth_failed';
           throw authError;
@@ -578,7 +612,9 @@ export class MHCAsiaAutomation {
         return true;
       } catch (error) {
         logger.error(`Login failed for ${this.config.name}:`, error);
-        await this.page.screenshot({ path: 'screenshots/mhc-asia-login-error.png', fullPage: true }).catch(() => {});
+        await this.page
+          .screenshot({ path: 'screenshots/mhc-asia-login-error.png', fullPage: true })
+          .catch(() => {});
         if (!this._shouldRetryLoginError(error, attempt, maxAttempts)) throw error;
       } finally {
         this._loginInProgress = false;
@@ -590,7 +626,10 @@ export class MHCAsiaAutomation {
 
   async _resetMhcSession(reason = 'unknown') {
     this._logStep('Reset MHC session', { reason });
-    await this.page.context().clearCookies().catch(() => {});
+    await this.page
+      .context()
+      .clearCookies()
+      .catch(() => {});
     await this.page
       .evaluate(() => {
         try {
@@ -601,7 +640,9 @@ export class MHCAsiaAutomation {
         }
       })
       .catch(() => {});
-    await this.page.goto(this.config.url, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
+    await this.page
+      .goto(this.config.url, { waitUntil: 'domcontentloaded', timeout: 60000 })
+      .catch(() => {});
     await this.page.waitForTimeout(1200);
   }
 
@@ -634,30 +675,41 @@ export class MHCAsiaAutomation {
       .isVisible()
       .catch(() => false);
     this._logStep('Singlife PCP login detected', { csrfDetected: csrfMsg });
-    await this.page.screenshot({ path: 'screenshots/singlife-pcp-login.png', fullPage: true }).catch(() => {});
+    await this.page
+      .screenshot({ path: 'screenshots/singlife-pcp-login.png', fullPage: true })
+      .catch(() => {});
 
     if (!username || !password) {
-      logger.warn('Singlife PCP login required but credentials not set (SINGLIFE_PCP_* or MHC_ASIA_*)');
+      logger.warn(
+        'Singlife PCP login required but credentials not set (SINGLIFE_PCP_* or MHC_ASIA_*)'
+      );
       return false;
     }
 
     // Best-effort: fill USER ID + PASSWORD and click SIGN IN.
-    const userIdField =
-      this.page.locator('input[name="username"], input[name="userId"], input[type="text"]').first();
+    const userIdField = this.page
+      .locator('input[name="username"], input[name="userId"], input[type="text"]')
+      .first();
     const passField = this.page.locator('input[type="password"]').first();
     const signInBtn = this.page
       .locator('button:has-text("SIGN IN"), input[type="submit"], button[type="submit"]')
       .first();
 
-    if ((await userIdField.count().catch(() => 0)) === 0 || (await passField.count().catch(() => 0)) === 0) {
+    if (
+      (await userIdField.count().catch(() => 0)) === 0 ||
+      (await passField.count().catch(() => 0)) === 0
+    ) {
       logger.warn('Singlife PCP login: could not locate credential fields');
-      await this.page.screenshot({ path: 'screenshots/singlife-pcp-login-fields-not-found.png', fullPage: true }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/singlife-pcp-login-fields-not-found.png', fullPage: true })
+        .catch(() => {});
       return false;
     }
 
     await userIdField.fill(username).catch(() => {});
     await passField.fill(password).catch(() => {});
-    if ((await signInBtn.count().catch(() => 0)) > 0) await this._safeClick(signInBtn, 'Singlife PCP: Sign in');
+    if ((await signInBtn.count().catch(() => 0)) > 0)
+      await this._safeClick(signInBtn, 'Singlife PCP: Sign in');
     else await passField.press('Enter').catch(() => {});
 
     await this.page.waitForLoadState('domcontentloaded').catch(() => {});
@@ -668,7 +720,9 @@ export class MHCAsiaAutomation {
       .first()
       .isVisible()
       .catch(() => false);
-    await this.page.screenshot({ path: 'screenshots/singlife-pcp-after-login.png', fullPage: true }).catch(() => {});
+    await this.page
+      .screenshot({ path: 'screenshots/singlife-pcp-after-login.png', fullPage: true })
+      .catch(() => {});
     if (stillOnLogin) {
       logger.warn('Singlife PCP login attempt did not leave login page (check credentials / CSRF)');
       return false;
@@ -681,14 +735,16 @@ export class MHCAsiaAutomation {
   async _safeClick(locator, label) {
     const timeoutMs = 5000;
     const onClaimForm = await this.page
-      .locator('button:has-text("Save As Draft"), input[value*="Save As Draft" i], input[value*="Save Draft" i]')
+      .locator(
+        'button:has-text("Save As Draft"), input[value*="Save As Draft" i], input[value*="Save Draft" i]'
+      )
       .first()
       .isVisible()
       .catch(() => false);
     if (onClaimForm) {
       const targetMeta = await locator
         .first()
-        .evaluate((el) => {
+        .evaluate(el => {
           const text = (el.textContent || '').trim();
           const value = (el.getAttribute('value') || '').trim();
           const aria = (el.getAttribute('aria-label') || '').trim();
@@ -696,18 +752,27 @@ export class MHCAsiaAutomation {
           return { text, value, aria, type };
         })
         .catch(() => null);
-      const combined = `${targetMeta?.text || ''} ${targetMeta?.value || ''} ${targetMeta?.aria || ''}`.toLowerCase();
+      const combined =
+        `${targetMeta?.text || ''} ${targetMeta?.value || ''} ${targetMeta?.aria || ''}`.toLowerCase();
       const safeLabel = String(label || '').toLowerCase();
-      const isSubmitLike = /\bsubmit\b/.test(combined) || (targetMeta?.type === 'submit' && !/search|find/.test(combined));
-      const isDraftAction = /save\s+as\s+draft|save\s+draft/.test(combined) || /save\s+as\s+draft|save\s+draft/.test(safeLabel);
-      const isComputeAction = /compute\s*claim|\bcompute\b/.test(combined) || /compute\s*claim|\bcompute\b/.test(safeLabel);
+      const isSubmitLike =
+        /\bsubmit\b/.test(combined) ||
+        (targetMeta?.type === 'submit' && !/search|find/.test(combined));
+      const isDraftAction =
+        /save\s+as\s+draft|save\s+draft/.test(combined) ||
+        /save\s+as\s+draft|save\s+draft/.test(safeLabel);
+      const isComputeAction =
+        /compute\s*claim|\bcompute\b/.test(combined) ||
+        /compute\s*claim|\bcompute\b/.test(safeLabel);
       if (isSubmitLike && !isDraftAction && !isComputeAction) {
         logger.error('[MHC] Blocked unsafe submit click on claim form', {
           label,
           target: targetMeta,
           url: this.page.url(),
         });
-        await this.page.screenshot({ path: 'screenshots/mhc-asia-blocked-submit-click.png', fullPage: true }).catch(() => {});
+        await this.page
+          .screenshot({ path: 'screenshots/mhc-asia-blocked-submit-click.png', fullPage: true })
+          .catch(() => {});
         throw new Error('Blocked unsafe submit click on claim form');
       }
     }
@@ -755,7 +820,9 @@ export class MHCAsiaAutomation {
       .isVisible()
       .catch(() => false);
     const hasSwitchSystem = await this.page
-      .locator('a:has-text("Switch System"), button:has-text("Switch System"), text=/Switch\\s+System/i')
+      .locator(
+        'a:has-text("Switch System"), button:has-text("Switch System"), text=/Switch\\s+System/i'
+      )
       .first()
       .isVisible()
       .catch(() => false);
@@ -838,115 +905,139 @@ export class MHCAsiaAutomation {
   async _collectVisibleSystemSwitchOptions(targetRegex, opts = {}) {
     const includeHidden = opts?.includeHidden === true;
     return this.page
-      .evaluate((regexSource, regexFlags, includeHiddenOptions) => {
-        const rx = new RegExp(regexSource, regexFlags);
-        const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
-        const isVisible = (el) => {
-          if (!el) return false;
-          const style = window.getComputedStyle(el);
-          if (!style) return false;
-          if (style.display === 'none' || style.visibility === 'hidden') return false;
-          const r = el.getBoundingClientRect();
-          return !!r && r.width > 0 && r.height > 0;
-        };
-        const options = [];
-        for (const a of Array.from(document.querySelectorAll('a[href]'))) {
-          const text = norm(a.textContent || a.getAttribute('title') || '');
-          if (!text || !rx.test(text)) continue;
-          if (!includeHiddenOptions && !isVisible(a)) continue;
-          options.push({
-            kind: 'anchor',
-            text,
-            href: String(a.getAttribute('href') || '').trim(),
-            selectorHint: String(a.id || '').trim() || null,
-          });
-        }
-        for (const sel of Array.from(document.querySelectorAll('select'))) {
-          if (!includeHiddenOptions && !isVisible(sel)) continue;
-          for (const opt of Array.from(sel.options || [])) {
-            const text = norm(opt.textContent || opt.label || '');
+      .evaluate(
+        (regexSource, regexFlags, includeHiddenOptions) => {
+          const rx = new RegExp(regexSource, regexFlags);
+          const norm = s =>
+            String(s || '')
+              .replace(/\s+/g, ' ')
+              .trim();
+          const isVisible = el => {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            if (!style) return false;
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            const r = el.getBoundingClientRect();
+            return !!r && r.width > 0 && r.height > 0;
+          };
+          const options = [];
+          for (const a of Array.from(document.querySelectorAll('a[href]'))) {
+            const text = norm(a.textContent || a.getAttribute('title') || '');
             if (!text || !rx.test(text)) continue;
+            if (!includeHiddenOptions && !isVisible(a)) continue;
             options.push({
-              kind: 'option',
+              kind: 'anchor',
               text,
-              value: String(opt.value || '').trim(),
-              selectName: String(sel.getAttribute('name') || '').trim() || null,
-              selectId: String(sel.id || '').trim() || null,
+              href: String(a.getAttribute('href') || '').trim(),
+              selectorHint: String(a.id || '').trim() || null,
             });
           }
-        }
-        return options;
-      }, targetRegex.source, targetRegex.flags, includeHidden)
+          for (const sel of Array.from(document.querySelectorAll('select'))) {
+            if (!includeHiddenOptions && !isVisible(sel)) continue;
+            for (const opt of Array.from(sel.options || [])) {
+              const text = norm(opt.textContent || opt.label || '');
+              if (!text || !rx.test(text)) continue;
+              options.push({
+                kind: 'option',
+                text,
+                value: String(opt.value || '').trim(),
+                selectName: String(sel.getAttribute('name') || '').trim() || null,
+                selectId: String(sel.id || '').trim() || null,
+              });
+            }
+          }
+          return options;
+        },
+        targetRegex.source,
+        targetRegex.flags,
+        includeHidden
+      )
       .catch(() => []);
   }
 
   async _collectSwitchSystemDebugTargets(targetRegex) {
     return this.page
-      .evaluate((regexSource, regexFlags) => {
-        const rx = new RegExp(regexSource, regexFlags);
-        const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
-        const isVisible = (el) => {
-          if (!el) return false;
-          const style = window.getComputedStyle(el);
-          if (!style) return false;
-          if (style.display === 'none' || style.visibility === 'hidden') return false;
-          const r = el.getBoundingClientRect();
-          return !!r && r.width > 0 && r.height > 0;
-        };
+      .evaluate(
+        (regexSource, regexFlags) => {
+          const rx = new RegExp(regexSource, regexFlags);
+          const norm = s =>
+            String(s || '')
+              .replace(/\s+/g, ' ')
+              .trim();
+          const isVisible = el => {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            if (!style) return false;
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            const r = el.getBoundingClientRect();
+            return !!r && r.width > 0 && r.height > 0;
+          };
 
-        const out = [];
-        const nodes = Array.from(document.querySelectorAll('a, option, li, div, span, td, button'));
-        for (const el of nodes) {
-          const text = norm(el.textContent || el.getAttribute('title') || '');
-          const href = String(el.getAttribute('href') || '').trim();
-          const onclick = String(el.getAttribute('onclick') || '').trim();
-          const interesting =
-            rx.test(text) ||
-            /switchsystem\.ec/i.test(href) ||
-            /switchsystem\.ec/i.test(onclick) ||
-            /aia\s*clinic/i.test(text);
-          if (!interesting) continue;
-          out.push({
-            tag: (el.tagName || '').toLowerCase(),
-            text,
-            href: href || null,
-            onclick: onclick || null,
-            id: String(el.id || '').trim() || null,
-            className: String(el.className || '').trim() || null,
-            visible: isVisible(el),
-          });
-          if (out.length >= 40) break;
-        }
-        return out;
-      }, targetRegex.source, targetRegex.flags)
+          const out = [];
+          const nodes = Array.from(
+            document.querySelectorAll('a, option, li, div, span, td, button')
+          );
+          for (const el of nodes) {
+            const text = norm(el.textContent || el.getAttribute('title') || '');
+            const href = String(el.getAttribute('href') || '').trim();
+            const onclick = String(el.getAttribute('onclick') || '').trim();
+            const interesting =
+              rx.test(text) ||
+              /switchsystem\.ec/i.test(href) ||
+              /switchsystem\.ec/i.test(onclick) ||
+              /aia\s*clinic/i.test(text);
+            if (!interesting) continue;
+            out.push({
+              tag: (el.tagName || '').toLowerCase(),
+              text,
+              href: href || null,
+              onclick: onclick || null,
+              id: String(el.id || '').trim() || null,
+              className: String(el.className || '').trim() || null,
+              visible: isVisible(el),
+            });
+            if (out.length >= 40) break;
+          }
+          return out;
+        },
+        targetRegex.source,
+        targetRegex.flags
+      )
       .catch(() => []);
   }
 
   async _collectSwitchSystemHrefCandidatesAcrossFrames(targetRegex) {
     const collectFromRoot = async (root, source) => {
       const rows = await root
-        .evaluate((regexSource, regexFlags) => {
-          const rx = new RegExp(regexSource, regexFlags);
-          const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim();
-          const out = [];
-          for (const a of Array.from(document.querySelectorAll('a[href], area[href]'))) {
-            const text = norm(a.textContent || a.getAttribute('title') || '');
-            const href = String(a.getAttribute('href') || '').trim();
-            if (!href) continue;
-            const interesting =
-              rx.test(text) ||
-              rx.test(href) ||
-              /switchsystem\.ec/i.test(href) ||
-              /aiaclinic\.com/i.test(href) ||
-              /pcpcare|singlife|myglobalbenefit/i.test(href);
-            if (!interesting) continue;
-            out.push({ text, href });
-            if (out.length >= 80) break;
-          }
-          return out;
-        }, targetRegex.source, targetRegex.flags)
+        .evaluate(
+          (regexSource, regexFlags) => {
+            const rx = new RegExp(regexSource, regexFlags);
+            const norm = s =>
+              String(s || '')
+                .replace(/\s+/g, ' ')
+                .trim();
+            const out = [];
+            for (const a of Array.from(document.querySelectorAll('a[href], area[href]'))) {
+              const text = norm(a.textContent || a.getAttribute('title') || '');
+              const href = String(a.getAttribute('href') || '').trim();
+              if (!href) continue;
+              const interesting =
+                rx.test(text) ||
+                rx.test(href) ||
+                /switchsystem\.ec/i.test(href) ||
+                /aiaclinic\.com/i.test(href) ||
+                /pcpcare|singlife|myglobalbenefit/i.test(href);
+              if (!interesting) continue;
+              out.push({ text, href });
+              if (out.length >= 80) break;
+            }
+            return out;
+          },
+          targetRegex.source,
+          targetRegex.flags
+        )
         .catch(() => []);
-      return (rows || []).map((r) => ({ ...r, source }));
+      return (rows || []).map(r => ({ ...r, source }));
     };
 
     const all = [];
@@ -984,10 +1075,14 @@ export class MHCAsiaAutomation {
     const t = this._normalizeText(text);
     if (!t) return null;
     const m =
-      t.match(/(?:\bDx\b|\bDiagnosis\b|\bImpression\b|\bAssessment\b)\s*[:\-]\s*([^\n\r;.]{3,80})/i) ||
-      t.match(/(?:\bDx\b|\bDiagnosis\b)\s+([^\n\r;.]{3,80})/i);
+      t.match(
+        /(?:\bDx\b|\bDiagnosis\b|\bImpression\b|\bAssessment\b)\s*[:\-]\s*([^\n\r;.]{3,80})/i
+      ) || t.match(/(?:\bDx\b|\bDiagnosis\b)\s+([^\n\r;.]{3,80})/i);
     if (m?.[1]) return this._normalizeText(m[1]);
-    const head = t.split(/[.\n\r]/).map((x) => this._normalizeText(x)).find((x) => x.length >= 4);
+    const head = t
+      .split(/[.\n\r]/)
+      .map(x => this._normalizeText(x))
+      .find(x => x.length >= 4);
     return head || null;
   }
 
@@ -1004,12 +1099,17 @@ export class MHCAsiaAutomation {
       try {
         const select = this.page.locator(sel).first();
         if ((await select.count().catch(() => 0)) === 0) continue;
-        const options = await select.locator('option').evaluateAll((opts) =>
-          opts.map((o) => ({ value: o.value, label: (o.textContent || '').trim() }))
-        );
-        const match = options.find((o) => desired.test(o.label)) || options.find((o) => desired.test(o.value));
+        const options = await select
+          .locator('option')
+          .evaluateAll(opts =>
+            opts.map(o => ({ value: o.value, label: (o.textContent || '').trim() }))
+          );
+        const match =
+          options.find(o => desired.test(o.label)) || options.find(o => desired.test(o.value));
         if (!match) continue;
-        await select.selectOption({ value: match.value }).catch(async () => select.selectOption({ label: match.label }));
+        await select
+          .selectOption({ value: match.value })
+          .catch(async () => select.selectOption({ label: match.label }));
         await this.page.waitForTimeout(400);
         logger.info(`Charge Type set from Clinic Assist visitType: ${visitType}`);
         return true;
@@ -1044,9 +1144,9 @@ export class MHCAsiaAutomation {
 
       // Prefer strict row-label targeting to avoid accidentally filling Visit Date or MC Day.
       const rowFilled = await this.page
-        .evaluate((val) => {
-          const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim();
-          const isVisible = (el) => {
+        .evaluate(val => {
+          const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim();
+          const isVisible = el => {
             if (!el) return false;
             const style = window.getComputedStyle(el);
             if (!style) return false;
@@ -1055,23 +1155,26 @@ export class MHCAsiaAutomation {
             if (!rect || rect.width <= 0 || rect.height <= 0) return false;
             return true;
           };
-          const sameNumeric = (a, b) => {
+          const _sameNumeric = (a, b) => {
             const n1 = Number(String(a || '').trim());
             const n2 = Number(String(b || '').trim());
             if (!Number.isFinite(n1) || !Number.isFinite(n2)) return false;
             return Math.abs(n1 - n2) < 1e-9;
           };
           const cells = Array.from(document.querySelectorAll('td, th, label, span, b, strong'));
-          const label = cells.find((el) => /^MC\s*Start\s*Date\b/i.test(norm(el.textContent)));
+          const label = cells.find(el => /^MC\s*Start\s*Date\b/i.test(norm(el.textContent)));
           if (!label) return { ok: false, reason: 'label_not_found' };
           const row = label.closest('tr');
           if (!row) return { ok: false, reason: 'row_not_found' };
-          const inputs = Array.from(row.querySelectorAll('input[type="text"], input:not([type])')).filter((x) =>
-            isVisible(x)
-          );
+          const inputs = Array.from(
+            row.querySelectorAll('input[type="text"], input:not([type])')
+          ).filter(x => isVisible(x));
           if (!inputs.length) return { ok: false, reason: 'input_not_found' };
           // Prefer the widest field (usually the date text input).
-          inputs.sort((a, b) => (b.getBoundingClientRect().width || 0) - (a.getBoundingClientRect().width || 0));
+          inputs.sort(
+            (a, b) =>
+              (b.getBoundingClientRect().width || 0) - (a.getBoundingClientRect().width || 0)
+          );
           const field = inputs[0];
           try {
             field.value = String(val);
@@ -1085,7 +1188,9 @@ export class MHCAsiaAutomation {
         .catch(() => ({ ok: false, reason: 'evaluate_failed' }));
 
       if (rowFilled?.ok) {
-        this._logStep('MC start date filled (row label scan)', { value: rowFilled.value || valueToSet });
+        this._logStep('MC start date filled (row label scan)', {
+          value: rowFilled.value || valueToSet,
+        });
         return true;
       }
 
@@ -1152,7 +1257,9 @@ export class MHCAsiaAutomation {
       }
 
       logger.warn('Could not find MC start date field');
-      await this.page.screenshot({ path: 'screenshots/mhc-mc-start-date-not-found.png', fullPage: true }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/mhc-mc-start-date-not-found.png', fullPage: true })
+        .catch(() => {});
       return false;
     } catch (error) {
       logger.warn('Could not fill MC start date:', error.message);
@@ -1170,42 +1277,48 @@ export class MHCAsiaAutomation {
   async normalizeMcStartDateIfNeeded({ clear = false } = {}) {
     this._logStep('Normalize MC start date if needed', { clear });
     const result = await this.page
-      .evaluate(({ clear }) => {
-        const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim();
-        const isVisible = (el) => {
-          if (!el) return false;
-          const style = window.getComputedStyle(el);
-          if (!style) return false;
-          if (style.display === 'none' || style.visibility === 'hidden') return false;
-          return true;
-        };
-        const cells = Array.from(document.querySelectorAll('td, th, label, span, b, strong'));
-        const label = cells.find((el) => /^MC\s*Start\s*Date\b/i.test(norm(el.textContent)));
-        if (!label) return { ok: false, reason: 'label_not_found' };
-        const row = label.closest('tr');
-        if (!row) return { ok: false, reason: 'row_not_found' };
-        const inputs = Array.from(row.querySelectorAll('input[type="text"], input:not([type])')).filter((x) =>
-          isVisible(x)
-        );
-        if (!inputs.length) return { ok: false, reason: 'input_not_found' };
-        inputs.sort((a, b) => (b.getBoundingClientRect().width || 0) - (a.getBoundingClientRect().width || 0));
-        const field = inputs[0];
-        const v = norm(field.value);
-        if (!v) return { ok: true, changed: false, value: '' };
-        if (clear) {
-          field.value = '';
-          // Do not fire change events when clearing; some portals validate on change.
-          return { ok: true, changed: true, value: '' };
-        }
-        const m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-        if (!m) return { ok: true, changed: false, value: v };
-        const padded = `${m[1].padStart(2, '0')}/${m[2].padStart(2, '0')}/${m[3]}`;
-        if (padded === v) return { ok: true, changed: false, value: v };
-        field.value = padded;
-        field.dispatchEvent(new Event('input', { bubbles: true }));
-        field.dispatchEvent(new Event('change', { bubbles: true }));
-        return { ok: true, changed: true, value: padded };
-      }, { clear })
+      .evaluate(
+        ({ clear }) => {
+          const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim();
+          const isVisible = el => {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            if (!style) return false;
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            return true;
+          };
+          const cells = Array.from(document.querySelectorAll('td, th, label, span, b, strong'));
+          const label = cells.find(el => /^MC\s*Start\s*Date\b/i.test(norm(el.textContent)));
+          if (!label) return { ok: false, reason: 'label_not_found' };
+          const row = label.closest('tr');
+          if (!row) return { ok: false, reason: 'row_not_found' };
+          const inputs = Array.from(
+            row.querySelectorAll('input[type="text"], input:not([type])')
+          ).filter(x => isVisible(x));
+          if (!inputs.length) return { ok: false, reason: 'input_not_found' };
+          inputs.sort(
+            (a, b) =>
+              (b.getBoundingClientRect().width || 0) - (a.getBoundingClientRect().width || 0)
+          );
+          const field = inputs[0];
+          const v = norm(field.value);
+          if (!v) return { ok: true, changed: false, value: '' };
+          if (clear) {
+            field.value = '';
+            // Do not fire change events when clearing; some portals validate on change.
+            return { ok: true, changed: true, value: '' };
+          }
+          const m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+          if (!m) return { ok: true, changed: false, value: v };
+          const padded = `${m[1].padStart(2, '0')}/${m[2].padStart(2, '0')}/${m[3]}`;
+          if (padded === v) return { ok: true, changed: false, value: v };
+          field.value = padded;
+          field.dispatchEvent(new Event('input', { bubbles: true }));
+          field.dispatchEvent(new Event('change', { bubbles: true }));
+          return { ok: true, changed: true, value: padded };
+        },
+        { clear }
+      )
       .catch(() => ({ ok: false, reason: 'evaluate_failed' }));
 
     if (result?.ok) {
@@ -1216,7 +1329,9 @@ export class MHCAsiaAutomation {
   }
 
   async fillDiagnosisFromText(diagnosisText) {
-    this._logStep('Fill diagnosis (best-effort)', { sample: (diagnosisText || '').toString().slice(0, 80) || null });
+    this._logStep('Fill diagnosis (best-effort)', {
+      sample: (diagnosisText || '').toString().slice(0, 80) || null,
+    });
     const candidate = this._parseDiagnosisCandidate(diagnosisText);
     if (!candidate) {
       logger.warn('No diagnosis text found to map into MHC diagnosis fields');
@@ -1225,26 +1340,35 @@ export class MHCAsiaAutomation {
 
     const words = candidate
       .split(/\s+/)
-      .map((w) => w.replace(/[^\w]/g, ''))
-      .filter((w) => w.length >= 4)
+      .map(w => w.replace(/[^\w]/g, ''))
+      .filter(w => w.length >= 4)
       .slice(0, 3);
-    const rx = words.length ? new RegExp(words.join('|'), 'i') : new RegExp(candidate.slice(0, 10), 'i');
+    const rx = words.length
+      ? new RegExp(words.join('|'), 'i')
+      : new RegExp(candidate.slice(0, 10), 'i');
 
-    const tryRow = async (rowText) => {
+    const tryRow = async rowText => {
       const row = this.page.locator(`tr:has-text("${rowText}")`).first();
       if ((await row.count().catch(() => 0)) === 0) return false;
       const select = row.locator('select').first();
       if ((await select.count().catch(() => 0)) === 0) return false;
-      const options = await select.locator('option').evaluateAll((opts) =>
-        opts.map((o) => ({ value: o.value, label: (o.textContent || '').trim() }))
-      );
-      const match = options.find((o) => rx.test(o.label)) || options.find((o) => rx.test(o.value));
+      const options = await select
+        .locator('option')
+        .evaluateAll(opts =>
+          opts.map(o => ({ value: o.value, label: (o.textContent || '').trim() }))
+        );
+      const match = options.find(o => rx.test(o.label)) || options.find(o => rx.test(o.value));
       if (!match) return false;
-      await select.selectOption({ value: match.value }).catch(async () => select.selectOption({ label: match.label }));
+      await select
+        .selectOption({ value: match.value })
+        .catch(async () => select.selectOption({ label: match.label }));
       return true;
     };
 
-    const ok = (await tryRow('Diagnosis Pri')) || (await tryRow('Diagnosis Primary')) || (await tryRow('Diagnosis'));
+    const ok =
+      (await tryRow('Diagnosis Pri')) ||
+      (await tryRow('Diagnosis Primary')) ||
+      (await tryRow('Diagnosis'));
     if (ok) {
       logger.info(`Diagnosis mapped into MHC from notes: ${candidate}`);
       return true;
@@ -1280,8 +1404,8 @@ export class MHCAsiaAutomation {
         ({ headerReSrc, stopReSrc, values }) => {
           const headerRe = new RegExp(headerReSrc, 'i');
           const stopRe = stopReSrc ? new RegExp(stopReSrc, 'i') : null;
-          const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
-          const isVisible = (el) => {
+          const norm = s => (s || '').replace(/\s+/g, ' ').trim();
+          const isVisible = el => {
             if (!el) return false;
             const style = window.getComputedStyle(el);
             if (!style) return false;
@@ -1290,23 +1414,27 @@ export class MHCAsiaAutomation {
             // We accept these inputs since we are only pre-filling for review.
             return true;
           };
-        const textOf = (el) => norm(el?.innerText || el?.textContent || '');
+          const textOf = el => norm(el?.innerText || el?.textContent || '');
 
           // Anchor to the *closest* table for the header cell so we don't accidentally pick an outer layout table
           // that contains nested tables (common on MHC/Singlife forms).
-          const headerCell = Array.from(document.querySelectorAll('th, td')).find((c) => headerRe.test(textOf(c)));
+          const headerCell = Array.from(document.querySelectorAll('th, td')).find(c =>
+            headerRe.test(textOf(c))
+          );
           if (!headerCell) return { filled: 0 };
 
           const table = headerCell.closest('table');
           const headerRow = headerCell.closest('tr');
           if (!table || !headerRow) return { filled: 0 };
 
-          const rows = Array.from(table.querySelectorAll('tr')).filter((r) => r.closest('table') === table);
+          const rows = Array.from(table.querySelectorAll('tr')).filter(
+            r => r.closest('table') === table
+          );
           const startIdx = rows.indexOf(headerRow);
           if (startIdx < 0) return { filled: 0 };
 
-          const rowCellsWithSpan = (row) =>
-            Array.from(row.querySelectorAll('th, td')).map((c) => ({
+          const rowCellsWithSpan = row =>
+            Array.from(row.querySelectorAll('th, td')).map(c => ({
               cell: c,
               span: Number(c.colSpan || 1),
             }));
@@ -1348,11 +1476,13 @@ export class MHCAsiaAutomation {
               let best = null;
               let bestWidth = 0;
               for (const c of overlapping) {
-                const inputs = Array.from(c.querySelectorAll('input[type="text"], input:not([type]), textarea')).filter(
-                  (x) => isVisible(x)
-                );
+                const inputs = Array.from(
+                  c.querySelectorAll('input[type="text"], input:not([type]), textarea')
+                ).filter(x => isVisible(x));
                 if (!inputs.length) continue;
-                inputs.sort((a, b) => b.getBoundingClientRect().width - a.getBoundingClientRect().width);
+                inputs.sort(
+                  (a, b) => b.getBoundingClientRect().width - a.getBoundingClientRect().width
+                );
                 const w = inputs[0].getBoundingClientRect().width;
                 if (w > bestWidth) {
                   bestWidth = w;
@@ -1364,8 +1494,10 @@ export class MHCAsiaAutomation {
 
             // Fallback: first visible text input in the row.
             if (!input) {
-              const rowInputs = Array.from(rows[i].querySelectorAll('input[type="text"], input:not([type]), textarea'));
-              input = rowInputs.find((x) => isVisible(x)) || null;
+              const rowInputs = Array.from(
+                rows[i].querySelectorAll('input[type="text"], input:not([type]), textarea')
+              );
+              input = rowInputs.find(x => isVisible(x)) || null;
             }
 
             // Do NOT exclude readOnly: many MHC "selector" inputs are readOnly but still reflect values
@@ -1390,135 +1522,160 @@ export class MHCAsiaAutomation {
   }
 
   async fillServicesAndDrugs(items, options = {}) {
-	    this._logStep('Fill services/drugs', { count: (items || []).length });
-      this.lastDrugSelectionByRow = {};
-      const skipProcedures = options?.skipProcedures === true;
-	    const isJunkLine = (s) => {
-	      const n = String(s || '').trim().replace(/\s+/g, ' ');
-	      if (!n) return true;
-	      const lower = n.toLowerCase();
-	      // Common junk that leaks from Clinic Assist extraction / directions.
-	      if (/^[\d.,]+$/.test(lower)) return true;
-	      if (/^\$?\s*\d+(?:\.\d+)?\s*(?:sgd)?\s*$/i.test(n)) return true;
-	      if (/^\d+(?:\.\d+)?\s*(?:tabs?|tab|caps?|cap|pcs?|pc|sachets?|pkt|packs?)\b/i.test(lower)) return true;
-	      if (/^\d+(?:\.\d+)?\s*(?:mg|g|ml|mcg|iu)\b/i.test(lower)) return true;
-	      if (lower.startsWith('unfit for ')) return true;
-	      if (lower.startsWith('for ')) return true;
-	      if (lower.includes('may cause')) return true;
-	      if (lower.includes('complete whole course')) return true;
-	      if (lower.includes('complete the whole course')) return true;
-	      if (lower.includes('course of medicine') || lower.includes('course of med')) return true;
-	      if (lower.startsWith('take ') || lower.startsWith('apply ') || lower.startsWith('use ')) return true;
-	      if (/^to be taken\b/i.test(lower) || /\bto be taken\b/i.test(lower)) return true;
-	      return false;
-	    };
+    this._logStep('Fill services/drugs', { count: (items || []).length });
+    this.lastDrugSelectionByRow = {};
+    const skipProcedures = options?.skipProcedures === true;
+    const isJunkLine = s => {
+      const n = String(s || '')
+        .trim()
+        .replace(/\s+/g, ' ');
+      if (!n) return true;
+      const lower = n.toLowerCase();
+      // Common junk that leaks from Clinic Assist extraction / directions.
+      if (/^[\d.,]+$/.test(lower)) return true;
+      if (/^\$?\s*\d+(?:\.\d+)?\s*(?:sgd)?\s*$/i.test(n)) return true;
+      if (/^\d+(?:\.\d+)?\s*(?:tabs?|tab|caps?|cap|pcs?|pc|sachets?|pkt|packs?)\b/i.test(lower))
+        return true;
+      if (/^\d+(?:\.\d+)?\s*(?:mg|g|ml|mcg|iu)\b/i.test(lower)) return true;
+      if (lower.startsWith('unfit for ')) return true;
+      if (lower.startsWith('for ')) return true;
+      if (lower.includes('may cause')) return true;
+      if (lower.includes('complete whole course')) return true;
+      if (lower.includes('complete the whole course')) return true;
+      if (lower.includes('course of medicine') || lower.includes('course of med')) return true;
+      if (lower.startsWith('take ') || lower.startsWith('apply ') || lower.startsWith('use '))
+        return true;
+      if (/^to be taken\b/i.test(lower) || /\bto be taken\b/i.test(lower)) return true;
+      return false;
+    };
 
-	    const list = (items || [])
-	      .map((x) => {
-	        if (typeof x === 'string') return { name: this._normalizeText(x), quantity: null, unit: null, unitPrice: null, amount: null };
-	        const name = this._normalizeText(x?.name || x?.description || '');
-	        const quantityRaw = x?.quantity ?? x?.qty ?? x?.qtyValue ?? x?.qtyText ?? null;
-	        const quantity = quantityRaw === null || quantityRaw === undefined
-	          ? null
-	          : String(quantityRaw).trim();
-	        const unit = x?.unit ?? x?.uom ?? x?.unitCode ?? null;
-	        const unitPriceRaw = x?.unitPrice ?? x?.unit_price ?? x?.price ?? null;
-	        const amountRaw = x?.amount ?? x?.lineAmount ?? x?.total ?? null;
-	        const unitPrice = unitPriceRaw === null || unitPriceRaw === undefined ? null : String(unitPriceRaw).trim();
-	        const amount = amountRaw === null || amountRaw === undefined ? null : String(amountRaw).trim();
-	        return { name, quantity, unit, unitPrice, amount };
-	      })
-	      .map((x) => ({ ...x, name: (x.name || '').toString().trim().replace(/\s+/g, ' ') }))
-	      .filter((x) => x.name && !isJunkLine(x.name));
-	    if (!list.length) return false;
+    const list = (items || [])
+      .map(x => {
+        if (typeof x === 'string')
+          return {
+            name: this._normalizeText(x),
+            quantity: null,
+            unit: null,
+            unitPrice: null,
+            amount: null,
+          };
+        const name = this._normalizeText(x?.name || x?.description || '');
+        const quantityRaw = x?.quantity ?? x?.qty ?? x?.qtyValue ?? x?.qtyText ?? null;
+        const quantity =
+          quantityRaw === null || quantityRaw === undefined ? null : String(quantityRaw).trim();
+        const unit = x?.unit ?? x?.uom ?? x?.unitCode ?? null;
+        const unitPriceRaw = x?.unitPrice ?? x?.unit_price ?? x?.price ?? null;
+        const amountRaw = x?.amount ?? x?.lineAmount ?? x?.total ?? null;
+        const unitPrice =
+          unitPriceRaw === null || unitPriceRaw === undefined ? null : String(unitPriceRaw).trim();
+        const amount =
+          amountRaw === null || amountRaw === undefined ? null : String(amountRaw).trim();
+        return { name, quantity, unit, unitPrice, amount };
+      })
+      .map(x => ({ ...x, name: (x.name || '').toString().trim().replace(/\s+/g, ' ') }))
+      .filter(x => x.name && !isJunkLine(x.name));
+    if (!list.length) return false;
 
-	    const procedures = [];
-	    const drugs = [];
-      const skippedProcedureLikes = [];
-      const procedureLikeRe =
-        /(xray|x-ray|scan|ultrasound|procedure|physio|physiotherapy|ecg|injection|dressing|suturing|vaccine|mri|ct\b|dexa|density|bmd|radiolog|radiology|imaging|consultation|consult\b|medical\s+expenses?)/i;
-	    for (const it of list) {
-        const isProcedureLike = procedureLikeRe.test(it.name);
-	      if (isProcedureLike) {
-          if (skipProcedures) {
-            skippedProcedureLikes.push(it.name);
-            continue;
-          }
-	        procedures.push(it.name);
+    const procedures = [];
+    const drugs = [];
+    const skippedProcedureLikes = [];
+    const procedureLikeRe =
+      /(xray|x-ray|scan|ultrasound|procedure|physio|physiotherapy|ecg|injection|dressing|suturing|vaccine|mri|ct\b|dexa|density|bmd|radiolog|radiology|imaging|consultation|consult\b|medical\s+expenses?)/i;
+    for (const it of list) {
+      const isProcedureLike = procedureLikeRe.test(it.name);
+      if (isProcedureLike) {
+        if (skipProcedures) {
+          skippedProcedureLikes.push(it.name);
           continue;
         }
-	      drugs.push(it);
-	    }
-
-      if (skipProcedures) {
-        logger.info('[MHC] Procedure fill skipped by policy for this run', {
-          skippedCount: skippedProcedureLikes.length,
-          skippedSample: skippedProcedureLikes.slice(0, 5),
-        });
+        procedures.push(it.name);
+        continue;
       }
+      drugs.push(it);
+    }
 
-	    let drugFilled = 0;
-	    for (let i = 0; i < Math.min(3, drugs.length); i++) {
-	      if (i > 0) await this.clickMoreDrug().catch(() => {});
-	      const quantity = drugs[i].quantity ?? '1';
-	      const unit = drugs[i].unit ?? null;
-	      const amountRaw = String(drugs[i].amount ?? '').trim();
-	      const unitPriceRaw = String(drugs[i].unitPrice ?? '').trim();
-	      const qn = Number.parseFloat(String(quantity).replace(/[^\d.]/g, ''));
-	      const amountNum = Number.parseFloat(amountRaw.replace(/[^\d.]/g, ''));
-	      const priceNum = Number.parseFloat(unitPriceRaw.replace(/[^\d.]/g, ''));
-	      const amount = Number.isFinite(amountNum) && amountNum > 0 ? String(Number(amountNum.toFixed(4))) : null;
-	      const unitPriceDerived =
-	        Number.isFinite(priceNum) && priceNum > 0
-	          ? String(Number(priceNum.toFixed(4)))
-	          : Number.isFinite(amountNum) && amountNum > 0 && Number.isFinite(qn) && qn > 0
-	            ? String(Number((amountNum / qn).toFixed(4)))
-	            : null;
-	      const ok = await this.fillDrugItem({ name: drugs[i].name, quantity, unit, unitPrice: unitPriceDerived, amount }, i + 1).catch(() => false);
-	      if (ok) {
-	        drugFilled += 1;
-	        // Ensure qty is filled even when the direct fill couldn't locate the qty cell.
-	        const qtyFallbackOk = await this.fillDrugQuantityFallback(i + 1, quantity).catch(() => false);
-	        const qtyVerified = await this.verifyDrugQuantity(i + 1, quantity).catch(() => false);
-	        if (!qtyFallbackOk || !qtyVerified) {
-	          logger.warn(`Drug qty may be missing for row ${i + 1} (${drugs[i].name})`);
-	        }
-		        const masterResolved =
-              this.lastDrugSelectionByRow?.[i + 1]?.fromMaster === true;
-            const portalContext = this._inferPortalContext();
-            if ((unitPriceDerived || amount) && (!masterResolved && portalContext === 'aia')) {
-              this._logStep('Skip AIA drug pricing fallback without resolved drug master code', {
-                rowIndex: i + 1,
-                drug: drugs[i].name,
-                unitPrice: unitPriceDerived,
-                amount,
-              });
-            } else if (unitPriceDerived || amount) {
-		          const pricingOk = await this.fillDrugPricingFallback(i + 1, {
-		            unit,
-		            quantity,
-		            unitPrice: unitPriceDerived,
-		            amount,
-		          }).catch(() => false);
-	          const pricingVerified = await this.verifyDrugPricing(i + 1, {
-	            unitPrice: unitPriceDerived,
-	            amount,
-	          }).catch(() => false);
-		          if (!pricingOk || !pricingVerified) {
-		            logger.warn(`Drug pricing may be missing for row ${i + 1} (${drugs[i].name})`, {
-		              unitPrice: unitPriceDerived,
-		              amount,
-		            });
-		          }
-		        }
-	      }
-	    }
+    if (skipProcedures) {
+      logger.info('[MHC] Procedure fill skipped by policy for this run', {
+        skippedCount: skippedProcedureLikes.length,
+        skippedSample: skippedProcedureLikes.slice(0, 5),
+      });
+    }
+
+    let drugFilled = 0;
+    for (let i = 0; i < Math.min(3, drugs.length); i++) {
+      if (i > 0) await this.clickMoreDrug().catch(() => {});
+      const quantity = drugs[i].quantity ?? '1';
+      const unit = drugs[i].unit ?? null;
+      const amountRaw = String(drugs[i].amount ?? '').trim();
+      const unitPriceRaw = String(drugs[i].unitPrice ?? '').trim();
+      const qn = Number.parseFloat(String(quantity).replace(/[^\d.]/g, ''));
+      const amountNum = Number.parseFloat(amountRaw.replace(/[^\d.]/g, ''));
+      const priceNum = Number.parseFloat(unitPriceRaw.replace(/[^\d.]/g, ''));
+      const amount =
+        Number.isFinite(amountNum) && amountNum > 0 ? String(Number(amountNum.toFixed(4))) : null;
+      const unitPriceDerived =
+        Number.isFinite(priceNum) && priceNum > 0
+          ? String(Number(priceNum.toFixed(4)))
+          : Number.isFinite(amountNum) && amountNum > 0 && Number.isFinite(qn) && qn > 0
+            ? String(Number((amountNum / qn).toFixed(4)))
+            : null;
+      const ok = await this.fillDrugItem(
+        { name: drugs[i].name, quantity, unit, unitPrice: unitPriceDerived, amount },
+        i + 1
+      ).catch(() => false);
+      if (ok) {
+        drugFilled += 1;
+        // Ensure qty is filled even when the direct fill couldn't locate the qty cell.
+        const qtyFallbackOk = await this.fillDrugQuantityFallback(i + 1, quantity).catch(
+          () => false
+        );
+        const qtyVerified = await this.verifyDrugQuantity(i + 1, quantity).catch(() => false);
+        if (!qtyFallbackOk || !qtyVerified) {
+          logger.warn(`Drug qty may be missing for row ${i + 1} (${drugs[i].name})`);
+        }
+        const masterResolved = this.lastDrugSelectionByRow?.[i + 1]?.fromMaster === true;
+        const portalContext = this._inferPortalContext();
+        if ((unitPriceDerived || amount) && !masterResolved && portalContext === 'aia') {
+          this._logStep('Skip AIA drug pricing fallback without resolved drug master code', {
+            rowIndex: i + 1,
+            drug: drugs[i].name,
+            unitPrice: unitPriceDerived,
+            amount,
+          });
+        } else if (unitPriceDerived || amount) {
+          const pricingOk = await this.fillDrugPricingFallback(i + 1, {
+            unit,
+            quantity,
+            unitPrice: unitPriceDerived,
+            amount,
+          }).catch(() => false);
+          const pricingVerified = await this.verifyDrugPricing(i + 1, {
+            unitPrice: unitPriceDerived,
+            amount,
+          }).catch(() => false);
+          if (!pricingOk || !pricingVerified) {
+            logger.warn(`Drug pricing may be missing for row ${i + 1} (${drugs[i].name})`, {
+              unitPrice: unitPriceDerived,
+              amount,
+            });
+          }
+        }
+      }
+    }
     if (drugs.length && drugFilled === 0) {
-      drugFilled = (await this._fillTextInputsInTableSection(/Drug Name/i, /Total Drug Fee/i, drugs.map((d) => d.name))).filled;
+      drugFilled = (
+        await this._fillTextInputsInTableSection(
+          /Drug Name/i,
+          /Total Drug Fee/i,
+          drugs.map(d => d.name)
+        )
+      ).filled;
       // When the generic table fill is used, the Qty column is not touched. Ensure it is set.
       for (let i = 0; i < Math.min(3, drugs.length); i++) {
         const quantity = drugs[i].quantity ?? '1';
-        const qtyFallbackOk = await this.fillDrugQuantityFallback(i + 1, quantity).catch(() => false);
+        const qtyFallbackOk = await this.fillDrugQuantityFallback(i + 1, quantity).catch(
+          () => false
+        );
         const qtyVerified = await this.verifyDrugQuantity(i + 1, quantity).catch(() => false);
         if (!qtyFallbackOk || !qtyVerified) {
           logger.warn(`Drug qty may be missing for row ${i + 1} (${drugs[i].name})`);
@@ -1526,7 +1683,9 @@ export class MHCAsiaAutomation {
       }
     }
 
-    let procFilled = (await this._fillTextInputsInTableSection(/Procedure Name/i, /Total Proc Fee/i, procedures)).filled;
+    let procFilled = (
+      await this._fillTextInputsInTableSection(/Procedure Name/i, /Total Proc Fee/i, procedures)
+    ).filled;
     if (procedures.length && procFilled === 0) {
       for (let i = 0; i < Math.min(2, procedures.length); i++) {
         if (i > 0) await this.clickMoreProcedure().catch(() => {});
@@ -1537,14 +1696,18 @@ export class MHCAsiaAutomation {
     // Portal validation often requires the procedure claim amount to be numeric.
     // Populate a safe default so Save As Draft does not fail with "valid amount for procedure".
     for (let i = 0; i < Math.min(2, procedures.length); i++) {
-      const amountOk = await this.fillProcedureClaimAmountFallback(i + 1, '0', procedures[i]).catch(() => false);
+      const amountOk = await this.fillProcedureClaimAmountFallback(i + 1, '0', procedures[i]).catch(
+        () => false
+      );
       if (!amountOk) {
         logger.warn(`Procedure claim amount may be missing for row ${i + 1} (${procedures[i]})`);
       }
     }
 
     logger.info(`Filled services/drugs into MHC: drugs=${drugFilled}, procedures=${procFilled}`);
-    await this.page.screenshot({ path: 'screenshots/mhc-asia-after-items.png', fullPage: true }).catch(() => {});
+    await this.page
+      .screenshot({ path: 'screenshots/mhc-asia-after-items.png', fullPage: true })
+      .catch(() => {});
     return drugFilled + procFilled > 0;
   }
 
@@ -1557,22 +1720,23 @@ export class MHCAsiaAutomation {
     try {
       this._logStep('2FA check', { provided: !!verificationCode });
       await this.page.waitForTimeout(500);
-      
+
       const pageText = await this.page.textContent('body').catch(() => '');
-      const has2FA = pageText.includes('Verification Code') || 
-                     pageText.includes('2 Factor') ||
-                     pageText.includes('Enter Your Verification Code');
-      
+      const has2FA =
+        pageText.includes('Verification Code') ||
+        pageText.includes('2 Factor') ||
+        pageText.includes('Enter Your Verification Code');
+
       if (!has2FA) {
         logger.info('2FA not required');
         this._logStep('2FA not required');
         return true;
       }
-      
+
       logger.info('2FA detected');
       this._logStep('2FA detected - waiting/entering code');
       await this.page.screenshot({ path: 'screenshots/mhc-asia-2fa.png', fullPage: true });
-      
+
       if (verificationCode) {
         // Find verification code input fields
         const codeInputs = await this.page.$$('input[type="text"]:not([disabled])');
@@ -1581,7 +1745,9 @@ export class MHCAsiaAutomation {
         }
         logger.info('2FA code entered');
         // Submit 2FA
-        const submitButton = await this.page.$('button[type="submit"], button:has-text("Submit"), button:has-text("Verify")');
+        const submitButton = await this.page.$(
+          'button[type="submit"], button:has-text("Submit"), button:has-text("Verify")'
+        );
         if (submitButton) {
           await submitButton.click();
           await this.page.waitForLoadState('domcontentloaded').catch(() => {});
@@ -1592,7 +1758,7 @@ export class MHCAsiaAutomation {
         // Wait up to 60 seconds for manual 2FA entry
         await this.page.waitForTimeout(60000);
       }
-      
+
       return true;
     } catch (error) {
       logger.error('Failed to handle 2FA:', error);
@@ -1614,7 +1780,7 @@ export class MHCAsiaAutomation {
       if (!skipEnsure) {
         await this.ensureAtMhcHome();
       }
-      
+
       const resetToPortalHome = async () => {
         try {
           await this.page.goto(this.config.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -1652,7 +1818,7 @@ export class MHCAsiaAutomation {
         await this.page.waitForLoadState('domcontentloaded').catch(() => {});
         await this.page.waitForTimeout(300);
       }
-      
+
       // Step 1: Click on "Normal Visit" or similar - try multiple selectors
       const normalVisitSelectors = [
         'a:has-text("Normal Visit")',
@@ -1661,7 +1827,7 @@ export class MHCAsiaAutomation {
         'a[href*="normalvisit" i]',
         '[onclick*="normal" i]',
       ];
-      
+
       let normalVisitClicked = false;
       for (const selector of normalVisitSelectors) {
         try {
@@ -1682,7 +1848,7 @@ export class MHCAsiaAutomation {
           continue;
         }
       }
-      
+
       if (!normalVisitClicked) {
         // One-time reset: we might be stuck in AIA Clinic or another sub-page without the Normal Visit nav.
         await resetToPortalHome();
@@ -1708,17 +1874,20 @@ export class MHCAsiaAutomation {
 
       if (!normalVisitClicked) {
         this._logStep('Could not find Normal Visit link - taking screenshot for debugging');
-        await this.page.screenshot({ path: 'screenshots/mhc-asia-normal-visit-not-found.png', fullPage: true });
+        await this.page.screenshot({
+          path: 'screenshots/mhc-asia-normal-visit-not-found.png',
+          fullPage: true,
+        });
         throw new Error('Could not find Normal Visit link after login');
       }
-      
+
       // After "Normal Visit", we're on the program selection page with two tiles:
-      // 1. "Search under AIA Program" 
+      // 1. "Search under AIA Program"
       // 2. "Search under other programs"
       // We'll proceed directly to the tile selection - no additional step needed here
       this._logStep('At program selection page (Normal Visit clicked)');
       // Skip screenshot for speed
-      
+
       return true;
     } catch (error) {
       logger.error('Failed to navigate to Normal Visit:', error);
@@ -1734,21 +1903,21 @@ export class MHCAsiaAutomation {
     try {
       this._logStep('Navigate: AIA Program search');
       logger.info('Navigating to AIA Program search through UI...');
-      
+
       // Use UI navigation instead of direct URL
       await this.navigateToNormalVisit();
-      
+
       // After navigating to "Search Other Programs", click on "Search under AIA Program" tile if present
       await this.page.waitForLoadState('domcontentloaded');
       await this.page.waitForTimeout(500);
-      
+
       const aiaTileSelectors = [
         'text=/Search\\s+under\\s+AIA\\s+Program/i',
         'a:has-text("AIA Program")',
         'button:has-text("AIA")',
         '[href*="aia" i]',
       ];
-      
+
       for (const selector of aiaTileSelectors) {
         try {
           const tile = this.page.locator(selector).first();
@@ -1761,8 +1930,11 @@ export class MHCAsiaAutomation {
           continue;
         }
       }
-      
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-patient-search.png', fullPage: true });
+
+      await this.page.screenshot({
+        path: 'screenshots/mhc-asia-patient-search.png',
+        fullPage: true,
+      });
       this._logStep('Navigated to patient search page');
       return true;
     } catch (error) {
@@ -1794,7 +1966,7 @@ export class MHCAsiaAutomation {
         .trim();
       const visitDate = String(visitDateRaw || '').trim();
 
-      const clickProgramTile = async (kind) => {
+      const clickProgramTile = async kind => {
         const k = String(kind || '').toLowerCase();
         if (k === 'other') {
           const otherProgramsSelectors = [
@@ -1805,7 +1977,10 @@ export class MHCAsiaAutomation {
           ];
           for (const selector of otherProgramsSelectors) {
             const tile = this.page.locator(selector).first();
-            if ((await tile.count().catch(() => 0)) > 0 && (await tile.isVisible().catch(() => false))) {
+            if (
+              (await tile.count().catch(() => 0)) > 0 &&
+              (await tile.isVisible().catch(() => false))
+            ) {
               await this._safeClick(tile, 'Search under other programs (tile)');
               await this.page.waitForTimeout(400);
               return true;
@@ -1823,7 +1998,10 @@ export class MHCAsiaAutomation {
           ];
           for (const selector of aiaSelectors) {
             const tile = this.page.locator(selector).first();
-            if ((await tile.count().catch(() => 0)) > 0 && (await tile.isVisible().catch(() => false))) {
+            if (
+              (await tile.count().catch(() => 0)) > 0 &&
+              (await tile.isVisible().catch(() => false))
+            ) {
               await this._safeClick(tile, 'Search under AIA Program (tile)');
               await this.page.waitForTimeout(600);
               return true;
@@ -1834,8 +2012,8 @@ export class MHCAsiaAutomation {
 
         return false;
       };
-      
-      const searchOne = async (termToSearch) => {
+
+      const searchOne = async termToSearch => {
         const term = String(termToSearch || '').trim();
         if (!term) return { nric: '', portal: null, found: false, usedTerm: '' };
 
@@ -1845,12 +2023,26 @@ export class MHCAsiaAutomation {
         const termCompact = term.replace(/\s+/g, '');
         const termNorm = termCompact.toUpperCase();
         if (termCompact.length < 5) {
-          logger.warn('Search term too short; aborting search to avoid portal validation error', { term });
-          return { nric: term, portal: null, found: false, memberNotFound: true, _invalidTerm: true };
+          logger.warn('Search term too short; aborting search to avoid portal validation error', {
+            term,
+          });
+          return {
+            nric: term,
+            portal: null,
+            found: false,
+            memberNotFound: true,
+            _invalidTerm: true,
+          };
         }
         if (!/\d/.test(termCompact)) {
           logger.warn('Search term has no digits; MHC requires NRIC/FIN/Member ID', { term });
-          return { nric: term, portal: null, found: false, memberNotFound: true, _invalidTerm: true };
+          return {
+            nric: term,
+            portal: null,
+            found: false,
+            memberNotFound: true,
+            _invalidTerm: true,
+          };
         }
 
         // Ensure we are on the base MHC portal before searching.
@@ -1859,7 +2051,9 @@ export class MHCAsiaAutomation {
           await this.ensureAtMhcHome().catch(() => {});
         }
 
-        const isLikelyId = /^(?:[STFGM]\d{7}[A-Z]|\d{6,}|[A-Z]\d{7}[A-Z])$/i.test(term.replace(/\s+/g, ''));
+        const _isLikelyId = /^(?:[STFGM]\d{7}[A-Z]|\d{6,}|[A-Z]\d{7}[A-Z])$/i.test(
+          term.replace(/\s+/g, '')
+        );
         const isLikelyName = false; // MHC portal requires NRIC/FIN/Member ID search only.
 
         // Enter search term. The page has two fields: NRIC/FIN/Member ID and Patient Name.
@@ -1895,11 +2089,13 @@ export class MHCAsiaAutomation {
               // Skip date fields that sometimes match the label-based selectors.
               const nameAttr = (await field.getAttribute('name').catch(() => '')) || '';
               const idAttr = (await field.getAttribute('id').catch(() => '')) || '';
-              const placeholderAttr = (await field.getAttribute('placeholder').catch(() => '')) || '';
+              const placeholderAttr =
+                (await field.getAttribute('placeholder').catch(() => '')) || '';
               const ariaLabel = (await field.getAttribute('aria-label').catch(() => '')) || '';
-              const attrText = `${nameAttr} ${idAttr} ${placeholderAttr} ${ariaLabel}`.toLowerCase();
+              const attrText =
+                `${nameAttr} ${idAttr} ${placeholderAttr} ${ariaLabel}`.toLowerCase();
               const rowText = await field
-                .evaluate((el) => (el.closest('tr')?.innerText || el.closest('tr')?.textContent || ''))
+                .evaluate(el => el.closest('tr')?.innerText || el.closest('tr')?.textContent || '')
                 .catch(() => '');
               const rowLower = String(rowText || '').toLowerCase();
               const valueNow = (await field.inputValue().catch(() => '')) || '';
@@ -1912,7 +2108,8 @@ export class MHCAsiaAutomation {
                 continue;
               }
               // Enforce NRIC/FIN/Member context so we don't accidentally select the Visit Date field.
-              const hasNricHints = /nric|fin|member/i.test(attrText) || /nric|fin|member/i.test(rowLower);
+              const hasNricHints =
+                /nric|fin|member/i.test(attrText) || /nric|fin|member/i.test(rowLower);
               if (requireNricHints && !hasNricHints) continue;
               // isEditable() is flaky across some MHC layouts (it may return false even though fill works).
               // Prefer selecting the visible field and handle fill errors with JS fallback later.
@@ -1924,23 +2121,28 @@ export class MHCAsiaAutomation {
           return null;
         };
 
-        const isNricSearchField = async (field) => {
+        const _isNricSearchField = async field => {
           if (!field) return false;
           return await field
-            .evaluate((el) => {
-              const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+            .evaluate(el => {
+              const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
               const row = el.closest('tr');
               const rowText = norm(row?.innerText || row?.textContent || '');
               const labelText = norm(el.closest('td, th')?.textContent || '');
-              const name = `${el.getAttribute('name') || ''} ${el.getAttribute('id') || ''} ${el.getAttribute('placeholder') || ''} ${el.getAttribute('aria-label') || ''}`.toLowerCase();
-              const hasNric = /nric|fin|member/.test(name) || /nric|fin|member/.test(rowText) || /nric|fin|member/.test(labelText);
-              const isDateLike = /visit\s*date|dd\/mm|mm\/dd|yyyy/.test(rowText) || /date/.test(name);
+              const name =
+                `${el.getAttribute('name') || ''} ${el.getAttribute('id') || ''} ${el.getAttribute('placeholder') || ''} ${el.getAttribute('aria-label') || ''}`.toLowerCase();
+              const hasNric =
+                /nric|fin|member/.test(name) ||
+                /nric|fin|member/.test(rowText) ||
+                /nric|fin|member/.test(labelText);
+              const isDateLike =
+                /visit\s*date|dd\/mm|mm\/dd|yyyy/.test(rowText) || /date/.test(name);
               return hasNric && !isDateLike;
             })
             .catch(() => false);
         };
 
-        const setInputValue = async (field, value) => {
+        const _setInputValue = async (field, value) => {
           try {
             await field.fill(value);
             return true;
@@ -1969,7 +2171,11 @@ export class MHCAsiaAutomation {
           ];
           for (const selector of tileSelectors) {
             const tile = this.page.locator(selector).first();
-            if ((await tile.count().catch(() => 0)) > 0 && (await tile.isVisible().catch(() => false))) return true;
+            if (
+              (await tile.count().catch(() => 0)) > 0 &&
+              (await tile.isVisible().catch(() => false))
+            )
+              return true;
           }
           return false;
         };
@@ -1985,7 +2191,10 @@ export class MHCAsiaAutomation {
           }
           try {
             const normalVisitLink = this.page.locator('a:has-text(\"Normal Visit\")').first();
-            if ((await normalVisitLink.count().catch(() => 0)) > 0 && (await normalVisitLink.isVisible().catch(() => false))) {
+            if (
+              (await normalVisitLink.count().catch(() => 0)) > 0 &&
+              (await normalVisitLink.isVisible().catch(() => false))
+            ) {
               await normalVisitLink.click();
               await this.page.waitForLoadState('domcontentloaded').catch(() => {});
               await this.page.waitForTimeout(300);
@@ -2064,7 +2273,11 @@ export class MHCAsiaAutomation {
                 .first()
                 .isVisible()
                 .catch(() => false);
-              const hasInput = await frame.locator(selectors).first().isVisible().catch(() => false);
+              const hasInput = await frame
+                .locator(selectors)
+                .first()
+                .isVisible()
+                .catch(() => false);
               if (hasLabel || hasInput) return frame;
             } catch {
               // ignore
@@ -2080,7 +2293,7 @@ export class MHCAsiaAutomation {
             // Project rule: no direct URL jump inside Clinic/MHC flows.
             // Always use UI navigation (Normal Visit -> program tiles).
             const searchVisible = await isSearchFormVisible();
-            let needsTiles = !searchVisible;
+            const needsTiles = !searchVisible;
             if (needsTiles) {
               await this.navigateToNormalVisit({ skipEnsure: true }).catch(() => {});
               await this.page.waitForTimeout(300);
@@ -2098,9 +2311,12 @@ export class MHCAsiaAutomation {
             searchCtx = await resolveSearchContext();
             if (!searchVisible) {
               await searchCtx
-                .waitForSelector('tr:has-text("NRIC/FIN/Member ID") input, tr:has-text("NRIC/FIN/Member ID") input:not([type])', {
-                  timeout: 1500,
-                })
+                .waitForSelector(
+                  'tr:has-text("NRIC/FIN/Member ID") input, tr:has-text("NRIC/FIN/Member ID") input:not([type])',
+                  {
+                    timeout: 1500,
+                  }
+                )
                 .catch(() => {});
             }
           } catch (e) {
@@ -2120,9 +2336,12 @@ export class MHCAsiaAutomation {
             }
             searchCtx = await resolveSearchContext();
             await searchCtx
-              .waitForSelector('tr:has-text("NRIC/FIN/Member ID") input, tr:has-text("NRIC/FIN/Member ID") input:not([type])', {
-                timeout: 1500,
-              })
+              .waitForSelector(
+                'tr:has-text("NRIC/FIN/Member ID") input, tr:has-text("NRIC/FIN/Member ID") input:not([type])',
+                {
+                  timeout: 1500,
+                }
+              )
               .catch(() => {});
           }
 
@@ -2137,7 +2356,11 @@ export class MHCAsiaAutomation {
           let idField = null;
           try {
             idField = await findVisibleEditableField(idSelectors, {}, searchCtx);
-            const nameField = await findVisibleEditableField(nameSelectors, { requireNricHints: false }, searchCtx);
+            const nameField = await findVisibleEditableField(
+              nameSelectors,
+              { requireNricHints: false },
+              searchCtx
+            );
             if (nameField) await nameField.fill('').catch(() => {});
             if (idField) await idField.fill('').catch(() => {});
           } catch {
@@ -2147,42 +2370,55 @@ export class MHCAsiaAutomation {
             await this.page
               .screenshot({ path: 'screenshots/mhc-asia-missing-nric-field.png', fullPage: true })
               .catch(() => {});
-            logger.warn('NRIC search field not found; aborting search to avoid typing into Visit Date');
-            return { nric: term, portal: null, found: false, memberNotFound: true, _missingNricField: true };
+            logger.warn(
+              'NRIC search field not found; aborting search to avoid typing into Visit Date'
+            );
+            return {
+              nric: term,
+              portal: null,
+              found: false,
+              memberNotFound: true,
+              _missingNricField: true,
+            };
           }
 
           let searchTriggered = false;
-          const readRowValue = async (ctx) =>
+          const readRowValue = async ctx =>
             ctx
               .evaluate(() => {
-                const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+                const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
                 const cells = Array.from(document.querySelectorAll('th, td'));
-                const labelCell = cells.find((c) => /nric\s*\/\s*fin\s*\/\s*member\s*id/i.test(norm(c.textContent || '')));
+                const labelCell = cells.find(c =>
+                  /nric\s*\/\s*fin\s*\/\s*member\s*id/i.test(norm(c.textContent || ''))
+                );
                 const row = labelCell?.closest('tr') || null;
                 if (!row) return '';
-                const getAttrText = (el) => {
+                const getAttrText = el => {
                   const name = el.getAttribute('name') || '';
                   const id = el.getAttribute('id') || '';
                   const placeholder = el.getAttribute('placeholder') || '';
                   return `${name} ${id} ${placeholder}`.toLowerCase();
                 };
-                const isDateLike = (el) => {
+                const isDateLike = el => {
                   const attrs = getAttrText(el);
                   if (/date|dd\/mm|mm\/dd|yyyy/.test(attrs)) return true;
                   const cellText = norm(el.closest('td, th')?.textContent || '');
                   if (/visit\s*date|dd\/mm|mm\/dd|yyyy/.test(cellText)) return true;
                   const rowText = norm(row.innerText || row.textContent || '');
-                  if (/visit\s*date/.test(rowText) && !/nric|fin|member/.test(cellText)) return true;
+                  if (/visit\s*date/.test(rowText) && !/nric|fin|member/.test(cellText))
+                    return true;
                   const val = (el.value || '').toString();
                   return /\d{1,2}\/\d{1,2}\/\d{2,4}/.test(val);
                 };
-                const inputs = Array.from(row.querySelectorAll('input')).filter((el) => {
+                const inputs = Array.from(row.querySelectorAll('input')).filter(el => {
                   const type = (el.getAttribute('type') || '').toLowerCase();
-                  return type !== 'hidden' && type !== 'button' && type !== 'submit' && type !== 'image';
+                  return (
+                    type !== 'hidden' && type !== 'button' && type !== 'submit' && type !== 'image'
+                  );
                 });
                 if (!inputs.length) return '';
-                let input = inputs.find((el) => /nric|fin|member/.test(getAttrText(el))) || null;
-                if (!input) input = inputs.find((el) => !isDateLike(el)) || null;
+                let input = inputs.find(el => /nric|fin|member/.test(getAttrText(el))) || null;
+                if (!input) input = inputs.find(el => !isDateLike(el)) || null;
                 if (!input) return '';
                 return (input?.value || '').toString();
               })
@@ -2190,38 +2426,46 @@ export class MHCAsiaAutomation {
 
           const fillRowAndClickSearch = async (ctx, value) =>
             ctx
-              .evaluate((term) => {
-                const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+              .evaluate(term => {
+                const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
                 const cells = Array.from(document.querySelectorAll('th, td'));
-                const labelCell = cells.find((c) => /nric\s*\/\s*fin\s*\/\s*member\s*id/i.test(norm(c.textContent || '')));
+                const labelCell = cells.find(c =>
+                  /nric\s*\/\s*fin\s*\/\s*member\s*id/i.test(norm(c.textContent || ''))
+                );
                 const row = labelCell?.closest('tr') || null;
                 if (!row) return { ok: false, clicked: false, value: '', reason: 'row_not_found' };
-                const inputs = Array.from(row.querySelectorAll('input')).filter((el) => {
+                const inputs = Array.from(row.querySelectorAll('input')).filter(el => {
                   const type = (el.getAttribute('type') || '').toLowerCase();
-                  return type !== 'hidden' && type !== 'button' && type !== 'submit' && type !== 'image';
+                  return (
+                    type !== 'hidden' && type !== 'button' && type !== 'submit' && type !== 'image'
+                  );
                 });
-                if (!inputs.length) return { ok: false, clicked: false, value: '', reason: 'input_not_found' };
-                const getAttrText = (el) => {
+                if (!inputs.length)
+                  return { ok: false, clicked: false, value: '', reason: 'input_not_found' };
+                const getAttrText = el => {
                   const name = el.getAttribute('name') || '';
                   const id = el.getAttribute('id') || '';
                   const placeholder = el.getAttribute('placeholder') || '';
                   return `${name} ${id} ${placeholder}`.toLowerCase();
                 };
-                const isDateLike = (el) => {
+                const isDateLike = el => {
                   const attrs = getAttrText(el);
                   if (/date|dd\/mm|mm\/dd|yyyy/.test(attrs)) return true;
                   const cellText = norm(el.closest('td, th')?.textContent || '');
                   if (/visit\s*date|dd\/mm|mm\/dd|yyyy/.test(cellText)) return true;
                   const rowText = norm(row.innerText || row.textContent || '');
-                  if (/visit\s*date/.test(rowText) && !/nric|fin|member/.test(cellText)) return true;
+                  if (/visit\s*date/.test(rowText) && !/nric|fin|member/.test(cellText))
+                    return true;
                   const val = (el.value || '').toString();
                   return /\d{1,2}\/\d{1,2}\/\d{2,4}/.test(val);
                 };
-                let input = inputs.find((el) => /nric|fin|member/.test(getAttrText(el))) || null;
-                if (!input) input = inputs.find((el) => !isDateLike(el)) || null;
+                let input = inputs.find(el => /nric|fin|member/.test(getAttrText(el))) || null;
+                if (!input) input = inputs.find(el => !isDateLike(el)) || null;
                 if (!input) return { ok: false, clicked: false, value: '', reason: 'date_only' };
                 const rows = Array.from(document.querySelectorAll('tr'));
-                const nameRow = rows.find((r) => /patient\s*name/i.test(norm(r.innerText || r.textContent || '')));
+                const nameRow = rows.find(r =>
+                  /patient\s*name/i.test(norm(r.innerText || r.textContent || ''))
+                );
                 if (nameRow) {
                   const nameInput =
                     nameRow.querySelector('input[type="text"]') ||
@@ -2238,12 +2482,18 @@ export class MHCAsiaAutomation {
                 input.dispatchEvent(new Event('change', { bubbles: true }));
                 const valueNow = (input.value || '').toString();
                 const compact = valueNow.replace(/\s+/g, '').toUpperCase();
-                const termCompact = String(term || '').replace(/\s+/g, '').toUpperCase();
+                const termCompact = String(term || '')
+                  .replace(/\s+/g, '')
+                  .toUpperCase();
                 const ok = compact.includes(termCompact) && compact.length >= 5;
                 let clicked = false;
                 if (ok) {
-                  const btns = Array.from(row.querySelectorAll('button, input[type="submit"], input[type="button"]'));
-                  const searchBtn = btns.find((b) => /search/i.test((b.textContent || b.value || '').toString())) || null;
+                  const btns = Array.from(
+                    row.querySelectorAll('button, input[type="submit"], input[type="button"]')
+                  );
+                  const searchBtn =
+                    btns.find(b => /search/i.test((b.textContent || b.value || '').toString())) ||
+                    null;
                   if (searchBtn) {
                     searchBtn.click();
                     clicked = true;
@@ -2255,38 +2505,45 @@ export class MHCAsiaAutomation {
 
           const forceFillRow = async (ctx, value) =>
             ctx
-              .evaluate((term) => {
-                const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+              .evaluate(term => {
+                const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
                 const cells = Array.from(document.querySelectorAll('th, td'));
-                const labelCell = cells.find((c) => /nric\s*\/\s*fin\s*\/\s*member\s*id/i.test(norm(c.textContent || '')));
+                const labelCell = cells.find(c =>
+                  /nric\s*\/\s*fin\s*\/\s*member\s*id/i.test(norm(c.textContent || ''))
+                );
                 const row = labelCell?.closest('tr') || null;
                 if (!row) return { ok: false, reason: 'row_not_found', value: '' };
-                const inputs = Array.from(row.querySelectorAll('input')).filter((el) => {
+                const inputs = Array.from(row.querySelectorAll('input')).filter(el => {
                   const type = (el.getAttribute('type') || '').toLowerCase();
-                  return type !== 'hidden' && type !== 'button' && type !== 'submit' && type !== 'image';
+                  return (
+                    type !== 'hidden' && type !== 'button' && type !== 'submit' && type !== 'image'
+                  );
                 });
                 if (!inputs.length) return { ok: false, reason: 'input_not_found', value: '' };
-                const getAttrText = (el) => {
+                const getAttrText = el => {
                   const name = el.getAttribute('name') || '';
                   const id = el.getAttribute('id') || '';
                   const placeholder = el.getAttribute('placeholder') || '';
                   return `${name} ${id} ${placeholder}`.toLowerCase();
                 };
-                const isDateLike = (el) => {
+                const isDateLike = el => {
                   const attrs = getAttrText(el);
                   if (/date|dd\/mm|mm\/dd|yyyy/.test(attrs)) return true;
                   const cellText = norm(el.closest('td, th')?.textContent || '');
                   if (/visit\s*date|dd\/mm|mm\/dd|yyyy/.test(cellText)) return true;
                   const rowText = norm(row.innerText || row.textContent || '');
-                  if (/visit\s*date/.test(rowText) && !/nric|fin|member/.test(cellText)) return true;
+                  if (/visit\s*date/.test(rowText) && !/nric|fin|member/.test(cellText))
+                    return true;
                   const val = (el.value || '').toString();
                   return /\d{1,2}\/\d{1,2}\/\d{2,4}/.test(val);
                 };
-                let input = inputs.find((el) => /nric|fin|member/.test(getAttrText(el))) || null;
-                if (!input) input = inputs.find((el) => !isDateLike(el)) || null;
+                let input = inputs.find(el => /nric|fin|member/.test(getAttrText(el))) || null;
+                if (!input) input = inputs.find(el => !isDateLike(el)) || null;
                 if (!input) return { ok: false, reason: 'date_only', value: '' };
                 const rows = Array.from(document.querySelectorAll('tr'));
-                const nameRow = rows.find((r) => /patient\s*name/i.test(norm(r.innerText || r.textContent || '')));
+                const nameRow = rows.find(r =>
+                  /patient\s*name/i.test(norm(r.innerText || r.textContent || ''))
+                );
                 if (nameRow) {
                   const nameInput =
                     nameRow.querySelector('input[type="text"]') ||
@@ -2306,42 +2563,51 @@ export class MHCAsiaAutomation {
               }, value)
               .catch(() => ({ ok: false, value: '' }));
 
-          const clickRowSearch = async (ctx) =>
+          const clickRowSearch = async ctx =>
             ctx
               .evaluate(() => {
-                const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+                const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
                 const cells = Array.from(document.querySelectorAll('th, td'));
-                const labelCell = cells.find((c) => /nric\s*\/\s*fin\s*\/\s*member\s*id/i.test(norm(c.textContent || '')));
+                const labelCell = cells.find(c =>
+                  /nric\s*\/\s*fin\s*\/\s*member\s*id/i.test(norm(c.textContent || ''))
+                );
                 const row = labelCell?.closest('tr') || null;
                 if (!row) return false;
-                const inputs = Array.from(row.querySelectorAll('input')).filter((el) => {
+                const inputs = Array.from(row.querySelectorAll('input')).filter(el => {
                   const type = (el.getAttribute('type') || '').toLowerCase();
-                  return type !== 'hidden' && type !== 'button' && type !== 'submit' && type !== 'image';
+                  return (
+                    type !== 'hidden' && type !== 'button' && type !== 'submit' && type !== 'image'
+                  );
                 });
                 if (!inputs.length) return false;
-                const getAttrText = (el) => {
+                const getAttrText = el => {
                   const name = el.getAttribute('name') || '';
                   const id = el.getAttribute('id') || '';
                   const placeholder = el.getAttribute('placeholder') || '';
                   return `${name} ${id} ${placeholder}`.toLowerCase();
                 };
-                const isDateLike = (el) => {
+                const isDateLike = el => {
                   const attrs = getAttrText(el);
                   if (/date|dd\/mm|mm\/dd|yyyy/.test(attrs)) return true;
                   const cellText = norm(el.closest('td, th')?.textContent || '');
                   if (/visit\s*date|dd\/mm|mm\/dd|yyyy/.test(cellText)) return true;
                   const rowText = norm(row.innerText || row.textContent || '');
-                  if (/visit\s*date/.test(rowText) && !/nric|fin|member/.test(cellText)) return true;
+                  if (/visit\s*date/.test(rowText) && !/nric|fin|member/.test(cellText))
+                    return true;
                   const val = (el.value || '').toString();
                   return /\d{1,2}\/\d{1,2}\/\d{2,4}/.test(val);
                 };
-                let input = inputs.find((el) => /nric|fin|member/.test(getAttrText(el))) || null;
-                if (!input) input = inputs.find((el) => !isDateLike(el)) || null;
+                let input = inputs.find(el => /nric|fin|member/.test(getAttrText(el))) || null;
+                if (!input) input = inputs.find(el => !isDateLike(el)) || null;
                 if (!input) return false;
                 const val = (input.value || '').toString().replace(/\s+/g, '');
                 if (val.length < 5) return false;
-                const btns = Array.from(row.querySelectorAll('button, input[type="submit"], input[type="button"]'));
-                const searchBtn = btns.find((b) => /search/i.test((b.textContent || b.value || '').toString())) || null;
+                const btns = Array.from(
+                  row.querySelectorAll('button, input[type="submit"], input[type="button"]')
+                );
+                const searchBtn =
+                  btns.find(b => /search/i.test((b.textContent || b.value || '').toString())) ||
+                  null;
                 if (!searchBtn) return false;
                 searchBtn.click();
                 return true;
@@ -2349,19 +2615,21 @@ export class MHCAsiaAutomation {
               .catch(() => false);
 
           const directRowFill = await searchCtx
-            .evaluate((term) => {
-              const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+            .evaluate(term => {
+              const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
               const cells = Array.from(document.querySelectorAll('th, td'));
-              const labelCell = cells.find((c) => /nric\s*\/\s*fin\s*\/\s*member\s*id/i.test(norm(c.textContent || '')));
+              const labelCell = cells.find(c =>
+                /nric\s*\/\s*fin\s*\/\s*member\s*id/i.test(norm(c.textContent || ''))
+              );
               const row = labelCell?.closest('tr') || null;
               if (!row) return { ok: false, clicked: false, value: '', reason: 'row_not_found' };
-              const getAttrText = (el) => {
+              const getAttrText = el => {
                 const name = el.getAttribute('name') || '';
                 const id = el.getAttribute('id') || '';
                 const placeholder = el.getAttribute('placeholder') || '';
                 return `${name} ${id} ${placeholder}`.toLowerCase();
               };
-              const isDateLike = (el) => {
+              const isDateLike = el => {
                 const attrs = getAttrText(el);
                 if (/date|dd\/mm|mm\/dd|yyyy/.test(attrs)) return true;
                 const cellText = norm(el.closest('td, th')?.textContent || '');
@@ -2371,22 +2639,24 @@ export class MHCAsiaAutomation {
                 const val = (el.value || '').toString();
                 return /\d{1,2}\/\d{1,2}\/\d{2,4}/.test(val);
               };
-              const collectInputs = (root) =>
-                Array.from(root.querySelectorAll('input'))
-                  .filter((el) => {
-                    const type = (el.getAttribute('type') || '').toLowerCase();
-                    return type !== 'hidden' && type !== 'button' && type !== 'submit' && type !== 'image';
-                  });
+              const collectInputs = root =>
+                Array.from(root.querySelectorAll('input')).filter(el => {
+                  const type = (el.getAttribute('type') || '').toLowerCase();
+                  return (
+                    type !== 'hidden' && type !== 'button' && type !== 'submit' && type !== 'image'
+                  );
+                });
               let candidates = [];
               const nextCell = labelCell?.nextElementSibling || null;
               if (nextCell) candidates = collectInputs(nextCell);
               if (!candidates.length) candidates = collectInputs(row);
-              if (!candidates.length) return { ok: false, clicked: false, value: '', reason: 'input_not_found' };
-              let input = candidates.find((el) => /nric|fin|member/.test(getAttrText(el))) || null;
-              if (!input) input = candidates.find((el) => !isDateLike(el)) || null;
+              if (!candidates.length)
+                return { ok: false, clicked: false, value: '', reason: 'input_not_found' };
+              let input = candidates.find(el => /nric|fin|member/.test(getAttrText(el))) || null;
+              if (!input) input = candidates.find(el => !isDateLike(el)) || null;
               if (!input) return { ok: false, clicked: false, value: '', reason: 'date_only' };
 
-              const nameRow = Array.from(document.querySelectorAll('tr')).find((r) =>
+              const nameRow = Array.from(document.querySelectorAll('tr')).find(r =>
                 /patient\s*name/i.test(norm(r.innerText || r.textContent || ''))
               );
               if (nameRow) {
@@ -2406,12 +2676,18 @@ export class MHCAsiaAutomation {
               input.dispatchEvent(new Event('change', { bubbles: true }));
               const valueNow = (input.value || '').toString();
               const compact = valueNow.replace(/\s+/g, '').toUpperCase();
-              const termCompact = String(term || '').replace(/\s+/g, '').toUpperCase();
+              const termCompact = String(term || '')
+                .replace(/\s+/g, '')
+                .toUpperCase();
               const ok = compact.includes(termCompact) && compact.length >= 5;
               let clicked = false;
               if (ok) {
-                const btns = Array.from(row.querySelectorAll('button, input[type="submit"], input[type="button"]'));
-                const searchBtn = btns.find((b) => /search/i.test((b.textContent || b.value || '').toString())) || null;
+                const btns = Array.from(
+                  row.querySelectorAll('button, input[type="submit"], input[type="button"]')
+                );
+                const searchBtn =
+                  btns.find(b => /search/i.test((b.textContent || b.value || '').toString())) ||
+                  null;
                 if (searchBtn) {
                   searchBtn.click();
                   clicked = true;
@@ -2425,7 +2701,9 @@ export class MHCAsiaAutomation {
             searchTriggered = true;
           }
 
-          const rowFill = directRowFill?.ok ? directRowFill : await fillRowAndClickSearch(searchCtx, term);
+          const rowFill = directRowFill?.ok
+            ? directRowFill
+            : await fillRowAndClickSearch(searchCtx, term);
           if (rowFill?.ok && rowFill?.clicked) {
             searchTriggered = true;
           }
@@ -2433,14 +2711,21 @@ export class MHCAsiaAutomation {
           const fastRow = await forceFillRow(searchCtx, term);
           const fastValue = String(fastRow?.value || '');
           const fastValueNorm = fastValue.replace(/\\s+/g, '').toUpperCase();
-          const fastRowOk = fastRow?.ok && fastValueNorm.includes(termNorm) && fastValueNorm.length >= 5;
+          const fastRowOk =
+            fastRow?.ok && fastValueNorm.includes(termNorm) && fastValueNorm.length >= 5;
 
           // Only proceed when we positively identified the NRIC/FIN row. Never fill generic inputs.
           if (!fastRowOk && !directRowFill?.ok && !rowFill?.ok && !searchTriggered) {
             await this.page
               .screenshot({ path: 'screenshots/mhc-asia-before-search-field.png', fullPage: true })
               .catch(() => {});
-            return { nric: term, portal: null, found: false, memberNotFound: false, _noField: true };
+            return {
+              nric: term,
+              portal: null,
+              found: false,
+              memberNotFound: false,
+              _noField: true,
+            };
           }
 
           // Safety: NEVER include generic submit selectors here. This flow is for patient search only.
@@ -2452,11 +2737,15 @@ export class MHCAsiaAutomation {
           ];
 
           let rowValue = rowFill?.value || (await readRowValue(searchCtx));
-          let rowValueNorm = String(rowValue || '').replace(/\\s+/g, '').toUpperCase();
+          let rowValueNorm = String(rowValue || '')
+            .replace(/\\s+/g, '')
+            .toUpperCase();
           if (!rowValueNorm || !rowValueNorm.includes(termNorm)) {
             const forced = await forceFillRow(searchCtx, term);
             rowValue = forced?.value || (await readRowValue(searchCtx));
-            rowValueNorm = String(rowValue || '').replace(/\\s+/g, '').toUpperCase();
+            rowValueNorm = String(rowValue || '')
+              .replace(/\\s+/g, '')
+              .toUpperCase();
           }
           if (!rowValueNorm || rowValueNorm.length < 5 || !rowValueNorm.includes(termNorm)) {
             logger.warn('NRIC field value mismatch; aborting search click', {
@@ -2464,7 +2753,14 @@ export class MHCAsiaAutomation {
               programKind,
               rowValue,
             });
-            return { nric: term, portal: null, found: false, memberNotFound: false, _noField: true, _valueMismatch: true };
+            return {
+              nric: term,
+              portal: null,
+              found: false,
+              memberNotFound: false,
+              _noField: true,
+              _valueMismatch: true,
+            };
           }
           this._logStep('NRIC search field set', { programKind, value: rowValueNorm });
 
@@ -2477,7 +2773,10 @@ export class MHCAsiaAutomation {
           if (!clicked) {
             for (const sel of rowBtnSelectors) {
               const btn = searchCtx.locator(sel).first();
-              if ((await btn.count().catch(() => 0)) > 0 && (await btn.isVisible().catch(() => true))) {
+              if (
+                (await btn.count().catch(() => 0)) > 0 &&
+                (await btn.isVisible().catch(() => true))
+              ) {
                 await btn.click();
                 clicked = true;
                 break;
@@ -2487,7 +2786,10 @@ export class MHCAsiaAutomation {
           if (!clicked && searchCtx !== this.page) {
             for (const sel of rowBtnSelectors) {
               const btn = this.page.locator(sel).first();
-              if ((await btn.count().catch(() => 0)) > 0 && (await btn.isVisible().catch(() => true))) {
+              if (
+                (await btn.count().catch(() => 0)) > 0 &&
+                (await btn.isVisible().catch(() => true))
+              ) {
                 await btn.click();
                 clicked = true;
                 break;
@@ -2498,7 +2800,10 @@ export class MHCAsiaAutomation {
           await this.page.waitForTimeout(200);
 
           await this.page
-            .screenshot({ path: `screenshots/mhc-asia-before-search-click-${programKind}.png`, fullPage: true })
+            .screenshot({
+              path: `screenshots/mhc-asia-before-search-click-${programKind}.png`,
+              fullPage: true,
+            })
             .catch(() => {});
 
           const valueNow = (await readRowValue(searchCtx)) || '';
@@ -2509,7 +2814,14 @@ export class MHCAsiaAutomation {
               programKind,
               valueNow,
             });
-            return { nric: term, portal: null, found: false, memberNotFound: true, _noField: true, _valueMismatch: true };
+            return {
+              nric: term,
+              portal: null,
+              found: false,
+              memberNotFound: true,
+              _noField: true,
+              _valueMismatch: true,
+            };
           }
           const shortMsg = await this.page
             .locator('text=/at least\\s+5\\s+char/i')
@@ -2518,18 +2830,26 @@ export class MHCAsiaAutomation {
             .catch(() => false);
           if (shortMsg) {
             logger.warn('MHC portal rejected search: minimum 5 characters');
-            return { nric: term, portal: null, found: false, memberNotFound: true, _invalidTerm: true };
+            return {
+              nric: term,
+              portal: null,
+              found: false,
+              memberNotFound: true,
+              _invalidTerm: true,
+            };
           }
 
           const collectResultInfo = async () => {
             const frames = this.page.frames();
-            let infoAgg = { linkCount: 0, rowCount: 0, hasTermMatch: false };
+            const infoAgg = { linkCount: 0, rowCount: 0, hasTermMatch: false };
             for (const frame of frames) {
               try {
                 const info = await frame
-                  .evaluate((t) => {
-                    const termLower = String(t || '').trim().toLowerCase();
-                    const isPatientLink = (a) => {
+                  .evaluate(t => {
+                    const termLower = String(t || '')
+                      .trim()
+                      .toLowerCase();
+                    const isPatientLink = a => {
                       const tt = (a.textContent || '').trim().toLowerCase();
                       if (!tt) return false;
                       if (tt === 'search') return false;
@@ -2541,7 +2861,8 @@ export class MHCAsiaAutomation {
                     const tables = Array.from(document.querySelectorAll('table'));
                     let resultTable = null;
                     for (const table of tables) {
-                      const header = (table.querySelector('thead') || table).innerText?.toLowerCase?.() || '';
+                      const header =
+                        (table.querySelector('thead') || table).innerText?.toLowerCase?.() || '';
                       if (header.includes('patient id') && header.includes('patient name')) {
                         resultTable = table;
                         break;
@@ -2559,7 +2880,8 @@ export class MHCAsiaAutomation {
                     for (const r of rows) {
                       const text = (r.innerText || '').toLowerCase();
                       if (!text) continue;
-                      if (text.includes('visit date') || text.includes('nric/fin/member id')) continue;
+                      if (text.includes('visit date') || text.includes('nric/fin/member id'))
+                        continue;
                       const cells = Array.from(r.querySelectorAll('td'));
                       if (!cells.length) continue;
                       const links = Array.from(r.querySelectorAll('a')).filter(isPatientLink);
@@ -2601,7 +2923,10 @@ export class MHCAsiaAutomation {
           };
 
           await this.page
-            .screenshot({ path: `screenshots/mhc-asia-search-results-${programKind}.png`, fullPage: true })
+            .screenshot({
+              path: `screenshots/mhc-asia-search-results-${programKind}.png`,
+              fullPage: true,
+            })
             .catch(() => {});
 
           const aiaInlinePrompt = await this.page
@@ -2615,7 +2940,10 @@ export class MHCAsiaAutomation {
             return { nric: term, portal: 'aiaclient', found: false, memberNotFound: false };
           }
 
-          if (this.lastDialogMessage && /please\s+enter\s+at\s+least\s+5/i.test(this.lastDialogMessage)) {
+          if (
+            this.lastDialogMessage &&
+            /please\s+enter\s+at\s+least\s+5/i.test(this.lastDialogMessage)
+          ) {
             logger.warn('Search rejected by portal validation', {
               term,
               programKind,
@@ -2644,8 +2972,13 @@ export class MHCAsiaAutomation {
 
           const hasPatientRow = (() => {
             // Require a term match for row-count-based detection to avoid counting header-only tables.
-            if (isLikelyName) return resultInfo.linkCount === 1 || (resultInfo.rowCount === 1 && resultInfo.hasTermMatch);
-            return resultInfo.linkCount >= 1 || (resultInfo.rowCount >= 1 && resultInfo.hasTermMatch);
+            if (isLikelyName)
+              return (
+                resultInfo.linkCount === 1 || (resultInfo.rowCount === 1 && resultInfo.hasTermMatch)
+              );
+            return (
+              resultInfo.linkCount >= 1 || (resultInfo.rowCount >= 1 && resultInfo.hasTermMatch)
+            );
           })();
 
           if (memberNotFound && !hasPatientRow) {
@@ -2656,31 +2989,38 @@ export class MHCAsiaAutomation {
           let portal = null;
           if (hasPatientRow) {
             const resultRowText = await this.page
-              .evaluate((term) => {
-                const termLower = String(term || '').trim().toLowerCase();
+              .evaluate(term => {
+                const termLower = String(term || '')
+                  .trim()
+                  .toLowerCase();
                 const tables = Array.from(document.querySelectorAll('table'));
                 let resultTable = null;
                 for (const table of tables) {
-                  const header = (table.querySelector('thead') || table).innerText?.toLowerCase?.() || '';
+                  const header =
+                    (table.querySelector('thead') || table).innerText?.toLowerCase?.() || '';
                   if (header.includes('patient id') && header.includes('patient name')) {
                     resultTable = table;
                     break;
                   }
                 }
                 const rows = Array.from((resultTable || document).querySelectorAll('tr'));
-                const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+                const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
                 if (termLower) {
-                  const matched = rows.find((r) => norm(r.innerText || r.textContent || '').includes(termLower));
+                  const matched = rows.find(r =>
+                    norm(r.innerText || r.textContent || '').includes(termLower)
+                  );
                   if (matched) return (matched.innerText || matched.textContent || '').trim();
                 }
                 // Fallback: if only one data row, use it.
-                const dataRows = rows.filter((r) => {
+                const dataRows = rows.filter(r => {
                   const text = norm(r.innerText || r.textContent || '');
                   if (!text) return false;
-                  if (text.includes('visit date') || text.includes('nric/fin/member id')) return false;
+                  if (text.includes('visit date') || text.includes('nric/fin/member id'))
+                    return false;
                   return r.querySelectorAll('td').length > 0;
                 });
-                if (dataRows.length === 1) return (dataRows[0].innerText || dataRows[0].textContent || '').trim();
+                if (dataRows.length === 1)
+                  return (dataRows[0].innerText || dataRows[0].textContent || '').trim();
                 return '';
               }, term)
               .catch(() => '');
@@ -2688,7 +3028,8 @@ export class MHCAsiaAutomation {
             const portalPatterns = {
               aiaclient: /aiaclient/i,
               // Avoid false positives from header links; require PCP/Preferred Care context.
-              singlife: /(singlife.*(pcp|preferred\\s+care|pcp\\s*sp|pcp\\s*programme|pcp\\s*program))|aviva/i,
+              singlife:
+                /(singlife.*(pcp|preferred\\s+care|pcp\\s*sp|pcp\\s*programme|pcp\\s*program))|aviva/i,
               ge: /great\\s+eastern\\b/i,
               prudential: /prudential/i,
               axa: /\\baxa\\b/i,
@@ -2737,7 +3078,7 @@ export class MHCAsiaAutomation {
           portal: last?.portal || null,
           found: !!last?.found,
           memberNotFound: !!last?.memberNotFound,
-          usedTerm: term
+          usedTerm: term,
         };
       };
 
@@ -2768,7 +3109,10 @@ export class MHCAsiaAutomation {
   async openPatientFromSearchResults(nric, opts = {}) {
     try {
       const term = String(nric || '').trim();
-      const preferredContext = String(opts?.preferredContext || '').trim().toLowerCase() || null;
+      const preferredContext =
+        String(opts?.preferredContext || '')
+          .trim()
+          .toLowerCase() || null;
       this._logStep('Open patient from results', { nric: term, preferredContext });
       logger.info('Opening patient from search results...');
       if (this.needsAIAClinicSwitch) {
@@ -2776,7 +3120,9 @@ export class MHCAsiaAutomation {
         return false;
       }
 
-      const isLikelyId = /^(?:[STFGM]\d{7}[A-Z]|\d{6,}|[A-Z]\d{7}[A-Z])$/i.test(term.replace(/\s+/g, ''));
+      const isLikelyId = /^(?:[STFGM]\d{7}[A-Z]|\d{6,}|[A-Z]\d{7}[A-Z])$/i.test(
+        term.replace(/\s+/g, '')
+      );
       const strictUnique = !isLikelyId; // For name-search, require unique match.
 
       // Search across frames for a result row/link.
@@ -2784,9 +3130,13 @@ export class MHCAsiaAutomation {
         try {
           const handle = await frame.evaluateHandle(
             ({ t, strict, preferred }) => {
-              const termLower = String(t || '').trim().toLowerCase();
-              const preferredContext = String(preferred || '').trim().toLowerCase();
-              const isPatientLink = (a) => {
+              const termLower = String(t || '')
+                .trim()
+                .toLowerCase();
+              const preferredContext = String(preferred || '')
+                .trim()
+                .toLowerCase();
+              const isPatientLink = a => {
                 const tt = (a.textContent || '').trim().toLowerCase();
                 if (!tt) return false;
                 if (tt === 'search') return false;
@@ -2794,7 +3144,7 @@ export class MHCAsiaAutomation {
                 if (tt === 'subsidiaries') return false;
                 return true;
               };
-              const contextScore = (text) => {
+              const contextScore = text => {
                 const s = String(text || '').toLowerCase();
                 if (!preferredContext) return 0;
                 if (preferredContext === 'aia') {
@@ -2817,7 +3167,7 @@ export class MHCAsiaAutomation {
                 }
                 return 0;
               };
-              const hrefScore = (href) => {
+              const hrefScore = href => {
                 const s = String(href || '').toLowerCase();
                 let score = 0;
                 if (/empvisitadd|visitadd|empvisit/i.test(s)) score += 30;
@@ -2829,7 +3179,8 @@ export class MHCAsiaAutomation {
               const tables = Array.from(document.querySelectorAll('table'));
               let resultTable = null;
               for (const table of tables) {
-                const header = (table.querySelector('thead') || table).innerText?.toLowerCase?.() || '';
+                const header =
+                  (table.querySelector('thead') || table).innerText?.toLowerCase?.() || '';
                 if (header.includes('patient id') && header.includes('patient name')) {
                   resultTable = table;
                   break;
@@ -2887,7 +3238,10 @@ export class MHCAsiaAutomation {
 
           const beforeUrl = this.page.url();
           const previousPage = this.page;
-          const popupPromise = this.page.context().waitForEvent('page', { timeout: 1500 }).catch(() => null);
+          const popupPromise = this.page
+            .context()
+            .waitForEvent('page', { timeout: 1500 })
+            .catch(() => null);
           // Clicking the actual patient-name link is more reliable than clicking the whole row.
           await el.click().catch(() => false);
           // Allow the global dialog handler to consume any alerts.
@@ -2933,14 +3287,30 @@ export class MHCAsiaAutomation {
           const checkVisitForm = async () => {
             const urlNow = this.page.url() || '';
             const hasEmployeeVisitAddHeader =
-              (await this.page.locator('text=/Employee\\s+Visit\\s*-\\s*Add/i').count().catch(() => 0)) > 0;
+              (await this.page
+                .locator('text=/Employee\\s+Visit\\s*-\\s*Add/i')
+                .count()
+                .catch(() => 0)) > 0;
             const hasChargeType =
-              (await this.page.locator('text=/Charge\\s*Type/i').count().catch(() => 0)) > 0;
+              (await this.page
+                .locator('text=/Charge\\s*Type/i')
+                .count()
+                .catch(() => 0)) > 0;
             const hasConsultFee =
-              (await this.page.locator('text=/Consultation\\s+Fee/i').count().catch(() => 0)) > 0;
+              (await this.page
+                .locator('text=/Consultation\\s+Fee/i')
+                .count()
+                .catch(() => 0)) > 0;
             const hasSaveDraft =
-              (await this.page.locator('button:has-text(\"Save As Draft\"), input[value*=\"Save As Draft\" i]').count().catch(() => 0)) > 0;
-            const hasDrugHeader = (await this.page.locator('text=/Drug\\s+Name/i').count().catch(() => 0)) > 0;
+              (await this.page
+                .locator('button:has-text(\"Save As Draft\"), input[value*=\"Save As Draft\" i]')
+                .count()
+                .catch(() => 0)) > 0;
+            const hasDrugHeader =
+              (await this.page
+                .locator('text=/Drug\\s+Name/i')
+                .count()
+                .catch(() => 0)) > 0;
             return (
               /EmpVisitAdd|VisitAdd/i.test(urlNow) ||
               hasEmployeeVisitAddHeader ||
@@ -2949,7 +3319,10 @@ export class MHCAsiaAutomation {
           };
           const isVisitForm = await checkVisitForm();
 
-          await this.page.screenshot({ path: 'screenshots/mhc-asia-patient-opened.png', fullPage: true });
+          await this.page.screenshot({
+            path: 'screenshots/mhc-asia-patient-opened.png',
+            fullPage: true,
+          });
           if (isVisitForm) {
             this._logStep('Patient opened from results');
             return true;
@@ -2959,13 +3332,18 @@ export class MHCAsiaAutomation {
           if (afterUrl === beforeUrl) {
             logger.warn('Patient click did not navigate away; still on search/results page');
           } else {
-            logger.warn('Patient click navigated but visit form not detected', { from: beforeUrl, to: afterUrl });
+            logger.warn('Patient click navigated but visit form not detected', {
+              from: beforeUrl,
+              to: afterUrl,
+            });
           }
 
           // Fallback: direct navigation to EmpVisitAdd/VisitAdd link in the results row.
           const directHref = await this.page
-            .evaluate((needle) => {
-              const lowerNeedle = String(needle || '').trim().toLowerCase();
+            .evaluate(needle => {
+              const lowerNeedle = String(needle || '')
+                .trim()
+                .toLowerCase();
               const rows = Array.from(document.querySelectorAll('tr'));
               let candidate = null;
               for (const row of rows) {
@@ -2993,7 +3371,9 @@ export class MHCAsiaAutomation {
 
           if (directHref) {
             const targetUrl = new URL(directHref, this.page.url()).href;
-            await this.page.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await this.page
+              .goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 15000 })
+              .catch(() => {});
             await this.page.waitForTimeout(300);
             await this.page.bringToFront().catch(() => {});
             if (await checkVisitForm()) {
@@ -3008,8 +3388,14 @@ export class MHCAsiaAutomation {
         }
       }
 
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-patient-open-not-found.png', fullPage: true }).catch(() => {});
-      logger.warn('Could not open patient from search results', { term, strictUnique, preferredContext });
+      await this.page
+        .screenshot({ path: 'screenshots/mhc-asia-patient-open-not-found.png', fullPage: true })
+        .catch(() => {});
+      logger.warn('Could not open patient from search results', {
+        term,
+        strictUnique,
+        preferredContext,
+      });
       return false;
     } catch (error) {
       logger.error('Failed to open patient from results:', error);
@@ -3023,7 +3409,9 @@ export class MHCAsiaAutomation {
    */
   async addVisit(portal, nric = null) {
     try {
-      const portalNorm = String(portal || '').trim().toLowerCase();
+      const portalNorm = String(portal || '')
+        .trim()
+        .toLowerCase();
       let effectivePortal = portalNorm;
       const forceAiaByDialog = this.needsAIAClinicSwitch === true;
       if (forceAiaByDialog && !/aia/i.test(effectivePortal || '')) {
@@ -3035,20 +3423,31 @@ export class MHCAsiaAutomation {
         effectivePortal: effectivePortal || null,
         nric: nric ? nric.substring(0, 4) + '...' : null,
       });
-      logger.info(`Adding visit for portal: ${portalNorm || '(base)'} (effective: ${effectivePortal || '(base)'})`);
+      logger.info(
+        `Adding visit for portal: ${portalNorm || '(base)'} (effective: ${effectivePortal || '(base)'})`
+      );
 
       // Some portals require switching the system context (top-right "Switch System").
       // Singlife (ex-Aviva) should use the Singlife system; AIA uses AIA Clinic.
       // Base MHC should not switch system here (routing is done by pay_type).
       const forceSinglife = !isBaseMhc && /singlife|aviva/i.test(effectivePortal || '');
-      const switchedToSinglife = forceSinglife ? await this.switchToSinglifeIfNeeded({ force: true }) : false;
+      const switchedToSinglife = forceSinglife
+        ? await this.switchToSinglifeIfNeeded({ force: true })
+        : false;
 
       // Check if we need to switch to AIA Clinic system (triggered by dialog handler).
       // Do NOT infer this from generic page text here; only switch when the flag is set.
-      const allowAiaSwitch = this.needsAIAClinicSwitch === true && /aia/i.test(effectivePortal || '') && !switchedToSinglife;
+      const allowAiaSwitch =
+        this.needsAIAClinicSwitch === true &&
+        /aia/i.test(effectivePortal || '') &&
+        !switchedToSinglife;
       // Never carry this flag across patients if the current portal doesn't support it.
       if (!allowAiaSwitch && this.needsAIAClinicSwitch) this.needsAIAClinicSwitch = false;
-      const switchedToAIA = switchedToSinglife ? false : (allowAiaSwitch ? await this.switchToAIAClinicIfNeeded() : false);
+      const switchedToAIA = switchedToSinglife
+        ? false
+        : allowAiaSwitch
+          ? await this.switchToAIAClinicIfNeeded()
+          : false;
 
       // If we switched to AIA Clinic, we need to use the AIA-specific flow:
       // 1. Click "Add AIA Visit"
@@ -3059,7 +3458,9 @@ export class MHCAsiaAutomation {
         logger.info('Using AIA Clinic visit flow after system switch');
         const aiaResult = await this.navigateToAIAVisitAndSearch(nric);
         if (aiaResult) {
-          await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-visit-form.png', fullPage: true }).catch(() => {});
+          await this.page
+            .screenshot({ path: 'screenshots/mhc-asia-aia-visit-form.png', fullPage: true })
+            .catch(() => {});
           return true;
         }
         // If AIA flow failed, continue with normal flow as fallback
@@ -3069,19 +3470,42 @@ export class MHCAsiaAutomation {
       // Many flows start the visit form by clicking the patient in the search results.
       // IMPORTANT: the *search results* page also contains a "Visit Date" field, so only use
       // strong visit-form signals here.
-      const alreadyInVisit = (await (async () => {
+      const alreadyInVisit = await (async () => {
         const hasEmployeeVisitHeader =
-          (await this.page.locator('text=/Employee\\s+Visit\\s*-\\s*Add/i').count().catch(() => 0)) > 0;
-        const hasChargeType = (await this.page.locator('text=/Charge\\s*Type/i').count().catch(() => 0)) > 0;
-        const hasConsultFee = (await this.page.locator('text=/Consultation\\s+Fee/i').count().catch(() => 0)) > 0;
+          (await this.page
+            .locator('text=/Employee\\s+Visit\\s*-\\s*Add/i')
+            .count()
+            .catch(() => 0)) > 0;
+        const hasChargeType =
+          (await this.page
+            .locator('text=/Charge\\s*Type/i')
+            .count()
+            .catch(() => 0)) > 0;
+        const hasConsultFee =
+          (await this.page
+            .locator('text=/Consultation\\s+Fee/i')
+            .count()
+            .catch(() => 0)) > 0;
         const hasSaveDraft =
-          (await this.page.locator('button:has-text(\"Save As Draft\"), input[value*=\"Save As Draft\" i]').count().catch(() => 0)) > 0;
-        const hasDrugHeader = (await this.page.locator('text=/Drug\\s+Name/i').count().catch(() => 0)) > 0;
-        return hasEmployeeVisitHeader || (hasChargeType && (hasConsultFee || hasDrugHeader || hasSaveDraft));
-      })());
+          (await this.page
+            .locator('button:has-text(\"Save As Draft\"), input[value*=\"Save As Draft\" i]')
+            .count()
+            .catch(() => 0)) > 0;
+        const hasDrugHeader =
+          (await this.page
+            .locator('text=/Drug\\s+Name/i')
+            .count()
+            .catch(() => 0)) > 0;
+        return (
+          hasEmployeeVisitHeader ||
+          (hasChargeType && (hasConsultFee || hasDrugHeader || hasSaveDraft))
+        );
+      })();
       if (alreadyInVisit) {
         logger.info('Already on visit form after selecting patient');
-        await this.page.screenshot({ path: 'screenshots/mhc-asia-add-visit-form.png', fullPage: true }).catch(() => {});
+        await this.page
+          .screenshot({ path: 'screenshots/mhc-asia-add-visit-form.png', fullPage: true })
+          .catch(() => {});
         this._logStep('Already on visit form');
         return true;
       }
@@ -3104,7 +3528,10 @@ export class MHCAsiaAutomation {
         for (const selector of nricChoiceSelectors) {
           try {
             const choice = this.page.locator(selector).first();
-            if ((await choice.count().catch(() => 0)) > 0 && (await choice.isVisible().catch(() => false))) {
+            if (
+              (await choice.count().catch(() => 0)) > 0 &&
+              (await choice.isVisible().catch(() => false))
+            ) {
               await this._safeClick(choice, 'Member card: NRIC');
               await this.page.waitForTimeout(800);
               break;
@@ -3126,7 +3553,7 @@ export class MHCAsiaAutomation {
         for (const selector of portalSelectors) {
           try {
             const link = this.page.locator(selector).first();
-            if (await link.count() > 0) {
+            if ((await link.count()) > 0) {
               await link.click();
               await this.page.waitForLoadState('domcontentloaded').catch(() => {});
               await this.page.waitForTimeout(400);
@@ -3138,7 +3565,7 @@ export class MHCAsiaAutomation {
           }
         }
       }
-      
+
       // Click "Add [Portal] Visit" (e.g., "Add AIA Visit")
       const addVisitSelectors = [
         // Base MHC flows sometimes have a left-nav item for this.
@@ -3150,23 +3577,25 @@ export class MHCAsiaAutomation {
         `a:has-text("Add Visit")`,
         'button:has-text("New Visit")',
       ];
-      
+
       for (const selector of addVisitSelectors) {
         try {
           const button = this.page.locator(selector).first();
-          if (await button.count() > 0) {
+          if ((await button.count()) > 0) {
             await button.click();
             await this.page.waitForLoadState('domcontentloaded').catch(() => {});
             await this.page.waitForTimeout(400);
             logger.info('Clicked Add Visit');
-            await this.page.screenshot({ path: 'screenshots/mhc-asia-add-visit-form.png', fullPage: true }).catch(() => {});
+            await this.page
+              .screenshot({ path: 'screenshots/mhc-asia-add-visit-form.png', fullPage: true })
+              .catch(() => {});
             return true;
           }
         } catch (e) {
           continue;
         }
       }
-      
+
       logger.warn('Could not find Add Visit button');
       return false;
     } catch (error) {
@@ -3183,19 +3612,19 @@ export class MHCAsiaAutomation {
   async switchToAIAClinicIfNeeded() {
     try {
       this._logStep('Check if AIA Clinic switch needed');
-      
+
       // Check if the dialog handler flagged that we need to switch
       // This happens when a dialog says "Please submit this claim under www.aiaclinic.com"
       const flaggedByDialog = this.needsAIAClinicSwitch === true;
       let needsSwitch = flaggedByDialog;
-      
+
       if (needsSwitch) {
         logger.info('AIA Clinic switch needed (flagged by dialog handler)');
       } else {
         // Check for dialog or message about AIA Clinic in page text
         const pageText = await this.page.textContent('body').catch(() => '');
         needsSwitch = /switch.*aia\s*clinic|go.*aia\s*clinic|aia\s*clinic.*system/i.test(pageText);
-        
+
         if (!needsSwitch) {
           // Also check for any visible prompt/message
           const switchPromptSelectors = [
@@ -3204,10 +3633,15 @@ export class MHCAsiaAutomation {
             '.alert:has-text("AIA Clinic")',
             '.modal:has-text("AIA Clinic")',
           ];
-          
+
           for (const selector of switchPromptSelectors) {
             try {
-              if ((await this.page.locator(selector).count().catch(() => 0)) > 0) {
+              if (
+                (await this.page
+                  .locator(selector)
+                  .count()
+                  .catch(() => 0)) > 0
+              ) {
                 needsSwitch = true;
                 break;
               }
@@ -3217,15 +3651,15 @@ export class MHCAsiaAutomation {
           }
         }
       }
-      
+
       if (!needsSwitch) {
         logger.info('No AIA Clinic switch needed');
         return false; // Return false to indicate no switch was performed
       }
-      
+
       logger.info('AIA Clinic switch detected - switching system...');
       this._logStep('Switching to AIA Clinic system');
-      
+
       // Step 1: Find and click "Switch System" in top right corner
       const switchSystemSelectors = [
         'a:has-text("Switch System")',
@@ -3233,7 +3667,7 @@ export class MHCAsiaAutomation {
         'select[name*="system" i]',
         'select[id*="system" i]',
       ];
-      
+
       let switchClicked = false;
       for (const selector of switchSystemSelectors) {
         try {
@@ -3248,7 +3682,7 @@ export class MHCAsiaAutomation {
           continue;
         }
       }
-      
+
       if (!switchClicked) {
         // Try to find it in a dropdown or menu
         const menuSelectors = [
@@ -3257,14 +3691,14 @@ export class MHCAsiaAutomation {
           '.user-menu',
           '[data-toggle="dropdown"]',
         ];
-        
+
         for (const menuSelector of menuSelectors) {
           try {
             const menu = this.page.locator(menuSelector).first();
             if ((await menu.count().catch(() => 0)) > 0) {
               await this._safeClick(menu, 'Open menu');
               await this.page.waitForTimeout(300);
-              
+
               // Now look for Switch System in the opened menu
               for (const selector of switchSystemSelectors) {
                 try {
@@ -3286,17 +3720,21 @@ export class MHCAsiaAutomation {
           }
         }
       }
-      
+
       if (!switchClicked) {
         logger.warn('Could not find Switch System button');
-        await this.page.screenshot({ path: 'screenshots/mhc-asia-switch-system-not-found.png' }).catch(() => {});
+        await this.page
+          .screenshot({ path: 'screenshots/mhc-asia-switch-system-not-found.png' })
+          .catch(() => {});
         return false;
       }
-      
+
       // Step 2: Select "AIA Clinic" from actionable controls.
       // Prime hover menus first (some deployments require hover to reveal switch links).
       await this.page
-        .locator('a:has-text("Switch System"), button:has-text("Switch System"), text=/Switch\\s+System/i')
+        .locator(
+          'a:has-text("Switch System"), button:has-text("Switch System"), text=/Switch\\s+System/i'
+        )
         .first()
         .hover()
         .catch(() => {});
@@ -3305,14 +3743,18 @@ export class MHCAsiaAutomation {
       let options = await this._collectVisibleSystemSwitchOptions(/aia\s*clinic/i);
       if (!options.length) {
         this._logStep('No visible AIA switch options; trying hidden switch links');
-        options = await this._collectVisibleSystemSwitchOptions(/aia\s*clinic/i, { includeHidden: true });
+        options = await this._collectVisibleSystemSwitchOptions(/aia\s*clinic/i, {
+          includeHidden: true,
+        });
       }
       if (!options.length) {
         const debugTargets = await this._collectSwitchSystemDebugTargets(/aia\s*clinic/i);
-        this._logStep('AIA switch debug targets', { count: debugTargets.length, sample: debugTargets.slice(0, 12) });
-        const hrefFallbackCandidates = await this._collectSwitchSystemHrefCandidatesAcrossFrames(
-          /aia\s*clinic|aiaclinic/i
-        );
+        this._logStep('AIA switch debug targets', {
+          count: debugTargets.length,
+          sample: debugTargets.slice(0, 12),
+        });
+        const hrefFallbackCandidates =
+          await this._collectSwitchSystemHrefCandidatesAcrossFrames(/aia\s*clinic|aiaclinic/i);
         this._logStep('AIA switch href fallback candidates', {
           count: hrefFallbackCandidates.length,
           sample: hrefFallbackCandidates.slice(0, 8),
@@ -3323,7 +3765,9 @@ export class MHCAsiaAutomation {
           const nextUrl = /^https?:\/\//i.test(switchHref)
             ? switchHref
             : new URL(switchHref, this.page.url()).toString();
-          await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+          await this.page
+            .goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 })
+            .catch(() => {});
           const fallbackSwitch = await this._waitForAiaSwitch(9000);
           this._logStep('AIA switch verification via href fallback', {
             candidate,
@@ -3340,11 +3784,16 @@ export class MHCAsiaAutomation {
           }
         }
 
-        const defaultSwitchUrl = this._getDefaultSwitchSystemUrl(/aia\s*clinic|aiaclinic/i, 'AIA Clinic');
+        const defaultSwitchUrl = this._getDefaultSwitchSystemUrl(
+          /aia\s*clinic|aiaclinic/i,
+          'AIA Clinic'
+        );
         if (defaultSwitchUrl) {
           const nextUrl = new URL(defaultSwitchUrl, this.page.url()).toString();
           this._logStep('AIA switch deterministic default fallback', { nextUrl });
-          await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+          await this.page
+            .goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 })
+            .catch(() => {});
           const defaultFallback = await this._waitForAiaSwitch(9000);
           this._logStep('AIA switch verification via default fallback', {
             nextUrl,
@@ -3376,7 +3825,10 @@ export class MHCAsiaAutomation {
             });
           } else {
             const prevPage = this.page;
-            const popupPromise = this.page.context().waitForEvent('page', { timeout: 6000 }).catch(() => null);
+            const popupPromise = this.page
+              .context()
+              .waitForEvent('page', { timeout: 6000 })
+              .catch(() => null);
             const link = this.page
               .locator('a[href]')
               .filter({
@@ -3413,7 +3865,9 @@ export class MHCAsiaAutomation {
             this.isAiaClinicSystem = true;
             this.isSinglifeSystem = false;
             this._logStep('Switched to AIA Clinic');
-            await this.page.screenshot({ path: 'screenshots/mhc-asia-switched-to-aia-clinic.png' }).catch(() => {});
+            await this.page
+              .screenshot({ path: 'screenshots/mhc-asia-switched-to-aia-clinic.png' })
+              .catch(() => {});
             await this.page.bringToFront().catch(() => {});
             if (flaggedByDialog) this.needsAIAClinicSwitch = false;
             return true;
@@ -3431,7 +3885,9 @@ export class MHCAsiaAutomation {
               switchHref,
               nextUrl,
             });
-            await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+            await this.page
+              .goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 })
+              .catch(() => {});
             const fallbackSwitch = await this._waitForAiaSwitch(9000);
             this._logStep('AIA switch verification after URL fallback', {
               option,
@@ -3441,7 +3897,9 @@ export class MHCAsiaAutomation {
               this.isAiaClinicSystem = true;
               this.isSinglifeSystem = false;
               if (flaggedByDialog) this.needsAIAClinicSwitch = false;
-              await this.page.screenshot({ path: 'screenshots/mhc-asia-switched-to-aia-clinic.png' }).catch(() => {});
+              await this.page
+                .screenshot({ path: 'screenshots/mhc-asia-switched-to-aia-clinic.png' })
+                .catch(() => {});
               return true;
             }
           }
@@ -3449,7 +3907,7 @@ export class MHCAsiaAutomation {
           continue;
         }
       }
-      
+
       // Try select dropdown
       const selectSelectors = ['select[name*="system" i]', 'select[id*="system" i]', 'select'];
       for (const selectSel of selectSelectors) {
@@ -3471,9 +3929,11 @@ export class MHCAsiaAutomation {
           continue;
         }
       }
-      
+
       logger.warn('Could not select AIA Clinic');
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-clinic-not-found.png' }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/mhc-asia-aia-clinic-not-found.png' })
+        .catch(() => {});
       return false;
     } catch (error) {
       logger.error('Failed to switch to AIA Clinic:', error);
@@ -3494,7 +3954,7 @@ export class MHCAsiaAutomation {
       this._logStep('Check if Singlife switch needed', { force });
 
       // Check if the dialog handler flagged that we need to switch.
-      let needsSwitch = force || this.needsSinglifeSwitch === true;
+      const needsSwitch = force || this.needsSinglifeSwitch === true;
 
       if (needsSwitch && this.needsSinglifeSwitch === true) {
         // Reset the flag after consuming it.
@@ -3511,7 +3971,9 @@ export class MHCAsiaAutomation {
       if (ok) {
         this.isSinglifeSystem = true;
         this.isAiaClinicSystem = false;
-        await this.page.screenshot({ path: 'screenshots/mhc-asia-switched-to-singlife.png' }).catch(() => {});
+        await this.page
+          .screenshot({ path: 'screenshots/mhc-asia-switched-to-singlife.png' })
+          .catch(() => {});
       }
       return ok;
     } catch (error) {
@@ -3568,7 +4030,9 @@ export class MHCAsiaAutomation {
       if (directSwitchUrl) {
         const nextUrl = new URL(directSwitchUrl, this.page.url()).toString();
         this._logStep('Switch system direct fallback without menu', { labelForLog, nextUrl });
-        await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await this.page
+          .goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 })
+          .catch(() => {});
         const directSnapCheck = isAiaTarget
           ? await this._waitForAiaSwitch(9000)
           : { ok: true, snap: await this._getPortalContextSnapshot() };
@@ -3598,7 +4062,9 @@ export class MHCAsiaAutomation {
 
     // Step 2: Select the target system from actionable controls.
     await this.page
-      .locator('a:has-text("Switch System"), button:has-text("Switch System"), text=/Switch\\s+System/i')
+      .locator(
+        'a:has-text("Switch System"), button:has-text("Switch System"), text=/Switch\\s+System/i'
+      )
       .first()
       .hover()
       .catch(() => {});
@@ -3616,9 +4082,8 @@ export class MHCAsiaAutomation {
         count: debugTargets.length,
         sample: debugTargets.slice(0, 12),
       });
-      const hrefFallbackCandidates = await this._collectSwitchSystemHrefCandidatesAcrossFrames(
-        targetRegex
-      );
+      const hrefFallbackCandidates =
+        await this._collectSwitchSystemHrefCandidatesAcrossFrames(targetRegex);
       this._logStep('Switch system href fallback candidates', {
         labelForLog,
         count: hrefFallbackCandidates.length,
@@ -3630,7 +4095,9 @@ export class MHCAsiaAutomation {
         const nextUrl = /^https?:\/\//i.test(switchHref)
           ? switchHref
           : new URL(switchHref, this.page.url()).toString();
-        await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await this.page
+          .goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 })
+          .catch(() => {});
         const fallbackSnapCheck = isAiaTarget
           ? await this._waitForAiaSwitch(9000)
           : { ok: true, snap: await this._getPortalContextSnapshot() };
@@ -3658,7 +4125,9 @@ export class MHCAsiaAutomation {
       const defaultSwitchUrl = this._getDefaultSwitchSystemUrl(targetRegex, labelForLog);
       if (defaultSwitchUrl) {
         const nextUrl = new URL(defaultSwitchUrl, this.page.url()).toString();
-        await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await this.page
+          .goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 })
+          .catch(() => {});
         const defaultSnapCheck = isAiaTarget
           ? await this._waitForAiaSwitch(9000)
           : { ok: true, snap: await this._getPortalContextSnapshot() };
@@ -3698,7 +4167,10 @@ export class MHCAsiaAutomation {
           });
         } else {
           const prevPage = this.page;
-          const popupPromise = this.page.context().waitForEvent('page', { timeout: 6000 }).catch(() => null);
+          const popupPromise = this.page
+            .context()
+            .waitForEvent('page', { timeout: 6000 })
+            .catch(() => null);
           const link = this.page
             .locator('a[href]')
             .filter({
@@ -3752,8 +4224,7 @@ export class MHCAsiaAutomation {
         }
 
         const switchHref =
-          this._extractSwitchSystemHref(option.href) ||
-          this._extractSwitchSystemHref(option.value);
+          this._extractSwitchSystemHref(option.href) || this._extractSwitchSystemHref(option.value);
         if (switchHref) {
           const nextUrl = /^https?:\/\//i.test(switchHref)
             ? switchHref
@@ -3764,7 +4235,9 @@ export class MHCAsiaAutomation {
             switchHref,
             nextUrl,
           });
-          await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+          await this.page
+            .goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 })
+            .catch(() => {});
           const fallbackSnapCheck = isAiaTarget
             ? await this._waitForAiaSwitch(9000)
             : { ok: true, snap: await this._getPortalContextSnapshot() };
@@ -3779,7 +4252,10 @@ export class MHCAsiaAutomation {
             this.isSinglifeSystem = false;
             return true;
           }
-          if (isSinglifeTarget && (fallbackSnap.isSinglifeDomain || /singlife|pcpcare/i.test(fallbackSnap.url))) {
+          if (
+            isSinglifeTarget &&
+            (fallbackSnap.isSinglifeDomain || /singlife|pcpcare/i.test(fallbackSnap.url))
+          ) {
             this.isSinglifeSystem = true;
             this.isAiaClinicSystem = false;
             return true;
@@ -3798,11 +4274,17 @@ export class MHCAsiaAutomation {
         if ((await select.count().catch(() => 0)) > 0) {
           const options = await select
             .locator('option')
-            .evaluateAll((opts) => opts.map((o) => ({ value: o.value, label: (o.textContent || '').trim() })))
+            .evaluateAll(opts =>
+              opts.map(o => ({ value: o.value, label: (o.textContent || '').trim() }))
+            )
             .catch(() => []);
-          const match = options.find((o) => targetRegex.test(o.label)) || options.find((o) => targetRegex.test(o.value));
+          const match =
+            options.find(o => targetRegex.test(o.label)) ||
+            options.find(o => targetRegex.test(o.value));
           if (!match) continue;
-          await select.selectOption({ value: match.value }).catch(async () => select.selectOption({ label: match.label }));
+          await select
+            .selectOption({ value: match.value })
+            .catch(async () => select.selectOption({ label: match.label }));
           await this.page.waitForTimeout(500);
           const snapCheck = isAiaTarget
             ? await this._waitForAiaSwitch(9000)
@@ -3847,7 +4329,7 @@ export class MHCAsiaAutomation {
   /**
    * Navigate to AIA Visit and search for patient by NRIC
    * This is the flow AFTER switching to AIA Clinic system:
-   * 1. Click "Add AIA Visit" 
+   * 1. Click "Add AIA Visit"
    * 2. Click search icon (#ctr_block > div:nth-child(2) > img)
    * 3. Enter NRIC
    * 4. Click patient name
@@ -3864,7 +4346,7 @@ export class MHCAsiaAutomation {
       });
       const retryCount = Number(opts.retryCount || 0);
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
-      
+
       // Step 1: Click "Add AIA Visit"
       const aiaVisitSelectors = [
         'a:has-text("Add AIA Visit")',
@@ -3873,13 +4355,16 @@ export class MHCAsiaAutomation {
         'text=/Add.*AIA.*Visit/i',
         'a[href*="aiavisit" i]',
       ];
-      
+
       const clickAiaVisitInFrames = async () => {
         const frames = this.page.frames();
         for (const frame of frames) {
           try {
             const link = frame.locator(aiaVisitSelectors.join(', ')).first();
-            if ((await link.count().catch(() => 0)) > 0 && (await link.isVisible().catch(() => false))) {
+            if (
+              (await link.count().catch(() => 0)) > 0 &&
+              (await link.isVisible().catch(() => false))
+            ) {
               await link.click().catch(() => false);
               await this.page.waitForTimeout(500);
               return true;
@@ -3908,17 +4393,23 @@ export class MHCAsiaAutomation {
       if (!clickedAIAVisit) {
         clickedAIAVisit = await clickAiaVisitInFrames();
       }
-      
+
       if (!clickedAIAVisit) {
         logger.warn('Could not find Add AIA Visit link');
-        await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-visit-not-found.png' }).catch(() => {});
+        await this.page
+          .screenshot({ path: 'screenshots/mhc-asia-aia-visit-not-found.png' })
+          .catch(() => {});
         const snapBeforeReload = await this._getPortalContextSnapshot();
         if (!snapBeforeReload.looksLikeAiaFlow) {
-          logger.warn('Not in AIA context when Add AIA Visit is missing; aborting without MHC reload');
+          logger.warn(
+            'Not in AIA context when Add AIA Visit is missing; aborting without MHC reload'
+          );
           return false;
         }
         // Try reloading the base page (system switch might require a fresh nav render)
-        await this.page.goto(this.config.url, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await this.page
+          .goto(this.config.url, { waitUntil: 'domcontentloaded', timeout: 30000 })
+          .catch(() => {});
         await this.page.waitForTimeout(500);
         for (const selector of aiaVisitSelectors) {
           try {
@@ -3967,12 +4458,14 @@ export class MHCAsiaAutomation {
       // Hard guard: never continue AIA search flow from MHC "other programs" search page.
       if (!(await isAiaSearchContext())) {
         logger.warn('Not on AIA search context after switch/navigation; aborting AIA search flow');
-        await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-wrong-context.png', fullPage: true }).catch(() => {});
+        await this.page
+          .screenshot({ path: 'screenshots/mhc-asia-aia-wrong-context.png', fullPage: true })
+          .catch(() => {});
         return false;
       }
-      
+
       await this.page.waitForTimeout(500);
-      
+
       // Some AIA flows show a "member card" selection screen before the NRIC search form.
       // Pick NRIC to proceed.
       const memberCardScreen = await this.page
@@ -3994,7 +4487,10 @@ export class MHCAsiaAutomation {
         for (const selector of redCardSelectors) {
           try {
             const choice = this.page.locator(selector).first();
-            if ((await choice.count().catch(() => 0)) > 0 && (await choice.isVisible().catch(() => false))) {
+            if (
+              (await choice.count().catch(() => 0)) > 0 &&
+              (await choice.isVisible().catch(() => false))
+            ) {
               await this._safeClick(choice, 'Member card: AIA red card');
               await this.page.waitForTimeout(800);
               cardClicked = true;
@@ -4016,7 +4512,10 @@ export class MHCAsiaAutomation {
           for (const selector of nricChoiceSelectors) {
             try {
               const choice = this.page.locator(selector).first();
-              if ((await choice.count().catch(() => 0)) > 0 && (await choice.isVisible().catch(() => false))) {
+              if (
+                (await choice.count().catch(() => 0)) > 0 &&
+                (await choice.isVisible().catch(() => false))
+              ) {
                 await this._safeClick(choice, 'Member card: NRIC');
                 await this.page.waitForTimeout(800);
                 break;
@@ -4030,13 +4529,25 @@ export class MHCAsiaAutomation {
 
       // Check if we're already on the search form (NRIC/FIN/Member ID visible)
       const hasAiaNav =
-        (await this.page.locator('text=/Add\\s+AIA\\s+Visit/i').count().catch(() => 0)) > 0 ||
-        (await this.page.locator('text=/AIA\\s+Visit/i').count().catch(() => 0)) > 0;
+        (await this.page
+          .locator('text=/Add\\s+AIA\\s+Visit/i')
+          .count()
+          .catch(() => 0)) > 0 ||
+        (await this.page
+          .locator('text=/AIA\\s+Visit/i')
+          .count()
+          .catch(() => 0)) > 0;
       const alreadyOnSearchForm =
         hasAiaNav &&
-        (((await this.page.locator('text=/NRIC.*FIN.*Member/i').count().catch(() => 0)) > 0) ||
-          ((await this.page.locator('text=/Search using full NRIC/i').count().catch(() => 0)) > 0));
-      
+        ((await this.page
+          .locator('text=/NRIC.*FIN.*Member/i')
+          .count()
+          .catch(() => 0)) > 0 ||
+          (await this.page
+            .locator('text=/Search using full NRIC/i')
+            .count()
+            .catch(() => 0)) > 0);
+
       if (alreadyOnSearchForm) {
         logger.info('Already on AIA search form, skipping search icon click');
       } else {
@@ -4049,7 +4560,7 @@ export class MHCAsiaAutomation {
           'img[alt*="search" i]',
           'img[onclick*="search" i]',
         ];
-        
+
         let clickedSearchIcon = false;
         for (const selector of searchIconSelectors) {
           try {
@@ -4064,7 +4575,7 @@ export class MHCAsiaAutomation {
             continue;
           }
         }
-        
+
         if (!clickedSearchIcon) {
           logger.warn('Could not find search icon, continuing anyway');
         }
@@ -4119,13 +4630,15 @@ export class MHCAsiaAutomation {
           });
         }
       }
-      
+
       // Step 3: Enter NRIC in search field
       // The form shows: "NRIC/FIN/Member ID" label with input field next to it
       this._logStep('Enter NRIC in AIA search', { nric });
       await this.page.waitForTimeout(400);
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-before-nric.png' }).catch(() => {});
-      
+      await this.page
+        .screenshot({ path: 'screenshots/mhc-asia-aia-before-nric.png' })
+        .catch(() => {});
+
       // The NRIC input is in a form next to the label "NRIC/FIN/Member ID"
       // Try multiple approaches to find it
       const nricInputSelectors = [
@@ -4143,17 +4656,24 @@ export class MHCAsiaAutomation {
         // Generic visible text inputs (skip the first which is date)
         'input.form-control[type="text"]',
       ];
-      const isDateLikeInput = async (input) => {
+      const isDateLikeInput = async input => {
         try {
           const name = ((await input.getAttribute('name').catch(() => '')) || '').toLowerCase();
           const id = ((await input.getAttribute('id').catch(() => '')) || '').toLowerCase();
-          const ph = ((await input.getAttribute('placeholder').catch(() => '')) || '').toLowerCase();
-          const aria = ((await input.getAttribute('aria-label').catch(() => '')) || '').toLowerCase();
+          const ph = (
+            (await input.getAttribute('placeholder').catch(() => '')) || ''
+          ).toLowerCase();
+          const aria = (
+            (await input.getAttribute('aria-label').catch(() => '')) || ''
+          ).toLowerCase();
           const rowText = await input
-            .evaluate((el) => (el.closest('tr')?.innerText || el.closest('tr')?.textContent || ''))
+            .evaluate(el => el.closest('tr')?.innerText || el.closest('tr')?.textContent || '')
             .catch(() => '');
           const rowLower = String(rowText || '').toLowerCase();
-          if (/visit\s*date|date|dd\s*\/\s*mm|mm\s*\/\s*dd|yyyy/.test(`${name} ${id} ${ph} ${aria}`)) return true;
+          if (
+            /visit\s*date|date|dd\s*\/\s*mm|mm\s*\/\s*dd|yyyy/.test(`${name} ${id} ${ph} ${aria}`)
+          )
+            return true;
           if (/visit\s*date/.test(rowLower)) return true;
           const value = (await input.inputValue().catch(() => '')) || '';
           return /\d{1,2}\/\d{1,2}\/\d{2,4}/.test(value);
@@ -4161,12 +4681,15 @@ export class MHCAsiaAutomation {
           return false;
         }
       };
-      
+
       let nricFilled = false;
       for (const selector of nricInputSelectors) {
         try {
           const input = this.page.locator(selector).first();
-          if ((await input.count().catch(() => 0)) > 0 && await input.isVisible().catch(() => false)) {
+          if (
+            (await input.count().catch(() => 0)) > 0 &&
+            (await input.isVisible().catch(() => false))
+          ) {
             if (await isDateLikeInput(input)) continue; // Skip date field
             await input.fill(nric);
             await this.page.waitForTimeout(300);
@@ -4178,7 +4701,7 @@ export class MHCAsiaAutomation {
           continue;
         }
       }
-      
+
       // If still not found, try to find all visible text inputs and pick the right one
       if (!nricFilled) {
         try {
@@ -4199,13 +4722,15 @@ export class MHCAsiaAutomation {
           logger.warn('Failed to iterate inputs:', e.message);
         }
       }
-      
+
       if (!nricFilled) {
         logger.warn('Could not find NRIC input field');
-        await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-nric-input-not-found.png' }).catch(() => {});
+        await this.page
+          .screenshot({ path: 'screenshots/mhc-asia-aia-nric-input-not-found.png' })
+          .catch(() => {});
         return false;
       }
-      
+
       // Press Enter or click Search button
       const searchBtnSelectors = [
         'input[type="submit"]',
@@ -4213,12 +4738,15 @@ export class MHCAsiaAutomation {
         'input[value*="Search" i]',
         'button:has-text("Search")',
       ];
-      
+
       let searchTriggered = false;
       for (const selector of searchBtnSelectors) {
         try {
           const btn = this.page.locator(selector).first();
-          if ((await btn.count().catch(() => 0)) > 0 && await btn.isVisible().catch(() => false)) {
+          if (
+            (await btn.count().catch(() => 0)) > 0 &&
+            (await btn.isVisible().catch(() => false))
+          ) {
             await this._safeClick(btn, 'Search button');
             searchTriggered = true;
             break;
@@ -4227,18 +4755,20 @@ export class MHCAsiaAutomation {
           continue;
         }
       }
-      
+
       if (!searchTriggered) {
         // Try pressing Enter
         await this.page.keyboard.press('Enter');
       }
-      
+
       await this.page.waitForTimeout(400);
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-search-results.png' }).catch(() => {});
-      
+      await this.page
+        .screenshot({ path: 'screenshots/mhc-asia-aia-search-results.png' })
+        .catch(() => {});
+
       // Step 4: Click patient name from results
       this._logStep('Click patient from AIA search results');
-      const withVisitDateParam = (href) => {
+      const withVisitDateParam = href => {
         if (!hasTargetVisitDate || !href) return null;
         try {
           const u = new URL(href, this.page.url());
@@ -4248,7 +4778,7 @@ export class MHCAsiaAutomation {
           return null;
         }
       };
-      
+
       // Look for patient link/row in results
       const patientSelectors = [
         // Prefer clickable links inside the matching result row.
@@ -4261,7 +4791,7 @@ export class MHCAsiaAutomation {
         'a[href*="VisitAdd" i]',
         'a[href*="patient" i]',
       ];
-      
+
       for (const selector of patientSelectors) {
         try {
           const patientLink = this.page.locator(selector).first();
@@ -4275,9 +4805,14 @@ export class MHCAsiaAutomation {
                 patchedHref,
                 visitDate: visitDateDdMmYyyy,
               });
-              await this.page.goto(patchedHref, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+              await this.page
+                .goto(patchedHref, { waitUntil: 'domcontentloaded', timeout: 15000 })
+                .catch(() => {});
             } else {
-              const popupPromise = this.page.context().waitForEvent('page', { timeout: 1500 }).catch(() => null);
+              const popupPromise = this.page
+                .context()
+                .waitForEvent('page', { timeout: 1500 })
+                .catch(() => null);
               await this._safeClick(patientLink, 'Patient in AIA results');
               const popup = await popupPromise;
               if (popup) {
@@ -4289,34 +4824,79 @@ export class MHCAsiaAutomation {
             }
             // Wait for the visit-add form to appear.
             await Promise.race([
-              this.page.waitForURL(/EmpVisitAdd|VisitAdd|Employee.*Visit.*Add/i, { timeout: 8000 }).catch(() => {}),
-              this.page.locator('text=/Employee\\s+Visit\\s*-\\s*Add/i').first().waitFor({ timeout: 8000 }).catch(() => {}),
-              this.page.locator('tr:has-text("Charge Type")').first().waitFor({ timeout: 8000 }).catch(() => {}),
+              this.page
+                .waitForURL(/EmpVisitAdd|VisitAdd|Employee.*Visit.*Add/i, { timeout: 8000 })
+                .catch(() => {}),
+              this.page
+                .locator('text=/Employee\\s+Visit\\s*-\\s*Add/i')
+                .first()
+                .waitFor({ timeout: 8000 })
+                .catch(() => {}),
+              this.page
+                .locator('tr:has-text("Charge Type")')
+                .first()
+                .waitFor({ timeout: 8000 })
+                .catch(() => {}),
             ]);
             await this.page.waitForTimeout(300);
             await this.page.bringToFront().catch(() => {});
             logger.info('Selected patient from AIA search results');
-            this._logStep('Patient selected from AIA results', { from: beforeUrl, to: this.page.url() });
-            await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-patient-selected.png' }).catch(() => {});
+            this._logStep('Patient selected from AIA results', {
+              from: beforeUrl,
+              to: this.page.url(),
+            });
+            await this.page
+              .screenshot({ path: 'screenshots/mhc-asia-aia-patient-selected.png' })
+              .catch(() => {});
 
             const isVisitForm = await (async () => {
               const urlNow = this.page.url();
               if (/PatientSearch/i.test(urlNow)) return false;
               if (/EmpVisitAdd|VisitAdd/i.test(urlNow)) return true;
-              if ((await this.page.locator('text=/Employee\\s+Visit\\s*-\\s*Add/i').count().catch(() => 0)) > 0)
+              if (
+                (await this.page
+                  .locator('text=/Employee\\s+Visit\\s*-\\s*Add/i')
+                  .count()
+                  .catch(() => 0)) > 0
+              )
                 return true;
-              if ((await this.page.locator('text=/Consultation\\s+Fee/i').count().catch(() => 0)) > 0) return true;
-              if ((await this.page.locator('text=/Drug\\s+Name/i').count().catch(() => 0)) > 0) return true;
-              if ((await this.page.locator('text=/Charge\\s*Type/i').count().catch(() => 0)) > 0) return true;
+              if (
+                (await this.page
+                  .locator('text=/Consultation\\s+Fee/i')
+                  .count()
+                  .catch(() => 0)) > 0
+              )
+                return true;
+              if (
+                (await this.page
+                  .locator('text=/Drug\\s+Name/i')
+                  .count()
+                  .catch(() => 0)) > 0
+              )
+                return true;
+              if (
+                (await this.page
+                  .locator('text=/Charge\\s*Type/i')
+                  .count()
+                  .catch(() => 0)) > 0
+              )
+                return true;
               return false;
             })();
             if (!isVisitForm) {
-              await this.page.screenshot({ path: 'screenshots/mhc-asia-aia-visit-form-missing.png', fullPage: true }).catch(() => {});
+              await this.page
+                .screenshot({
+                  path: 'screenshots/mhc-asia-aia-visit-form-missing.png',
+                  fullPage: true,
+                })
+                .catch(() => {});
               logger.warn('AIA patient selected but visit form not detected');
               // Attempt direct navigation via EmpVisitAdd href in the matching row.
               const directHref = await this.page
-                .evaluate((needle) => {
-                  const lowerNeedle = String(needle || '').trim().toLowerCase();
+                .evaluate(needle => {
+                  const lowerNeedle = String(needle || '')
+                    .trim()
+                    .toLowerCase();
                   const rows = Array.from(document.querySelectorAll('tr'));
                   let candidate = null;
                   for (const row of rows) {
@@ -4346,20 +4926,26 @@ export class MHCAsiaAutomation {
                   .catch(() => {});
                 await this.page.waitForTimeout(300);
                 const formOk =
-                  (await this.page.locator('text=/Consultation\\s+Fee/i').count().catch(() => 0)) > 0 ||
-                  (await this.page.locator('text=/Drug\\s+Name/i').count().catch(() => 0)) > 0;
+                  (await this.page
+                    .locator('text=/Consultation\\s+Fee/i')
+                    .count()
+                    .catch(() => 0)) > 0 ||
+                  (await this.page
+                    .locator('text=/Drug\\s+Name/i')
+                    .count()
+                    .catch(() => 0)) > 0;
                 if (formOk) return true;
               }
               // Occasionally the portal bounces to the AIA home page; retry once.
               const currentUrl = this.page.url();
               if (/aiaclinic\.com\/?$/.test(currentUrl) && retryCount < 1) {
-                logger.warn('AIA redirected to home after patient click; retrying Add AIA Visit flow once');
-                const retryOk = await this
-                  .navigateToAIAVisitAndSearch(nric, {
-                    retryCount: retryCount + 1,
-                    visitDate: hasTargetVisitDate ? visitDateDdMmYyyy : undefined,
-                  })
-                  .catch(() => false);
+                logger.warn(
+                  'AIA redirected to home after patient click; retrying Add AIA Visit flow once'
+                );
+                const retryOk = await this.navigateToAIAVisitAndSearch(nric, {
+                  retryCount: retryCount + 1,
+                  visitDate: hasTargetVisitDate ? visitDateDdMmYyyy : undefined,
+                }).catch(() => false);
                 return retryOk;
               }
               return false;
@@ -4371,8 +4957,14 @@ export class MHCAsiaAutomation {
               if ((await rowLink.count().catch(() => 0)) > 0) {
                 await this._safeClick(rowLink, 'Patient name link (AIA row)');
                 await Promise.race([
-                  this.page.waitForURL(/EmpVisitAdd|VisitAdd|Employee.*Visit.*Add/i, { timeout: 8000 }).catch(() => {}),
-                  this.page.locator('tr:has-text("Charge Type")').first().waitFor({ timeout: 8000 }).catch(() => {}),
+                  this.page
+                    .waitForURL(/EmpVisitAdd|VisitAdd|Employee.*Visit.*Add/i, { timeout: 8000 })
+                    .catch(() => {}),
+                  this.page
+                    .locator('tr:has-text("Charge Type")')
+                    .first()
+                    .waitFor({ timeout: 8000 })
+                    .catch(() => {}),
                 ]);
                 await this.page.waitForTimeout(300);
               }
@@ -4383,7 +4975,7 @@ export class MHCAsiaAutomation {
           continue;
         }
       }
-      
+
       logger.warn('Could not find patient in AIA search results');
       return false;
     } catch (error) {
@@ -4425,7 +5017,11 @@ export class MHCAsiaAutomation {
           .first()
           .isVisible()
           .catch(() => false);
-        const hasVisitDateInvalid = await this.page.locator('text=/Visit\\s+date\\s+invalid/i').first().isVisible().catch(() => false);
+        const hasVisitDateInvalid = await this.page
+          .locator('text=/Visit\\s+date\\s+invalid/i')
+          .first()
+          .isVisible()
+          .catch(() => false);
         return hasUnexpected && hasVisitDateInvalid;
       };
 
@@ -4433,15 +5029,25 @@ export class MHCAsiaAutomation {
         const url = this.page.url();
         if (/pcpcare\.com\//i.test(url)) return true;
         // Heuristic signals: Singlife brand and/or left nav items only present in Singlife PCP.
-        const hasBrand = await this.page.locator('text=/\\bSinglife\\b/i').first().isVisible().catch(() => false);
-        const hasAddNormal = (await this.page.locator('a:has-text("Add Normal Visit")').count().catch(() => 0)) > 0;
+        const hasBrand = await this.page
+          .locator('text=/\\bSinglife\\b/i')
+          .first()
+          .isVisible()
+          .catch(() => false);
+        const hasAddNormal =
+          (await this.page
+            .locator('a:has-text("Add Normal Visit")')
+            .count()
+            .catch(() => 0)) > 0;
         return hasBrand || hasAddNormal;
       };
 
       const gotoSinglifePatientSearch = async () => {
         // Direct navigation is more reliable than relying on the left-nav being present in every state.
         const url = 'https://www.pcpcare.com/pcpcare/ClinicIECAvivaPatientSearch.ec';
-        await this.page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+        await this.page
+          .goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 })
+          .catch(() => {});
         await this.page.waitForTimeout(700);
       };
 
@@ -4459,7 +5065,12 @@ export class MHCAsiaAutomation {
       // If Singlife PCP login is required, try to satisfy it first (best-effort).
       const pcpOk = await this.loginSinglifePcpIfNeeded();
       if (!pcpOk) {
-        await this.page.screenshot({ path: 'screenshots/mhc-asia-singlife-pcp-login-required.png', fullPage: true }).catch(() => {});
+        await this.page
+          .screenshot({
+            path: 'screenshots/mhc-asia-singlife-pcp-login-required.png',
+            fullPage: true,
+          })
+          .catch(() => {});
         return false;
       }
 
@@ -4484,16 +5095,36 @@ export class MHCAsiaAutomation {
       const handleAnnouncement = async () => {
         if (!(await isAnnouncement())) return false;
         this._logStep('Singlife: announcement page (no action required)');
-        await this.page.screenshot({ path: 'screenshots/mhc-asia-singlife-announcement.png', fullPage: true }).catch(() => {});
+        await this.page
+          .screenshot({ path: 'screenshots/mhc-asia-singlife-announcement.png', fullPage: true })
+          .catch(() => {});
         return true;
       };
 
       const isVisitForm = async () => {
         // Strong signals only.
-        const hasChargeType = (await this.page.locator('text=/Charge\\s*Type/i').count().catch(() => 0)) > 0;
-        const hasCompute = (await this.page.locator('button:has-text("Compute"), button:has-text("Compute claim"), input[value*="Compute" i]').count().catch(() => 0)) > 0;
-        const hasSaveDraft = (await this.page.locator('button:has-text("Save As Draft"), input[value*="Save As Draft" i]').count().catch(() => 0)) > 0;
-        const hasEmployeeVisitHeader = (await this.page.locator('text=/Employee\\s+Visit\\s*-\\s*Add/i').count().catch(() => 0)) > 0;
+        const hasChargeType =
+          (await this.page
+            .locator('text=/Charge\\s*Type/i')
+            .count()
+            .catch(() => 0)) > 0;
+        const hasCompute =
+          (await this.page
+            .locator(
+              'button:has-text("Compute"), button:has-text("Compute claim"), input[value*="Compute" i]'
+            )
+            .count()
+            .catch(() => 0)) > 0;
+        const hasSaveDraft =
+          (await this.page
+            .locator('button:has-text("Save As Draft"), input[value*="Save As Draft" i]')
+            .count()
+            .catch(() => 0)) > 0;
+        const hasEmployeeVisitHeader =
+          (await this.page
+            .locator('text=/Employee\\s+Visit\\s*-\\s*Add/i')
+            .count()
+            .catch(() => 0)) > 0;
         return hasEmployeeVisitHeader || (hasChargeType && (hasCompute || hasSaveDraft));
       };
 
@@ -4512,7 +5143,12 @@ export class MHCAsiaAutomation {
         // Guard rails: if Singlife threw "Visit date invalid", restart from patient search and set the date again.
         if (await isVisitDateInvalidError()) {
           this._logStep('Singlife: visit date invalid error page; restarting patient search');
-          await this.page.screenshot({ path: 'screenshots/mhc-asia-singlife-visit-date-invalid.png', fullPage: true }).catch(() => {});
+          await this.page
+            .screenshot({
+              path: 'screenshots/mhc-asia-singlife-visit-date-invalid.png',
+              fullPage: true,
+            })
+            .catch(() => {});
           await gotoSinglifePatientSearch();
         }
 
@@ -4542,7 +5178,10 @@ export class MHCAsiaAutomation {
         if (!clicked) {
           // Fallback: direct navigation to the patient search page.
           await this.page
-            .screenshot({ path: 'screenshots/mhc-asia-singlife-add-normal-visit-not-found.png', fullPage: true })
+            .screenshot({
+              path: 'screenshots/mhc-asia-singlife-add-normal-visit-not-found.png',
+              fullPage: true,
+            })
             .catch(() => {});
           await gotoSinglifePatientSearch();
         }
@@ -4555,7 +5194,9 @@ export class MHCAsiaAutomation {
           try {
             const nextUrl = new URL(addNormalHref, 'https://www.pcpcare.com/pcpcare/').toString();
             logger.info('Singlife: navigating to Add Normal Visit via href', { nextUrl });
-            await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await this.page
+              .goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 30000 })
+              .catch(() => {});
             await this.page.waitForTimeout(600);
           } catch {
             // ignore
@@ -4604,21 +5245,43 @@ export class MHCAsiaAutomation {
         }
 
         // Fill NRIC and search.
-        const pickVisibleNonDateInput = async (loc) => {
+        const pickVisibleNonDateInput = async loc => {
           try {
             const count = await loc.count().catch(() => 0);
             for (let i = 0; i < count; i++) {
               const cand = loc.nth(i);
               if (!(await cand.isVisible().catch(() => true))) continue;
               // Skip non-fillable inputs (e.g., calendar "Select" buttons).
-              const type = (((await cand.getAttribute('type').catch(() => null)) || 'text') + '').toLowerCase();
-              if (['button', 'submit', 'reset', 'image', 'hidden', 'checkbox', 'radio', 'file'].includes(type)) continue;
+              const type = (
+                ((await cand.getAttribute('type').catch(() => null)) || 'text') + ''
+              ).toLowerCase();
+              if (
+                [
+                  'button',
+                  'submit',
+                  'reset',
+                  'image',
+                  'hidden',
+                  'checkbox',
+                  'radio',
+                  'file',
+                ].includes(type)
+              )
+                continue;
               const editable = await cand.isEditable().catch(() => true);
               if (!editable) continue;
               const name = ((await cand.getAttribute('name').catch(() => '')) || '').toLowerCase();
               const id = ((await cand.getAttribute('id').catch(() => '')) || '').toLowerCase();
-              const ph = ((await cand.getAttribute('placeholder').catch(() => '')) || '').toLowerCase();
-              if (name.includes('visit') || id.includes('visit') || ph.includes('dd/mm') || ph.includes('visit')) continue;
+              const ph = (
+                (await cand.getAttribute('placeholder').catch(() => '')) || ''
+              ).toLowerCase();
+              if (
+                name.includes('visit') ||
+                id.includes('visit') ||
+                ph.includes('dd/mm') ||
+                ph.includes('visit')
+              )
+                continue;
               return cand;
             }
           } catch {
@@ -4629,10 +5292,18 @@ export class MHCAsiaAutomation {
 
         // Singlife search page label is typically "NRIC/FIN/Member ID".
         const memberIdCandidates = [
-          this.page.locator('tr:has-text("NRIC/FIN/Member ID") input[type="text"], tr:has-text("NRIC/FIN/Member ID") input:not([type])'),
-          this.page.locator('tr:has-text("NRIC/FIN/Member") input[type="text"], tr:has-text("NRIC/FIN/Member") input:not([type])'),
-          this.page.locator('xpath=//*[self::td or self::th or self::label][contains(normalize-space(.), \"NRIC/FIN/Member ID\")]/following::input[1]'),
-          this.page.locator('xpath=//*[self::td or self::th or self::label][contains(normalize-space(.), \"NRIC\") and contains(normalize-space(.), \"Member\")]/following::input[1]'),
+          this.page.locator(
+            'tr:has-text("NRIC/FIN/Member ID") input[type="text"], tr:has-text("NRIC/FIN/Member ID") input:not([type])'
+          ),
+          this.page.locator(
+            'tr:has-text("NRIC/FIN/Member") input[type="text"], tr:has-text("NRIC/FIN/Member") input:not([type])'
+          ),
+          this.page.locator(
+            'xpath=//*[self::td or self::th or self::label][contains(normalize-space(.), \"NRIC/FIN/Member ID\")]/following::input[1]'
+          ),
+          this.page.locator(
+            'xpath=//*[self::td or self::th or self::label][contains(normalize-space(.), \"NRIC\") and contains(normalize-space(.), \"Member\")]/following::input[1]'
+          ),
           // Last-resort: attribute heuristics (exclude visit-date-ish inputs via pickVisibleNonDateInput)
           this.page.locator(
             'input[name*="nric" i], input[id*="nric" i], input[placeholder*="nric" i], input[name*="member" i], input[id*="member" i], input[placeholder*="member" i]'
@@ -4647,7 +5318,10 @@ export class MHCAsiaAutomation {
 
         if (!nricField) {
           await this.page
-            .screenshot({ path: 'screenshots/mhc-asia-singlife-nric-field-not-found.png', fullPage: true })
+            .screenshot({
+              path: 'screenshots/mhc-asia-singlife-nric-field-not-found.png',
+              fullPage: true,
+            })
             .catch(() => {});
           return false;
         }
@@ -4673,7 +5347,14 @@ export class MHCAsiaAutomation {
             }, nric)
             .catch(() => {});
           const check = await nricField.inputValue().catch(() => '');
-          if (String(check || '').trim().toUpperCase() === String(nric || '').trim().toUpperCase()) {
+          if (
+            String(check || '')
+              .trim()
+              .toUpperCase() ===
+            String(nric || '')
+              .trim()
+              .toUpperCase()
+          ) {
             nricFilled = true;
           }
         }
@@ -4716,7 +5397,9 @@ export class MHCAsiaAutomation {
         // Otherwise, click the patient link. The link we want typically targets:
         // - ClinicIECAvivaEmpVisitAdd.ec?...&memberICNo=<NRIC>...
         // Avoid selecting the left-nav "Announcement" link (which can also match broad row filters).
-        let patientLink = this.page.locator(`a[href*="ClinicIECAvivaEmpVisitAdd"][href*="memberICNo=${nric}"]`).first();
+        let patientLink = this.page
+          .locator(`a[href*="ClinicIECAvivaEmpVisitAdd"][href*="memberICNo=${nric}"]`)
+          .first();
         let hasPatientLink = (await patientLink.count().catch(() => 0)) > 0;
         if (!hasPatientLink) {
           // Fallback: click the first link in the result row containing the NRIC.
@@ -4730,7 +5413,10 @@ export class MHCAsiaAutomation {
 
         if (!hasPatientLink) {
           await this.page
-            .screenshot({ path: 'screenshots/mhc-asia-singlife-no-patient-link.png', fullPage: true })
+            .screenshot({
+              path: 'screenshots/mhc-asia-singlife-no-patient-link.png',
+              fullPage: true,
+            })
             .catch(() => {});
           if (attempt < 3) continue;
           return false;
@@ -4753,16 +5439,27 @@ export class MHCAsiaAutomation {
           if (popup) {
             await popup.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
             this.page = popup;
-            logger.info('Singlife: visit opened in popup tab', { from: beforeUrl, to: popup.url() });
+            logger.info('Singlife: visit opened in popup tab', {
+              from: beforeUrl,
+              to: popup.url(),
+            });
           } else {
             await navPromise;
-            logger.info('Singlife: patient click navigation check', { from: beforeUrl, to: this.page.url() });
+            logger.info('Singlife: patient click navigation check', {
+              from: beforeUrl,
+              to: this.page.url(),
+            });
           }
 
           // If the patient click redirects back to ClinicAnnouncement, try a direct navigation to the visit href.
           if (/ClinicAnnouncement\.ec/i.test(this.page.url()) && resolvedHref) {
-            this._logStep('Singlife: redirected to announcement after patient click; trying direct visit URL', { resolvedHref });
-            await this.page.goto(resolvedHref, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            this._logStep(
+              'Singlife: redirected to announcement after patient click; trying direct visit URL',
+              { resolvedHref }
+            );
+            await this.page
+              .goto(resolvedHref, { waitUntil: 'domcontentloaded', timeout: 30000 })
+              .catch(() => {});
             await this.page.waitForTimeout(800);
           }
         }
@@ -4778,7 +5475,9 @@ export class MHCAsiaAutomation {
             const announcementUrl = this.page.url();
             // Instead of goBack() (which can land on chrome-error://), explicitly return to the
             // previous search results URL.
-            await this.page.goto(beforeUrl, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => null);
+            await this.page
+              .goto(beforeUrl, { waitUntil: 'domcontentloaded', timeout: 30000 })
+              .catch(() => null);
             await this.page.waitForTimeout(700);
             logger.info('Singlife: returned to search results after announcement', {
               announcementUrl,
@@ -4790,7 +5489,9 @@ export class MHCAsiaAutomation {
             const row2 = this.page.locator('tr').filter({ hasText: nric }).first();
             const link2 = row2.locator('a').first();
             if ((await link2.count().catch(() => 0)) > 0) {
-              const popupPromise2 = this.page.waitForEvent('popup', { timeout: 8000 }).catch(() => null);
+              const popupPromise2 = this.page
+                .waitForEvent('popup', { timeout: 8000 })
+                .catch(() => null);
               const navPromise2 = this.page
                 .waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 8000 })
                 .catch(() => null);
@@ -4798,7 +5499,9 @@ export class MHCAsiaAutomation {
 
               const popup2 = await popupPromise2;
               if (popup2) {
-                await popup2.waitForLoadState('domcontentloaded', { timeout: 15000 }).catch(() => {});
+                await popup2
+                  .waitForLoadState('domcontentloaded', { timeout: 15000 })
+                  .catch(() => {});
                 this.page = popup2;
               } else {
                 await navPromise2;
@@ -4807,7 +5510,10 @@ export class MHCAsiaAutomation {
               await this.page.waitForTimeout(800);
               if (!(await handleAnnouncement()) && (await isVisitForm())) {
                 await this.page
-                  .screenshot({ path: 'screenshots/mhc-asia-singlife-visit-form.png', fullPage: true })
+                  .screenshot({
+                    path: 'screenshots/mhc-asia-singlife-visit-form.png',
+                    fullPage: true,
+                  })
                   .catch(() => {});
                 return true;
               }
@@ -4824,7 +5530,10 @@ export class MHCAsiaAutomation {
         const pcpOkAfter = await this.loginSinglifePcpIfNeeded();
         if (!pcpOkAfter) {
           await this.page
-            .screenshot({ path: 'screenshots/mhc-asia-singlife-pcp-login-required-after-click.png', fullPage: true })
+            .screenshot({
+              path: 'screenshots/mhc-asia-singlife-pcp-login-required-after-click.png',
+              fullPage: true,
+            })
             .catch(() => {});
           if (attempt < 3) continue;
           return false;
@@ -4845,7 +5554,9 @@ export class MHCAsiaAutomation {
       return false;
     } catch (error) {
       logger.error('Failed Singlife Add Normal Visit search:', error);
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-singlife-search-error.png', fullPage: true }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/mhc-asia-singlife-search-error.png', fullPage: true })
+        .catch(() => {});
       return false;
     }
   }
@@ -4859,18 +5570,18 @@ export class MHCAsiaAutomation {
     try {
       this._logStep('Select card/patient', { cardNumber: cardNumber || null, patientName });
       logger.info(`Selecting card: ${cardNumber}, patient: ${patientName}`);
-      
+
       // Select card
       const cardSelectors = [
         'select[name*="card" i]',
         'select[id*="card" i]',
         'select[name*="policy" i]',
       ];
-      
+
       for (const selector of cardSelectors) {
         try {
           const select = this.page.locator(selector).first();
-          if (await select.count() > 0) {
+          if ((await select.count()) > 0) {
             // Try to select by value or label
             try {
               await select.selectOption({ label: cardNumber });
@@ -4885,25 +5596,27 @@ export class MHCAsiaAutomation {
           continue;
         }
       }
-      
+
       // Select patient name
       const patientSelectors = [
         'select[name*="patient" i]',
         'select[id*="patient" i]',
         'select[name*="name" i]',
       ];
-      
+
       for (const selector of patientSelectors) {
         try {
           const select = this.page.locator(selector).first();
-          if (await select.count() > 0) {
+          if ((await select.count()) > 0) {
             if (!patientName || patientName === '__FIRST__') {
-              const options = await select.locator('option').evaluateAll((opts) =>
-                opts.map((o) => ({ value: o.value, label: (o.textContent || '').trim() }))
-              );
+              const options = await select
+                .locator('option')
+                .evaluateAll(opts =>
+                  opts.map(o => ({ value: o.value, label: (o.textContent || '').trim() }))
+                );
               const candidate =
-                options.find((o) => o.value && o.value.trim().length > 0) ||
-                options.find((o) => o.label && o.label.trim().length > 0);
+                options.find(o => o.value && o.value.trim().length > 0) ||
+                options.find(o => o.label && o.label.trim().length > 0);
               if (candidate) {
                 try {
                   await select.selectOption({ value: candidate.value });
@@ -4922,7 +5635,7 @@ export class MHCAsiaAutomation {
           continue;
         }
       }
-      
+
       return true;
     } catch (error) {
       logger.error('Failed to select card and patient:', error);
@@ -4937,17 +5650,17 @@ export class MHCAsiaAutomation {
   async fillChargeType(chargeType) {
     try {
       logger.info(`Filling charge type: ${chargeType}`);
-      
+
       const chargeTypeSelectors = [
         'select[name*="charge" i]',
         'select[id*="charge" i]',
         'input[name*="charge" i]',
       ];
-      
+
       for (const selector of chargeTypeSelectors) {
         try {
           const field = this.page.locator(selector).first();
-          if (await field.count() > 0) {
+          if ((await field.count()) > 0) {
             const tagName = await field.evaluate(el => el.tagName);
             if (tagName === 'SELECT') {
               await field.selectOption({ label: chargeType });
@@ -4962,7 +5675,7 @@ export class MHCAsiaAutomation {
           continue;
         }
       }
-      
+
       logger.warn('Could not find charge type field');
       return false;
     } catch (error) {
@@ -4980,11 +5693,11 @@ export class MHCAsiaAutomation {
   async processSpecialRemarks(specialRemarks) {
     try {
       logger.info(`Processing special remarks: ${specialRemarks?.substring(0, 50)}...`);
-      
+
       if (!specialRemarks) {
         return { diagnosisCategory: null, hasWaiver: false };
       }
-      
+
       // Simple keyword-based diagnosis category detection
       // In production, this could use an AI/ML model for better understanding
       const diagnosisKeywords = {
@@ -4994,23 +5707,23 @@ export class MHCAsiaAutomation {
         'Preventive Care': ['vaccine', 'screening', 'checkup', 'preventive'],
         'Mental Health': ['depression', 'anxiety', 'mental', 'psychiatric'],
       };
-      
+
       const remarksLower = specialRemarks.toLowerCase();
       let diagnosisCategory = 'General Consultation'; // Default
-      
+
       for (const [category, keywords] of Object.entries(diagnosisKeywords)) {
         if (keywords.some(keyword => remarksLower.includes(keyword))) {
           diagnosisCategory = category;
           break;
         }
       }
-      
+
       // Check for waiver keywords
       const waiverKeywords = ['waiver', 'waive', 'no referral', 'referral not required', 'exempt'];
       const hasWaiver = waiverKeywords.some(keyword => remarksLower.includes(keyword));
-      
+
       logger.info(`Diagnosis category: ${diagnosisCategory}, Has waiver: ${hasWaiver}`);
-      
+
       return {
         diagnosisCategory,
         hasWaiver,
@@ -5029,19 +5742,19 @@ export class MHCAsiaAutomation {
   async fillDiagnosisAndWaiver(processedRemarks) {
     try {
       logger.info('Filling diagnosis category and waiver...');
-      
+
       // Fill diagnosis category
       const diagnosisSelectors = [
         'select[name*="diagnosis" i]',
         'select[id*="diagnosis" i]',
         'select[name*="category" i]',
       ];
-      
+
       if (processedRemarks.diagnosisCategory) {
         for (const selector of diagnosisSelectors) {
           try {
             const select = this.page.locator(selector).first();
-            if (await select.count() > 0) {
+            if ((await select.count()) > 0) {
               await select.selectOption({ label: processedRemarks.diagnosisCategory });
               await this.page.waitForTimeout(500);
               logger.info(`Diagnosis category filled: ${processedRemarks.diagnosisCategory}`);
@@ -5052,7 +5765,7 @@ export class MHCAsiaAutomation {
           }
         }
       }
-      
+
       // Check waiver of referral checkbox if needed
       if (processedRemarks.hasWaiver) {
         const waiverSelectors = [
@@ -5060,11 +5773,11 @@ export class MHCAsiaAutomation {
           'input[type="checkbox"][id*="waiver" i]',
           'input[type="checkbox"][name*="referral" i]',
         ];
-        
+
         for (const selector of waiverSelectors) {
           try {
             const checkbox = this.page.locator(selector).first();
-            if (await checkbox.count() > 0) {
+            if ((await checkbox.count()) > 0) {
               await checkbox.check();
               await this.page.waitForTimeout(500);
               logger.info('Waiver of referral checkbox checked');
@@ -5075,7 +5788,7 @@ export class MHCAsiaAutomation {
           }
         }
       }
-      
+
       return true;
     } catch (error) {
       logger.error('Failed to fill diagnosis and waiver:', error);
@@ -5093,19 +5806,25 @@ export class MHCAsiaAutomation {
       const candidates = [
         {
           locator: this.page
-            .locator('tr:has-text("Waiver Of Referral") input[type="checkbox"], tr:has-text("Waiver of Referral") input[type="checkbox"]')
+            .locator(
+              'tr:has-text("Waiver Of Referral") input[type="checkbox"], tr:has-text("Waiver of Referral") input[type="checkbox"]'
+            )
             .first(),
           reason: 'waiver_row',
         },
         {
           locator: this.page
-            .locator('tr:has-text("Waiver") input[type="checkbox"], tr:has-text("Referral") input[type="checkbox"]')
+            .locator(
+              'tr:has-text("Waiver") input[type="checkbox"], tr:has-text("Referral") input[type="checkbox"]'
+            )
             .first(),
           reason: 'waiver_or_referral_row',
         },
         {
           locator: this.page
-            .locator('input[type="checkbox"][name*="waiver" i], input[type="checkbox"][id*="waiver" i], input[type="checkbox"][name*="referral" i], input[type="checkbox"][id*="referral" i]')
+            .locator(
+              'input[type="checkbox"][name*="waiver" i], input[type="checkbox"][id*="waiver" i], input[type="checkbox"][name*="referral" i], input[type="checkbox"][id*="referral" i]'
+            )
             .first(),
           reason: 'name_or_id_fallback',
         },
@@ -5168,18 +5887,18 @@ export class MHCAsiaAutomation {
   async setConsultationMax(maxAmount) {
     try {
       logger.info(`Setting consultation max: ${maxAmount}`);
-      
+
       const maxSelectors = [
         'input[name*="max" i]',
         'input[id*="max" i]',
         'input[name*="consultation" i]',
         'input[type="number"]',
       ];
-      
+
       for (const selector of maxSelectors) {
         try {
           const field = this.page.locator(selector).first();
-          if (await field.count() > 0) {
+          if ((await field.count()) > 0) {
             await field.fill(maxAmount.toString());
             await this.page.waitForTimeout(500);
             logger.info(`Consultation max set: ${maxAmount}`);
@@ -5189,7 +5908,7 @@ export class MHCAsiaAutomation {
           continue;
         }
       }
-      
+
       logger.warn('Could not find consultation max field');
       return false;
     } catch (error) {
@@ -5205,7 +5924,7 @@ export class MHCAsiaAutomation {
   async fillMedicines(medicineNames) {
     try {
       logger.info(`Filling ${medicineNames.length} medicines...`);
-      
+
       // Look for medicine input fields or add medicine buttons
       const medicineInputSelectors = [
         'input[name*="medicine" i]',
@@ -5213,11 +5932,11 @@ export class MHCAsiaAutomation {
         'textarea[name*="medicine" i]',
         'input[placeholder*="medicine" i]',
       ];
-      
+
       // Try to find and fill medicine fields
       for (let i = 0; i < medicineNames.length; i++) {
         const medicineName = medicineNames[i];
-        
+
         // Look for add medicine button first
         const addButtonSelectors = [
           'button:has-text("Add Medicine")',
@@ -5225,18 +5944,20 @@ export class MHCAsiaAutomation {
           'button:has-text("+")',
           'a:has-text("Add")',
         ];
-        
+
         let added = false;
         for (const selector of addButtonSelectors) {
           try {
             const button = this.page.locator(selector).first();
-            if (await button.count() > 0) {
+            if ((await button.count()) > 0) {
               await button.click();
               await this.page.waitForTimeout(1000);
-              
+
               // Fill the medicine name in the newly added field
-              const medicineField = this.page.locator('input[type="text"]:last-of-type, textarea:last-of-type').first();
-              if (await medicineField.count() > 0) {
+              const medicineField = this.page
+                .locator('input[type="text"]:last-of-type, textarea:last-of-type')
+                .first();
+              if ((await medicineField.count()) > 0) {
                 await medicineField.fill(medicineName);
                 await this.page.waitForTimeout(500);
                 added = true;
@@ -5248,13 +5969,13 @@ export class MHCAsiaAutomation {
             continue;
           }
         }
-        
+
         if (!added) {
           // Try direct input if no add button
           for (const selector of medicineInputSelectors) {
             try {
               const field = this.page.locator(selector).first();
-              if (await field.count() > 0) {
+              if ((await field.count()) > 0) {
                 await field.fill(medicineName);
                 await this.page.waitForTimeout(500);
                 logger.info(`Medicine filled: ${medicineName}`);
@@ -5266,7 +5987,7 @@ export class MHCAsiaAutomation {
           }
         }
       }
-      
+
       return true;
     } catch (error) {
       logger.error('Failed to fill medicines:', error);
@@ -5286,14 +6007,16 @@ export class MHCAsiaAutomation {
         reason: 'not_attempted',
         checkedAt: new Date().toISOString(),
       };
-      
+
       // Safety: never click submit-like buttons
       if (!this.draftOnly) {
         throw new Error('Draft-only mode disabled unexpectedly; refusing to proceed.');
       }
 
       // Lightweight screenshot for debugging (visit form shows buttons at bottom)
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-before-save-draft.png', fullPage: true }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/mhc-asia-before-save-draft.png', fullPage: true })
+        .catch(() => {});
 
       // Helper: click and capture any blocking dialog message.
       const clickWithDialogCapture = async (locator, label) => {
@@ -5306,17 +6029,25 @@ export class MHCAsiaAutomation {
         await dialog.accept().catch(() => {});
         return msg;
       };
-      const mapDialogToSaveReason = (msg) => {
+      const mapDialogToSaveReason = msg => {
         const text = String(msg || '').toLowerCase();
         if (!text) return null;
         if (/must\s+compute\s+claim/.test(text)) return 'compute_claim_required';
-        if (/referring\s+clinic\s+is\s+required|referral\s+letter\s+is\s+required|waiver\s+of\s+referral/.test(text)) {
+        if (
+          /referring\s+clinic\s+is\s+required|referral\s+letter\s+is\s+required|waiver\s+of\s+referral/.test(
+            text
+          )
+        ) {
           return 'referral_required_or_waiver_missing';
         }
         if (/valid\s+amount\s+for\s+procedure|please\s+select\s+procedure\s+first/.test(text)) {
           return 'procedure_amount_invalid';
         }
-        if (/(please\s+enter|valid\s+amount|required|invalid|can\s*not|cannot|failed|error)/.test(text)) {
+        if (
+          /(please\s+enter|valid\s+amount|required|invalid|can\s*not|cannot|failed|error)/.test(
+            text
+          )
+        ) {
           return 'validation_error';
         }
         return 'portal_dialog';
@@ -5324,17 +6055,27 @@ export class MHCAsiaAutomation {
       const captureInlineSaveValidation = async () => {
         const payload = await this.page
           .evaluate(() => {
-            const clean = (s) => String(s || '').replace(/\s+/g, ' ').trim();
+            const clean = s =>
+              String(s || '')
+                .replace(/\s+/g, ' ')
+                .trim();
             const texts = [];
-            const pushIfInteresting = (raw) => {
+            const pushIfInteresting = raw => {
               const text = clean(raw);
               if (!text) return;
               if (text.length > 280) return;
               const lower = text.toLowerCase();
-              if (!/(remark|error|required|invalid|duplicate|failed|not allowed|cannot|can not)/i.test(lower)) return;
+              if (
+                !/(remark|error|required|invalid|duplicate|failed|not allowed|cannot|can not)/i.test(
+                  lower
+                )
+              )
+                return;
               texts.push(text);
             };
-            for (const node of Array.from(document.querySelectorAll('font, span, div, p, li, label, b, strong'))) {
+            for (const node of Array.from(
+              document.querySelectorAll('font, span, div, p, li, label, b, strong')
+            )) {
               const style = window.getComputedStyle(node);
               const color = String(style?.color || '').toLowerCase();
               const isRed = /rgb\(\s*255\s*,\s*0\s*,\s*0\s*\)|#f00|red/.test(color);
@@ -5361,9 +6102,10 @@ export class MHCAsiaAutomation {
         }
         return { reason: null, messages: payload };
       };
-      const shouldRetryAfterDisclaimer = async (dialogMsg) => {
+      const shouldRetryAfterDisclaimer = async dialogMsg => {
         const msg = String(dialogMsg || '').toLowerCase();
-        if (!/draft\s+claims\s+will\s+be\s+deleted|billing\s+cycle\s+cut-?off/i.test(msg)) return false;
+        if (!/draft\s+claims\s+will\s+be\s+deleted|billing\s+cycle\s+cut-?off/i.test(msg))
+          return false;
         const stillHasDraftButton = await this.page
           .locator(
             'input[value*="save as draft" i], input[value*="save a draft" i], input[value*="save draft" i], button:has-text("Save As Draft")'
@@ -5372,15 +6114,23 @@ export class MHCAsiaAutomation {
           .isVisible()
           .catch(() => false);
         const stillOnVisitForm =
-          (await this.page.locator('text=/Employee\\s+Visit\\s*-\\s*(Add|Edit)/i').first().isVisible().catch(() => false)) ||
-          (await this.page.locator('text=/Charge\\s*Type/i').first().isVisible().catch(() => false));
+          (await this.page
+            .locator('text=/Employee\\s+Visit\\s*-\\s*(Add|Edit)/i')
+            .first()
+            .isVisible()
+            .catch(() => false)) ||
+          (await this.page
+            .locator('text=/Charge\\s*Type/i')
+            .first()
+            .isVisible()
+            .catch(() => false));
         return stillHasDraftButton && stillOnVisitForm;
       };
 
-      const captureDraftFieldState = async (phase) => {
+      const captureDraftFieldState = async phase => {
         const state = await this.page
           .evaluate(() => {
-            const pick = (name) => {
+            const pick = name => {
               const el = document.querySelector(`[name="${name}"]`);
               if (!el) return null;
               return String(el.value || '').trim();
@@ -5421,7 +6171,9 @@ export class MHCAsiaAutomation {
       // Portal postbacks can settle slowly; wait before attempting Save As Draft.
       if (computeDone) await this.page.waitForTimeout(2000);
       await captureDraftFieldState('post_compute');
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-after-compute-before-save.png', fullPage: true }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/mhc-asia-after-compute-before-save.png', fullPage: true })
+        .catch(() => {});
 
       // Fast-fail on known inline portal validations (for example same-day duplicate visit)
       // so Flow 3 gets a deterministic reason without a misleading save click.
@@ -5429,7 +6181,10 @@ export class MHCAsiaAutomation {
       if (preSaveInlineValidation?.reason) {
         logger.warn('Draft save blocked by pre-save inline validation', preSaveInlineValidation);
         await this.page
-          .screenshot({ path: 'screenshots/mhc-asia-draft-save-inline-validation-precheck.png', fullPage: true })
+          .screenshot({
+            path: 'screenshots/mhc-asia-draft-save-inline-validation-precheck.png',
+            fullPage: true,
+          })
           .catch(() => {});
         this.lastSaveDraftResult = {
           success: false,
@@ -5443,13 +6198,23 @@ export class MHCAsiaAutomation {
       // Only click buttons that explicitly indicate DRAFT (never generic "Save" to avoid risky actions).
       const saveDraftLocators = [
         // Explicit <input value="Save As Draft"> (common on MHC/Singlife)
-        this.page.locator('input[value*="save as draft" i], input[value*="save a draft" i], input[value*="save draft" i]').first(),
+        this.page
+          .locator(
+            'input[value*="save as draft" i], input[value*="save a draft" i], input[value*="save draft" i]'
+          )
+          .first(),
         // Accessible name based (covers <button>, <input type=button|submit|reset>, etc.)
         this.page.getByRole('button', { name: /save\s+as\s+draft/i }).first(),
         this.page.getByRole('button', { name: /save\s+(?:a\s+)?draft/i }).first(),
         // Fallbacks for older markup
-        this.page.locator('button, input, a').filter({ hasText: /save\s+as\s+draft/i }).first(),
-        this.page.locator('button, input, a').filter({ hasText: /save\s+(?:a\s+)?draft/i }).first(),
+        this.page
+          .locator('button, input, a')
+          .filter({ hasText: /save\s+as\s+draft/i })
+          .first(),
+        this.page
+          .locator('button, input, a')
+          .filter({ hasText: /save\s+(?:a\s+)?draft/i })
+          .first(),
       ];
 
       // Prefer robust explicit matches first
@@ -5460,13 +6225,14 @@ export class MHCAsiaAutomation {
 
           // Extra safety: ensure the visible text/value contains "draft" and NOT "submit"
           const text = ((await locator.textContent().catch(() => '')) || '').toLowerCase();
-          const ariaLabel = ((await locator.getAttribute('aria-label').catch(() => '')) || '').toLowerCase();
-          const valueAttr = ((await locator.getAttribute('value').catch(() => '')) || '').toLowerCase();
+          const ariaLabel = (
+            (await locator.getAttribute('aria-label').catch(() => '')) || ''
+          ).toLowerCase();
+          const valueAttr = (
+            (await locator.getAttribute('value').catch(() => '')) || ''
+          ).toLowerCase();
           const combined = `${text} ${ariaLabel} ${valueAttr}`;
-          if (
-            !combined.includes('draft') ||
-            combined.includes('submit')
-          ) {
+          if (!combined.includes('draft') || combined.includes('submit')) {
             continue;
           }
 
@@ -5475,9 +6241,13 @@ export class MHCAsiaAutomation {
           await this.page.waitForLoadState('domcontentloaded').catch(() => {});
           await this.page.waitForTimeout(500);
 
-          await this.page.screenshot({ path: 'screenshots/mhc-asia-draft-saved.png', fullPage: true }).catch(() => {});
+          await this.page
+            .screenshot({ path: 'screenshots/mhc-asia-draft-saved.png', fullPage: true })
+            .catch(() => {});
           if (dialogMsg && /must\s+compute\s+claim/i.test(dialogMsg)) {
-            logger.warn('Draft save blocked: portal requires Compute claim first (already attempted).');
+            logger.warn(
+              'Draft save blocked: portal requires Compute claim first (already attempted).'
+            );
             this.lastSaveDraftResult = {
               success: false,
               reason: mapDialogToSaveReason(dialogMsg) || 'compute_claim_required',
@@ -5486,21 +6256,34 @@ export class MHCAsiaAutomation {
             };
             return false;
           }
-          if (dialogMsg && /valid\s+amount\s+for\s+procedure|please\s+select\s+procedure\s+first/i.test(dialogMsg)) {
-            logger.warn(`Draft save blocked by procedure validation; clearing procedure rows and retrying once: ${dialogMsg}`);
+          if (
+            dialogMsg &&
+            /valid\s+amount\s+for\s+procedure|please\s+select\s+procedure\s+first/i.test(dialogMsg)
+          ) {
+            logger.warn(
+              `Draft save blocked by procedure validation; clearing procedure rows and retrying once: ${dialogMsg}`
+            );
             await this.clearProcedureRows(3).catch(() => {});
             await this.page.waitForTimeout(300);
-            const retryDialog = await clickWithDialogCapture(locator, 'Save As Draft (retry after clearing procedures)');
+            const retryDialog = await clickWithDialogCapture(
+              locator,
+              'Save As Draft (retry after clearing procedures)'
+            );
             await this.page.waitForLoadState('domcontentloaded').catch(() => {});
             await this.page.waitForTimeout(400);
             if (
               retryDialog &&
-              /(please\s+enter|valid\s+amount|required|invalid|can\s*not|cannot|failed|error)/i.test(retryDialog) &&
+              /(please\s+enter|valid\s+amount|required|invalid|can\s*not|cannot|failed|error)/i.test(
+                retryDialog
+              ) &&
               !/are\s+you\s+sure|confirm/i.test(retryDialog)
             ) {
               logger.warn(`Draft retry still blocked: ${retryDialog}`);
               await this.page
-                .screenshot({ path: 'screenshots/mhc-asia-draft-save-validation-error.png', fullPage: true })
+                .screenshot({
+                  path: 'screenshots/mhc-asia-draft-save-validation-error.png',
+                  fullPage: true,
+                })
                 .catch(() => {});
               this.lastSaveDraftResult = {
                 success: false,
@@ -5520,11 +6303,18 @@ export class MHCAsiaAutomation {
           }
           if (
             dialogMsg &&
-            /(please\s+enter|valid\s+amount|required|invalid|can\s*not|cannot|failed|error)/i.test(dialogMsg) &&
+            /(please\s+enter|valid\s+amount|required|invalid|can\s*not|cannot|failed|error)/i.test(
+              dialogMsg
+            ) &&
             !/are\s+you\s+sure|confirm/i.test(dialogMsg)
           ) {
             logger.warn(`Draft save blocked by validation dialog: ${dialogMsg}`);
-            await this.page.screenshot({ path: 'screenshots/mhc-asia-draft-save-validation-error.png', fullPage: true }).catch(() => {});
+            await this.page
+              .screenshot({
+                path: 'screenshots/mhc-asia-draft-save-validation-error.png',
+                fullPage: true,
+              })
+              .catch(() => {});
             this.lastSaveDraftResult = {
               success: false,
               reason: mapDialogToSaveReason(dialogMsg) || 'validation_error',
@@ -5537,7 +6327,10 @@ export class MHCAsiaAutomation {
           if (inlineValidation?.reason) {
             logger.warn('Draft save blocked by inline validation', inlineValidation);
             await this.page
-              .screenshot({ path: 'screenshots/mhc-asia-draft-save-inline-validation-error.png', fullPage: true })
+              .screenshot({
+                path: 'screenshots/mhc-asia-draft-save-inline-validation-error.png',
+                fullPage: true,
+              })
               .catch(() => {});
             this.lastSaveDraftResult = {
               success: false,
@@ -5550,18 +6343,30 @@ export class MHCAsiaAutomation {
           let usedSecondClick = false;
           let secondDialogMsg = null;
           if (await shouldRetryAfterDisclaimer(dialogMsg)) {
-            this._logStep('Draft save retry after disclaimer', { visitNo: this._lastSavedDraftVisitNo || null });
-            secondDialogMsg = await clickWithDialogCapture(locator, 'Save As Draft (retry after disclaimer)');
+            this._logStep('Draft save retry after disclaimer', {
+              visitNo: this._lastSavedDraftVisitNo || null,
+            });
+            secondDialogMsg = await clickWithDialogCapture(
+              locator,
+              'Save As Draft (retry after disclaimer)'
+            );
             await this.page.waitForLoadState('domcontentloaded').catch(() => {});
             await this.page.waitForTimeout(500);
             if (
               secondDialogMsg &&
-              /(please\s+enter|valid\s+amount|required|invalid|can\s*not|cannot|failed|error)/i.test(secondDialogMsg) &&
-              !/are\s+you\s+sure|confirm|draft\s+claims\s+will\s+be\s+deleted/i.test(secondDialogMsg)
+              /(please\s+enter|valid\s+amount|required|invalid|can\s*not|cannot|failed|error)/i.test(
+                secondDialogMsg
+              ) &&
+              !/are\s+you\s+sure|confirm|draft\s+claims\s+will\s+be\s+deleted/i.test(
+                secondDialogMsg
+              )
             ) {
               logger.warn(`Draft retry blocked by validation dialog: ${secondDialogMsg}`);
               await this.page
-                .screenshot({ path: 'screenshots/mhc-asia-draft-save-validation-error-retry.png', fullPage: true })
+                .screenshot({
+                  path: 'screenshots/mhc-asia-draft-save-validation-error-retry.png',
+                  fullPage: true,
+                })
                 .catch(() => {});
               this.lastSaveDraftResult = {
                 success: false,
@@ -5576,7 +6381,10 @@ export class MHCAsiaAutomation {
             if (inlineValidationAfterRetry?.reason) {
               logger.warn('Draft retry blocked by inline validation', inlineValidationAfterRetry);
               await this.page
-                .screenshot({ path: 'screenshots/mhc-asia-draft-save-inline-validation-error-retry.png', fullPage: true })
+                .screenshot({
+                  path: 'screenshots/mhc-asia-draft-save-inline-validation-error-retry.png',
+                  fullPage: true,
+                })
                 .catch(() => {});
               this.lastSaveDraftResult = {
                 success: false,
@@ -5590,7 +6398,9 @@ export class MHCAsiaAutomation {
 
           const postSaveState = await captureDraftFieldState('post_save');
           this._lastSavedDraftVisitNo = String(postSaveState?.visitNo || '').trim() || null;
-          await this.page.screenshot({ path: 'screenshots/mhc-asia-after-save-draft-state.png', fullPage: true }).catch(() => {});
+          await this.page
+            .screenshot({ path: 'screenshots/mhc-asia-after-save-draft-state.png', fullPage: true })
+            .catch(() => {});
           logger.info('Claim saved as draft (clicked Save As Draft)');
           this.lastSaveDraftResult = {
             success: true,
@@ -5607,7 +6417,9 @@ export class MHCAsiaAutomation {
       }
 
       logger.warn('Could not find Save As Draft button');
-      await this.page.screenshot({ path: 'screenshots/mhc-asia-save-draft-not-found.png', fullPage: true }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/mhc-asia-save-draft-not-found.png', fullPage: true })
+        .catch(() => {});
       this.lastSaveDraftResult = {
         success: false,
         reason: 'save_draft_button_not_found',
@@ -5645,7 +6457,9 @@ export class MHCAsiaAutomation {
   }
 
   _draftVisitNoRank(visitNo) {
-    const raw = String(visitNo || '').trim().toUpperCase();
+    const raw = String(visitNo || '')
+      .trim()
+      .toUpperCase();
     const m = raw.match(/^EV(\d+)$/i);
     if (!m) return -1;
     const n = Number.parseInt(m[1], 10);
@@ -5674,12 +6488,7 @@ export class MHCAsiaAutomation {
       this.isAiaClinicSystem = false;
       return true;
     }
-    if (
-      context === 'mhc' &&
-      snap?.isMhcDomain &&
-      !snap?.isAiaDomain &&
-      !snap?.isSinglifeDomain
-    ) {
+    if (context === 'mhc' && snap?.isMhcDomain && !snap?.isAiaDomain && !snap?.isSinglifeDomain) {
       this.isAiaClinicSystem = false;
       this.isSinglifeSystem = false;
       return true;
@@ -5697,11 +6506,14 @@ export class MHCAsiaAutomation {
       const fallbackUrl = this._getDefaultSwitchSystemUrl(/singlife|aviva|pcp/i, 'Singlife');
       if (fallbackUrl) {
         const nextUrl = new URL(fallbackUrl, this.page.url()).toString();
-        await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
+        await this.page
+          .goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 })
+          .catch(() => {});
         const fallbackSnap = await this._getPortalContextSnapshot().catch(() => null);
         if (
           fallbackSnap &&
-          (fallbackSnap.isSinglifeDomain || /singlife|pcpcare/i.test(String(fallbackSnap.url || '')))
+          (fallbackSnap.isSinglifeDomain ||
+            /singlife|pcpcare/i.test(String(fallbackSnap.url || '')))
         ) {
           this.isSinglifeSystem = true;
           this.isAiaClinicSystem = false;
@@ -5718,8 +6530,13 @@ export class MHCAsiaAutomation {
       const fallbackUrl = this._getDefaultSwitchSystemUrl(/aia\s*clinic|aiaclinic/i, 'AIA Clinic');
       if (fallbackUrl) {
         const nextUrl = new URL(fallbackUrl, this.page.url()).toString();
-        await this.page.goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
-        const fallbackSwitch = await this._waitForAiaSwitch(9000).catch(() => ({ ok: false, snap: null }));
+        await this.page
+          .goto(nextUrl, { waitUntil: 'domcontentloaded', timeout: 15000 })
+          .catch(() => {});
+        const fallbackSwitch = await this._waitForAiaSwitch(9000).catch(() => ({
+          ok: false,
+          snap: null,
+        }));
         if (fallbackSwitch.ok) {
           this.isAiaClinicSystem = true;
           this.isSinglifeSystem = false;
@@ -5754,7 +6571,9 @@ export class MHCAsiaAutomation {
   }
 
   async _searchDraftByNric(nric) {
-    const normalized = String(nric || '').toUpperCase().trim();
+    const normalized = String(nric || '')
+      .toUpperCase()
+      .trim();
     if (!normalized) return false;
 
     await this.page
@@ -5793,7 +6612,9 @@ export class MHCAsiaAutomation {
       }, normalized)
       .catch(() => {});
 
-    const searchBtn = this.page.locator('input[name="SearchAction"], button:has-text("Search")').first();
+    const searchBtn = this.page
+      .locator('input[name="SearchAction"], button:has-text("Search")')
+      .first();
     if ((await searchBtn.count().catch(() => 0)) > 0) {
       await Promise.all([
         this.page.waitForLoadState('domcontentloaded').catch(() => {}),
@@ -5811,7 +6632,10 @@ export class MHCAsiaAutomation {
   async _extractDraftRows() {
     return this.page
       .evaluate(() => {
-        const clean = s => String(s || '').replace(/\s+/g, ' ').trim();
+        const clean = s =>
+          String(s || '')
+            .replace(/\s+/g, ' ')
+            .trim();
         const rows = [];
         for (const tr of Array.from(document.querySelectorAll('table tr'))) {
           const cells = Array.from(tr.querySelectorAll('th,td')).map(td => clean(td.textContent));
@@ -5844,11 +6668,15 @@ export class MHCAsiaAutomation {
     allowCrossContext = false,
     expectedVisitNo = null,
   } = {}) {
-    const normalizedNric = String(nric || '').toUpperCase().trim();
+    const normalizedNric = String(nric || '')
+      .toUpperCase()
+      .trim();
     if (!normalizedNric) return { found: false, reason: 'missing_nric' };
 
     const hint = String(contextHint || this._inferPortalContext() || 'mhc').toLowerCase();
-    const normalizedExpectedVisitNo = String(expectedVisitNo || '').toUpperCase().trim();
+    const normalizedExpectedVisitNo = String(expectedVisitNo || '')
+      .toUpperCase()
+      .trim();
     const contextOrder = [];
     const addCtx = ctx => {
       if (!ctx || contextOrder.includes(ctx)) return;
@@ -5954,18 +6782,30 @@ export class MHCAsiaAutomation {
   }
 
   _pickDraftRow(rows, { nric, visitDate, patientName, expectedVisitNo = null }) {
-    const picked = this._pickDraftRowWithReason(rows, { nric, visitDate, patientName, expectedVisitNo });
+    const picked = this._pickDraftRowWithReason(rows, {
+      nric,
+      visitDate,
+      patientName,
+      expectedVisitNo,
+    });
     return picked?.row || null;
   }
 
   _pickDraftRowWithReason(rows, { nric, visitDate, patientName, expectedVisitNo = null }) {
-    const normalizedNric = String(nric || '').toUpperCase().trim();
+    const normalizedNric = String(nric || '')
+      .toUpperCase()
+      .trim();
     const normalizedDate = this._normalizeDraftDate(visitDate);
     const normalizedName = this._normalizeDraftName(patientName);
-    const normalizedVisitNo = String(expectedVisitNo || '').toUpperCase().trim();
+    const normalizedVisitNo = String(expectedVisitNo || '')
+      .toUpperCase()
+      .trim();
 
     const byNric = (rows || []).filter(
-      row => String(row?.patientNric || '').toUpperCase().trim() === normalizedNric
+      row =>
+        String(row?.patientNric || '')
+          .toUpperCase()
+          .trim() === normalizedNric
     );
     if (!byNric.length) return { row: null, reason: 'nric_no_match' };
 
@@ -5983,7 +6823,10 @@ export class MHCAsiaAutomation {
 
     if (normalizedVisitNo) {
       const byVisitNo = sorted.find(
-        row => String(row?.visitNo || '').toUpperCase().trim() === normalizedVisitNo
+        row =>
+          String(row?.visitNo || '')
+            .toUpperCase()
+            .trim() === normalizedVisitNo
       );
       return byVisitNo
         ? { row: byVisitNo, reason: 'expected_visit_no_match' }
@@ -6000,7 +6843,8 @@ export class MHCAsiaAutomation {
       const rowName = this._normalizeDraftName(row?.patientName || '');
       return rowName && (rowName.includes(normalizedName) || normalizedName.includes(rowName));
     });
-    if (byName) return { row: byName, reason: normalizedDate ? 'nric_date_name_match' : 'nric_name_match' };
+    if (byName)
+      return { row: byName, reason: normalizedDate ? 'nric_date_name_match' : 'nric_name_match' };
     if (normalizedDate) {
       return sorted[0]
         ? { row: sorted[0], reason: 'nric_date_match_name_relaxed' }
@@ -6072,7 +6916,7 @@ export class MHCAsiaAutomation {
             rowsSeen: extracted.rows.length,
             url: extracted.url,
             matched: Boolean(match),
-            reason: match ? null : (matchPick?.reason || 'draft_not_found'),
+            reason: match ? null : matchPick?.reason || 'draft_not_found',
             expectedVisitNo: normalizedExpectedVisitNo || null,
             match: match || null,
           });
@@ -6137,7 +6981,9 @@ export class MHCAsiaAutomation {
       .evaluate(() => {
         const anchors = Array.from(document.querySelectorAll('a[href]'));
         const hit = anchors.find(anchor => {
-          const text = String(anchor.textContent || '').replace(/\s+/g, ' ').trim();
+          const text = String(anchor.textContent || '')
+            .replace(/\s+/g, ' ')
+            .trim();
           const href = String(anchor.getAttribute('href') || '').trim();
           return (
             /claims\s+history/i.test(text) ||
@@ -6150,10 +6996,12 @@ export class MHCAsiaAutomation {
       })
       .catch(() => '');
     if (!fallbackHref) return false;
-    await this.page.goto(new URL(fallbackHref, this.page.url()).toString(), {
-      waitUntil: 'domcontentloaded',
-      timeout: 15000,
-    }).catch(() => {});
+    await this.page
+      .goto(new URL(fallbackHref, this.page.url()).toString(), {
+        waitUntil: 'domcontentloaded',
+        timeout: 15000,
+      })
+      .catch(() => {});
     await this.page.waitForTimeout(900);
     return true;
   }
@@ -6164,164 +7012,197 @@ export class MHCAsiaAutomation {
     visitDate = null,
     patientName = null,
   } = {}) {
-    const normalizedVisitNo = String(expectedVisitNo || '').trim().toUpperCase();
-    const normalizedNric = String(nric || '').trim().toUpperCase();
+    const normalizedVisitNo = String(expectedVisitNo || '')
+      .trim()
+      .toUpperCase();
+    const normalizedNric = String(nric || '')
+      .trim()
+      .toUpperCase();
     const normalizedVisitDate = this._normalizeDraftDate(visitDate);
     const normalizedPatientName = String(patientName || '').trim();
 
     const searchPayload = await this.page
-      .evaluate(({ normalizedVisitNo, normalizedNric, normalizedVisitDate, normalizedPatientName }) => {
-        const clean = value =>
-          String(value || '')
-            .replace(/\s+/g, ' ')
-            .trim();
-        const lower = value => clean(value).toLowerCase();
-        const setValue = (el, value) => {
-          if (!el) return false;
-          const tag = String(el.tagName || '').toLowerCase();
-          try {
-            el.removeAttribute?.('readonly');
-            el.removeAttribute?.('disabled');
-            el.readOnly = false;
-            el.disabled = false;
-          } catch {
-            // ignore
-          }
-          if (tag === 'select') {
-            const options = Array.from(el.options || []);
-            const match = options.find(option => {
-              const text = lower(option.textContent || '');
-              const val = lower(option.value || '');
-              if (value.kind === 'visitNo') return /visit\s*no|reference|claim/i.test(text) || /visit|claim/i.test(val);
-              if (value.kind === 'nric') return /nric|national id|member id|id no/i.test(text) || /nric|member|id/i.test(val);
-              if (value.kind === 'name') return /name|member/i.test(text) || /name/i.test(val);
-              if (value.kind === 'status') return /submitted|completed|approved/i.test(text) || /submitted|completed|approved/i.test(val);
+      .evaluate(
+        ({ normalizedVisitNo, normalizedNric, normalizedVisitDate, normalizedPatientName }) => {
+          const clean = value =>
+            String(value || '')
+              .replace(/\s+/g, ' ')
+              .trim();
+          const lower = value => clean(value).toLowerCase();
+          const setValue = (el, value) => {
+            if (!el) return false;
+            const tag = String(el.tagName || '').toLowerCase();
+            try {
+              el.removeAttribute?.('readonly');
+              el.removeAttribute?.('disabled');
+              el.readOnly = false;
+              el.disabled = false;
+            } catch {
+              // ignore
+            }
+            if (tag === 'select') {
+              const options = Array.from(el.options || []);
+              const match = options.find(option => {
+                const text = lower(option.textContent || '');
+                const val = lower(option.value || '');
+                if (value.kind === 'visitNo')
+                  return /visit\s*no|reference|claim/i.test(text) || /visit|claim/i.test(val);
+                if (value.kind === 'nric')
+                  return (
+                    /nric|national id|member id|id no/i.test(text) || /nric|member|id/i.test(val)
+                  );
+                if (value.kind === 'name') return /name|member/i.test(text) || /name/i.test(val);
+                if (value.kind === 'status')
+                  return (
+                    /submitted|completed|approved/i.test(text) ||
+                    /submitted|completed|approved/i.test(val)
+                  );
+                return false;
+              });
+              if (!match) return false;
+              el.value = match.value;
+            } else {
+              el.value = value.value;
+            }
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+            return true;
+          };
+
+          const controls = Array.from(document.querySelectorAll('input, select, textarea'));
+          const summaries = controls.map(control => {
+            const tag = String(control.tagName || '').toLowerCase();
+            const type = String(control.getAttribute('type') || '').toLowerCase();
+            const name = clean(control.getAttribute('name') || control.getAttribute('id') || '');
+            const label = clean(control.closest('td,th,label,div')?.textContent || '');
+            return { control, tag, type, name, label };
+          });
+
+          const preferredTokens = normalizedVisitNo
+            ? [{ kind: 'visitNo', value: normalizedVisitNo }]
+            : normalizedNric
+              ? [{ kind: 'nric', value: normalizedNric }]
+              : normalizedPatientName
+                ? [{ kind: 'name', value: normalizedPatientName }]
+                : [];
+
+          const findDateControl = which =>
+            summaries.find(item => {
+              if (!['input', 'textarea'].includes(item.tag)) return false;
+              const hay = `${lower(item.name)} ${lower(item.label)}`;
+              return which === 'from'
+                ? /\bfrom\b/.test(hay) || /\bvisit\s*date\b/.test(hay)
+                : /\bto\b/.test(hay) || /\bend\b/.test(hay);
+            });
+          const findNamedControl = pattern =>
+            summaries.find(item => {
+              if (!['input', 'textarea'].includes(item.tag)) return false;
+              return pattern.test(lower(item.name));
+            });
+
+          let searchFieldFilled = false;
+          for (const token of preferredTokens) {
+            const textInput = summaries.find(item => {
+              if (item.tag !== 'input' && item.tag !== 'textarea') return false;
+              if (item.type && !['text', 'search', ''].includes(item.type)) return false;
+              const hay = `${lower(item.name)} ${lower(item.label)}`;
+              if (token.kind === 'visitNo') return /visit\s*no|claim|reference|search/i.test(hay);
+              if (token.kind === 'nric')
+                return /nric|national id|member id|id no|search/i.test(hay);
+              if (token.kind === 'name') return /name|member|patient|search/i.test(hay);
               return false;
             });
-            if (!match) return false;
-            el.value = match.value;
-          } else {
-            el.value = value.value;
-          }
-          el.dispatchEvent(new Event('input', { bubbles: true }));
-          el.dispatchEvent(new Event('change', { bubbles: true }));
-          return true;
-        };
-
-        const controls = Array.from(document.querySelectorAll('input, select, textarea'));
-        const summaries = controls.map(control => {
-          const tag = String(control.tagName || '').toLowerCase();
-          const type = String(control.getAttribute('type') || '').toLowerCase();
-          const name = clean(control.getAttribute('name') || control.getAttribute('id') || '');
-          const label = clean(control.closest('td,th,label,div')?.textContent || '');
-          return { control, tag, type, name, label };
-        });
-
-        const preferredTokens = normalizedVisitNo
-          ? [{ kind: 'visitNo', value: normalizedVisitNo }]
-          : normalizedNric
-            ? [{ kind: 'nric', value: normalizedNric }]
-            : normalizedPatientName
-              ? [{ kind: 'name', value: normalizedPatientName }]
-              : [];
-
-        const findDateControl = which => summaries.find(item => {
-          if (!['input', 'textarea'].includes(item.tag)) return false;
-          const hay = `${lower(item.name)} ${lower(item.label)}`;
-          return which === 'from'
-            ? /\bfrom\b/.test(hay) || /\bvisit\s*date\b/.test(hay)
-            : /\bto\b/.test(hay) || /\bend\b/.test(hay);
-        });
-        const findNamedControl = pattern =>
-          summaries.find(item => {
-            if (!['input', 'textarea'].includes(item.tag)) return false;
-            return pattern.test(lower(item.name));
-          });
-
-        let searchFieldFilled = false;
-        for (const token of preferredTokens) {
-          const textInput = summaries.find(item => {
-            if (item.tag !== 'input' && item.tag !== 'textarea') return false;
-            if (item.type && !['text', 'search', ''].includes(item.type)) return false;
-            const hay = `${lower(item.name)} ${lower(item.label)}`;
-            if (token.kind === 'visitNo') return /visit\s*no|claim|reference|search/i.test(hay);
-            if (token.kind === 'nric') return /nric|national id|member id|id no|search/i.test(hay);
-            if (token.kind === 'name') return /name|member|patient|search/i.test(hay);
-            return false;
-          });
-          if (textInput && setValue(textInput.control, token)) {
-            searchFieldFilled = true;
-            break;
-          }
-        }
-
-        const keySelect = summaries.find(item => item.tag === 'select' && /key|search/i.test(lower(item.name)));
-        const valueInput = summaries.find(
-          item =>
-            item.tag === 'input' &&
-            (!item.type || ['text', 'search', ''].includes(item.type)) &&
-            /keyvalue|search|keyword|value/.test(lower(item.name) + ' ' + lower(item.label))
-        );
-        if (!searchFieldFilled && keySelect && valueInput && preferredTokens.length > 0) {
-          const token = preferredTokens[0];
-          searchFieldFilled = setValue(keySelect.control, token) && setValue(valueInput.control, token);
-        }
-
-        if (normalizedVisitDate) {
-          const parts = normalizedVisitDate.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-          if (parts) {
-            const [, day, month, year] = parts;
-            const fromDay = findNamedControl(/^fromdateday$/);
-            const fromMonth = findNamedControl(/^fromdatemonth$/);
-            const fromYear = findNamedControl(/^fromdateyear$/);
-            const toDay = findNamedControl(/^todateday$/);
-            const toMonth = findNamedControl(/^todatemonth$/);
-            const toYear = findNamedControl(/^todateyear$/);
-            if (fromDay) setValue(fromDay.control, { kind: 'date_day', value: day });
-            if (fromMonth) setValue(fromMonth.control, { kind: 'date_month', value: month });
-            if (fromYear) setValue(fromYear.control, { kind: 'date_year', value: year });
-            if (toDay) setValue(toDay.control, { kind: 'date_day', value: day });
-            if (toMonth) setValue(toMonth.control, { kind: 'date_month', value: month });
-            if (toYear) setValue(toYear.control, { kind: 'date_year', value: year });
-          } else if (!normalizedVisitNo) {
-            const fromControl = findDateControl('from');
-            const toControl = findDateControl('to');
-            if (fromControl) setValue(fromControl.control, { kind: 'date', value: normalizedVisitDate });
-            if (toControl) setValue(toControl.control, { kind: 'date', value: normalizedVisitDate });
-          }
-        }
-
-        const statusSelect = summaries.find(item => item.tag === 'select' && /status/i.test(lower(item.name) + ' ' + lower(item.label)));
-        if (statusSelect) setValue(statusSelect.control, { kind: 'status', value: 'submitted' });
-        const keyTypeSelect = summaries.find(item => item.tag === 'select' && /keytype|match/i.test(lower(item.name) + ' ' + lower(item.label)));
-        if (keyTypeSelect && preferredTokens.length > 0) {
-          const token = preferredTokens[0];
-          if (token.kind === 'visitNo' || token.kind === 'nric') {
-            const options = Array.from(keyTypeSelect.control.options || []);
-            const exact = options.find(option => /equals\s*to/i.test(clean(option.textContent || '')) || /^=$/.test(clean(option.value || '')));
-            if (exact) {
-              keyTypeSelect.control.value = exact.value;
-              keyTypeSelect.control.dispatchEvent(new Event('input', { bubbles: true }));
-              keyTypeSelect.control.dispatchEvent(new Event('change', { bubbles: true }));
+            if (textInput && setValue(textInput.control, token)) {
+              searchFieldFilled = true;
+              break;
             }
           }
-        }
 
-        return {
-          searchFieldFilled,
-          controls: summaries.slice(0, 40).map(item => ({
-            tag: item.tag,
-            type: item.type,
-            name: item.name,
-            label: item.label,
-          })),
-        };
-      }, {
-        normalizedVisitNo,
-        normalizedNric,
-        normalizedVisitDate,
-        normalizedPatientName,
-      })
+          const keySelect = summaries.find(
+            item => item.tag === 'select' && /key|search/i.test(lower(item.name))
+          );
+          const valueInput = summaries.find(
+            item =>
+              item.tag === 'input' &&
+              (!item.type || ['text', 'search', ''].includes(item.type)) &&
+              /keyvalue|search|keyword|value/.test(lower(item.name) + ' ' + lower(item.label))
+          );
+          if (!searchFieldFilled && keySelect && valueInput && preferredTokens.length > 0) {
+            const token = preferredTokens[0];
+            searchFieldFilled =
+              setValue(keySelect.control, token) && setValue(valueInput.control, token);
+          }
+
+          if (normalizedVisitDate) {
+            const parts = normalizedVisitDate.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+            if (parts) {
+              const [, day, month, year] = parts;
+              const fromDay = findNamedControl(/^fromdateday$/);
+              const fromMonth = findNamedControl(/^fromdatemonth$/);
+              const fromYear = findNamedControl(/^fromdateyear$/);
+              const toDay = findNamedControl(/^todateday$/);
+              const toMonth = findNamedControl(/^todatemonth$/);
+              const toYear = findNamedControl(/^todateyear$/);
+              if (fromDay) setValue(fromDay.control, { kind: 'date_day', value: day });
+              if (fromMonth) setValue(fromMonth.control, { kind: 'date_month', value: month });
+              if (fromYear) setValue(fromYear.control, { kind: 'date_year', value: year });
+              if (toDay) setValue(toDay.control, { kind: 'date_day', value: day });
+              if (toMonth) setValue(toMonth.control, { kind: 'date_month', value: month });
+              if (toYear) setValue(toYear.control, { kind: 'date_year', value: year });
+            } else if (!normalizedVisitNo) {
+              const fromControl = findDateControl('from');
+              const toControl = findDateControl('to');
+              if (fromControl)
+                setValue(fromControl.control, { kind: 'date', value: normalizedVisitDate });
+              if (toControl)
+                setValue(toControl.control, { kind: 'date', value: normalizedVisitDate });
+            }
+          }
+
+          const statusSelect = summaries.find(
+            item =>
+              item.tag === 'select' && /status/i.test(lower(item.name) + ' ' + lower(item.label))
+          );
+          if (statusSelect) setValue(statusSelect.control, { kind: 'status', value: 'submitted' });
+          const keyTypeSelect = summaries.find(
+            item =>
+              item.tag === 'select' &&
+              /keytype|match/i.test(lower(item.name) + ' ' + lower(item.label))
+          );
+          if (keyTypeSelect && preferredTokens.length > 0) {
+            const token = preferredTokens[0];
+            if (token.kind === 'visitNo' || token.kind === 'nric') {
+              const options = Array.from(keyTypeSelect.control.options || []);
+              const exact = options.find(
+                option =>
+                  /equals\s*to/i.test(clean(option.textContent || '')) ||
+                  /^=$/.test(clean(option.value || ''))
+              );
+              if (exact) {
+                keyTypeSelect.control.value = exact.value;
+                keyTypeSelect.control.dispatchEvent(new Event('input', { bubbles: true }));
+                keyTypeSelect.control.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+            }
+          }
+
+          return {
+            searchFieldFilled,
+            controls: summaries.slice(0, 40).map(item => ({
+              tag: item.tag,
+              type: item.type,
+              name: item.name,
+              label: item.label,
+            })),
+          };
+        },
+        {
+          normalizedVisitNo,
+          normalizedNric,
+          normalizedVisitDate,
+          normalizedPatientName,
+        }
+      )
       .catch(() => ({ searchFieldFilled: false, controls: [] }));
 
     const searchButton = this.page
@@ -6345,7 +7226,10 @@ export class MHCAsiaAutomation {
   async _extractSubmittedRows() {
     return this.page
       .evaluate(() => {
-        const clean = value => String(value || '').replace(/\s+/g, ' ').trim();
+        const clean = value =>
+          String(value || '')
+            .replace(/\s+/g, ' ')
+            .trim();
         const rows = [];
         for (const tr of Array.from(document.querySelectorAll('table tr'))) {
           const cells = Array.from(tr.querySelectorAll('th,td')).map(td => clean(td.textContent));
@@ -6367,11 +7251,15 @@ export class MHCAsiaAutomation {
                 !/submitted|completed|approved|rejected|view|detail|edit/i.test(cell.toLowerCase())
             ) || '';
           const status =
-            cells.find(cell => /submitted|completed|approved|rejected|draft/i.test(cell.toLowerCase())) || '';
+            cells.find(cell =>
+              /submitted|completed|approved|rejected|draft/i.test(cell.toLowerCase())
+            ) || '';
           const totalClaim =
             [...cells].reverse().find(cell => /\$?\d+(?:,\d{3})*(?:\.\d{2})/.test(cell)) || '';
 
-          const actions = Array.from(tr.querySelectorAll('a, button, input[type="button"], input[type="submit"]'))
+          const actions = Array.from(
+            tr.querySelectorAll('a, button, input[type="button"], input[type="submit"]')
+          )
             .map(el => ({
               text: clean(el.textContent || el.value || ''),
               href: clean(el.getAttribute?.('href') || ''),
@@ -6396,29 +7284,41 @@ export class MHCAsiaAutomation {
       .catch(() => ({ rows: [], url: this.page.url() || '', title: '' }));
   }
 
-  _pickSubmittedRowWithReason(rows, {
-    nric,
-    visitDate,
-    patientName = '',
-    expectedVisitNo = null,
-  } = {}) {
-    const normalizedVisitNo = String(expectedVisitNo || '').trim().toUpperCase();
-    const normalizedNric = String(nric || '').trim().toUpperCase();
+  _pickSubmittedRowWithReason(
+    rows,
+    { nric, visitDate, patientName = '', expectedVisitNo = null } = {}
+  ) {
+    const normalizedVisitNo = String(expectedVisitNo || '')
+      .trim()
+      .toUpperCase();
+    const normalizedNric = String(nric || '')
+      .trim()
+      .toUpperCase();
     const normalizedDate = this._normalizeDraftDate(visitDate);
     const normalizedName = this._normalizeDraftName(patientName);
 
-    const submittedRows = (rows || []).filter(row =>
-      !row?.status || /submitted|completed|approved/i.test(String(row.status || ''))
+    const submittedRows = (rows || []).filter(
+      row => !row?.status || /submitted|completed|approved/i.test(String(row.status || ''))
     );
     const pool = submittedRows.length ? submittedRows : rows || [];
 
     if (normalizedVisitNo) {
-      const byVisitNo = pool.find(row => String(row?.visitNo || '').trim().toUpperCase() === normalizedVisitNo);
+      const byVisitNo = pool.find(
+        row =>
+          String(row?.visitNo || '')
+            .trim()
+            .toUpperCase() === normalizedVisitNo
+      );
       if (byVisitNo) return { row: byVisitNo, reason: 'visit_no_match' };
     }
 
     const byNric = normalizedNric
-      ? pool.filter(row => String(row?.patientNric || '').trim().toUpperCase() === normalizedNric)
+      ? pool.filter(
+          row =>
+            String(row?.patientNric || '')
+              .trim()
+              .toUpperCase() === normalizedNric
+        )
       : pool;
     if (normalizedNric && !byNric.length) return { row: null, reason: 'nric_no_match' };
 
@@ -6437,7 +7337,9 @@ export class MHCAsiaAutomation {
       if (byName) return { row: byName, reason: 'nric_date_name_match' };
     }
 
-    return byDate[0] ? { row: byDate[0], reason: 'best_available_match' } : { row: null, reason: 'submitted_detail_not_found' };
+    return byDate[0]
+      ? { row: byDate[0], reason: 'best_available_match' }
+      : { row: null, reason: 'submitted_detail_not_found' };
   }
 
   async openSubmittedClaimDetail({
@@ -6448,7 +7350,9 @@ export class MHCAsiaAutomation {
     allowCrossContext = true,
     expectedVisitNo = null,
   } = {}) {
-    const normalizedNric = String(nric || '').toUpperCase().trim();
+    const normalizedNric = String(nric || '')
+      .toUpperCase()
+      .trim();
     if (!normalizedNric && !expectedVisitNo && !patientName) {
       return { found: false, reason: 'missing_identifiers' };
     }
@@ -6624,149 +7528,178 @@ export class MHCAsiaAutomation {
    */
   async clearProcedureRows(maxRows = 3) {
     const cleared = await this.page
-      .evaluate(({ maxRows }) => {
-        const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
-        const isVisible = (el) => {
-          if (!el) return false;
-          const style = window.getComputedStyle(el);
-          if (!style) return false;
-          if (style.display === 'none' || style.visibility === 'hidden') return false;
-          const r = el.getBoundingClientRect();
-          return !!r && r.width > 0 && r.height > 0;
-        };
-        const setValue = (el, v) => {
-          if (!el) return;
-          try {
-            el.readOnly = false;
-            el.disabled = false;
-            el.removeAttribute && el.removeAttribute('readonly');
-            el.removeAttribute && el.removeAttribute('disabled');
-          } catch {
-            // ignore
-          }
-          const tag = (el.tagName || '').toLowerCase();
-          if (tag === 'select') {
-            const opts = Array.from(el.querySelectorAll('option'));
-            if (opts.length) el.value = opts[0].value;
-          } else {
-            el.value = v;
-          }
-          el.dispatchEvent(new Event('input', { bubbles: true }));
-          el.dispatchEvent(new Event('change', { bubbles: true }));
-        };
-        const isTextLike = (el) => {
-          if (!el) return false;
-          const tag = (el.tagName || '').toLowerCase();
-          if (tag === 'select' || tag === 'textarea') return true;
-          const t = String(el.getAttribute('type') || '').toLowerCase();
-          return !t || t === 'text' || t === 'number' || t === 'tel';
-        };
-        const clearRowInputs = (row) => {
-          if (!row) return 0;
-          const inputs = Array.from(
-            row.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea')
-          ).filter((el) => isVisible(el) && isTextLike(el));
-          if (!inputs.length) return 0;
-          for (const inp of inputs) setValue(inp, '');
-          return 1;
-        };
+      .evaluate(
+        ({ maxRows }) => {
+          const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+          const isVisible = el => {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            if (!style) return false;
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            const r = el.getBoundingClientRect();
+            return !!r && r.width > 0 && r.height > 0;
+          };
+          const setValue = (el, v) => {
+            if (!el) return;
+            try {
+              el.readOnly = false;
+              el.disabled = false;
+              el.removeAttribute && el.removeAttribute('readonly');
+              el.removeAttribute && el.removeAttribute('disabled');
+            } catch {
+              // ignore
+            }
+            const tag = (el.tagName || '').toLowerCase();
+            if (tag === 'select') {
+              const opts = Array.from(el.querySelectorAll('option'));
+              if (opts.length) el.value = opts[0].value;
+            } else {
+              el.value = v;
+            }
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+          };
+          const isTextLike = el => {
+            if (!el) return false;
+            const tag = (el.tagName || '').toLowerCase();
+            if (tag === 'select' || tag === 'textarea') return true;
+            const t = String(el.getAttribute('type') || '').toLowerCase();
+            return !t || t === 'text' || t === 'number' || t === 'tel';
+          };
+          const clearRowInputs = row => {
+            if (!row) return 0;
+            const inputs = Array.from(
+              row.querySelectorAll(
+                'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea'
+              )
+            ).filter(el => isVisible(el) && isTextLike(el));
+            if (!inputs.length) return 0;
+            for (const inp of inputs) setValue(inp, '');
+            return 1;
+          };
 
-        let totalCleared = 0;
-        const tables = Array.from(document.querySelectorAll('table')).filter((t) =>
-          /procedure\s*name/i.test(norm(t.innerText || t.textContent || ''))
-        );
-        if (tables.length) {
-          const table = tables
-            .map((t) => ({ t, score: /total\s+proc\s+fee/i.test(norm(t.innerText || t.textContent || '')) ? 1 : 0 }))
-            .sort((a, b) => b.score - a.score)[0].t;
-          const rows = Array.from(table.querySelectorAll('tr')).filter((r) => r.closest('table') === table);
-          const headerIdx = rows.findIndex((r) => /procedure\s*name/i.test(norm(r.innerText || r.textContent || '')));
-          if (headerIdx >= 0) {
-            for (let i = headerIdx + 1; i < rows.length && totalCleared < maxRows; i++) {
-              const row = rows[i];
-              const txt = norm(row.innerText || row.textContent || '');
-              if (/total\s+proc\s+fee|total\s+procedure/.test(txt)) break;
-              if (/more\s+procedure/.test(txt)) continue;
+          let totalCleared = 0;
+          const tables = Array.from(document.querySelectorAll('table')).filter(t =>
+            /procedure\s*name/i.test(norm(t.innerText || t.textContent || ''))
+          );
+          if (tables.length) {
+            const table = tables
+              .map(t => ({
+                t,
+                score: /total\s+proc\s+fee/i.test(norm(t.innerText || t.textContent || '')) ? 1 : 0,
+              }))
+              .sort((a, b) => b.score - a.score)[0].t;
+            const rows = Array.from(table.querySelectorAll('tr')).filter(
+              r => r.closest('table') === table
+            );
+            const headerIdx = rows.findIndex(r =>
+              /procedure\s*name/i.test(norm(r.innerText || r.textContent || ''))
+            );
+            if (headerIdx >= 0) {
+              for (let i = headerIdx + 1; i < rows.length && totalCleared < maxRows; i++) {
+                const row = rows[i];
+                const txt = norm(row.innerText || row.textContent || '');
+                if (/total\s+proc\s+fee|total\s+procedure/.test(txt)) break;
+                if (/more\s+procedure/.test(txt)) continue;
+                totalCleared += clearRowInputs(row);
+              }
+            }
+          }
+
+          // Fallback 1: clear rows where a procedure-like input currently has a value.
+          if (totalCleared < maxRows) {
+            const allRows = Array.from(document.querySelectorAll('tr'));
+            for (const row of allRows) {
+              if (totalCleared >= maxRows) break;
+              const rowText = norm(row.innerText || row.textContent || '');
+              if (
+                !rowText ||
+                /total\s+proc\s+fee|total\s+before\s+gst|copayment|cash\s+collected|gst/.test(
+                  rowText
+                )
+              )
+                continue;
+              const rowInputs = Array.from(
+                row.querySelectorAll(
+                  'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea'
+                )
+              ).filter(el => isVisible(el) && isTextLike(el));
+              if (!rowInputs.length) continue;
+              const hasProcedureLikeValue = rowInputs.some(el => {
+                const idn =
+                  `${el.getAttribute('name') || ''} ${el.getAttribute('id') || ''} ${el.className || ''}`.toLowerCase();
+                if (!/proc|procedure|claim/.test(idn)) return false;
+                return !!String(el.value || '').trim();
+              });
+              if (!hasProcedureLikeValue) continue;
               totalCleared += clearRowInputs(row);
             }
           }
-        }
 
-        // Fallback 1: clear rows where a procedure-like input currently has a value.
-        if (totalCleared < maxRows) {
-          const allRows = Array.from(document.querySelectorAll('tr'));
-          for (const row of allRows) {
-            if (totalCleared >= maxRows) break;
-            const rowText = norm(row.innerText || row.textContent || '');
-            if (!rowText || /total\s+proc\s+fee|total\s+before\s+gst|copayment|cash\s+collected|gst/.test(rowText)) continue;
-            const rowInputs = Array.from(
-              row.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea')
-            ).filter((el) => isVisible(el) && isTextLike(el));
-            if (!rowInputs.length) continue;
-            const hasProcedureLikeValue = rowInputs.some((el) => {
-              const idn = `${el.getAttribute('name') || ''} ${el.getAttribute('id') || ''} ${el.className || ''}`.toLowerCase();
-              if (!/proc|procedure|claim/.test(idn)) return false;
-              return !!String(el.value || '').trim();
-            });
-            if (!hasProcedureLikeValue) continue;
-            totalCleared += clearRowInputs(row);
-          }
-        }
+          // Fallback 2: geometry band between "Procedure Name" header and "Total Proc Fee".
+          if (totalCleared < maxRows) {
+            const labels = Array.from(
+              document.querySelectorAll('th, td, div, span, label, b, strong')
+            );
+            const procHeader =
+              labels.find(el => /procedure\s*name/i.test(norm(el.textContent || ''))) || null;
+            const totalProc =
+              labels.find(el => /total\s+proc\s+fee/i.test(norm(el.textContent || ''))) || null;
+            if (procHeader) {
+              const top = procHeader.getBoundingClientRect().bottom + 2;
+              const bottom = totalProc ? totalProc.getBoundingClientRect().top - 2 : top + 260;
 
-        // Fallback 2: geometry band between "Procedure Name" header and "Total Proc Fee".
-        if (totalCleared < maxRows) {
-          const labels = Array.from(document.querySelectorAll('th, td, div, span, label, b, strong'));
-          const procHeader = labels.find((el) => /procedure\s*name/i.test(norm(el.textContent || ''))) || null;
-          const totalProc = labels.find((el) => /total\s+proc\s+fee/i.test(norm(el.textContent || ''))) || null;
-          if (procHeader) {
-            const top = procHeader.getBoundingClientRect().bottom + 2;
-            const bottom = totalProc ? totalProc.getBoundingClientRect().top - 2 : top + 260;
+              // First try the portal's native row clear control ("C"), which also clears hidden backing fields.
+              const clearButtons = Array.from(
+                document.querySelectorAll(
+                  'button, input[type="button"], input[type="submit"], input[type="reset"]'
+                )
+              )
+                .filter(el => isVisible(el))
+                .filter(el => /^c$/i.test(norm(el.textContent || el.value || '')))
+                .map(el => ({ el, r: el.getBoundingClientRect() }))
+                .filter(({ r }) => r.top >= top && r.bottom <= bottom)
+                .sort((a, b) => a.r.top - b.r.top || a.r.left - b.r.left);
+              for (const { el } of clearButtons) {
+                if (totalCleared >= maxRows) break;
+                try {
+                  el.click();
+                  totalCleared++;
+                } catch {
+                  // ignore
+                }
+              }
 
-            // First try the portal's native row clear control ("C"), which also clears hidden backing fields.
-            const clearButtons = Array.from(
-              document.querySelectorAll('button, input[type="button"], input[type="submit"], input[type="reset"]')
-            )
-              .filter((el) => isVisible(el))
-              .filter((el) => /^c$/i.test(norm(el.textContent || el.value || '')))
-              .map((el) => ({ el, r: el.getBoundingClientRect() }))
-              .filter(({ r }) => r.top >= top && r.bottom <= bottom)
-              .sort((a, b) => (a.r.top - b.r.top) || (a.r.left - b.r.left));
-            for (const { el } of clearButtons) {
-              if (totalCleared >= maxRows) break;
-              try {
-                el.click();
+              const textLikes = Array.from(
+                document.querySelectorAll(
+                  'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea'
+                )
+              )
+                .filter(el => isVisible(el) && isTextLike(el))
+                .map(el => ({ el, r: el.getBoundingClientRect() }))
+                .filter(({ r }) => r.top >= top && r.bottom <= bottom)
+                .sort((a, b) => a.r.top - b.r.top || a.r.left - b.r.left);
+              const rowsByY = [];
+              for (const item of textLikes) {
+                const bucket = rowsByY.find(g => Math.abs(g.y - item.r.top) <= 8);
+                if (bucket) bucket.items.push(item.el);
+                else rowsByY.push({ y: item.r.top, items: [item.el] });
+              }
+              rowsByY.sort((a, b) => a.y - b.y);
+              for (const g of rowsByY) {
+                if (totalCleared >= maxRows) break;
+                const meaningful = g.items.some(el => !!String(el.value || '').trim());
+                if (!meaningful) continue;
+                for (const el of g.items) setValue(el, '');
                 totalCleared++;
-              } catch {
-                // ignore
               }
             }
-
-            const textLikes = Array.from(
-              document.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea')
-            )
-              .filter((el) => isVisible(el) && isTextLike(el))
-              .map((el) => ({ el, r: el.getBoundingClientRect() }))
-              .filter(({ r }) => r.top >= top && r.bottom <= bottom)
-              .sort((a, b) => (a.r.top - b.r.top) || (a.r.left - b.r.left));
-            const rowsByY = [];
-            for (const item of textLikes) {
-              const bucket = rowsByY.find((g) => Math.abs(g.y - item.r.top) <= 8);
-              if (bucket) bucket.items.push(item.el);
-              else rowsByY.push({ y: item.r.top, items: [item.el] });
-            }
-            rowsByY.sort((a, b) => a.y - b.y);
-            for (const g of rowsByY) {
-              if (totalCleared >= maxRows) break;
-              const meaningful = g.items.some((el) => !!String(el.value || '').trim());
-              if (!meaningful) continue;
-              for (const el of g.items) setValue(el, '');
-              totalCleared++;
-            }
           }
-        }
 
-        return totalCleared;
-      }, { maxRows: Math.max(1, Number(maxRows || 3)) })
+          return totalCleared;
+        },
+        { maxRows: Math.max(1, Number(maxRows || 3)) }
+      )
       .catch(() => 0);
     this._logStep('Procedure rows cleared for draft retry', { cleared });
     return cleared > 0;
@@ -6778,7 +7711,7 @@ export class MHCAsiaAutomation {
   async logout() {
     try {
       logger.info('Logging out...');
-      
+
       const logoutSelectors = [
         'a:has-text("Logout")',
         'a:has-text("Log Out")',
@@ -6792,7 +7725,7 @@ export class MHCAsiaAutomation {
       for (const selector of logoutSelectors) {
         try {
           const element = await this.page.$(selector);
-          if (element && await element.isVisible()) {
+          if (element && (await element.isVisible())) {
             await element.click();
             await this.page.waitForLoadState('domcontentloaded').catch(() => {});
             logger.info('Logged out successfully');
@@ -6828,10 +7761,12 @@ export class MHCAsiaAutomation {
 
       // Fast path: set Visit Date by DOM row scan once (reduces long waits on MHC search page).
       const fastOk = await this.page
-        .evaluate((val) => {
-          const norm = (s) => (s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+        .evaluate(val => {
+          const norm = s => (s || '').replace(/\s+/g, ' ').trim().toLowerCase();
           const rows = Array.from(document.querySelectorAll('tr'));
-          const row = rows.find((r) => /visit\s*date/i.test(norm(r.innerText || r.textContent || '')));
+          const row = rows.find(r =>
+            /visit\s*date/i.test(norm(r.innerText || r.textContent || ''))
+          );
           if (!row) return false;
           const input =
             row.querySelector('input[type=\"text\"]') ||
@@ -6898,13 +7833,19 @@ export class MHCAsiaAutomation {
       // If the portal already redirected to a hard error page, don't keep trying.
       const bodyText = await this.page.textContent('body').catch(() => '');
       if (/visit date invalid/i.test(bodyText) || /unexpected error/i.test(bodyText)) {
-        logger.error('Portal rejected visit date and redirected to error page', { date: normalized });
-        await this.page.screenshot({ path: 'screenshots/mhc-visit-date-invalid.png', fullPage: true }).catch(() => {});
+        logger.error('Portal rejected visit date and redirected to error page', {
+          date: normalized,
+        });
+        await this.page
+          .screenshot({ path: 'screenshots/mhc-visit-date-invalid.png', fullPage: true })
+          .catch(() => {});
         return false;
       }
 
       logger.warn('Visit date field not found');
-      await this.page.screenshot({ path: 'screenshots/mhc-visit-date-not-found.png', fullPage: true }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/mhc-visit-date-not-found.png', fullPage: true })
+        .catch(() => {});
       return false;
     } catch (error) {
       logger.error('Failed to fill visit date:', error);
@@ -6916,11 +7857,11 @@ export class MHCAsiaAutomation {
    * Enable scrolling for manual verification (best-effort).
    */
   async enablePageScroll() {
-    const apply = async (frame) =>
+    const apply = async frame =>
       frame
         .evaluate(() => {
           try {
-            const enable = (el) => {
+            const enable = el => {
               if (!el) return;
               el.style.overflow = 'auto';
               el.style.overflowY = 'auto';
@@ -7002,12 +7943,25 @@ export class MHCAsiaAutomation {
       const urlNow = this.page.url() || '';
       if (/EmpVisitAdd|VisitAdd/i.test(urlNow)) return true;
       const hasHeader =
-        (await this.page.locator('text=/Employee\\s+Visit\\s*-\\s*Add/i').count().catch(() => 0)) > 0;
+        (await this.page
+          .locator('text=/Employee\\s+Visit\\s*-\\s*Add/i')
+          .count()
+          .catch(() => 0)) > 0;
       const hasConsultFee =
-        (await this.page.locator('text=/Consultation\\s+Fee/i').count().catch(() => 0)) > 0;
-      const hasDrugHeader = (await this.page.locator('text=/Drug\\s+Name/i').count().catch(() => 0)) > 0;
+        (await this.page
+          .locator('text=/Consultation\\s+Fee/i')
+          .count()
+          .catch(() => 0)) > 0;
+      const hasDrugHeader =
+        (await this.page
+          .locator('text=/Drug\\s+Name/i')
+          .count()
+          .catch(() => 0)) > 0;
       const hasSaveDraft =
-        (await this.page.locator('button:has-text("Save As Draft"), input[value*="Save As Draft" i]').count().catch(() => 0)) > 0;
+        (await this.page
+          .locator('button:has-text("Save As Draft"), input[value*="Save As Draft" i]')
+          .count()
+          .catch(() => 0)) > 0;
       return hasHeader || hasConsultFee || hasDrugHeader || hasSaveDraft;
     };
 
@@ -7020,7 +7974,9 @@ export class MHCAsiaAutomation {
     }
 
     this._logStep('Visit form not detected within timeout', { timeoutMs });
-    await this.page.screenshot({ path: 'screenshots/mhc-visit-form-not-ready.png', fullPage: true }).catch(() => {});
+    await this.page
+      .screenshot({ path: 'screenshots/mhc-visit-form-not-ready.png', fullPage: true })
+      .catch(() => {});
     return false;
   }
 
@@ -7035,13 +7991,13 @@ export class MHCAsiaAutomation {
       // Ensure the visit form has rendered before scanning.
       await this.waitForVisitFormReady({ timeout: 5000 }).catch(() => {});
       await this.page.waitForTimeout(500);
-      
+
       // Map visit types
       const typeMap = {
-        'new': 'First Consult',
+        new: 'First Consult',
         'follow up': 'Follow Up',
-        'follow': 'Follow Up',
-        'repeat': 'Repeat Medicine',
+        follow: 'Follow Up',
+        repeat: 'Repeat Medicine',
         'repeat medicine': 'Repeat Medicine',
       };
 
@@ -7049,22 +8005,31 @@ export class MHCAsiaAutomation {
 
       // Prefer row-based lookup to avoid mis-detecting unrelated selects.
       const rowFilled = await this.page
-        .evaluate((label) => {
-          const norm = (s) => (s || '').toString().replace(/\\s+/g, ' ').trim().toLowerCase();
+        .evaluate(label => {
+          const norm = s => (s || '').toString().replace(/\\s+/g, ' ').trim().toLowerCase();
           const rows = Array.from(document.querySelectorAll('tr'));
-          const row = rows.find((r) => /(charge|visit)\\s*type/i.test(norm(r.textContent || '')));
+          const row = rows.find(r => /(charge|visit)\\s*type/i.test(norm(r.textContent || '')));
           if (!row) return false;
           const select =
             row.querySelector('select') ||
-            row.querySelector('select[name*="charge" i], select[id*="charge" i], select[name*="visit" i], select[id*="visit" i], select[name*="type" i]');
+            row.querySelector(
+              'select[name*="charge" i], select[id*="charge" i], select[name*="visit" i], select[id*="visit" i], select[name*="type" i]'
+            );
           if (!select) return false;
           const options = Array.from(select.querySelectorAll('option'));
           const desired = String(label || '').toLowerCase();
           const match =
-            options.find((o) => norm(o.textContent || o.value || '') === desired) ||
-            options.find((o) => norm(o.textContent || o.value || '').includes(desired)) ||
-            options.find((o) => /first\\s*consult/i.test(norm(o.textContent || o.value || '')) && /first/.test(desired)) ||
-            options.find((o) => /follow\\s*up/i.test(norm(o.textContent || o.value || '')) && /follow/.test(desired));
+            options.find(o => norm(o.textContent || o.value || '') === desired) ||
+            options.find(o => norm(o.textContent || o.value || '').includes(desired)) ||
+            options.find(
+              o =>
+                /first\\s*consult/i.test(norm(o.textContent || o.value || '')) &&
+                /first/.test(desired)
+            ) ||
+            options.find(
+              o =>
+                /follow\\s*up/i.test(norm(o.textContent || o.value || '')) && /follow/.test(desired)
+            );
           if (!match) return false;
           select.value = match.value;
           select.dispatchEvent(new Event('change', { bubbles: true }));
@@ -7080,20 +8045,22 @@ export class MHCAsiaAutomation {
       // Retry once after a short wait (some forms render late).
       await this.page.waitForTimeout(800);
       const rowRetry = await this.page
-        .evaluate((label) => {
-          const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+        .evaluate(label => {
+          const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
           const rows = Array.from(document.querySelectorAll('tr'));
-          const row = rows.find((r) => /(charge|visit)\\s*type/i.test(norm(r.textContent || '')));
+          const row = rows.find(r => /(charge|visit)\\s*type/i.test(norm(r.textContent || '')));
           if (!row) return false;
           const select =
             row.querySelector('select') ||
-            row.querySelector('select[name*="charge" i], select[id*="charge" i], select[name*="visit" i], select[id*="visit" i], select[name*="type" i]');
+            row.querySelector(
+              'select[name*="charge" i], select[id*="charge" i], select[name*="visit" i], select[id*="visit" i], select[name*="type" i]'
+            );
           if (!select) return false;
           const options = Array.from(select.querySelectorAll('option'));
           const desired = String(label || '').toLowerCase();
           const match =
-            options.find((o) => norm(o.textContent || o.value || '') === desired) ||
-            options.find((o) => norm(o.textContent || o.value || '').includes(desired));
+            options.find(o => norm(o.textContent || o.value || '') === desired) ||
+            options.find(o => norm(o.textContent || o.value || '').includes(desired));
           if (!match) return false;
           select.value = match.value;
           select.dispatchEvent(new Event('change', { bubbles: true }));
@@ -7105,27 +8072,27 @@ export class MHCAsiaAutomation {
         return true;
       }
 
-      const fillByOptions = async (frame) =>
+      const fillByOptions = async frame =>
         frame
-          .evaluate((label) => {
-            const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+          .evaluate(label => {
+            const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
             const desired = norm(label);
             const selects = Array.from(document.querySelectorAll('select'));
             for (const select of selects) {
-              const options = Array.from(select.querySelectorAll('option')).map((o) => ({
+              const options = Array.from(select.querySelectorAll('option')).map(o => ({
                 value: o.value,
                 label: norm(o.textContent || o.value || ''),
               }));
-              const hasChargeOptions = options.some((o) =>
+              const hasChargeOptions = options.some(o =>
                 /(first\\s*consult|follow\\s*up|repeat\\s*medicine)/i.test(o.label)
               );
               if (!hasChargeOptions) continue;
               const match =
-                options.find((o) => o.label === desired) ||
-                options.find((o) => o.label.includes(desired)) ||
-                options.find((o) => /first\\s*consult/i.test(o.label) && /first/.test(desired)) ||
-                options.find((o) => /follow\\s*up/i.test(o.label) && /follow/.test(desired)) ||
-                options.find((o) => /repeat\\s*medicine/i.test(o.label) && /repeat/.test(desired));
+                options.find(o => o.label === desired) ||
+                options.find(o => o.label.includes(desired)) ||
+                options.find(o => /first\\s*consult/i.test(o.label) && /first/.test(desired)) ||
+                options.find(o => /follow\\s*up/i.test(o.label) && /follow/.test(desired)) ||
+                options.find(o => /repeat\\s*medicine/i.test(o.label) && /repeat/.test(desired));
               if (!match) continue;
               select.value = match.value;
               select.dispatchEvent(new Event('change', { bubbles: true }));
@@ -7170,7 +8137,7 @@ export class MHCAsiaAutomation {
           } else {
             dropdown = this.page.locator(selector).first();
           }
-          
+
           if ((await dropdown.count().catch(() => 0)) > 0) {
             await dropdown.selectOption({ label: mhcType });
             this._logStep('Charge type filled', { visitType, mhcType });
@@ -7193,127 +8160,139 @@ export class MHCAsiaAutomation {
    * Fill MC Days field
    * @param {number} mcDays - Number of MC days (usually 0)
    */
-	  async fillMcDays(mcDays) {
-	    try {
-	      this._logStep('Fill MC days', { mcDays });
-	      
-	      const days = Number.isFinite(Number(mcDays)) ? Number(mcDays) : 0;
+  async fillMcDays(mcDays) {
+    try {
+      this._logStep('Fill MC days', { mcDays });
+
+      const days = Number.isFinite(Number(mcDays)) ? Number(mcDays) : 0;
       // AIA Clinic in particular can pop "Invalid MC Day value!" alerts when the MC field
       // transitions away from its default placeholder. We set "0" for no-MC but avoid
       // firing change events for days=0 to keep the UI stable.
       const effectiveValue = days > 0 ? String(days) : '0';
-      const toNum = (s) => {
+      const toNum = s => {
         const t = (s ?? '').toString().replace(/[^\d.]/g, '');
         const n = Number.parseFloat(t);
         return Number.isFinite(n) ? n : null;
       };
 
-	      // Always attempt to set MC Day, even when 0, to avoid leaving '?' placeholders.
+      // Always attempt to set MC Day, even when 0, to avoid leaving '?' placeholders.
 
-	      // Safe path: DOM-scan within the exact "MC Day" row and fill/select within it only.
-	      // Avoid geometric selectors (easy to target Visit Date by mistake).
-	      const scanned = await this.page
-	        .evaluate(({ days }) => {
-	          const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim();
-          const toNum = (s) => {
-            const t = (s ?? '').toString().replace(/[^\d.]/g, '');
-            const n = Number.parseFloat(t);
-            return Number.isFinite(n) ? n : null;
-          };
-          const isMcDayLabel = (t) => /^MC\s*Day\b/i.test(t) && !/^MC\s*Start/i.test(t);
+      // Safe path: DOM-scan within the exact "MC Day" row and fill/select within it only.
+      // Avoid geometric selectors (easy to target Visit Date by mistake).
+      const scanned = await this.page
+        .evaluate(
+          ({ days }) => {
+            const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim();
+            const toNum = s => {
+              const t = (s ?? '').toString().replace(/[^\d.]/g, '');
+              const n = Number.parseFloat(t);
+              return Number.isFinite(n) ? n : null;
+            };
+            const isMcDayLabel = t => /^MC\s*Day\b/i.test(t) && !/^MC\s*Start/i.test(t);
 
-	          const rowHasField = (row) => row && row.querySelector('select, input:not([type="hidden"])');
+            const rowHasField = row =>
+              row && row.querySelector('select, input:not([type="hidden"])');
 
-	          const cells = Array.from(document.querySelectorAll('td, th, div, span, label, b, strong'));
-	          const candidates = cells
-	            .map((el) => ({ el, text: norm(el.textContent) }))
-	            .filter((x) => isMcDayLabel(x.text))
-	            .sort((a, b) => a.text.length - b.text.length);
-
-	          let row = null;
-	          for (const c of candidates) {
-	            const r = c.el.closest('tr');
-	            if (!r) continue;
-	            if (!rowHasField(r)) continue;
-	            const rowText = norm(r.textContent);
-	            if (/^visit\s*date\b/i.test(rowText) || /\bvisit\s*date\b/i.test(rowText)) continue;
-	            row = r;
-	            break;
-	          }
-
-	          // Fallback: scan tables for a row that contains an MC Day label cell plus a field.
-	          if (!row) {
-	            const tables = Array.from(document.querySelectorAll('table'));
-	            for (const t of tables) {
-	              const rows = Array.from(t.querySelectorAll('tr'));
-	              for (const r of rows) {
-	                const labelCells = Array.from(r.querySelectorAll('td, th')).filter((td) =>
-	                  isMcDayLabel(norm(td.textContent))
-	                );
-	                if (!labelCells.length) continue;
-	                if (!rowHasField(r)) continue;
-	                const rowText = norm(r.textContent);
-	                if (/^visit\s*date\b/i.test(rowText) || /\bvisit\s*date\b/i.test(rowText)) continue;
-	                row = r;
-	                break;
-	              }
-	              if (row) break;
-	            }
-	          }
-
-	          if (!row) return { ok: false, reason: 'row_not_found' };
-
-	          const select = row.querySelector('select');
-	          if (select) {
-	            const opts = Array.from(select.options || []).map((o) => ({
-	              value: (o.value || '').trim(),
-	              label: norm(o.textContent),
-	            }));
-            let match = null;
-            if (days <= 0) {
-              // Most portals treat "0" as the valid "no MC" value; selecting an empty/"?" placeholder
-              // can trigger "Invalid MC Day value!" dialogs later.
-              match =
-                opts.find((o) => toNum(o.value) === 0 || toNum(o.label) === 0) ||
-                opts.find((o) => (o.value || '').trim() === '0' || (o.label || '').trim() === '0') ||
-                opts.find((o) => (o.value || '').trim() === '') ||
-                opts.find((o) => (o.label || '').trim() === '?' || /\bselect\b/i.test(o.label || '')) ||
-                opts.find((o) => /^n\/?a$/i.test((o.label || '').trim()));
-            }
-            if (!match) {
-              match =
-                opts.find((o) => toNum(o.value) === days) ||
-                opts.find((o) => toNum(o.label) === days) ||
-                opts.find((o) => o.value === String(days) || o.label === String(days));
-            }
-            if (!match) return { ok: false, reason: 'no_matching_option', options: opts.slice(0, 30) };
-
-            select.value = match.value;
-            select.dispatchEvent(new Event('input', { bubbles: true }));
-            select.dispatchEvent(new Event('change', { bubbles: true }));
-            return { ok: true, kind: 'select', value: match.value, label: match.label };
-          }
-
-	          const input = row.querySelector('input:not([type="hidden"])');
-	          if (input) {
-	            const v = days > 0 ? String(days) : '0';
-	            input.value = v;
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-            input.dispatchEvent(new Event('change', { bubbles: true }));
-            // Some portals submit a hidden MC-day field; set it too if present.
-            const hidden = Array.from(row.querySelectorAll('input[type="hidden"]')).filter((h) =>
-              /mc/i.test(h.name || h.id || '') && /day/i.test(h.name || h.id || '')
+            const cells = Array.from(
+              document.querySelectorAll('td, th, div, span, label, b, strong')
             );
-            for (const h of hidden) {
-              h.value = v;
-              h.dispatchEvent(new Event('input', { bubbles: true }));
-              h.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-            return { ok: true, kind: 'input', value: v };
-          }
+            const candidates = cells
+              .map(el => ({ el, text: norm(el.textContent) }))
+              .filter(x => isMcDayLabel(x.text))
+              .sort((a, b) => a.text.length - b.text.length);
 
-          return { ok: false, reason: 'no_field_in_row' };
-        }, { days })
+            let row = null;
+            for (const c of candidates) {
+              const r = c.el.closest('tr');
+              if (!r) continue;
+              if (!rowHasField(r)) continue;
+              const rowText = norm(r.textContent);
+              if (/^visit\s*date\b/i.test(rowText) || /\bvisit\s*date\b/i.test(rowText)) continue;
+              row = r;
+              break;
+            }
+
+            // Fallback: scan tables for a row that contains an MC Day label cell plus a field.
+            if (!row) {
+              const tables = Array.from(document.querySelectorAll('table'));
+              for (const t of tables) {
+                const rows = Array.from(t.querySelectorAll('tr'));
+                for (const r of rows) {
+                  const labelCells = Array.from(r.querySelectorAll('td, th')).filter(td =>
+                    isMcDayLabel(norm(td.textContent))
+                  );
+                  if (!labelCells.length) continue;
+                  if (!rowHasField(r)) continue;
+                  const rowText = norm(r.textContent);
+                  if (/^visit\s*date\b/i.test(rowText) || /\bvisit\s*date\b/i.test(rowText))
+                    continue;
+                  row = r;
+                  break;
+                }
+                if (row) break;
+              }
+            }
+
+            if (!row) return { ok: false, reason: 'row_not_found' };
+
+            const select = row.querySelector('select');
+            if (select) {
+              const opts = Array.from(select.options || []).map(o => ({
+                value: (o.value || '').trim(),
+                label: norm(o.textContent),
+              }));
+              let match = null;
+              if (days <= 0) {
+                // Most portals treat "0" as the valid "no MC" value; selecting an empty/"?" placeholder
+                // can trigger "Invalid MC Day value!" dialogs later.
+                match =
+                  opts.find(o => toNum(o.value) === 0 || toNum(o.label) === 0) ||
+                  opts.find(
+                    o => (o.value || '').trim() === '0' || (o.label || '').trim() === '0'
+                  ) ||
+                  opts.find(o => (o.value || '').trim() === '') ||
+                  opts.find(
+                    o => (o.label || '').trim() === '?' || /\bselect\b/i.test(o.label || '')
+                  ) ||
+                  opts.find(o => /^n\/?a$/i.test((o.label || '').trim()));
+              }
+              if (!match) {
+                match =
+                  opts.find(o => toNum(o.value) === days) ||
+                  opts.find(o => toNum(o.label) === days) ||
+                  opts.find(o => o.value === String(days) || o.label === String(days));
+              }
+              if (!match)
+                return { ok: false, reason: 'no_matching_option', options: opts.slice(0, 30) };
+
+              select.value = match.value;
+              select.dispatchEvent(new Event('input', { bubbles: true }));
+              select.dispatchEvent(new Event('change', { bubbles: true }));
+              return { ok: true, kind: 'select', value: match.value, label: match.label };
+            }
+
+            const input = row.querySelector('input:not([type="hidden"])');
+            if (input) {
+              const v = days > 0 ? String(days) : '0';
+              input.value = v;
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+              input.dispatchEvent(new Event('change', { bubbles: true }));
+              // Some portals submit a hidden MC-day field; set it too if present.
+              const hidden = Array.from(row.querySelectorAll('input[type="hidden"]')).filter(
+                h => /mc/i.test(h.name || h.id || '') && /day/i.test(h.name || h.id || '')
+              );
+              for (const h of hidden) {
+                h.value = v;
+                h.dispatchEvent(new Event('input', { bubbles: true }));
+                h.dispatchEvent(new Event('change', { bubbles: true }));
+              }
+              return { ok: true, kind: 'input', value: v };
+            }
+
+            return { ok: false, reason: 'no_field_in_row' };
+          },
+          { days }
+        )
         .catch(() => ({ ok: false, reason: 'evaluate_failed' }));
 
       let anyOk = false;
@@ -7341,21 +8320,27 @@ export class MHCAsiaAutomation {
           const field = this.page.locator(selector).first();
           if ((await field.count().catch(() => 0)) > 0) {
             const nid = await field
-              .evaluate((el) => `${el.getAttribute('name') || ''} ${el.getAttribute('id') || ''}`.toLowerCase())
+              .evaluate(el =>
+                `${el.getAttribute('name') || ''} ${el.getAttribute('id') || ''}`.toLowerCase()
+              )
               .catch(() => '');
             if (nid.includes('visit') || nid.includes('date')) continue;
 
-            const tag = await field.evaluate((el) => el.tagName).catch(() => 'INPUT');
+            const tag = await field.evaluate(el => el.tagName).catch(() => 'INPUT');
             if (tag === 'SELECT') {
-              const options = await field.locator('option').evaluateAll((opts) =>
-                opts.map((o) => ({ value: o.value, label: (o.textContent || '').trim() }))
-              );
+              const options = await field
+                .locator('option')
+                .evaluateAll(opts =>
+                  opts.map(o => ({ value: o.value, label: (o.textContent || '').trim() }))
+                );
               const match =
                 (days === 0
-                  ? options.find((o) => toNum(o.value) === 0 || toNum(o.label) === 0) ||
-                    options.find((o) => (o.value || '').trim() === '0' || (o.label || '').trim() === '0') ||
+                  ? options.find(o => toNum(o.value) === 0 || toNum(o.label) === 0) ||
                     options.find(
-                      (o) =>
+                      o => (o.value || '').trim() === '0' || (o.label || '').trim() === '0'
+                    ) ||
+                    options.find(
+                      o =>
                         (o.value || '').trim() === '' ||
                         (o.label || '').trim() === '' ||
                         /^\?$/.test((o.label || '').trim()) ||
@@ -7363,15 +8348,23 @@ export class MHCAsiaAutomation {
                         /^n\/?a$/i.test((o.label || '').trim())
                     )
                   : null) ||
-                options.find((o) => toNum(o.value) === days) ||
-                options.find((o) => toNum(o.label) === days) ||
-                options.find((o) => (o.label || '').trim() === String(days) || (o.value || '').trim() === String(days)) ||
-                options.find((o) => toNum(o.value) === 0 || toNum(o.label) === 0);
+                options.find(o => toNum(o.value) === days) ||
+                options.find(o => toNum(o.label) === days) ||
+                options.find(
+                  o =>
+                    (o.label || '').trim() === String(days) ||
+                    (o.value || '').trim() === String(days)
+                ) ||
+                options.find(o => toNum(o.value) === 0 || toNum(o.label) === 0);
               if (match) {
-                await field.selectOption({ value: match.value }).catch(async () =>
-                  field.selectOption({ label: match.label })
-                );
-                this._logStep('MC days selected', { mcDays: days, value: match.value, label: match.label });
+                await field
+                  .selectOption({ value: match.value })
+                  .catch(async () => field.selectOption({ label: match.label }));
+                this._logStep('MC days selected', {
+                  mcDays: days,
+                  value: match.value,
+                  label: match.label,
+                });
                 anyOk = true;
                 continue;
               }
@@ -7408,7 +8401,9 @@ export class MHCAsiaAutomation {
           .first()
           .locator('input:not([type="hidden"])')
           .first()
-          .evaluate((el) => String(el.value || '').trim() === '?' || String(el.value || '').trim() === '')
+          .evaluate(
+            el => String(el.value || '').trim() === '?' || String(el.value || '').trim() === ''
+          )
           .catch(() => false);
         if (placeholderPresent) {
           this._logStep('MC days left as placeholder to avoid portal validation', { mcDays: days });
@@ -7418,12 +8413,16 @@ export class MHCAsiaAutomation {
 
       if (scanned?.reason === 'no_matching_option') {
         this._logStep('MC day present but no matching option', { mcDays: days, ...scanned });
-        await this.page.screenshot({ path: 'screenshots/mhc-mc-days-option-not-found.png', fullPage: true }).catch(() => {});
+        await this.page
+          .screenshot({ path: 'screenshots/mhc-mc-days-option-not-found.png', fullPage: true })
+          .catch(() => {});
         return false;
       }
 
       logger.warn('MC days field not found');
-      await this.page.screenshot({ path: 'screenshots/mhc-mc-days-not-found.png', fullPage: true }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/mhc-mc-days-not-found.png', fullPage: true })
+        .catch(() => {});
       return false;
     } catch (error) {
       logger.error('Failed to fill MC days:', error);
@@ -7438,7 +8437,7 @@ export class MHCAsiaAutomation {
   async fillConsultationFee(fee) {
     try {
       this._logStep('Fill consultation fee', { fee });
-      
+
       // Strategy: Enter 99999 to trigger max amount dialog, then accept it.
       // Must be strict about selecting the right input; outer-table selectors can accidentally
       // target MC Day on these forms.
@@ -7446,31 +8445,31 @@ export class MHCAsiaAutomation {
 
       // Strict first attempt: find the row whose label starts with "Consultation Fee" and fill the best input in that row.
       const strict = await this.page
-        .evaluate((value) => {
-          const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim();
-          const isVisible = (el) => {
+        .evaluate(value => {
+          const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim();
+          const isVisible = el => {
             if (!el) return false;
             const style = window.getComputedStyle(el);
             if (!style) return false;
             if (style.display === 'none' || style.visibility === 'hidden') return false;
             return true;
           };
-          const sameNumeric = (a, b) => {
+          const _sameNumeric = (a, b) => {
             const n1 = Number(String(a || '').trim());
             const n2 = Number(String(b || '').trim());
             if (!Number.isFinite(n1) || !Number.isFinite(n2)) return false;
             return Math.abs(n1 - n2) < 1e-9;
           };
           const cells = Array.from(document.querySelectorAll('td, th, label, span, b, strong'));
-          const label = cells.find((el) => /^Consultation\s*Fee\b/i.test(norm(el.textContent)));
+          const label = cells.find(el => /^Consultation\s*Fee\b/i.test(norm(el.textContent)));
           if (!label) return { ok: false, reason: 'label_not_found' };
           const row = label.closest('tr');
           if (!row) return { ok: false, reason: 'row_not_found' };
           const inputs = Array.from(
             row.querySelectorAll('input[type="text"], input[type="number"], input:not([type])')
-          ).filter((x) => isVisible(x) && !x.disabled);
+          ).filter(x => isVisible(x) && !x.disabled);
           if (!inputs.length) return { ok: false, reason: 'input_not_found' };
-          const score = (inp) => {
+          const score = inp => {
             const idn = `${inp.name || ''} ${inp.id || ''}`.toLowerCase();
             let s = 0;
             if (/consult/.test(idn)) s += 30;
@@ -7506,7 +8505,7 @@ export class MHCAsiaAutomation {
       if (strict?.ok) {
         this._logStep('Consultation fee set to 99999 (strict row scan)', strict);
       }
-      
+
       // Try to find the consultation fee field
       const feeSelectors = [
         // Row-based (works on many AIA/Singlife forms); avoid readonly date inputs in the same table.
@@ -7520,7 +8519,7 @@ export class MHCAsiaAutomation {
       ];
 
       let feeInput = null;
-      
+
       // First try direct selectors
       for (const selector of feeSelectors) {
         try {
@@ -7542,7 +8541,7 @@ export class MHCAsiaAutomation {
       if (!feeInput && !strict?.ok) {
         try {
           const feeLabel = this.page.locator('td:has-text("Consultation Fee")').first();
-          if (await feeLabel.count() > 0) {
+          if ((await feeLabel.count()) > 0) {
             const row = feeLabel.locator('xpath=ancestor::tr');
             const input = row
               .locator(
@@ -7553,7 +8552,7 @@ export class MHCAsiaAutomation {
                   'input[type="text"]:not([readonly]):not([disabled])'
               )
               .first();
-            if (await input.count() > 0) {
+            if ((await input.count()) > 0) {
               feeInput = input;
             }
           }
@@ -7577,10 +8576,10 @@ export class MHCAsiaAutomation {
           }
           return false;
         });
-        
+
         if (found) {
           // Use JavaScript to fill
-          await this.page.evaluate((value) => {
+          await this.page.evaluate(value => {
             const inputs = document.querySelectorAll('input[type="text"]');
             for (const input of inputs) {
               const row = input.closest('tr');
@@ -7595,7 +8594,7 @@ export class MHCAsiaAutomation {
               return;
             }
           }, highAmount);
-          
+
           this._logStep('Consultation fee set to 99999 via JS, waiting for dialog');
         }
       } else if (feeInput) {
@@ -7608,12 +8607,14 @@ export class MHCAsiaAutomation {
 
       // Wait for and accept the max amount dialog
       await this.page.waitForTimeout(500);
-      
+
       // Handle the dialog - accept to use the max amount
       // The dialog handler should be set up before this, but also try clicking OK
       try {
-        const okButton = this.page.locator('button:has-text("OK"), input[value="OK"], button:has-text("Yes")').first();
-        if (await okButton.count() > 0 && await okButton.isVisible()) {
+        const okButton = this.page
+          .locator('button:has-text("OK"), input[value="OK"], button:has-text("Yes")')
+          .first();
+        if ((await okButton.count()) > 0 && (await okButton.isVisible())) {
           await okButton.click();
           this._logStep('Clicked OK on max amount dialog');
         }
@@ -7659,7 +8660,8 @@ export class MHCAsiaAutomation {
           const tag = String(el.tagName || '').toLowerCase();
           const type = String(el.getAttribute?.('type') || '').toLowerCase();
           if (type === 'checkbox') return el.checked ? 'true' : 'false';
-          if (type === 'radio') return el.checked ? clean(el.value || el.getAttribute?.('value') || 'true') : '';
+          if (type === 'radio')
+            return el.checked ? clean(el.value || el.getAttribute?.('value') || 'true') : '';
           if (tag === 'select') {
             const selected = el.options?.[el.selectedIndex];
             return clean(selected?.textContent || el.value || '');
@@ -7670,10 +8672,13 @@ export class MHCAsiaAutomation {
           const tag = String(el.tagName || '').toLowerCase();
           if (!['input', 'select', 'textarea'].includes(tag)) return false;
           const type = String(el.getAttribute?.('type') || '').toLowerCase();
-          if (type === 'hidden' || type === 'button' || type === 'submit' || type === 'reset') return false;
+          if (type === 'hidden' || type === 'button' || type === 'submit' || type === 'reset')
+            return false;
           return true;
         };
-        const formFields = Array.from(document.querySelectorAll('input, select, textarea')).filter(isUsefulField);
+        const formFields = Array.from(document.querySelectorAll('input, select, textarea')).filter(
+          isUsefulField
+        );
         const namedValues = {};
         for (const field of formFields) {
           const key = clean(field.getAttribute('name') || field.getAttribute('id') || '');
@@ -7722,7 +8727,9 @@ export class MHCAsiaAutomation {
         const findByNames = (...names) => {
           for (const name of names) {
             if (namedValues[name]) return namedValues[name];
-            const hit = Object.entries(namedValues).find(([key]) => key.toLowerCase() === String(name).toLowerCase());
+            const hit = Object.entries(namedValues).find(
+              ([key]) => key.toLowerCase() === String(name).toLowerCase()
+            );
             if (hit?.[1]) return hit[1];
           }
           return '';
@@ -7784,7 +8791,8 @@ export class MHCAsiaAutomation {
           const pushItem = (kind, name, meta = {}) => {
             const cleanName = clean(name);
             if (!cleanName) return;
-            if (/^(drug name|procedure name|unit|qty|claim|amount|medicine)$/i.test(cleanName)) return;
+            if (/^(drug name|procedure name|unit|qty|claim|amount|medicine)$/i.test(cleanName))
+              return;
             const normalizedKind = clean(kind) || 'item';
             const dupeKey = `${normalizedKind}|${cleanName}|${clean(meta.quantity || '')}|${clean(meta.amount || '')}`;
             if (items.some(item => item._dupeKey === dupeKey)) return;
@@ -7819,13 +8827,19 @@ export class MHCAsiaAutomation {
             const label = clean(row.label || row.cellTexts?.[0] || '');
             const text = clean(row.text || '');
             if (text.length > 220) continue;
-            if (!/\b(drug|medicine|medication|procedure|service)\b/i.test(label) &&
-                !/\b(drug|medicine|medication|procedure|service)\b/i.test(text)) {
+            if (
+              !/\b(drug|medicine|medication|procedure|service)\b/i.test(label) &&
+              !/\b(drug|medicine|medication|procedure|service)\b/i.test(text)
+            ) {
               continue;
             }
             const valueCells = row.cellTexts.slice(1).filter(Boolean);
             if (!valueCells.length) continue;
-            if (valueCells.every(cell => !/\d/.test(cell) && /unit|qty|claim|amount|price|sgd/i.test(cell))) {
+            if (
+              valueCells.every(
+                cell => !/\d/.test(cell) && /unit|qty|claim|amount|price|sgd/i.test(cell)
+              )
+            ) {
               continue;
             }
             if (/first consult|follow up|repeat medicine/i.test(valueCells[0])) {
@@ -7870,7 +8884,9 @@ export class MHCAsiaAutomation {
           text => /\b(employee|member|patient)\s+name\b/i.test(text),
           text => /\bdoctor\b/i.test(text)
         );
-        const patientNricRow = findRowValue(text => /\b(nric|fin|member\s*id|employee\s*id|id\s*no)\b/i.test(text));
+        const patientNricRow = findRowValue(text =>
+          /\b(nric|fin|member\s*id|employee\s*id|id\s*no)\b/i.test(text)
+        );
         const chargeTypeRow = findRowValue(text => /\bcharge\s*type\b/i.test(text));
         const mcDaysRow = findRowValue(
           text => /^mc\s*day\b/i.test(text) || /\bmc\s*day\b/i.test(text),
@@ -7879,13 +8895,21 @@ export class MHCAsiaAutomation {
         const mcStartRow = findRowValue(text => /\bmc\s*start\b/i.test(text));
         const visitDateRow = findRowValue(text => /\bvisit\s*date\b/i.test(text));
         const consultFeeRow = findRowValue(text => /\bconsultation\s*fee\b/i.test(text));
-        const totalFeeRow = findRowValue(text => /^total\s*fee\b/i.test(text) || /\btotal\s*fee\b/i.test(text));
-        const totalClaimRow = findRowValue(text => /^total\s*claim\b/i.test(text) || /\btotal\s*claim\b/i.test(text));
+        const totalFeeRow = findRowValue(
+          text => /^total\s*fee\b/i.test(text) || /\btotal\s*fee\b/i.test(text)
+        );
+        const totalClaimRow = findRowValue(
+          text => /^total\s*claim\b/i.test(text) || /\btotal\s*claim\b/i.test(text)
+        );
         const remarksRow = findRowValue(text => /\bremarks?\b/i.test(text));
         const claimStatusRow = findRowValue(text => /\bclaim\s*status\b/i.test(text));
         const lineItems = collectLineItems();
-        const patientNameText = findLabeledText(text => /\b(employee|member|patient)\s+name\b/i.test(text));
-        const patientIdText = findLabeledText(text => /\b(patient|member|employee)\s+id\b/i.test(text));
+        const patientNameText = findLabeledText(text =>
+          /\b(employee|member|patient)\s+name\b/i.test(text)
+        );
+        const patientIdText = findLabeledText(text =>
+          /\b(patient|member|employee)\s+id\b/i.test(text)
+        );
         const visitNoText = findLabeledText(text => /\bvisit\s+no\b/i.test(text));
         const visitNoFromText =
           clean(visitNoText).match(/\b(?:EV|CL)\d+\b/i)?.[0] ||
@@ -7938,9 +8962,12 @@ export class MHCAsiaAutomation {
             '',
           diagnosisCode,
           diagnosisText: diagnosisDesc,
-          consultationFee: findByNames('consultFee', 'consultationFee') || consultFeeRow?.value || '',
+          consultationFee:
+            findByNames('consultFee', 'consultationFee') || consultFeeRow?.value || '',
           totalFee:
-            findByNames('totalUnitFee', 'totalFee', 'empVisitDetail_totalFee') || totalFeeRow?.value || '',
+            findByNames('totalUnitFee', 'totalFee', 'empVisitDetail_totalFee') ||
+            totalFeeRow?.value ||
+            '',
           totalClaim:
             findByNames(
               'totalUnitClaim',
@@ -7968,17 +8995,15 @@ export class MHCAsiaAutomation {
             ...namedValues,
           },
           lineItems,
-          rowHints: rowEntries
-            .slice(0, 80)
-            .map(row => ({
-              key: toKey(row.label || row.cellTexts?.[0] || row.text || ''),
-              label: row.label || null,
-              text: row.text || null,
-              values: row.fields.map(field => ({
-                name: field.name,
-                value: field.value,
-              })),
+          rowHints: rowEntries.slice(0, 80).map(row => ({
+            key: toKey(row.label || row.cellTexts?.[0] || row.text || ''),
+            label: row.label || null,
+            text: row.text || null,
+            values: row.fields.map(field => ({
+              name: field.name,
+              value: field.value,
             })),
+          })),
         };
       })
       .catch(error => ({
@@ -8145,9 +9170,7 @@ export class MHCAsiaAutomation {
       'the',
       'in',
     ]);
-    const tokens = descNorm
-      .split(/\s+/)
-      .filter((w) => w.length >= 3 && !stop.has(w));
+    const tokens = descNorm.split(/\s+/).filter(w => w.length >= 3 && !stop.has(w));
     const bodyPart = tokens[0] || '';
     const sideBody = side && bodyPart ? `${side} ${bodyPart}` : '';
     const noDot = code ? code.replace(/\./g, '') : '';
@@ -8160,26 +9183,23 @@ export class MHCAsiaAutomation {
       code,
       noDot,
     ]
-      .map((v) => String(v || '').trim())
-      .filter((v) => v.length >= 2);
+      .map(v => String(v || '').trim())
+      .filter(v => v.length >= 2);
     return Array.from(new Set(candidates));
   }
 
   async prefetchDiagnosisOptions(opts = {}) {
-    const {
-      diagnosisHint = null,
-      maxRows = 100,
-      maxTerms = 6,
-      contextHint = null,
-    } = opts || {};
+    const { diagnosisHint = null, maxRows = 100, maxTerms = 6, contextHint = null } = opts || {};
 
     const fetchedAt = new Date().toISOString();
     const context = String(contextHint || this._inferPortalContext() || 'mhc').toLowerCase();
     const options = [];
     const seen = new Set();
     const searchTerms = this._buildDiagnosisSearchTermsFromHint(diagnosisHint).slice(0, maxTerms);
-    const addOption = (row) => {
-      const text = String(row?.text || '').replace(/\s+/g, ' ').trim();
+    const addOption = row => {
+      const text = String(row?.text || '')
+        .replace(/\s+/g, ' ')
+        .trim();
       if (!text) return;
       if (/^\s*na\s*$/i.test(text)) return;
       const code = this._extractDiagnosisCodeToken(row?.code || text) || null;
@@ -8201,11 +9221,14 @@ export class MHCAsiaAutomation {
       const dropdown = this.page
         .locator('select[name="diagnosisPriIdTemp"], select[id*="diagnosisPriIdTemp" i]')
         .first();
-      if ((await dropdown.count().catch(() => 0)) > 0 && (await dropdown.isVisible().catch(() => false))) {
+      if (
+        (await dropdown.count().catch(() => 0)) > 0 &&
+        (await dropdown.isVisible().catch(() => false))
+      ) {
         const dropdownOptions = await dropdown
           .locator('option')
-          .evaluateAll((opts) =>
-            opts.map((o) => ({
+          .evaluateAll(opts =>
+            opts.map(o => ({
               text: String(o.textContent || '').trim(),
               value: String(o.value || '').trim(),
             }))
@@ -8256,8 +9279,8 @@ export class MHCAsiaAutomation {
         if (popup) {
           ctx = {
             kind: 'popup',
-            locator: (sel) => popup.locator(sel),
-            waitForTimeout: (ms) => popup.waitForTimeout(ms),
+            locator: sel => popup.locator(sel),
+            waitForTimeout: ms => popup.waitForTimeout(ms),
             close: async () => popup.close().catch(() => {}),
           };
         } else {
@@ -8267,14 +9290,19 @@ export class MHCAsiaAutomation {
               has: this.page.locator('input[type="text"], input[type="search"], input:not([type])'),
             })
             .first();
-          if ((await modal.count().catch(() => 0)) > 0 && (await modal.isVisible().catch(() => false))) {
+          if (
+            (await modal.count().catch(() => 0)) > 0 &&
+            (await modal.isVisible().catch(() => false))
+          ) {
             ctx = {
               kind: 'modal',
-              locator: (sel) => modal.locator(sel),
-              waitForTimeout: (ms) => this.page.waitForTimeout(ms),
+              locator: sel => modal.locator(sel),
+              waitForTimeout: ms => this.page.waitForTimeout(ms),
               close: async () => {
                 const closeBtn = modal
-                  .locator('button:has-text("Close"), button.close, [data-dismiss="modal"], a:has-text("Close")')
+                  .locator(
+                    'button:has-text("Close"), button.close, [data-dismiss="modal"], a:has-text("Close")'
+                  )
                   .first();
                 if ((await closeBtn.count().catch(() => 0)) > 0) {
                   await closeBtn.click().catch(() => {});
@@ -8317,7 +9345,10 @@ export class MHCAsiaAutomation {
                 await searchField.press('Control+A').catch(() => {});
                 await searchField.type(term).catch(() => {});
               });
-              if ((await searchBtn.count().catch(() => 0)) > 0 && (await searchBtn.isVisible().catch(() => false))) {
+              if (
+                (await searchBtn.count().catch(() => 0)) > 0 &&
+                (await searchBtn.isVisible().catch(() => false))
+              ) {
                 await searchBtn.click().catch(() => {});
               } else {
                 await searchField.press('Enter').catch(() => {});
@@ -8332,10 +9363,18 @@ export class MHCAsiaAutomation {
                   .replace(/\s+/g, ' ')
                   .trim();
                 if (!rowText) continue;
-                if (/click on the diagnosis|starts with|equals to|next|prev|sort/i.test(rowText.toLowerCase())) {
+                if (
+                  /click on the diagnosis|starts with|equals to|next|prev|sort/i.test(
+                    rowText.toLowerCase()
+                  )
+                ) {
                   continue;
                 }
-                const hasSelectable = (await row.locator('a, button, input[type="button"], input[type="submit"]').count().catch(() => 0)) > 0;
+                const hasSelectable =
+                  (await row
+                    .locator('a, button, input[type="button"], input[type="submit"]')
+                    .count()
+                    .catch(() => 0)) > 0;
                 if (!hasSelectable) continue;
                 const code = this._extractDiagnosisCodeToken(rowText);
                 if (!code && !/[a-z]{3,}/i.test(rowText)) continue;
@@ -8391,19 +9430,21 @@ export class MHCAsiaAutomation {
 
     const state = await this.page
       .evaluate(() => {
-        const readInputValue = (selector) => {
+        const readInputValue = selector => {
           const el = document.querySelector(selector);
           if (!el) return '';
           return String(el.value || '').trim();
         };
-        const readSelectLabel = (selector) => {
+        const readSelectLabel = selector => {
           const el = document.querySelector(selector);
           if (!el || el.tagName?.toLowerCase() !== 'select') return '';
           const selected = el.options?.[el.selectedIndex];
           return String(selected?.textContent || el.value || '').trim();
         };
 
-        const diagnosisPriId = readInputValue('input[name="diagnosisPriId"], input[id*="diagnosisPriId" i]');
+        const diagnosisPriId = readInputValue(
+          'input[name="diagnosisPriId"], input[id*="diagnosisPriId" i]'
+        );
         const diagnosisPriDesc = readInputValue(
           'input[name="diagnosisPriDesc"], input[id*="diagnosisPriDesc" i], input[name*="diagnosisPriDesc" i]'
         );
@@ -8441,7 +9482,7 @@ export class MHCAsiaAutomation {
           reasons,
         };
       })
-      .catch((error) => ({
+      .catch(error => ({
         resolved: false,
         diagnosisPriId: '',
         diagnosisPriDesc: '',
@@ -8473,9 +9514,20 @@ export class MHCAsiaAutomation {
     try {
       const allowTextFallback =
         options?.allowTextFallback === true || process.env.MHC_ALLOW_DIAG_TEXT_FALLBACK === '1';
-      const code = diagnosisText && typeof diagnosisText === 'object' ? String(diagnosisText.code || '').trim() : '';
+      // When the extractor said `missing_in_source` we MUST NOT let the modal's
+      // first-ICD-row-wins picker fire — that is how visit 3fb132fc ended up
+      // submitted as "S83.411A - Sprain of the knee" against an admin truth of
+      // "Cough" (the picker grabbed a leftover row from the prior patient's
+      // session). Caller passes `disableGenericRowPick: true` for this case.
+      const disableGenericRowPick = options?.disableGenericRowPick === true;
+      const code =
+        diagnosisText && typeof diagnosisText === 'object'
+          ? String(diagnosisText.code || '').trim()
+          : '';
       const desc =
-        diagnosisText && typeof diagnosisText === 'object' ? String(diagnosisText.description || '').trim() : String(diagnosisText || '').trim();
+        diagnosisText && typeof diagnosisText === 'object'
+          ? String(diagnosisText.description || '').trim()
+          : String(diagnosisText || '').trim();
 
       const preview = (code || desc).slice(0, 50);
       this._logStep('Fill primary diagnosis via M button', { diagnosis: preview });
@@ -8518,7 +9570,7 @@ export class MHCAsiaAutomation {
         return false;
       }
 
-      const fillInFormTextFallback = async (why) => {
+      const fillInFormTextFallback = async why => {
         const fallbackText = [code, desc].filter(Boolean).join(' - ').slice(0, 80);
         if (!fallbackText) return false;
         // In AIA Clinic pages, only write to explicit diagnosis primary description inputs.
@@ -8526,8 +9578,8 @@ export class MHCAsiaAutomation {
         const urlNow = this.page.url() || '';
         if (this.isAiaClinicSystem || /aiaclinic\.com/i.test(urlNow)) {
           const safeFilled = await this.page
-            .evaluate((value) => {
-              const isVisible = (el) => {
+            .evaluate(value => {
+              const isVisible = el => {
                 if (!el) return false;
                 const style = window.getComputedStyle(el);
                 if (!style) return false;
@@ -8540,7 +9592,7 @@ export class MHCAsiaAutomation {
                 document.querySelectorAll(
                   'input[name="diagnosisPriDesc"], input[id*="diagnosisPriDesc" i], input[name*="diagnosisPriDesc" i]'
                 )
-              ).filter((el) => {
+              ).filter(el => {
                 const name = `${el.getAttribute('name') || ''} ${el.id || ''}`.toLowerCase();
                 if (name.includes('sec') || name.includes('secondary')) return false;
                 if (el.disabled) return false;
@@ -8568,9 +9620,9 @@ export class MHCAsiaAutomation {
         if (why) this._logStep(why, { url: this.page.url() });
 
         const filled = await this.page
-          .evaluate((val) => {
-            const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim();
-            const isVisible = (el) => {
+          .evaluate(val => {
+            const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim();
+            const isVisible = el => {
               if (!el) return false;
               const style = window.getComputedStyle(el);
               if (!style) return false;
@@ -8579,21 +9631,23 @@ export class MHCAsiaAutomation {
               if (!rect || rect.width <= 0 || rect.height <= 0) return false;
               return true;
             };
-            const sameNumeric = (a, b) => {
+            const _sameNumeric = (a, b) => {
               const n1 = Number(String(a || '').trim());
               const n2 = Number(String(b || '').trim());
               if (!Number.isFinite(n1) || !Number.isFinite(n2)) return false;
               return Math.abs(n1 - n2) < 1e-9;
             };
-            const isAllowed = (el) => {
+            const isAllowed = el => {
               if (!el || el.disabled) return false;
               if (!isVisible(el)) return false;
               const tag = el.tagName?.toLowerCase();
-              const name = `${el.getAttribute('name') || ''} ${el.id || ''} ${el.getAttribute('aria-label') || ''}`.toLowerCase();
+              const name =
+                `${el.getAttribute('name') || ''} ${el.id || ''} ${el.getAttribute('aria-label') || ''}`.toLowerCase();
               if (name.includes('remark') || name.includes('special')) return false;
               const cellText = norm(el.closest('td, th')?.textContent || '');
               const rowText = norm(el.closest('tr')?.textContent || '');
-              if (/special\s+remarks/i.test(cellText) || /special\s+remarks/i.test(rowText)) return false;
+              if (/special\s+remarks/i.test(cellText) || /special\s+remarks/i.test(rowText))
+                return false;
               if (tag === 'textarea' && !/diag|dx|icd/.test(name)) return false;
               return tag === 'input' || tag === 'textarea';
             };
@@ -8619,7 +9673,7 @@ export class MHCAsiaAutomation {
               document.querySelectorAll(
                 'input[name="diagnosisPriDesc"], input[id*="diagnosisPriDesc" i], input[name*="diagnosisPriDesc" i]'
               )
-            ).filter((el) => {
+            ).filter(el => {
               const name = `${el.getAttribute('name') || ''} ${el.id || ''}`.toLowerCase();
               if (name.includes('sec') || name.includes('secondary')) return false;
               return true;
@@ -8628,9 +9682,10 @@ export class MHCAsiaAutomation {
               if (setField(el, val)) return true;
             }
 
-            const score = (el) => {
+            const score = el => {
               const tag = el.tagName?.toLowerCase();
-              const name = `${el.getAttribute('name') || ''} ${el.id || ''} ${el.getAttribute('aria-label') || ''}`.toLowerCase();
+              const name =
+                `${el.getAttribute('name') || ''} ${el.id || ''} ${el.getAttribute('aria-label') || ''}`.toLowerCase();
               let s = 0;
               if (/diag|dx|icd/.test(name)) s += 50;
               if (tag === 'input') s += 10;
@@ -8638,22 +9693,24 @@ export class MHCAsiaAutomation {
               const w = el.getBoundingClientRect().width || 0;
               return s + w / 10;
             };
-            const rows = Array.from(document.querySelectorAll('tr')).filter((r) =>
+            const rows = Array.from(document.querySelectorAll('tr')).filter(r =>
               /Diagnosis\s*(Pri|Primary|Sec|Secondary)?/i.test(norm(r.textContent || ''))
             );
             if (!rows.length) return false;
-            const priRows = rows.filter((r) => /Diagnosis\s+Pri/i.test(norm(r.textContent || '')));
+            const priRows = rows.filter(r => /Diagnosis\s+Pri/i.test(norm(r.textContent || '')));
             const targetRows = priRows.length ? priRows : rows;
             for (const row of targetRows) {
               const rowText = norm(row.textContent || '');
               if (/Special\s+Remarks/i.test(rowText)) continue;
               if (!/Diagnosis/i.test(rowText)) continue;
               const cells = Array.from(row.querySelectorAll('th, td'));
-              const labelCell = cells.find((c) => /Diagnosis\s+Pri/i.test(norm(c.textContent)));
+              const labelCell = cells.find(c => /Diagnosis\s+Pri/i.test(norm(c.textContent)));
               const candidates = [];
-              const addFrom = (root) => {
+              const addFrom = root => {
                 if (!root) return;
-                const inputs = Array.from(root.querySelectorAll('input[type="text"], input:not([type]), textarea'));
+                const inputs = Array.from(
+                  root.querySelectorAll('input[type="text"], input:not([type]), textarea')
+                );
                 for (const el of inputs) {
                   const localCell = norm(el.closest('td, th')?.textContent || '');
                   if (/special\s+remarks/i.test(localCell)) continue;
@@ -8723,9 +9780,9 @@ export class MHCAsiaAutomation {
         .toLowerCase()
         .replace(/[^a-z0-9\s]/g, ' ')
         .split(/\s+/)
-        .filter((w) => w.length >= 3)
-        .filter((w) => !/\d/.test(w))
-        .filter((w) => !stop.has(w));
+        .filter(w => w.length >= 3)
+        .filter(w => !/\d/.test(w))
+        .filter(w => !stop.has(w));
       // Practical default: many valid diagnosis rows only match one strong keyword
       // (e.g., "shoulder"), so 50 is too strict and leaves Diagnosis Pri as NA.
       const minScore = Number(process.env.MHC_DIAG_MIN_SCORE || '25');
@@ -8737,7 +9794,9 @@ export class MHCAsiaAutomation {
         .replace(/\s+/g, ' ')
         .trim();
       const sideToken = descNorm.match(/\b(left|right|bilateral)\b/i)?.[1]?.toLowerCase() || '';
-      const shoulderPhrase = /\bshoulder\b/i.test(descNorm) ? `${sideToken ? `${sideToken} ` : ''}shoulder`.trim() : '';
+      const shoulderPhrase = /\bshoulder\b/i.test(descNorm)
+        ? `${sideToken ? `${sideToken} ` : ''}shoulder`.trim()
+        : '';
       const sideWordSet = new Set(['left', 'right', 'bilateral']);
       const weakBodyTokens = new Set(['acute', 'chronic', 'joint', 'region', 'unspecified']);
       const knownBodyParts = [
@@ -8755,11 +9814,11 @@ export class MHCAsiaAutomation {
       ];
       const descWords = descNorm.split(' ').filter(Boolean);
       const bodyPartKeywordPool = keywords.filter(
-        (w) => !weakBodyTokens.has(w) && !sideWordSet.has(w) && /^[a-z]+$/.test(w)
+        w => !weakBodyTokens.has(w) && !sideWordSet.has(w) && /^[a-z]+$/.test(w)
       );
       const bodyPartToken =
-        knownBodyParts.find((k) => descWords.includes(k) || descNorm.includes(k)) ||
-        bodyPartKeywordPool.find((k) => knownBodyParts.includes(k)) ||
+        knownBodyParts.find(k => descWords.includes(k) || descNorm.includes(k)) ||
+        bodyPartKeywordPool.find(k => knownBodyParts.includes(k)) ||
         '';
       const sideBodyPhrase = sideToken && bodyPartToken ? `${sideToken} ${bodyPartToken}` : '';
       const descPhrase = String(descNorm || '')
@@ -8769,16 +9828,25 @@ export class MHCAsiaAutomation {
         .join(' ');
       const codeRaw = String(code || '').trim();
       const codeNoDot = codeRaw.replace(/\./g, '');
-      const rankedSearchTerms = [sideBodyPhrase, shoulderPhrase, bodyPartToken, keyword, descPhrase, descNorm, codeRaw, codeNoDot];
+      const rankedSearchTerms = [
+        sideBodyPhrase,
+        shoulderPhrase,
+        bodyPartToken,
+        keyword,
+        descPhrase,
+        descNorm,
+        codeRaw,
+        codeNoDot,
+      ];
       const searchCandidates = Array.from(
         new Set(
           rankedSearchTerms
-            .map((v) => String(v || '').trim())
-            .filter((v) => v.length >= 2)
-            .filter((v) => !sideWordSet.has(String(v).toLowerCase()))
+            .map(v => String(v || '').trim())
+            .filter(v => v.length >= 2)
+            .filter(v => !sideWordSet.has(String(v).toLowerCase()))
             .filter((v, idx, arr) => arr.indexOf(v) === idx)
             .filter((v, idx, arr) => !(idx > 0 && v.toLowerCase() === arr[idx - 1].toLowerCase()))
-            .map((v) => v.slice(0, 50))
+            .map(v => v.slice(0, 50))
         )
       );
       let searchText = (searchCandidates[0] || code || keyword || desc).slice(0, 50);
@@ -8809,7 +9877,10 @@ export class MHCAsiaAutomation {
             };
             return false;
           }
-          return await finalizeDiagnosisResult({ method: 'in_form_text_fallback', mode: 'pcpcare' });
+          return await finalizeDiagnosisResult({
+            method: 'in_form_text_fallback',
+            mode: 'pcpcare',
+          });
         }
         this.lastDiagnosisSelection = {
           ok: false,
@@ -8880,10 +9951,15 @@ export class MHCAsiaAutomation {
           for (let i = 0; i < Math.min(total, 220); i++) {
             const candidate = allButtons.nth(i);
             const matches = await candidate
-              .evaluate((el) => {
-                const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+              .evaluate(el => {
+                const norm = s =>
+                  String(s || '')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .toLowerCase();
                 const style = window.getComputedStyle(el);
-                if (!style || style.display === 'none' || style.visibility === 'hidden') return false;
+                if (!style || style.display === 'none' || style.visibility === 'hidden')
+                  return false;
                 const rect = el.getBoundingClientRect();
                 if (!rect || rect.width <= 0 || rect.height <= 0) return false;
                 const value = norm(
@@ -8891,7 +9967,11 @@ export class MHCAsiaAutomation {
                 );
                 const onclick = norm(el.getAttribute('onclick') || '');
                 // Strong match: explicit primary diagnosis master selector.
-                if (onclick.includes('doselectmasterdiagnosis') && onclick.includes('diagnosispriid')) return true;
+                if (
+                  onclick.includes('doselectmasterdiagnosis') &&
+                  onclick.includes('diagnosispriid')
+                )
+                  return true;
                 if (value !== 'm') return false;
                 const rowText = norm(el.closest('tr')?.textContent || '');
                 if (!/diagnosis\s*pri/.test(rowText)) return false;
@@ -8900,7 +9980,11 @@ export class MHCAsiaAutomation {
               })
               .catch(() => false);
             if (!matches) continue;
-            mButtonFound = await clickMButtonByLocator(candidate, { strategy: 'scan', index: i, total });
+            mButtonFound = await clickMButtonByLocator(candidate, {
+              strategy: 'scan',
+              index: i,
+              total,
+            });
             if (mButtonFound) break;
           }
         } catch {
@@ -8941,8 +10025,8 @@ export class MHCAsiaAutomation {
       if (popup) {
         ctx = {
           kind: 'popup',
-          locator: (sel) => popup.locator(sel),
-          waitForTimeout: (ms) => popup.waitForTimeout(ms),
+          locator: sel => popup.locator(sel),
+          waitForTimeout: ms => popup.waitForTimeout(ms),
           waitForLoadState: (s, o) => popup.waitForLoadState(s, o),
           close: async () => popup.close().catch(() => {}),
         };
@@ -8950,20 +10034,24 @@ export class MHCAsiaAutomation {
 
       // Non-popup flows: attempt to find a real modal dialog container (NOT inside #visit_form).
       if (!ctx) {
-        const modalCandidates = this.page.locator('dialog, [role="dialog"], .ui-dialog, .modal, .popup, .ui-widget-overlay').filter({
-          has: this.page.locator('input[type="text"], input[type="search"], input:not([type])'),
-        });
+        const modalCandidates = this.page
+          .locator('dialog, [role="dialog"], .ui-dialog, .modal, .popup, .ui-widget-overlay')
+          .filter({
+            has: this.page.locator('input[type="text"], input[type="search"], input:not([type])'),
+          });
         const n = await modalCandidates.count().catch(() => 0);
         for (let i = 0; i < Math.min(10, n); i++) {
           const cand = modalCandidates.nth(i);
           const ok = await cand
-            .evaluate((el) => {
+            .evaluate(el => {
               const style = window.getComputedStyle(el);
               if (!style) return false;
               if (style.display === 'none' || style.visibility === 'hidden') return false;
               // Exclude anything embedded in the main visit form: that's where MC Day / Visit Date live.
               if (el.closest('#visit_form')) return false;
-              const hasSearchInput = !!el.querySelector('input[type="text"], input[type="search"], input:not([type])');
+              const hasSearchInput = !!el.querySelector(
+                'input[type="text"], input[type="search"], input:not([type])'
+              );
               const hasSearchButton = !!el.querySelector(
                 'button, input[type="submit"], input[type="button"], a'
               );
@@ -8973,8 +10061,8 @@ export class MHCAsiaAutomation {
           if (!ok) continue;
           ctx = {
             kind: 'modal',
-            locator: (sel) => cand.locator(sel),
-            waitForTimeout: (ms) => this.page.waitForTimeout(ms),
+            locator: sel => cand.locator(sel),
+            waitForTimeout: ms => this.page.waitForTimeout(ms),
             waitForLoadState: (s, o) => this.page.waitForLoadState(s, o),
           };
           this._logStep('Diagnosis modal detected (same tab)', { candidateIndex: i });
@@ -8984,22 +10072,28 @@ export class MHCAsiaAutomation {
 
       // Frame-based flows: some portals open diagnosis search inside an iframe.
       if (!ctx) {
-        const frames = this.page.frames().filter((f) => f !== this.page.mainFrame());
+        const frames = this.page.frames().filter(f => f !== this.page.mainFrame());
         for (const frame of frames) {
           const fUrl = frame.url() || '';
           // Ignore about:blank frames; prefer frames that actually have content.
           if (!fUrl || fUrl === 'about:blank') continue;
-          const hasInput = (await frame.locator('input[type="text"], input[type="search"], input:not([type])').count().catch(() => 0)) > 0;
+          const hasInput =
+            (await frame
+              .locator('input[type="text"], input[type="search"], input:not([type])')
+              .count()
+              .catch(() => 0)) > 0;
           const hasBtn =
             (await frame
-              .locator('button:has-text("Search"), button:has-text("Find"), input[type="submit"], input[type="button"][value*="Search" i]')
+              .locator(
+                'button:has-text("Search"), button:has-text("Find"), input[type="submit"], input[type="button"][value*="Search" i]'
+              )
               .count()
               .catch(() => 0)) > 0;
           if (!hasInput || !hasBtn) continue;
           ctx = {
             kind: 'frame',
-            locator: (sel) => frame.locator(sel),
-            waitForTimeout: (ms) => this.page.waitForTimeout(ms),
+            locator: sel => frame.locator(sel),
+            waitForTimeout: ms => this.page.waitForTimeout(ms),
             waitForLoadState: (s, o) => this.page.waitForLoadState(s, o),
           };
           this._logStep('Diagnosis iframe detected', { url: fUrl });
@@ -9009,22 +10103,30 @@ export class MHCAsiaAutomation {
 
       // Page-navigation flows: if the main tab navigated away from the visit form and looks like a search page.
       if (!ctx && urlChanged) {
-        const stillOnVisitForm = await this.page.locator('#visit_form').count().catch(() => 0);
+        const stillOnVisitForm = await this.page
+          .locator('#visit_form')
+          .count()
+          .catch(() => 0);
         if (!stillOnVisitForm) {
           ctx = {
             kind: 'page',
-            locator: (sel) => this.page.locator(sel),
-            waitForTimeout: (ms) => this.page.waitForTimeout(ms),
+            locator: sel => this.page.locator(sel),
+            waitForTimeout: ms => this.page.waitForTimeout(ms),
             waitForLoadState: (s, o) => this.page.waitForLoadState(s, o),
           };
-          this._logStep('Diagnosis search appears to be a full-page navigation', { from: preUrl, to: postUrl });
+          this._logStep('Diagnosis search appears to be a full-page navigation', {
+            from: preUrl,
+            to: postUrl,
+          });
         }
       }
 
       if (!ctx) {
         const urlNow = this.page.url();
         this._logStep('Diagnosis search UI not detected; leaving diagnosis blank', { url: urlNow });
-        await this.page.screenshot({ path: 'screenshots/mhc-diagnosis-modal-not-detected.png', fullPage: true }).catch(() => {});
+        await this.page
+          .screenshot({ path: 'screenshots/mhc-diagnosis-modal-not-detected.png', fullPage: true })
+          .catch(() => {});
         if (this.isAiaClinicSystem || /aiaclinic\.com/i.test(urlNow)) {
           if (allowTextFallback) {
             const fallbackOk = await fillInFormTextFallback(
@@ -9038,7 +10140,9 @@ export class MHCAsiaAutomation {
               });
             }
           }
-          logger.warn('AIA Clinic diagnosis modal not detected; strict mode requires modal selection');
+          logger.warn(
+            'AIA Clinic diagnosis modal not detected; strict mode requires modal selection'
+          );
           this.lastDiagnosisSelection = {
             ok: false,
             method: 'modal',
@@ -9083,7 +10187,10 @@ export class MHCAsiaAutomation {
       for (const selector of searchSelectors) {
         try {
           const field = ctx.locator(selector).first();
-          if ((await field.count().catch(() => 0)) > 0 && (await field.isVisible().catch(() => false))) {
+          if (
+            (await field.count().catch(() => 0)) > 0 &&
+            (await field.isVisible().catch(() => false))
+          ) {
             // Avoid read-only fields like Visit Date.
             const ro = await field.getAttribute('readonly').catch(() => null);
             const dis = await field.isDisabled().catch(() => false);
@@ -9108,7 +10215,7 @@ export class MHCAsiaAutomation {
         return false;
       }
 
-      const enterSearchTerm = async (term) => {
+      const enterSearchTerm = async term => {
         try {
           await searchField.fill(term, { timeout: 4000 });
           return true;
@@ -9167,14 +10274,14 @@ export class MHCAsiaAutomation {
             if ((await sel.count().catch(() => 0)) === 0) continue;
             const options = await sel
               .locator('option')
-              .evaluateAll((opts) =>
-                opts.map((o) => ({
+              .evaluateAll(opts =>
+                opts.map(o => ({
                   value: o.value,
                   label: (o.textContent || '').trim(),
                 }))
               )
               .catch(() => []);
-            const containsOpt = options.find((o) =>
+            const containsOpt = options.find(o =>
               /\bcontains\b/i.test(`${o.label || ''} ${o.value || ''}`)
             );
             if (!containsOpt) continue;
@@ -9218,7 +10325,9 @@ export class MHCAsiaAutomation {
             if (!text) continue;
             if (forbidden.test(text)) continue;
             if (!/\b[A-Z][0-9]{2,3}(?:\.[0-9A-Z]+)?\b/.test(text.toUpperCase())) continue;
-            const link = row.locator('a, button, input[type="button"], input[type="submit"]').first();
+            const link = row
+              .locator('a, button, input[type="button"], input[type="submit"]')
+              .first();
             const hasLink = (await link.count().catch(() => 0)) > 0;
             if (hasLink) return true;
           }
@@ -9269,17 +10378,19 @@ export class MHCAsiaAutomation {
       // Popup/same-page diagnosis lists often use doSelect(...) anchors rather than clean row structures.
       // Match selectable anchors directly before row-based scoring.
       const pickedAnchor = await (async () => {
-        const normalizeCode = (value) =>
+        const normalizeCode = value =>
           String(value || '')
             .toUpperCase()
             .replace(/[^A-Z0-9.]/g, '');
-        const extractCode = (value) => {
+        const extractCode = value => {
           const m = normalizeCode(value).match(/[A-Z]\d{2,3}(?:\.[0-9A-Z]+)?/);
           return m ? m[0] : '';
         };
         const requestedCode = extractCode(code || '');
         const requestedCodePlain = requestedCode.replace(/\./g, '');
-        const kw = Array.isArray(keywords) ? keywords.filter(Boolean).map((k) => String(k).toLowerCase()) : [];
+        const kw = Array.isArray(keywords)
+          ? keywords.filter(Boolean).map(k => String(k).toLowerCase())
+          : [];
 
         const links = ctx.locator('a[onclick*="doSelect"], a[href="#"]');
         const count = Math.min(await links.count().catch(() => 0), 220);
@@ -9302,7 +10413,11 @@ export class MHCAsiaAutomation {
           if (/click on the diagnosis/i.test(text)) continue;
 
           const rowText = await link
-            .evaluate((el) => String(el.closest('tr')?.innerText || '').replace(/\s+/g, ' ').trim())
+            .evaluate(el =>
+              String(el.closest('tr')?.innerText || '')
+                .replace(/\s+/g, ' ')
+                .trim()
+            )
             .catch(() => '');
           const combined = `${text} ${rowText}`.trim();
           const lower = combined.toLowerCase();
@@ -9322,7 +10437,10 @@ export class MHCAsiaAutomation {
             } else if (requestedCodePlain.startsWith(optionCodePlain)) {
               score += 700;
               codeHits += 1;
-            } else if (requestedCodePlain.slice(0, 3) && optionCodePlain.startsWith(requestedCodePlain.slice(0, 3))) {
+            } else if (
+              requestedCodePlain.slice(0, 3) &&
+              optionCodePlain.startsWith(requestedCodePlain.slice(0, 3))
+            ) {
               score += 200;
               codeHits += 1;
             }
@@ -9376,86 +10494,104 @@ export class MHCAsiaAutomation {
       const pickedEval = !canEval
         ? { ok: false }
         : await (ctx.kind === 'popup' ? popup : this.page)
-            .evaluate(({ code, keywords, minScore }) => {
-          const esc = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          const isVisible = (el) => {
-            if (!el) return false;
-            const style = window.getComputedStyle(el);
-            if (!style) return false;
-            if (style.display === 'none' || style.visibility === 'hidden') return false;
-            return true;
-          };
-          const buildCodeVariants = (c) => {
-            const s = String(c || '').replace(/\s+/g, '').toUpperCase();
-            if (!s) return [];
-            const noDot = s.replace(/\./g, '');
-            const noTrailingZeros = noDot.replace(/0+$/g, '');
-            const m = s.match(/^([A-Z]\d{2,3})\.?(\d+)?$/);
-            const base = m?.[1] || null;
-            const suffix = m?.[2] || null;
-            const short1 = base && suffix ? `${base}${suffix.slice(0, 1)}` : null;
-            const short2 = base && suffix ? `${base}${suffix.slice(0, 2)}` : null;
-            return Array.from(new Set([s, noDot, noTrailingZeros, base, short2, short1].filter((x) => x && x.length >= 3)));
-          };
-          const codeVariants = code ? buildCodeVariants(code) : [];
-          const codeRegexes = codeVariants.map((v) => new RegExp(`\\b${esc(v)}\\b`, 'i'));
-          const forbidden = /(click on the diagnosis|that contains|starts with|equals to|sort code|next|prev|page|\d+\s*-\s*\d+\s+of\s+\d+)/i;
-          const hasIcdLikeCode = (txt) => /\b[A-Z][0-9]{2,3}(?:\.[0-9A-Z]+)?\b/.test(String(txt || '').toUpperCase());
-          const isHeaderLike = (txt) => /^\s*(code|description|diagnosis|icd)\b/i.test(String(txt || '').trim());
-
-          const tables = Array.from(document.querySelectorAll('table')).filter((t) => isVisible(t));
-          let best = null;
-          let bestScore = 0;
-
-          const scoreText = (txt) => {
-            const t = String(txt || '').toLowerCase();
-            if (!t) return null;
-            if (forbidden.test(t) || isHeaderLike(t) || !hasIcdLikeCode(t)) return null;
-            let codeHits = 0;
-            for (const r of codeRegexes) if (r.test(txt)) codeHits += 1;
-            let keywordHits = 0;
-            for (const k of keywords || []) if (k && t.includes(k)) keywordHits += 1;
-            if (codeHits === 0 && keywordHits < 2) return null;
-            return {
-              score: codeHits * 1000 + keywordHits * 40,
-              codeHits,
-              keywordHits,
-            };
-          };
-
-          for (const table of tables) {
-            const rows = Array.from(table.querySelectorAll('tr'));
-            for (const row of rows) {
-              const link = row.querySelector('a, button, input[type="button"], input[type="submit"]');
-              if (!link || !isVisible(link)) continue;
-              const txt = row.innerText || row.textContent || '';
-              const scored = scoreText(txt);
-              if (!scored || scored.score < minScore) continue;
-              if (scored.score > bestScore) {
-                bestScore = scored.score;
-                best = {
-                  row,
-                  link,
-                  txt: String(txt).trim().slice(0, 120),
-                  codeHits: scored.codeHits,
-                  keywordHits: scored.keywordHits,
+            .evaluate(
+              ({ code, keywords, minScore }) => {
+                const esc = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const isVisible = el => {
+                  if (!el) return false;
+                  const style = window.getComputedStyle(el);
+                  if (!style) return false;
+                  if (style.display === 'none' || style.visibility === 'hidden') return false;
+                  return true;
                 };
-              }
-            }
-          }
+                const buildCodeVariants = c => {
+                  const s = String(c || '')
+                    .replace(/\s+/g, '')
+                    .toUpperCase();
+                  if (!s) return [];
+                  const noDot = s.replace(/\./g, '');
+                  const noTrailingZeros = noDot.replace(/0+$/g, '');
+                  const m = s.match(/^([A-Z]\d{2,3})\.?(\d+)?$/);
+                  const base = m?.[1] || null;
+                  const suffix = m?.[2] || null;
+                  const short1 = base && suffix ? `${base}${suffix.slice(0, 1)}` : null;
+                  const short2 = base && suffix ? `${base}${suffix.slice(0, 2)}` : null;
+                  return Array.from(
+                    new Set(
+                      [s, noDot, noTrailingZeros, base, short2, short1].filter(
+                        x => x && x.length >= 3
+                      )
+                    )
+                  );
+                };
+                const codeVariants = code ? buildCodeVariants(code) : [];
+                const codeRegexes = codeVariants.map(v => new RegExp(`\\b${esc(v)}\\b`, 'i'));
+                const forbidden =
+                  /(click on the diagnosis|that contains|starts with|equals to|sort code|next|prev|page|\d+\s*-\s*\d+\s+of\s+\d+)/i;
+                const hasIcdLikeCode = txt =>
+                  /\b[A-Z][0-9]{2,3}(?:\.[0-9A-Z]+)?\b/.test(String(txt || '').toUpperCase());
+                const isHeaderLike = txt =>
+                  /^\s*(code|description|diagnosis|icd)\b/i.test(String(txt || '').trim());
 
-          if (best && best.link && bestScore >= minScore) {
-            (best.link instanceof HTMLElement ? best.link : best.row).click();
-            return {
-              ok: true,
-              score: bestScore,
-              text: best.txt,
-              codeHits: best.codeHits,
-              keywordHits: best.keywordHits,
-            };
-          }
-          return { ok: false };
-        }, { code, keywords, minScore })
+                const tables = Array.from(document.querySelectorAll('table')).filter(t =>
+                  isVisible(t)
+                );
+                let best = null;
+                let bestScore = 0;
+
+                const scoreText = txt => {
+                  const t = String(txt || '').toLowerCase();
+                  if (!t) return null;
+                  if (forbidden.test(t) || isHeaderLike(t) || !hasIcdLikeCode(t)) return null;
+                  let codeHits = 0;
+                  for (const r of codeRegexes) if (r.test(txt)) codeHits += 1;
+                  let keywordHits = 0;
+                  for (const k of keywords || []) if (k && t.includes(k)) keywordHits += 1;
+                  if (codeHits === 0 && keywordHits < 2) return null;
+                  return {
+                    score: codeHits * 1000 + keywordHits * 40,
+                    codeHits,
+                    keywordHits,
+                  };
+                };
+
+                for (const table of tables) {
+                  const rows = Array.from(table.querySelectorAll('tr'));
+                  for (const row of rows) {
+                    const link = row.querySelector(
+                      'a, button, input[type="button"], input[type="submit"]'
+                    );
+                    if (!link || !isVisible(link)) continue;
+                    const txt = row.innerText || row.textContent || '';
+                    const scored = scoreText(txt);
+                    if (!scored || scored.score < minScore) continue;
+                    if (scored.score > bestScore) {
+                      bestScore = scored.score;
+                      best = {
+                        row,
+                        link,
+                        txt: String(txt).trim().slice(0, 120),
+                        codeHits: scored.codeHits,
+                        keywordHits: scored.keywordHits,
+                      };
+                    }
+                  }
+                }
+
+                if (best && best.link && bestScore >= minScore) {
+                  (best.link instanceof HTMLElement ? best.link : best.row).click();
+                  return {
+                    ok: true,
+                    score: bestScore,
+                    text: best.txt,
+                    codeHits: best.codeHits,
+                    keywordHits: best.keywordHits,
+                  };
+                }
+                return { ok: false };
+              },
+              { code, keywords, minScore }
+            )
             .catch(() => ({ ok: false }));
 
       if (pickedEval?.ok) {
@@ -9472,9 +10608,11 @@ export class MHCAsiaAutomation {
 
       // Locator-based best-match for modal/iframe (and as a fallback for popup/page).
       const pickedLocator = await (async () => {
-        const esc = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const buildCodeVariants = (c) => {
-          const s = String(c || '').replace(/\s+/g, '').toUpperCase();
+        const esc = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const buildCodeVariants = c => {
+          const s = String(c || '')
+            .replace(/\s+/g, '')
+            .toUpperCase();
           if (!s) return [];
           const noDot = s.replace(/\./g, '');
           const noTrailingZeros = noDot.replace(/0+$/g, '');
@@ -9483,16 +10621,21 @@ export class MHCAsiaAutomation {
           const suffix = m?.[2] || null;
           const short1 = base && suffix ? `${base}${suffix.slice(0, 1)}` : null;
           const short2 = base && suffix ? `${base}${suffix.slice(0, 2)}` : null;
-          return Array.from(new Set([s, noDot, noTrailingZeros, base, short2, short1].filter((x) => x && x.length >= 3)));
+          return Array.from(
+            new Set(
+              [s, noDot, noTrailingZeros, base, short2, short1].filter(x => x && x.length >= 3)
+            )
+          );
         };
         const codeVariants = code ? buildCodeVariants(code) : [];
-        const codeRegexes = codeVariants.map((v) => new RegExp(`\\b${esc(v)}\\b`, 'i'));
+        const codeRegexes = codeVariants.map(v => new RegExp(`\\b${esc(v)}\\b`, 'i'));
         const kw = Array.isArray(keywords) ? keywords.filter(Boolean) : [];
 
         // If no signal at all, avoid selecting a random row.
         if (!codeRegexes.length && !kw.length) return { ok: false };
 
-        const forbidden = /(click on the diagnosis|that contains|starts with|equals to|sort code|next|prev|page|\d+\s*-\s*\d+\s+of\s+\d+)/i;
+        const forbidden =
+          /(click on the diagnosis|that contains|starts with|equals to|sort code|next|prev|page|\d+\s*-\s*\d+\s+of\s+\d+)/i;
         const rows = ctx.locator('table tr');
         const rowCount = Math.min(await rows.count().catch(() => 0), 80);
         let bestIdx = -1;
@@ -9500,12 +10643,13 @@ export class MHCAsiaAutomation {
         let bestText = '';
         let bestSignals = null;
 
-        const scoreText = (txt) => {
+        const scoreText = txt => {
           const t = String(txt || '').toLowerCase();
           if (!t) return null;
           if (forbidden.test(t)) return null;
           if (/^\s*(code|description|diagnosis|icd)\b/i.test(t)) return null;
-          if (!/\b[A-Z][0-9]{2,3}(?:\.[0-9A-Z]+)?\b/.test(String(txt || '').toUpperCase())) return null;
+          if (!/\b[A-Z][0-9]{2,3}(?:\.[0-9A-Z]+)?\b/.test(String(txt || '').toUpperCase()))
+            return null;
           let codeHits = 0;
           for (const r of codeRegexes) if (r.test(txt)) codeHits += 1;
           let keywordHits = 0;
@@ -9526,7 +10670,9 @@ export class MHCAsiaAutomation {
           if (scored.score > bestScore) {
             bestScore = scored.score;
             bestIdx = i;
-            bestText = String(txt || '').trim().slice(0, 120);
+            bestText = String(txt || '')
+              .trim()
+              .slice(0, 120);
             bestSignals = {
               codeHits: scored.codeHits,
               keywordHits: scored.keywordHits,
@@ -9569,22 +10715,31 @@ export class MHCAsiaAutomation {
       // Strict fallback: select only when the row itself looks like a diagnosis and score is meaningful.
       const pickedFallback = await (async () => {
         const codeTokens = [code, code?.replace(/\./g, '')]
-          .map((x) => String(x || '').toLowerCase().trim())
+          .map(x =>
+            String(x || '')
+              .toLowerCase()
+              .trim()
+          )
           .filter(Boolean);
-        const kw = Array.isArray(keywords) ? keywords.filter(Boolean).map((k) => String(k).toLowerCase()) : [];
+        const kw = Array.isArray(keywords)
+          ? keywords.filter(Boolean).map(k => String(k).toLowerCase())
+          : [];
         const rows = ctx.locator('table tr');
         const rowCount = Math.min(await rows.count().catch(() => 0), 120);
         let bestIdx = -1;
         let bestScore = 0;
         let bestText = '';
-        const forbidden = /(click on the diagnosis|that contains|starts with|equals to|sort code|next|prev|page|\d+\s*-\s*\d+\s+of\s+\d+)/i;
+        const forbidden =
+          /(click on the diagnosis|that contains|starts with|equals to|sort code|next|prev|page|\d+\s*-\s*\d+\s+of\s+\d+)/i;
         for (let i = 0; i < rowCount; i++) {
           const row = rows.nth(i);
           const link = row.locator('a, button, input[type="button"], input[type="submit"]').first();
           const hasLink = (await link.count().catch(() => 0)) > 0;
           const rowCanClick = hasLink || (await row.getAttribute('onclick').catch(() => null));
           if (!rowCanClick) continue;
-          const txt = String((await row.innerText().catch(() => '')) || '').replace(/\s+/g, ' ').trim();
+          const txt = String((await row.innerText().catch(() => '')) || '')
+            .replace(/\s+/g, ' ')
+            .trim();
           if (!txt) continue;
           if (forbidden.test(txt)) continue;
           const lower = txt.toLowerCase();
@@ -9652,7 +10807,9 @@ export class MHCAsiaAutomation {
               .replace(/\s+/g, ' ')
               .trim();
             if (!text) continue;
-            const link = row.locator('a, button, input[type="button"], input[type="submit"]').first();
+            const link = row
+              .locator('a, button, input[type="button"], input[type="submit"]')
+              .first();
             const hasLink = (await link.count().catch(() => 0)) > 0;
             const hasIcdLikeCode = /\b[A-Z][0-9]{2,3}(?:\.[0-9A-Z]+)?\b/.test(text.toUpperCase());
             sample.push({
@@ -9677,33 +10834,38 @@ export class MHCAsiaAutomation {
 
       this._logStep('Diagnosis search had no confident match');
       logger.warn('Could not select diagnosis result');
-      const genericSafePick = await (async () => {
-        const forbidden = /(click on the diagnosis|that contains|starts with|equals to|sort code|next|prev|page|\d+\s*-\s*\d+\s+of\s+\d+)/i;
-        try {
-          const rows = ctx.locator('table tr');
-          const rowCount = Math.min(await rows.count().catch(() => 0), 80);
-          for (let i = 0; i < rowCount; i++) {
-            const row = rows.nth(i);
-            const text = String((await row.innerText().catch(() => '')) || '')
-              .replace(/\s+/g, ' ')
-              .trim();
-            if (!text) continue;
-            if (forbidden.test(text)) continue;
-            if (/^\s*(code|description|diagnosis|icd)\b/i.test(text)) continue;
-            if (!/\b[A-Z][0-9]{2,3}(?:\.[0-9A-Z]+)?\b/.test(text.toUpperCase())) continue;
-            const action = row.locator('a, button, input[type="button"], input[type="submit"]').first();
-            const hasAction = (await action.count().catch(() => 0)) > 0;
-            if (!hasAction) continue;
-            await action.click().catch(async () => {
-              await row.click({ force: true }).catch(() => {});
-            });
-            return { ok: true, idx: i, text: text.slice(0, 180) };
-          }
-        } catch {
-          // ignore
-        }
-        return { ok: false };
-      })();
+      const genericSafePick = disableGenericRowPick
+        ? { ok: false, skipped: 'disabled_for_missing_in_source' }
+        : await (async () => {
+            const forbidden =
+              /(click on the diagnosis|that contains|starts with|equals to|sort code|next|prev|page|\d+\s*-\s*\d+\s+of\s+\d+)/i;
+            try {
+              const rows = ctx.locator('table tr');
+              const rowCount = Math.min(await rows.count().catch(() => 0), 80);
+              for (let i = 0; i < rowCount; i++) {
+                const row = rows.nth(i);
+                const text = String((await row.innerText().catch(() => '')) || '')
+                  .replace(/\s+/g, ' ')
+                  .trim();
+                if (!text) continue;
+                if (forbidden.test(text)) continue;
+                if (/^\s*(code|description|diagnosis|icd)\b/i.test(text)) continue;
+                if (!/\b[A-Z][0-9]{2,3}(?:\.[0-9A-Z]+)?\b/.test(text.toUpperCase())) continue;
+                const action = row
+                  .locator('a, button, input[type="button"], input[type="submit"]')
+                  .first();
+                const hasAction = (await action.count().catch(() => 0)) > 0;
+                if (!hasAction) continue;
+                await action.click().catch(async () => {
+                  await row.click({ force: true }).catch(() => {});
+                });
+                return { ok: true, idx: i, text: text.slice(0, 180) };
+              }
+            } catch {
+              // ignore
+            }
+            return { ok: false };
+          })();
       if (genericSafePick?.ok) {
         this._logStep('Selected diagnosis result (generic safe fallback)', genericSafePick);
         await ctx.waitForTimeout(500).catch(() => {});
@@ -9755,7 +10917,8 @@ export class MHCAsiaAutomation {
         ok: false,
         method: 'modal',
         diagnosis: {
-          code: diagnosisText && typeof diagnosisText === 'object' ? diagnosisText.code || null : null,
+          code:
+            diagnosisText && typeof diagnosisText === 'object' ? diagnosisText.code || null : null,
           description:
             diagnosisText && typeof diagnosisText === 'object'
               ? diagnosisText.description || null
@@ -9787,18 +10950,24 @@ export class MHCAsiaAutomation {
       const stop = new Set(['mg', 'ml', 'tab', 'tabs', 'cap', 'caps', 'tablet', 'capsule']);
       const tokens = cleaned
         .split(/\s+/)
-        .map((w) => w.trim())
-        .filter((w) => w.length >= 3 && !stop.has(w));
+        .map(w => w.trim())
+        .filter(w => w.length >= 3 && !stop.has(w));
       const primary = tokens[0] || cleaned.split(/\s+/)[0] || cleaned;
       const searchTerms = Array.from(
-        new Set([primary, tokens.slice(0, 2).join(' ').trim(), cleaned].map((s) => String(s || '').trim()).filter(Boolean))
+        new Set(
+          [primary, tokens.slice(0, 2).join(' ').trim(), cleaned]
+            .map(s => String(s || '').trim())
+            .filter(Boolean)
+        )
       );
 
       const popupPromise = this.page.waitForEvent('popup', { timeout: 6000 }).catch(() => null);
       let clicked = false;
 
       // Fast path: MHC drug rows expose a dedicated SelectMasterDrug button.
-      const masterButtons = this.page.locator('input[name="SelectMasterDrug"], input[name*="SelectMasterDrug" i]');
+      const masterButtons = this.page.locator(
+        'input[name="SelectMasterDrug"], input[name*="SelectMasterDrug" i]'
+      );
       const masterButtonCount = await masterButtons.count().catch(() => 0);
       if (masterButtonCount > 0) {
         const idx = Math.min(Math.max(0, rowIndex - 1), masterButtonCount - 1);
@@ -9811,61 +10980,71 @@ export class MHCAsiaAutomation {
 
       if (!clicked) {
         clicked = await this.page
-          .evaluate((targetRowIndex) => {
-          const norm = (s) => String(s || '').replace(/\s+/g, ' ').trim().toLowerCase();
-          const isVisible = (el) => {
-            if (!el) return false;
-            const style = window.getComputedStyle(el);
-            if (!style) return false;
-            if (style.display === 'none' || style.visibility === 'hidden') return false;
-            const rect = el.getBoundingClientRect();
-            return !!rect && rect.width > 0 && rect.height > 0;
-          };
+          .evaluate(targetRowIndex => {
+            const norm = s =>
+              String(s || '')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .toLowerCase();
+            const isVisible = el => {
+              if (!el) return false;
+              const style = window.getComputedStyle(el);
+              if (!style) return false;
+              if (style.display === 'none' || style.visibility === 'hidden') return false;
+              const rect = el.getBoundingClientRect();
+              return !!rect && rect.width > 0 && rect.height > 0;
+            };
 
-          const tables = Array.from(document.querySelectorAll('table')).filter((t) => /drug\s*name/i.test(norm(t.innerText || '')));
-          const table = tables[0] || null;
-          if (!table) return false;
-
-          const rows = Array.from(table.querySelectorAll('tr')).filter((r) => r.closest('table') === table);
-          const headerIdx = rows.findIndex((r) => /drug\s*name/i.test(norm(r.innerText || '')));
-          if (headerIdx < 0) return false;
-
-          const dataRows = [];
-          for (let i = headerIdx + 1; i < rows.length; i++) {
-            const rowText = norm(rows[i].innerText || '');
-            if (/total\s+drug\s+fee/.test(rowText)) break;
-            if (rows[i].querySelector('input[type="text"], input:not([type]), textarea')) dataRows.push(rows[i]);
-          }
-          const target = dataRows[Math.max(0, Number(targetRowIndex || 1) - 1)];
-          if (!target) return false;
-
-          const pickMasterButton = (root) => {
-            const controls = Array.from(
-              root.querySelectorAll('input[type="button"], input[type="submit"], button')
+            const tables = Array.from(document.querySelectorAll('table')).filter(t =>
+              /drug\s*name/i.test(norm(t.innerText || ''))
             );
-            return (
-              controls.find((el) => {
-                const name = String(el.getAttribute('name') || '').toLowerCase();
-                if (/selectmasterdrug/.test(name)) return true;
-                const value = String(el.getAttribute('value') || el.textContent || '')
-                  .replace(/\s+/g, '')
-                  .toUpperCase();
-                return value === 'M';
-              }) || null
-            );
-          };
+            const table = tables[0] || null;
+            if (!table) return false;
 
-          let btn = pickMasterButton(target);
-          if (!btn) {
-            const global = Array.from(document.querySelectorAll('input[name*="SelectMasterDrug" i]'));
-            const idx = Math.max(0, Number(targetRowIndex || 1) - 1);
-            btn = global[idx] || global[0] || null;
-          }
-          if (!btn || !isVisible(btn)) return false;
-          btn.click();
+            const rows = Array.from(table.querySelectorAll('tr')).filter(
+              r => r.closest('table') === table
+            );
+            const headerIdx = rows.findIndex(r => /drug\s*name/i.test(norm(r.innerText || '')));
+            if (headerIdx < 0) return false;
+
+            const dataRows = [];
+            for (let i = headerIdx + 1; i < rows.length; i++) {
+              const rowText = norm(rows[i].innerText || '');
+              if (/total\s+drug\s+fee/.test(rowText)) break;
+              if (rows[i].querySelector('input[type="text"], input:not([type]), textarea'))
+                dataRows.push(rows[i]);
+            }
+            const target = dataRows[Math.max(0, Number(targetRowIndex || 1) - 1)];
+            if (!target) return false;
+
+            const pickMasterButton = root => {
+              const controls = Array.from(
+                root.querySelectorAll('input[type="button"], input[type="submit"], button')
+              );
+              return (
+                controls.find(el => {
+                  const name = String(el.getAttribute('name') || '').toLowerCase();
+                  if (/selectmasterdrug/.test(name)) return true;
+                  const value = String(el.getAttribute('value') || el.textContent || '')
+                    .replace(/\s+/g, '')
+                    .toUpperCase();
+                  return value === 'M';
+                }) || null
+              );
+            };
+
+            let btn = pickMasterButton(target);
+            if (!btn) {
+              const global = Array.from(
+                document.querySelectorAll('input[name*="SelectMasterDrug" i]')
+              );
+              const idx = Math.max(0, Number(targetRowIndex || 1) - 1);
+              btn = global[idx] || global[0] || null;
+            }
+            if (!btn || !isVisible(btn)) return false;
+            btn.click();
             return true;
-          },
-          rowIndex)
+          }, rowIndex)
           .catch(() => false);
       }
 
@@ -9878,27 +11057,33 @@ export class MHCAsiaAutomation {
         await popup.waitForLoadState('domcontentloaded', { timeout: 6000 }).catch(() => {});
         await popup.waitForTimeout(250).catch(() => {});
         ctx = {
-          locator: (sel) => popup.locator(sel),
-          waitForTimeout: (ms) => popup.waitForTimeout(ms),
+          locator: sel => popup.locator(sel),
+          waitForTimeout: ms => popup.waitForTimeout(ms),
           close: async () => popup.close().catch(() => {}),
         };
       } else {
         await this.page.waitForLoadState('domcontentloaded', { timeout: 4000 }).catch(() => {});
         await this.page.waitForTimeout(250);
         ctx = {
-          locator: (sel) => this.page.locator(sel),
-          waitForTimeout: (ms) => this.page.waitForTimeout(ms),
+          locator: sel => this.page.locator(sel),
+          waitForTimeout: ms => this.page.waitForTimeout(ms),
         };
       }
 
-      const searchInput = ctx.locator('input[name="keyValue"], input[name*="search" i], input[type="text"]').first();
+      const searchInput = ctx
+        .locator('input[name="keyValue"], input[name*="search" i], input[type="text"]')
+        .first();
       if ((await searchInput.count().catch(() => 0)) === 0) {
         if (ctx.close) await ctx.close().catch(() => {});
         return false;
       }
 
       const clickSearch = async () => {
-        const btn = ctx.locator('input[name="SearchAction"], input[value*="Search" i], button:has-text("Search"), input[type="submit"]').first();
+        const btn = ctx
+          .locator(
+            'input[name="SearchAction"], input[value*="Search" i], button:has-text("Search"), input[type="submit"]'
+          )
+          .first();
         if ((await btn.count().catch(() => 0)) > 0 && (await btn.isVisible().catch(() => false))) {
           await btn.click().catch(() => {});
           return;
@@ -9906,21 +11091,28 @@ export class MHCAsiaAutomation {
         await searchInput.press('Enter').catch(() => {});
       };
 
-      const pickResult = async (term) => {
+      const pickResult = async term => {
         const termLower = String(term || '').toLowerCase();
-        const kws = termLower.split(/\s+/).filter((w) => w.length >= 3);
+        const kws = termLower.split(/\s+/).filter(w => w.length >= 3);
         const links = ctx.locator('a[onclick*="doSelect"], a[href="#"]');
         const count = Math.min(await links.count().catch(() => 0), 250);
         let bestIdx = -1;
         let bestScore = 0;
         for (let i = 0; i < count; i++) {
           const link = links.nth(i);
-          const text = String((await link.innerText().catch(() => '')) || '').replace(/\s+/g, ' ').trim();
+          const text = String((await link.innerText().catch(() => '')) || '')
+            .replace(/\s+/g, ' ')
+            .trim();
           if (!text) continue;
           if (/^(next|prev|previous|sort|code|description)$/i.test(text)) continue;
-          if (/click on the drug|click on the medicine|click on the diagnosis/i.test(text)) continue;
+          if (/click on the drug|click on the medicine|click on the diagnosis/i.test(text))
+            continue;
           const rowText = await link
-            .evaluate((el) => String(el.closest('tr')?.innerText || '').replace(/\s+/g, ' ').trim())
+            .evaluate(el =>
+              String(el.closest('tr')?.innerText || '')
+                .replace(/\s+/g, ' ')
+                .trim()
+            )
             .catch(() => '');
           const combined = `${text} ${rowText}`.toLowerCase();
           let score = 0;
@@ -9932,7 +11124,10 @@ export class MHCAsiaAutomation {
           }
         }
         if (bestIdx < 0 || bestScore <= 0) return false;
-        await links.nth(bestIdx).click().catch(() => {});
+        await links
+          .nth(bestIdx)
+          .click()
+          .catch(() => {});
         return true;
       };
 
@@ -9947,7 +11142,11 @@ export class MHCAsiaAutomation {
         if (picked) {
           await ctx.waitForTimeout(300).catch(() => {});
           if (ctx.close) await ctx.close().catch(() => {});
-          this._logStep('Drug selected from master popup', { rowIndex, term, drug: rawName.slice(0, 80) });
+          this._logStep('Drug selected from master popup', {
+            rowIndex,
+            term,
+            drug: rawName.slice(0, 80),
+          });
           return true;
         }
       }
@@ -9967,38 +11166,50 @@ export class MHCAsiaAutomation {
    */
   async fillDrugItem(drugData, rowIndex = 1) {
     try {
-      this._logStep('Fill drug item', { drug: drugData.name?.substring(0, 30), quantity: drugData.quantity, rowIndex });
-      
+      this._logStep('Fill drug item', {
+        drug: drugData.name?.substring(0, 30),
+        quantity: drugData.quantity,
+        rowIndex,
+      });
+
       if (!drugData.name || drugData.name.length < 2) {
         logger.warn('Drug name too short, skipping');
         return false;
       }
 
-	      const useMasterFirst = process.env.MHC_DRUG_MASTER_FIRST !== '0';
-	      if (useMasterFirst) {
-	        const selectedFromMaster = await this.selectDrugFromMaster(drugData.name, rowIndex).catch(() => false);
-	        if (selectedFromMaster) {
-            this.lastDrugSelectionByRow[rowIndex] = {
-              fromMaster: true,
-              name: String(drugData.name || '').trim(),
-              checkedAt: new Date().toISOString(),
-            };
-	          return true;
-	        }
-	      }
+      const useMasterFirst = process.env.MHC_DRUG_MASTER_FIRST !== '0';
+      if (useMasterFirst) {
+        const selectedFromMaster = await this.selectDrugFromMaster(drugData.name, rowIndex).catch(
+          () => false
+        );
+        if (selectedFromMaster) {
+          this.lastDrugSelectionByRow[rowIndex] = {
+            fromMaster: true,
+            name: String(drugData.name || '').trim(),
+            checkedAt: new Date().toISOString(),
+          };
+          return true;
+        }
+      }
 
       // Prefer direct fill into the visible "Drug Name" cell for the requested row.
       // This is more reliable than modal selection for our "leave browser open" workflow.
       const directFilled = await this.page
         .evaluate(
           ({ rowIndex, name, quantity }) => {
-            const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
-            const isVisible = (el) => {
+            const norm = s => (s || '').replace(/\s+/g, ' ').trim();
+            const isVisible = el => {
               if (!el) return false;
               const style = window.getComputedStyle(el);
               if (!style) return false;
               if (style.display === 'none' || style.visibility === 'hidden') return false;
               return true;
+            };
+            const sameNumeric = (a, b) => {
+              const n1 = Number(String(a || '').trim());
+              const n2 = Number(String(b || '').trim());
+              if (!Number.isFinite(n1) || !Number.isFinite(n2)) return false;
+              return Math.abs(n1 - n2) < 1e-9;
             };
 
             // Prefer the explicit drug table id when present (common on MHC/Singlife).
@@ -10008,32 +11219,36 @@ export class MHCAsiaAutomation {
 
             if (scopedTable) {
               const rows = Array.from(scopedTable.querySelectorAll('tr'));
-              headerRow = rows.find((r) => /drug\s*name/i.test(norm(r.innerText))) || null;
+              headerRow = rows.find(r => /drug\s*name/i.test(norm(r.innerText))) || null;
               if (headerRow) {
                 headerCell =
-                  Array.from(headerRow.querySelectorAll('th, td')).find((c) => /drug\s*name/i.test(norm(c.innerText))) ||
-                  null;
+                  Array.from(headerRow.querySelectorAll('th, td')).find(c =>
+                    /drug\s*name/i.test(norm(c.innerText))
+                  ) || null;
               }
             }
 
             // Fallback: find a header cell anywhere and anchor to its closest table.
             if (!scopedTable || !headerRow || !headerCell) {
               headerCell =
-                Array.from(document.querySelectorAll('th, td')).find((c) => /drug\s*name/i.test(norm(c.innerText))) ||
-                null;
+                Array.from(document.querySelectorAll('th, td')).find(c =>
+                  /drug\s*name/i.test(norm(c.innerText))
+                ) || null;
               if (!headerCell) return false;
               scopedTable = headerCell.closest('table');
               headerRow = headerCell.closest('tr');
               if (!scopedTable || !headerRow) return false;
             }
 
-            const rows = Array.from(scopedTable.querySelectorAll('tr')).filter((r) => r.closest('table') === scopedTable);
+            const rows = Array.from(scopedTable.querySelectorAll('tr')).filter(
+              r => r.closest('table') === scopedTable
+            );
             const headerIdx = rows.indexOf(headerRow);
             if (headerIdx < 0) return false;
 
             // Compute the column-range covered by the "Procedure Name" header, accounting for colspans.
-            const rowCellsWithSpan = (row) =>
-              Array.from(row.querySelectorAll('th, td')).map((c) => ({
+            const rowCellsWithSpan = row =>
+              Array.from(row.querySelectorAll('th, td')).map(c => ({
                 cell: c,
                 span: Number(c.colSpan || 1),
               }));
@@ -10055,7 +11270,12 @@ export class MHCAsiaAutomation {
             for (let i = headerIdx + 1; i < rows.length; i++) {
               const rowText = norm(rows[i].innerText);
               if (/total\s+drug\s+fee/i.test(rowText)) break;
-              if (rows[i].querySelector('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), textarea')) dataRows.push(rows[i]);
+              if (
+                rows[i].querySelector(
+                  'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), textarea'
+                )
+              )
+                dataRows.push(rows[i]);
             }
             if (!dataRows.length) return false;
 
@@ -10078,11 +11298,13 @@ export class MHCAsiaAutomation {
             let bestCell = null;
             let bestWidth = 0;
             for (const c of overlapping) {
-              const inputs = Array.from(c.querySelectorAll('input[type="text"], input:not([type]), textarea')).filter((x) =>
-                isVisible(x)
-              );
+              const inputs = Array.from(
+                c.querySelectorAll('input[type="text"], input:not([type]), textarea')
+              ).filter(x => isVisible(x));
               if (!inputs.length) continue;
-              inputs.sort((a, b) => b.getBoundingClientRect().width - a.getBoundingClientRect().width);
+              inputs.sort(
+                (a, b) => b.getBoundingClientRect().width - a.getBoundingClientRect().width
+              );
               const w = inputs[0].getBoundingClientRect().width;
               if (w > bestWidth) {
                 bestWidth = w;
@@ -10091,11 +11313,15 @@ export class MHCAsiaAutomation {
             }
             const cell = bestCell || overlapping[0];
 
-            const inputs = Array.from(cell.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), textarea')).filter(
-              (x) => isVisible(x)
-            );
+            const inputs = Array.from(
+              cell.querySelectorAll(
+                'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), textarea'
+              )
+            ).filter(x => isVisible(x));
             // Choose the widest visible field; drug name inputs are usually the widest in the cell.
-            inputs.sort((a, b) => b.getBoundingClientRect().width - a.getBoundingClientRect().width);
+            inputs.sort(
+              (a, b) => b.getBoundingClientRect().width - a.getBoundingClientRect().width
+            );
             const input = inputs[0] || null;
             if (!input) return false;
 
@@ -10104,31 +11330,40 @@ export class MHCAsiaAutomation {
             input.dispatchEvent(new Event('input', { bubbles: true }));
             input.dispatchEvent(new Event('change', { bubbles: true }));
             let qtyOk = false;
-            const qtyRaw = quantity === null || quantity === undefined ? '' : String(quantity).trim();
+            const qtyRaw =
+              quantity === null || quantity === undefined ? '' : String(quantity).trim();
             const qtyMatch = qtyRaw.match(/\\d+(?:\\.\\d+)?/);
             let qtyValue = qtyMatch ? qtyMatch[0] : qtyRaw;
             if (qtyValue === '') qtyValue = '1';
             if (qtyValue !== '') {
               // Prefer an explicit qty/quantity input on the same row.
               const rowInputs = Array.from(
-                targetRow.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select')
-              ).filter((x) => isVisible(x) && x !== input);
-              const byAttr = rowInputs.find((x) => /qty|quantity/i.test((x.name || '') + ' ' + (x.id || '')));
+                targetRow.querySelectorAll(
+                  'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select'
+                )
+              ).filter(x => isVisible(x) && x !== input);
+              const byAttr = rowInputs.find(x =>
+                /qty|quantity/i.test((x.name || '') + ' ' + (x.id || ''))
+              );
               let qtyInput = byAttr || null;
 
               if (!qtyInput) {
                 // Try to map via the qty header within the same table.
                 let qtyHeader =
-                  Array.from(headerRow.querySelectorAll('th, td')).find((c) =>
+                  Array.from(headerRow.querySelectorAll('th, td')).find(c =>
                     /qty|quantity/i.test(norm(c.innerText || c.textContent || ''))
                   ) || null;
                 if (!qtyHeader) {
-                  const headerRows = Array.from(scopedTable.querySelectorAll('tr')).filter(
-                    (r) => /drug\\s*name|unit|price|qty|amount/i.test(norm(r.innerText || r.textContent || ''))
+                  const headerRows = Array.from(scopedTable.querySelectorAll('tr')).filter(r =>
+                    /drug\\s*name|unit|price|qty|amount/i.test(
+                      norm(r.innerText || r.textContent || '')
+                    )
                   );
                   for (const r of headerRows) {
                     const cells = Array.from(r.querySelectorAll('th, td'));
-                    const found = cells.find((c) => /qty|quantity/i.test(norm(c.innerText || c.textContent || '')));
+                    const found = cells.find(c =>
+                      /qty|quantity/i.test(norm(c.innerText || c.textContent || ''))
+                    );
                     if (found) {
                       qtyHeader = found;
                       break;
@@ -10137,8 +11372,9 @@ export class MHCAsiaAutomation {
                 }
                 if (!qtyHeader) {
                   qtyHeader =
-                    Array.from(scopedTable.querySelectorAll('th, td')).find((c) => /qty|quantity/i.test(norm(c.innerText))) ||
-                    null;
+                    Array.from(scopedTable.querySelectorAll('th, td')).find(c =>
+                      /qty|quantity/i.test(norm(c.innerText))
+                    ) || null;
                 }
                 if (qtyHeader && rowInputs.length) {
                   try {
@@ -10177,10 +11413,16 @@ export class MHCAsiaAutomation {
                     const qtyCell = overlapQty[0] || null;
                     if (qtyCell) {
                       const qtyInputs = Array.from(
-                        qtyCell.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select')
-                      ).filter((x) => isVisible(x));
+                        qtyCell.querySelectorAll(
+                          'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select'
+                        )
+                      ).filter(x => isVisible(x));
                       // Quantity fields are usually narrow; pick the smallest visible input.
-                      qtyInputs.sort((a, b) => (a.getBoundingClientRect().width || 0) - (b.getBoundingClientRect().width || 0));
+                      qtyInputs.sort(
+                        (a, b) =>
+                          (a.getBoundingClientRect().width || 0) -
+                          (b.getBoundingClientRect().width || 0)
+                      );
                       qtyInput = qtyInputs[0] || null;
                     }
                   }
@@ -10189,13 +11431,16 @@ export class MHCAsiaAutomation {
 
               if (!qtyInput && rowInputs.length) {
                 // Heuristic fallback: choose the narrowest visible input in the row.
-                const filtered = rowInputs.filter((x) => {
+                const filtered = rowInputs.filter(x => {
                   const idn = `${x.name || ''} ${x.id || ''}`.toLowerCase();
                   if (/unit|price|amount|amt/.test(idn)) return false;
                   return true;
                 });
                 const pool = filtered.length ? filtered : rowInputs;
-                pool.sort((a, b) => (a.getBoundingClientRect().width || 0) - (b.getBoundingClientRect().width || 0));
+                pool.sort(
+                  (a, b) =>
+                    (a.getBoundingClientRect().width || 0) - (b.getBoundingClientRect().width || 0)
+                );
                 qtyInput = pool[0] || null;
               }
 
@@ -10211,8 +11456,9 @@ export class MHCAsiaAutomation {
                 const tag = (qtyInput.tagName || '').toLowerCase();
                 if (tag === 'select') {
                   const opts = Array.from(qtyInput.querySelectorAll('option'));
-                  const match = opts.find((o) => (o.value || '').toString() === qtyValue) ||
-                    opts.find((o) => (o.textContent || '').trim() === qtyValue);
+                  const match =
+                    opts.find(o => (o.value || '').toString() === qtyValue) ||
+                    opts.find(o => (o.textContent || '').trim() === qtyValue);
                   if (match) {
                     qtyInput.value = match.value;
                   } else if (opts.length) {
@@ -10237,18 +11483,23 @@ export class MHCAsiaAutomation {
         )
         .catch(() => ({ ok: false, qtyOk: false }));
 
-	      if (directFilled?.ok) {
-	        this._logStep('Drug name filled directly in drug table', { rowIndex, qtyFilled: directFilled.qtyOk });
-          this.lastDrugSelectionByRow[rowIndex] = {
-            fromMaster: false,
-            name: String(drugData.name || '').trim(),
-            checkedAt: new Date().toISOString(),
-          };
-	        return true;
-	      }
+      if (directFilled?.ok) {
+        this._logStep('Drug name filled directly in drug table', {
+          rowIndex,
+          qtyFilled: directFilled.qtyOk,
+        });
+        this.lastDrugSelectionByRow[rowIndex] = {
+          fromMaster: false,
+          name: String(drugData.name || '').trim(),
+          checkedAt: new Date().toISOString(),
+        };
+        return true;
+      }
 
       // Best-effort: modal selection is highly portal-specific; don't risk filling the wrong field.
-      logger.warn(`Could not fill Drug Name row ${rowIndex} (direct fill did not locate the drug table)`);
+      logger.warn(
+        `Could not fill Drug Name row ${rowIndex} (direct fill did not locate the drug table)`
+      );
       return false;
     } catch (error) {
       logger.error('Failed to fill drug item:', error);
@@ -10271,48 +11522,57 @@ export class MHCAsiaAutomation {
     const ok = await this.page
       .evaluate(
         ({ rowIndex, qtyValue }) => {
-          const norm = (s) => (s || '').replace(/\s+/g, ' ').trim().toLowerCase();
-          const isVisible = (el) => {
+          const norm = s => (s || '').replace(/\s+/g, ' ').trim().toLowerCase();
+          const isVisible = el => {
             if (!el) return false;
             const style = window.getComputedStyle(el);
             if (!style) return false;
             if (style.display === 'none' || style.visibility === 'hidden') return false;
             return true;
           };
+          const sameNumeric = (a, b) => {
+            const n1 = Number(String(a || '').trim());
+            const n2 = Number(String(b || '').trim());
+            if (!Number.isFinite(n1) || !Number.isFinite(n2)) return false;
+            return Math.abs(n1 - n2) < 1e-9;
+          };
 
           let table = document.querySelector('#drugTable');
           let headerRow = null;
           let qtyHeader = null;
-          let drugHeader = null;
+          let _drugHeader = null;
 
-          const findHeaderRow = (root) => {
+          const findHeaderRow = root => {
             const rows = Array.from(root.querySelectorAll('tr'));
-            return rows.find((r) => /drug\s*name/i.test(norm(r.innerText))) || null;
+            return rows.find(r => /drug\s*name/i.test(norm(r.innerText))) || null;
           };
 
           if (table) {
             headerRow = findHeaderRow(table);
             if (headerRow) {
               const cells = Array.from(headerRow.querySelectorAll('th, td'));
-              drugHeader = cells.find((c) => /drug\s*name/i.test(norm(c.innerText))) || null;
-              qtyHeader = cells.find((c) => /qty|quantity/i.test(norm(c.innerText))) || null;
+              _drugHeader = cells.find(c => /drug\s*name/i.test(norm(c.innerText))) || null;
+              qtyHeader = cells.find(c => /qty|quantity/i.test(norm(c.innerText))) || null;
             }
           }
 
           if (!table || !headerRow) {
             const headerCell =
-              Array.from(document.querySelectorAll('th, td')).find((c) => /drug\s*name/i.test(norm(c.innerText))) ||
-              null;
+              Array.from(document.querySelectorAll('th, td')).find(c =>
+                /drug\s*name/i.test(norm(c.innerText))
+              ) || null;
             if (!headerCell) return false;
             table = headerCell.closest('table');
             headerRow = headerCell.closest('tr');
             if (!table || !headerRow) return false;
             const cells = Array.from(headerRow.querySelectorAll('th, td'));
-            drugHeader = headerCell;
-            qtyHeader = cells.find((c) => /qty|quantity/i.test(norm(c.innerText))) || null;
+            _drugHeader = headerCell;
+            qtyHeader = cells.find(c => /qty|quantity/i.test(norm(c.innerText))) || null;
           }
 
-          const rows = Array.from(table.querySelectorAll('tr')).filter((r) => r.closest('table') === table);
+          const rows = Array.from(table.querySelectorAll('tr')).filter(
+            r => r.closest('table') === table
+          );
           const headerIdx = rows.indexOf(headerRow);
           if (headerIdx < 0) return false;
 
@@ -10320,7 +11580,11 @@ export class MHCAsiaAutomation {
           for (let i = headerIdx + 1; i < rows.length; i++) {
             const text = norm(rows[i].innerText || '');
             if (/total\s+drug\s+fee/i.test(text)) break;
-            if (rows[i].querySelector('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select')) {
+            if (
+              rows[i].querySelector(
+                'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select'
+              )
+            ) {
               dataRows.push(rows[i]);
             }
           }
@@ -10342,8 +11606,10 @@ export class MHCAsiaAutomation {
               const cell = rowCells[qtyIndex] || null;
               if (cell) {
                 const inputs = Array.from(
-                  cell.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select')
-                ).filter((x) => isVisible(x));
+                  cell.querySelectorAll(
+                    'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select'
+                  )
+                ).filter(x => isVisible(x));
                 qtyInput = inputs[0] || null;
               }
             }
@@ -10351,26 +11617,33 @@ export class MHCAsiaAutomation {
 
           if (!qtyInput) {
             const rowInputs = Array.from(
-              targetRow.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select')
-            ).filter((x) => isVisible(x));
-            const attrFirst = rowInputs.find((x) => /qty|quantity/i.test((x.name || '') + ' ' + (x.id || '')));
+              targetRow.querySelectorAll(
+                'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select'
+              )
+            ).filter(x => isVisible(x));
+            const attrFirst = rowInputs.find(x =>
+              /qty|quantity/i.test((x.name || '') + ' ' + (x.id || ''))
+            );
             if (attrFirst) {
               qtyInput = attrFirst;
             } else {
               // Last resort: choose a narrow input that does not look like unit/price/amount.
-              const filtered = rowInputs.filter((x) => {
+              const filtered = rowInputs.filter(x => {
                 const idn = `${x.name || ''} ${x.id || ''}`.toLowerCase();
                 return !/unit|price|amount|amt|claim|code/.test(idn);
               });
               const pool = filtered.length ? filtered : rowInputs;
-              pool.sort((a, b) => (a.getBoundingClientRect().width || 0) - (b.getBoundingClientRect().width || 0));
+              pool.sort(
+                (a, b) =>
+                  (a.getBoundingClientRect().width || 0) - (b.getBoundingClientRect().width || 0)
+              );
               qtyInput = pool[0] || null;
             }
           }
           if (!qtyInput) {
             const qtyInputs = Array.from(
               document.querySelectorAll('input[name*="qty" i], input[id*="qty" i]')
-            ).filter((x) => isVisible(x));
+            ).filter(x => isVisible(x));
             if (qtyInputs.length) {
               const idx = Math.max(0, rowIndex - 1);
               qtyInput = qtyInputs[idx] || qtyInputs[0];
@@ -10381,8 +11654,9 @@ export class MHCAsiaAutomation {
           const tag = (qtyInput.tagName || '').toLowerCase();
           if (tag === 'select') {
             const opts = Array.from(qtyInput.querySelectorAll('option'));
-            const match = opts.find((o) => (o.value || '').toString() === qtyValue) ||
-              opts.find((o) => (o.textContent || '').trim() === qtyValue);
+            const match =
+              opts.find(o => (o.value || '').toString() === qtyValue) ||
+              opts.find(o => (o.textContent || '').trim() === qtyValue);
             if (match) qtyInput.value = match.value;
             else if (opts.length) qtyInput.value = opts[0].value;
             qtyInput.dispatchEvent(new Event('input', { bubbles: true }));
@@ -10424,138 +11698,157 @@ export class MHCAsiaAutomation {
     if (!qtyValue) return false;
 
     const ok = await this.page
-      .evaluate(({ rowIndex, qtyValue }) => {
-        const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
-        const isVisible = (el) => {
-          if (!el) return false;
-          const style = window.getComputedStyle(el);
-          if (!style) return false;
-          if (style.display === 'none' || style.visibility === 'hidden') return false;
-          const rect = el.getBoundingClientRect();
-          if (!rect || rect.width <= 0 || rect.height <= 0) return false;
-          return true;
-        };
-        const sameNumeric = (a, b) => {
-          const n1 = Number(String(a || '').trim());
-          const n2 = Number(String(b || '').trim());
-          if (!Number.isFinite(n1) || !Number.isFinite(n2)) return false;
-          return Math.abs(n1 - n2) < 1e-9;
-        };
-        const rowCellsWithSpan = (row) =>
-          Array.from(row.querySelectorAll('th, td')).map((c) => ({
-            cell: c,
-            span: Number(c.colSpan || 1),
-          }));
-        const getRange = (row, targetCell) => {
-          const cells = rowCellsWithSpan(row);
-          let col = 0;
-          for (const it of cells) {
-            const start = col;
-            const end = col + it.span;
-            if (it.cell === targetCell) return { start, end };
-            col = end;
-          }
-          return null;
-        };
-
-        const tables = [
-          document.querySelector('#drugTable'),
-          ...Array.from(document.querySelectorAll('table')).filter((t) =>
-            /drug\s*name/i.test(norm(t.innerText || ''))
-          ),
-        ].filter(Boolean);
-        const table = tables[0] || null;
-        if (!table) return false;
-
-        const rows = Array.from(table.querySelectorAll('tr')).filter((r) => r.closest('table') === table);
-        const headerRow = rows.find((r) => /drug\s*name/i.test(norm(r.innerText || ''))) || null;
-        if (!headerRow) return false;
-        const headerIdx = rows.indexOf(headerRow);
-        if (headerIdx < 0) return false;
-
-        const dataRows = [];
-        for (let i = headerIdx + 1; i < rows.length; i++) {
-          const row = rows[i];
-          const text = norm(row.innerText || '');
-          if (/total\s+drug\s+fee/i.test(text)) break;
-          if (row.querySelector('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select')) {
-            dataRows.push(row);
-          }
-        }
-        const target = dataRows[Math.max(0, rowIndex - 1)];
-        if (!target) return false;
-
-        const headerCells = Array.from(headerRow.querySelectorAll('th, td'));
-        const qtyHeader = headerCells.find((c) => /qty|quantity/i.test(norm(c.innerText || c.textContent || ''))) || null;
-        let qtyInput = null;
-
-        if (qtyHeader) {
-          const qtyRange = getRange(headerRow, qtyHeader);
-          if (qtyRange) {
-            const tCells = rowCellsWithSpan(target);
+      .evaluate(
+        ({ rowIndex, qtyValue }) => {
+          const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+          const isVisible = el => {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            if (!style) return false;
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            const rect = el.getBoundingClientRect();
+            if (!rect || rect.width <= 0 || rect.height <= 0) return false;
+            return true;
+          };
+          const sameNumeric = (a, b) => {
+            const n1 = Number(String(a || '').trim());
+            const n2 = Number(String(b || '').trim());
+            if (!Number.isFinite(n1) || !Number.isFinite(n2)) return false;
+            return Math.abs(n1 - n2) < 1e-9;
+          };
+          const rowCellsWithSpan = row =>
+            Array.from(row.querySelectorAll('th, td')).map(c => ({
+              cell: c,
+              span: Number(c.colSpan || 1),
+            }));
+          const getRange = (row, targetCell) => {
+            const cells = rowCellsWithSpan(row);
             let col = 0;
-            const overlap = [];
-            for (const it of tCells) {
+            for (const it of cells) {
               const start = col;
               const end = col + it.span;
-              if (start < qtyRange.end && end > qtyRange.start) overlap.push(it.cell);
+              if (it.cell === targetCell) return { start, end };
               col = end;
             }
-            const qtyCell = overlap[0] || null;
-            if (qtyCell) {
-              const candidates = Array.from(
-                qtyCell.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select')
-              ).filter((x) => isVisible(x));
-              qtyInput = candidates[0] || null;
+            return null;
+          };
+
+          const tables = [
+            document.querySelector('#drugTable'),
+            ...Array.from(document.querySelectorAll('table')).filter(t =>
+              /drug\s*name/i.test(norm(t.innerText || ''))
+            ),
+          ].filter(Boolean);
+          const table = tables[0] || null;
+          if (!table) return false;
+
+          const rows = Array.from(table.querySelectorAll('tr')).filter(
+            r => r.closest('table') === table
+          );
+          const headerRow = rows.find(r => /drug\s*name/i.test(norm(r.innerText || ''))) || null;
+          if (!headerRow) return false;
+          const headerIdx = rows.indexOf(headerRow);
+          if (headerIdx < 0) return false;
+
+          const dataRows = [];
+          for (let i = headerIdx + 1; i < rows.length; i++) {
+            const row = rows[i];
+            const text = norm(row.innerText || '');
+            if (/total\s+drug\s+fee/i.test(text)) break;
+            if (
+              row.querySelector(
+                'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select'
+              )
+            ) {
+              dataRows.push(row);
             }
           }
-        }
+          const target = dataRows[Math.max(0, rowIndex - 1)];
+          if (!target) return false;
 
-        if (!qtyInput) {
-          const inputs = Array.from(
-            target.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select')
-          ).filter((x) => isVisible(x));
-          if (!inputs.length) return false;
-          qtyInput = inputs.find((x) => /qty|quantity/i.test((x.name || '') + ' ' + (x.id || ''))) || null;
-          if (!qtyInput) {
-            const filtered = inputs.filter((x) => {
-              const idn = `${x.name || ''} ${x.id || ''}`.toLowerCase();
-              return !/unit|price|amount|amt|claim|code/.test(idn);
-            });
-            const pool = filtered.length ? filtered : inputs;
-            pool.sort((a, b) => (a.getBoundingClientRect().width || 0) - (b.getBoundingClientRect().width || 0));
-            qtyInput = pool[0] || null;
+          const headerCells = Array.from(headerRow.querySelectorAll('th, td'));
+          const qtyHeader =
+            headerCells.find(c => /qty|quantity/i.test(norm(c.innerText || c.textContent || ''))) ||
+            null;
+          let qtyInput = null;
+
+          if (qtyHeader) {
+            const qtyRange = getRange(headerRow, qtyHeader);
+            if (qtyRange) {
+              const tCells = rowCellsWithSpan(target);
+              let col = 0;
+              const overlap = [];
+              for (const it of tCells) {
+                const start = col;
+                const end = col + it.span;
+                if (start < qtyRange.end && end > qtyRange.start) overlap.push(it.cell);
+                col = end;
+              }
+              const qtyCell = overlap[0] || null;
+              if (qtyCell) {
+                const candidates = Array.from(
+                  qtyCell.querySelectorAll(
+                    'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select'
+                  )
+                ).filter(x => isVisible(x));
+                qtyInput = candidates[0] || null;
+              }
+            }
           }
-        }
 
-        if (!qtyInput) return false;
-        const tag = (qtyInput.tagName || '').toLowerCase();
-        if (tag === 'select') {
-          const opts = Array.from(qtyInput.querySelectorAll('option'));
-          const match =
-            opts.find((o) => (o.value || '').toString() === qtyValue) ||
-            opts.find((o) => (o.textContent || '').trim() === qtyValue);
-          if (match) qtyInput.value = match.value;
-          else if (opts.length) qtyInput.value = opts[0].value;
+          if (!qtyInput) {
+            const inputs = Array.from(
+              target.querySelectorAll(
+                'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select'
+              )
+            ).filter(x => isVisible(x));
+            if (!inputs.length) return false;
+            qtyInput =
+              inputs.find(x => /qty|quantity/i.test((x.name || '') + ' ' + (x.id || ''))) || null;
+            if (!qtyInput) {
+              const filtered = inputs.filter(x => {
+                const idn = `${x.name || ''} ${x.id || ''}`.toLowerCase();
+                return !/unit|price|amount|amt|claim|code/.test(idn);
+              });
+              const pool = filtered.length ? filtered : inputs;
+              pool.sort(
+                (a, b) =>
+                  (a.getBoundingClientRect().width || 0) - (b.getBoundingClientRect().width || 0)
+              );
+              qtyInput = pool[0] || null;
+            }
+          }
+
+          if (!qtyInput) return false;
+          const tag = (qtyInput.tagName || '').toLowerCase();
+          if (tag === 'select') {
+            const opts = Array.from(qtyInput.querySelectorAll('option'));
+            const match =
+              opts.find(o => (o.value || '').toString() === qtyValue) ||
+              opts.find(o => (o.textContent || '').trim() === qtyValue);
+            if (match) qtyInput.value = match.value;
+            else if (opts.length) qtyInput.value = opts[0].value;
+            qtyInput.dispatchEvent(new Event('input', { bubbles: true }));
+            const finalValue = String(qtyInput.value || '').trim();
+            return finalValue === qtyValue || sameNumeric(finalValue, qtyValue);
+          }
+          try {
+            qtyInput.readOnly = false;
+            qtyInput.disabled = false;
+            qtyInput.removeAttribute && qtyInput.removeAttribute('readonly');
+            qtyInput.removeAttribute && qtyInput.removeAttribute('disabled');
+          } catch {
+            // ignore
+          }
+          qtyInput.focus();
+          qtyInput.value = qtyValue;
           qtyInput.dispatchEvent(new Event('input', { bubbles: true }));
+          qtyInput.blur && qtyInput.blur();
           const finalValue = String(qtyInput.value || '').trim();
           return finalValue === qtyValue || sameNumeric(finalValue, qtyValue);
-        }
-        try {
-          qtyInput.readOnly = false;
-          qtyInput.disabled = false;
-          qtyInput.removeAttribute && qtyInput.removeAttribute('readonly');
-          qtyInput.removeAttribute && qtyInput.removeAttribute('disabled');
-        } catch {
-          // ignore
-        }
-        qtyInput.focus();
-        qtyInput.value = qtyValue;
-        qtyInput.dispatchEvent(new Event('input', { bubbles: true }));
-        qtyInput.blur && qtyInput.blur();
-        const finalValue = String(qtyInput.value || '').trim();
-        return finalValue === qtyValue || sameNumeric(finalValue, qtyValue);
-      }, { rowIndex, qtyValue })
+        },
+        { rowIndex, qtyValue }
+      )
       .catch(() => false);
 
     if (ok) this._logStep('Drug qty verified', { rowIndex, quantity: qtyValue });
@@ -10578,17 +11871,32 @@ export class MHCAsiaAutomation {
       if (!Number.isFinite(n)) return null;
       return String(Number(n.toFixed(decimals)));
     };
-    const unit = String(pricing?.unit || '').trim().toUpperCase() || null;
+    const unit =
+      String(pricing?.unit || '')
+        .trim()
+        .toUpperCase() || null;
     const qtyValue = normalizeNumber(pricing?.quantity, 4);
     let unitPriceValue = normalizeNumber(pricing?.unitPrice, 4);
     let amountValue = normalizeNumber(pricing?.amount, 4);
     const qtyNum = qtyValue === null ? NaN : Number.parseFloat(qtyValue);
     const amountNum = amountValue === null ? NaN : Number.parseFloat(amountValue);
-    if ((!unitPriceValue || Number.parseFloat(unitPriceValue) <= 0) && Number.isFinite(amountNum) && amountNum > 0 && Number.isFinite(qtyNum) && qtyNum > 0) {
+    if (
+      (!unitPriceValue || Number.parseFloat(unitPriceValue) <= 0) &&
+      Number.isFinite(amountNum) &&
+      amountNum > 0 &&
+      Number.isFinite(qtyNum) &&
+      qtyNum > 0
+    ) {
       unitPriceValue = String(Number((amountNum / qtyNum).toFixed(4)));
     }
     const priceNum = unitPriceValue === null ? NaN : Number.parseFloat(unitPriceValue);
-    if ((!amountValue || Number.parseFloat(amountValue) <= 0) && Number.isFinite(priceNum) && priceNum > 0 && Number.isFinite(qtyNum) && qtyNum > 0) {
+    if (
+      (!amountValue || Number.parseFloat(amountValue) <= 0) &&
+      Number.isFinite(priceNum) &&
+      priceNum > 0 &&
+      Number.isFinite(qtyNum) &&
+      qtyNum > 0
+    ) {
       amountValue = String(Number((priceNum * qtyNum).toFixed(4)));
     }
     if (!unit && !unitPriceValue && !amountValue) return false;
@@ -10596,8 +11904,8 @@ export class MHCAsiaAutomation {
     const result = await this.page
       .evaluate(
         ({ rowIndex, unit, unitPriceValue, amountValue }) => {
-          const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
-          const isVisible = (el) => {
+          const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+          const isVisible = el => {
             if (!el) return false;
             const style = window.getComputedStyle(el);
             if (!style) return false;
@@ -10613,8 +11921,14 @@ export class MHCAsiaAutomation {
             const tag = (el.tagName || '').toLowerCase();
             if (tag === 'select') {
               const options = Array.from(el.querySelectorAll('option'));
-              const exact = options.find((o) => norm(o.value) === norm(val) || norm(o.textContent) === norm(val));
-              const partial = exact || options.find((o) => norm(o.value).includes(norm(val)) || norm(o.textContent).includes(norm(val)));
+              const exact = options.find(
+                o => norm(o.value) === norm(val) || norm(o.textContent) === norm(val)
+              );
+              const partial =
+                exact ||
+                options.find(
+                  o => norm(o.value).includes(norm(val)) || norm(o.textContent).includes(norm(val))
+                );
               if (!partial) return false;
               el.value = partial.value;
               el.dispatchEvent(new Event('input', { bubbles: true }));
@@ -10639,11 +11953,16 @@ export class MHCAsiaAutomation {
 
           const table =
             document.querySelector('#drugTable') ||
-            Array.from(document.querySelectorAll('table')).find((t) => /drug\s*name/i.test(norm(t.innerText || t.textContent || ''))) ||
+            Array.from(document.querySelectorAll('table')).find(t =>
+              /drug\s*name/i.test(norm(t.innerText || t.textContent || ''))
+            ) ||
             null;
           if (!table) return { unitSet: false, priceSet: false, amountSet: false };
-          const rows = Array.from(table.querySelectorAll('tr')).filter((r) => r.closest('table') === table);
-          const headerRow = rows.find((r) => /drug\s*name/i.test(norm(r.innerText || r.textContent || ''))) || null;
+          const rows = Array.from(table.querySelectorAll('tr')).filter(
+            r => r.closest('table') === table
+          );
+          const headerRow =
+            rows.find(r => /drug\s*name/i.test(norm(r.innerText || r.textContent || ''))) || null;
           if (!headerRow) return { unitSet: false, priceSet: false, amountSet: false };
           const headerIdx = rows.indexOf(headerRow);
           if (headerIdx < 0) return { unitSet: false, priceSet: false, amountSet: false };
@@ -10652,7 +11971,11 @@ export class MHCAsiaAutomation {
           for (let i = headerIdx + 1; i < rows.length; i++) {
             const text = norm(rows[i].innerText || '');
             if (/total\s+drug\s+fee/.test(text)) break;
-            if (rows[i].querySelector('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select')) {
+            if (
+              rows[i].querySelector(
+                'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select'
+              )
+            ) {
               dataRows.push(rows[i]);
             }
           }
@@ -10660,23 +11983,28 @@ export class MHCAsiaAutomation {
           if (!row) return { unitSet: false, priceSet: false, amountSet: false };
 
           const rowInputs = Array.from(
-            row.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea')
-          ).filter((el) => isVisible(el));
+            row.querySelectorAll(
+              'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea'
+            )
+          ).filter(el => isVisible(el));
           if (!rowInputs.length) return { unitSet: false, priceSet: false, amountSet: false };
 
-          const idn = (el) => `${el.name || ''} ${el.id || ''}`.toLowerCase();
+          const idn = el => `${el.name || ''} ${el.id || ''}`.toLowerCase();
           const unitInput =
-            rowInputs.find((el) => {
+            rowInputs.find(el => {
               const s = idn(el);
               return /unit/.test(s) && !/price|qty|quantity|amount|amt|code|claim|total/.test(s);
             }) || null;
           const priceInput =
-            rowInputs.find((el) => {
+            rowInputs.find(el => {
               const s = idn(el);
-              return /unit\s*price|unitprice|price/.test(s) && !/amount|amt|qty|quantity|claim|total|gst/.test(s);
+              return (
+                /unit\s*price|unitprice|price/.test(s) &&
+                !/amount|amt|qty|quantity|claim|total|gst/.test(s)
+              );
             }) || null;
           const amountInput =
-            rowInputs.find((el) => {
+            rowInputs.find(el => {
               const s = idn(el);
               return /amount|amt/.test(s) && !/claim|total|gst/.test(s);
             }) || null;
@@ -10697,8 +12025,12 @@ export class MHCAsiaAutomation {
             priceFinal,
             amountFinal,
             unitField: unitInput ? { name: unitInput.name || '', id: unitInput.id || '' } : null,
-            priceField: priceInput ? { name: priceInput.name || '', id: priceInput.id || '' } : null,
-            amountField: amountInput ? { name: amountInput.name || '', id: amountInput.id || '' } : null,
+            priceField: priceInput
+              ? { name: priceInput.name || '', id: priceInput.id || '' }
+              : null,
+            amountField: amountInput
+              ? { name: amountInput.name || '', id: amountInput.id || '' }
+              : null,
           };
         },
         { rowIndex, unit, unitPriceValue, amountValue }
@@ -10724,7 +12056,7 @@ export class MHCAsiaAutomation {
    * @param {{unitPrice?: string|number|null, amount?: string|number|null}} pricing
    */
   async verifyDrugPricing(rowIndex = 1, pricing = {}) {
-    const normalizeNumber = (v) => {
+    const normalizeNumber = v => {
       if (v === null || v === undefined) return null;
       const s = String(v).replace(/,/g, '').trim();
       if (!s) return null;
@@ -10741,8 +12073,8 @@ export class MHCAsiaAutomation {
     const ok = await this.page
       .evaluate(
         ({ rowIndex, expectedPrice, expectedAmount }) => {
-          const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
-          const isVisible = (el) => {
+          const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+          const isVisible = el => {
             if (!el) return false;
             const style = window.getComputedStyle(el);
             if (!style) return false;
@@ -10750,21 +12082,29 @@ export class MHCAsiaAutomation {
             const r = el.getBoundingClientRect();
             return !!r && r.width > 0 && r.height > 0;
           };
-          const asNumber = (v) => {
-            const s = String(v || '').replace(/,/g, '').trim();
+          const asNumber = v => {
+            const s = String(v || '')
+              .replace(/,/g, '')
+              .trim();
             const m = s.match(/-?\d+(?:\.\d+)?/);
             if (!m) return NaN;
             return Number.parseFloat(m[0]);
           };
-          const same = (a, b) => Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) <= 0.05;
+          const same = (a, b) =>
+            Number.isFinite(a) && Number.isFinite(b) && Math.abs(a - b) <= 0.05;
 
           const table =
             document.querySelector('#drugTable') ||
-            Array.from(document.querySelectorAll('table')).find((t) => /drug\s*name/i.test(norm(t.innerText || t.textContent || ''))) ||
+            Array.from(document.querySelectorAll('table')).find(t =>
+              /drug\s*name/i.test(norm(t.innerText || t.textContent || ''))
+            ) ||
             null;
           if (!table) return false;
-          const rows = Array.from(table.querySelectorAll('tr')).filter((r) => r.closest('table') === table);
-          const headerRow = rows.find((r) => /drug\s*name/i.test(norm(r.innerText || r.textContent || ''))) || null;
+          const rows = Array.from(table.querySelectorAll('tr')).filter(
+            r => r.closest('table') === table
+          );
+          const headerRow =
+            rows.find(r => /drug\s*name/i.test(norm(r.innerText || r.textContent || ''))) || null;
           if (!headerRow) return false;
           const headerIdx = rows.indexOf(headerRow);
           if (headerIdx < 0) return false;
@@ -10773,7 +12113,11 @@ export class MHCAsiaAutomation {
           for (let i = headerIdx + 1; i < rows.length; i++) {
             const text = norm(rows[i].innerText || '');
             if (/total\s+drug\s+fee/.test(text)) break;
-            if (rows[i].querySelector('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select')) {
+            if (
+              rows[i].querySelector(
+                'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select'
+              )
+            ) {
               dataRows.push(rows[i]);
             }
           }
@@ -10781,16 +12125,21 @@ export class MHCAsiaAutomation {
           if (!row) return false;
 
           const rowInputs = Array.from(
-            row.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea')
-          ).filter((el) => isVisible(el));
-          const idn = (el) => `${el.name || ''} ${el.id || ''}`.toLowerCase();
+            row.querySelectorAll(
+              'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea'
+            )
+          ).filter(el => isVisible(el));
+          const idn = el => `${el.name || ''} ${el.id || ''}`.toLowerCase();
           const priceInput =
-            rowInputs.find((el) => {
+            rowInputs.find(el => {
               const s = idn(el);
-              return /unit\s*price|unitprice|price/.test(s) && !/amount|amt|qty|quantity|claim|total|gst/.test(s);
+              return (
+                /unit\s*price|unitprice|price/.test(s) &&
+                !/amount|amt|qty|quantity|claim|total|gst/.test(s)
+              );
             }) || null;
           const amountInput =
-            rowInputs.find((el) => {
+            rowInputs.find(el => {
               const s = idn(el);
               return /amount|amt/.test(s) && !/claim|total|gst/.test(s);
             }) || null;
@@ -10806,7 +12155,12 @@ export class MHCAsiaAutomation {
       )
       .catch(() => false);
 
-    if (ok) this._logStep('Drug pricing verified', { rowIndex, unitPrice: expectedPrice ?? null, amount: expectedAmount ?? null });
+    if (ok)
+      this._logStep('Drug pricing verified', {
+        rowIndex,
+        unitPrice: expectedPrice ?? null,
+        amount: expectedAmount ?? null,
+      });
     return ok;
   }
 
@@ -10816,7 +12170,7 @@ export class MHCAsiaAutomation {
   async clickMoreDrug() {
     try {
       this._logStep('Click More Drug button');
-      
+
       const moreDrugSelectors = [
         'button:has-text("More Drug")',
         'button:has-text("Add Drug")',
@@ -10859,8 +12213,8 @@ export class MHCAsiaAutomation {
       const ok = await this.page
         .evaluate(
           ({ rowIndex, name }) => {
-            const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
-            const isVisible = (el) => {
+            const norm = s => (s || '').replace(/\s+/g, ' ').trim();
+            const isVisible = el => {
               if (!el) return false;
               const style = window.getComputedStyle(el);
               if (!style) return false;
@@ -10870,26 +12224,33 @@ export class MHCAsiaAutomation {
 
             // Best anchor: the "More Procedure" button; it uniquely identifies the procedure section.
             const moreBtn =
-              Array.from(document.querySelectorAll('button, input[type="button"], input[type="submit"]')).find((el) =>
-                /more\s+procedure/i.test(norm(el.textContent || el.value || ''))
-              ) || null;
+              Array.from(
+                document.querySelectorAll('button, input[type="button"], input[type="submit"]')
+              ).find(el => /more\s+procedure/i.test(norm(el.textContent || el.value || ''))) ||
+              null;
             if (moreBtn) {
               const table = moreBtn.closest('table');
               const row = moreBtn.closest('tr');
               if (table && row) {
-                const rows = Array.from(table.querySelectorAll('tr')).filter((r) => r.closest('table') === table);
+                const rows = Array.from(table.querySelectorAll('tr')).filter(
+                  r => r.closest('table') === table
+                );
                 const idx = rows.indexOf(row);
                 // Fill into the nearest prior data row (normally the row directly above the More Procedure button).
                 for (let i = idx - 1; i >= 0; i--) {
                   const rt = norm(rows[i].innerText || rows[i].textContent || '');
                   if (!rt) continue;
                   if (/procedure\s*name/i.test(rt) || /total\s+proc\s+fee/i.test(rt)) continue;
-                  const inputs = Array.from(rows[i].querySelectorAll('input[type="text"], input:not([type]), textarea')).filter(
-                    (x) => isVisible(x)
-                  );
+                  const inputs = Array.from(
+                    rows[i].querySelectorAll('input[type="text"], input:not([type]), textarea')
+                  ).filter(x => isVisible(x));
                   if (!inputs.length) continue;
                   // Prefer the widest input (usually the "Procedure Name" input).
-                  inputs.sort((a, b) => (b.getBoundingClientRect().width || 0) - (a.getBoundingClientRect().width || 0));
+                  inputs.sort(
+                    (a, b) =>
+                      (b.getBoundingClientRect().width || 0) -
+                      (a.getBoundingClientRect().width || 0)
+                  );
                   const target = inputs[0];
                   target.scrollIntoView({ block: 'center' });
                   target.value = String(name).slice(0, 80);
@@ -10901,7 +12262,7 @@ export class MHCAsiaAutomation {
             }
 
             // Choose the best matching table to avoid grabbing an outer layout table.
-            const headerCells = Array.from(document.querySelectorAll('th, td')).filter((c) =>
+            const headerCells = Array.from(document.querySelectorAll('th, td')).filter(c =>
               /procedure\s*name/i.test(norm(c.innerText))
             );
             if (!headerCells.length) return false;
@@ -10914,16 +12275,21 @@ export class MHCAsiaAutomation {
               if (!table || !headerRow) continue;
               const tableText = norm(table.innerText || table.textContent || '');
               let score = 0;
-              if (/total\s+proc\s+fee/i.test(tableText) || /total\s+procedure/i.test(tableText)) score += 10;
+              if (/total\s+proc\s+fee/i.test(tableText) || /total\s+procedure/i.test(tableText))
+                score += 10;
               if (/more\s+procedure/i.test(tableText)) score += 5;
-              const rows = Array.from(table.querySelectorAll('tr')).filter((r) => r.closest('table') === table);
+              const rows = Array.from(table.querySelectorAll('tr')).filter(
+                r => r.closest('table') === table
+              );
               const headerIdx = rows.indexOf(headerRow);
               if (headerIdx < 0) continue;
               let dataRows = 0;
               for (let i = headerIdx + 1; i < rows.length; i++) {
                 const rowText = norm(rows[i].innerText);
-                if (/total\s+proc\s+fee/i.test(rowText) || /total\s+procedure/i.test(rowText)) break;
-                if (rows[i].querySelector('input[type="text"], input:not([type]), textarea')) dataRows += 1;
+                if (/total\s+proc\s+fee/i.test(rowText) || /total\s+procedure/i.test(rowText))
+                  break;
+                if (rows[i].querySelector('input[type="text"], input:not([type]), textarea'))
+                  dataRows += 1;
               }
               score += Math.min(10, dataRows);
               if (score > bestScore) {
@@ -10937,12 +12303,14 @@ export class MHCAsiaAutomation {
             const headerRow = best.headerRow;
             const headerCell = best.headerCell;
 
-            const rows = Array.from(table.querySelectorAll('tr')).filter((r) => r.closest('table') === table);
+            const rows = Array.from(table.querySelectorAll('tr')).filter(
+              r => r.closest('table') === table
+            );
             const headerIdx = rows.indexOf(headerRow);
             if (headerIdx < 0) return false;
 
-            const rowCellsWithSpan = (row) =>
-              Array.from(row.querySelectorAll('th, td')).map((c) => ({
+            const rowCellsWithSpan = row =>
+              Array.from(row.querySelectorAll('th, td')).map(c => ({
                 cell: c,
                 span: Number(c.colSpan || 1),
               }));
@@ -10964,7 +12332,8 @@ export class MHCAsiaAutomation {
             for (let i = headerIdx + 1; i < rows.length; i++) {
               const rowText = norm(rows[i].innerText);
               if (/total\s+proc\s+fee/i.test(rowText) || /total\s+procedure/i.test(rowText)) break;
-              if (rows[i].querySelector('input[type="text"], input:not([type]), textarea')) dataRows.push(rows[i]);
+              if (rows[i].querySelector('input[type="text"], input:not([type]), textarea'))
+                dataRows.push(rows[i]);
             }
             if (!dataRows.length) return false;
 
@@ -10983,7 +12352,7 @@ export class MHCAsiaAutomation {
             }
             if (!overlapping.length) return false;
 
-            const scoreInput = (inp) => {
+            const scoreInput = inp => {
               const idn = `${inp.name || ''} ${inp.id || ''}`.toLowerCase();
               let s = 0;
               if (/proc|procedure/.test(idn)) s += 12;
@@ -11002,9 +12371,9 @@ export class MHCAsiaAutomation {
             let input = null;
             let bestS = -1e9;
             for (const c of overlapping) {
-              const inputs = Array.from(c.querySelectorAll('input[type="text"], input:not([type]), textarea')).filter((x) =>
-                isVisible(x)
-              );
+              const inputs = Array.from(
+                c.querySelectorAll('input[type="text"], input:not([type]), textarea')
+              ).filter(x => isVisible(x));
               for (const inp of inputs) {
                 const sc = scoreInput(inp);
                 if (sc > bestS) {
@@ -11076,13 +12445,15 @@ export class MHCAsiaAutomation {
     const match = raw.match(/\d+(?:\.\d+)?/);
     const claimValue = match ? match[0] : raw;
     if (!claimValue) return false;
-    const procNameNorm = String(procedureName || '').trim().toLowerCase();
+    const procNameNorm = String(procedureName || '')
+      .trim()
+      .toLowerCase();
 
     const ok = await this.page
       .evaluate(
         ({ rowIndex, claimValue, procNameNorm }) => {
-          const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
-          const isVisible = (el) => {
+          const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+          const isVisible = el => {
             if (!el) return false;
             const style = window.getComputedStyle(el);
             if (!style) return false;
@@ -11091,7 +12462,7 @@ export class MHCAsiaAutomation {
             if (!r || r.width <= 0 || r.height <= 0) return false;
             return true;
           };
-          const isTextLike = (el) => {
+          const isTextLike = el => {
             const tag = (el.tagName || '').toLowerCase();
             if (tag === 'select' || tag === 'textarea') return true;
             const t = String(el.type || '').toLowerCase();
@@ -11103,8 +12474,8 @@ export class MHCAsiaAutomation {
             if (tag === 'select') {
               const opts = Array.from(el.querySelectorAll('option'));
               const match =
-                opts.find((o) => (o.value || '').toString().trim() === v) ||
-                opts.find((o) => (o.textContent || '').toString().trim() === v);
+                opts.find(o => (o.value || '').toString().trim() === v) ||
+                opts.find(o => (o.textContent || '').toString().trim() === v);
               if (!match) return false;
               el.value = match.value;
               el.dispatchEvent(new Event('input', { bubbles: true }));
@@ -11129,34 +12500,48 @@ export class MHCAsiaAutomation {
           const byRowFromName = () => {
             if (!procNameNorm) return false;
             const textLikes = Array.from(
-              document.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), textarea')
-            ).filter((el) => isVisible(el));
-            const nameCandidates = textLikes.filter((el) => {
+              document.querySelectorAll(
+                'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), textarea'
+              )
+            ).filter(el => isVisible(el));
+            const nameCandidates = textLikes.filter(el => {
               const v = norm(el.value || '');
               if (!v) return false;
               if (!v.includes(procNameNorm)) return false;
               const idn = `${el.name || ''} ${el.id || ''}`.toLowerCase();
               // Prefer true procedure-name fields.
-              return /proc|procedure|desc|name/.test(idn) || v.length >= Math.min(8, procNameNorm.length);
+              return (
+                /proc|procedure|desc|name/.test(idn) || v.length >= Math.min(8, procNameNorm.length)
+              );
             });
             for (const nameEl of nameCandidates) {
               const row = nameEl.closest('tr');
               if (row) {
                 const rowInputs = Array.from(
-                  row.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea')
-                ).filter((el) => isVisible(el) && isTextLike(el));
+                  row.querySelectorAll(
+                    'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea'
+                  )
+                ).filter(el => isVisible(el) && isTextLike(el));
                 if (rowInputs.length) {
-                  rowInputs.sort((a, b) => (a.getBoundingClientRect().left || 0) - (b.getBoundingClientRect().left || 0));
+                  rowInputs.sort(
+                    (a, b) =>
+                      (a.getBoundingClientRect().left || 0) - (b.getBoundingClientRect().left || 0)
+                  );
                   const nameX = nameEl.getBoundingClientRect().left || 0;
-                  const rightCandidates = rowInputs.filter((el) => {
+                  const rightCandidates = rowInputs.filter(el => {
                     if (el === nameEl) return false;
                     const idn = `${el.name || ''} ${el.id || ''}`.toLowerCase();
                     if (/proc|procedure|desc|name/.test(idn)) return false;
                     const x = el.getBoundingClientRect().left || 0;
                     return x > nameX + 20;
                   });
-                  const pool = rightCandidates.length ? rightCandidates : rowInputs.filter((el) => el !== nameEl);
-                  for (const inp of pool.sort((a, b) => (a.getBoundingClientRect().left || 0) - (b.getBoundingClientRect().left || 0))) {
+                  const pool = rightCandidates.length
+                    ? rightCandidates
+                    : rowInputs.filter(el => el !== nameEl);
+                  for (const inp of pool.sort(
+                    (a, b) =>
+                      (a.getBoundingClientRect().left || 0) - (b.getBoundingClientRect().left || 0)
+                  )) {
                     if (setValue(inp, claimValue)) return true;
                   }
                 }
@@ -11164,14 +12549,20 @@ export class MHCAsiaAutomation {
               // Non-table fallback: same y-band to the right of procedure name input.
               const nr = nameEl.getBoundingClientRect();
               const band = textLikes
-                .filter((el) => {
+                .filter(el => {
                   if (el === nameEl) return false;
                   const idn = `${el.name || ''} ${el.id || ''}`.toLowerCase();
                   if (/proc|procedure|desc|name/.test(idn)) return false;
                   const r = el.getBoundingClientRect();
-                  return Math.abs((r.top || 0) - (nr.top || 0)) <= 8 && (r.left || 0) > (nr.left || 0) + 20;
+                  return (
+                    Math.abs((r.top || 0) - (nr.top || 0)) <= 8 &&
+                    (r.left || 0) > (nr.left || 0) + 20
+                  );
                 })
-                .sort((a, b) => (a.getBoundingClientRect().left || 0) - (b.getBoundingClientRect().left || 0));
+                .sort(
+                  (a, b) =>
+                    (a.getBoundingClientRect().left || 0) - (b.getBoundingClientRect().left || 0)
+                );
               for (const inp of band) {
                 if (setValue(inp, claimValue)) return true;
               }
@@ -11182,14 +12573,20 @@ export class MHCAsiaAutomation {
 
           // Fast path: many legacy pages expose procedure claim inputs with claim-like names/ids.
           // Fill those directly first (excluding total claim fields).
-          const labels = Array.from(document.querySelectorAll('th, td, div, span, label, b, strong'));
-          const procHeaderEl = labels.find((el) => /procedure\s*name/i.test(norm(el.textContent || ''))) || null;
-          const totalProcEl = labels.find((el) => /total\s+proc\s+fee/i.test(norm(el.textContent || ''))) || null;
+          const labels = Array.from(
+            document.querySelectorAll('th, td, div, span, label, b, strong')
+          );
+          const procHeaderEl =
+            labels.find(el => /procedure\s*name/i.test(norm(el.textContent || ''))) || null;
+          const totalProcEl =
+            labels.find(el => /total\s+proc\s+fee/i.test(norm(el.textContent || ''))) || null;
           const claimLikeInputs = Array.from(
-            document.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea')
+            document.querySelectorAll(
+              'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea'
+            )
           )
-            .filter((el) => isVisible(el) && isTextLike(el))
-            .filter((el) => {
+            .filter(el => isVisible(el) && isTextLike(el))
+            .filter(el => {
               const idn = `${el.name || ''} ${el.id || ''}`.toLowerCase();
               if (!/claim|clm/.test(idn)) return false;
               if (/total/.test(idn)) return false;
@@ -11199,10 +12596,8 @@ export class MHCAsiaAutomation {
             let scoped = claimLikeInputs;
             if (procHeaderEl) {
               const top = procHeaderEl.getBoundingClientRect().bottom + 2;
-              const bottom = totalProcEl
-                ? totalProcEl.getBoundingClientRect().top - 2
-                : top + 260;
-              const inBand = scoped.filter((el) => {
+              const bottom = totalProcEl ? totalProcEl.getBoundingClientRect().top - 2 : top + 260;
+              const inBand = scoped.filter(el => {
                 const r = el.getBoundingClientRect();
                 return r.top >= top && r.bottom <= bottom;
               });
@@ -11211,13 +12606,13 @@ export class MHCAsiaAutomation {
             scoped.sort((a, b) => {
               const ra = a.getBoundingClientRect();
               const rb = b.getBoundingClientRect();
-              return (ra.top - rb.top) || (ra.left - rb.left);
+              return ra.top - rb.top || ra.left - rb.left;
             });
             const directTarget = scoped[Math.max(0, rowIndex - 1)] || null;
             if (directTarget && setValue(directTarget, claimValue)) return true;
           }
-          const rowCellsWithSpan = (row) =>
-            Array.from(row.querySelectorAll('th, td')).map((c) => ({
+          const rowCellsWithSpan = row =>
+            Array.from(row.querySelectorAll('th, td')).map(c => ({
               cell: c,
               span: Number(c.colSpan || 1),
             }));
@@ -11233,14 +12628,14 @@ export class MHCAsiaAutomation {
             return null;
           };
 
-          const tables = Array.from(document.querySelectorAll('table')).filter((t) =>
+          const tables = Array.from(document.querySelectorAll('table')).filter(t =>
             /procedure\s*name/i.test(norm(t.innerText || t.textContent || ''))
           );
           if (!tables.length) return false;
 
           // Prefer the table that has both the procedure and claim headers.
           const sortedTables = tables
-            .map((t) => {
+            .map(t => {
               const txt = norm(t.innerText || t.textContent || '');
               let score = 0;
               if (/claim\s*\(?.*sgd.*\)?/i.test(txt)) score += 20;
@@ -11252,13 +12647,15 @@ export class MHCAsiaAutomation {
           const chosenTable = sortedTables[0]?.t || tables[0];
           if (!chosenTable) return false;
 
-          const rows = Array.from(chosenTable.querySelectorAll('tr')).filter((r) => r.closest('table') === chosenTable);
+          const rows = Array.from(chosenTable.querySelectorAll('tr')).filter(
+            r => r.closest('table') === chosenTable
+          );
           const headerRow =
-            rows.find((r) => {
+            rows.find(r => {
               const rt = norm(r.innerText || r.textContent || '');
               return /procedure\s*name/i.test(rt) && /claim/i.test(rt);
             }) ||
-            rows.find((r) => /procedure\s*name/i.test(norm(r.innerText || r.textContent || ''))) ||
+            rows.find(r => /procedure\s*name/i.test(norm(r.innerText || r.textContent || ''))) ||
             null;
           if (!headerRow) return false;
           const headerIdx = rows.indexOf(headerRow);
@@ -11266,8 +12663,12 @@ export class MHCAsiaAutomation {
 
           const headerCells = Array.from(headerRow.querySelectorAll('th, td'));
           const claimHeaderCell =
-            headerCells.find((c) => /claim\s*\(?.*sgd.*\)?/i.test(norm(c.innerText || c.textContent || ''))) ||
-            headerCells.find((c) => /claim|amt|amount/i.test(norm(c.innerText || c.textContent || ''))) ||
+            headerCells.find(c =>
+              /claim\s*\(?.*sgd.*\)?/i.test(norm(c.innerText || c.textContent || ''))
+            ) ||
+            headerCells.find(c =>
+              /claim|amt|amount/i.test(norm(c.innerText || c.textContent || ''))
+            ) ||
             null;
           if (!claimHeaderCell) return false;
           const claimRange = getRange(headerRow, claimHeaderCell);
@@ -11279,7 +12680,11 @@ export class MHCAsiaAutomation {
             const rowText = norm(row.innerText || row.textContent || '');
             if (/total\s+proc\s+fee|total\s+procedure/.test(rowText)) break;
             if (/more\s+procedure/.test(rowText)) continue;
-            if (row.querySelector('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select')) {
+            if (
+              row.querySelector(
+                'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select'
+              )
+            ) {
               dataRows.push(row);
             }
           }
@@ -11297,14 +12702,16 @@ export class MHCAsiaAutomation {
           }
 
           const overlapInputs = overlapCells
-            .flatMap((cell) =>
+            .flatMap(cell =>
               Array.from(
-                cell.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea')
+                cell.querySelectorAll(
+                  'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea'
+                )
               )
             )
-            .filter((x) => isVisible(x) && isTextLike(x));
+            .filter(x => isVisible(x) && isTextLike(x));
 
-          const scoreInput = (el) => {
+          const scoreInput = el => {
             const idn = `${el.name || ''} ${el.id || ''}`.toLowerCase();
             const cls = `${el.className || ''}`.toLowerCase();
             const parentText = norm(el.closest('td, th')?.innerText || '');
@@ -11327,50 +12734,64 @@ export class MHCAsiaAutomation {
 
           // Fallback: target rightmost non-name text-like input in row.
           const rowInputs = Array.from(
-            targetRow.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea')
-          ).filter((x) => isVisible(x) && isTextLike(x));
+            targetRow.querySelectorAll(
+              'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea'
+            )
+          ).filter(x => isVisible(x) && isTextLike(x));
           if (!rowInputs.length) return false;
-          const fallbackCandidates = rowInputs.filter((x) => {
+          const fallbackCandidates = rowInputs.filter(x => {
             const idn = `${x.name || ''} ${x.id || ''}`.toLowerCase();
             return !/proc|procedure|desc|name/.test(idn);
           });
           const pool = fallbackCandidates.length ? fallbackCandidates : rowInputs;
-          pool.sort((a, b) => (b.getBoundingClientRect().left || 0) - (a.getBoundingClientRect().left || 0));
+          pool.sort(
+            (a, b) => (b.getBoundingClientRect().left || 0) - (a.getBoundingClientRect().left || 0)
+          );
           for (const inp of pool) {
             if (setValue(inp, claimValue)) return true;
           }
 
           // Final fallback for inconsistent legacy DOM: use geometry within Procedure section.
           const allTextLike = Array.from(
-            document.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea')
-          ).filter((x) => isVisible(x) && isTextLike(x));
-          const labels2 = Array.from(document.querySelectorAll('th, td, div, span, label, b, strong'));
-          const procHeaderEl2 = labels2.find((el) => /procedure\s*name/i.test(norm(el.textContent || ''))) || null;
-          const moreProcEl = Array.from(document.querySelectorAll('button, input[type="button"], input[type="submit"]')).find((el) =>
-            /more\s+procedure/i.test(norm(el.textContent || el.value || ''))
-          ) || null;
-          const totalProcEl2 = labels2.find((el) => /total\s+proc\s+fee/i.test(norm(el.textContent || ''))) || null;
+            document.querySelectorAll(
+              'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea'
+            )
+          ).filter(x => isVisible(x) && isTextLike(x));
+          const labels2 = Array.from(
+            document.querySelectorAll('th, td, div, span, label, b, strong')
+          );
+          const procHeaderEl2 =
+            labels2.find(el => /procedure\s*name/i.test(norm(el.textContent || ''))) || null;
+          const moreProcEl =
+            Array.from(
+              document.querySelectorAll('button, input[type="button"], input[type="submit"]')
+            ).find(el => /more\s+procedure/i.test(norm(el.textContent || el.value || ''))) || null;
+          const totalProcEl2 =
+            labels2.find(el => /total\s+proc\s+fee/i.test(norm(el.textContent || ''))) || null;
           if (procHeaderEl2) {
             const top = procHeaderEl2.getBoundingClientRect().bottom + 2;
             let bottom = top + 260;
             if (moreProcEl) bottom = Math.min(bottom, moreProcEl.getBoundingClientRect().top - 2);
-            if (totalProcEl2) bottom = Math.min(bottom, totalProcEl2.getBoundingClientRect().top - 2);
+            if (totalProcEl2)
+              bottom = Math.min(bottom, totalProcEl2.getBoundingClientRect().top - 2);
             const scoped = allTextLike
-              .map((el) => ({ el, r: el.getBoundingClientRect() }))
+              .map(el => ({ el, r: el.getBoundingClientRect() }))
               .filter(({ r }) => r.top >= top && r.bottom <= bottom && r.left >= 0)
-              .sort((a, b) => (a.r.top - b.r.top) || (a.r.left - b.r.left));
+              .sort((a, b) => a.r.top - b.r.top || a.r.left - b.r.left);
             if (scoped.length) {
               const rowsByY = [];
               for (const item of scoped) {
-                const row = rowsByY.find((g) => Math.abs(g.y - item.r.top) <= 8);
+                const row = rowsByY.find(g => Math.abs(g.y - item.r.top) <= 8);
                 if (row) row.items.push(item);
                 else rowsByY.push({ y: item.r.top, items: [item] });
               }
               rowsByY.sort((a, b) => a.y - b.y);
               const targetGroup = rowsByY[Math.max(0, rowIndex - 1)] || null;
               if (targetGroup && targetGroup.items.length) {
-                const groupItems = targetGroup.items.sort((a, b) => a.r.left - b.r.left).map((x) => x.el);
-                const groupCandidates = groupItems.filter((x) => {
+                const groupItems = targetGroup.items
+                  .sort((a, b) => a.r.left - b.r.left)
+                  .map(x => x.el);
+                const groupCandidates = groupItems.filter(x => {
                   const idn = `${x.name || ''} ${x.id || ''}`.toLowerCase();
                   return !/proc|procedure|desc|name/.test(idn);
                 });
@@ -11395,47 +12816,62 @@ export class MHCAsiaAutomation {
       this._logStep('Procedure claim amount filled (fallback)', { rowIndex, claim: claimValue });
     } else {
       const debug = await this.page
-        .evaluate(({ rowIndex }) => {
-          const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
-          const isVisible = (el) => {
-            if (!el) return false;
-            const style = window.getComputedStyle(el);
-            if (!style) return false;
-            if (style.display === 'none' || style.visibility === 'hidden') return false;
-            const r = el.getBoundingClientRect();
-            return !!r && r.width > 0 && r.height > 0;
-          };
-          const labels = Array.from(document.querySelectorAll('th, td, div, span, label, b, strong'));
-          const procHeaderEl = labels.find((el) => /procedure\s*name/i.test(norm(el.textContent || ''))) || null;
-          const totalProcEl = labels.find((el) => /total\s+proc\s+fee/i.test(norm(el.textContent || ''))) || null;
-          const top = procHeaderEl ? procHeaderEl.getBoundingClientRect().bottom + 2 : 0;
-          const bottom = totalProcEl ? totalProcEl.getBoundingClientRect().top - 2 : Number.POSITIVE_INFINITY;
-          const inputs = Array.from(
-            document.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea')
-          )
-            .filter((el) => isVisible(el))
-            .map((el) => {
+        .evaluate(
+          ({ rowIndex }) => {
+            const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+            const isVisible = el => {
+              if (!el) return false;
+              const style = window.getComputedStyle(el);
+              if (!style) return false;
+              if (style.display === 'none' || style.visibility === 'hidden') return false;
               const r = el.getBoundingClientRect();
-              return {
-                name: el.getAttribute('name') || '',
-                id: el.getAttribute('id') || '',
-                type: (el.getAttribute('type') || '').toLowerCase(),
-                value: (el.value || '').toString(),
-                left: Math.round(r.left),
-                top: Math.round(r.top),
-                width: Math.round(r.width),
-                inProcBand: r.top >= top && r.bottom <= bottom,
-              };
-            });
-          const procInputs = inputs.filter((x) => x.inProcBand).sort((a, b) => (a.top - b.top) || (a.left - b.left));
-          return {
-            rowIndex,
-            procHeaderTop: Math.round(top),
-            procBottom: Number.isFinite(bottom) ? Math.round(bottom) : null,
-            procInputs: procInputs.slice(0, 20),
-            claimLike: procInputs.filter((x) => /claim|clm/i.test(`${x.name} ${x.id}`)).slice(0, 10),
-          };
-        }, { rowIndex })
+              return !!r && r.width > 0 && r.height > 0;
+            };
+            const labels = Array.from(
+              document.querySelectorAll('th, td, div, span, label, b, strong')
+            );
+            const procHeaderEl =
+              labels.find(el => /procedure\s*name/i.test(norm(el.textContent || ''))) || null;
+            const totalProcEl =
+              labels.find(el => /total\s+proc\s+fee/i.test(norm(el.textContent || ''))) || null;
+            const top = procHeaderEl ? procHeaderEl.getBoundingClientRect().bottom + 2 : 0;
+            const bottom = totalProcEl
+              ? totalProcEl.getBoundingClientRect().top - 2
+              : Number.POSITIVE_INFINITY;
+            const inputs = Array.from(
+              document.querySelectorAll(
+                'input[type="text"], input[type="number"], input[type="tel"], input:not([type]), select, textarea'
+              )
+            )
+              .filter(el => isVisible(el))
+              .map(el => {
+                const r = el.getBoundingClientRect();
+                return {
+                  name: el.getAttribute('name') || '',
+                  id: el.getAttribute('id') || '',
+                  type: (el.getAttribute('type') || '').toLowerCase(),
+                  value: (el.value || '').toString(),
+                  left: Math.round(r.left),
+                  top: Math.round(r.top),
+                  width: Math.round(r.width),
+                  inProcBand: r.top >= top && r.bottom <= bottom,
+                };
+              });
+            const procInputs = inputs
+              .filter(x => x.inProcBand)
+              .sort((a, b) => a.top - b.top || a.left - b.left);
+            return {
+              rowIndex,
+              procHeaderTop: Math.round(top),
+              procBottom: Number.isFinite(bottom) ? Math.round(bottom) : null,
+              procInputs: procInputs.slice(0, 20),
+              claimLike: procInputs
+                .filter(x => /claim|clm/i.test(`${x.name} ${x.id}`))
+                .slice(0, 10),
+            };
+          },
+          { rowIndex }
+        )
         .catch(() => null);
       logger.warn('[MHC] Procedure claim fallback failed', { rowIndex, claimValue, debug });
     }
@@ -11448,7 +12884,7 @@ export class MHCAsiaAutomation {
   async computeClaim() {
     try {
       this._logStep('Click Compute claim button');
-      
+
       const computeSelectors = [
         'button:has-text("Compute claim")',
         'button:has-text("Compute")',
@@ -11458,10 +12894,17 @@ export class MHCAsiaAutomation {
       for (const selector of computeSelectors) {
         try {
           const button = this.page.locator(selector).first();
-          if ((await button.count().catch(() => 0)) > 0 && (await button.isVisible().catch(() => true))) {
+          if (
+            (await button.count().catch(() => 0)) > 0 &&
+            (await button.isVisible().catch(() => true))
+          ) {
             const beforeUrl = this.page.url();
-            const navPromise = this.page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 8000 }).catch(() => null);
-            const dialogPromise = this.page.waitForEvent('dialog', { timeout: 2000 }).catch(() => null);
+            const navPromise = this.page
+              .waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 8000 })
+              .catch(() => null);
+            const dialogPromise = this.page
+              .waitForEvent('dialog', { timeout: 2000 })
+              .catch(() => null);
             await this._safeClick(button, 'Compute claim');
             const dialog = await dialogPromise;
             if (dialog) {
@@ -11472,7 +12915,9 @@ export class MHCAsiaAutomation {
             await navPromise;
             await this.page.waitForLoadState('domcontentloaded', { timeout: 8000 }).catch(() => {});
             await this.page.waitForTimeout(700);
-            this._logStep('Compute claim clicked', { urlChanged: beforeUrl !== (this.page.url() || '') });
+            this._logStep('Compute claim clicked', {
+              urlChanged: beforeUrl !== (this.page.url() || ''),
+            });
             return true;
           }
         } catch (e) {
@@ -11483,8 +12928,10 @@ export class MHCAsiaAutomation {
       // Fallback: some portals render it as an <input type="button" value="Compute claim"> inside a form table.
       const clicked = await this.page
         .evaluate(() => {
-          const candidates = Array.from(document.querySelectorAll('button, input[type="button"], input[type="submit"]'));
-          const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+          const candidates = Array.from(
+            document.querySelectorAll('button, input[type="button"], input[type="submit"]')
+          );
+          const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
           for (const el of candidates) {
             const label = norm(el.textContent || el.value || el.getAttribute('aria-label') || '');
             if (!label) continue;
@@ -11520,12 +12967,13 @@ export class MHCAsiaAutomation {
   async fillDrugName(drugName) {
     try {
       this._logStep('Fill drug name', { drugName });
-      
-      const drugSelector = '#drugTable > tbody > tr:nth-child(2) > td:nth-child(2) > input:nth-child(3)';
-      
+
+      const drugSelector =
+        '#drugTable > tbody > tr:nth-child(2) > td:nth-child(2) > input:nth-child(3)';
+
       // Try the exact selector first
       let drugInput = this.page.locator(drugSelector).first();
-      
+
       if ((await drugInput.count().catch(() => 0)) === 0) {
         // Try alternative selectors
         const altSelectors = [
@@ -11533,7 +12981,7 @@ export class MHCAsiaAutomation {
           'table[id*="drug" i] input[type="text"]',
           'tr:has-text("Drug Name") input[type="text"]',
         ];
-        
+
         for (const sel of altSelectors) {
           drugInput = this.page.locator(sel).first();
           if ((await drugInput.count().catch(() => 0)) > 0) {
@@ -11541,17 +12989,19 @@ export class MHCAsiaAutomation {
           }
         }
       }
-      
+
       if ((await drugInput.count().catch(() => 0)) > 0) {
         await drugInput.clear();
         await drugInput.fill(drugName);
         this._logStep('Drug name filled', { drugName });
         return true;
       }
-      
+
       // Try JavaScript fallback
-      const filled = await this.page.evaluate((name) => {
-        const input = document.querySelector('#drugTable > tbody > tr:nth-child(2) > td:nth-child(2) > input:nth-child(3)');
+      const filled = await this.page.evaluate(name => {
+        const input = document.querySelector(
+          '#drugTable > tbody > tr:nth-child(2) > td:nth-child(2) > input:nth-child(3)'
+        );
         if (input) {
           input.value = name;
           input.dispatchEvent(new Event('change', { bubbles: true }));
@@ -11559,12 +13009,12 @@ export class MHCAsiaAutomation {
         }
         return false;
       }, drugName);
-      
+
       if (filled) {
         this._logStep('Drug name filled via JavaScript', { drugName });
         return true;
       }
-      
+
       logger.warn('Drug name field not found');
       return false;
     } catch (error) {
@@ -11583,10 +13033,10 @@ export class MHCAsiaAutomation {
   async setChargeType(chargeType = 'first') {
     try {
       this._logStep('Set charge type', { chargeType });
-      
+
       // Determine which option to select
       const searchPattern = chargeType.toLowerCase().includes('follow') ? /follow/i : /first/i;
-      
+
       // The select name is "subType"
       const chargeTypeSelectors = [
         'tr:has-text("Charge Type") select',
@@ -11599,20 +13049,25 @@ export class MHCAsiaAutomation {
         'select[name*="visitType" i]',
         'select[id*="visitType" i]',
       ];
-      
+
       for (const selector of chargeTypeSelectors) {
         try {
           const select = this.page.locator(selector).first();
           if ((await select.count().catch(() => 0)) > 0) {
-            const options = await select.locator('option').evaluateAll((opts) =>
-              opts.map((o) => ({ value: o.value, label: (o.textContent || '').trim() }))
-            );
-            
-            const targetOption = options.find((o) => searchPattern.test(o.label));
-            
+            const options = await select
+              .locator('option')
+              .evaluateAll(opts =>
+                opts.map(o => ({ value: o.value, label: (o.textContent || '').trim() }))
+              );
+
+            const targetOption = options.find(o => searchPattern.test(o.label));
+
             if (targetOption) {
               await select.selectOption({ value: targetOption.value });
-              this._logStep('Charge type set', { value: targetOption.value, label: targetOption.label });
+              this._logStep('Charge type set', {
+                value: targetOption.value,
+                label: targetOption.label,
+              });
               return true;
             }
           }
@@ -11623,56 +13078,65 @@ export class MHCAsiaAutomation {
 
       // Robust fallback: pick the first select whose options include First/Follow/Repeat.
       const fallback = await this.page
-        .evaluate((wantFollow) => {
-          const norm = (s) => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
+        .evaluate(wantFollow => {
+          const norm = s => (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
           const root = document.querySelector('#visit_form') || document;
           const selects = Array.from(root.querySelectorAll('select'));
           const wantRe = wantFollow ? /follow/i : /first/i;
           for (const sel of selects) {
             const opts = Array.from(sel.options || []);
             if (!opts.length) continue;
-            const labels = opts.map((o) => norm(o.textContent || o.label || o.value || ''));
-            const hasChargeOptions = labels.some((t) => /first|follow|repeat/.test(t));
+            const labels = opts.map(o => norm(o.textContent || o.label || o.value || ''));
+            const hasChargeOptions = labels.some(t => /first|follow|repeat/.test(t));
             if (!hasChargeOptions) continue;
-            const idx = labels.findIndex((t) => wantRe.test(t));
+            const idx = labels.findIndex(t => wantRe.test(t));
             if (idx >= 0) {
               sel.value = opts[idx].value;
               sel.dispatchEvent(new Event('change', { bubbles: true }));
-              return { success: true, value: opts[idx].value, label: opts[idx].textContent || opts[idx].label || '' };
+              return {
+                success: true,
+                value: opts[idx].value,
+                label: opts[idx].textContent || opts[idx].label || '',
+              };
             }
           }
           return { success: false };
         }, chargeType.toLowerCase().includes('follow'))
         .catch(() => ({ success: false }));
-      
+
       if (fallback?.success) {
         this._logStep('Charge type set via fallback select scan', fallback);
         return true;
       }
-      
+
       // Try JavaScript fallback
-      const selected = await this.page.evaluate((pattern) => {
-        const select = document.querySelector('select[name="subType"]');
-        if (select) {
-          const regex = new RegExp(pattern, 'i');
-          for (const opt of select.options) {
-            if (regex.test(opt.text)) {
-              select.value = opt.value;
-              select.dispatchEvent(new Event('change', { bubbles: true }));
-              return { success: true, value: opt.value, text: opt.text };
+      const selected = await this.page.evaluate(
+        pattern => {
+          const select = document.querySelector('select[name="subType"]');
+          if (select) {
+            const regex = new RegExp(pattern, 'i');
+            for (const opt of select.options) {
+              if (regex.test(opt.text)) {
+                select.value = opt.value;
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                return { success: true, value: opt.value, text: opt.text };
+              }
             }
           }
-        }
-        return { success: false };
-      }, chargeType.toLowerCase().includes('follow') ? 'follow' : 'first');
-      
+          return { success: false };
+        },
+        chargeType.toLowerCase().includes('follow') ? 'follow' : 'first'
+      );
+
       if (selected.success) {
         this._logStep('Charge type set via JavaScript', selected);
         return true;
       }
-      
+
       logger.warn('Charge type field not found');
-      await this.page.screenshot({ path: 'screenshots/mhc-charge-type-not-found.png', fullPage: true }).catch(() => {});
+      await this.page
+        .screenshot({ path: 'screenshots/mhc-charge-type-not-found.png', fullPage: true })
+        .catch(() => {});
       return false;
     } catch (error) {
       logger.error('Failed to set charge type:', error);
@@ -11706,11 +13170,11 @@ export class MHCAsiaAutomation {
     // Keep the last dialog message for better error reporting/routing.
     if (reset || typeof this.lastDialogMessage !== 'string') this.lastDialogMessage = null;
     if (reset || typeof this.lastDialogType !== 'string') this.lastDialogType = null;
-    
+
     // Remove existing dialog handlers to avoid duplicates
     this.page.removeAllListeners('dialog');
-    
-    this.page.on('dialog', async (dialog) => {
+
+    this.page.on('dialog', async dialog => {
       try {
         const msg = dialog.message();
         this.lastDialogMessage = msg;
@@ -11762,8 +13226,8 @@ export class MHCAsiaAutomation {
         reason: 'not_attempted',
         checkedAt: new Date().toISOString(),
       };
-      
-      const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      const escapeRegExp = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
       const terms = [];
       let codeOnly = null;
@@ -11788,7 +13252,7 @@ export class MHCAsiaAutomation {
         terms.push(descOnly);
       }
 
-      const primary = terms.find((t) => t && t.length >= 2) || '';
+      const primary = terms.find(t => t && t.length >= 2) || '';
       if (!primary) {
         logger.warn('Search term too short');
         this.lastDiagnosisSelection = {
@@ -11806,8 +13270,10 @@ export class MHCAsiaAutomation {
       // 2. Individual words
       // 3. Diagnosis code variants (fallback)
       const searchPatterns = [];
-      const buildCodeVariants = (code) => {
-        const c = String(code || '').replace(/\s+/g, '').toUpperCase();
+      const buildCodeVariants = code => {
+        const c = String(code || '')
+          .replace(/\s+/g, '')
+          .toUpperCase();
         if (!c) return [];
         const noDot = c.replace(/\./g, '');
         const noTrailingZeros = noDot.replace(/0+$/g, '');
@@ -11817,16 +13283,16 @@ export class MHCAsiaAutomation {
         const short1 = base && suffix ? `${base}${suffix.slice(0, 1)}` : null;
         const short2 = base && suffix ? `${base}${suffix.slice(0, 2)}` : null;
         return Array.from(
-          new Set([c, noDot, noTrailingZeros, base, short2, short1].filter((x) => x && x.length >= 3))
+          new Set([c, noDot, noTrailingZeros, base, short2, short1].filter(x => x && x.length >= 3))
         );
       };
 
       const codeVariants = codeOnly ? buildCodeVariants(codeOnly) : [];
-      const normalizeCode = (value) =>
+      const normalizeCode = value =>
         String(value || '')
           .toUpperCase()
           .replace(/[^A-Z0-9.]/g, '');
-      const extractCode = (value) => {
+      const extractCode = value => {
         const m = normalizeCode(value).match(/[A-Z]\d{2,3}(?:\.[0-9A-Z]{1,4})?/);
         return m ? m[0] : '';
       };
@@ -11841,12 +13307,16 @@ export class MHCAsiaAutomation {
           // Also allow a dot between base and suffix: S635 -> S63.5
           const base = v.slice(0, 3);
           const rest = v.slice(3);
-          searchPatterns.push(new RegExp(`\\b${escapeRegExp(base)}\\.${escapeRegExp(rest)}\\b`, 'i'));
-          searchPatterns.push(new RegExp(`\\b${escapeRegExp(base)}\\.${escapeRegExp(rest)}\\d*\\b`, 'i'));
+          searchPatterns.push(
+            new RegExp(`\\b${escapeRegExp(base)}\\.${escapeRegExp(rest)}\\b`, 'i')
+          );
+          searchPatterns.push(
+            new RegExp(`\\b${escapeRegExp(base)}\\.${escapeRegExp(rest)}\\d*\\b`, 'i')
+          );
         }
       }
 
-      const normalizeDescKeywords = (desc) => {
+      const normalizeDescKeywords = desc => {
         const stop = new Set([
           'the',
           'and',
@@ -11882,9 +13352,9 @@ export class MHCAsiaAutomation {
           .toLowerCase()
           .replace(/[^a-z0-9\s]/g, ' ')
           .split(/\s+/)
-          .filter((w) => w.length >= 3)
-          .filter((w) => !/\d/.test(w))
-          .filter((w) => !stop.has(w));
+          .filter(w => w.length >= 3)
+          .filter(w => !/\d/.test(w))
+          .filter(w => !stop.has(w));
       };
       const descForScoring = String(descOnly || '')
         .replace(/^[A-Z]\d{2,3}(?:\.[0-9A-Z]{1,4})?\s*[-: ]\s*/i, '')
@@ -11897,7 +13367,15 @@ export class MHCAsiaAutomation {
         .trim();
       const sideToken = descNorm.match(/\b(left|right|bilateral)\b/)?.[1] || '';
       const sideWordSet = new Set(['left', 'right', 'bilateral']);
-      const weakBodyTokens = new Set(['joint', 'region', 'site', 'part', 'acute', 'chronic', 'unspecified']);
+      const weakBodyTokens = new Set([
+        'joint',
+        'region',
+        'site',
+        'part',
+        'acute',
+        'chronic',
+        'unspecified',
+      ]);
       const knownBodyParts = [
         'shoulder',
         'knee',
@@ -11913,14 +13391,15 @@ export class MHCAsiaAutomation {
       ];
       const descWords = descNorm.split(' ').filter(Boolean);
       const lexicalKeywords = descKeywords.filter(
-        (k) => !weakBodyTokens.has(k) && /^[a-z]+$/.test(k) && !sideWordSet.has(k)
+        k => !weakBodyTokens.has(k) && /^[a-z]+$/.test(k) && !sideWordSet.has(k)
       );
       const bodyPartToken =
-        knownBodyParts.find((k) => descWords.includes(k) || descNorm.includes(k)) ||
-        lexicalKeywords.find((k) => knownBodyParts.includes(k)) ||
+        knownBodyParts.find(k => descWords.includes(k) || descNorm.includes(k)) ||
+        lexicalKeywords.find(k => knownBodyParts.includes(k)) ||
         '';
-      const bodyPhrase = sideToken && bodyPartToken ? `${sideToken} ${bodyPartToken}` : bodyPartToken;
-      
+      const bodyPhrase =
+        sideToken && bodyPartToken ? `${sideToken} ${bodyPartToken}` : bodyPartToken;
+
       // Conservative default: avoid false positives; leave blank if below threshold.
       const dropdownMinScore = Number(process.env.MHC_DIAG_MIN_SCORE_DROPDOWN || '25');
       // Try the diagnosis dropdown
@@ -11931,21 +13410,23 @@ export class MHCAsiaAutomation {
       ];
 
       let lastOptionsSample = null;
-      
+
       for (const selector of diagSelectors) {
         try {
           const select = this.page.locator(selector).first();
           if ((await select.count().catch(() => 0)) > 0) {
-            const options = await select.locator('option').evaluateAll((opts) =>
-              opts.map((o) => ({ value: o.value, label: (o.textContent || '').trim() }))
-            );
+            const options = await select
+              .locator('option')
+              .evaluateAll(opts =>
+                opts.map(o => ({ value: o.value, label: (o.textContent || '').trim() }))
+              );
             lastOptionsSample = options.slice(0, 40);
-            
+
             // 1) Prefer description-based matching when we have a description.
             let targetOption = null;
             if (preferredValue) {
               targetOption =
-                options.find((o) => String(o?.value || '').trim() === preferredValue) || null;
+                options.find(o => String(o?.value || '').trim() === preferredValue) || null;
               if (targetOption) {
                 this._logStep('Diagnosis selected by exact option value hint', {
                   value: preferredValue,
@@ -11956,7 +13437,7 @@ export class MHCAsiaAutomation {
             if (!targetOption && descOnly) {
               const desc = descNorm;
               const keywords = descKeywords;
-              const score = (opt) => {
+              const score = opt => {
                 const l = String((opt?.label || '') + ' ' + (opt?.value || '')).toLowerCase();
                 const optionCode = extractCode(`${opt?.label || ''} ${opt?.value || ''}`);
                 const optionCodePlain = optionCode.replace(/\./g, '');
@@ -11968,7 +13449,11 @@ export class MHCAsiaAutomation {
                   if (optionCodePlain === requestedCodePlain) s += 100;
                   else if (optionCodePlain.startsWith(requestedCodePlain)) s += 70;
                   else if (requestedCodePlain.startsWith(optionCodePlain)) s += 50;
-                  else if (requestedCodePlain.slice(0, 3) && optionCodePlain.startsWith(requestedCodePlain.slice(0, 3))) s += 20;
+                  else if (
+                    requestedCodePlain.slice(0, 3) &&
+                    optionCodePlain.startsWith(requestedCodePlain.slice(0, 3))
+                  )
+                    s += 20;
                 }
                 for (const k of keywords) if (l.includes(k)) s += 30;
                 return s;
@@ -12010,10 +13495,13 @@ export class MHCAsiaAutomation {
                 }
               }
               if (!targetOption && keywords.length === 0 && desc) {
-                this._logStep('Diagnosis scoring had no keyword hits; relying on phrase/code weights', {
-                  desc: desc.slice(0, 120),
-                  bestScore,
-                });
+                this._logStep(
+                  'Diagnosis scoring had no keyword hits; relying on phrase/code weights',
+                  {
+                    desc: desc.slice(0, 120),
+                    bestScore,
+                  }
+                );
               }
             }
 
@@ -12029,7 +13517,11 @@ export class MHCAsiaAutomation {
                 if (optionCodePlain === requestedCodePlain) score = 1000;
                 else if (optionCodePlain.startsWith(requestedCodePlain)) score = 900;
                 else if (requestedCodePlain.startsWith(optionCodePlain)) score = 700;
-                else if (requestedCodePlain.slice(0, 3) && optionCodePlain.startsWith(requestedCodePlain.slice(0, 3))) score = 200;
+                else if (
+                  requestedCodePlain.slice(0, 3) &&
+                  optionCodePlain.startsWith(requestedCodePlain.slice(0, 3))
+                )
+                  score = 200;
                 if (score > bestScore) {
                   bestScore = score;
                   best = o;
@@ -12048,11 +13540,13 @@ export class MHCAsiaAutomation {
             // 2) If still no match, try code patterns (fallback).
             if (!targetOption && searchPatterns.length) {
               for (const pattern of searchPatterns) {
-                targetOption = options.find((o) => pattern.test((o.label || '') + ' ' + (o.value || '')));
+                targetOption = options.find(o =>
+                  pattern.test((o.label || '') + ' ' + (o.value || ''))
+                );
                 if (targetOption) break;
               }
             }
-            
+
             if (targetOption) {
               const candidateLabel = String(targetOption?.label || '');
               const candidateValue = String(targetOption?.value || '');
@@ -12081,7 +13575,10 @@ export class MHCAsiaAutomation {
 
             if (targetOption) {
               await select.selectOption({ value: targetOption.value });
-              this._logStep('Diagnosis selected', { value: targetOption.value, label: targetOption.label });
+              this._logStep('Diagnosis selected', {
+                value: targetOption.value,
+                label: targetOption.label,
+              });
               const resolution = await this.getDiagnosisResolutionState({ waitMs: 300 });
               this.lastDiagnosisSelection = {
                 ok: !!resolution?.resolved,
@@ -12102,13 +13599,16 @@ export class MHCAsiaAutomation {
 
       if (lastOptionsSample && lastOptionsSample.length) {
         this._logStep('Diagnosis dropdown options sample (no match)', {
-          sample: lastOptionsSample.map((o) => ({ label: String(o.label || '').slice(0, 60), value: String(o.value || '').slice(0, 60) })),
+          sample: lastOptionsSample.map(o => ({
+            label: String(o.label || '').slice(0, 60),
+            value: String(o.value || '').slice(0, 60),
+          })),
         });
       }
-      
+
       // Try JavaScript fallback
-      const selected = await this.page.evaluate((termSrc) => {
-        const escapeRegExp = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const selected = await this.page.evaluate(termSrc => {
+        const escapeRegExp = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const select = document.querySelector('select[name="diagnosisPriIdTemp"]');
         if (select) {
           const regex = new RegExp(escapeRegExp(termSrc), 'i');
@@ -12122,7 +13622,7 @@ export class MHCAsiaAutomation {
         }
         return { success: false };
       }, primary);
-      
+
       if (selected.success) {
         this._logStep('Diagnosis selected via JavaScript', selected);
         const resolution = await this.getDiagnosisResolutionState({ waitMs: 300 });

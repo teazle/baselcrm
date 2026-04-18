@@ -62,6 +62,8 @@ export default [
         Blob: 'readonly',
         File: 'readonly',
         FileReader: 'readonly',
+        localStorage: 'readonly',
+        sessionStorage: 'readonly',
         // Third-party globals injected on portal pages (visible inside page.evaluate)
         jQuery: 'readonly',
         $: 'readonly',

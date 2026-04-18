@@ -11,9 +11,11 @@ function normalizeDate(value) {
     .trim();
   if (!raw) return '';
   const dmy = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (dmy) return `${dmy[3]}-${String(Number(dmy[2])).padStart(2, '0')}-${String(Number(dmy[1])).padStart(2, '0')}`;
+  if (dmy)
+    return `${dmy[3]}-${String(Number(dmy[2])).padStart(2, '0')}-${String(Number(dmy[1])).padStart(2, '0')}`;
   const ymd = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  if (ymd) return `${ymd[1]}-${String(Number(ymd[2])).padStart(2, '0')}-${String(Number(ymd[3])).padStart(2, '0')}`;
+  if (ymd)
+    return `${ymd[1]}-${String(Number(ymd[2])).padStart(2, '0')}-${String(Number(ymd[3])).padStart(2, '0')}`;
   return normalizeText(raw);
 }
 
@@ -132,9 +134,7 @@ function parseIxchangeClaimSnippet(snippet) {
     return m?.[1] ? String(m[1]).trim() : '';
   };
   const visitDate = pick(/"visitDate"\s*:\s*"([^"]+)"/i);
-  const diagnosis = pick(
-    /"diagnosis(?:Description|Text|)"\s*:\s*"([^"]+)"/i
-  );
+  const diagnosis = pick(/"diagnosis(?:Description|Text|)"\s*:\s*"([^"]+)"/i);
   const amount =
     pick(/"consultFee"\s*:\s*([0-9]+(?:\.[0-9]+)?)/i) ||
     pick(/"invoiceAmount"\s*:\s*([0-9]+(?:\.[0-9]+)?)/i) ||
@@ -155,7 +155,8 @@ function parseIxchangeClaimSnippet(snippet) {
 async function readIxchangeLatestClaim(page, state) {
   const visitId =
     state?.form_navigation?.visitId ||
-    (String(page.url() || '').match(/\/spos\/claim\/edit\/(\d+)/i)?.[1] || null);
+    String(page.url() || '').match(/\/spos\/claim\/edit\/(\d+)/i)?.[1] ||
+    null;
 
   if (!visitId) {
     return { ok: false, reason: 'missing_visit_id' };
@@ -181,7 +182,10 @@ async function readIxchangeLatestClaim(page, state) {
       : [];
     const claimLog = [...logEntries]
       .reverse()
-      .find(entry => /\/claim-payment\/claim\//i.test(String(entry?.url || '')) && entry?.responseSnippet);
+      .find(
+        entry =>
+          /\/claim-payment\/claim\//i.test(String(entry?.url || '')) && entry?.responseSnippet
+      );
     const fallback = parseIxchangeClaimSnippet(claimLog?.responseSnippet || '');
     if (fallback) {
       return {
@@ -253,57 +257,85 @@ async function readFullertonLatestClaim(page, expectedNric = '') {
     await claimPage.goto(absoluteHref, { waitUntil: 'domcontentloaded', timeout: 15000 });
     await claimPage.waitForTimeout(1500);
     const baseline = await claimPage
-    .evaluate(nricToken => {
-      const norm = value =>
-        String(value || '')
-          .replace(/\s+/g, ' ')
-          .trim();
-      const amountLike = value => {
-        const m = norm(value).replace(/,/g, '').match(/\d+(?:\.\d{1,2})?/);
-        return m ? m[0] : '';
-      };
-      const isDateLike = value =>
-        /\b\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}\b/.test(norm(value)) ||
-        /\b\d{4}[\/-]\d{1,2}[\/-]\d{1,2}\b/.test(norm(value));
+      .evaluate(nricToken => {
+        const norm = value =>
+          String(value || '')
+            .replace(/\s+/g, ' ')
+            .trim();
+        const amountLike = value => {
+          const m = norm(value)
+            .replace(/,/g, '')
+            .match(/\d+(?:\.\d{1,2})?/);
+          return m ? m[0] : '';
+        };
+        const isDateLike = value =>
+          /\b\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}\b/.test(norm(value)) ||
+          /\b\d{4}[\/-]\d{1,2}[\/-]\d{1,2}\b/.test(norm(value));
 
-      const rows = Array.from(globalThis.document?.querySelectorAll?.('table tbody tr') || []);
-      if (!rows.length) return null;
-      const normalizedNric = norm(nricToken).toUpperCase();
-      let chosen = rows[0];
-      if (normalizedNric) {
-        const byNric = rows.find(row =>
-          norm(row.textContent || '')
-            .toUpperCase()
-            .includes(normalizedNric)
+        // Skip rows that are clearly column headers / sub-headers leaking into <tbody>.
+        // Symptoms we've observed in production: a row whose first cell reads "Visit SNo."
+        // and second cell reads "1", which the parser then mis-reports as
+        // diagnosis="Visit SNo." amount="1" — a portal-scraper artifact.
+        const HEADER_CELL_RE =
+          /^(s\/?no\.?|visit\s*s\/?no\.?|date|visit\s*date|patient(\s*name)?|nric|diagnosis|amount|status|action|claim(\s*no\.?)?|provider|doctor)\s*[:.]?$/i;
+        const isHeaderRow = row => {
+          const tds = Array.from(row.querySelectorAll('td'));
+          if (!tds.length) return true; // pure-th row
+          const cellTexts = tds.map(td => norm(td.textContent || ''));
+          const headerHits = cellTexts.filter(c => HEADER_CELL_RE.test(c)).length;
+          return headerHits >= 2; // two or more header-y cells = sub-header row
+        };
+
+        const allRows = Array.from(globalThis.document?.querySelectorAll?.('table tbody tr') || []);
+        const rows = allRows.filter(r => !isHeaderRow(r));
+        if (!rows.length) return null;
+        const normalizedNric = norm(nricToken).toUpperCase();
+        let chosen = rows[0];
+        if (normalizedNric) {
+          const byNric = rows.find(row =>
+            norm(row.textContent || '')
+              .toUpperCase()
+              .includes(normalizedNric)
+          );
+          if (byNric) chosen = byNric;
+        }
+        const cells = Array.from(chosen.querySelectorAll('td')).map(td =>
+          norm(td.textContent || '')
         );
-        if (byNric) chosen = byNric;
-      }
-      const cells = Array.from(chosen.querySelectorAll('td')).map(td => norm(td.textContent || ''));
-      if (!cells.length) return null;
+        if (!cells.length) return null;
 
-      const dateCell = cells.find(cell => isDateLike(cell)) || '';
-      const amountCell = [...cells]
-        .reverse()
-        .map(cell => amountLike(cell))
-        .find(Boolean);
-      const diagnosisCell =
-        cells.find(
-          cell =>
-            cell &&
-            !isDateLike(cell) &&
-            !/^[STFGM]\d{7}[A-Z]$/i.test(cell) &&
-            !/^\d+(?:\.\d{1,2})?$/.test(cell.replace(/,/g, '')) &&
-            !/select|edit|view|delete|details/i.test(cell)
-        ) || '';
+        // Hard reject the chosen row if any of its cells STILL reads as a header label
+        // (defence in depth — happens when the table has only one tbody row that is
+        // itself a header masquerading as data).
+        if (cells.some(c => HEADER_CELL_RE.test(c))) return null;
 
-      return {
-        visitDate: dateCell,
-        diagnosis: diagnosisCell,
-        amount: amountCell || '',
-        provider: '',
-      };
-    }, expectedNric)
-    .catch(() => null);
+        const dateCell = cells.find(cell => isDateLike(cell)) || '';
+        // Amount: walk reversed cells but reject "1"/"2"-style row indices that
+        // sit alone in a narrow first column. We require at least 2 digits OR a
+        // decimal point, since real consultation amounts are never < $10.
+        const amountCell = [...cells]
+          .reverse()
+          .map(cell => amountLike(cell))
+          .find(v => v && (v.includes('.') || Number(v) >= 10));
+        const diagnosisCell =
+          cells.find(
+            cell =>
+              cell &&
+              !isDateLike(cell) &&
+              !HEADER_CELL_RE.test(cell) &&
+              !/^[STFGM]\d{7}[A-Z]$/i.test(cell) &&
+              !/^\d+(?:\.\d{1,2})?$/.test(cell.replace(/,/g, '')) &&
+              !/select|edit|view|delete|details/i.test(cell)
+          ) || '';
+
+        return {
+          visitDate: dateCell,
+          diagnosis: diagnosisCell,
+          amount: amountCell || '',
+          provider: '',
+        };
+      }, expectedNric)
+      .catch(() => null);
     if (!baseline) return { ok: false, reason: 'claims_history_parse_failed' };
     return { ok: true, source: 'fullerton_claims_history_latest', baseline };
   } catch (error) {

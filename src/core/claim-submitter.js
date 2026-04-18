@@ -1351,13 +1351,27 @@ export class ClaimSubmitter {
           genericFallbackDiagnosisText,
         value: diagnosisMatch?.selected_value || null,
       };
+      // When the source genuinely had no diagnosis at all, suppress the
+      // modal's "first ICD row wins" picker — without this guard we have
+      // observed the picker latch onto a leftover row from the previous
+      // patient (e.g. visit 3fb132fc was filed as "S83.411A - Sprain of
+      // the knee" against an admin truth of "Cough"). A failure here
+      // surfaces as `diagnosis_mapping_failed`, which is the right
+      // outcome for an unfileable visit.
+      const isGenuineMissing =
+        diagnosisResolution?.status === 'missing_in_source' &&
+        !diagnosisMatch?.selected_code &&
+        !diagnosisMatch?.selected_text;
       let ok = false;
       if (diagnosisMatch?.blocked === false) {
         ok = await this.mhcAsia.selectDiagnosis(fallbackDiagnosis).catch(() => false);
       }
       if (!ok) {
         ok = await this.mhcAsia
-          .fillDiagnosisPrimary(fallbackDiagnosis, { allowTextFallback: true })
+          .fillDiagnosisPrimary(fallbackDiagnosis, {
+            allowTextFallback: true,
+            disableGenericRowPick: isGenuineMissing,
+          })
           .catch(() => false);
       }
       if (!ok) {
