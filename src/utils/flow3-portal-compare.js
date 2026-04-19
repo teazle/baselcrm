@@ -534,12 +534,52 @@ async function readFullertonLatestClaim(page, expectedNric = '') {
 // portal-generic-submitter._fillAndVerify just before the bot wrote each
 // field. This is the universal, portal-agnostic source of truth: whatever
 // was in the field when the bot arrived IS what the admin had filed.
+const MONTH_TO_NUM = {
+  jan: 1,
+  feb: 2,
+  mar: 3,
+  apr: 4,
+  may: 5,
+  jun: 6,
+  jul: 7,
+  aug: 8,
+  sep: 9,
+  oct: 10,
+  nov: 11,
+  dec: 12,
+};
+
+function tryParseDateLoose(raw) {
+  // Accept additional human-readable formats Fullerton/MHC display:
+  //   "19 Apr 2026", "19-Apr-2026", "Apr 19 2026", "Apr 19, 2026"
+  const v = String(raw || '').trim();
+  if (!v) return '';
+  // First try the strict normaliser (handles d/m/yyyy and yyyy-m-d)
+  const strict = normalizeDate(v);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(strict)) return strict;
+  // "19 Apr 2026" / "19-Apr-2026"
+  let m = v.match(/^(\d{1,2})[\s-]+([A-Za-z]{3,9})[\s-]+(\d{4})$/);
+  if (m) {
+    const mon = MONTH_TO_NUM[m[2].slice(0, 3).toLowerCase()];
+    if (mon)
+      return `${m[3]}-${String(mon).padStart(2, '0')}-${String(Number(m[1])).padStart(2, '0')}`;
+  }
+  // "Apr 19 2026" / "Apr 19, 2026"
+  m = v.match(/^([A-Za-z]{3,9})[\s-]+(\d{1,2}),?[\s-]+(\d{4})$/);
+  if (m) {
+    const mon = MONTH_TO_NUM[m[1].slice(0, 3).toLowerCase()];
+    if (mon)
+      return `${m[3]}-${String(mon).padStart(2, '0')}-${String(Number(m[2])).padStart(2, '0')}`;
+  }
+  return '';
+}
+
 function isTodayDateString(value) {
   // Many portals auto-default the visit-date input to today's date on form
   // open. That value is NOT admin truth — it's a form default. Detect it so
   // the comparator can skip it instead of falsely reporting a mismatch.
-  const norm = normalizeDate(value);
-  if (!norm || !/^\d{4}-\d{2}-\d{2}$/.test(norm)) return false;
+  const norm = tryParseDateLoose(value);
+  if (!norm) return false;
   const now = new Date();
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   return norm === today;
