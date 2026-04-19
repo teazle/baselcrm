@@ -272,72 +272,86 @@ async function readFullertonLatestClaim(page, expectedNric = '') {
           /\b\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}\b/.test(norm(value)) ||
           /\b\d{4}[\/-]\d{1,2}[\/-]\d{1,2}\b/.test(norm(value));
 
-        // Skip rows that are clearly column headers / sub-headers leaking into <tbody>.
-        // Symptom we've observed: a row whose first cell reads "Visit SNo." and
-        // second cell reads "1", which the parser would mis-report as
-        // diagnosis="Visit SNo." amount="1" — a portal-scraper artifact.
-        const HEADER_CELL_RE =
-          /^(s\/?no\.?|visit\s*s\/?no\.?|date|visit\s*date|patient(\s*name)?|nric|diagnosis|amount|status|action|claim(\s*no\.?)?|provider|doctor)\s*[:.]?$/i;
+        // Strategy: locate the table whose THEAD (or first all-<th> row) exposes
+        // a "Diagnosis" column header, then index columns by header text. This
+        // is robust against header rows leaking into <tbody>, narrow filter rows
+        // (From Date / To Date), and varying header labels like "National ID
+        // No." vs "NRIC" — none of which a content-based blacklist could cover.
+        const tables = Array.from(globalThis.document?.querySelectorAll?.('table') || []);
+        let chosenTable = null;
+        let headerCells = [];
+        for (const table of tables) {
+          // Prefer <thead><tr><th>; fall back to first row whose cells are ALL <th>.
+          let ths = Array.from(table.querySelectorAll('thead tr th'));
+          if (!ths.length) {
+            const firstRow = table.querySelector('tr');
+            if (firstRow) {
+              const cells = Array.from(firstRow.children);
+              if (cells.length && cells.every(c => c.tagName === 'TH')) ths = cells;
+            }
+          }
+          if (!ths.length) continue;
+          const labels = ths.map(th => norm(th.textContent || '').toLowerCase());
+          if (labels.some(l => /diagnos/i.test(l))) {
+            chosenTable = table;
+            headerCells = labels;
+            break;
+          }
+        }
+        if (!chosenTable) return null;
 
-        // Wider exclusion used ONLY when picking the diagnosis cell — adds
-        // "From Date" / "To Date" / bare "from"|"to" labels that legitimately
-        // appear inside data rows (so the row itself is real data, but those
-        // specific cells must NOT be picked as the diagnosis).
-        // Verified from Apr 14 + Apr 17 fill_evidence runs that always reported
-        //   diagnosis: actual="From Date"
-        // before this exclusion was added.
-        const NOT_A_DIAGNOSIS_RE =
-          /^(s\/?no\.?|visit\s*s\/?no\.?|date|visit\s*date|from\s*date|to\s*date|from|to|patient(\s*name)?|nric|diagnosis|amount|status|action|claim(\s*no\.?)?|provider|doctor)\s*[:.]?$/i;
+        const colIdx = predicate => headerCells.findIndex(predicate);
+        const diagnosisIdx = colIdx(l => /diagnos/i.test(l));
+        const dateIdx = colIdx(
+          l => /visit\s*date/i.test(l) || (/date/i.test(l) && !/(from|to|reg|created)/i.test(l))
+        );
+        const amountIdx = colIdx(l => /amount|fee|total/i.test(l));
+        const nricIdx = colIdx(l => /nric|national\s*id|id\s*no/i.test(l));
 
-        const isHeaderRow = row => {
-          const tds = Array.from(row.querySelectorAll('td'));
-          if (!tds.length) return true; // pure-th row
-          const cellTexts = tds.map(td => norm(td.textContent || ''));
-          const headerHits = cellTexts.filter(c => HEADER_CELL_RE.test(c)).length;
-          return headerHits >= 2; // two or more header-y cells = sub-header row
-        };
+        // Collect all data rows: <tbody> rows whose cell count matches header
+        // length AND that contain at least one date-like cell (filters out
+        // sub-header rows with "From Date" / "To Date" filter inputs).
+        const tbodyRows = Array.from(chosenTable.querySelectorAll('tbody tr'));
+        const dataRows = tbodyRows
+          .map(row => {
+            const tds = Array.from(row.querySelectorAll('td'));
+            if (!tds.length) return null;
+            const cells = tds.map(td => norm(td.textContent || ''));
+            if (cells.length !== headerCells.length) return null;
+            // Reject if every non-empty cell exactly equals its header label
+            // (a header row leaked into tbody).
+            const looksLikeHeader = cells.every((c, i) => !c || c.toLowerCase() === headerCells[i]);
+            if (looksLikeHeader) return null;
+            // Require at least one date-like cell — real claim rows always have one.
+            if (!cells.some(isDateLike)) return null;
+            return cells;
+          })
+          .filter(Boolean);
 
-        const allRows = Array.from(globalThis.document?.querySelectorAll?.('table tbody tr') || []);
-        const rows = allRows.filter(r => !isHeaderRow(r));
-        if (!rows.length) return null;
+        if (!dataRows.length) return null;
+
         const normalizedNric = norm(nricToken).toUpperCase();
-        let chosen = rows[0];
+        let chosen = dataRows[0];
         if (normalizedNric) {
-          const byNric = rows.find(row =>
-            norm(row.textContent || '')
-              .toUpperCase()
-              .includes(normalizedNric)
-          );
+          const byNric = dataRows.find(cells => {
+            if (nricIdx >= 0) return cells[nricIdx]?.toUpperCase().includes(normalizedNric);
+            return cells.some(c => c.toUpperCase().includes(normalizedNric));
+          });
           if (byNric) chosen = byNric;
         }
-        const cells = Array.from(chosen.querySelectorAll('td')).map(td =>
-          norm(td.textContent || '')
-        );
-        if (!cells.length) return null;
 
-        // Hard reject the chosen row if any of its cells STILL reads as a header label
-        // (defence in depth — happens when the table has only one tbody row that is
-        // itself a header masquerading as data).
-        if (cells.some(c => HEADER_CELL_RE.test(c))) return null;
-
-        const dateCell = cells.find(cell => isDateLike(cell)) || '';
-        // Amount: walk reversed cells but reject "1"/"2"-style row indices that
-        // sit alone in a narrow first column. We require at least 2 digits OR a
-        // decimal point, since real consultation amounts are never < $10.
-        const amountCell = [...cells]
-          .reverse()
-          .map(cell => amountLike(cell))
-          .find(v => v && (v.includes('.') || Number(v) >= 10));
-        const diagnosisCell =
-          cells.find(
-            cell =>
-              cell &&
-              !isDateLike(cell) &&
-              !NOT_A_DIAGNOSIS_RE.test(cell) &&
-              !/^[STFGM]\d{7}[A-Z]$/i.test(cell) &&
-              !/^\d+(?:\.\d{1,2})?$/.test(cell.replace(/,/g, '')) &&
-              !/select|edit|view|delete|details/i.test(cell)
-          ) || '';
+        const dateCell =
+          (dateIdx >= 0 && isDateLike(chosen[dateIdx]) ? chosen[dateIdx] : '') ||
+          chosen.find(isDateLike) ||
+          '';
+        const diagnosisCell = diagnosisIdx >= 0 ? chosen[diagnosisIdx] : '';
+        const amountCell =
+          amountIdx >= 0
+            ? amountLike(chosen[amountIdx])
+            : [...chosen]
+                .reverse()
+                .map(amountLike)
+                .find(v => v && (v.includes('.') || Number(v) >= 10)) || '';
 
         return {
           visitDate: dateCell,
