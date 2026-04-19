@@ -273,15 +273,22 @@ async function readFullertonLatestClaim(page, expectedNric = '') {
           /\b\d{4}[\/-]\d{1,2}[\/-]\d{1,2}\b/.test(norm(value));
 
         // Skip rows that are clearly column headers / sub-headers leaking into <tbody>.
-        // Symptoms we've observed in production:
-        //   - a row whose first cell reads "Visit SNo." and second cell reads "1",
-        //     which the parser then mis-reports as diagnosis="Visit SNo." amount="1"
-        //   - a row whose cells include "From Date" / "To Date" labels, which then
-        //     get picked up as the diagnosis since they aren't date-like values
-        // (verified from Apr 14 + Apr 17 fill_evidence runs that always reported
-        //  diagnosis "actual" = "From Date").
+        // Symptom we've observed: a row whose first cell reads "Visit SNo." and
+        // second cell reads "1", which the parser would mis-report as
+        // diagnosis="Visit SNo." amount="1" — a portal-scraper artifact.
         const HEADER_CELL_RE =
-          /^(s\/?no\.?|visit\s*s\/?no\.?|date|visit\s*date|from\s*date|to\s*date|patient(\s*name)?|nric|diagnosis|amount|status|action|claim(\s*no\.?)?|provider|doctor)\s*[:.]?$/i;
+          /^(s\/?no\.?|visit\s*s\/?no\.?|date|visit\s*date|patient(\s*name)?|nric|diagnosis|amount|status|action|claim(\s*no\.?)?|provider|doctor)\s*[:.]?$/i;
+
+        // Wider exclusion used ONLY when picking the diagnosis cell — adds
+        // "From Date" / "To Date" / bare "from"|"to" labels that legitimately
+        // appear inside data rows (so the row itself is real data, but those
+        // specific cells must NOT be picked as the diagnosis).
+        // Verified from Apr 14 + Apr 17 fill_evidence runs that always reported
+        //   diagnosis: actual="From Date"
+        // before this exclusion was added.
+        const NOT_A_DIAGNOSIS_RE =
+          /^(s\/?no\.?|visit\s*s\/?no\.?|date|visit\s*date|from\s*date|to\s*date|from|to|patient(\s*name)?|nric|diagnosis|amount|status|action|claim(\s*no\.?)?|provider|doctor)\s*[:.]?$/i;
+
         const isHeaderRow = row => {
           const tds = Array.from(row.querySelectorAll('td'));
           if (!tds.length) return true; // pure-th row
@@ -326,7 +333,7 @@ async function readFullertonLatestClaim(page, expectedNric = '') {
             cell =>
               cell &&
               !isDateLike(cell) &&
-              !HEADER_CELL_RE.test(cell) &&
+              !NOT_A_DIAGNOSIS_RE.test(cell) &&
               !/^[STFGM]\d{7}[A-Z]$/i.test(cell) &&
               !/^\d+(?:\.\d{1,2})?$/.test(cell.replace(/,/g, '')) &&
               !/select|edit|view|delete|details/i.test(cell)
