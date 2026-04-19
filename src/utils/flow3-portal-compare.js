@@ -534,6 +534,17 @@ async function readFullertonLatestClaim(page, expectedNric = '') {
 // portal-generic-submitter._fillAndVerify just before the bot wrote each
 // field. This is the universal, portal-agnostic source of truth: whatever
 // was in the field when the bot arrived IS what the admin had filed.
+function isTodayDateString(value) {
+  // Many portals auto-default the visit-date input to today's date on form
+  // open. That value is NOT admin truth — it's a form default. Detect it so
+  // the comparator can skip it instead of falsely reporting a mismatch.
+  const norm = normalizeDate(value);
+  if (!norm || !/^\d{4}-\d{2}-\d{2}$/.test(norm)) return false;
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  return norm === today;
+}
+
 function buildBaselineFromPriorValues(state) {
   const fv = state?.fillVerification || {};
   // Prefer priorValue (captured pre-fill, true admin truth). Fall back to
@@ -550,8 +561,14 @@ function buildBaselineFromPriorValues(state) {
     }
     return '';
   };
+  const visitDateRaw = pick(fv?.visitDate);
+  // Suppress visitDate baseline when it matches today — that's the portal's
+  // auto-populated default, not admin's claim date. Without this filter,
+  // every comparison run on the same day would falsely flag visitDate as
+  // mismatched.
+  const visitDate = isTodayDateString(visitDateRaw) ? '' : visitDateRaw;
   const baseline = {
-    visitDate: pick(fv?.visitDate),
+    visitDate,
     diagnosis: pick(fv?.diagnosis),
     amount: pick(fv?.fee),
     provider: '',
