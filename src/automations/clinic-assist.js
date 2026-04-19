@@ -7561,10 +7561,22 @@ export class ClinicAssistAutomation {
         const fee = feeAmount !== null ? String(feeAmount) : null;
 
         // Contract/pay type: prefer CONTRACT column if present; else scan row from the end.
+        // Capture the raw CONTRACT cell value separately for debuggability — when payType
+        // ends up null, we want to know whether the cell was empty (cash patient) or had
+        // unrecognized text (new portal / typo / format change) without re-pulling Excel.
         let payType = null;
-        if (contractColPos >= 0 && row[contractColPos]) {
-          const v = String(row[contractColPos]).replace(/\s+/g, ' ').trim();
-          if (v) payType = v.toUpperCase();
+        let payTypeRaw = null;
+        let payTypeSource = null;
+        if (contractColPos >= 0) {
+          const cellRaw = row[contractColPos];
+          if (cellRaw !== null && cellRaw !== undefined) {
+            const cellStr = String(cellRaw).replace(/\s+/g, ' ').trim();
+            payTypeRaw = cellStr || null;
+            if (cellStr) {
+              payType = cellStr.toUpperCase();
+              payTypeSource = 'contract_column';
+            }
+          }
         }
         if (!payType) {
           for (let j = row.length - 1; j >= 0; j--) {
@@ -7575,10 +7587,12 @@ export class ClinicAssistAutomation {
             if (!cellStr) continue;
             if (knownContractsExact.has(cellStr)) {
               payType = cellStr;
+              payTypeSource = 'tail_scan_known';
               break;
             }
             if (cellStr.includes('AVIVA') || cellStr.includes('SINGLIFE')) {
               payType = cellStr;
+              payTypeSource = 'tail_scan_substring';
               break;
             }
           }
@@ -7621,6 +7635,8 @@ export class ClinicAssistAutomation {
           status: null,
           fee,
           payType: payType || null,
+          payTypeRaw: payTypeRaw || null,
+          payTypeSource: payTypeSource || null,
           sex: sexRaw || null,
           spCode: spCodeRaw || null,
           timeIn: timeInRaw || null,

@@ -794,6 +794,13 @@ export class BatchExtraction {
             lastIngestedAt: new Date().toISOString(),
             source: item.source || existingMetadata?.flow1?.source || null,
             payType: item.payType || existingMetadata?.flow1?.payType || null,
+            // payTypeRaw / payTypeSource: persisted so the next NULL-payType
+            // audit can tell whether the CONTRACT cell was empty (cash visit
+            // — null is correct) or had unrecognized text (new portal /
+            // typo — needs knownContractsExact update). Without this we
+            // can't distinguish at-rest, only by re-pulling the source Excel.
+            payTypeRaw: item.payTypeRaw || existingMetadata?.flow1?.payTypeRaw || null,
+            payTypeSource: item.payTypeSource || existingMetadata?.flow1?.payTypeSource || null,
             rowIndex: item.rowIndex ?? existingMetadata?.flow1?.rowIndex ?? null,
             dedupeDisposition: existingRecord ? 'updated_existing' : 'inserted_new',
             visitRecordNo: visitRecordNo || existingMetadata?.flow1?.visitRecordNo || null,
