@@ -329,7 +329,6 @@ async function readFullertonLatestClaim(page, expectedNric = '') {
     // Search-form fill is best-effort; unsuccessful execution is logged inline
     // via the parse fallback's reason rather than as a separate noisy entry.
     if (!searchExecuted?.clickedSearch) {
-       
       console.log(
         `[FULLERTON][cmp-search-skipped] ${JSON.stringify(searchExecuted).slice(0, 200)}`
       );
@@ -531,11 +530,59 @@ async function readFullertonLatestClaim(page, expectedNric = '') {
   }
 }
 
+// Build a baseline (admin-truth) from fillVerification.priorValue captured by
+// portal-generic-submitter._fillAndVerify just before the bot wrote each
+// field. This is the universal, portal-agnostic source of truth: whatever
+// was in the field when the bot arrived IS what the admin had filed.
+function buildBaselineFromPriorValues(state) {
+  const fv = state?.fillVerification || {};
+  // Prefer priorValue (captured pre-fill, true admin truth). Fall back to
+  // observed when status is readonly/skipped — for those statuses the field
+  // wasn't writeable so observed == priorValue, and some fields (notably
+  // Fullerton visitDate evidence-extracted) populate observed without going
+  // through _fillAndVerify.
+  const pick = entry => {
+    if (!entry) return '';
+    if (entry.priorValue) return String(entry.priorValue).trim();
+    const status = String(entry.status || '');
+    if ((status === 'readonly' || status === 'skipped') && entry.observed) {
+      return String(entry.observed).trim();
+    }
+    return '';
+  };
+  const baseline = {
+    visitDate: pick(fv?.visitDate),
+    diagnosis: pick(fv?.diagnosis),
+    amount: pick(fv?.fee),
+    provider: '',
+  };
+  const hasAny = Boolean(baseline.visitDate || baseline.diagnosis || baseline.amount);
+  return { baseline, hasAny };
+}
+
 export async function comparePortalLatestClaim({ portalTarget, page, visit, state }) {
   const target = String(portalTarget || '').toUpperCase();
   const expected = buildExpectedFromVisit(visit);
   const nric = String(state?.nric || visit?.nric || visit?.extraction_metadata?.nric || '').trim();
 
+  // Primary baseline: pre-fill values captured by _fillAndVerify. This is the
+  // most reliable admin-truth signal because it reads the actual form fields
+  // the bot operated on, not a separate (possibly stale or mis-navigated)
+  // claims-history scrape. Works for any portal where the bot opens an
+  // admin-created form (Fullerton patient_search → row click; MHC visit
+  // detail; etc.). Does NOT work when the bot creates a fresh blank claim
+  // (IXCHANGE current behaviour) — in that case priorValues are all empty.
+  const { baseline: priorBaseline, hasAny: hasPriorAny } = buildBaselineFromPriorValues(state);
+  if (hasPriorAny) {
+    return buildComparisonPayload(
+      expected,
+      priorBaseline,
+      `${target.toLowerCase()}_form_priorvalue`
+    );
+  }
+
+  // Portal-specific fallbacks — only reached when no priorValue baseline
+  // exists (e.g. IXCHANGE's blank-claim flow, or fillVerification missing).
   if (target === 'IXCHANGE') {
     const baselineRes = await readIxchangeLatestClaim(page, state);
     if (!baselineRes?.ok) {

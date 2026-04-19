@@ -446,6 +446,12 @@ export class GenericPortalSubmitter {
     if (!found) return result;
 
     result.selector = found.selector;
+    // Capture admin's pre-fill value BEFORE bot writes anything. This becomes
+    // the per-field "baseline" for comparator: if admin had filled the field
+    // already, we have ground truth; otherwise priorValue is empty and the
+    // comparator reports unavailable for that field.
+    const priorObserved = await this._readLocatorObserved(found.locator);
+    result.priorValue = String(priorObserved?.value || '').trim();
     let writeFailed = false;
     try {
       await found.locator.click({ timeout: 2000 }).catch(() => null);
