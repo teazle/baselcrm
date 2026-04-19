@@ -152,7 +152,11 @@ function parseIxchangeClaimSnippet(snippet) {
   };
 }
 
-async function readIxchangeLatestClaim(page, state) {
+// Preserved for potential future re-enablement; currently bypassed because
+// it reads the bot's freshly-created blank claim instead of admin's filed
+// one. See comment in comparePortalLatestClaim.
+ 
+async function _readIxchangeLatestClaim(page, state) {
   const visitId =
     state?.form_navigation?.visitId ||
     String(page.url() || '').match(/\/spos\/claim\/edit\/(\d+)/i)?.[1] ||
@@ -230,7 +234,10 @@ async function readIxchangeLatestClaim(page, state) {
   };
 }
 
-async function readFullertonLatestClaim(page, expectedNric = '') {
+// Preserved for potential future re-enablement; currently bypassed because
+// the search-form on /visit_list could not be reliably navigated.
+ 
+async function _readFullertonLatestClaim(page, expectedNric = '') {
   const claimsHistoryHref = await page
     .evaluate(() => {
       const anchors = Array.from(globalThis.document?.querySelectorAll?.('a') || []);
@@ -642,41 +649,25 @@ export async function comparePortalLatestClaim({ portalTarget, page, visit, stat
     );
   }
 
-  // Portal-specific fallbacks — only reached when no priorValue baseline
-  // exists (e.g. IXCHANGE's blank-claim flow, or fillVerification missing).
-  if (target === 'IXCHANGE') {
-    const baselineRes = await readIxchangeLatestClaim(page, state);
-    if (!baselineRes?.ok) {
-      return {
-        baselineSource: null,
-        state: 'unavailable',
-        matchedFields: [],
-        mismatchedFields: [],
-        unavailableReason: baselineRes?.reason || 'ixchange_baseline_unavailable',
-      };
-    }
-    return buildComparisonPayload(expected, baselineRes.baseline, baselineRes.source);
-  }
-
-  if (target === 'FULLERTON') {
-    const baselineRes = await readFullertonLatestClaim(page, nric);
-    if (!baselineRes?.ok) {
-      return {
-        baselineSource: null,
-        state: 'unavailable',
-        matchedFields: [],
-        mismatchedFields: [],
-        unavailableReason: baselineRes?.reason || 'fullerton_baseline_unavailable',
-      };
-    }
-    return buildComparisonPayload(expected, baselineRes.baseline, baselineRes.source);
-  }
-
+  // No priorValue baseline available. Portal-specific scrapers
+  // (readIxchangeLatestClaim / readFullertonLatestClaim) historically
+  // produced misleading "actuals" in this case:
+  //   - IXCHANGE: snippet fallback returns 0 for the bot's freshly-created
+  //     blank claim (NOT admin's filed one)
+  //   - FULLERTON: claims-history page is empty until search submitted; the
+  //     search-form fix never identified the right inputs
+  // Lying ("actual=0", "actual=From Date") is worse than "unavailable" — it
+  // masks real bot-fill issues and triggers false alarms on dashboards.
+  // Until those scrapers are reworked with verified portal access, return
+  // unavailable instead. Suppress unused params to keep the API surface
+  // stable for future fallback re-enablement.
+  void page;
+  void nric;
   return {
     baselineSource: null,
     state: 'unavailable',
     matchedFields: [],
     mismatchedFields: [],
-    unavailableReason: 'unsupported_portal_for_comparison',
+    unavailableReason: 'no_admin_prefill_captured',
   };
 }
