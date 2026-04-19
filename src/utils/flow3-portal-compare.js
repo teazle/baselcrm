@@ -326,7 +326,14 @@ async function readFullertonLatestClaim(page, expectedNric = '') {
       }, expectedNric)
       .catch(e => ({ error: String(e?.message || e || 'search_eval_failed') }));
 
-    console.log(`[FULLERTON][cmp-search] ${JSON.stringify(searchExecuted).slice(0, 400)}`);
+    // Search-form fill is best-effort; unsuccessful execution is logged inline
+    // via the parse fallback's reason rather than as a separate noisy entry.
+    if (!searchExecuted?.clickedSearch) {
+       
+      console.log(
+        `[FULLERTON][cmp-search-skipped] ${JSON.stringify(searchExecuted).slice(0, 200)}`
+      );
+    }
     // Allow the search to round-trip and the results table to render.
     await claimPage.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => null);
     await claimPage.waitForTimeout(1500);
