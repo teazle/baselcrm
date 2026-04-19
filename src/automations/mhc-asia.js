@@ -3,6 +3,7 @@ import os from 'os';
 import path from 'path';
 import { logger } from '../utils/logger.js';
 import { PORTALS } from '../config/portals.js';
+import { resolveDiagnosisAgainstPortalOptions } from './clinic-assist.js';
 
 /**
  * MHC Asia automation module
@@ -10394,11 +10395,15 @@ export class MHCAsiaAutomation {
 
         const links = ctx.locator('a[onclick*="doSelect"], a[href="#"]');
         const count = Math.min(await links.count().catch(() => 0), 220);
-        let bestIdx = -1;
-        let bestScore = 0;
-        let bestText = '';
-        let bestRow = '';
-        let bestOptionCode = '';
+
+        // Gather all viable rows BEFORE clicking, so a deterministic
+        // canonical resolver can choose. The legacy keyword scorer remains
+        // as a controlled fallback when the resolver finds no match (rare,
+        // and gated by env to keep current behaviour available).
+        const candidates = [];
+        let legacyBestIdx = -1;
+        let legacyBestScore = 0;
+        let legacyBestText = '';
 
         for (let i = 0; i < count; i++) {
           const link = links.nth(i);
@@ -10424,6 +10429,23 @@ export class MHCAsiaAutomation {
           const optionCode = extractCode(combined);
           const optionCodePlain = optionCode.replace(/\./g, '');
 
+          // Build the option text we hand to the canonical resolver. Strip
+          // the leading ICD code so the resolver scores body-part / condition
+          // / side against just the description (which is what it expects).
+          const descriptionOnly = combined
+            .replace(/\b[A-Z]\d{2,3}(?:\.[0-9A-Z]+)?\b\s*[-:]?\s*/, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+          candidates.push({
+            idx: i,
+            text: text.slice(0, 120),
+            rowText: rowText.slice(0, 220),
+            optionCode,
+            descriptionOnly: descriptionOnly || combined,
+          });
+
+          // Legacy keyword/code scorer kept only as a fallback signal; do
+          // NOT click anything here.
           let score = 0;
           let codeHits = 0;
           let keywordHits = 0;
@@ -10454,24 +10476,112 @@ export class MHCAsiaAutomation {
           }
           if (codeHits === 0 && keywordHits < 2) continue;
           if (score < minScore) continue;
-          if (score > bestScore) {
-            bestScore = score;
-            bestIdx = i;
-            bestText = text.slice(0, 120);
-            bestRow = rowText.slice(0, 220);
-            bestOptionCode = optionCode;
+          if (score > legacyBestScore) {
+            legacyBestScore = score;
+            legacyBestIdx = i;
+            legacyBestText = text.slice(0, 120);
           }
         }
 
-        if (bestIdx < 0) return { ok: false };
-        const target = links.nth(bestIdx);
+        // Deterministic canonical resolver (mirrors GE/NTUC and clinic-assist).
+        // Refuses ambiguous matches like "Pain in left wrist" → "Injury of
+        // wrist and hand" because the resolver penalises condition_mismatch
+        // (-140) and body_part_mismatch (-180), then enforces a min score.
+        const canonicalMinScore = Number(process.env.MHC_DIAG_CANONICAL_MIN_SCORE || '150');
+        const canonicalFallback = String(process.env.MHC_DIAG_CANONICAL_FALLBACK || 'refuse')
+          .trim()
+          .toLowerCase();
+
+        let canonicalDecision = null;
+        if (candidates.length > 0) {
+          canonicalDecision = resolveDiagnosisAgainstPortalOptions({
+            diagnosis: {
+              code: code || null,
+              description: descClean || desc || null,
+            },
+            portalOptions: candidates.map(c => ({
+              text: c.descriptionOnly,
+              code: c.optionCode || null,
+            })),
+            minScore: canonicalMinScore,
+            codeMode: code ? 'primary' : 'secondary',
+          });
+        }
+
+        let chosenIdx = -1;
+        let chosenSource = '';
+        let chosenScore = 0;
+        if (canonicalDecision && canonicalDecision.blocked === false) {
+          const wantText = String(canonicalDecision.selected_text || '')
+            .trim()
+            .toLowerCase();
+          const wantCode = String(canonicalDecision.selected_code || '')
+            .toUpperCase()
+            .replace(/[^A-Z0-9.]/g, '');
+          const found = candidates.find(c => {
+            const cText = String(c.descriptionOnly || '')
+              .trim()
+              .toLowerCase();
+            const cCode = String(c.optionCode || '')
+              .toUpperCase()
+              .replace(/[^A-Z0-9.]/g, '');
+            if (wantText && cText && wantText === cText) {
+              if (!wantCode || !cCode) return true;
+              return wantCode === cCode;
+            }
+            return false;
+          });
+          if (found) {
+            chosenIdx = found.idx;
+            chosenSource = 'canonical_resolver';
+            chosenScore = canonicalDecision.match_score || 0;
+          }
+        }
+
+        if (chosenIdx < 0) {
+          const blockedReason =
+            (canonicalDecision && canonicalDecision.blocked_reason) || 'no_candidates';
+          if (canonicalFallback === 'keyword' && legacyBestIdx >= 0) {
+            chosenIdx = legacyBestIdx;
+            chosenSource = 'legacy_keyword_fallback';
+            chosenScore = legacyBestScore;
+            this._logStep('Diagnosis canonical resolver blocked; falling back to keyword scorer', {
+              blockedReason,
+              canonicalScore: canonicalDecision?.match_score || 0,
+              canonicalConsidered: (canonicalDecision?.considered || []).slice(0, 5),
+              legacyBestText,
+            });
+          } else {
+            this._logStep('Diagnosis canonical resolver refused selection', {
+              blockedReason,
+              canonicalScore: canonicalDecision?.match_score || 0,
+              canonicalConsidered: (canonicalDecision?.considered || []).slice(0, 5),
+              candidatesCount: candidates.length,
+              legacyBestText: legacyBestText || null,
+              legacyBestScore: legacyBestScore || 0,
+              minScoreRequired: canonicalMinScore,
+            });
+            return {
+              ok: false,
+              reason: `canonical_${blockedReason}`,
+              canonicalDecision,
+              candidatesCount: candidates.length,
+            };
+          }
+        }
+
+        const chosenCandidate = candidates.find(c => c.idx === chosenIdx);
+        if (!chosenCandidate) return { ok: false, reason: 'chosen_candidate_lost' };
+        const target = links.nth(chosenIdx);
         await target.click().catch(() => {});
         return {
           ok: true,
-          score: bestScore,
-          text: bestText,
-          row: bestRow,
-          optionCode: bestOptionCode,
+          score: chosenScore,
+          text: chosenCandidate.text,
+          row: chosenCandidate.rowText,
+          optionCode: chosenCandidate.optionCode,
+          source: chosenSource,
+          canonicalReason: canonicalDecision?.match_reason || null,
         };
       })();
 
@@ -10486,6 +10596,32 @@ export class MHCAsiaAutomation {
           attemptedSelectors: mButtonSelectors,
           searchText,
         });
+      }
+
+      // Hard stop: if the anchor scan found candidates but the canonical
+      // resolver explicitly refused them, do NOT fall through to the legacy
+      // pickedEval / pickedLocator / pickedFallback scorers. Those use the
+      // same naive keyword+code scoring that produced the DYLAN AUSTIN TARIN
+      // failure ("Pain in left wrist" → "Injury of wrist and hand") and
+      // would silently bypass the canonical gate we just added.
+      if (
+        pickedAnchor &&
+        pickedAnchor.ok === false &&
+        typeof pickedAnchor.reason === 'string' &&
+        pickedAnchor.reason.startsWith('canonical_') &&
+        Number(pickedAnchor.candidatesCount || 0) > 0
+      ) {
+        this.lastDiagnosisSelection = {
+          ok: false,
+          method: 'modal',
+          diagnosis: { code: code || null, description: desc || null },
+          reason: pickedAnchor.reason,
+          canonicalDecision: pickedAnchor.canonicalDecision || null,
+          candidatesCount: pickedAnchor.candidatesCount || 0,
+          checkedAt: new Date().toISOString(),
+        };
+        if (ctx.close) await ctx.close().catch(() => {});
+        return false;
       }
 
       // Prefer a best-match row rather than blindly taking the first result.
@@ -13468,6 +13604,54 @@ export class MHCAsiaAutomation {
                   best = o;
                 }
               }
+              // Canonical resolver gate: even if the legacy keyword scorer
+              // picked a winner, run all options through the deterministic
+              // resolver (same one GE/NTUC uses) and require it to agree.
+              // This blocks the DYLAN AUSTIN TARIN-style failure where
+              // "Pain in left wrist" could otherwise snap to the dropdown
+              // entry "Injury of wrist and hand".
+              const canonicalMin = Number(process.env.MHC_DIAG_CANONICAL_MIN_SCORE || '150');
+              const canonicalFallback = String(process.env.MHC_DIAG_CANONICAL_FALLBACK || 'refuse')
+                .trim()
+                .toLowerCase();
+              const portalOptionsForResolver = options
+                .filter(o => String(o?.label || '').trim())
+                .map(o => {
+                  const labelText = String(o?.label || '').trim();
+                  const optCode = extractCode(`${labelText} ${o?.value || ''}`);
+                  const labelDescOnly = labelText
+                    .replace(/\b[A-Z]\d{2,3}(?:\.[0-9A-Z]+)?\b\s*[-:]?\s*/, '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                  return {
+                    text: labelDescOnly || labelText,
+                    code: optCode || null,
+                    value: String(o?.value || '').trim() || null,
+                  };
+                });
+              const canonical = resolveDiagnosisAgainstPortalOptions({
+                diagnosis: {
+                  code: codeOnly || null,
+                  description: descForScoring || descOnly || null,
+                },
+                portalOptions: portalOptionsForResolver,
+                minScore: canonicalMin,
+                codeMode: codeOnly ? 'primary' : 'secondary',
+              });
+              const canonicalAccepted = canonical && canonical.blocked === false ? canonical : null;
+              const canonicalAgreesWithLegacy = (() => {
+                if (!canonicalAccepted || !best) return false;
+                const wantText = String(canonicalAccepted.selected_text || '')
+                  .trim()
+                  .toLowerCase();
+                const bestLabelDesc = String(best?.label || '')
+                  .replace(/\b[A-Z]\d{2,3}(?:\.[0-9A-Z]+)?\b\s*[-:]?\s*/, '')
+                  .replace(/\s+/g, ' ')
+                  .trim()
+                  .toLowerCase();
+                return wantText && wantText === bestLabelDesc;
+              })();
+
               if (best && bestScore >= dropdownMinScore) {
                 const bestCode = extractCode(`${best?.label || ''} ${best?.value || ''}`);
                 const bestCodePlain = String(bestCode || '').replace(/\./g, '');
@@ -13483,15 +13667,81 @@ export class MHCAsiaAutomation {
                   String(best?.label || '')
                     .toLowerCase()
                     .includes(bodyPartToken);
-                if (prefixCompatible || bodyCompatible) {
-                  targetOption = best;
+
+                if (canonicalAccepted) {
+                  if (canonicalAgreesWithLegacy && (prefixCompatible || bodyCompatible)) {
+                    targetOption = best;
+                  } else {
+                    // Canonical resolver picked something different — trust
+                    // the resolver, not the legacy scorer.
+                    const resolverOption = options.find(o => {
+                      const labelDescOnly = String(o?.label || '')
+                        .replace(/\b[A-Z]\d{2,3}(?:\.[0-9A-Z]+)?\b\s*[-:]?\s*/, '')
+                        .replace(/\s+/g, ' ')
+                        .trim()
+                        .toLowerCase();
+                      return (
+                        labelDescOnly ===
+                        String(canonicalAccepted.selected_text || '')
+                          .trim()
+                          .toLowerCase()
+                      );
+                    });
+                    if (resolverOption) {
+                      targetOption = resolverOption;
+                      this._logStep('Diagnosis dropdown: canonical resolver overrode legacy pick', {
+                        legacyLabel: String(best?.label || '').slice(0, 80),
+                        canonicalLabel: String(canonicalAccepted.selected_text || '').slice(0, 80),
+                        canonicalScore: canonicalAccepted.match_score || 0,
+                      });
+                    }
+                  }
+                } else if (canonicalFallback === 'keyword') {
+                  // Explicit opt-in: trust the legacy scorer when canonical refused.
+                  if (prefixCompatible || bodyCompatible) {
+                    targetOption = best;
+                    this._logStep(
+                      'Diagnosis dropdown: canonical refused; using legacy keyword pick',
+                      {
+                        bestLabel: String(best?.label || '').slice(0, 80),
+                        bestScore,
+                      }
+                    );
+                  }
                 } else {
-                  this._logStep('Rejected dropdown best-candidate as implausible', {
-                    requestedCode,
-                    requestedDesc: descNorm.slice(0, 80),
-                    bestLabel: String(best?.label || '').slice(0, 80),
-                    bestScore,
+                  // Default: refuse rather than risk a wrong canonical write.
+                  this._logStep('Diagnosis dropdown: canonical resolver refused, no fallback', {
+                    blockedReason: canonical?.blocked_reason || 'unknown',
+                    canonicalScore: canonical?.match_score || 0,
+                    minScoreRequired: canonicalMin,
+                    legacyBestLabel: String(best?.label || '').slice(0, 80),
+                    legacyBestScore: bestScore,
                   });
+                }
+              } else if (canonicalAccepted) {
+                // Legacy scorer found nothing above threshold but canonical did.
+                const resolverOption = options.find(o => {
+                  const labelDescOnly = String(o?.label || '')
+                    .replace(/\b[A-Z]\d{2,3}(?:\.[0-9A-Z]+)?\b\s*[-:]?\s*/, '')
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .toLowerCase();
+                  return (
+                    labelDescOnly ===
+                    String(canonicalAccepted.selected_text || '')
+                      .trim()
+                      .toLowerCase()
+                  );
+                });
+                if (resolverOption) {
+                  targetOption = resolverOption;
+                  this._logStep(
+                    'Diagnosis dropdown: canonical-only pick (legacy below threshold)',
+                    {
+                      canonicalLabel: String(canonicalAccepted.selected_text || '').slice(0, 80),
+                      canonicalScore: canonicalAccepted.match_score || 0,
+                    }
+                  );
                 }
               }
               if (!targetOption && keywords.length === 0 && desc) {
