@@ -584,16 +584,29 @@ export class VisitDetailsExtractor {
       const incomingResolutionStatus = String(sources?.diagnosisResolution?.status || '')
         .trim()
         .toLowerCase();
+      const incomingResolutionConfidence = Number(sources?.diagnosisResolution?.confidence || 0);
       const incomingDiagnosisLooksNonPortable =
         /(?:\blab(?:oratory)?\b|\btest\b|\bscreen(?:ing)?\b|\bpanel\b|\bconsult(?:ation)?\b|\bprocedure\b|\btherapy\b)/i.test(
           incomingDiagnosis
         );
+      // Ambiguous-but-acceptable carve-out: previously we threw away every
+      // ambiguous-status extraction even when the canonical text was clearly
+      // a real diagnosis ("Headache", "Sprain of the knee") with confidence
+      // 0.5–0.7. That was rejecting ~40% of successful extractions and
+      // starving Phase 3 of input. Accept ambiguous extractions when confidence
+      // ≥ 0.5 and the text doesn't look non-portable; keep the "ambiguous"
+      // flag in metadata so downstream UI can surface "needs human review".
+      const ambiguousButAcceptable =
+        incomingResolutionStatus === 'ambiguous' &&
+        hasIncomingDiagnosis &&
+        !incomingDiagnosisLooksNonPortable &&
+        incomingResolutionConfidence >= 0.5;
       const incomingDiagnosisUnresolved =
         !hasIncomingDiagnosis ||
         incomingResolutionStatus === 'missing' ||
         incomingResolutionStatus === 'missing_in_source' ||
         incomingResolutionStatus === 'found_but_invalid' ||
-        incomingResolutionStatus === 'ambiguous' ||
+        (incomingResolutionStatus === 'ambiguous' && !ambiguousButAcceptable) ||
         incomingResolutionStatus === 'unresolved' ||
         (incomingDiagnosisLooksNonPortable && incomingResolutionStatus !== 'resolved');
       const shouldUseIncomingDiagnosis = hasIncomingDiagnosis && !incomingDiagnosisUnresolved;
@@ -697,6 +710,7 @@ export class VisitDetailsExtractor {
             ...sources,
             diagnosisIncomingStatus: incomingResolutionStatus || null,
             diagnosisIncomingUnresolved: incomingDiagnosisUnresolved,
+            diagnosisAmbiguousButAccepted: ambiguousButAcceptable,
             diagnosisFallbackFromExisting: usedExistingDiagnosisFallback,
             diagnosisGenericFallbackApplied: usedGenericDiagnosisFallback,
             diagnosisGenericFallback: genericFallback
