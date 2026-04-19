@@ -256,6 +256,41 @@ async function readFullertonLatestClaim(page, expectedNric = '') {
     const absoluteHref = new URL(claimsHistoryHref, page.url()).toString();
     await claimPage.goto(absoluteHref, { waitUntil: 'domcontentloaded', timeout: 15000 });
     await claimPage.waitForTimeout(1500);
+
+    // Diagnostic: dump page summary (URL, table count, row counts, first
+    // table preview) so the comparator failure mode is debuggable from logs.
+    const pageDiag = await claimPage
+      .evaluate(() => {
+        const norm = v =>
+          String(v || '')
+            .replace(/\s+/g, ' ')
+            .trim();
+        const tables = Array.from(globalThis.document?.querySelectorAll?.('table') || []);
+        const summary = tables.slice(0, 3).map((t, i) => {
+          const ths = Array.from(t.querySelectorAll('th')).map(th =>
+            norm(th.textContent || '').slice(0, 40)
+          );
+          const trs = Array.from(t.querySelectorAll('tr'));
+          const sampleCells = trs
+            .slice(0, 3)
+            .map(tr =>
+              Array.from(tr.children).map(c =>
+                norm((c.tagName === 'INPUT' ? c.value : c.textContent) || '').slice(0, 30)
+              )
+            );
+          return { idx: i, ths: ths.slice(0, 12), rowCount: trs.length, sampleCells };
+        });
+        return {
+          url: globalThis.location?.href || '',
+          title: globalThis.document?.title || '',
+          tableCount: tables.length,
+          tables: summary,
+          h1: norm(globalThis.document?.querySelector?.('h1')?.textContent || ''),
+        };
+      })
+      .catch(e => ({ error: String(e?.message || e || 'diag_failed') }));
+     
+    console.log(`[FULLERTON][cmp-diag] ${JSON.stringify(pageDiag).slice(0, 1200)}`);
     const baseline = await claimPage
       .evaluate(nricToken => {
         const norm = value =>
