@@ -587,12 +587,18 @@ function isTodayDateString(value) {
 
 function buildBaselineFromPriorValues(state) {
   const fv = state?.fillVerification || {};
-  // Prefer priorValue (captured pre-fill, true admin truth). Fall back to
-  // observed when status is readonly/skipped — for those statuses the field
-  // wasn't writeable so observed == priorValue, and some fields (notably
-  // Fullerton visitDate evidence-extracted) populate observed without going
-  // through _fillAndVerify.
-  const pick = entry => {
+  // pickStrict: priorValue ONLY. Use for amount, where readonly observed
+  // values are typically portal-computed program rates / consultation caps
+  // (e.g. Fullerton always shows 70.00, IXCHANGE shows the program rate)
+  // and would falsely flag every visit as "amount mismatch" against admin.
+  const pickStrict = entry => {
+    if (!entry?.priorValue) return '';
+    return String(entry.priorValue).trim();
+  };
+  // pickSoft: priorValue OR readonly/skipped observed. Use for fields where
+  // the portal genuinely renders the admin-entered value as readonly (e.g.
+  // visitDate locked after admin pick, diagnosis text reflected back).
+  const pickSoft = entry => {
     if (!entry) return '';
     if (entry.priorValue) return String(entry.priorValue).trim();
     const status = String(entry.status || '');
@@ -601,16 +607,14 @@ function buildBaselineFromPriorValues(state) {
     }
     return '';
   };
-  const visitDateRaw = pick(fv?.visitDate);
+  const visitDateRaw = pickSoft(fv?.visitDate);
   // Suppress visitDate baseline when it matches today — that's the portal's
-  // auto-populated default, not admin's claim date. Without this filter,
-  // every comparison run on the same day would falsely flag visitDate as
-  // mismatched.
+  // auto-populated default, not admin's claim date.
   const visitDate = isTodayDateString(visitDateRaw) ? '' : visitDateRaw;
   const baseline = {
     visitDate,
-    diagnosis: pick(fv?.diagnosis),
-    amount: pick(fv?.fee),
+    diagnosis: pickSoft(fv?.diagnosis),
+    amount: pickStrict(fv?.fee),
     provider: '',
   };
   const hasAny = Boolean(baseline.visitDate || baseline.diagnosis || baseline.amount);
