@@ -298,7 +298,78 @@ async function readFullertonLatestClaim(page, expectedNric = '') {
             break;
           }
         }
-        if (!chosenTable) return null;
+        // Fallback when no <thead> / th-row exposes Diagnosis: collect every
+        // <th> label anywhere on the page and use THAT as the exclusion set
+        // for diagnosis-cell picking. Covers portals whose headers are inside
+        // <tbody> or rendered without semantic <thead>.
+        if (!chosenTable) {
+          const pageHeaderLabels = new Set();
+          const allThs = Array.from(globalThis.document?.querySelectorAll?.('th') || []);
+          for (const th of allThs) {
+            const t = norm(th.textContent || '').toLowerCase();
+            if (t) pageHeaderLabels.add(t);
+          }
+          // Also harvest header-looking text from any cell with role="columnheader"
+          const rc = Array.from(
+            globalThis.document?.querySelectorAll?.('[role="columnheader"]') || []
+          );
+          for (const c of rc) {
+            const t = norm(c.textContent || '').toLowerCase();
+            if (t) pageHeaderLabels.add(t);
+          }
+
+          // Find any <table> containing rows with date-like cells AND cells whose
+          // text isn't in the header-label set — that's the data table.
+          const allTables = Array.from(globalThis.document?.querySelectorAll?.('table') || []);
+          const candidates = [];
+          for (const table of allTables) {
+            const rows = Array.from(table.querySelectorAll('tr'));
+            for (const row of rows) {
+              const tds = Array.from(row.querySelectorAll('td'));
+              if (!tds.length) continue;
+              const cells = tds.map(td => norm(td.textContent || ''));
+              if (!cells.some(isDateLike)) continue;
+              candidates.push(cells);
+            }
+          }
+          if (!candidates.length) {
+            return { __debug: 'no_table_with_diagnosis_header_and_no_date_rows_anywhere' };
+          }
+          const normalizedNric = norm(nricToken).toUpperCase();
+          let chosen = candidates[0];
+          if (normalizedNric) {
+            const hit = candidates.find(cells =>
+              cells.some(c => c.toUpperCase().includes(normalizedNric))
+            );
+            if (hit) chosen = hit;
+          }
+          const dateCell = chosen.find(isDateLike) || '';
+          const amountCell =
+            [...chosen]
+              .reverse()
+              .map(amountLike)
+              .find(v => v && (v.includes('.') || Number(v) >= 10)) || '';
+          const diagnosisCell =
+            chosen.find(cell => {
+              if (!cell) return false;
+              const low = cell.toLowerCase();
+              if (pageHeaderLabels.has(low)) return false;
+              if (isDateLike(cell)) return false;
+              if (/^[STFGM]\d{7}[A-Z]$/i.test(cell)) return false;
+              if (/^\d+(?:\.\d{1,2})?$/.test(cell.replace(/,/g, ''))) return false;
+              if (/^(select|edit|view|delete|details)$/i.test(cell)) return false;
+              // Don't pick very short fragments (<=3 chars) — usually S/No or row-index.
+              if (cell.length <= 3) return false;
+              return true;
+            }) || '';
+          return {
+            visitDate: dateCell,
+            diagnosis: diagnosisCell,
+            amount: amountCell || '',
+            provider: '',
+            __debug: `fallback_page_headers:[${[...pageHeaderLabels].slice(0, 12).join('|')}]`,
+          };
+        }
 
         const colIdx = predicate => headerCells.findIndex(predicate);
         const diagnosisIdx = colIdx(l => /diagnos/i.test(l));
@@ -362,6 +433,13 @@ async function readFullertonLatestClaim(page, expectedNric = '') {
       }, expectedNric)
       .catch(() => null);
     if (!baseline) return { ok: false, reason: 'claims_history_parse_failed' };
+    if (baseline && !baseline.diagnosis && !baseline.visitDate && !baseline.amount) {
+      return {
+        ok: false,
+        reason: `claims_history_parse_empty:${String(baseline.__debug || '').slice(0, 160)}`,
+      };
+    }
+    if (baseline?.__debug) delete baseline.__debug;
     return { ok: true, source: 'fullerton_claims_history_latest', baseline };
   } catch (error) {
     return { ok: false, reason: String(error?.message || error || 'claims_history_open_failed') };
