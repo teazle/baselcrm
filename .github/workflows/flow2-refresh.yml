@@ -1,6 +1,13 @@
 name: Flow2 Refresh
 
 on:
+  # Auto-run every 4 hours to process any visits Flow1 has classified but
+  # Phase 2 hasn't extracted yet. Without this, Flow2 only runs on manual
+  # trigger and visits accumulate in 'manual_review' indefinitely (e.g. 59
+  # of 87 April 2026 portal visits never had Phase 2 attempted before this
+  # cron was added). UTC times: 00:15, 04:15, 08:15, 12:15, 16:15, 20:15.
+  schedule:
+    - cron: '15 */4 * * *'
   workflow_dispatch:
     inputs:
       from:
@@ -59,22 +66,36 @@ jobs:
             exit 1
           fi
 
+      - name: Compute scheduled-run defaults
+        id: defaults
+        if: github.event_name == 'schedule'
+        run: |
+          # Cron run: walk back 30 days so any newly-classified Phase 1
+          # visits get extraction. Force=false to skip already-completed
+          # work (avoids burning ClinicAssist time on the same visits).
+          echo "from=$(date -u -d '30 days ago' +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+          echo "to=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
       - name: Run Flow 2 refresh on EC2
         uses: appleboy/ssh-action@v1.0.3
         env:
-          FLOW_FROM: ${{ inputs.from }}
-          FLOW_TO: ${{ inputs.to }}
+          FLOW_FROM: ${{ inputs.from || steps.defaults.outputs.from }}
+          FLOW_TO: ${{ inputs.to || steps.defaults.outputs.to }}
           FLOW_VISIT_IDS: ${{ inputs.visit_ids }}
           FLOW_PAY_TYPE: ${{ inputs.pay_type }}
           FLOW_RETRY_FAILED: ${{ inputs.retry_failed }}
-          FLOW_FORCE: ${{ inputs.force }}
+          FLOW_FORCE: ${{ github.event_name == 'schedule' && 'false' || inputs.force }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.EC2_PORT || 22 }}
           timeout: 60s
-          command_timeout: 60m
+          # Bumped from 60m → 180m after Apr 18 cron failure: a 37-visit batch
+          # processed 28 visits in ~58 min, then the SSH command_timeout cut it
+          # off at visit 29/37. ~2 min/visit means a 100-visit batch needs
+          # ~200 min headroom; 180m is the safe default for scheduled scope.
+          command_timeout: 180m
           envs: FLOW_FROM,FLOW_TO,FLOW_VISIT_IDS,FLOW_PAY_TYPE,FLOW_RETRY_FAILED,FLOW_FORCE
           script_stop: true
           script: |
