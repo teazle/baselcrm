@@ -257,40 +257,79 @@ async function readFullertonLatestClaim(page, expectedNric = '') {
     await claimPage.goto(absoluteHref, { waitUntil: 'domcontentloaded', timeout: 15000 });
     await claimPage.waitForTimeout(1500);
 
-    // Diagnostic: dump page summary (URL, table count, row counts, first
-    // table preview) so the comparator failure mode is debuggable from logs.
-    const pageDiag = await claimPage
-      .evaluate(() => {
+    // Discovered from cmp-form-diag: Fullerton lands on /visit_list which is a
+    // search-criteria page with an EMPTY results table until you submit a
+    // search. Headers exist (Visit Date / Patient Name / National ID No. /
+    // ...) but no data rows. We must fill From/To Date + (optional) NRIC and
+    // click Search to populate. The actual input names are discovered by
+    // fuzzy attribute matching so this works without the live portal in hand.
+    const searchExecuted = await claimPage
+      .evaluate(nricToken => {
         const norm = v =>
           String(v || '')
             .replace(/\s+/g, ' ')
             .trim();
-        const tables = Array.from(globalThis.document?.querySelectorAll?.('table') || []);
-        const summary = tables.slice(0, 3).map((t, i) => {
-          const ths = Array.from(t.querySelectorAll('th')).map(th =>
-            norm(th.textContent || '').slice(0, 40)
-          );
-          const trs = Array.from(t.querySelectorAll('tr'));
-          const sampleCells = trs
-            .slice(0, 3)
-            .map(tr =>
-              Array.from(tr.children).map(c =>
-                norm((c.tagName === 'INPUT' ? c.value : c.textContent) || '').slice(0, 30)
-              )
-            );
-          return { idx: i, ths: ths.slice(0, 12), rowCount: trs.length, sampleCells };
-        });
-        return {
-          url: globalThis.location?.href || '',
-          title: globalThis.document?.title || '',
-          tableCount: tables.length,
-          tables: summary,
-          h1: norm(globalThis.document?.querySelector?.('h1')?.textContent || ''),
+        const matchInput = predicate => {
+          const all = Array.from(globalThis.document?.querySelectorAll?.('input, select') || []);
+          return all.find(el => {
+            if (el.type === 'hidden') return false;
+            const haystack = `${el.name || ''} ${el.id || ''} ${el.placeholder || ''} ${
+              el.getAttribute('aria-label') || ''
+            }`.toLowerCase();
+            return predicate(haystack);
+          });
         };
-      })
-      .catch(e => ({ error: String(e?.message || e || 'diag_failed') }));
-     
-    console.log(`[FULLERTON][cmp-diag] ${JSON.stringify(pageDiag).slice(0, 1200)}`);
+        const fromInput = matchInput(s => /from.*date|date.*from|fromdate/i.test(s));
+        const toInput = matchInput(s => /to.*date|date.*to|todate/i.test(s));
+        const nricInput = matchInput(s =>
+          /(national.*id|id.*no|nric|patient.*id|identity)/i.test(s)
+        );
+        // Set wide date range covering past 60 days.
+        const today = new Date();
+        const past = new Date(today.getTime() - 60 * 24 * 60 * 60 * 1000);
+        const dmy = d =>
+          `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(
+            2,
+            '0'
+          )}/${d.getFullYear()}`;
+        const fillField = (el, val) => {
+          if (!el) return false;
+          el.focus();
+          el.value = val;
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+          return true;
+        };
+        const filledFrom = fillField(fromInput, dmy(past));
+        const filledTo = fillField(toInput, dmy(today));
+        const nricStr = String(nricToken || '').trim();
+        const filledNric = nricStr ? fillField(nricInput, nricStr) : false;
+        // Click Search button: prefer one whose text/value mentions "search".
+        const buttons = Array.from(
+          globalThis.document?.querySelectorAll?.(
+            'button, input[type=submit], input[type=button]'
+          ) || []
+        );
+        const searchBtn = buttons.find(b => {
+          const t = norm(b.textContent || b.value || '').toLowerCase();
+          return /search/i.test(t);
+        });
+        if (searchBtn) searchBtn.click();
+        return {
+          filledFrom,
+          filledTo,
+          filledNric,
+          clickedSearch: Boolean(searchBtn),
+          fromName: fromInput?.name || fromInput?.id || null,
+          toName: toInput?.name || toInput?.id || null,
+        };
+      }, expectedNric)
+      .catch(e => ({ error: String(e?.message || e || 'search_eval_failed') }));
+
+    console.log(`[FULLERTON][cmp-search] ${JSON.stringify(searchExecuted).slice(0, 400)}`);
+    // Allow the search to round-trip and the results table to render.
+    await claimPage.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => null);
+    await claimPage.waitForTimeout(1500);
     const baseline = await claimPage
       .evaluate(nricToken => {
         const norm = value =>
