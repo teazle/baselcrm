@@ -232,9 +232,16 @@ export function resolveDiagnosisAgainstPortalOptions({
         reasonParts.push(`token_overlap_${overlap.toFixed(2)}`);
       }
 
+      const bodyPartMatches = !!(bodyPartHint && optionBodyPart && bodyPartHint === optionBodyPart);
       if (bodyPartHint && optionBodyPart) {
-        if (bodyPartHint === optionBodyPart) {
-          score += 110;
+        if (bodyPartMatches) {
+          // Stronger body-part signal (was +110). Body part matching the
+          // EMR-extracted canonical is a high-precision anchor — we lean
+          // on it to override condition-nuance mismatches (e.g. EMR says
+          // "Pain in left wrist", portal option is "Sprain and strain of
+          // wrist": same body part, different condition — still the best
+          // available map).
+          score += 150;
           reasonParts.push('body_part_match');
         } else {
           score -= 180;
@@ -246,6 +253,15 @@ export function resolveDiagnosisAgainstPortalOptions({
         if (conditionHint === optionCondition) {
           score += 95;
           reasonParts.push('condition_match');
+        } else if (bodyPartMatches) {
+          // Body-part-correct options should not be hard-blocked for
+          // condition divergence (EMR "pain" vs portal "sprain" on the
+          // same body part is a routine clinical mapping). Apply only a
+          // gentle penalty so that a body-part-correct option still wins
+          // over body-part-absent options that share the generic
+          // condition token (e.g. "Chest pain" for a wrist complaint).
+          score -= 30;
+          reasonParts.push('condition_divergence_bodypart_ok');
         } else {
           score -= 140;
           reasonParts.push('condition_mismatch');
