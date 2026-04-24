@@ -18,8 +18,8 @@ const PORTAL_MATCHERS = {
     from: [/allianz/i],
   },
   FULLERTON: {
-    labels: [/fullerton/i, /fhn/i, /fhn3/i],
-    from: [/fullerton/i, /fhn/i],
+    labels: [/fullerton/i, /fhn/i, /fhn3/i, /2xsecure/i],
+    from: [/fullerton/i, /fhn/i, /2xsecure/i],
   },
   IHP: {
     labels: [/\bihp\b/i, /eclaim/i, /doctoranywhere/i, /2xsecure/i],
@@ -32,8 +32,9 @@ const PORTAL_MATCHERS = {
 };
 
 const GENERIC_OTP_REGEXES = [
-  /\b(?:otp|one[-\s]?time\s*password|verification\s*code|security\s*code|passcode)\D{0,20}(\d{6})\b/i,
-  /\b(?:code|pin)\D{0,12}(\d{6})\b/i,
+  /\b(?:otp|one[-\s]?time\s*(?:password|pin)|verification\s*code|security\s*code|passcode|token)\D{0,120}([0-9][0-9\s-]{2,18}[0-9])\b/i,
+  /\b(?:code|pin)\D{0,80}([0-9][0-9\s-]{2,18}[0-9])\b/i,
+  /\b([0-9][0-9\s-]{2,18}[0-9])\D{0,80}(?:otp|one[-\s]?time\s*(?:password|pin)|verification\s*code|security\s*code|passcode|token)\b/i,
 ];
 
 function toBoolean(value, fallback = false) {
@@ -64,7 +65,8 @@ function buildOtpRegexes(portal) {
   }
   if (key === 'FULLERTON') {
     return [
-      /\b(?:fullerton|fhn|2xsecure).{0,40}?(?:otp|verification|security|code).{0,20}?(\d{6})\b/i,
+      /\b(?:fullerton|fhn|2xsecure).{0,120}?(?:otp|verification|security|code|pin|token).{0,120}?([0-9][0-9\s-]{2,18}[0-9])\b/i,
+      /\b(?:otp|one[-\s]?time\s*(?:password|pin)|verification|security|code|pin|token).{0,120}?([0-9][0-9\s-]{2,18}[0-9])\b/i,
       ...GENERIC_OTP_REGEXES,
     ];
   }
@@ -100,7 +102,7 @@ function shouldConsiderMessage(portal, envelope, parsed) {
   return fromMatch || labelMatch;
 }
 
-function extractCodeFromText(text, portal) {
+export function extractCodeFromText(text, portal) {
   const body = String(text || '');
   if (!body) return null;
 
@@ -108,7 +110,7 @@ function extractCodeFromText(text, portal) {
   for (const re of regexes) {
     const m = body.match(re);
     if (!m) continue;
-    const code = String(m[1] || '').trim();
+    const code = String(m[1] || '').replace(/\D/g, '');
     if (!/^\d{4,8}$/.test(code)) continue;
     return { code, matchedBy: re.source };
   }
