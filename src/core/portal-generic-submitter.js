@@ -820,9 +820,20 @@ export class GenericPortalSubmitter {
     // The 5s backdate absorbs clock skew between this host and Gmail.
     const otpTriggeredAt = Date.now() - 5000;
     state.otp_triggered_at = otpTriggeredAt;
+    const isHeadless =
+      toBoolean(process.env.HEADLESS, false) ||
+      toBoolean(process.env.CI, false) ||
+      toBoolean(process.env.CLOUD_RUN, false);
+    const headlessOtpTimeoutMs = Number(
+      process.env.FLOW3_HEADLESS_OTP_TIMEOUT_MS || process.env.OTP_HEADLESS_TIMEOUT_MS || 15000
+    );
     const otpResult = await getOtpCode({
       portal: this.portalTarget,
       triggeredAfter: otpTriggeredAt,
+      timeoutMs:
+        isHeadless && Number.isFinite(headlessOtpTimeoutMs) && headlessOtpTimeoutMs > 0
+          ? headlessOtpTimeoutMs
+          : undefined,
     });
     state.otp = otpResult;
 
@@ -844,11 +855,6 @@ export class GenericPortalSubmitter {
 
     // In headless / cloud mode there is no operator to enter the code manually.
     // Fail fast so the visit is tagged as OTP-blocked rather than burning 5 minutes.
-    const isHeadless =
-      toBoolean(process.env.HEADLESS, false) ||
-      toBoolean(process.env.CI, false) ||
-      toBoolean(process.env.CLOUD_RUN, false);
-
     if (isHeadless) {
       logger.warn(
         `[${this.portalTarget}] OTP auto-read failed in headless mode; skipping manual wait`,
