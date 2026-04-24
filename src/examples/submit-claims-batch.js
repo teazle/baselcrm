@@ -335,6 +335,25 @@ async function submitClaimsBatch() {
     return portalTargetToLabel(hinted);
   };
 
+  const isDeterministicPortalBlocked = result => {
+    const blockedReason = String(result?.blocked_reason || result?.reason || '')
+      .trim()
+      .toLowerCase();
+    return new Set([
+      'portal_auth_failed',
+      'portal_contract_unvalidated',
+      'portal_credentials_missing',
+      'portal_login_failed',
+      'portal_otp_required',
+      'portal_search_failed',
+      'portal_session_conflict',
+      'portal_timeout',
+      'member_not_found',
+      'not_found',
+      'otp_required',
+    ]).has(blockedReason);
+  };
+
   const buildFlow3VerificationNotes = result => {
     if (!result || typeof result !== 'object') return '';
     const bits = [];
@@ -485,6 +504,16 @@ async function submitClaimsBatch() {
           logger.warn(`Member not found in portal: ${visit.patient_name} (${visit.pay_type})`);
           rowStatus = 'not_found';
           rowNotes = result.error || result.reason || 'Member not found in portal';
+        } else if (isDeterministicPortalBlocked(result)) {
+          notStartedCount++;
+          const blockedReason = result.blocked_reason || result.reason || 'portal_blocked';
+          logger.warn(`Portal blocked before fill: ${blockedReason}`);
+          rowStatus = 'not_started';
+          rowNotes = result.error || blockedReason;
+          const verificationNotes = buildFlow3VerificationNotes(result);
+          if (verificationNotes) {
+            rowNotes = rowNotes ? `${rowNotes} ; ${verificationNotes}` : verificationNotes;
+          }
         } else if (result.reason === 'not_implemented' || result.reason === 'unknown_pay_type') {
           notStartedCount++;
           rowStatus = 'not_started';

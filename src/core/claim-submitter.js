@@ -62,6 +62,85 @@ const CONDITION_ICD_MAP = {
   migraine: { code: 'G43.9', text: 'Migraine' },
 };
 
+const BODY_CONDITION_ICD_MAP = {
+  'knee:sprain': { code: 'S83.9', text: 'Sprain of the knee' },
+  'knee:strain': { code: 'S83.9', text: 'Sprain and strain of knee' },
+  'ankle:sprain': { code: 'S93.4', text: 'Sprain and strain of ankle' },
+  'ankle:strain': { code: 'S93.4', text: 'Sprain and strain of ankle' },
+  'wrist:sprain': { code: 'S63.5', text: 'Sprain and strain of wrist' },
+  'wrist:strain': { code: 'S63.5', text: 'Sprain and strain of wrist' },
+  'back:pain': { code: 'M54.5', text: 'Low back pain' },
+  'low back:pain': { code: 'M54.5', text: 'Low back pain' },
+  'lower back:pain': { code: 'M54.5', text: 'Low back pain' },
+  'neck:pain': { code: 'M54.2', text: 'Neck pain' },
+  'shoulder:pain': { code: 'M25.51', text: 'Shoulder pain' },
+  'hip:pain': { code: 'M25.55', text: 'Hip pain' },
+};
+
+function detectFallbackBodyPart(text) {
+  const raw = String(text || '').toLowerCase();
+  const patterns = [
+    ['low back', /\blow(?:er)?\s+back\b|\blumbar\b|\bloin\b/],
+    ['back', /\bback\b/],
+    ['knee', /\bknee\b|\bpatella\b/],
+    ['ankle', /\bankle\b/],
+    ['wrist', /\bwrist\b/],
+    ['shoulder', /\bshoulder\b/],
+    ['neck', /\bneck\b/],
+    ['hip', /\bhip\b|\bglut(?:e|s|eal)?\b|\bbuttock\b/],
+    ['elbow', /\belbow\b/],
+    ['foot', /\bfoot\b|\bfeet\b|\btoe\b/],
+    ['hand', /\bhand\b|\bfinger\b/],
+    ['chest', /\bchest\b/],
+    ['head', /\bheadache\b|\bhead\b/],
+    ['throat', /\bthroat\b|\bpharyng/i],
+    ['abdomen', /\babdom(?:en|inal)\b|\bstomach\b|\bepigastr/i],
+    ['eye', /\beye\b/],
+    ['ear', /\bear\b/],
+  ];
+  return patterns.find(([, pattern]) => pattern.test(raw))?.[0] || '';
+}
+
+function detectFallbackCondition(text) {
+  const raw = String(text || '').toLowerCase();
+  const patterns = [
+    ['sprain', /\bsprain(?:ed)?\b/],
+    ['strain', /\bstrain(?:ed)?\b/],
+    ['fracture', /\bfracture\b|\bfx\b/],
+    ['fever', /\bfever\b|\bpyrexia\b/],
+    ['cough', /\bcough\b/],
+    ['headache', /\bheadache\b/],
+    ['migraine', /\bmigraine\b/],
+    ['diarrhea', /\bdiarrh(?:ea|oea)\b/],
+    ['allergy', /\ballerg/i],
+    ['infection', /\binfect/i],
+    ['pain', /\bpain\b|\bache\b|\bsore\b/],
+  ];
+  return patterns.find(([, pattern]) => pattern.test(raw))?.[0] || '';
+}
+
+function inferDiagnosisFallbackFromText(text, codeHint = '') {
+  const bodyPart = detectFallbackBodyPart(text);
+  const condition = detectFallbackCondition(text);
+  const rawCode = String(codeHint || '')
+    .trim()
+    .toUpperCase();
+  const code = rawCode === 'R05' && condition !== 'cough' ? '' : rawCode;
+  if (bodyPart && condition) {
+    const combo = BODY_CONDITION_ICD_MAP[`${bodyPart}:${condition}`];
+    if (combo) return { ...combo, code: code || combo.code, source: 'text_body_condition' };
+  }
+  if (bodyPart && BODY_PART_ICD_MAP[bodyPart]) {
+    const mapping = BODY_PART_ICD_MAP[bodyPart];
+    return { ...mapping, code: code || mapping.code, source: 'text_body_part' };
+  }
+  if (condition && CONDITION_ICD_MAP[condition]) {
+    const mapping = CONDITION_ICD_MAP[condition];
+    return { ...mapping, code: code || mapping.code, source: 'text_condition' };
+  }
+  return null;
+}
+
 /**
  * Build a tiered diagnosis fallback, preferring canonical/extracted data over generic "Cough".
  * Returns { code, text, source } where source describes which tier was used.
@@ -82,6 +161,8 @@ function buildDiagnosisFallbackLadder(diagnosisCanonical, diagnosisDesc, diagnos
     .trim()
     .toUpperCase();
   if (canonicalDesc && !/^missing\s+diagnosis$/i.test(canonicalDesc)) {
+    const inferred = inferDiagnosisFallbackFromText(canonicalDesc, canonicalCode || diagnosisCode);
+    if (inferred) return inferred;
     return {
       code: canonicalCode || diagnosisCode || lastResortCode,
       text: canonicalDesc,
@@ -96,6 +177,16 @@ function buildDiagnosisFallbackLadder(diagnosisCanonical, diagnosisDesc, diagnos
   const condition = String(diagnosisCanonical?.condition || '')
     .trim()
     .toLowerCase();
+  if (bodyPart && condition) {
+    const mapping = BODY_CONDITION_ICD_MAP[`${bodyPart}:${condition}`];
+    if (mapping) {
+      return {
+        code: canonicalCode || mapping.code,
+        text: mapping.text,
+        source: 'body_condition_inference',
+      };
+    }
+  }
   if (bodyPart && BODY_PART_ICD_MAP[bodyPart]) {
     const mapping = BODY_PART_ICD_MAP[bodyPart];
     // If we have a condition too, combine them (e.g. "Knee sprain" instead of "Knee pain")
@@ -121,6 +212,8 @@ function buildDiagnosisFallbackLadder(diagnosisCanonical, diagnosisDesc, diagnos
   // Tier 3: raw extracted diagnosis text from Flow 2 (even if it didn't resolve against portal options)
   const rawDesc = String(diagnosisDesc || '').trim();
   if (rawDesc && !/^missing\s+diagnosis$/i.test(rawDesc) && rawDesc.length >= 3) {
+    const inferred = inferDiagnosisFallbackFromText(rawDesc, diagnosisCode || canonicalCode);
+    if (inferred) return inferred;
     return {
       code: diagnosisCode || canonicalCode || lastResortCode,
       text: rawDesc,
@@ -263,6 +356,44 @@ export class ClaimSubmitter {
       )
       .filter(Boolean);
     return new Set(raw);
+  }
+
+  _getPortalTimeoutMs(route) {
+    const normalizedRoute = String(route || 'DEFAULT')
+      .trim()
+      .toUpperCase();
+    const specific = Number(process.env[`FLOW3_${normalizedRoute}_TIMEOUT_MS`] || 0);
+    if (Number.isFinite(specific) && specific > 0) return specific;
+    const configuredDefault = Number(process.env.FLOW3_PORTAL_TIMEOUT_MS || 0);
+    if (Number.isFinite(configuredDefault) && configuredDefault > 0) return configuredDefault;
+    const defaults = {
+      IHP: 90000,
+      IXCHANGE: 120000,
+      FULLERTON: 120000,
+      ALLIANZ: 240000,
+      ALLIANCE_MEDINET: 180000,
+      GE_NTUC: 180000,
+    };
+    return defaults[normalizedRoute] || 180000;
+  }
+
+  _buildPortalTimeoutError(route, timeoutMs, visit) {
+    const portalService = String(route || 'UNKNOWN')
+      .trim()
+      .toUpperCase();
+    const error = new Error(`${portalService} portal timed out after ${timeoutMs}ms`);
+    error.submissionMetadata = {
+      success: false,
+      reason: 'portal_timeout',
+      blocked_reason: 'portal_timeout',
+      detailReason: 'portal_timeout',
+      sessionState: 'timeout',
+      portalService,
+      error: error.message,
+      visitId: visit?.id || null,
+      timeoutMs,
+    };
+    return error;
   }
 
   _normalizePortalResult(result, visit, route) {
@@ -582,6 +713,22 @@ export class ClaimSubmitter {
       // Persist submission status only when we actually did a portal action that should advance the workflow.
       // Today we only support "Save as Draft" (and we intentionally avoid auto-submit).
       // For fill-only verification runs (no draft), do NOT mark the record as submitted.
+      if (!result?.success && this.supabase && requestedMode === 'fill_evidence') {
+        const mergedFailureMetadata = this._mergeSubmissionMetadata(
+          visit?.submission_metadata || null,
+          result
+        );
+        await this.supabase
+          .from('visits')
+          .update({
+            submission_status: null,
+            submission_portal: result?.portal || route || payTypeRaw || null,
+            submission_error: result?.error || result?.reason || null,
+            submission_metadata: mergedFailureMetadata,
+          })
+          .eq('id', visit.id);
+      }
+
       if (result?.success && this.supabase) {
         if (result.submitted && !allowLiveSubmit) {
           logger.error('[SUBMIT] Live submit result blocked by policy (draft-only mode)', {
@@ -2014,6 +2161,13 @@ export class ClaimSubmitter {
     const browser = mainPage.context().browser();
     let isolatedContext = null;
     let isolatedPage = null;
+    const route =
+      runtimeCredential?.portal_target ||
+      runtimeCredential?.portalTarget ||
+      SubmitterClass?.name?.replace(/Submitter$/, '') ||
+      'UNKNOWN';
+    const timeoutMs = this._getPortalTimeoutMs(route);
+    let timeoutHandle = null;
     try {
       isolatedContext = await browser.newContext({
         viewport: { width: 1280, height: 900 },
@@ -2021,9 +2175,17 @@ export class ClaimSubmitter {
       });
       isolatedPage = await isolatedContext.newPage();
       const isolatedSubmitter = new SubmitterClass(isolatedPage, this.steps);
-      const result = await isolatedSubmitter.submit(visit, runtimeCredential);
+      const operation = isolatedSubmitter.submit(visit, runtimeCredential);
+      operation.catch(() => null);
+      const timeout = new Promise((_, reject) => {
+        timeoutHandle = globalThis.setTimeout(() => {
+          reject(this._buildPortalTimeoutError(route, timeoutMs, visit));
+        }, timeoutMs);
+      });
+      const result = await Promise.race([operation, timeout]);
       return result;
     } finally {
+      if (timeoutHandle) globalThis.clearTimeout(timeoutHandle);
       if (isolatedPage) await isolatedPage.close().catch(() => {});
       if (isolatedContext) await isolatedContext.close().catch(() => {});
     }

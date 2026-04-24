@@ -539,6 +539,12 @@ export class GenericPortalSubmitter {
       String(process.env.FLOW3_MODE || '')
         .trim()
         .toLowerCase() || 'fill_evidence';
+    const blockedReason =
+      overrides.blocked_reason ||
+      base.blocked_reason ||
+      (overrides.success === false || base.success === false
+        ? overrides.reason || base.reason || null
+        : null);
     return {
       success: false,
       portal: this.portalName,
@@ -546,7 +552,7 @@ export class GenericPortalSubmitter {
       mode: requestedMode,
       savedAsDraft: false,
       submitted: false,
-      blocked_reason: null,
+      blocked_reason: blockedReason || null,
       ...base,
       ...overrides,
     };
@@ -1555,8 +1561,10 @@ export class GenericPortalSubmitter {
     if (!url || !username || !password) {
       return this._buildResult(state, {
         reason: 'credentials_missing',
+        blocked_reason: 'portal_credentials_missing',
         detailReason: 'portal_credentials_missing',
         error: `${this.portalTarget} portal credentials are missing`,
+        sessionState: 'blocked',
         portalUrl: url || null,
         hasRuntimeCredential: Boolean(runtimeCredential?.username || runtimeCredential?.password),
       });
@@ -1567,10 +1575,18 @@ export class GenericPortalSubmitter {
 
       const loggedIn = await this._login(url, username, password, state, visit);
       if (!loggedIn) {
+        const loginBlockedReason =
+          state.login_state === 'login_invalid_credentials'
+            ? 'portal_auth_failed'
+            : state.login_state === 'session_conflict'
+              ? 'portal_session_conflict'
+              : 'portal_login_failed';
         return this._buildResult(state, {
           reason: 'login_failed',
+          blocked_reason: loginBlockedReason,
           detailReason: state.login_state || 'login_failed',
           error: `${this.portalTarget} login failed`,
+          sessionState: state.login_state === 'session_conflict' ? 'session_conflict' : 'blocked',
           portalUrl: url,
         });
       }
@@ -1579,8 +1595,10 @@ export class GenericPortalSubmitter {
       if (!otpOk) {
         return this._buildResult(state, {
           reason: 'otp_required',
+          blocked_reason: 'portal_otp_required',
           detailReason: state.otp_state || 'otp_failed',
           error: `${this.portalTarget} OTP was not completed`,
+          sessionState: 'otp_blocked',
           portalUrl: url,
         });
       }
@@ -1596,8 +1614,10 @@ export class GenericPortalSubmitter {
           if (!otpLateOk) {
             return this._buildResult(state, {
               reason: 'otp_required',
+              blocked_reason: 'portal_otp_required',
               detailReason: state.otp_state || 'otp_failed',
               error: `${this.portalTarget} OTP was not completed`,
+              sessionState: 'otp_blocked',
               portalUrl: url,
             });
           }
@@ -1609,6 +1629,7 @@ export class GenericPortalSubmitter {
         state.evidence = await this._safeScreenshot(visit, 'search-not-found');
         return this._buildResult(state, {
           reason: 'not_found',
+          blocked_reason: 'member_not_found',
           detailReason: 'member_not_found',
           error: `Member not found in ${this.portalName}: ${search.nric || 'unknown'}`,
           portalUrl: url,
@@ -1618,8 +1639,10 @@ export class GenericPortalSubmitter {
         state.evidence = await this._safeScreenshot(visit, 'search-failed');
         return this._buildResult(state, {
           reason: 'search_failed',
+          blocked_reason: 'portal_search_failed',
           detailReason: search.reason || 'search_failed',
           error: `Patient search failed in ${this.portalName}`,
+          sessionState: 'blocked',
           portalUrl: url,
         });
       }
@@ -1630,8 +1653,10 @@ export class GenericPortalSubmitter {
         state.evidence = await this._safeScreenshot(visit, 'form-fields-missing');
         return this._buildResult(state, {
           reason: 'form_failed',
+          blocked_reason: 'portal_contract_unvalidated',
           detailReason: state.form_detail_reason || state.form_state || 'form_failed',
           error: `Claim form fields were not found in ${this.portalName}`,
+          sessionState: 'blocked',
           portalUrl: url,
         });
       }
@@ -1698,8 +1723,10 @@ export class GenericPortalSubmitter {
       });
       return this._buildResult(state, {
         reason: 'portal_runtime_error',
+        blocked_reason: 'portal_runtime_error',
         detailReason: 'portal_runtime_error',
         error: error?.message || String(error),
+        sessionState: 'error',
         portalUrl: url,
       });
     }
