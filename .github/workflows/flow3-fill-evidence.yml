@@ -4,33 +4,33 @@ on:
   workflow_dispatch:
     inputs:
       from:
-        description: "Start date (YYYY-MM-DD)"
+        description: 'Start date (YYYY-MM-DD)'
         required: false
         type: string
       to:
-        description: "End date (YYYY-MM-DD)"
+        description: 'End date (YYYY-MM-DD)'
         required: false
         type: string
       visit_ids:
-        description: "Comma-separated visit IDs"
+        description: 'Comma-separated visit IDs'
         required: false
         type: string
       portal_targets:
-        description: "Comma-separated portal targets"
+        description: 'Comma-separated portal targets'
         required: false
-        default: "MHC"
+        default: 'MHC'
         type: string
       pay_type:
-        description: "Optional pay type filter"
+        description: 'Optional pay type filter'
         required: false
         type: string
       portal_only:
-        description: "Restrict to portal-scope rows"
+        description: 'Restrict to portal-scope rows'
         required: false
         default: true
         type: boolean
       all_pending:
-        description: "Allow unscoped pending run"
+        description: 'Allow unscoped pending run'
         required: false
         default: false
         type: boolean
@@ -134,9 +134,60 @@ jobs:
 
             echo "Running Flow 3 fill_evidence on EC2..."
             echo "Browser mode: headless + non-persistent context + restored session state"
+            REPORT_MARKER=$(mktemp)
+            touch "$REPORT_MARKER"
             HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/submit-claims-batch.js "${ARGS[@]}" 2>&1
 
-            LATEST_JSON=$(ls -t output/run-reports/flow3_[0-9]*.json | head -n 1)
+            LATEST_JSON=$(node --input-type=module - "$REPORT_MARKER" <<'NODE' || true
+            import fs from 'fs';
+            import path from 'path';
+
+            const markerPath = process.argv[2];
+            const markerMs = fs.statSync(markerPath).mtimeMs;
+            const dir = path.resolve('output', 'run-reports');
+            const expected = {
+              from: process.env.FLOW_FROM || '',
+              to: process.env.FLOW_TO || '',
+              visitIds: process.env.FLOW_VISIT_IDS || '',
+              portalTargets: process.env.FLOW_PORTAL_TARGETS || '',
+              payType: process.env.FLOW_PAY_TYPE || '',
+            };
+
+            const clean = value => String(value ?? '').trim();
+            const matchesScope = report => {
+              const scope = report?.scope || {};
+              for (const [key, expectedValue] of Object.entries(expected)) {
+                if (!expectedValue) continue;
+                if (clean(scope[key]) !== clean(expectedValue)) return false;
+              }
+              return true;
+            };
+
+            const candidates = fs
+              .readdirSync(dir)
+              .filter(name => /^flow3_[0-9].*\.json$/.test(name))
+              .map(name => {
+                const filePath = path.join(dir, name);
+                return { filePath, mtimeMs: fs.statSync(filePath).mtimeMs };
+              })
+              .filter(entry => entry.mtimeMs >= markerMs)
+              .sort((a, b) => b.mtimeMs - a.mtimeMs);
+
+            for (const entry of candidates) {
+              try {
+                const report = JSON.parse(fs.readFileSync(entry.filePath, 'utf8'));
+                if (matchesScope(report)) {
+                  console.log(entry.filePath);
+                  process.exit(0);
+                }
+              } catch {
+                // Ignore partially-written or invalid report candidates.
+              }
+            }
+            process.exit(1);
+            NODE
+            )
+            rm -f "$REPORT_MARKER"
             if [ -z "${LATEST_JSON:-}" ]; then
               echo "Flow 3 finished but no report was found."
               exit 1
