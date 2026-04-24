@@ -1,6 +1,7 @@
 import { logger } from '../utils/logger.js';
 import { getOtpCode } from '../utils/portal-otp.js';
 import { comparePortalLatestClaim } from '../utils/flow3-portal-compare.js';
+import { writeFlow3TruthArtifacts } from '../utils/flow3-truth-compare.js';
 
 function sleep(ms) {
   return new Promise(resolve => globalThis.setTimeout(resolve, ms));
@@ -152,6 +153,106 @@ function extractAmount(visit) {
   const amount = Number(raw);
   if (!Number.isFinite(amount)) return '';
   return amount.toFixed(2);
+}
+
+function extractLineItems(visit) {
+  const metadata = visit?.extraction_metadata || {};
+  if (Array.isArray(metadata?.medicines) && metadata.medicines.length > 0) {
+    return metadata.medicines.map(item => ({
+      name: String(item?.name || '').trim() || null,
+      quantity: item?.quantity ?? null,
+      unit: item?.unit ?? null,
+      unitPrice: item?.unitPrice ?? item?.unit_price ?? null,
+      amount: item?.amount ?? null,
+      source: 'flow2_medicines',
+    }));
+  }
+
+  const treatment = String(visit?.treatment_detail || '').trim();
+  if (!treatment) return [];
+  return treatment
+    .split(/\r?\n/)
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => {
+      const qtyMatch = line.match(/\s+x\s*(\d+(?:\.\d+)?)\s*$/i);
+      return {
+        name: qtyMatch ? line.slice(0, qtyMatch.index).trim() : line,
+        quantity: qtyMatch ? qtyMatch[1] : null,
+        unit: null,
+        unitPrice: null,
+        amount: null,
+        source: 'treatment_detail',
+      };
+    });
+}
+
+function verificationObserved(fillVerification, key) {
+  const node = fillVerification?.[key] || {};
+  return String(node.observed || node.expected || '').trim() || null;
+}
+
+export function buildGenericBotSnapshot({
+  visit,
+  portalTarget,
+  portalName,
+  mode,
+  fillVerification,
+  pageSnapshot = null,
+  evidence = null,
+} = {}) {
+  const metadata = visit?.extraction_metadata || {};
+  const canonical = metadata?.diagnosisCanonical || {};
+  const diagnosisResolution = metadata?.diagnosisResolution || null;
+  const amount = extractAmount(visit);
+  const visitDate = toDdMmYyyy(visit?.visit_date);
+  const diagnosisText =
+    verificationObserved(fillVerification, 'diagnosis') || extractDiagnosisText(visit);
+  const diagnosisCode =
+    String(
+      metadata?.diagnosisCode || canonical?.code_normalized || canonical?.code_raw || ''
+    ).trim() || null;
+
+  return {
+    capturedAt: new Date().toISOString(),
+    source: 'bot_filled_form',
+    mode: mode || 'fill_evidence',
+    portal: portalName || portalTarget || null,
+    portalService: portalTarget || null,
+    patientName: String(visit?.patient_name || '').trim() || null,
+    patientNric: extractNric(visit) || null,
+    visitDate: verificationObserved(fillVerification, 'visitDate') || visitDate || null,
+    expectedVisitDate: visitDate || null,
+    chargeType:
+      metadata?.chargeType ||
+      metadata?.detailsExtractionSources?.chargeType ||
+      visit?.charge_type ||
+      null,
+    diagnosisText,
+    diagnosisCode,
+    diagnosisResolution: diagnosisResolution
+      ? {
+          status: diagnosisResolution.status || null,
+          confidence: diagnosisResolution.confidence ?? null,
+          reason: diagnosisResolution.reason_if_unresolved || null,
+          sourceDate: canonical?.source_date || null,
+          sourceAgeDays: canonical?.source_age_days ?? null,
+        }
+      : null,
+    mcDays: metadata?.mcDays ?? visit?.mc_days ?? null,
+    mcStartDate: metadata?.mcStartDate || visit?.mc_start_date || null,
+    consultationFee: verificationObserved(fillVerification, 'fee') || amount || null,
+    totalFee: amount || null,
+    totalClaim: amount || null,
+    lineItems: extractLineItems(visit),
+    remarks: verificationObserved(fillVerification, 'remarks'),
+    claimStatus: null,
+    fillVerification: fillVerification || null,
+    pageSnapshot,
+    artifacts: {
+      screenshot: evidence || null,
+    },
+  };
 }
 
 function normalizeText(value) {
@@ -325,6 +426,104 @@ export class GenericPortalSubmitter {
       .then(() => true)
       .catch(() => false);
     return saved ? path : null;
+  }
+
+  async _captureFormFieldSnapshot() {
+    return this.page
+      .evaluate(() => {
+        const norm = value =>
+          String(value || '')
+            .replace(/\s+/g, ' ')
+            .trim();
+        const labelFor = node => {
+          const id = node.getAttribute?.('id');
+          if (id && globalThis.CSS?.escape) {
+            const label = globalThis.document?.querySelector?.(
+              `label[for="${globalThis.CSS.escape(id)}"]`
+            );
+            if (label?.textContent) return norm(label.textContent);
+          }
+          const wrapped = node.closest?.('label');
+          if (wrapped?.textContent) return norm(wrapped.textContent);
+          const row = node.closest?.('tr');
+          if (row?.textContent) return norm(row.textContent).slice(0, 180);
+          const parent = node.parentElement;
+          if (parent?.textContent) return norm(parent.textContent).slice(0, 180);
+          return '';
+        };
+        const fields = Array.from(
+          globalThis.document?.querySelectorAll?.('input, textarea, select') || []
+        )
+          .map(node => ({
+            tag: String(node.tagName || '').toLowerCase(),
+            type: norm(node.getAttribute?.('type')),
+            id: norm(node.getAttribute?.('id')),
+            name: norm(node.getAttribute?.('name')),
+            label: labelFor(node),
+            value:
+              node.tagName === 'SELECT'
+                ? norm(node.options?.[node.selectedIndex]?.text || node.value || '')
+                : norm(node.value || ''),
+            readonly: Boolean(node.readOnly || node.disabled),
+          }))
+          .filter(item => item.name || item.id || item.label || item.value)
+          .slice(0, 120);
+        return {
+          url: String(globalThis.location?.href || ''),
+          title: String(globalThis.document?.title || ''),
+          fields,
+        };
+      })
+      .catch(() => null);
+  }
+
+  async _buildBotSnapshotArtifact({ visit, state, evidence }) {
+    const botSnapshot = buildGenericBotSnapshot({
+      visit,
+      portalTarget: this.portalTarget,
+      portalName: this.portalName,
+      mode:
+        String(process.env.FLOW3_MODE || '')
+          .trim()
+          .toLowerCase() || 'fill_evidence',
+      fillVerification: state?.fillVerification || null,
+      pageSnapshot: await this._captureFormFieldSnapshot(),
+      evidence,
+    });
+
+    const artifacts = {
+      screenshot: evidence || null,
+      botSnapshot: null,
+    };
+
+    try {
+      const written = await writeFlow3TruthArtifacts({
+        visit,
+        portalTarget: this.portalTarget,
+        botSnapshot,
+        comparison: state?.comparison || null,
+        extra: {
+          fillVerification: state?.fillVerification || null,
+          requiredFieldGate: state?.requiredFieldGate || null,
+          sessionState: state?.sessionState || null,
+        },
+      });
+      if (written?.json) {
+        botSnapshot.artifacts = {
+          ...(botSnapshot.artifacts || {}),
+          json: written.json,
+        };
+        artifacts.botSnapshot = botSnapshot.artifacts;
+      }
+    } catch (error) {
+      logger.warn(`[${this.portalTarget}] Failed to write bot snapshot artifact`, {
+        error: error?.message || String(error),
+      });
+    }
+
+    state.botSnapshot = botSnapshot;
+    state.evidenceArtifacts = artifacts;
+    return { botSnapshot, evidenceArtifacts: artifacts };
   }
 
   async _waitForFirst(selectors, options = {}) {
@@ -1657,6 +1856,11 @@ export class GenericPortalSubmitter {
       if (!formFill?.ok) {
         state.form_debug = await this._captureSearchDebug();
         state.evidence = await this._safeScreenshot(visit, 'form-fields-missing');
+        const snapshotArtifacts = await this._buildBotSnapshotArtifact({
+          visit,
+          state,
+          evidence: state.evidence,
+        });
         return this._buildResult(state, {
           reason: 'form_failed',
           blocked_reason: state.form_blocked_reason || 'portal_contract_unvalidated',
@@ -1664,6 +1868,7 @@ export class GenericPortalSubmitter {
           error: `Claim form fields were not found in ${this.portalName}`,
           sessionState: 'blocked',
           portalUrl: url,
+          ...snapshotArtifacts,
         });
       }
 
@@ -1711,6 +1916,11 @@ export class GenericPortalSubmitter {
       }
 
       const evidence = await this._safeScreenshot(visit, 'form-filled');
+      const snapshotArtifacts = await this._buildBotSnapshotArtifact({
+        visit,
+        state,
+        evidence,
+      });
 
       return this._buildResult(state, {
         success: true,
@@ -1721,6 +1931,7 @@ export class GenericPortalSubmitter {
         hasRuntimeCredential: Boolean(runtimeCredential?.username || runtimeCredential?.password),
         nric: search.nric || null,
         evidence,
+        ...snapshotArtifacts,
       });
     } catch (error) {
       state.evidence = await this._safeScreenshot(visit, 'fatal-error');
