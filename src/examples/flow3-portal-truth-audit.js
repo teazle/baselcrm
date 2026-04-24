@@ -173,6 +173,33 @@ function buildDiagnosisAuditFields(comparison = null, submittedTruthCapture = nu
   };
 }
 
+function hasAuditMaterial(visit) {
+  const md = visit?.submission_metadata || {};
+  return Boolean(
+    visit?.submission_status === 'submitted' ||
+    md?.submittedTruthSnapshot ||
+    md?.submittedTruthCapture ||
+    md?.botSnapshot ||
+    md?.draftVerification ||
+    md?.draftReference
+  );
+}
+
+function buildUnavailableAuditRow({ visit, route, comparison, reason }) {
+  return {
+    visitId: visit.id,
+    patientName: visit.patient_name || '',
+    visitDate: visit.visit_date || '',
+    context: String(route || 'UNKNOWN').toLowerCase(),
+    submittedTruth: 'unavailable',
+    flow2VsSubmittedTruth: comparison?.flow2VsSubmittedTruth?.state || 'unavailable',
+    botVsSubmittedTruth: comparison?.botVsSubmittedTruth?.state || 'unavailable',
+    ...buildDiagnosisAuditFields(comparison, null),
+    mismatchCategories: (comparison?.mismatchCategories || []).join(','),
+    notes: reason,
+  };
+}
+
 async function writeAuditReport(payload) {
   const baseDir = path.resolve(process.cwd(), 'output', 'run-reports');
   await fs.mkdir(baseDir, { recursive: true });
@@ -223,50 +250,96 @@ async function main() {
     process.exit(1);
   }
 
-  const rows = (data || [])
-    .filter(
-      visit =>
-        resolveFlow3PortalTarget(
-          visit?.pay_type,
-          visit?.patient_name,
-          visit?.extraction_metadata || null
-        ) === 'MHC'
-    )
-    .filter(visit => {
-      const md = visit?.submission_metadata || {};
-      return Boolean(
-        visit?.submission_status === 'submitted' ||
-        md?.submittedTruthSnapshot ||
-        md?.submittedTruthCapture ||
-        md?.botSnapshot ||
-        md?.draftVerification ||
-        md?.draftReference
-      );
-    })
+  const explicitVisitIds = Array.isArray(args.visitIds) && args.visitIds.length > 0;
+  const candidateRows = (data || [])
+    .filter(visit => explicitVisitIds || hasAuditMaterial(visit))
     .slice(0, args.limit);
+  const rows = candidateRows.filter(
+    visit =>
+      resolveFlow3PortalTarget(
+        visit?.pay_type,
+        visit?.patient_name,
+        visit?.extraction_metadata || null
+      ) === 'MHC'
+  );
+  const unsupportedRows = candidateRows.filter(
+    visit =>
+      resolveFlow3PortalTarget(
+        visit?.pay_type,
+        visit?.patient_name,
+        visit?.extraction_metadata || null
+      ) !== 'MHC'
+  );
 
-  logger.info(`[TRUTH AUDIT] Auditing ${rows.length} MHC/AIA visit(s) against submitted detail`);
+  logger.info(
+    `[TRUTH AUDIT] Auditing ${rows.length} MHC/AIA visit(s); ${unsupportedRows.length} scoped non-MHC visit(s) will be reported as unsupported for submitted-detail truth`
+  );
 
-  const browserManager = new BrowserManager();
-  const page = await browserManager.newPage();
-  const mhc = new MHCAsiaAutomation(page);
+  const reportRows = [];
+  for (const visit of unsupportedRows) {
+    const route = resolveFlow3PortalTarget(
+      visit?.pay_type,
+      visit?.patient_name,
+      visit?.extraction_metadata || null
+    );
+    const reason = `submitted_detail_extractor_unavailable_for_${String(route || 'unknown').toLowerCase()}`;
+    const comparison = comparePortalTruthSnapshots({
+      portalTarget: route || 'UNKNOWN',
+      visit,
+      botSnapshot: visit?.submission_metadata?.botSnapshot || null,
+      submittedTruthSnapshot: null,
+      diagnosisMatch:
+        visit?.submission_metadata?.diagnosisMatch ||
+        visit?.extraction_metadata?.diagnosisMatch ||
+        null,
+    });
+    if (!args.dryRun) {
+      const nextMetadata = {
+        ...(visit?.submission_metadata || {}),
+        submittedTruthCapture: {
+          found: false,
+          reason,
+          attempts: [],
+          auditedAt: new Date().toISOString(),
+        },
+        comparison,
+        mismatchCategories: comparison?.mismatchCategories || [],
+        blocked_reason: 'submitted_truth_unavailable',
+        sessionState: visit?.submission_metadata?.sessionState || 'healthy',
+      };
+      await supabase
+        .from('visits')
+        .update({
+          submission_metadata: nextMetadata,
+        })
+        .eq('id', visit.id);
+    }
+    reportRows.push(buildUnavailableAuditRow({ visit, route, comparison, reason }));
+  }
+
+  let browserManager = null;
+  let mhc = null;
   let portalBlockedReason = null;
-  try {
-    await mhc.ensureAtMhcHome();
-  } catch (error) {
-    if (error?.portalBlocked === true) {
-      portalBlockedReason = String(
-        error?.code || error?.submissionMetadata?.reason || 'portal_blocked'
-      );
-      logger.warn('[TRUTH AUDIT] Portal blocked before audit start', {
-        reason: portalBlockedReason,
-      });
-    } else {
-      throw error;
+  if (rows.length > 0) {
+    browserManager = new BrowserManager();
+    const page = await browserManager.newPage();
+    mhc = new MHCAsiaAutomation(page);
+    try {
+      await mhc.ensureAtMhcHome();
+    } catch (error) {
+      if (error?.portalBlocked === true) {
+        portalBlockedReason = String(
+          error?.code || error?.submissionMetadata?.reason || 'portal_blocked'
+        );
+        logger.warn('[TRUTH AUDIT] Portal blocked before audit start', {
+          reason: portalBlockedReason,
+        });
+      } else {
+        throw error;
+      }
     }
   }
 
-  const reportRows = [];
   for (const visit of rows) {
     const nric = pickNric(visit);
     const contextHint = contextHintForVisit(visit);
@@ -529,7 +602,7 @@ async function main() {
   const reportPaths = await writeAuditReport(reportPayload);
   logger.info('[TRUTH AUDIT] Report written', reportPaths);
 
-  if (!args.leaveOpen) {
+  if (browserManager && !args.leaveOpen) {
     await browserManager.close();
   }
 }
