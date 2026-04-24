@@ -138,54 +138,8 @@ jobs:
             touch "$REPORT_MARKER"
             HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/submit-claims-batch.js "${ARGS[@]}" 2>&1
 
-            LATEST_JSON=$(node --input-type=module - "$REPORT_MARKER" <<'NODE' || true
-            import fs from 'fs';
-            import path from 'path';
-
-            const markerPath = process.argv[2];
-            const markerMs = fs.statSync(markerPath).mtimeMs;
-            const dir = path.resolve('output', 'run-reports');
-            const expected = {
-              from: process.env.FLOW_FROM || '',
-              to: process.env.FLOW_TO || '',
-              visitIds: process.env.FLOW_VISIT_IDS || '',
-              portalTargets: process.env.FLOW_PORTAL_TARGETS || '',
-              payType: process.env.FLOW_PAY_TYPE || '',
-            };
-
-            const clean = value => String(value ?? '').trim();
-            const matchesScope = report => {
-              const scope = report?.scope || {};
-              for (const [key, expectedValue] of Object.entries(expected)) {
-                if (!expectedValue) continue;
-                if (clean(scope[key]) !== clean(expectedValue)) return false;
-              }
-              return true;
-            };
-
-            const candidates = fs
-              .readdirSync(dir)
-              .filter(name => /^flow3_[0-9].*\.json$/.test(name))
-              .map(name => {
-                const filePath = path.join(dir, name);
-                return { filePath, mtimeMs: fs.statSync(filePath).mtimeMs };
-              })
-              .filter(entry => entry.mtimeMs >= markerMs)
-              .sort((a, b) => b.mtimeMs - a.mtimeMs);
-
-            for (const entry of candidates) {
-              try {
-                const report = JSON.parse(fs.readFileSync(entry.filePath, 'utf8'));
-                if (matchesScope(report)) {
-                  console.log(entry.filePath);
-                  process.exit(0);
-                }
-              } catch {
-                // Ignore partially-written or invalid report candidates.
-              }
-            }
-            process.exit(1);
-            NODE
+            LATEST_JSON=$(
+              REPORT_MARKER="$REPORT_MARKER" node -e 'const fs = require("fs"); const path = require("path"); const markerMs = fs.statSync(process.env.REPORT_MARKER).mtimeMs; const dir = path.resolve("output", "run-reports"); const expected = { from: process.env.FLOW_FROM || "", to: process.env.FLOW_TO || "", visitIds: process.env.FLOW_VISIT_IDS || "", portalTargets: process.env.FLOW_PORTAL_TARGETS || "", payType: process.env.FLOW_PAY_TYPE || "" }; const clean = value => String(value ?? "").trim(); const matchesScope = report => { const scope = report?.scope || {}; for (const [key, expectedValue] of Object.entries(expected)) { if (!expectedValue) continue; if (clean(scope[key]) !== clean(expectedValue)) return false; } return true; }; const candidates = fs.readdirSync(dir).filter(name => /^flow3_[0-9].*\.json$/.test(name)).map(name => { const filePath = path.join(dir, name); return { filePath, mtimeMs: fs.statSync(filePath).mtimeMs }; }).filter(entry => entry.mtimeMs >= markerMs).sort((a, b) => b.mtimeMs - a.mtimeMs); for (const entry of candidates) { try { const report = JSON.parse(fs.readFileSync(entry.filePath, "utf8")); if (matchesScope(report)) { console.log(entry.filePath); process.exit(0); } } catch {} } process.exit(1);' || true
             )
             rm -f "$REPORT_MARKER"
             if [ -z "${LATEST_JSON:-}" ]; then
