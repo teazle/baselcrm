@@ -1659,7 +1659,7 @@ export class GenericPortalSubmitter {
         state.evidence = await this._safeScreenshot(visit, 'form-fields-missing');
         return this._buildResult(state, {
           reason: 'form_failed',
-          blocked_reason: 'portal_contract_unvalidated',
+          blocked_reason: state.form_blocked_reason || 'portal_contract_unvalidated',
           detailReason: state.form_detail_reason || state.form_state || 'form_failed',
           error: `Claim form fields were not found in ${this.portalName}`,
           sessionState: 'blocked',
@@ -1667,19 +1667,20 @@ export class GenericPortalSubmitter {
         });
       }
 
-      // Portal-read-only success path (e.g. Allianz AMOS TPA): we verified
-      // member coverage + extracted policy evidence, but no claim form
-      // exists. Return success with a distinctive reason so downstream can
-      // route the visit to a manual / alternative submission channel.
+      // Portal-read-only path (e.g. Allianz AMOS TPA): we verified member
+      // coverage + extracted policy evidence, but no claim form exists.
+      // This is not a successful fill; downstream must treat it as blocked.
       if (formFill?.portalReadOnly) {
         const evidence =
           state.allianz_policy_evidence_screenshot ||
           (await this._safeScreenshot(visit, 'policy-verified'));
         return this._buildResult(state, {
-          success: true,
+          success: false,
           reason: 'policy_verified_no_claim_form',
+          blocked_reason: 'portal_read_only_no_claim_form',
           detailReason: state.detailReason || 'portal_read_only',
           error: null,
+          sessionState: 'blocked',
           portalUrl: url,
           nric: search.nric || null,
           evidence,

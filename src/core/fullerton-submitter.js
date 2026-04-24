@@ -252,6 +252,33 @@ async function ensureFullertonVisitForm({ page, state, helpers }) {
   };
 }
 
+function classifyFullertonFormNavigation(state) {
+  const mode = String(state?.form_navigation?.mode || '').trim();
+  if (!mode || ['already_edit', 'popup_resolved_to_edit', 'register_to_edit'].includes(mode)) {
+    return;
+  }
+
+  if (mode === 'session_expired') {
+    state.form_detail_reason = 'fullerton_session_expired';
+    state.form_blocked_reason = 'portal_session_expired';
+    state.sessionState = 'session_expired';
+    return;
+  }
+
+  if (mode === 'global_timeout') {
+    state.form_detail_reason = 'fullerton_register_timeout';
+    state.form_blocked_reason = 'portal_timeout';
+    state.sessionState = 'timeout';
+    return;
+  }
+
+  if (mode === 'register_not_advanced') {
+    state.form_detail_reason = 'fullerton_register_not_advanced';
+    state.form_blocked_reason = 'portal_contract_unvalidated';
+    state.sessionState = 'blocked';
+  }
+}
+
 function buildSelectors() {
   return withOverrides(createDefaultSelectors(), {
     loginUsername: [
@@ -390,6 +417,7 @@ export class FullertonSubmitter {
       selectors: buildSelectors(),
       beforeForm: async ({ page: runPage, state, helpers }) => {
         await ensureFullertonVisitForm({ page: runPage, state, helpers });
+        classifyFullertonFormNavigation(state);
       },
       adjustFillVerification: async ({ page: runPage, fillVerification }) => {
         const visitDateStatus = String(fillVerification?.visitDate?.status || '');
