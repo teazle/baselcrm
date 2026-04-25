@@ -1,5 +1,6 @@
 import { PORTALS } from '../config/portals.js';
 import { GenericPortalSubmitter, createDefaultSelectors } from './portal-generic-submitter.js';
+import { extractFullertonSubmittedTruthCapture } from './portal-truth/fullerton.js';
 
 function withOverrides(base, overrides) {
   const next = { ...base };
@@ -457,4 +458,21 @@ export class FullertonSubmitter {
     }
     return this.runtime.submit(visit, runtimeCredential);
   }
+
+  async captureSubmittedTruthSnapshot({
+    visit = null,
+    context = 'fullerton',
+    pageUrl = null,
+    auditedAt = new Date().toISOString(),
+  } = {}) {
+    return extractFullertonSubmittedTruthCapture({
+      page: this.runtime?.page || null,
+      visit,
+      context,
+      pageUrl,
+      auditedAt,
+    });
+  }
 }
+
+export { extractFullertonSubmittedTruthCapture } from './portal-truth/fullerton.js';

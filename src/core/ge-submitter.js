@@ -1,6 +1,7 @@
 import { logger } from '../utils/logger.js';
 import { PORTALS } from '../config/portals.js';
 import { resolveDiagnosisAgainstPortalOptions } from '../automations/clinic-assist.js';
+import { buildGeNtucSubmittedTruthCapture } from './portal-truth-extractors.js';
 
 /**
  * Dedicated submit service boundary for GE / NTUC IM portal flow.
@@ -1250,31 +1251,38 @@ export class GENtucSubmitter {
     }
 
     const metadata = visit?.extraction_metadata || {};
+    const saveDraftEnabled = process.env.WORKFLOW_SAVE_DRAFT !== '0';
+    const submittedTruthCapture = buildGeNtucSubmittedTruthCapture({
+      visit,
+      mode: saveDraftEnabled ? 'draft' : 'fill_evidence',
+      savedAsDraft: false,
+      submitted: false,
+    });
+    const baseResult = (overrides = {}) => ({
+      portal: 'GE_NTUC',
+      portalService: 'GE_NTUC',
+      portalUrl: runtimeCredential?.url || PORTALS.GE_NTUC?.url || null,
+      savedAsDraft: false,
+      submitted: false,
+      submittedTruthCapture,
+      submittedTruthSnapshot: null,
+      ...overrides,
+    });
     const nric = this._pickNricForVisit(visit, metadata);
     if (!nric) {
-      return {
+      return baseResult({
         success: false,
         reason: 'missing_nric',
         error: 'NRIC not found in visit record for GE / NTUC IM',
-        portal: 'GE_NTUC',
-        portalService: 'GE_NTUC',
-        portalUrl: runtimeCredential?.url || PORTALS.GE_NTUC?.url || null,
-        savedAsDraft: false,
-        submitted: false,
-      };
+      });
     }
 
     if (!this.allianceAutomation) {
-      return {
+      return baseResult({
         success: false,
         reason: 'missing_alliance_automation',
         error: 'GE / NTUC IM flow requires Alliance Medinet automation context',
-        portal: 'GE_NTUC',
-        portalService: 'GE_NTUC',
-        portalUrl: runtimeCredential?.url || PORTALS.GE_NTUC?.url || null,
-        savedAsDraft: false,
-        submitted: false,
-      };
+      });
     }
 
     const visitDate = visit?.visit_date || visit?.visitDate || null;
@@ -1288,7 +1296,6 @@ export class GENtucSubmitter {
     const feeType = this._deriveFeeType(visit);
     const feeAmount = this._deriveFeeAmount(visit);
     const remarks = String(visit?.treatment_detail || visit?.treatmentDetail || '').trim();
-    const saveDraftEnabled = process.env.WORKFLOW_SAVE_DRAFT !== '0';
 
     try {
       // Check if the GE/NTUC panel-claim popup was already captured during a prior
@@ -1363,16 +1370,11 @@ export class GENtucSubmitter {
         }
 
         if (!found?.found) {
-          return {
+          return baseResult({
             success: false,
             reason: 'not_found',
             error: `Member not found in Alliance Medinet for GE route: ${nric}`,
-            portal: 'GE_NTUC',
-            portalService: 'GE_NTUC',
-            portalUrl: runtimeCredential?.url || PORTALS.GE_NTUC?.url || null,
-            savedAsDraft: false,
-            submitted: false,
-          };
+          });
         }
 
         popup = this.allianceAutomation.lastGePopupPage;
@@ -1400,19 +1402,14 @@ export class GENtucSubmitter {
       if (!diagnosisResult?.success) {
         const screenshotPath = `screenshots/ge-ntuc-diagnosis-missing-${visit?.id || nric}-${Date.now()}.png`;
         await popup.screenshot({ path: screenshotPath, fullPage: true }).catch(() => {});
-        return {
+        return baseResult({
           success: false,
           reason: 'diagnosis_not_selected',
           error: 'GE / NTUC IM diagnosis selection failed in popup.',
-          portal: 'GE_NTUC',
-          portalService: 'GE_NTUC',
-          portalUrl: runtimeCredential?.url || PORTALS.GE_NTUC?.url || null,
-          savedAsDraft: false,
-          submitted: false,
           screenshot: screenshotPath,
           diagnosisPortalMatch,
           diagnosisState: diagnosisResult?.diagnosisState || null,
-        };
+        });
       }
 
       const feeLabels =
@@ -1501,17 +1498,12 @@ export class GENtucSubmitter {
       await popup.screenshot({ path: preCalculateScreenshot, fullPage: true }).catch(() => {});
 
       if (!saveDraftEnabled) {
-        return {
+        return baseResult({
           success: true,
-          portal: 'GE_NTUC',
-          portalService: 'GE_NTUC',
-          portalUrl: runtimeCredential?.url || PORTALS.GE_NTUC?.url || null,
-          savedAsDraft: false,
-          submitted: false,
           filledOnly: true,
           screenshot: preCalculateScreenshot,
           diagnosisPortalMatch,
-        };
+        });
       }
 
       const calc = await this._calculateUntilSaveReady(popup, visit);
@@ -1524,19 +1516,14 @@ export class GENtucSubmitter {
       await popup.screenshot({ path: summaryScreenshot, fullPage: true }).catch(() => {});
 
       if (!saveButton) {
-        return {
+        return baseResult({
           success: false,
           reason: 'save_button_missing',
           error: calc?.message || 'GE / NTUC IM save/draft control not found after calculate',
-          portal: 'GE_NTUC',
-          portalService: 'GE_NTUC',
-          portalUrl: runtimeCredential?.url || PORTALS.GE_NTUC?.url || null,
-          savedAsDraft: false,
-          submitted: false,
           screenshot: summaryScreenshot,
           screenshotBeforeCalculate: preCalculateScreenshot,
           diagnosisPortalMatch,
-        };
+        });
       }
 
       await saveButton.locator.click({ timeout: 8000 }).catch(async () => {
@@ -1552,36 +1539,27 @@ export class GENtucSubmitter {
         postSaveLower.includes('please select') ||
         postSaveLower.includes('required')
       ) {
-        return {
+        return baseResult({
           success: false,
           reason: 'save_validation_failed',
           error: postSaveMessage || 'GE / NTUC save validation failed',
-          portal: 'GE_NTUC',
-          portalService: 'GE_NTUC',
-          portalUrl: runtimeCredential?.url || PORTALS.GE_NTUC?.url || null,
-          savedAsDraft: false,
-          submitted: false,
           screenshot: summaryScreenshot,
           screenshotBeforeCalculate: preCalculateScreenshot,
           diagnosisPortalMatch,
-        };
+        });
       }
 
       const savedScreenshot = `screenshots/ge-ntuc-after-save-${visit?.id || nric}-${Date.now()}.png`;
       await popup.screenshot({ path: savedScreenshot, fullPage: true }).catch(() => {});
 
-      return {
+      return baseResult({
         success: true,
-        portal: 'GE_NTUC',
-        portalService: 'GE_NTUC',
-        portalUrl: runtimeCredential?.url || PORTALS.GE_NTUC?.url || null,
         savedAsDraft: true,
-        submitted: false,
         screenshot: preCalculateScreenshot,
         screenshotAfterCalculate: summaryScreenshot,
         screenshotAfterSave: savedScreenshot,
         diagnosisPortalMatch,
-      };
+      });
     } catch (error) {
       const screenshotPath = `screenshots/ge-ntuc-error-${visit?.id || nric}-${Date.now()}.png`;
       try {
@@ -1598,17 +1576,12 @@ export class GENtucSubmitter {
         error: error?.message || String(error),
       });
 
-      return {
+      return baseResult({
         success: false,
         reason: 'submission_failed',
         error: error?.message || String(error),
-        portal: 'GE_NTUC',
-        portalService: 'GE_NTUC',
-        portalUrl: runtimeCredential?.url || PORTALS.GE_NTUC?.url || null,
-        savedAsDraft: false,
-        submitted: false,
         screenshot: screenshotPath,
-      };
+      });
     }
   }
 }

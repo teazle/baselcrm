@@ -16,6 +16,7 @@ import {
   PORTAL_PAY_TYPES,
   SUPPORTED_PORTALS,
   UNSUPPORTED_PORTALS,
+  deriveFlow3UiStatus,
   extractAlliancePortalHint,
   extractAllianceMedinetTag,
   classifyVisitForRpa,
@@ -47,6 +48,7 @@ export {
   PORTAL_PAY_TYPES,
   SUPPORTED_PORTALS,
   UNSUPPORTED_PORTALS,
+  deriveFlow3UiStatus,
   extractAlliancePortalHint,
   extractAllianceMedinetTag,
   classifyVisitForRpa,
@@ -65,8 +67,8 @@ export {
   getUnsupportedPortals,
 };
 
-export type SupportedPortal =
-  (typeof SUPPORTED_PORTALS)[number];
+export type SupportedPortal = (typeof SUPPORTED_PORTALS)[number];
 export type UnsupportedPortal = (typeof UNSUPPORTED_PORTALS)[number];
 export type Portal = SupportedPortal | UnsupportedPortal;
 export type Flow3PortalTarget = (typeof FLOW3_PORTAL_TARGETS)[number];
+export type { Flow3UiStatus } from './portals.shared';

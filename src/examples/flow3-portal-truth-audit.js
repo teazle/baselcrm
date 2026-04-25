@@ -11,7 +11,11 @@ import {
   comparePortalTruthSnapshots,
   writeFlow3TruthArtifacts,
 } from '../utils/flow3-truth-compare.js';
-import { resolveFlow3PortalTarget } from '../../apps/crm/src/lib/rpa/portals.shared.js';
+import {
+  capturePortalSubmittedTruth,
+  portalTruthExtractorRequiresMhc,
+  resolveVisitPortalTarget,
+} from '../core/portal-truth-extractors.js';
 
 function usage() {
   console.log(`
@@ -254,40 +258,28 @@ async function main() {
   const candidateRows = (data || [])
     .filter(visit => explicitVisitIds || hasAuditMaterial(visit))
     .slice(0, args.limit);
-  const rows = candidateRows.filter(
-    visit =>
-      resolveFlow3PortalTarget(
-        visit?.pay_type,
-        visit?.patient_name,
-        visit?.extraction_metadata || null
-      ) === 'MHC'
-  );
-  const unsupportedRows = candidateRows.filter(
-    visit =>
-      resolveFlow3PortalTarget(
-        visit?.pay_type,
-        visit?.patient_name,
-        visit?.extraction_metadata || null
-      ) !== 'MHC'
-  );
+  const routeRows = candidateRows.map(visit => ({
+    visit,
+    route: resolveVisitPortalTarget(visit),
+  }));
+  const rows = routeRows.filter(row => portalTruthExtractorRequiresMhc(row.route));
+  const unsupportedRows = routeRows.filter(row => !portalTruthExtractorRequiresMhc(row.route));
 
   logger.info(
-    `[TRUTH AUDIT] Auditing ${rows.length} MHC/AIA visit(s); ${unsupportedRows.length} scoped non-MHC visit(s) will be reported as unsupported for submitted-detail truth`
+    `[TRUTH AUDIT] Auditing ${rows.length} MHC/AIA visit(s); ${unsupportedRows.length} scoped non-MHC visit(s) will use portal truth extractor registry`
   );
 
   const reportRows = [];
-  for (const visit of unsupportedRows) {
-    const route = resolveFlow3PortalTarget(
-      visit?.pay_type,
-      visit?.patient_name,
-      visit?.extraction_metadata || null
-    );
-    const reason = `submitted_detail_extractor_unavailable_for_${String(route || 'unknown').toLowerCase()}`;
+  for (const { visit, route } of unsupportedRows) {
+    const submittedTruthCapture = await capturePortalSubmittedTruth({ route, visit });
+    const reason =
+      submittedTruthCapture?.reason ||
+      `submitted_detail_extractor_unavailable_for_${String(route || 'unknown').toLowerCase()}`;
     const comparison = comparePortalTruthSnapshots({
       portalTarget: route || 'UNKNOWN',
       visit,
       botSnapshot: visit?.submission_metadata?.botSnapshot || null,
-      submittedTruthSnapshot: null,
+      submittedTruthSnapshot: submittedTruthCapture?.snapshot || null,
       diagnosisMatch:
         visit?.submission_metadata?.diagnosisMatch ||
         visit?.extraction_metadata?.diagnosisMatch ||
@@ -296,12 +288,8 @@ async function main() {
     if (!args.dryRun) {
       const nextMetadata = {
         ...(visit?.submission_metadata || {}),
-        submittedTruthCapture: {
-          found: false,
-          reason,
-          attempts: [],
-          auditedAt: new Date().toISOString(),
-        },
+        submittedTruthCapture,
+        submittedTruthSnapshot: submittedTruthCapture?.snapshot || null,
         comparison,
         mismatchCategories: comparison?.mismatchCategories || [],
         blocked_reason: 'submitted_truth_unavailable',
@@ -340,10 +328,9 @@ async function main() {
     }
   }
 
-  for (const visit of rows) {
+  for (const { visit, route } of rows) {
     const nric = pickNric(visit);
     const contextHint = contextHintForVisit(visit);
-    const allowCrossContext = contextHint !== 'mhc';
     const expectedVisitNo =
       String(
         visit?.submission_metadata?.draftReference ||
@@ -422,13 +409,12 @@ async function main() {
 
     let submittedTruthCapture;
     try {
-      submittedTruthCapture = await mhc.captureSubmittedTruthSnapshot({
+      submittedTruthCapture = await capturePortalSubmittedTruth({
+        route,
         visit,
+        mhc,
         nric,
-        visitDate: visit.visit_date || null,
-        patientName: visit.patient_name || '',
         contextHint,
-        allowCrossContext,
         expectedVisitNo,
       });
     } catch (error) {

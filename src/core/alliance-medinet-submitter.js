@@ -1,5 +1,17 @@
 import { logger } from '../utils/logger.js';
 import { extractAllianceMedinetTag } from '../../apps/crm/src/lib/rpa/portals.shared.js';
+import { buildAllianceMedinetSubmittedTruthCapture } from './portal-truth-extractors.js';
+
+export function shouldSaveAllianceMedinetDraft({
+  flow3Mode = process.env.FLOW3_MODE,
+  workflowSaveDraft = process.env.WORKFLOW_SAVE_DRAFT,
+} = {}) {
+  const normalizedMode = String(flow3Mode || '')
+    .trim()
+    .toLowerCase();
+  if (normalizedMode === 'fill_evidence') return false;
+  return String(workflowSaveDraft ?? '1') !== '0';
+}
 
 /**
  * Dedicated submit service for Alliance Medinet claim-form flow.
@@ -85,7 +97,10 @@ export class AllianceMedinetSubmitter {
 
   _isRetryableAllianceError(error) {
     const code = error?.allianceError?.code || null;
-    if (code && ['login_trace_error', 'search_trace_error', 'search_wait_interrupted'].includes(code)) {
+    if (
+      code &&
+      ['login_trace_error', 'search_trace_error', 'search_wait_interrupted'].includes(code)
+    ) {
       return true;
     }
     const message = String(error?.message || '').toLowerCase();
@@ -184,7 +199,23 @@ export class AllianceMedinetSubmitter {
           doctor.doctorName
         );
 
-        const saveDraft = process.env.WORKFLOW_SAVE_DRAFT !== '0';
+        const flow3Mode = String(process.env.FLOW3_MODE || '')
+          .trim()
+          .toLowerCase();
+        const saveDraft = shouldSaveAllianceMedinetDraft({
+          flow3Mode,
+          workflowSaveDraft: process.env.WORKFLOW_SAVE_DRAFT,
+        });
+        const submittedTruthCapture = buildAllianceMedinetSubmittedTruthCapture({
+          visit,
+          attempts: [
+            {
+              stage: 'submitted_detail_extractor',
+              status: 'not_implemented',
+              mode: flow3Mode || 'fill_evidence',
+            },
+          ],
+        });
         if (saveDraft) {
           const ok = await this.automation.saveAsDraft();
           if (!ok) {
@@ -202,6 +233,8 @@ export class AllianceMedinetSubmitter {
           savedAsDraft: saveDraft,
           persisted: saveDraft,
           submitted: false,
+          submittedTruthCapture,
+          submittedTruthSnapshot: null,
           attempt,
           diagnosisPortalMatch: fillResult?.diagnosisPortalMatch || null,
         };

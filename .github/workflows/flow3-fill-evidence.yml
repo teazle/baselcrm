@@ -20,6 +20,10 @@ on:
         required: false
         default: 'MHC'
         type: string
+      portal_preset:
+        description: 'Optional single portal preset (MHC,FULLERTON,IXCHANGE,IHP,ALLIANCE_MEDINET,GE_NTUC,ALLIANZ)'
+        required: false
+        type: string
       pay_type:
         description: 'Optional pay type filter'
         required: false
@@ -71,6 +75,7 @@ jobs:
           FLOW_TO: ${{ inputs.to }}
           FLOW_VISIT_IDS: ${{ inputs.visit_ids }}
           FLOW_PORTAL_TARGETS: ${{ inputs.portal_targets }}
+          FLOW_PORTAL_PRESET: ${{ inputs.portal_preset }}
           FLOW_PAY_TYPE: ${{ inputs.pay_type }}
           FLOW_PORTAL_ONLY: ${{ inputs.portal_only }}
           FLOW_ALL_PENDING: ${{ inputs.all_pending }}
@@ -81,7 +86,7 @@ jobs:
           port: ${{ secrets.EC2_PORT || 22 }}
           timeout: 60s
           command_timeout: 60m
-          envs: FLOW_FROM,FLOW_TO,FLOW_VISIT_IDS,FLOW_PORTAL_TARGETS,FLOW_PAY_TYPE,FLOW_PORTAL_ONLY,FLOW_ALL_PENDING
+          envs: FLOW_FROM,FLOW_TO,FLOW_VISIT_IDS,FLOW_PORTAL_TARGETS,FLOW_PORTAL_PRESET,FLOW_PAY_TYPE,FLOW_PORTAL_ONLY,FLOW_ALL_PENDING
           script_stop: true
           script: |
             set -euo pipefail
@@ -99,6 +104,10 @@ jobs:
 
             echo "Current commit on EC2:"
             git log -1 --oneline || true
+
+            if [ -n "${FLOW_PORTAL_PRESET:-}" ]; then
+              FLOW_PORTAL_TARGETS="$FLOW_PORTAL_PRESET"
+            fi
 
             ARGS=(--mode fill_evidence)
             if [ -n "${FLOW_FROM:-}" ]; then
@@ -148,4 +157,4 @@ jobs:
             fi
 
             echo "Latest Flow 3 report: $LATEST_JSON"
-            node -e 'const fs = require("fs"); const reportPath = process.argv[1]; const report = JSON.parse(fs.readFileSync(reportPath, "utf8")); const rows = Array.isArray(report.rows) ? report.rows : []; console.log("Flow 3 summary:"); console.log(JSON.stringify({ generatedAt: report.generatedAt || null, scope: report.scope || null, totals: report.totals || null, totalRows: rows.length }, null, 2)); for (const row of rows) { console.log(JSON.stringify({ date: row.date || null, patientName: row.patientName || null, nric: row.nric || null, payType: row.payType || null, portal: row.portal || null, status: row.status || null, diagnosisStatus: row.diagnosisStatus || null, fillVerification: row.fillVerification || null, comparison: row.comparison || null, evidence: row.evidence || null, notes: row.notes || null })); }' "$LATEST_JSON"
+            node -e 'const fs = require("fs"); const reportPath = process.argv[1]; const report = JSON.parse(fs.readFileSync(reportPath, "utf8")); const rows = Array.isArray(report.rows) ? report.rows : []; console.log("Flow 3 summary:"); console.log(JSON.stringify({ generatedAt: report.generatedAt || null, scope: report.scope || null, totals: report.totals || null, totalRows: rows.length }, null, 2)); for (const row of rows) { console.log(JSON.stringify({ date: row.date || null, patientName: row.patientName || null, nric: row.nric || null, payType: row.payType || null, portal: row.portal || null, status: row.status || null, diagnosisStatus: row.diagnosisStatus || null, fillVerification: row.fillVerification || null, comparison: row.comparison || null, botSnapshot: row.botSnapshot || null, submittedTruth: row.submittedTruth || null, flow2VsSubmittedTruth: row.flow2VsSubmittedTruth || null, botVsSubmittedTruth: row.botVsSubmittedTruth || null, blockedReason: row.blockedReason || null, evidence: row.evidence || null, notes: row.notes || null })); }' "$LATEST_JSON"

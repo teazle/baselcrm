@@ -1,5 +1,6 @@
 import { PORTALS } from '../config/portals.js';
 import { GenericPortalSubmitter, createDefaultSelectors } from './portal-generic-submitter.js';
+import { captureAllianzSubmittedTruthSnapshot } from './portal-truth/allianz.js';
 import { logger } from '../utils/logger.js';
 
 function withOverrides(base, overrides) {
@@ -753,6 +754,23 @@ export class AllianzSubmitter {
     if (this.steps?.step) {
       this.steps.step(2, 'Submitting to Allianz portal service');
     }
-    return this.runtime.submit(visit, runtimeCredential);
+    const result = await this.runtime.submit(visit, runtimeCredential);
+    if (
+      result?.portalReadOnly === true ||
+      result?.blocked_reason === 'portal_read_only_no_claim_form'
+    ) {
+      const submittedTruthCapture = captureAllianzSubmittedTruthSnapshot({
+        state: result,
+        visit,
+        portalUrl: result?.portalUrl || runtimeCredential?.url || this.runtime.defaultUrl || null,
+        auditedAt: result?.processedAt || new Date().toISOString(),
+      });
+      return {
+        ...result,
+        submittedTruthCapture,
+        submittedTruthSnapshot: null,
+      };
+    }
+    return result;
   }
 }

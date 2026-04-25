@@ -15,6 +15,8 @@ import {
 import { cn } from '@/lib/cn';
 import {
   classifyVisitForRpa,
+  deriveFlow3UiStatus,
+  type Flow3UiStatus,
   getFlow3PortalTargets,
   getPortalScopeOrFilter,
   matchesFlow3PortalTargets,
@@ -43,14 +45,12 @@ type VisitRow = {
     evidence?: string | null;
     mismatchCategories?: string[] | null;
     submittedTruthSnapshot?: { source?: string | null } | null;
-    comparison?:
-      | {
-          state?: string;
-          unavailableReason?: string;
-          flow2VsSubmittedTruth?: { state?: string | null } | null;
-          botVsSubmittedTruth?: { state?: string | null } | null;
-        }
-      | null;
+    comparison?: {
+      state?: string;
+      unavailableReason?: string;
+      flow2VsSubmittedTruth?: { state?: string | null } | null;
+      botVsSubmittedTruth?: { state?: string | null } | null;
+    } | null;
     [key: string]: unknown;
   } | null;
   extraction_metadata: {
@@ -65,7 +65,13 @@ type FilterKey =
   | 'all'
   | 'candidate_pending'
   | 'manual_review'
-  | 'filled_evidence'
+  | 'shadow_fill_ready'
+  | 'truth_unavailable'
+  | 'truth_captured'
+  | 'drift_mismatch'
+  | 'otp_blocked'
+  | 'captcha_blocked'
+  | 'portal_read_only'
   | 'draft'
   | 'submitted'
   | 'error';
@@ -74,7 +80,13 @@ const filters: Array<{ key: FilterKey; label: string }> = [
   { key: 'all', label: 'All' },
   { key: 'candidate_pending', label: 'Candidate pending' },
   { key: 'manual_review', label: 'Manual review' },
-  { key: 'filled_evidence', label: 'Filled + evidence' },
+  { key: 'shadow_fill_ready', label: 'Shadow fill ready' },
+  { key: 'truth_unavailable', label: 'Truth unavailable' },
+  { key: 'truth_captured', label: 'Truth captured' },
+  { key: 'drift_mismatch', label: 'Drift mismatch' },
+  { key: 'otp_blocked', label: 'OTP blocked' },
+  { key: 'captcha_blocked', label: 'CAPTCHA blocked' },
+  { key: 'portal_read_only', label: 'Portal read-only' },
   { key: 'draft', label: 'Draft' },
   { key: 'submitted', label: 'Submitted' },
   { key: 'error', label: 'Error' },
@@ -112,10 +124,7 @@ export default function Flow3FillForms() {
   const [leaveBrowserOpen, setLeaveBrowserOpen] = useState(false);
   const [mode, setMode] = useState<'fill_evidence' | 'draft'>('fill_evidence');
 
-  const getSubmissionStatus = useCallback((
-    visit: VisitRow
-  ): 'candidate_pending' | 'manual_review' | 'filled_evidence' | 'draft' | 'submitted' | 'error' => {
-    const status = String(visit.submission_status || '').trim().toLowerCase();
+  const getSubmissionStatus = useCallback((visit: VisitRow): Flow3UiStatus => {
     const candidate = classifyVisitForRpa(
       visit.pay_type,
       visit.patient_name,
@@ -123,13 +132,8 @@ export default function Flow3FillForms() {
       visit.extraction_metadata,
       visit.submission_status
     );
-    const metadataMode = String(visit.submission_metadata?.mode || '').trim().toLowerCase();
-    const metadataSuccess = visit.submission_metadata?.success === true;
-
-    if (status === 'error') return 'error';
-    if (status === 'submitted') return 'submitted';
-    if (status === 'draft') return 'draft';
-    if (metadataMode === 'fill_evidence' && metadataSuccess) return 'filled_evidence';
+    const derived = deriveFlow3UiStatus(visit.submission_status, visit.submission_metadata);
+    if (derived !== 'candidate_pending') return derived;
     if (candidate.status === 'manual_review') return 'manual_review';
     return 'candidate_pending';
   }, []);
@@ -241,8 +245,20 @@ export default function Flow3FillForms() {
           return status === 'candidate_pending';
         case 'manual_review':
           return status === 'manual_review';
-        case 'filled_evidence':
-          return status === 'filled_evidence';
+        case 'shadow_fill_ready':
+          return status === 'shadow_fill_ready';
+        case 'truth_unavailable':
+          return status === 'truth_unavailable';
+        case 'truth_captured':
+          return status === 'truth_captured';
+        case 'drift_mismatch':
+          return status === 'drift_mismatch';
+        case 'otp_blocked':
+          return status === 'otp_blocked';
+        case 'captcha_blocked':
+          return status === 'captcha_blocked';
+        case 'portal_read_only':
+          return status === 'portal_read_only';
         case 'draft':
           return status === 'draft';
         case 'submitted':
@@ -275,21 +291,35 @@ export default function Flow3FillForms() {
         total: 0,
       };
     }
-    const candidatePending = scopedRows.filter(r => getSubmissionStatus(r) === 'candidate_pending').length;
+    const candidatePending = scopedRows.filter(
+      r => getSubmissionStatus(r) === 'candidate_pending'
+    ).length;
     const manualReview = scopedRows.filter(r => getSubmissionStatus(r) === 'manual_review').length;
-    const filledEvidence = scopedRows.filter(r => getSubmissionStatus(r) === 'filled_evidence').length;
+    const filledEvidence = scopedRows.filter(r =>
+      ['shadow_fill_ready', 'truth_unavailable', 'truth_captured', 'drift_mismatch'].includes(
+        getSubmissionStatus(r)
+      )
+    ).length;
     const draft = scopedRows.filter(r => getSubmissionStatus(r) === 'draft').length;
     const submitted = scopedRows.filter(r => getSubmissionStatus(r) === 'submitted').length;
     const error = scopedRows.filter(r => getSubmissionStatus(r) === 'error').length;
-    return { candidatePending, manualReview, filledEvidence, draft, submitted, error, total: scopedRows.length };
+    return {
+      candidatePending,
+      manualReview,
+      filledEvidence,
+      draft,
+      submitted,
+      error,
+      total: scopedRows.length,
+    };
   }, [rows, selectedPortalTargets, getSubmissionStatus]);
 
   const flowStatus =
     metrics.error > 0
       ? { label: 'Needs attention', tone: 'danger' as const }
       : metrics.candidatePending > 0 || metrics.manualReview > 0
-          ? { label: 'Pending', tone: 'warning' as const }
-          : { label: 'Ready', tone: 'success' as const };
+        ? { label: 'Pending', tone: 'warning' as const }
+        : { label: 'Ready', tone: 'success' as const };
 
   const errorIds = useMemo(
     () =>
@@ -311,7 +341,13 @@ export default function Flow3FillForms() {
     const status = getSubmissionStatus(visit);
     if (status === 'candidate_pending') return 'Candidate pending';
     if (status === 'manual_review') return 'Manual review';
-    if (status === 'filled_evidence') return 'Filled + evidence';
+    if (status === 'shadow_fill_ready') return 'Shadow fill ready';
+    if (status === 'truth_unavailable') return 'Truth unavailable';
+    if (status === 'truth_captured') return 'Truth captured';
+    if (status === 'drift_mismatch') return 'Drift mismatch';
+    if (status === 'otp_blocked') return 'OTP blocked';
+    if (status === 'captcha_blocked') return 'CAPTCHA blocked';
+    if (status === 'portal_read_only') return 'Portal read-only';
     if (status === 'draft') return 'Draft';
     if (status === 'submitted') return 'Submitted';
     if (status === 'error') return 'Error';
@@ -441,7 +477,7 @@ export default function Flow3FillForms() {
           <div className="mt-2 text-2xl font-semibold">{metrics.manualReview}</div>
         </Card>
         <Card className="p-5">
-          <div className="text-xs text-muted-foreground">Filled + evidence</div>
+          <div className="text-xs text-muted-foreground">Shadow/audit evidence</div>
           <div className="mt-2 text-2xl font-semibold">{metrics.filledEvidence}</div>
         </Card>
         <Card className="p-5">
@@ -463,7 +499,8 @@ export default function Flow3FillForms() {
           <div className="text-xs font-medium text-muted-foreground">Manual Trigger</div>
           <div className="text-lg font-semibold">Submit Claims</div>
           <div className="mt-2 text-sm text-muted-foreground">
-            Fill portal forms with evidence capture by default. Draft mode is available for validated routes only.
+            Fill portal forms with evidence capture by default. Draft mode is available for
+            validated routes only.
           </div>
         </div>
 
@@ -600,15 +637,23 @@ export default function Flow3FillForms() {
                         'inline-flex rounded-full border px-2.5 py-1 text-xs font-medium',
                         status === 'submitted'
                           ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                          : status === 'filled_evidence'
+                          : status === 'shadow_fill_ready' ||
+                              status === 'truth_unavailable' ||
+                              status === 'truth_captured'
                             ? 'border-sky-200 bg-sky-50 text-sky-700'
-                          : status === 'draft'
-                            ? 'border-blue-200 bg-blue-50 text-blue-700'
-                            : status === 'manual_review'
-                              ? 'border-amber-200 bg-amber-50 text-amber-700'
-                            : status === 'error'
-                              ? 'border-red-200 bg-red-50 text-red-700'
-                              : 'border-border bg-muted/50 text-muted-foreground'
+                            : status === 'drift_mismatch'
+                              ? 'border-orange-200 bg-orange-50 text-orange-700'
+                              : status === 'draft'
+                                ? 'border-blue-200 bg-blue-50 text-blue-700'
+                                : status === 'otp_blocked' ||
+                                    status === 'captcha_blocked' ||
+                                    status === 'portal_read_only'
+                                  ? 'border-red-200 bg-red-50 text-red-700'
+                                  : status === 'manual_review'
+                                    ? 'border-amber-200 bg-amber-50 text-amber-700'
+                                    : status === 'error'
+                                      ? 'border-red-200 bg-red-50 text-red-700'
+                                      : 'border-border bg-muted/50 text-muted-foreground'
                       )}
                     >
                       {label}
@@ -659,9 +704,13 @@ export default function Flow3FillForms() {
                       <div>Portal: {portal}</div>
                       <div>Mode: {metadata.mode || '--'}</div>
                       {metadata.blocked_reason ? (
-                        <div className="text-amber-700">Blocked: {String(metadata.blocked_reason)}</div>
+                        <div className="text-amber-700">
+                          Blocked: {String(metadata.blocked_reason)}
+                        </div>
                       ) : null}
-                      {metadata.sessionState ? <div>Session: {String(metadata.sessionState)}</div> : null}
+                      {metadata.sessionState ? (
+                        <div>Session: {String(metadata.sessionState)}</div>
+                      ) : null}
                       {metadata.evidence ? <div>Evidence: captured</div> : null}
                       {metadata.comparison && typeof metadata.comparison === 'object' ? (
                         <div>
@@ -674,8 +723,16 @@ export default function Flow3FillForms() {
                             : ''}
                         </div>
                       ) : null}
-                      {metadata.submittedTruthSnapshot ? <div>Submitted truth: captured</div> : null}
-                      {Array.isArray(metadata.mismatchCategories) && metadata.mismatchCategories.length ? (
+                      {metadata.submittedTruthSnapshot ? (
+                        <div>Submitted truth: captured</div>
+                      ) : null}
+                      {metadata.submittedTruthCapture &&
+                      typeof metadata.submittedTruthCapture === 'object' &&
+                      (metadata.submittedTruthCapture as { found?: unknown }).found === false ? (
+                        <div className="text-amber-700">Submitted truth: unavailable</div>
+                      ) : null}
+                      {Array.isArray(metadata.mismatchCategories) &&
+                      metadata.mismatchCategories.length ? (
                         <div className="text-amber-700">
                           Mismatch: {metadata.mismatchCategories.join(', ')}
                         </div>

@@ -1,5 +1,6 @@
 import { PORTALS } from '../config/portals.js';
 import { GenericPortalSubmitter, createDefaultSelectors } from './portal-generic-submitter.js';
+import { buildIxchangeSubmittedTruthCaptureUnavailable } from './portal-truth/ixchange.js';
 
 function withOverrides(base, overrides) {
   const next = { ...base };
@@ -633,9 +634,7 @@ async function selectProgramType({ page, state, helpers }) {
   const finalValue = await page
     .evaluate(() => {
       const text = String(globalThis.document?.body?.innerText || '');
-      const line = text
-        .split(/\n+/)
-        .find(v => /program type/i.test(String(v || '')));
+      const line = text.split(/\n+/).find(v => /program type/i.test(String(v || '')));
       return String(line || '').trim();
     })
     .catch(() => '');
@@ -678,7 +677,9 @@ async function extractIxchangeFeeEvidence(page) {
           .replace(/\s+/g, ' ')
           .trim();
       const parseAmount = value => {
-        const match = norm(value).replace(/,/g, '').match(/\d+(?:\.\d{1,2})?/);
+        const match = norm(value)
+          .replace(/,/g, '')
+          .match(/\d+(?:\.\d{1,2})?/);
         if (!match) return '';
         const num = Number(match[0]);
         return Number.isFinite(num) ? num.toFixed(2) : '';
@@ -1210,5 +1211,17 @@ export class IXChangeSubmitter {
       this.steps.step(2, 'Submitting to IXCHANGE portal service');
     }
     return this.runtime.submit(visit, runtimeCredential);
+  }
+
+  async captureSubmittedTruthSnapshot({
+    visit = null,
+    sessionState = 'unknown',
+    auditedAt = new Date().toISOString(),
+  } = {}) {
+    return buildIxchangeSubmittedTruthCaptureUnavailable({
+      visit,
+      sessionState,
+      auditedAt,
+    });
   }
 }

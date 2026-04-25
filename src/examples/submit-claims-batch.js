@@ -419,7 +419,16 @@ async function submitClaimsBatch() {
 
   const buildFlow3StructuredSummary = result => {
     if (!result || typeof result !== 'object') {
-      return { fillVerification: '-', comparison: '-', evidence: '-' };
+      return {
+        fillVerification: '-',
+        comparison: '-',
+        botSnapshot: '-',
+        submittedTruth: '-',
+        flow2VsSubmittedTruth: '-',
+        botVsSubmittedTruth: '-',
+        blockedReason: '-',
+        evidence: '-',
+      };
     }
     const verification =
       result.fillVerification && typeof result.fillVerification === 'object'
@@ -431,18 +440,34 @@ async function submitClaimsBatch() {
           .join(', ')
       : '-';
 
-    const comparison =
-      result.comparison && typeof result.comparison === 'object'
-        ? (() => {
-            const state = String(result.comparison.state || 'unavailable');
-            const mismatched = Array.isArray(result.comparison.mismatchedFields)
-              ? result.comparison.mismatchedFields
-                  .map(item => (typeof item === 'string' ? item : item?.field))
-                  .filter(Boolean)
-              : [];
-            return mismatched.length > 0 ? `${state} (${mismatched.join('|')})` : state;
-          })()
-        : '-';
+    const comparisonObject =
+      result.comparison && typeof result.comparison === 'object' ? result.comparison : null;
+    const comparison = comparisonObject
+      ? (() => {
+          const state = String(comparisonObject.state || 'unavailable');
+          const mismatched = Array.isArray(comparisonObject.mismatchedFields)
+            ? comparisonObject.mismatchedFields
+                .map(item => (typeof item === 'string' ? item : item?.field))
+                .filter(Boolean)
+            : [];
+          return mismatched.length > 0 ? `${state} (${mismatched.join('|')})` : state;
+        })()
+      : '-';
+    const botSnapshot = result.botSnapshot ? 'captured' : '-';
+    const submittedTruth =
+      result.submittedTruthSnapshot || result.submittedTruthCapture?.found === true
+        ? 'captured'
+        : result.submittedTruthCapture?.found === false
+          ? `unavailable:${String(result.submittedTruthCapture.reason || 'unknown')}`
+          : '-';
+    const flow2VsSubmittedTruth = comparisonObject?.flow2VsSubmittedTruth?.state || '-';
+    const botVsSubmittedTruth = comparisonObject?.botVsSubmittedTruth?.state || '-';
+    const blockedReason =
+      result.blocked_reason ||
+      result.blockedReason ||
+      result.reason ||
+      comparisonObject?.unavailableReason ||
+      '-';
     const evidence = result.evidence ? String(result.evidence) : '-';
     const mismatchCategories =
       Array.isArray(result.mismatchCategories) && result.mismatchCategories.length
@@ -452,6 +477,11 @@ async function submitClaimsBatch() {
     return {
       fillVerification,
       comparison: mismatchCategories !== '-' ? `${comparison}; ${mismatchCategories}` : comparison,
+      botSnapshot,
+      submittedTruth,
+      flow2VsSubmittedTruth,
+      botVsSubmittedTruth,
+      blockedReason: String(blockedReason || '-'),
       evidence,
     };
   };

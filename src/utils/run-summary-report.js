@@ -3,7 +3,7 @@ import path from 'path';
 
 function nowStamp() {
   const d = new Date();
-  const pad = (n) => String(n).padStart(2, '0');
+  const pad = n => String(n).padStart(2, '0');
   return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
 }
 
@@ -17,7 +17,9 @@ function escapeCell(value) {
 }
 
 export function portalTargetToLabel(target) {
-  const key = String(target || '').trim().toUpperCase();
+  const key = String(target || '')
+    .trim()
+    .toUpperCase();
   if (key === 'MHC') return 'MHC Asia';
   if (key === 'ALLIANCE_MEDINET') return 'Alliance Medinet';
   if (key === 'ALLIANZ') return 'Allianz';
@@ -28,13 +30,7 @@ export function portalTargetToLabel(target) {
   return key || 'Unknown';
 }
 
-function toMarkdown({
-  flowName,
-  generatedAt,
-  scope = {},
-  totals = {},
-  rows = [],
-}) {
+function toMarkdown({ flowName, generatedAt, scope = {}, totals = {}, rows = [] }) {
   const lines = [];
   lines.push(`# ${flowName} Run Summary`);
   lines.push('');
@@ -51,15 +47,21 @@ function toMarkdown({
   }
   lines.push('');
   lines.push('## Records');
-  lines.push('| Date | Patient Name | NRIC | Pay Type | TPA/Portal | Status | Diagnosis Status | Fill Verification | Comparison | Evidence | Notes |');
-  lines.push('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+  lines.push(
+    '| Date | Patient Name | NRIC | Pay Type | TPA/Portal | Status | Diagnosis Status | Fill Verification | Comparison | Bot Snapshot | Submitted Truth | Flow2 vs Truth | Bot vs Truth | Blocked Reason | Evidence | Notes |'
+  );
+  lines.push(
+    '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |'
+  );
   for (const row of rows) {
     lines.push(
-      `| ${escapeCell(row.date)} | ${escapeCell(row.patientName)} | ${escapeCell(row.nric)} | ${escapeCell(row.payType)} | ${escapeCell(row.portal)} | ${escapeCell(row.status)} | ${escapeCell(row.diagnosisStatus)} | ${escapeCell(row.fillVerification)} | ${escapeCell(row.comparison)} | ${escapeCell(row.evidence)} | ${escapeCell(row.notes)} |`
+      `| ${escapeCell(row.date)} | ${escapeCell(row.patientName)} | ${escapeCell(row.nric)} | ${escapeCell(row.payType)} | ${escapeCell(row.portal)} | ${escapeCell(row.status)} | ${escapeCell(row.diagnosisStatus)} | ${escapeCell(row.fillVerification)} | ${escapeCell(row.comparison)} | ${escapeCell(row.botSnapshot)} | ${escapeCell(row.submittedTruth)} | ${escapeCell(row.flow2VsSubmittedTruth)} | ${escapeCell(row.botVsSubmittedTruth)} | ${escapeCell(row.blockedReason)} | ${escapeCell(row.evidence)} | ${escapeCell(row.notes)} |`
     );
   }
   if (!rows.length) {
-    lines.push('| - | - | - | - | - | no_records | - | - | - | - | No records for this run |');
+    lines.push(
+      '| - | - | - | - | - | no_records | - | - | - | - | - | - | - | - | - | No records for this run |'
+    );
   }
   lines.push('');
   return `${lines.join('\n')}\n`;

@@ -72,9 +72,23 @@ export const PATIENT_NAME_PORTAL_TAGS = [
   'MHCAXA',
 ] as const;
 export const CLAIM_CANDIDATE_STATUSES = [
-  "claim_candidate",
-  "not_claim_candidate",
-  "manual_review",
+  'claim_candidate',
+  'not_claim_candidate',
+  'manual_review',
+] as const;
+export const FLOW3_UI_STATUSES = [
+  'candidate_pending',
+  'manual_review',
+  'shadow_fill_ready',
+  'truth_unavailable',
+  'truth_captured',
+  'drift_mismatch',
+  'otp_blocked',
+  'captcha_blocked',
+  'portal_read_only',
+  'draft',
+  'submitted',
+  'error',
 ] as const;
 
 export type SupportedPortal = (typeof SUPPORTED_PORTALS)[number];
@@ -82,6 +96,7 @@ export type UnsupportedPortal = (typeof UNSUPPORTED_PORTALS)[number];
 export type Portal = SupportedPortal | UnsupportedPortal;
 export type Flow3PortalTarget = (typeof FLOW3_PORTAL_TARGETS)[number];
 export type ClaimCandidateStatus = (typeof CLAIM_CANDIDATE_STATUSES)[number];
+export type Flow3UiStatus = (typeof FLOW3_UI_STATUSES)[number];
 
 export type ClaimCandidateClassification = {
   status: ClaimCandidateStatus;
@@ -90,6 +105,66 @@ export type ClaimCandidateClassification = {
   normalizedPayType: string;
   hasNric: boolean;
 };
+
+function lowerMeta(value: unknown): string {
+  return String(value || '')
+    .trim()
+    .toLowerCase();
+}
+
+function hasRealFlow3Mismatches(comparison: unknown): boolean {
+  const c =
+    comparison && typeof comparison === 'object' ? (comparison as Record<string, unknown>) : null;
+  if (!c) return false;
+  const categories = Array.isArray(c.mismatchCategories) ? c.mismatchCategories : [];
+  return categories.some(category => {
+    const key = lowerMeta(category);
+    return key.length > 0 && key !== 'submitted_truth_unavailable';
+  });
+}
+
+export function deriveFlow3UiStatus(
+  submissionStatus: unknown,
+  submissionMetadata: unknown
+): Flow3UiStatus {
+  const status = lowerMeta(submissionStatus);
+  const md =
+    submissionMetadata && typeof submissionMetadata === 'object'
+      ? (submissionMetadata as Record<string, unknown>)
+      : {};
+  const sessionState = lowerMeta(md.sessionState);
+  const blockedReason = lowerMeta(md.blocked_reason ?? md.blockedReason ?? md.reason);
+  const comparison =
+    md.comparison && typeof md.comparison === 'object'
+      ? (md.comparison as Record<string, unknown>)
+      : null;
+  const submittedTruthCapture =
+    md.submittedTruthCapture && typeof md.submittedTruthCapture === 'object'
+      ? (md.submittedTruthCapture as Record<string, unknown>)
+      : null;
+
+  if (status === 'submitted') return 'submitted';
+  if (status === 'draft') return 'draft';
+  if (sessionState === 'captcha_blocked' || blockedReason.includes('captcha'))
+    return 'captcha_blocked';
+  if (sessionState === 'otp_blocked' || blockedReason.includes('otp')) return 'otp_blocked';
+  if (blockedReason.includes('read_only') || blockedReason.includes('no_claim_form'))
+    return 'portal_read_only';
+  if (status === 'error' || md.success === false) return 'error';
+  if (hasRealFlow3Mismatches(comparison)) return 'drift_mismatch';
+  if (md.submittedTruthSnapshot || submittedTruthCapture?.found === true) return 'truth_captured';
+  if (
+    submittedTruthCapture?.found === false ||
+    blockedReason === 'submitted_truth_unavailable' ||
+    comparison?.unavailableReason === 'submitted_truth_unavailable'
+  ) {
+    return 'truth_unavailable';
+  }
+  if (lowerMeta(md.mode) === 'fill_evidence' && md.success === true && md.botSnapshot) {
+    return 'shadow_fill_ready';
+  }
+  return 'candidate_pending';
+}
 
 /**
  * Check if a pay type is a supported portal
@@ -141,23 +216,21 @@ function normalizeMetadataPortalHint(value: unknown): string {
 }
 
 function normalizeCandidateStatus(value: unknown): ClaimCandidateStatus | null {
-  const raw = String(value || "").trim().toLowerCase();
-  if (
-    raw === "claim_candidate" ||
-    raw === "not_claim_candidate" ||
-    raw === "manual_review"
-  ) {
+  const raw = String(value || '')
+    .trim()
+    .toLowerCase();
+  if (raw === 'claim_candidate' || raw === 'not_claim_candidate' || raw === 'manual_review') {
     return raw as ClaimCandidateStatus;
   }
   return null;
 }
 
 function uniqueStrings(values: Array<string | null | undefined>): string[] {
-  return [...new Set(values.map((value) => String(value || "").trim()).filter(Boolean))];
+  return [...new Set(values.map(value => String(value || '').trim()).filter(Boolean))];
 }
 
 function hasUsableNric(value: unknown): boolean {
-  const raw = String(value || "")
+  const raw = String(value || '')
     .trim()
     .toUpperCase();
   if (!raw) return false;
@@ -305,27 +378,29 @@ export function classifyVisitForRpa(
   patientName: string | null | undefined,
   nric: string | null | undefined,
   extractionMetadata: unknown = null,
-  submissionStatus: string | null | undefined = null,
+  submissionStatus: string | null | undefined = null
 ): ClaimCandidateClassification {
-  const normalizedPayType = normalizePortalTag(payType).replace(/\s+/g, " ").trim();
+  const normalizedPayType = normalizePortalTag(payType).replace(/\s+/g, ' ').trim();
   const existingStatus =
-    extractionMetadata && typeof extractionMetadata === "object"
+    extractionMetadata && typeof extractionMetadata === 'object'
       ? normalizeCandidateStatus(
-          (extractionMetadata as Record<string, unknown>).claimCandidateStatus,
+          (extractionMetadata as Record<string, unknown>).claimCandidateStatus
         )
       : null;
   const route = resolveFlow3PortalTarget(payType, patientName, extractionMetadata);
   const metadataNric =
-    extractionMetadata && typeof extractionMetadata === "object"
-      ? String((extractionMetadata as Record<string, unknown>).nric || "").trim()
-      : "";
+    extractionMetadata && typeof extractionMetadata === 'object'
+      ? String((extractionMetadata as Record<string, unknown>).nric || '').trim()
+      : '';
   const hasNric = hasUsableNric(nric) || hasUsableNric(metadataNric);
-  const submission = String(submissionStatus || "").trim().toLowerCase();
+  const submission = String(submissionStatus || '')
+    .trim()
+    .toLowerCase();
 
-  if (submission === "draft" || submission === "submitted") {
+  if (submission === 'draft' || submission === 'submitted') {
     return {
-      status: "not_claim_candidate",
-      reasons: ["already_submitted"],
+      status: 'not_claim_candidate',
+      reasons: ['already_submitted'],
       portalTarget: route,
       normalizedPayType,
       hasNric,
@@ -334,8 +409,8 @@ export function classifyVisitForRpa(
 
   if (normalizedPayType && looksLikeCreditCardPayType(normalizedPayType)) {
     return {
-      status: "not_claim_candidate",
-      reasons: ["credit_card"],
+      status: 'not_claim_candidate',
+      reasons: ['credit_card'],
       portalTarget: route,
       normalizedPayType,
       hasNric,
@@ -344,8 +419,8 @@ export function classifyVisitForRpa(
 
   if (normalizedPayType && looksLikeCashOrSelfPay(normalizedPayType)) {
     return {
-      status: "not_claim_candidate",
-      reasons: ["cash_self_pay"],
+      status: 'not_claim_candidate',
+      reasons: ['cash_self_pay'],
       portalTarget: route,
       normalizedPayType,
       hasNric,
@@ -353,12 +428,9 @@ export function classifyVisitForRpa(
   }
 
   if (route) {
-    const reasons = uniqueStrings([
-      "portal_supported",
-      !hasNric ? "missing_nric" : null,
-    ]);
+    const reasons = uniqueStrings(['portal_supported', !hasNric ? 'missing_nric' : null]);
     return {
-      status: hasNric ? "claim_candidate" : "manual_review",
+      status: hasNric ? 'claim_candidate' : 'manual_review',
       reasons,
       portalTarget: route,
       normalizedPayType,
@@ -369,7 +441,7 @@ export function classifyVisitForRpa(
   if (existingStatus) {
     return {
       status: existingStatus,
-      reasons: uniqueStrings(["portal_unknown"]),
+      reasons: uniqueStrings(['portal_unknown']),
       portalTarget: route,
       normalizedPayType,
       hasNric,
@@ -377,8 +449,8 @@ export function classifyVisitForRpa(
   }
 
   return {
-    status: "manual_review",
-    reasons: ["portal_unknown"],
+    status: 'manual_review',
+    reasons: ['portal_unknown'],
     portalTarget: null,
     normalizedPayType,
     hasNric,
@@ -387,13 +459,13 @@ export function classifyVisitForRpa(
 
 export function isFlow2EligibleVisit(extractionMetadata: unknown = null): boolean {
   const status =
-    extractionMetadata && typeof extractionMetadata === "object"
+    extractionMetadata && typeof extractionMetadata === 'object'
       ? normalizeCandidateStatus(
-          (extractionMetadata as Record<string, unknown>).claimCandidateStatus,
+          (extractionMetadata as Record<string, unknown>).claimCandidateStatus
         )
       : null;
-  if (status === "claim_candidate" || status === "manual_review") return true;
-  if (status === "not_claim_candidate") return false;
+  if (status === 'claim_candidate' || status === 'manual_review') return true;
+  if (status === 'not_claim_candidate') return false;
   return true;
 }
 

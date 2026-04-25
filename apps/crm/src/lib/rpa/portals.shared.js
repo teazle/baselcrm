@@ -62,11 +62,68 @@ export const PATIENT_NAME_PORTAL_TAGS = [
   'NTUC_IM',
   'MHCAXA',
 ];
-export const CLAIM_CANDIDATE_STATUSES = [
-  'claim_candidate',
-  'not_claim_candidate',
+export const CLAIM_CANDIDATE_STATUSES = ['claim_candidate', 'not_claim_candidate', 'manual_review'];
+export const FLOW3_UI_STATUSES = [
+  'candidate_pending',
   'manual_review',
+  'shadow_fill_ready',
+  'truth_unavailable',
+  'truth_captured',
+  'drift_mismatch',
+  'otp_blocked',
+  'captcha_blocked',
+  'portal_read_only',
+  'draft',
+  'submitted',
+  'error',
 ];
+
+function lowerMeta(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase();
+}
+
+function hasRealFlow3Mismatches(comparison) {
+  const c = comparison && typeof comparison === 'object' ? comparison : null;
+  if (!c) return false;
+  const categories = Array.isArray(c.mismatchCategories) ? c.mismatchCategories : [];
+  return categories.some(category => {
+    const key = lowerMeta(category);
+    return key.length > 0 && key !== 'submitted_truth_unavailable';
+  });
+}
+
+export function deriveFlow3UiStatus(submissionStatus, submissionMetadata) {
+  const status = lowerMeta(submissionStatus);
+  const md = submissionMetadata && typeof submissionMetadata === 'object' ? submissionMetadata : {};
+  const sessionState = lowerMeta(md.sessionState);
+  const blockedReason = lowerMeta(md.blocked_reason ?? md.blockedReason ?? md.reason);
+  const comparison = md.comparison && typeof md.comparison === 'object' ? md.comparison : null;
+
+  if (status === 'submitted') return 'submitted';
+  if (status === 'draft') return 'draft';
+  if (sessionState === 'captcha_blocked' || blockedReason.includes('captcha'))
+    return 'captcha_blocked';
+  if (sessionState === 'otp_blocked' || blockedReason.includes('otp')) return 'otp_blocked';
+  if (blockedReason.includes('read_only') || blockedReason.includes('no_claim_form'))
+    return 'portal_read_only';
+  if (status === 'error' || md.success === false) return 'error';
+  if (hasRealFlow3Mismatches(comparison)) return 'drift_mismatch';
+  if (md.submittedTruthSnapshot || md.submittedTruthCapture?.found === true)
+    return 'truth_captured';
+  if (
+    md.submittedTruthCapture?.found === false ||
+    blockedReason === 'submitted_truth_unavailable' ||
+    comparison?.unavailableReason === 'submitted_truth_unavailable'
+  ) {
+    return 'truth_unavailable';
+  }
+  if (lowerMeta(md.mode) === 'fill_evidence' && md.success === true && md.botSnapshot) {
+    return 'shadow_fill_ready';
+  }
+  return 'candidate_pending';
+}
 
 export function isSupportedPortal(payType) {
   if (!payType) return false;
@@ -106,12 +163,10 @@ function normalizeMetadataPortalHint(value) {
 }
 
 function normalizeCandidateStatus(value) {
-  const raw = String(value || '').trim().toLowerCase();
-  if (
-    raw === 'claim_candidate' ||
-    raw === 'not_claim_candidate' ||
-    raw === 'manual_review'
-  ) {
+  const raw = String(value || '')
+    .trim()
+    .toLowerCase();
+  if (raw === 'claim_candidate' || raw === 'not_claim_candidate' || raw === 'manual_review') {
     return raw;
   }
   return null;
@@ -262,7 +317,9 @@ export function classifyVisitForRpa(
       ? String(extractionMetadata.nric || '').trim()
       : '';
   const hasNric = hasUsableNric(nric) || hasUsableNric(metadataNric);
-  const submission = String(submissionStatus || '').trim().toLowerCase();
+  const submission = String(submissionStatus || '')
+    .trim()
+    .toLowerCase();
 
   if (submission === 'draft' || submission === 'submitted') {
     return {
@@ -295,10 +352,7 @@ export function classifyVisitForRpa(
   }
 
   if (route) {
-    const reasons = uniqueStrings([
-      'portal_supported',
-      !hasNric ? 'missing_nric' : null,
-    ]);
+    const reasons = uniqueStrings(['portal_supported', !hasNric ? 'missing_nric' : null]);
     return {
       status: hasNric ? 'claim_candidate' : 'manual_review',
       reasons,

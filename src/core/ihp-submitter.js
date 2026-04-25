@@ -1,5 +1,6 @@
 import { PORTALS } from '../config/portals.js';
 import { GenericPortalSubmitter, createDefaultSelectors } from './portal-generic-submitter.js';
+import { buildIhpSubmittedTruthCapture } from './portal-truth/ihp.js';
 
 function withOverrides(base, overrides) {
   const next = { ...base };
@@ -66,6 +67,18 @@ export class IHPSubmitter {
     if (this.steps?.step) {
       this.steps.step(2, 'Submitting to IHP portal service');
     }
-    return this.runtime.submit(visit, runtimeCredential);
+    const result = await this.runtime.submit(visit, runtimeCredential);
+    return {
+      ...result,
+      submittedTruthCapture:
+        result?.submittedTruthCapture ||
+        buildIhpSubmittedTruthCapture({
+          visit,
+          result,
+          portalUrl: result?.portalUrl || runtimeCredential?.url || this.runtime.defaultUrl || null,
+          auditedAt: result?.processedAt || new Date().toISOString(),
+        }),
+      submittedTruthSnapshot: result?.submittedTruthSnapshot ?? null,
+    };
   }
 }
