@@ -104,7 +104,24 @@ jobs:
           envs: PIPE_FROM,PIPE_TO,PIPE_PORTAL_TARGETS,PIPE_LIMIT_PER_PORTAL,PIPE_RUN_FLOW1,PIPE_FORCE_FLOW1,PIPE_RUN_FLOW2,PIPE_FORCE_FLOW2,PIPE_RUN_TRUTH_AUDIT,PIPE_TRUTH_AUDIT_DRY_RUN
           script_stop: true
           script: |
+            bash <<'BASH'
             set -euo pipefail
+
+            : "${PIPE_FROM:=}"
+            : "${PIPE_TO:=}"
+            : "${PIPE_PORTAL_TARGETS:=MHC,FULLERTON,IXCHANGE,IHP,ALLIANCE_MEDINET,GE_NTUC,ALLIANZ}"
+            : "${PIPE_LIMIT_PER_PORTAL:=3}"
+            : "${PIPE_RUN_FLOW1:=false}"
+            : "${PIPE_FORCE_FLOW1:=false}"
+            : "${PIPE_RUN_FLOW2:=true}"
+            : "${PIPE_FORCE_FLOW2:=false}"
+            : "${PIPE_RUN_TRUTH_AUDIT:=true}"
+            : "${PIPE_TRUTH_AUDIT_DRY_RUN:=false}"
+
+            if [ -z "$PIPE_FROM" ] || [ -z "$PIPE_TO" ]; then
+              echo "from and to are required"
+              exit 2
+            fi
 
             DEPLOY_PATH="${{ secrets.EC2_DEPLOY_PATH || '~/Baselrpacrm' }}"
             DEPLOY_PATH="${DEPLOY_PATH/#\~/$HOME}"
@@ -209,3 +226,4 @@ jobs:
 
             echo "Pipeline summary: $SUMMARY"
             cat "$SUMMARY"
+            BASH
