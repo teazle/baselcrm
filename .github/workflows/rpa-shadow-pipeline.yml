@@ -151,37 +151,19 @@ jobs:
             echo "Portal Targets: ${PIPE_PORTAL_TARGETS}"
             echo "Limit Per Portal: ${PIPE_LIMIT_PER_PORTAL}"
 
-            append_summary() {
-              echo "PIPELINE_STEP step=$1 scope=$2 status=$3 notes=$4"
-            }
-
-            run_step() {
-              step="$1"
-              scope="$2"
-              shift 2
-              echo "=== ${step}: ${scope} ==="
-              set +e
-              timeout 90m "$@"
-              rc=$?
-              set -e
-              if [ "$rc" -eq 0 ]; then
-                append_summary "$step" "$scope" "ok" "completed"
-              elif [ "$rc" -eq 124 ]; then
-                append_summary "$step" "$scope" "timeout" "timed out and pipeline continued"
-              else
-                append_summary "$step" "$scope" "failed" "exit code ${rc}; pipeline continued"
-              fi
-              return 0
-            }
-
             if [ "${PIPE_RUN_FLOW1:-false}" = "true" ]; then
               FLOW1_ARGS=("$PIPE_FROM" "$PIPE_TO")
               if [ "${PIPE_FORCE_FLOW1:-false}" = "true" ]; then
                 FLOW1_ARGS+=(--force)
               fi
-              run_step "flow1" "${PIPE_FROM}..${PIPE_TO}" env HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/extract-date-range.js "${FLOW1_ARGS[@]}"
+              echo "=== flow1: ${PIPE_FROM}..${PIPE_TO} ==="
+              set +e
+              timeout 90m env HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/extract-date-range.js "${FLOW1_ARGS[@]}"
+              rc=$?
+              set -e
+              echo "PIPELINE_STEP step=flow1 scope=${PIPE_FROM}..${PIPE_TO} status=${rc}"
             else
-              append_summary "flow1" "${PIPE_FROM}..${PIPE_TO}" "skipped" "run_flow1=false"
+              echo "PIPELINE_STEP step=flow1 scope=${PIPE_FROM}..${PIPE_TO} status=skipped notes=run_flow1=false"
             fi
 
             if [ "${PIPE_RUN_FLOW2:-true}" = "true" ]; then
@@ -189,9 +171,14 @@ jobs:
               if [ "${PIPE_FORCE_FLOW2:-false}" = "true" ]; then
                 FLOW2_ARGS+=(--force)
               fi
-              run_step "flow2" "${PIPE_FROM}..${PIPE_TO}" env HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/extract-visit-details-batch.js "${FLOW2_ARGS[@]}"
+              echo "=== flow2: ${PIPE_FROM}..${PIPE_TO} ==="
+              set +e
+              timeout 90m env HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/extract-visit-details-batch.js "${FLOW2_ARGS[@]}"
+              rc=$?
+              set -e
+              echo "PIPELINE_STEP step=flow2 scope=${PIPE_FROM}..${PIPE_TO} status=${rc}"
             else
-              append_summary "flow2" "${PIPE_FROM}..${PIPE_TO}" "skipped" "run_flow2=false"
+              echo "PIPELINE_STEP step=flow2 scope=${PIPE_FROM}..${PIPE_TO} status=skipped notes=run_flow2=false"
             fi
 
             IFS=',' read -ra PORTALS <<< "${PIPE_PORTAL_TARGETS}"
@@ -200,16 +187,26 @@ jobs:
               if [ -z "$portal" ]; then
                 continue
               fi
-              run_step "flow3_fill_evidence" "$portal" env HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/submit-claims-batch.js --mode fill_evidence --from "$PIPE_FROM" --to "$PIPE_TO" --portal-targets "$portal" --portal-only --limit "$PIPE_LIMIT_PER_PORTAL"
+              echo "=== flow3_fill_evidence: ${portal} ==="
+              set +e
+              timeout 90m env HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/submit-claims-batch.js --mode fill_evidence --from "$PIPE_FROM" --to "$PIPE_TO" --portal-targets "$portal" --portal-only --limit "$PIPE_LIMIT_PER_PORTAL"
+              rc=$?
+              set -e
+              echo "PIPELINE_STEP step=flow3_fill_evidence scope=${portal} status=${rc}"
 
               if [ "${PIPE_RUN_TRUTH_AUDIT:-true}" = "true" ]; then
                 AUDIT_ARGS=(--from "$PIPE_FROM" --to "$PIPE_TO" --portal-targets "$portal" --limit "$PIPE_LIMIT_PER_PORTAL")
                 if [ "${PIPE_TRUTH_AUDIT_DRY_RUN:-false}" = "true" ]; then
                   AUDIT_ARGS+=(--dry-run)
                 fi
-                run_step "submitted_truth_audit" "$portal" env HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/flow3-portal-truth-audit.js "${AUDIT_ARGS[@]}"
+                echo "=== submitted_truth_audit: ${portal} ==="
+                set +e
+                timeout 90m env HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/flow3-portal-truth-audit.js "${AUDIT_ARGS[@]}"
+                rc=$?
+                set -e
+                echo "PIPELINE_STEP step=submitted_truth_audit scope=${portal} status=${rc}"
               else
-                append_summary "submitted_truth_audit" "$portal" "skipped" "run_truth_audit=false"
+                echo "PIPELINE_STEP step=submitted_truth_audit scope=${portal} status=skipped notes=run_truth_audit=false"
               fi
             done
 
