@@ -146,19 +146,13 @@ jobs:
             STAMP="$(/bin/date -u '+%Y%m%d_%H%M%S')"
             GENERATED_AT="$(/bin/date -u '+%Y-%m-%dT%H:%M:%SZ')"
             echo "Pipeline stamp: $STAMP"
-            SUMMARY="/tmp/rpa_shadow_pipeline_${STAMP}.md"
-            echo '# RPA Shadow Pipeline' > "$SUMMARY"
-            echo '' >> "$SUMMARY"
-            echo "Generated: ${GENERATED_AT}" >> "$SUMMARY"
-            echo "Date Range: ${PIPE_FROM} to ${PIPE_TO}" >> "$SUMMARY"
-            echo "Portal Targets: ${PIPE_PORTAL_TARGETS}" >> "$SUMMARY"
-            echo "Limit Per Portal: ${PIPE_LIMIT_PER_PORTAL}" >> "$SUMMARY"
-            echo '' >> "$SUMMARY"
-            echo '| Step | Scope | Status | Notes |' >> "$SUMMARY"
-            echo '| --- | --- | --- | --- |' >> "$SUMMARY"
+            echo "Generated: ${GENERATED_AT}"
+            echo "Date Range: ${PIPE_FROM} to ${PIPE_TO}"
+            echo "Portal Targets: ${PIPE_PORTAL_TARGETS}"
+            echo "Limit Per Portal: ${PIPE_LIMIT_PER_PORTAL}"
 
             append_summary() {
-              echo "| $1 | $2 | $3 | $4 |" >> "$SUMMARY"
+              echo "PIPELINE_STEP step=$1 scope=$2 status=$3 notes=$4"
             }
 
             run_step() {
@@ -219,8 +213,5 @@ jobs:
               fi
             done
 
-            echo "Pipeline summary: $SUMMARY"
-            cat "$SUMMARY"
-            mkdir -p output/run-reports
-            cp "$SUMMARY" "output/run-reports/rpa_shadow_pipeline_${STAMP}.md" || true
+            echo "Pipeline wrapper finished. Flow scripts wrote their own run reports under output/run-reports."
             BASH
