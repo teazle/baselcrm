@@ -134,9 +134,14 @@ jobs:
             node -v || true
             echo "Playwright user data dir: ${PLAYWRIGHT_USER_DATA_DIR:-$HOME/.playwright-browser-data}"
             ls -la "${PLAYWRIGHT_USER_DATA_DIR:-$HOME/.playwright-browser-data}" 2>/dev/null | head -n 20 || true
+            REPORT_MARKER=$(mktemp)
+            touch "$REPORT_MARKER"
             HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/flow3-portal-truth-audit.js "${ARGS[@]}" 2>&1
 
-            LATEST_JSON=$(ls -t output/run-reports/flow3_submitted_truth_audit_*.json | head -n 1)
+            LATEST_JSON=$(
+              REPORT_MARKER="$REPORT_MARKER" node -e 'const fs = require("fs"); const path = require("path"); const markerMs = fs.statSync(process.env.REPORT_MARKER).mtimeMs; const dir = path.resolve("output", "run-reports"); const expected = { from: process.env.AUDIT_FROM || "", to: process.env.AUDIT_TO || "", visitIds: process.env.AUDIT_VISIT_IDS || "", portalTargets: process.env.AUDIT_PORTAL_TARGETS || "" }; const clean = value => String(value ?? "").trim(); const matchesScope = report => { const scope = report?.scope || {}; for (const [key, expectedValue] of Object.entries(expected)) { if (!expectedValue) continue; if (clean(scope[key]) !== clean(expectedValue)) return false; } return true; }; const candidates = fs.readdirSync(dir).filter(name => /^flow3_submitted_truth_audit_.*\.json$/.test(name)).map(name => { const filePath = path.join(dir, name); return { filePath, mtimeMs: fs.statSync(filePath).mtimeMs }; }).filter(entry => entry.mtimeMs >= markerMs).sort((a, b) => b.mtimeMs - a.mtimeMs); for (const entry of candidates) { try { const report = JSON.parse(fs.readFileSync(entry.filePath, "utf8")); if (matchesScope(report)) { console.log(entry.filePath); process.exit(0); } } catch {} } process.exit(1);' || true
+            )
+            rm -f "$REPORT_MARKER"
             if [ -z "${LATEST_JSON:-}" ]; then
               echo "Audit finished but no report was found."
               exit 1
