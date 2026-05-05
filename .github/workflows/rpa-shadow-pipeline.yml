@@ -159,22 +159,17 @@ jobs:
             echo '| --- | --- | --- | --- |' >> "$SUMMARY"
 
             append_summary() {
-              local step="$1"
-              local scope="$2"
-              local status="$3"
-              local notes="$4"
-              notes="$(printf '%s' "$notes" | tr '\n|' '  ')"
-              echo "| ${step} | ${scope} | ${status} | ${notes} |" >> "$SUMMARY"
+              echo "| $1 | $2 | $3 | $4 |" >> "$SUMMARY"
             }
 
             run_step() {
-              local step="$1"
-              local scope="$2"
+              step="$1"
+              scope="$2"
               shift 2
               echo "=== ${step}: ${scope} ==="
               set +e
               timeout 90m "$@"
-              local rc=$?
+              rc=$?
               set -e
               if [ "$rc" -eq 0 ]; then
                 append_summary "$step" "$scope" "ok" "completed"
