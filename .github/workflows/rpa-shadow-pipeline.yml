@@ -143,20 +143,22 @@ jobs:
             echo "Current commit on EC2:"
             git log -1 --oneline || true
 
-            STAMP=$(date -u +%Y%m%d_%H%M%S)
+            STAMP="$(/bin/date -u '+%Y%m%d_%H%M%S')"
+            GENERATED_AT="$(/bin/date -u '+%Y-%m-%dT%H:%M:%SZ')"
+            echo "Pipeline stamp: $STAMP"
             SUMMARY="output/run-reports/rpa_shadow_pipeline_${STAMP}.md"
             mkdir -p output/run-reports
-            {
-              echo "# RPA Shadow Pipeline"
-              echo ""
-              echo "Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-              echo "Date Range: ${PIPE_FROM} to ${PIPE_TO}"
-              echo "Portal Targets: ${PIPE_PORTAL_TARGETS}"
-              echo "Limit Per Portal: ${PIPE_LIMIT_PER_PORTAL}"
-              echo ""
-              echo "| Step | Scope | Status | Notes |"
-              echo "| --- | --- | --- | --- |"
-            } > "$SUMMARY"
+            printf '%s\n' \
+              '# RPA Shadow Pipeline' \
+              '' \
+              "Generated: ${GENERATED_AT}" \
+              "Date Range: ${PIPE_FROM} to ${PIPE_TO}" \
+              "Portal Targets: ${PIPE_PORTAL_TARGETS}" \
+              "Limit Per Portal: ${PIPE_LIMIT_PER_PORTAL}" \
+              '' \
+              '| Step | Scope | Status | Notes |' \
+              '| --- | --- | --- | --- |' \
+              > "$SUMMARY"
 
             append_summary() {
               local step="$1"
