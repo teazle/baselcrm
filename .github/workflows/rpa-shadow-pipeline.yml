@@ -106,6 +106,7 @@ jobs:
           script: |
             bash <<'BASH'
             set -euo pipefail
+            trap 'rc=$?; echo "Shadow pipeline failed at line ${LINENO}: ${BASH_COMMAND} (exit ${rc})"; exit ${rc}' ERR
 
             : "${PIPE_FROM:=}"
             : "${PIPE_TO:=}"
