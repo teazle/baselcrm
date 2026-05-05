@@ -2094,15 +2094,17 @@ export class AllianceMedinetAutomation {
       }
 
       await this.page.waitForTimeout(600);
+      const screenshotPath = `screenshots/alliance-medinet-final-form-${visit?.id || 'unknown'}.png`;
       await this.page
         .screenshot({
-          path: `screenshots/alliance-medinet-final-form-${visit?.id || 'unknown'}.png`,
+          path: screenshotPath,
           fullPage: true,
         })
         .catch(() => {});
       return {
         doctorName: mappedDoctorName,
         diagnosisPortalMatch: this.lastDiagnosisPortalMatch || null,
+        screenshot: screenshotPath,
       };
     } catch (error) {
       await this.page

@@ -2,7 +2,10 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { buildAllianceMedinetSubmittedTruthCapture } from './portal-truth-extractors.js';
-import { shouldSaveAllianceMedinetDraft } from './alliance-medinet-submitter.js';
+import {
+  buildAllianceFillVerification,
+  shouldSaveAllianceMedinetDraft,
+} from './alliance-medinet-submitter.js';
 
 test('Alliance Medinet fill_evidence mode skips draft save', () => {
   assert.equal(
@@ -40,4 +43,28 @@ test('Alliance Medinet submitted truth capture is normalized unavailable', () =>
   assert.equal(capture.context, 'alliance_medinet');
   assert.equal(capture.attempts.length, 1);
   assert.equal(capture.attempts[0].stage, 'submitted_detail_extractor');
+});
+
+test('Alliance Medinet fill verification exposes shadow-filled fields', () => {
+  const verification = buildAllianceFillVerification({
+    visit: {
+      visit_date: '2026-05-04',
+      total_amount: '38.00',
+      diagnosis_description: 'Upper respiratory tract infection',
+      extraction_metadata: {},
+    },
+    doctor: { doctorName: 'Tan Guoping Kelvin' },
+    fillResult: {
+      doctorName: 'Tan Guoping Kelvin',
+      diagnosisPortalMatch: {
+        blocked: false,
+        selectedOption: { text: 'J06.9 - Acute upper respiratory infection' },
+      },
+    },
+  });
+
+  assert.equal(verification.visitDate.status, 'filled_unverified');
+  assert.equal(verification.diagnosis.status, 'verified');
+  assert.equal(verification.fee.expected, '38.00');
+  assert.equal(verification.doctor.status, 'verified');
 });

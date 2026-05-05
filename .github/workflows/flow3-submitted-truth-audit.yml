@@ -15,6 +15,14 @@ on:
         description: 'Comma-separated visit IDs'
         required: false
         type: string
+      portal_targets:
+        description: 'Comma-separated portal targets'
+        required: false
+        type: string
+      portal_preset:
+        description: 'Optional single portal preset (MHC,FULLERTON,IXCHANGE,IHP,ALLIANCE_MEDINET,GE_NTUC,ALLIANZ)'
+        required: false
+        type: string
       limit:
         description: 'Max visits to audit'
         required: false
@@ -61,6 +69,8 @@ jobs:
           AUDIT_FROM: ${{ inputs.from }}
           AUDIT_TO: ${{ inputs.to }}
           AUDIT_VISIT_IDS: ${{ inputs.visit_ids }}
+          AUDIT_PORTAL_TARGETS: ${{ inputs.portal_targets }}
+          AUDIT_PORTAL_PRESET: ${{ inputs.portal_preset }}
           AUDIT_LIMIT: ${{ inputs.limit }}
           AUDIT_DRY_RUN: ${{ inputs.dry_run }}
         with:
@@ -70,7 +80,7 @@ jobs:
           port: ${{ secrets.EC2_PORT || 22 }}
           timeout: 60s
           command_timeout: 60m
-          envs: AUDIT_FROM,AUDIT_TO,AUDIT_VISIT_IDS,AUDIT_LIMIT,AUDIT_DRY_RUN
+          envs: AUDIT_FROM,AUDIT_TO,AUDIT_VISIT_IDS,AUDIT_PORTAL_TARGETS,AUDIT_PORTAL_PRESET,AUDIT_LIMIT,AUDIT_DRY_RUN
           script_stop: true
           script: |
             set -euo pipefail
@@ -89,6 +99,10 @@ jobs:
             echo "Current commit on EC2:"
             git log -1 --oneline || true
 
+            if [ -n "${AUDIT_PORTAL_PRESET:-}" ]; then
+              AUDIT_PORTAL_TARGETS="$AUDIT_PORTAL_PRESET"
+            fi
+
             ARGS=()
             if [ -n "${AUDIT_FROM:-}" ]; then
               ARGS+=(--from "$AUDIT_FROM")
@@ -98,6 +112,9 @@ jobs:
             fi
             if [ -n "${AUDIT_VISIT_IDS:-}" ]; then
               ARGS+=(--visit-ids "$AUDIT_VISIT_IDS")
+            fi
+            if [ -n "${AUDIT_PORTAL_TARGETS:-}" ]; then
+              ARGS+=(--portal-targets "$AUDIT_PORTAL_TARGETS")
             fi
             if [ -n "${AUDIT_LIMIT:-}" ]; then
               ARGS+=(--limit "$AUDIT_LIMIT")

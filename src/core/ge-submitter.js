@@ -1,7 +1,199 @@
 import { logger } from '../utils/logger.js';
 import { PORTALS } from '../config/portals.js';
 import { resolveDiagnosisAgainstPortalOptions } from '../automations/clinic-assist.js';
+import { buildGenericBotSnapshot } from './portal-generic-submitter.js';
 import { buildGeNtucSubmittedTruthCapture } from './portal-truth-extractors.js';
+import {
+  comparePortalTruthSnapshots,
+  writeFlow3TruthArtifacts,
+} from '../utils/flow3-truth-compare.js';
+
+async function captureGePageSnapshot(page) {
+  if (!page) return null;
+  return page
+    .evaluate(() => {
+      const norm = value =>
+        String(value || '')
+          .replace(/\s+/g, ' ')
+          .trim();
+      const fields = Array.from(
+        globalThis.document?.querySelectorAll?.('input, textarea, select') || []
+      )
+        .map(node => ({
+          tag: String(node.tagName || '').toLowerCase(),
+          type: norm(node.getAttribute?.('type')),
+          id: norm(node.getAttribute?.('id')),
+          name: norm(node.getAttribute?.('name')),
+          value:
+            node.tagName === 'SELECT'
+              ? norm(node.options?.[node.selectedIndex]?.text || node.value || '')
+              : norm(node.value || ''),
+          readonly: Boolean(node.readOnly || node.disabled),
+        }))
+        .filter(item => item.name || item.id || item.value)
+        .slice(0, 140);
+      return {
+        url: String(globalThis.location?.href || ''),
+        title: String(globalThis.document?.title || ''),
+        fields,
+      };
+    })
+    .catch(() => null);
+}
+
+export function buildGeFillVerification({
+  visit,
+  diagnosisResult,
+  feeTypeState,
+  feeAmount,
+  mcDays,
+  mcReason,
+  remarks,
+} = {}) {
+  const metadata = visit?.extraction_metadata || {};
+  const diagnosisState = diagnosisResult?.diagnosisState || {};
+  const selectedOption = diagnosisResult?.selectedOption || {};
+  return {
+    visitDate: {
+      status: visit?.visit_date ? 'portal_managed' : 'missing_source',
+      expected: visit?.visit_date || null,
+      observed: null,
+      selector: null,
+    },
+    diagnosis: {
+      status: diagnosisResult?.success ? 'verified' : 'filled_unverified',
+      expected: metadata?.diagnosis_description || visit?.diagnosis_description || null,
+      observed:
+        diagnosisState?.primaryText ||
+        selectedOption?.text ||
+        metadata?.diagnosis_description ||
+        visit?.diagnosis_description ||
+        null,
+      selector: diagnosisResult?.selector || null,
+    },
+    fee: {
+      status: feeAmount ? 'filled_unverified' : 'missing_source',
+      expected: feeAmount || visit?.total_amount || null,
+      observed: feeAmount || null,
+      selector: '#ctl00_MainContent_uc_MakeClaim_txtFeeAmount',
+    },
+    chargeType: {
+      status: feeTypeState?.selected ? 'verified' : 'filled_unverified',
+      expected: metadata?.chargeType || visit?.charge_type || null,
+      observed: feeTypeState?.value || null,
+      selector: feeTypeState?.by || null,
+    },
+    mcDays: {
+      status: mcDays !== null && mcDays !== undefined ? 'filled_unverified' : 'missing_source',
+      expected: mcDays ?? null,
+      observed: mcDays ?? null,
+      selector: '#ctl00_MainContent_uc_MakeClaim_txtMcDays',
+    },
+    mcReason: {
+      status: mcReason ? 'filled_unverified' : 'missing_source',
+      expected: mcReason || null,
+      observed: mcReason || null,
+      selector: '#ctl00_MainContent_uc_MakeClaim_ddlMcReasons',
+    },
+    remarks: {
+      status: remarks ? 'filled_unverified' : 'not_applicable',
+      expected: remarks || null,
+      observed: remarks || null,
+      selector: '#ctl00_MainContent_uc_MakeClaim_txtClaimRemarks',
+    },
+  };
+}
+
+async function buildGeEvidenceBundle({
+  visit,
+  page,
+  mode,
+  screenshot,
+  diagnosisResult,
+  diagnosisPortalMatch,
+  feeTypeState,
+  feeAmount,
+  mcDays,
+  mcReason,
+  remarks,
+  submittedTruthCapture,
+} = {}) {
+  const fillVerification = buildGeFillVerification({
+    visit,
+    diagnosisResult,
+    feeTypeState,
+    feeAmount,
+    mcDays,
+    mcReason,
+    remarks,
+  });
+  const botSnapshot = buildGenericBotSnapshot({
+    visit,
+    portalTarget: 'GE_NTUC',
+    portalName: 'GE / NTUC IM',
+    mode: mode || 'fill_evidence',
+    fillVerification,
+    pageSnapshot: await captureGePageSnapshot(page),
+    evidence: screenshot || null,
+  });
+  if (diagnosisResult?.diagnosisState?.primaryCode || diagnosisResult?.selectedOption?.code) {
+    botSnapshot.diagnosisCode =
+      diagnosisResult?.diagnosisState?.primaryCode || diagnosisResult?.selectedOption?.code;
+  }
+  if (diagnosisResult?.diagnosisState?.primaryText || diagnosisResult?.selectedOption?.text) {
+    botSnapshot.diagnosisText =
+      diagnosisResult?.diagnosisState?.primaryText || diagnosisResult?.selectedOption?.text;
+  }
+  const comparison = comparePortalTruthSnapshots({
+    portalTarget: 'GE_NTUC',
+    visit,
+    botSnapshot,
+    submittedTruthSnapshot: submittedTruthCapture?.snapshot || null,
+    diagnosisMatch: diagnosisPortalMatch || null,
+  });
+  const artifacts = await writeFlow3TruthArtifacts({
+    visit,
+    portalTarget: 'GE_NTUC',
+    expectedSnapshot: comparison?.expectedSnapshot || null,
+    botSnapshot,
+    submittedTruthSnapshot: submittedTruthCapture?.snapshot || null,
+    comparison,
+    extra: {
+      fillVerification,
+      submittedTruthCapture,
+    },
+  }).catch(error => {
+    logger.warn('[GE] Failed to write bot snapshot artifact', {
+      error: error?.message || String(error),
+    });
+    return null;
+  });
+  if (artifacts?.json) {
+    botSnapshot.artifacts = {
+      ...(botSnapshot.artifacts || {}),
+      json: artifacts.json,
+    };
+  }
+  return {
+    botSnapshot,
+    fillVerification,
+    comparison,
+    mismatchCategories: comparison?.mismatchCategories || [],
+    evidence:
+      [
+        botSnapshot?.artifacts?.json ? 'bot_snapshot' : null,
+        artifacts?.json ? 'comparison_artifact' : null,
+      ]
+        .filter(Boolean)
+        .join(',') || null,
+    evidenceArtifacts: {
+      screenshot: screenshot || null,
+      botSnapshot: botSnapshot?.artifacts || null,
+      comparison: artifacts || null,
+    },
+    sessionState: 'healthy',
+  };
+}
 
 /**
  * Dedicated submit service boundary for GE / NTUC IM portal flow.
@@ -1496,6 +1688,20 @@ export class GENtucSubmitter {
 
       const preCalculateScreenshot = `screenshots/ge-ntuc-filled-before-calculate-${visit?.id || nric}-${Date.now()}.png`;
       await popup.screenshot({ path: preCalculateScreenshot, fullPage: true }).catch(() => {});
+      const evidenceBundle = await buildGeEvidenceBundle({
+        visit,
+        page: popup,
+        mode: saveDraftEnabled ? 'draft' : 'fill_evidence',
+        screenshot: preCalculateScreenshot,
+        diagnosisResult,
+        diagnosisPortalMatch,
+        feeTypeState,
+        feeAmount,
+        mcDays,
+        mcReason,
+        remarks,
+        submittedTruthCapture,
+      });
 
       if (!saveDraftEnabled) {
         return baseResult({
@@ -1503,6 +1709,7 @@ export class GENtucSubmitter {
           filledOnly: true,
           screenshot: preCalculateScreenshot,
           diagnosisPortalMatch,
+          ...evidenceBundle,
         });
       }
 
@@ -1523,6 +1730,7 @@ export class GENtucSubmitter {
           screenshot: summaryScreenshot,
           screenshotBeforeCalculate: preCalculateScreenshot,
           diagnosisPortalMatch,
+          ...evidenceBundle,
         });
       }
 
@@ -1546,6 +1754,7 @@ export class GENtucSubmitter {
           screenshot: summaryScreenshot,
           screenshotBeforeCalculate: preCalculateScreenshot,
           diagnosisPortalMatch,
+          ...evidenceBundle,
         });
       }
 
@@ -1559,6 +1768,7 @@ export class GENtucSubmitter {
         screenshotAfterCalculate: summaryScreenshot,
         screenshotAfterSave: savedScreenshot,
         diagnosisPortalMatch,
+        ...evidenceBundle,
       });
     } catch (error) {
       const screenshotPath = `screenshots/ge-ntuc-error-${visit?.id || nric}-${Date.now()}.png`;

@@ -1,6 +1,11 @@
 import { logger } from '../utils/logger.js';
 import { extractAllianceMedinetTag } from '../../apps/crm/src/lib/rpa/portals.shared.js';
+import { buildGenericBotSnapshot } from './portal-generic-submitter.js';
 import { buildAllianceMedinetSubmittedTruthCapture } from './portal-truth-extractors.js';
+import {
+  comparePortalTruthSnapshots,
+  writeFlow3TruthArtifacts,
+} from '../utils/flow3-truth-compare.js';
 
 export function shouldSaveAllianceMedinetDraft({
   flow3Mode = process.env.FLOW3_MODE,
@@ -11,6 +16,145 @@ export function shouldSaveAllianceMedinetDraft({
     .toLowerCase();
   if (normalizedMode === 'fill_evidence') return false;
   return String(workflowSaveDraft ?? '1') !== '0';
+}
+
+async function captureAlliancePageSnapshot(page) {
+  if (!page) return null;
+  return page
+    .evaluate(() => {
+      const norm = value =>
+        String(value || '')
+          .replace(/\s+/g, ' ')
+          .trim();
+      const fields = Array.from(
+        globalThis.document?.querySelectorAll?.('input, textarea, select') || []
+      )
+        .map(node => ({
+          tag: String(node.tagName || '').toLowerCase(),
+          type: norm(node.getAttribute?.('type')),
+          id: norm(node.getAttribute?.('id')),
+          name: norm(node.getAttribute?.('name')),
+          value:
+            node.tagName === 'SELECT'
+              ? norm(node.options?.[node.selectedIndex]?.text || node.value || '')
+              : norm(node.value || ''),
+          readonly: Boolean(node.readOnly || node.disabled),
+        }))
+        .filter(item => item.name || item.id || item.value)
+        .slice(0, 120);
+      return {
+        url: String(globalThis.location?.href || ''),
+        title: String(globalThis.document?.title || ''),
+        fields,
+      };
+    })
+    .catch(() => null);
+}
+
+export function buildAllianceFillVerification({ visit, doctor, fillResult } = {}) {
+  const metadata = visit?.extraction_metadata || {};
+  const diagnosisMatch = fillResult?.diagnosisPortalMatch || null;
+  const diagnosisObserved =
+    diagnosisMatch?.selectedOption?.text ||
+    diagnosisMatch?.selectedText ||
+    diagnosisMatch?.text ||
+    metadata?.diagnosis_description ||
+    visit?.diagnosis_description ||
+    null;
+  return {
+    visitDate: {
+      status: visit?.visit_date ? 'filled_unverified' : 'missing_source',
+      expected: visit?.visit_date || null,
+      observed: null,
+      selector: null,
+    },
+    diagnosis: {
+      status: diagnosisMatch && diagnosisMatch.blocked === false ? 'verified' : 'filled_unverified',
+      expected: metadata?.diagnosis_description || visit?.diagnosis_description || null,
+      observed: diagnosisObserved,
+      selector: diagnosisMatch?.selector || null,
+    },
+    fee: {
+      status: visit?.total_amount ? 'filled_unverified' : 'missing_source',
+      expected: visit?.total_amount || null,
+      observed: null,
+      selector: null,
+    },
+    doctor: {
+      status: doctor?.doctorName ? 'verified' : 'missing_source',
+      expected: doctor?.doctorName || null,
+      observed: fillResult?.doctorName || null,
+      selector: null,
+    },
+  };
+}
+
+async function buildAllianceEvidenceBundle({
+  visit,
+  page,
+  flow3Mode,
+  fillResult,
+  doctor,
+  submittedTruthCapture,
+} = {}) {
+  const fillVerification = buildAllianceFillVerification({ visit, doctor, fillResult });
+  const botSnapshot = buildGenericBotSnapshot({
+    visit,
+    portalTarget: 'ALLIANCE_MEDINET',
+    portalName: 'Alliance Medinet',
+    mode: flow3Mode || 'fill_evidence',
+    fillVerification,
+    pageSnapshot: await captureAlliancePageSnapshot(page),
+    evidence: fillResult?.screenshot || null,
+  });
+  const comparison = comparePortalTruthSnapshots({
+    portalTarget: 'ALLIANCE_MEDINET',
+    visit,
+    botSnapshot,
+    submittedTruthSnapshot: submittedTruthCapture?.snapshot || null,
+    diagnosisMatch: fillResult?.diagnosisPortalMatch || null,
+  });
+  const artifacts = await writeFlow3TruthArtifacts({
+    visit,
+    portalTarget: 'ALLIANCE_MEDINET',
+    expectedSnapshot: comparison?.expectedSnapshot || null,
+    botSnapshot,
+    submittedTruthSnapshot: submittedTruthCapture?.snapshot || null,
+    comparison,
+    extra: {
+      fillVerification,
+      submittedTruthCapture,
+    },
+  }).catch(error => {
+    logger.warn('[ALLIANCE] Failed to write bot snapshot artifact', {
+      error: error?.message || String(error),
+    });
+    return null;
+  });
+  if (artifacts?.json) {
+    botSnapshot.artifacts = {
+      ...(botSnapshot.artifacts || {}),
+      json: artifacts.json,
+    };
+  }
+  return {
+    botSnapshot,
+    fillVerification,
+    comparison,
+    mismatchCategories: comparison?.mismatchCategories || [],
+    evidence:
+      [
+        botSnapshot?.artifacts?.json ? 'bot_snapshot' : null,
+        artifacts?.json ? 'comparison_artifact' : null,
+      ]
+        .filter(Boolean)
+        .join(',') || null,
+    evidenceArtifacts: {
+      screenshot: fillResult?.screenshot || null,
+      botSnapshot: botSnapshot?.artifacts || null,
+      comparison: artifacts || null,
+    },
+  };
 }
 
 /**
@@ -216,6 +360,14 @@ export class AllianceMedinetSubmitter {
             },
           ],
         });
+        const evidenceBundle = await buildAllianceEvidenceBundle({
+          visit,
+          page: this.automation?.page || null,
+          flow3Mode: flow3Mode || 'fill_evidence',
+          fillResult,
+          doctor,
+          submittedTruthCapture,
+        });
         if (saveDraft) {
           const ok = await this.automation.saveAsDraft();
           if (!ok) {
@@ -235,6 +387,8 @@ export class AllianceMedinetSubmitter {
           submitted: false,
           submittedTruthCapture,
           submittedTruthSnapshot: null,
+          ...evidenceBundle,
+          sessionState: 'healthy',
           attempt,
           diagnosisPortalMatch: fillResult?.diagnosisPortalMatch || null,
         };

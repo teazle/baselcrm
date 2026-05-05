@@ -16,6 +16,10 @@ import {
   portalTruthExtractorRequiresMhc,
   resolveVisitPortalTarget,
 } from '../core/portal-truth-extractors.js';
+import {
+  getFlow3PortalTargets,
+  normalizeFlow3PortalTarget,
+} from '../../apps/crm/src/lib/rpa/portals.shared.js';
 
 function usage() {
   console.log(`
@@ -29,6 +33,7 @@ Options:
   --from <YYYY-MM-DD>      Start date
   --to <YYYY-MM-DD>        End date
   --visit-ids <csv>        Specific visit IDs
+  --portal-targets <csv>   Restrict to portal targets (${getFlow3PortalTargets().join(', ')})
   --limit <n>              Max rows to audit (default 25)
   --dry-run                Capture and report only, do not persist back to DB
   --leave-open             Keep browser open
@@ -41,6 +46,7 @@ function parseArgs(argv) {
     from: null,
     to: null,
     visitIds: null,
+    portalTargets: null,
     limit: 25,
     dryRun: false,
     leaveOpen: false,
@@ -69,6 +75,19 @@ function parseArgs(argv) {
     } else if (arg === '--visit-ids') {
       out.visitIds = read(i).split(',').filter(Boolean);
       i += 1;
+    } else if (arg.startsWith('--portal-targets=')) {
+      out.portalTargets =
+        arg
+          .split('=')[1]
+          ?.split(',')
+          .map(value => normalizeFlow3PortalTarget(value))
+          .filter(Boolean) || null;
+    } else if (arg === '--portal-targets') {
+      out.portalTargets = read(i)
+        .split(',')
+        .map(value => normalizeFlow3PortalTarget(value))
+        .filter(Boolean);
+      i += 1;
     } else if (arg.startsWith('--limit=')) {
       out.limit = Number.parseInt(arg.split('=')[1] || '25', 10);
     } else if (arg === '--limit') {
@@ -85,6 +104,9 @@ function parseArgs(argv) {
     throw new Error('Provide --visit-ids or a --from/--to range');
   }
   if (!Number.isFinite(out.limit) || out.limit <= 0) out.limit = 25;
+  if (Array.isArray(out.portalTargets) && out.portalTargets.length === 0) {
+    throw new Error(`Invalid --portal-targets. Allowed: ${getFlow3PortalTargets().join(', ')}`);
+  }
   return out;
 }
 
@@ -128,6 +150,7 @@ function buildReportMarkdown({ generatedAt, scope, rows }) {
   lines.push(`Generated: ${generatedAt}`);
   lines.push(`Date Range: ${scope.from || '-'} to ${scope.to || '-'}`);
   lines.push(`Visit IDs: ${scope.visitIds || '-'}`);
+  lines.push(`Portal Targets: ${scope.portalTargets || '-'}`);
   lines.push(`Dry Run: ${String(scope.dryRun)}`);
   lines.push('');
   lines.push(
@@ -258,10 +281,13 @@ async function main() {
   const candidateRows = (data || [])
     .filter(visit => explicitVisitIds || hasAuditMaterial(visit))
     .slice(0, args.limit);
-  const routeRows = candidateRows.map(visit => ({
-    visit,
-    route: resolveVisitPortalTarget(visit),
-  }));
+  const portalTargetFilter = Array.isArray(args.portalTargets) ? new Set(args.portalTargets) : null;
+  const routeRows = candidateRows
+    .map(visit => ({
+      visit,
+      route: resolveVisitPortalTarget(visit),
+    }))
+    .filter(row => !portalTargetFilter || portalTargetFilter.has(row.route));
   const rows = routeRows.filter(row => portalTruthExtractorRequiresMhc(row.route));
   const unsupportedRows = routeRows.filter(row => !portalTruthExtractorRequiresMhc(row.route));
 
@@ -581,6 +607,7 @@ async function main() {
       from: args.from,
       to: args.to,
       visitIds: args.visitIds?.join(',') || null,
+      portalTargets: args.portalTargets?.join(',') || null,
       dryRun: args.dryRun,
     },
     rows: reportRows,
