@@ -38,6 +38,7 @@ function toMarkdown({ flowName, generatedAt, scope = {}, totals = {}, rows = [] 
   lines.push(`Date Range: ${clean(scope.from)} to ${clean(scope.to)}`);
   lines.push(`Date: ${clean(scope.date)}`);
   lines.push(`Pay Type: ${clean(scope.payType)}`);
+  lines.push(`Limit: ${clean(scope.limit)}`);
   lines.push(`Portal Targets: ${clean(scope.portalTargets)}`);
   lines.push(`Visit IDs: ${clean(scope.visitIds)}`);
   lines.push('');

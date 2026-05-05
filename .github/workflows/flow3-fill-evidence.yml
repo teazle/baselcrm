@@ -28,6 +28,11 @@ on:
         description: 'Optional pay type filter'
         required: false
         type: string
+      limit:
+        description: 'Max visits to process after candidate filtering'
+        required: false
+        default: '3'
+        type: string
       portal_only:
         description: 'Restrict to portal-scope rows'
         required: false
@@ -77,6 +82,7 @@ jobs:
           FLOW_PORTAL_TARGETS: ${{ inputs.portal_targets }}
           FLOW_PORTAL_PRESET: ${{ inputs.portal_preset }}
           FLOW_PAY_TYPE: ${{ inputs.pay_type }}
+          FLOW_LIMIT: ${{ inputs.limit }}
           FLOW_PORTAL_ONLY: ${{ inputs.portal_only }}
           FLOW_ALL_PENDING: ${{ inputs.all_pending }}
         with:
@@ -86,7 +92,7 @@ jobs:
           port: ${{ secrets.EC2_PORT || 22 }}
           timeout: 60s
           command_timeout: 60m
-          envs: FLOW_FROM,FLOW_TO,FLOW_VISIT_IDS,FLOW_PORTAL_TARGETS,FLOW_PORTAL_PRESET,FLOW_PAY_TYPE,FLOW_PORTAL_ONLY,FLOW_ALL_PENDING
+          envs: FLOW_FROM,FLOW_TO,FLOW_VISIT_IDS,FLOW_PORTAL_TARGETS,FLOW_PORTAL_PRESET,FLOW_PAY_TYPE,FLOW_LIMIT,FLOW_PORTAL_ONLY,FLOW_ALL_PENDING
           script_stop: true
           script: |
             set -euo pipefail
@@ -125,6 +131,9 @@ jobs:
             if [ -n "${FLOW_PAY_TYPE:-}" ]; then
               ARGS+=(--pay-type "$FLOW_PAY_TYPE")
             fi
+            if [ -n "${FLOW_LIMIT:-}" ]; then
+              ARGS+=(--limit "$FLOW_LIMIT")
+            fi
             if [ "${FLOW_PORTAL_ONLY:-true}" = "true" ]; then
               ARGS+=(--portal-only)
             fi
@@ -148,7 +157,7 @@ jobs:
             HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/submit-claims-batch.js "${ARGS[@]}" 2>&1
 
             LATEST_JSON=$(
-              REPORT_MARKER="$REPORT_MARKER" node -e 'const fs = require("fs"); const path = require("path"); const markerMs = fs.statSync(process.env.REPORT_MARKER).mtimeMs; const dir = path.resolve("output", "run-reports"); const expected = { from: process.env.FLOW_FROM || "", to: process.env.FLOW_TO || "", visitIds: process.env.FLOW_VISIT_IDS || "", portalTargets: process.env.FLOW_PORTAL_TARGETS || "", payType: process.env.FLOW_PAY_TYPE || "" }; const clean = value => String(value ?? "").trim(); const matchesScope = report => { const scope = report?.scope || {}; for (const [key, expectedValue] of Object.entries(expected)) { if (!expectedValue) continue; if (clean(scope[key]) !== clean(expectedValue)) return false; } return true; }; const candidates = fs.readdirSync(dir).filter(name => /^flow3_[0-9].*\.json$/.test(name)).map(name => { const filePath = path.join(dir, name); return { filePath, mtimeMs: fs.statSync(filePath).mtimeMs }; }).filter(entry => entry.mtimeMs >= markerMs).sort((a, b) => b.mtimeMs - a.mtimeMs); for (const entry of candidates) { try { const report = JSON.parse(fs.readFileSync(entry.filePath, "utf8")); if (matchesScope(report)) { console.log(entry.filePath); process.exit(0); } } catch {} } process.exit(1);' || true
+              REPORT_MARKER="$REPORT_MARKER" node -e 'const fs = require("fs"); const path = require("path"); const markerMs = fs.statSync(process.env.REPORT_MARKER).mtimeMs; const dir = path.resolve("output", "run-reports"); const expected = { from: process.env.FLOW_FROM || "", to: process.env.FLOW_TO || "", visitIds: process.env.FLOW_VISIT_IDS || "", portalTargets: process.env.FLOW_PORTAL_TARGETS || "", payType: process.env.FLOW_PAY_TYPE || "", limit: process.env.FLOW_LIMIT || "" }; const clean = value => String(value ?? "").trim(); const matchesScope = report => { const scope = report?.scope || {}; for (const [key, expectedValue] of Object.entries(expected)) { if (!expectedValue) continue; if (clean(scope[key]) !== clean(expectedValue)) return false; } return true; }; const candidates = fs.readdirSync(dir).filter(name => /^flow3_[0-9].*\.json$/.test(name)).map(name => { const filePath = path.join(dir, name); return { filePath, mtimeMs: fs.statSync(filePath).mtimeMs }; }).filter(entry => entry.mtimeMs >= markerMs).sort((a, b) => b.mtimeMs - a.mtimeMs); for (const entry of candidates) { try { const report = JSON.parse(fs.readFileSync(entry.filePath, "utf8")); if (matchesScope(report)) { console.log(entry.filePath); process.exit(0); } } catch {} } process.exit(1);' || true
             )
             rm -f "$REPORT_MARKER"
             if [ -z "${LATEST_JSON:-}" ]; then

@@ -1,12 +1,12 @@
-import { spawn } from "child_process";
-import path from "path";
-import { NextResponse } from "next/server";
+import { spawn } from 'child_process';
+import path from 'path';
+import { NextResponse } from 'next/server';
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 function repoRoot() {
-  return path.resolve(process.cwd(), "..", "..");
+  return path.resolve(process.cwd(), '..', '..');
 }
 
 function spawnSubmission(args: string[]) {
@@ -14,7 +14,7 @@ function spawnSubmission(args: string[]) {
     cwd: repoRoot(),
     env: { ...process.env },
     detached: true,
-    stdio: "ignore",
+    stdio: 'ignore',
   });
   child.unref();
   return child.pid;
@@ -23,51 +23,64 @@ function spawnSubmission(args: string[]) {
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const visitIds = Array.isArray(body?.visitIds) ? body.visitIds : undefined;
-  const payType = typeof body?.payType === "string" ? body.payType : undefined;
+  const payType = typeof body?.payType === 'string' ? body.payType : undefined;
   const portalTargets = Array.isArray(body?.portalTargets)
     ? body.portalTargets
-      .map((value: unknown) => String(value ?? "").trim().toUpperCase())
-      .filter(Boolean)
+        .map((value: unknown) =>
+          String(value ?? '')
+            .trim()
+            .toUpperCase()
+        )
+        .filter(Boolean)
     : undefined;
   const requestedMode =
-    typeof body?.mode === "string" ? String(body.mode).trim().toLowerCase() : "";
-  const from = typeof body?.from === "string" ? body.from : undefined;
-  const to = typeof body?.to === "string" ? body.to : undefined;
+    typeof body?.mode === 'string' ? String(body.mode).trim().toLowerCase() : '';
+  const from = typeof body?.from === 'string' ? body.from : undefined;
+  const to = typeof body?.to === 'string' ? body.to : undefined;
+  const limit =
+    Number.isInteger(body?.limit) && body.limit > 0
+      ? String(body.limit)
+      : typeof body?.limit === 'string' && /^\d+$/.test(body.limit) && Number(body.limit) > 0
+        ? body.limit
+        : undefined;
   const portalOnly = Boolean(body?.portalOnly);
   const saveAsDraft = Boolean(body?.saveAsDraft);
   const leaveOpen = Boolean(body?.leaveOpen);
   const mode =
-    requestedMode === "draft" || requestedMode === "submit" || requestedMode === "fill_evidence"
+    requestedMode === 'draft' || requestedMode === 'submit' || requestedMode === 'fill_evidence'
       ? requestedMode
       : saveAsDraft
-        ? "draft"
-        : "fill_evidence";
+        ? 'draft'
+        : 'fill_evidence';
 
   try {
     // For now, we'll create a simple batch submission script
     // In the future, this could call ClaimSubmitter directly
-    const args = ["src/examples/submit-claims-batch.js"];
+    const args = ['src/examples/submit-claims-batch.js'];
     if (visitIds && visitIds.length > 0) {
-      args.push("--visit-ids", visitIds.join(","));
+      args.push('--visit-ids', visitIds.join(','));
     }
     if (payType) {
-      args.push("--pay-type", payType);
+      args.push('--pay-type', payType);
     }
     if (portalTargets && portalTargets.length > 0) {
-      args.push("--portal-targets", portalTargets.join(","));
+      args.push('--portal-targets', portalTargets.join(','));
     }
-    args.push("--mode", mode);
+    args.push('--mode', mode);
     if (from) {
-      args.push("--from", from);
+      args.push('--from', from);
     }
     if (to) {
-      args.push("--to", to);
+      args.push('--to', to);
+    }
+    if (limit) {
+      args.push('--limit', limit);
     }
     if (portalOnly) {
-      args.push("--portal-only");
+      args.push('--portal-only');
     }
     if (leaveOpen) {
-      args.push("--leave-open");
+      args.push('--leave-open');
     }
     if (
       (!visitIds || visitIds.length === 0) &&
@@ -78,7 +91,7 @@ export async function POST(request: Request) {
       !portalOnly
     ) {
       // The CLI now blocks unscoped runs unless explicit.
-      args.push("--all-pending");
+      args.push('--all-pending');
     }
 
     const pid = spawnSubmission(args);
@@ -86,18 +99,15 @@ export async function POST(request: Request) {
       ok: true,
       pid,
       message:
-        mode === "draft"
-          ? "Flow 3 draft run started."
-          : mode === "submit"
-            ? "Flow 3 submit run started."
+        mode === 'draft'
+          ? 'Flow 3 draft run started.'
+          : mode === 'submit'
+            ? 'Flow 3 submit run started.'
             : leaveOpen
-              ? "Flow 3 fill + evidence run started (browser left open)."
-              : "Flow 3 fill + evidence run started.",
+              ? 'Flow 3 fill + evidence run started (browser left open).'
+              : 'Flow 3 fill + evidence run started.',
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: String((error as Error).message ?? error) },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: String((error as Error).message ?? error) }, { status: 500 });
   }
 }

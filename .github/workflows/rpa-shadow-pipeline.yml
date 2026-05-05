@@ -1,0 +1,211 @@
+name: RPA Shadow Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      from:
+        description: 'Start date (YYYY-MM-DD)'
+        required: true
+        type: string
+      to:
+        description: 'End date (YYYY-MM-DD)'
+        required: true
+        type: string
+      portal_targets:
+        description: 'Comma-separated portal targets; default runs all'
+        required: false
+        default: 'MHC,FULLERTON,IXCHANGE,IHP,ALLIANCE_MEDINET,GE_NTUC,ALLIANZ'
+        type: string
+      limit_per_portal:
+        description: 'Max visits per portal for fill_evidence'
+        required: false
+        default: '3'
+        type: string
+      run_flow1:
+        description: 'Run Flow 1 extraction first'
+        required: false
+        default: false
+        type: boolean
+      force_flow1:
+        description: 'Force Flow 1 re-extraction'
+        required: false
+        default: false
+        type: boolean
+      run_flow2:
+        description: 'Run Flow 2 refresh before fill_evidence'
+        required: false
+        default: true
+        type: boolean
+      force_flow2:
+        description: 'Force Flow 2 re-extraction'
+        required: false
+        default: false
+        type: boolean
+      run_truth_audit:
+        description: 'Run submitted-truth audit after fill_evidence'
+        required: false
+        default: true
+        type: boolean
+      truth_audit_dry_run:
+        description: 'Do not persist submitted-truth audit updates'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  shadow-pipeline:
+    name: Run shadow pipeline on EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate EC2 SSH reachability
+        shell: bash
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_PORT: ${{ secrets.EC2_PORT || 22 }}
+        run: |
+          set -euo pipefail
+          connected=false
+          for attempt in 1 2 3; do
+            echo "Reachability check ${attempt}/3 to EC2 SSH port..."
+            if timeout 10 bash -c "cat < /dev/null > /dev/tcp/${EC2_HOST}/${EC2_PORT}" 2>/dev/null; then
+              connected=true
+              echo "EC2 SSH endpoint is reachable."
+              break
+            fi
+            sleep 15
+          done
+
+          if [ "${connected}" != "true" ]; then
+            echo "Cannot reach EC2 SSH endpoint (${EC2_HOST}:${EC2_PORT})."
+            exit 1
+          fi
+
+      - name: Run RPA shadow pipeline on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          PIPE_FROM: ${{ inputs.from }}
+          PIPE_TO: ${{ inputs.to }}
+          PIPE_PORTAL_TARGETS: ${{ inputs.portal_targets }}
+          PIPE_LIMIT_PER_PORTAL: ${{ inputs.limit_per_portal }}
+          PIPE_RUN_FLOW1: ${{ inputs.run_flow1 }}
+          PIPE_FORCE_FLOW1: ${{ inputs.force_flow1 }}
+          PIPE_RUN_FLOW2: ${{ inputs.run_flow2 }}
+          PIPE_FORCE_FLOW2: ${{ inputs.force_flow2 }}
+          PIPE_RUN_TRUTH_AUDIT: ${{ inputs.run_truth_audit }}
+          PIPE_TRUTH_AUDIT_DRY_RUN: ${{ inputs.truth_audit_dry_run }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || 22 }}
+          timeout: 60s
+          command_timeout: 360m
+          envs: PIPE_FROM,PIPE_TO,PIPE_PORTAL_TARGETS,PIPE_LIMIT_PER_PORTAL,PIPE_RUN_FLOW1,PIPE_FORCE_FLOW1,PIPE_RUN_FLOW2,PIPE_FORCE_FLOW2,PIPE_RUN_TRUTH_AUDIT,PIPE_TRUTH_AUDIT_DRY_RUN
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            DEPLOY_PATH="${{ secrets.EC2_DEPLOY_PATH || '~/Baselrpacrm' }}"
+            DEPLOY_PATH="${DEPLOY_PATH/#\~/$HOME}"
+
+            echo "Deploy path: $DEPLOY_PATH"
+            cd "$DEPLOY_PATH"
+
+            if [ ! -d .git ]; then
+              echo "Not a git repository in $DEPLOY_PATH"
+              exit 1
+            fi
+
+            if ! [[ "${PIPE_LIMIT_PER_PORTAL:-3}" =~ ^[0-9]+$ ]] || [ "${PIPE_LIMIT_PER_PORTAL:-3}" -le 0 ]; then
+              echo "limit_per_portal must be a positive integer"
+              exit 2
+            fi
+
+            echo "Current commit on EC2:"
+            git log -1 --oneline || true
+
+            STAMP=$(date -u +%Y%m%d_%H%M%S)
+            SUMMARY="output/run-reports/rpa_shadow_pipeline_${STAMP}.md"
+            mkdir -p output/run-reports
+            {
+              echo "# RPA Shadow Pipeline"
+              echo ""
+              echo "Generated: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+              echo "Date Range: ${PIPE_FROM} to ${PIPE_TO}"
+              echo "Portal Targets: ${PIPE_PORTAL_TARGETS}"
+              echo "Limit Per Portal: ${PIPE_LIMIT_PER_PORTAL}"
+              echo ""
+              echo "| Step | Scope | Status | Notes |"
+              echo "| --- | --- | --- | --- |"
+            } > "$SUMMARY"
+
+            append_summary() {
+              local step="$1"
+              local scope="$2"
+              local status="$3"
+              local notes="$4"
+              notes="${notes//$'\n'/ }"
+              echo "| ${step} | ${scope} | ${status} | ${notes//|//} |" >> "$SUMMARY"
+            }
+
+            run_step() {
+              local step="$1"
+              local scope="$2"
+              shift 2
+              echo "=== ${step}: ${scope} ==="
+              set +e
+              timeout 90m "$@"
+              local rc=$?
+              set -e
+              if [ "$rc" -eq 0 ]; then
+                append_summary "$step" "$scope" "ok" "completed"
+              elif [ "$rc" -eq 124 ]; then
+                append_summary "$step" "$scope" "timeout" "timed out and pipeline continued"
+              else
+                append_summary "$step" "$scope" "failed" "exit code ${rc}; pipeline continued"
+              fi
+              return 0
+            }
+
+            if [ "${PIPE_RUN_FLOW1:-false}" = "true" ]; then
+              FLOW1_ARGS=("$PIPE_FROM" "$PIPE_TO")
+              if [ "${PIPE_FORCE_FLOW1:-false}" = "true" ]; then
+                FLOW1_ARGS+=(--force)
+              fi
+              run_step "flow1" "${PIPE_FROM}..${PIPE_TO}" env HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/extract-date-range.js "${FLOW1_ARGS[@]}"
+            else
+              append_summary "flow1" "${PIPE_FROM}..${PIPE_TO}" "skipped" "run_flow1=false"
+            fi
+
+            if [ "${PIPE_RUN_FLOW2:-true}" = "true" ]; then
+              FLOW2_ARGS=(--from "$PIPE_FROM" --to "$PIPE_TO")
+              if [ "${PIPE_FORCE_FLOW2:-false}" = "true" ]; then
+                FLOW2_ARGS+=(--force)
+              fi
+              run_step "flow2" "${PIPE_FROM}..${PIPE_TO}" env HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/extract-visit-details-batch.js "${FLOW2_ARGS[@]}"
+            else
+              append_summary "flow2" "${PIPE_FROM}..${PIPE_TO}" "skipped" "run_flow2=false"
+            fi
+
+            IFS=',' read -ra PORTALS <<< "${PIPE_PORTAL_TARGETS}"
+            for raw_portal in "${PORTALS[@]}"; do
+              portal="$(echo "$raw_portal" | xargs | tr '[:lower:]' '[:upper:]')"
+              if [ -z "$portal" ]; then
+                continue
+              fi
+              run_step "flow3_fill_evidence" "$portal" env HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/submit-claims-batch.js --mode fill_evidence --from "$PIPE_FROM" --to "$PIPE_TO" --portal-targets "$portal" --portal-only --limit "$PIPE_LIMIT_PER_PORTAL"
+
+              if [ "${PIPE_RUN_TRUTH_AUDIT:-true}" = "true" ]; then
+                AUDIT_ARGS=(--from "$PIPE_FROM" --to "$PIPE_TO" --portal-targets "$portal" --limit "$PIPE_LIMIT_PER_PORTAL")
+                if [ "${PIPE_TRUTH_AUDIT_DRY_RUN:-false}" = "true" ]; then
+                  AUDIT_ARGS+=(--dry-run)
+                fi
+                run_step "submitted_truth_audit" "$portal" env HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/flow3-portal-truth-audit.js "${AUDIT_ARGS[@]}"
+              else
+                append_summary "submitted_truth_audit" "$portal" "skipped" "run_truth_audit=false"
+              fi
+            done
+
+            echo "Pipeline summary: $SUMMARY"
+            cat "$SUMMARY"

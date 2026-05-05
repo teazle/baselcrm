@@ -460,7 +460,14 @@ export class ClaimSubmitter {
       return [];
     }
 
-    const { from = null, to = null, portalOnly = false, portalTargets = null } = opts || {};
+    const {
+      from = null,
+      to = null,
+      portalOnly = false,
+      portalTargets = null,
+      limit = null,
+    } = opts || {};
+    const maxRows = Number.isInteger(limit) && limit > 0 ? limit : null;
     const explicitVisitIds = Array.isArray(visitIds) && visitIds.length > 0;
     const requestedMode = this._getRequestedMode();
     const allowSubmittedShadowFill = explicitVisitIds && requestedMode === 'fill_evidence';
@@ -480,6 +487,9 @@ export class ClaimSubmitter {
     if (to && /^\d{4}-\d{2}-\d{2}$/.test(String(to))) {
       query = query.lte('visit_date', to);
     }
+    query = query.order('visit_date', { ascending: true }).order('patient_name', {
+      ascending: true,
+    });
 
     // Convenience filter for verification runs: only rows that look like portal-tagged patients.
     if (portalOnly && !payType) {
@@ -540,6 +550,10 @@ export class ClaimSubmitter {
           visit?.extraction_metadata || null
         )
       );
+    }
+
+    if (maxRows) {
+      rows = rows.slice(0, maxRows);
     }
 
     return rows;

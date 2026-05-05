@@ -20,6 +20,7 @@ Usage:
   node src/examples/submit-claims-batch.js --visit-ids id1,id2,id3
   node src/examples/submit-claims-batch.js --pay-type MHC
   node src/examples/submit-claims-batch.js --portal-targets MHC,ALLIANCE_MEDINET --from 2026-02-02 --to 2026-02-07
+  node src/examples/submit-claims-batch.js --portal-targets FULLERTON --from 2026-02-02 --to 2026-02-07 --limit 3
   node src/examples/submit-claims-batch.js --mode draft --from 2026-02-02 --to 2026-02-07 --portal-only
   node src/examples/submit-claims-batch.js --all-pending
 
@@ -30,6 +31,7 @@ Options:
   --mode <value>         One of: fill_evidence, draft, submit
   --from <YYYY-MM-DD>    Start date filter
   --to <YYYY-MM-DD>      End date filter
+  --limit <n>            Max visits to process after candidate filtering
   --portal-only          Only rows in portal scope (MHC/AIA/AVIVA/SINGLIFE + Allianz Medinet tags)
   --save-as-draft        Deprecated alias for --mode draft
   --leave-open           Keep browser open for manual verification
@@ -46,6 +48,7 @@ function parseCliArgs(argv) {
     mode: 'fill_evidence',
     from: null,
     to: null,
+    limit: null,
     portalOnly: false,
     leaveOpen: process.env.BROWSER_LEAVE_OPEN === '1',
     allPending: false,
@@ -151,6 +154,15 @@ function parseCliArgs(argv) {
       i++;
       continue;
     }
+    if (arg.startsWith('--limit=')) {
+      opts.limit = Number.parseInt(arg.split('=')[1] || '', 10);
+      continue;
+    }
+    if (arg === '--limit') {
+      opts.limit = Number.parseInt(readValue(i), 10);
+      i++;
+      continue;
+    }
     throw new Error(`Unknown argument: ${arg}`);
   }
 
@@ -160,6 +172,9 @@ function parseCliArgs(argv) {
   }
   if (opts.to && !dateRe.test(opts.to)) {
     throw new Error(`Invalid --to date format: ${opts.to} (expected YYYY-MM-DD)`);
+  }
+  if (opts.limit !== null && (!Number.isInteger(opts.limit) || opts.limit <= 0)) {
+    throw new Error(`Invalid --limit value: ${opts.limit} (expected positive integer)`);
   }
 
   const normalizedMode = String(opts.mode || 'fill_evidence')
@@ -200,8 +215,18 @@ async function submitClaimsBatch() {
     return;
   }
 
-  const { visitIds, payType, portalTargets, mode, from, to, portalOnly, leaveOpen, allPending } =
-    parsed;
+  const {
+    visitIds,
+    payType,
+    portalTargets,
+    mode,
+    from,
+    to,
+    limit,
+    portalOnly,
+    leaveOpen,
+    allPending,
+  } = parsed;
   const normalizedPortalTargets = Array.isArray(portalTargets)
     ? [...new Set(portalTargets.map(v => normalizeFlow3PortalTarget(v)).filter(Boolean))]
     : undefined;
@@ -244,6 +269,7 @@ async function submitClaimsBatch() {
     `Portal Targets: ${normalizedPortalTargets?.length ? normalizedPortalTargets.join(', ') : 'All routes'}`
   );
   logger.info(`Date Range: ${from || '-'} to ${to || '-'}`);
+  logger.info(`Limit: ${limit || 'None'}`);
   logger.info(`Portal Only: ${portalOnly}`);
   logger.info(`Flow 3 Mode: ${mode}`);
   logger.info(`Leave Browser Open: ${leaveOpen}`);
@@ -260,6 +286,7 @@ async function submitClaimsBatch() {
     portalTargets: normalizedPortalTargets,
     from,
     to,
+    limit,
     portalOnly,
     mode,
     trigger: 'manual',
@@ -290,6 +317,7 @@ async function submitClaimsBatch() {
     to: to || null,
     date: null,
     payType: payType || 'All',
+    limit: limit || null,
     portalTargets:
       normalizedPortalTargets?.join(',') || (portalOnly ? 'Portal scope' : 'All routes'),
     visitIds: visitIds?.join(',') || null,
@@ -493,6 +521,7 @@ async function submitClaimsBatch() {
       to,
       portalOnly,
       portalTargets: normalizedPortalTargets,
+      limit,
     });
 
     totalRecords = visits.length;
@@ -748,4 +777,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   });
 }
 
-export { submitClaimsBatch };
+export { parseCliArgs, submitClaimsBatch };
