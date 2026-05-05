@@ -163,8 +163,8 @@ jobs:
               local scope="$2"
               local status="$3"
               local notes="$4"
-              notes="${notes//$'\n'/ }"
-              echo "| ${step} | ${scope} | ${status} | ${notes//|//} |" >> "$SUMMARY"
+              notes="$(printf '%s' "$notes" | tr '\n|' '  ')"
+              echo "| ${step} | ${scope} | ${status} | ${notes} |" >> "$SUMMARY"
             }
 
             run_step() {
