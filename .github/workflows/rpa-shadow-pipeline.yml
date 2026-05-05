@@ -148,17 +148,15 @@ jobs:
             echo "Pipeline stamp: $STAMP"
             SUMMARY="output/run-reports/rpa_shadow_pipeline_${STAMP}.md"
             mkdir -p output/run-reports
-            printf '%s\n' \
-              '# RPA Shadow Pipeline' \
-              '' \
-              "Generated: ${GENERATED_AT}" \
-              "Date Range: ${PIPE_FROM} to ${PIPE_TO}" \
-              "Portal Targets: ${PIPE_PORTAL_TARGETS}" \
-              "Limit Per Portal: ${PIPE_LIMIT_PER_PORTAL}" \
-              '' \
-              '| Step | Scope | Status | Notes |' \
-              '| --- | --- | --- | --- |' \
-              > "$SUMMARY"
+            echo '# RPA Shadow Pipeline' > "$SUMMARY"
+            echo '' >> "$SUMMARY"
+            echo "Generated: ${GENERATED_AT}" >> "$SUMMARY"
+            echo "Date Range: ${PIPE_FROM} to ${PIPE_TO}" >> "$SUMMARY"
+            echo "Portal Targets: ${PIPE_PORTAL_TARGETS}" >> "$SUMMARY"
+            echo "Limit Per Portal: ${PIPE_LIMIT_PER_PORTAL}" >> "$SUMMARY"
+            echo '' >> "$SUMMARY"
+            echo '| Step | Scope | Status | Notes |' >> "$SUMMARY"
+            echo '| --- | --- | --- | --- |' >> "$SUMMARY"
 
             append_summary() {
               local step="$1"
