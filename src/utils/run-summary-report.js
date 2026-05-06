@@ -3,8 +3,12 @@ import path from 'path';
 
 function nowStamp() {
   const d = new Date();
-  const pad = n => String(n).padStart(2, '0');
-  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+  const pad = (n, size = 2) => String(n).padStart(size, '0');
+  return [
+    `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`,
+    `${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}${pad(d.getMilliseconds(), 3)}`,
+    process.pid,
+  ].join('_');
 }
 
 function clean(value, fallback = '-') {
