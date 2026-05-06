@@ -563,6 +563,7 @@ export class AllianzSubmitter {
       defaultUsername: PORTALS.ALLIANZ?.username || '',
       defaultPassword: PORTALS.ALLIANZ?.password || '',
       supportsOtp: true,
+      disableDefaultSearchFallback: true,
       selectors: buildSelectors(),
       beforeSearch: async ({ page: searchPage, state }) => {
         // Log page state before search to diagnose session loss
@@ -635,11 +636,12 @@ export class AllianzSubmitter {
           state.allianz_search_blocked = 'dob_required';
         }
       },
-      searchAttemptBuilder: ({ visit }) => {
+      searchAttemptBuilder: ({ visit, state = {} }) => {
         const attempts = [];
-        // Allianz AMOS portal "Policy search" accepts:
-        //   Option A: Policy Number + Date of Birth
-        //   Option B: Surname + Date of Birth (or sometimes just Surname)
+        // Allianz AMOS portal "Policy search" requires DOB for a reliable lookup.
+        // We only attempt the Surname + DOB path and intentionally block when
+        // DOB is missing so the caller gets a source-data reason instead of a
+        // vague portal_search_failed result.
         //
         // NRIC ≠ Policy Number — never put NRIC into the Policy Number field.
         //
@@ -653,6 +655,13 @@ export class AllianzSubmitter {
           dobAmos = `${isoMatch[3]}/${isoMatch[2]}/${isoMatch[1]}`;
         }
 
+        if (!dobAmos) {
+          state.search_blocked_reason = 'allianz_dob_required';
+          state.allianz_search_blocked = 'dob_required';
+          state.allianz_dob_supplied = false;
+          return [];
+        }
+
         let surname = '';
         if (fullName) {
           // For Western names "FIRST LAST" → last part is the surname.
@@ -663,17 +672,8 @@ export class AllianzSubmitter {
           surname = parts.length > 1 ? parts[0].replace(/,$/, '') : fullName;
         }
 
-        const dobInputSelectors = [
-          'input[name*="dob" i]',
-          'input[id*="dob" i]',
-          'input[name*="dateOfBirth" i]',
-          'input[id*="dateOfBirth" i]',
-          'input[name*="birth" i]',
-          'input[id*="birth" i]',
-        ];
-
         // Attempt 1 (preferred): Surname + DOB
-        if (surname && dobAmos) {
+        if (surname) {
           attempts.push({
             label: 'surname_and_dob',
             normalize: false,
@@ -682,7 +682,14 @@ export class AllianzSubmitter {
             extraInputs: [
               {
                 value: dobAmos,
-                inputSelectors: dobInputSelectors,
+                inputSelectors: [
+                  'input[name*="dob" i]',
+                  'input[id*="dob" i]',
+                  'input[name*="dateOfBirth" i]',
+                  'input[id*="dateOfBirth" i]',
+                  'input[name*="birth" i]',
+                  'input[id*="birth" i]',
+                ],
                 label: 'dob',
                 // AMOS: displaySearchButtonForTPA() only runs on blur/keyup/change
                 // of the dob input — Playwright .fill() doesn't trigger it, so the
@@ -691,38 +698,6 @@ export class AllianzSubmitter {
                 blurAfterFill: true,
               },
             ],
-          });
-        }
-
-        // Attempt 2: Surname only (some AMOS instances allow surname-only search)
-        if (surname) {
-          attempts.push({
-            value: surname,
-            inputSelectors: ['input[name*="surname" i]', 'input[id*="surname" i]'],
-            label: 'surname_only',
-            normalize: false,
-          });
-        }
-
-        // Attempt 3: NRIC/member ID in NRIC-specific fields only (NOT policy).
-        // AMOS typically has no NRIC field, so this is a safety fallback that
-        // the continue-on-missing logic will skip cleanly.
-        const nric = String(visit?.nric || '')
-          .trim()
-          .toUpperCase();
-        if (nric) {
-          attempts.push({
-            value: nric,
-            inputSelectors: [
-              'input[name*="nric" i]',
-              'input[id*="nric" i]',
-              'input[name*="memberId" i]',
-              'input[id*="memberId" i]',
-              'input[name*="memberNo" i]',
-              // IMPORTANT: Do NOT include policy fields — NRIC ≠ Policy Number
-            ],
-            label: 'nric_only',
-            normalize: false,
           });
         }
         return attempts;

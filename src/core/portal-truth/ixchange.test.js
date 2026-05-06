@@ -49,4 +49,12 @@ test('buildIxchangeSubmittedTruthCaptureUnavailable keeps ALL mode signals in at
   assert.equal(capture.attempts[0].modeSignals.parkway, false);
   assert.equal(capture.attempts[0].modeSignals.all, true);
   assert.ok(capture.searchTags.includes('ALL'));
+  assert.ok(
+    capture.attempts.some(
+      attempt =>
+        attempt.label === 'all_identifier_fallback' &&
+        attempt.attemptKind === 'patient_id' &&
+        attempt.value === 'S1234567A'
+    )
+  );
 });

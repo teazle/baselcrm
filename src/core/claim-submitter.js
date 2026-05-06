@@ -2061,8 +2061,16 @@ export class ClaimSubmitter {
       visit?.patient_dob,
       md?.dob,
       md?.date_of_birth,
+      md?.dateOfBirth,
+      md?.patientDob,
+      md?.patient_dob,
+      md?.dobRaw,
       md?.flow1?.dob,
+      md?.flow1?.dateOfBirth,
+      md?.flow1?.patientDob,
       md?.flow2?.dob,
+      md?.flow2?.dateOfBirth,
+      md?.flow2?.patientDob,
     ].filter(Boolean);
     for (const cand of candidates) {
       const s = String(cand).trim();
@@ -2074,6 +2082,22 @@ export class ClaimSubmitter {
         const dd = parseInt(iso[3], 10);
         if (yyyy >= 1900 && yyyy <= 2100 && mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31) {
           return `${iso[1]}-${iso[2]}-${iso[3]}`;
+        }
+      }
+      const dmy = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+      if (dmy) {
+        const dd = String(Number(dmy[1])).padStart(2, '0');
+        const mm = String(Number(dmy[2])).padStart(2, '0');
+        const yyyy = parseInt(dmy[3], 10);
+        if (
+          yyyy >= 1900 &&
+          yyyy <= 2100 &&
+          Number(mm) >= 1 &&
+          Number(mm) <= 12 &&
+          Number(dd) >= 1 &&
+          Number(dd) <= 31
+        ) {
+          return `${dmy[3]}-${mm}-${dd}`;
         }
       }
     }

@@ -166,6 +166,13 @@ function buildIxchangeSearchAttempts({ visit, state, selectors }) {
       label: 'all_name',
     });
   }
+  for (const id of idCandidates) {
+    attempts.push({
+      value: id,
+      inputSelectors: selectors.searchInputPatientId,
+      label: 'all_identifier_fallback',
+    });
+  }
   return attempts;
 }
 

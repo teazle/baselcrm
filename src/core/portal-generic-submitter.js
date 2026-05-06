@@ -282,6 +282,44 @@ function toBoolean(value, fallback = false) {
   return fallback;
 }
 
+function credentialFingerprint(credential) {
+  return [
+    String(credential?.url || '').trim(),
+    String(credential?.username || '').trim(),
+    String(credential?.password || '').trim(),
+  ].join('\n');
+}
+
+export function buildCredentialCandidates({ runtimeCredential, config, defaultUrl }) {
+  const candidates = [];
+  const push = candidate => {
+    const normalized = {
+      source: candidate.source,
+      url: String(candidate.url || '').trim(),
+      username: String(candidate.username || '').trim(),
+      password: String(candidate.password || '').trim(),
+    };
+    if (!normalized.url || !normalized.username || !normalized.password) return;
+    const fp = credentialFingerprint(normalized);
+    if (candidates.some(existing => credentialFingerprint(existing) === fp)) return;
+    candidates.push(normalized);
+  };
+
+  push({
+    source: 'runtime',
+    url: runtimeCredential?.url || defaultUrl,
+    username: runtimeCredential?.username,
+    password: runtimeCredential?.password,
+  });
+  push({
+    source: 'env',
+    url: config?.defaultUrl || defaultUrl,
+    username: config?.defaultUsername,
+    password: config?.defaultPassword,
+  });
+  return candidates;
+}
+
 function normalizeDateValue(value) {
   const raw = String(value || '')
     .replace(/\s+/g, ' ')
@@ -972,7 +1010,7 @@ export class GenericPortalSubmitter {
         .evaluate(() => String(globalThis.document?.body?.innerText || ''))
         .catch(() => '');
       const hasAuthError =
-        /invalid|incorrect|failed|unsuccessful|wrong password|wrong username|authentication/i.test(
+        /invalid|incorrect|failed|unsuccessful|wrong password|wrong username|authentication failed|failed authentication|login failed|login unsuccessful/i.test(
           bodyText
         );
       const hasCredentialDecryptError =
@@ -1209,6 +1247,15 @@ export class GenericPortalSubmitter {
     }
 
     if (!attempts.length) {
+      if (state.search_blocked_reason) {
+        state.search_state = state.search_blocked_reason;
+        state.search_debug = await this._captureSearchDebug();
+        return {
+          ok: false,
+          reason: state.search_blocked_reason,
+          nric: nric || null,
+        };
+      }
       state.search_state = 'missing_identifier';
       return { ok: false, reason: 'missing_identifier', nric: null };
     }
@@ -1755,30 +1802,53 @@ export class GenericPortalSubmitter {
       sessionState: 'healthy',
     };
 
-    const url = String(runtimeCredential?.url || this.defaultUrl || '').trim();
-    const username = String(
-      runtimeCredential?.username || this.config?.defaultUsername || ''
-    ).trim();
-    const password = String(
-      runtimeCredential?.password || this.config?.defaultPassword || ''
-    ).trim();
+    const credentialCandidates = buildCredentialCandidates({
+      runtimeCredential,
+      config: this.config,
+      defaultUrl: this.defaultUrl,
+    });
 
-    if (!url || !username || !password) {
+    if (!credentialCandidates.length) {
       return this._buildResult(state, {
         reason: 'credentials_missing',
         blocked_reason: 'portal_credentials_missing',
         detailReason: 'portal_credentials_missing',
         error: `${this.portalTarget} portal credentials are missing`,
         sessionState: 'blocked',
-        portalUrl: url || null,
+        portalUrl: this.defaultUrl || runtimeCredential?.url || null,
         hasRuntimeCredential: Boolean(runtimeCredential?.username || runtimeCredential?.password),
       });
     }
 
+    let activeCredential = credentialCandidates[0];
+
     try {
       this.steps?.step?.(2, `[${this.portalTarget}] Login + fill (probe mode)`);
 
-      const loggedIn = await this._login(url, username, password, state, visit);
+      let loggedIn = false;
+      for (let idx = 0; idx < credentialCandidates.length; idx += 1) {
+        activeCredential = credentialCandidates[idx];
+        state.login_state = 'pending';
+        state.credential_source = activeCredential.source;
+        loggedIn = await this._login(
+          activeCredential.url,
+          activeCredential.username,
+          activeCredential.password,
+          state,
+          visit
+        );
+        if (loggedIn) break;
+        const canRetryWithFallback =
+          state.login_state === 'login_invalid_credentials' &&
+          idx < credentialCandidates.length - 1;
+        if (!canRetryWithFallback) break;
+        state.login_fallback_attempted = true;
+        logger.warn(`[${this.portalTarget}] Runtime credential failed; retrying env credential`, {
+          failedSource: activeCredential.source,
+          nextSource: credentialCandidates[idx + 1]?.source || null,
+        });
+      }
+
       if (!loggedIn) {
         const loginBlockedReason =
           state.login_state === 'login_invalid_credentials'
@@ -1792,7 +1862,7 @@ export class GenericPortalSubmitter {
           detailReason: state.login_state || 'login_failed',
           error: `${this.portalTarget} login failed`,
           sessionState: state.login_state === 'session_conflict' ? 'session_conflict' : 'blocked',
-          portalUrl: url,
+          portalUrl: activeCredential?.url || null,
         });
       }
 
@@ -1804,7 +1874,7 @@ export class GenericPortalSubmitter {
           detailReason: state.otp_state || 'otp_failed',
           error: `${this.portalTarget} OTP was not completed`,
           sessionState: 'otp_blocked',
-          portalUrl: url,
+          portalUrl: activeCredential?.url || null,
         });
       }
 
@@ -1823,7 +1893,7 @@ export class GenericPortalSubmitter {
               detailReason: state.otp_state || 'otp_failed',
               error: `${this.portalTarget} OTP was not completed`,
               sessionState: 'otp_blocked',
-              portalUrl: url,
+              portalUrl: activeCredential?.url || null,
             });
           }
         }
@@ -1837,18 +1907,23 @@ export class GenericPortalSubmitter {
           blocked_reason: 'member_not_found',
           detailReason: 'member_not_found',
           error: `Member not found in ${this.portalName}: ${search.nric || 'unknown'}`,
-          portalUrl: url,
+          portalUrl: activeCredential?.url || null,
         });
       }
       if (!search.ok) {
         state.evidence = await this._safeScreenshot(visit, 'search-failed');
+        const detailReason = search.reason || 'search_failed';
+        const blockedReason =
+          detailReason === 'allianz_dob_required'
+            ? 'portal_search_requires_dob'
+            : 'portal_search_failed';
         return this._buildResult(state, {
           reason: 'search_failed',
-          blocked_reason: 'portal_search_failed',
-          detailReason: search.reason || 'search_failed',
+          blocked_reason: blockedReason,
+          detailReason,
           error: `Patient search failed in ${this.portalName}`,
           sessionState: 'blocked',
-          portalUrl: url,
+          portalUrl: activeCredential?.url || null,
         });
       }
 
@@ -1867,7 +1942,7 @@ export class GenericPortalSubmitter {
           detailReason: state.form_detail_reason || state.form_state || 'form_failed',
           error: `Claim form fields were not found in ${this.portalName}`,
           sessionState: 'blocked',
-          portalUrl: url,
+          portalUrl: activeCredential?.url || null,
           ...snapshotArtifacts,
         });
       }
@@ -1886,7 +1961,7 @@ export class GenericPortalSubmitter {
           detailReason: state.detailReason || 'portal_read_only',
           error: null,
           sessionState: 'blocked',
-          portalUrl: url,
+          portalUrl: activeCredential?.url || null,
           nric: search.nric || null,
           evidence,
         });
@@ -1927,7 +2002,7 @@ export class GenericPortalSubmitter {
         reason: 'filled_evidence',
         detailReason: 'fill_only_probe',
         error: null,
-        portalUrl: url,
+        portalUrl: activeCredential?.url || null,
         hasRuntimeCredential: Boolean(runtimeCredential?.username || runtimeCredential?.password),
         nric: search.nric || null,
         evidence,
@@ -1945,7 +2020,7 @@ export class GenericPortalSubmitter {
         detailReason: 'portal_runtime_error',
         error: error?.message || String(error),
         sessionState: 'error',
-        portalUrl: url,
+        portalUrl: activeCredential?.url || null,
       });
     }
   }

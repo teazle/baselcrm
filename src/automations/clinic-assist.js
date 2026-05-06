@@ -2012,6 +2012,82 @@ export class ClinicAssistAutomation {
   }
 
   /**
+   * Extract DOB from patient biodata/info page.
+   * Returns { iso, raw, source } when found, otherwise null.
+   */
+  async extractPatientDobFromPatientInfo() {
+    try {
+      this._logStep('Extract DOB from patient biodata/info page');
+      await this.page.waitForLoadState('networkidle').catch(() => {});
+      await this.page.waitForTimeout(1000);
+
+      const dobLabels = ['date of birth', 'dob', 'd.o.b', 'birth date', 'birthday'];
+
+      const parseDob = raw => {
+        const text = String(raw || '').trim();
+        if (!text) return null;
+
+        const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (iso) {
+          return { iso: `${iso[1]}-${iso[2]}-${iso[3]}`, raw: text };
+        }
+
+        const dmy = text.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if (dmy) {
+          const first = Number(dmy[1]);
+          const second = Number(dmy[2]);
+          const year = dmy[3];
+          const day =
+            first > 12 && second <= 12 ? first : first <= 12 && second > 12 ? second : first;
+          const month =
+            first > 12 && second <= 12 ? second : first <= 12 && second > 12 ? first : second;
+          return {
+            iso: `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`,
+            raw: text,
+          };
+        }
+
+        return null;
+      };
+
+      for (const label of dobLabels) {
+        const labeled = await this._extractLabeledValue(label);
+        const parsed = parseDob(labeled);
+        if (parsed?.iso) {
+          this._logStep('DOB found via labeled field', { label, iso: parsed.iso });
+          return { ...parsed, source: `label:${label}` };
+        }
+      }
+
+      const bodyText = await this.page.textContent('body').catch(() => '');
+      const bodyPatterns = [
+        /date of birth\s*[:#-]?\s*(\d{4}-\d{2}-\d{2})/i,
+        /date of birth\s*[:#-]?\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/i,
+        /\bdob\b\s*[:#-]?\s*(\d{4}-\d{2}-\d{2})/i,
+        /\bdob\b\s*[:#-]?\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/i,
+        /\bbirth\s*date\b\s*[:#-]?\s*(\d{4}-\d{2}-\d{2})/i,
+        /\bbirth\s*date\b\s*[:#-]?\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/i,
+      ];
+
+      for (const pattern of bodyPatterns) {
+        const match = String(bodyText || '').match(pattern);
+        const parsed = parseDob(match?.[1]);
+        if (parsed?.iso) {
+          this._logStep('DOB found in page body text', { iso: parsed.iso });
+          return { ...parsed, source: 'body_text' };
+        }
+      }
+
+      this._logStep('DOB not found in patient biodata/info page');
+      return null;
+    } catch (error) {
+      logger.error('Error extracting DOB from patient info:', error);
+      this._logStep('Error extracting DOB', { error: error.message });
+      return null;
+    }
+  }
+
+  /**
    * Get patient NRIC from the current patient record page
    * Wrapper around extractPatientNricFromPatientInfo with additional fallbacks
    * @returns {Promise<string|null>} NRIC if found, null otherwise

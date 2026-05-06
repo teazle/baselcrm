@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { buildGenericBotSnapshot } from './portal-generic-submitter.js';
+import { buildCredentialCandidates, buildGenericBotSnapshot } from './portal-generic-submitter.js';
 
 test('buildGenericBotSnapshot normalizes core audit fields from visit and verification evidence', () => {
   const snapshot = buildGenericBotSnapshot({
@@ -50,4 +50,44 @@ test('buildGenericBotSnapshot normalizes core audit fields from visit and verifi
   assert.equal(snapshot.lineItems.length, 2);
   assert.equal(snapshot.artifacts.screenshot, 'screenshots/example.png');
   assert.equal(snapshot.diagnosisResolution.status, 'ambiguous');
+});
+
+test('buildCredentialCandidates tries runtime credentials before distinct env fallback', () => {
+  const candidates = buildCredentialCandidates({
+    runtimeCredential: {
+      url: 'https://portal.example/login',
+      username: 'stale-user',
+      password: 'stale-pass',
+    },
+    config: {
+      defaultUrl: 'https://portal.example/login',
+      defaultUsername: 'env-user',
+      defaultPassword: 'env-pass',
+    },
+    defaultUrl: 'https://portal.example/login',
+  });
+
+  assert.equal(candidates.length, 2);
+  assert.equal(candidates[0].source, 'runtime');
+  assert.equal(candidates[1].source, 'env');
+  assert.equal(candidates[1].username, 'env-user');
+});
+
+test('buildCredentialCandidates does not duplicate identical runtime and env credentials', () => {
+  const candidates = buildCredentialCandidates({
+    runtimeCredential: {
+      url: 'https://portal.example/login',
+      username: 'same-user',
+      password: 'same-pass',
+    },
+    config: {
+      defaultUrl: 'https://portal.example/login',
+      defaultUsername: 'same-user',
+      defaultPassword: 'same-pass',
+    },
+    defaultUrl: 'https://portal.example/login',
+  });
+
+  assert.equal(candidates.length, 1);
+  assert.equal(candidates[0].source, 'runtime');
 });

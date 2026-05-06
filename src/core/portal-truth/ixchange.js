@@ -189,19 +189,21 @@ export function buildIxchangeSearchAttempts({
     })
   );
 
-  if (attempts.length > 0) return attempts;
+  for (const value of idCandidates) {
+    attempts.push(
+      decorateAttempt({
+        value,
+        inputSelectors: patientIdSelectors,
+        label: 'all_identifier_fallback',
+        mode,
+        tags,
+        attemptKind: 'patient_id',
+        purpose,
+      })
+    );
+  }
 
-  return idCandidates.map(value =>
-    decorateAttempt({
-      value,
-      inputSelectors: patientIdSelectors,
-      label: 'all_identifier_fallback',
-      mode,
-      tags,
-      attemptKind: 'patient_id',
-      purpose,
-    })
-  );
+  return attempts;
 }
 
 export function buildIxchangeSubmittedTruthCaptureUnavailable({
