@@ -117,10 +117,6 @@ jobs:
             fi
             echo "Flow 3 browser lock acquired."
 
-            echo "Cleaning stale Playwright processes from interrupted runs..."
-            pkill -f "node src/examples/submit-claims-batch.js" 2>/dev/null || true
-            pkill -f "playwright_chromiumdev_profile" 2>/dev/null || true
-
             echo "Current commit on EC2:"
             git log -1 --oneline || true
 
