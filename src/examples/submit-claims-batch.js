@@ -375,6 +375,7 @@ async function submitClaimsBatch() {
       'portal_otp_required',
       'portal_read_only_no_claim_form',
       'portal_search_failed',
+      'portal_search_requires_dob',
       'portal_session_expired',
       'portal_session_conflict',
       'portal_timeout',
