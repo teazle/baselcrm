@@ -108,6 +108,19 @@ jobs:
               exit 1
             fi
 
+            mkdir -p .flow-locks
+            exec 9>.flow-locks/flow3-fill-evidence.lock
+            echo "Acquiring Flow 3 EC2 browser lock..."
+            if ! flock -w 900 9; then
+              echo "Timed out waiting for another Flow 3 browser run to finish."
+              exit 1
+            fi
+            echo "Flow 3 browser lock acquired."
+
+            echo "Cleaning stale Playwright processes from interrupted runs..."
+            pkill -f "node src/examples/submit-claims-batch.js" 2>/dev/null || true
+            pkill -f "playwright_chromiumdev_profile" 2>/dev/null || true
+
             echo "Current commit on EC2:"
             git log -1 --oneline || true
 
