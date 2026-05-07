@@ -1028,6 +1028,7 @@ export class GenericPortalSubmitter {
         url: page.url(),
       });
       state.evidence = await this._safeScreenshot(visit, 'login-not-advanced');
+      state.login_debug = await this._captureSearchDebug();
       return false;
     }
 
@@ -1855,13 +1856,23 @@ export class GenericPortalSubmitter {
             ? 'portal_auth_failed'
             : state.login_state === 'session_conflict'
               ? 'portal_session_conflict'
-              : 'portal_login_failed';
+              : state.login_state === 'login_not_advanced'
+                ? 'portal_login_not_advanced'
+                : state.login_state === 'login_inputs_missing' ||
+                    state.login_state === 'login_submit_missing'
+                  ? 'portal_unavailable'
+                  : 'portal_login_failed';
         return this._buildResult(state, {
           reason: 'login_failed',
           blocked_reason: loginBlockedReason,
           detailReason: state.login_state || 'login_failed',
           error: `${this.portalTarget} login failed`,
-          sessionState: state.login_state === 'session_conflict' ? 'session_conflict' : 'blocked',
+          sessionState:
+            state.login_state === 'session_conflict'
+              ? 'session_conflict'
+              : state.login_state === 'login_not_advanced'
+                ? 'login_blocked'
+                : 'blocked',
           portalUrl: activeCredential?.url || null,
         });
       }

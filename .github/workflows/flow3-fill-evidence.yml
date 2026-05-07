@@ -119,12 +119,22 @@ jobs:
 
             echo "Current commit on EC2:"
             git log -1 --oneline || true
+            echo "EC2 preflight:"
+            node -v
+            npm -v
+            df -h . || true
+            free -h || true
+            echo "Chromium process count: $(pgrep -af chromium 2>/dev/null | wc -l | tr -d ' ')"
 
             if [ -n "${FLOW_PORTAL_PRESET:-}" ]; then
               FLOW_PORTAL_TARGETS="$FLOW_PORTAL_PRESET"
             fi
+            if [ "${FLOW_PORTAL_TARGETS:-}" = "IXCHANGE" ] && { [ -z "${FLOW_LIMIT:-}" ] || [ "${FLOW_LIMIT:-0}" -lt 3 ] 2>/dev/null; }; then
+              echo "IXCHANGE probe uses up to 3 candidates so member_not_found does not stop at the first bad sample."
+              FLOW_LIMIT=3
+            fi
 
-            ARGS=(--mode fill_evidence)
+            ARGS=(--shadow-fill --ec2-only)
             if [ -n "${FLOW_FROM:-}" ]; then
               ARGS+=(--from "$FLOW_FROM")
             fi
@@ -163,7 +173,7 @@ jobs:
             echo "Browser mode: headless + non-persistent context + restored session state"
             REPORT_MARKER=$(mktemp)
             touch "$REPORT_MARKER"
-            HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/submit-claims-batch.js "${ARGS[@]}" 2>&1
+            FLOW3_EC2_RUNNER=1 FLOW3_MODE=fill_evidence WORKFLOW_SAVE_DRAFT=0 ALLOW_LIVE_SUBMIT=0 FLOW3_ENABLE_SUBMIT_MODE=0 HEADLESS=true FORCE_NON_PERSISTENT_CONTEXT=true node src/examples/submit-claims-batch.js "${ARGS[@]}" 2>&1
 
             LATEST_JSON=$(
               REPORT_MARKER="$REPORT_MARKER" node -e 'const fs = require("fs"); const path = require("path"); const markerMs = fs.statSync(process.env.REPORT_MARKER).mtimeMs; const dir = path.resolve("output", "run-reports"); const expected = { from: process.env.FLOW_FROM || "", to: process.env.FLOW_TO || "", visitIds: process.env.FLOW_VISIT_IDS || "", portalTargets: process.env.FLOW_PORTAL_TARGETS || "", payType: process.env.FLOW_PAY_TYPE || "", limit: process.env.FLOW_LIMIT || "" }; const clean = value => String(value ?? "").trim(); const matchesScope = report => { const scope = report?.scope || {}; for (const [key, expectedValue] of Object.entries(expected)) { if (!expectedValue) continue; if (clean(scope[key]) !== clean(expectedValue)) return false; } return true; }; const candidates = fs.readdirSync(dir).filter(name => /^flow3_[0-9].*\.json$/.test(name)).map(name => { const filePath = path.join(dir, name); return { filePath, mtimeMs: fs.statSync(filePath).mtimeMs }; }).filter(entry => entry.mtimeMs >= markerMs).sort((a, b) => b.mtimeMs - a.mtimeMs); for (const entry of candidates) { try { const report = JSON.parse(fs.readFileSync(entry.filePath, "utf8")); if (matchesScope(report)) { console.log(entry.filePath); process.exit(0); } } catch {} } process.exit(1);' || true
@@ -175,4 +185,4 @@ jobs:
             fi
 
             echo "Latest Flow 3 report: $LATEST_JSON"
-            node -e 'const fs = require("fs"); const reportPath = process.argv[1]; const report = JSON.parse(fs.readFileSync(reportPath, "utf8")); const rows = Array.isArray(report.rows) ? report.rows : []; console.log("Flow 3 summary:"); console.log(JSON.stringify({ generatedAt: report.generatedAt || null, scope: report.scope || null, totals: report.totals || null, totalRows: rows.length }, null, 2)); for (const row of rows) { console.log(JSON.stringify({ date: row.date || null, patientName: row.patientName || null, nric: row.nric || null, payType: row.payType || null, portal: row.portal || null, status: row.status || null, diagnosisStatus: row.diagnosisStatus || null, fillVerification: row.fillVerification || null, comparison: row.comparison || null, botSnapshot: row.botSnapshot || null, submittedTruth: row.submittedTruth || null, flow2VsSubmittedTruth: row.flow2VsSubmittedTruth || null, botVsSubmittedTruth: row.botVsSubmittedTruth || null, blockedReason: row.blockedReason || null, evidence: row.evidence || null, notes: row.notes || null })); }' "$LATEST_JSON"
+            node -e 'const fs = require("fs"); const reportPath = process.argv[1]; const report = JSON.parse(fs.readFileSync(reportPath, "utf8")); const rows = Array.isArray(report.rows) ? report.rows : []; console.log("Flow 3 summary:"); console.log(JSON.stringify({ generatedAt: report.generatedAt || null, scope: report.scope || null, totals: report.totals || null, totalRows: rows.length }, null, 2)); for (const row of rows) { console.log(JSON.stringify({ date: row.date || null, payType: row.payType || null, portal: row.portal || null, status: row.status || null, diagnosisStatus: row.diagnosisStatus || null, fillVerification: row.fillVerification || null, comparison: row.comparison || null, botSnapshot: row.botSnapshot || null, submittedTruth: row.submittedTruth || null, flow2VsSubmittedTruth: row.flow2VsSubmittedTruth || null, botVsSubmittedTruth: row.botVsSubmittedTruth || null, blockedReason: row.blockedReason || null, evidence: row.evidence || null, notes: row.notes || null })); }' "$LATEST_JSON"

@@ -21,19 +21,21 @@ Usage:
   node src/examples/submit-claims-batch.js --pay-type MHC
   node src/examples/submit-claims-batch.js --portal-targets MHC,ALLIANCE_MEDINET --from 2026-02-02 --to 2026-02-07
   node src/examples/submit-claims-batch.js --portal-targets FULLERTON --from 2026-02-02 --to 2026-02-07 --limit 3
-  node src/examples/submit-claims-batch.js --mode draft --from 2026-02-02 --to 2026-02-07 --portal-only
+  node src/examples/submit-claims-batch.js --shadow-fill --ec2-only --from 2026-02-02 --to 2026-02-07 --portal-only
   node src/examples/submit-claims-batch.js --all-pending
 
 Options:
   --visit-ids <csv>      Specific visit IDs (comma separated)
   --pay-type <value>     Filter by pay type
   --portal-targets <csv> Restrict Flow 3 submit service routes (MHC,ALLIANCE_MEDINET,ALLIANZ,FULLERTON,IHP,IXCHANGE,GE_NTUC)
-  --mode <value>         One of: fill_evidence, draft, submit
+  --mode <value>         fill_evidence only for the current shadow-fill production pass
+  --shadow-fill          Alias for --mode fill_evidence
+  --ec2-only             Require FLOW3_EC2_RUNNER=1 before opening portal sessions
   --from <YYYY-MM-DD>    Start date filter
   --to <YYYY-MM-DD>      End date filter
   --limit <n>            Max visits to process after candidate filtering
   --portal-only          Only rows in portal scope (MHC/AIA/AVIVA/SINGLIFE + Allianz Medinet tags)
-  --save-as-draft        Deprecated alias for --mode draft
+  --save-as-draft        Disabled; draft/save is blocked for the current shadow-fill pass
   --leave-open           Keep browser open for manual verification
   --all-pending          Explicitly allow unscoped run across all pending rows
   --help, -h             Show this help
@@ -52,6 +54,7 @@ function parseCliArgs(argv) {
     portalOnly: false,
     leaveOpen: process.env.BROWSER_LEAVE_OPEN === '1',
     allPending: false,
+    ec2Only: false,
     help: false,
   };
 
@@ -71,6 +74,14 @@ function parseCliArgs(argv) {
     }
     if (arg === '--portal-only') {
       opts.portalOnly = true;
+      continue;
+    }
+    if (arg === '--shadow-fill') {
+      opts.mode = 'fill_evidence';
+      continue;
+    }
+    if (arg === '--ec2-only') {
+      opts.ec2Only = true;
       continue;
     }
     if (arg === '--save-as-draft') {
@@ -186,6 +197,16 @@ function parseCliArgs(argv) {
     );
   }
   opts.mode = normalizedMode;
+  if (opts.mode !== 'fill_evidence') {
+    throw new Error(
+      `Flow 3 is locked to fill_evidence mode for this shadow-fill production pass; ${opts.mode} is disabled.`
+    );
+  }
+  if (opts.ec2Only && process.env.FLOW3_EC2_RUNNER !== '1') {
+    throw new Error(
+      'Flow 3 shadow-fill was requested with --ec2-only, but FLOW3_EC2_RUNNER=1 is not set.'
+    );
+  }
 
   return opts;
 }
@@ -198,7 +219,7 @@ function parseCliArgs(argv) {
  *   node src/examples/submit-claims-batch.js --visit-ids id1,id2,id3
  *   node src/examples/submit-claims-batch.js --pay-type MHC
  *   node src/examples/submit-claims-batch.js --from 2026-02-02 --to 2026-02-07 --portal-only
- *   node src/examples/submit-claims-batch.js --mode draft
+ *   node src/examples/submit-claims-batch.js --shadow-fill --ec2-only
  */
 async function submitClaimsBatch() {
   let parsed;
@@ -302,8 +323,8 @@ async function submitClaimsBatch() {
   const submitter = new ClaimSubmitter(mhcAsiaPage);
 
   process.env.FLOW3_MODE = mode;
-  process.env.WORKFLOW_SAVE_DRAFT = mode === 'draft' ? '1' : '0';
-  process.env.ALLOW_LIVE_SUBMIT = mode === 'submit' ? '1' : '0';
+  process.env.WORKFLOW_SAVE_DRAFT = '0';
+  process.env.ALLOW_LIVE_SUBMIT = '0';
 
   let totalRecords = 0;
   let submittedCount = 0;
@@ -371,6 +392,7 @@ async function submitClaimsBatch() {
       'portal_auth_failed',
       'portal_contract_unvalidated',
       'portal_credentials_missing',
+      'portal_login_not_advanced',
       'portal_login_failed',
       'portal_otp_required',
       'portal_read_only_no_claim_form',
@@ -379,7 +401,9 @@ async function submitClaimsBatch() {
       'portal_session_expired',
       'portal_session_conflict',
       'portal_timeout',
+      'portal_unavailable',
       'policy_verified_no_claim_form',
+      'flow3_shadow_only_mode_locked',
       'member_not_found',
       'not_found',
       'otp_required',

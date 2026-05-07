@@ -72,6 +72,9 @@ type FilterKey =
   | 'otp_blocked'
   | 'captcha_blocked'
   | 'portal_read_only'
+  | 'not_found'
+  | 'login_blocked'
+  | 'session_blocked'
   | 'draft'
   | 'submitted'
   | 'error';
@@ -87,6 +90,9 @@ const filters: Array<{ key: FilterKey; label: string }> = [
   { key: 'otp_blocked', label: 'OTP blocked' },
   { key: 'captcha_blocked', label: 'CAPTCHA blocked' },
   { key: 'portal_read_only', label: 'Portal read-only' },
+  { key: 'not_found', label: 'Not found' },
+  { key: 'login_blocked', label: 'Login blocked' },
+  { key: 'session_blocked', label: 'Session blocked' },
   { key: 'draft', label: 'Draft' },
   { key: 'submitted', label: 'Submitted' },
   { key: 'error', label: 'Error' },
@@ -122,7 +128,6 @@ export default function Flow3FillForms() {
     getFlow3PortalTargets().map(v => String(v))
   );
   const [leaveBrowserOpen, setLeaveBrowserOpen] = useState(false);
-  const [mode, setMode] = useState<'fill_evidence' | 'draft'>('fill_evidence');
 
   const getSubmissionStatus = useCallback((visit: VisitRow): Flow3UiStatus => {
     const candidate = classifyVisitForRpa(
@@ -191,10 +196,7 @@ export default function Flow3FillForms() {
     };
   }, [fromDate, portalOnly, toDate]);
 
-  const handleSubmitClaims = async (
-    visitIds?: string[],
-    requestedMode: 'fill_evidence' | 'draft' = mode
-  ) => {
+  const handleSubmitClaims = async (visitIds?: string[]) => {
     setSubmitBusy(true);
     setNotice(null);
     try {
@@ -203,7 +205,7 @@ export default function Flow3FillForms() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           visitIds,
-          mode: requestedMode,
+          mode: 'fill_evidence',
           leaveOpen: leaveBrowserOpen,
           from: fromDate,
           to: toDate,
@@ -348,6 +350,9 @@ export default function Flow3FillForms() {
     if (status === 'otp_blocked') return 'OTP blocked';
     if (status === 'captcha_blocked') return 'CAPTCHA blocked';
     if (status === 'portal_read_only') return 'Portal read-only';
+    if (status === 'not_found') return 'Not found';
+    if (status === 'login_blocked') return 'Login blocked';
+    if (status === 'session_blocked') return 'Session blocked';
     if (status === 'draft') return 'Draft';
     if (status === 'submitted') return 'Submitted';
     if (status === 'error') return 'Error';
@@ -430,32 +435,9 @@ export default function Flow3FillForms() {
             Selected: {selectedPortalTargets.length > 0 ? selectedPortalTargets.join(', ') : 'none'}
           </div>
         </div>
-        <div className="mt-3 flex flex-wrap items-center gap-3">
-          <div className="text-xs text-muted-foreground">Mode</div>
-          <button
-            type="button"
-            className={cn(
-              'rounded-full border px-3 py-1 text-xs font-medium transition',
-              mode === 'fill_evidence'
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-border bg-card text-foreground hover:bg-muted'
-            )}
-            onClick={() => setMode('fill_evidence')}
-          >
-            Fill + evidence
-          </button>
-          <button
-            type="button"
-            className={cn(
-              'rounded-full border px-3 py-1 text-xs font-medium transition',
-              mode === 'draft'
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-border bg-card text-foreground hover:bg-muted'
-            )}
-            onClick={() => setMode('draft')}
-          >
-            Draft
-          </button>
+        <div className="mt-3 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-xs text-sky-800">
+          Mode is locked to fill + evidence. Draft, save, and submit are disabled for this
+          shadow-fill production pass.
         </div>
         <div className="mt-2 text-xs text-muted-foreground">
           Showing {portalOnly ? 'portal-tagged visits' : 'all visits'} between {fromDate} and{' '}
@@ -499,8 +481,8 @@ export default function Flow3FillForms() {
           <div className="text-xs font-medium text-muted-foreground">Manual Trigger</div>
           <div className="text-lg font-semibold">Submit Claims</div>
           <div className="mt-2 text-sm text-muted-foreground">
-            Fill portal forms with evidence capture by default. Draft mode is available for
-            validated routes only.
+            Fill portal forms with evidence capture only. Draft, save, and submit are disabled for
+            this shadow-fill production pass.
           </div>
         </div>
 
@@ -518,27 +500,15 @@ export default function Flow3FillForms() {
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
-              onClick={() => handleSubmitClaims(undefined, mode)}
+              onClick={() => handleSubmitClaims(undefined)}
               disabled={submitBusy || selectedPortalTargets.length === 0}
             >
-              {submitBusy
-                ? 'Starting...'
-                : mode === 'draft'
-                  ? 'Run Draft Mode'
-                  : 'Run Fill + Evidence'}
+              {submitBusy ? 'Starting...' : 'Run Fill + Evidence'}
             </Button>
             <Button
               type="button"
               variant="outline"
-              onClick={() => handleSubmitClaims(errorIds, 'draft')}
-              disabled={submitBusy || errorIds.length === 0 || selectedPortalTargets.length === 0}
-            >
-              Retry Errors (draft) ({errorIds.length})
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleSubmitClaims(errorIds, 'fill_evidence')}
+              onClick={() => handleSubmitClaims(errorIds)}
               disabled={submitBusy || errorIds.length === 0 || selectedPortalTargets.length === 0}
             >
               Retry Errors (fill + evidence) ({errorIds.length})
@@ -647,13 +617,17 @@ export default function Flow3FillForms() {
                                 ? 'border-blue-200 bg-blue-50 text-blue-700'
                                 : status === 'otp_blocked' ||
                                     status === 'captcha_blocked' ||
-                                    status === 'portal_read_only'
+                                    status === 'portal_read_only' ||
+                                    status === 'login_blocked' ||
+                                    status === 'session_blocked'
                                   ? 'border-red-200 bg-red-50 text-red-700'
-                                  : status === 'manual_review'
-                                    ? 'border-amber-200 bg-amber-50 text-amber-700'
-                                    : status === 'error'
-                                      ? 'border-red-200 bg-red-50 text-red-700'
-                                      : 'border-border bg-muted/50 text-muted-foreground'
+                                  : status === 'not_found'
+                                    ? 'border-slate-200 bg-slate-50 text-slate-700'
+                                    : status === 'manual_review'
+                                      ? 'border-amber-200 bg-amber-50 text-amber-700'
+                                      : status === 'error'
+                                        ? 'border-red-200 bg-red-50 text-red-700'
+                                        : 'border-border bg-muted/50 text-muted-foreground'
                       )}
                     >
                       {label}

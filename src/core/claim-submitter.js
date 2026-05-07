@@ -634,6 +634,22 @@ export class ClaimSubmitter {
         visit.patient_name,
         visit.extraction_metadata || null
       );
+      if (requestedMode !== 'fill_evidence') {
+        return this._normalizePortalResult(
+          {
+            success: false,
+            reason: 'flow3_shadow_only_mode_locked',
+            blocked_reason: 'flow3_shadow_only_mode_locked',
+            error:
+              'Flow 3 is locked to fill_evidence mode for this shadow-fill production pass; draft/save/submit are disabled.',
+            submitted: false,
+            savedAsDraft: false,
+            sessionState: 'blocked',
+          },
+          visit,
+          route
+        );
+      }
       if (requestedMode === 'submit' && !allowLiveSubmit) {
         return this._normalizePortalResult(
           {

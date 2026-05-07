@@ -46,12 +46,16 @@ export async function POST(request: Request) {
   const portalOnly = Boolean(body?.portalOnly);
   const saveAsDraft = Boolean(body?.saveAsDraft);
   const leaveOpen = Boolean(body?.leaveOpen);
-  const mode =
-    requestedMode === 'draft' || requestedMode === 'submit' || requestedMode === 'fill_evidence'
-      ? requestedMode
-      : saveAsDraft
-        ? 'draft'
-        : 'fill_evidence';
+  if (requestedMode === 'draft' || requestedMode === 'submit' || saveAsDraft) {
+    return NextResponse.json(
+      {
+        error:
+          'Flow 3 is locked to fill_evidence mode for this shadow-fill production pass; draft/save/submit are disabled.',
+      },
+      { status: 400 }
+    );
+  }
+  const mode = 'fill_evidence';
 
   try {
     // For now, we'll create a simple batch submission script
@@ -98,14 +102,9 @@ export async function POST(request: Request) {
     return NextResponse.json({
       ok: true,
       pid,
-      message:
-        mode === 'draft'
-          ? 'Flow 3 draft run started.'
-          : mode === 'submit'
-            ? 'Flow 3 submit run started.'
-            : leaveOpen
-              ? 'Flow 3 fill + evidence run started (browser left open).'
-              : 'Flow 3 fill + evidence run started.',
+      message: leaveOpen
+        ? 'Flow 3 fill + evidence run started (browser left open).'
+        : 'Flow 3 fill + evidence run started.',
     });
   } catch (error) {
     return NextResponse.json({ error: String((error as Error).message ?? error) }, { status: 500 });

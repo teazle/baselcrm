@@ -62,3 +62,18 @@ test('deriveFlow3Readiness maps OTP, CAPTCHA, and read-only blocked states', () 
     FLOW3_UI_STATUSES.PORTAL_READ_ONLY
   );
 });
+
+test('deriveFlow3Readiness preserves deterministic portal blocked states', () => {
+  assert.equal(
+    deriveFlow3Readiness({ metadata: { blocked_reason: 'member_not_found' } }).uiStatus,
+    FLOW3_UI_STATUSES.NOT_FOUND
+  );
+  assert.equal(
+    deriveFlow3Readiness({ metadata: { blocked_reason: 'portal_login_not_advanced' } }).uiStatus,
+    FLOW3_UI_STATUSES.LOGIN_BLOCKED
+  );
+  assert.equal(
+    deriveFlow3Readiness({ metadata: { blocked_reason: 'portal_session_conflict' } }).uiStatus,
+    FLOW3_UI_STATUSES.SESSION_BLOCKED
+  );
+});

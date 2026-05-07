@@ -15,6 +15,9 @@ export const FLOW3_UI_STATUSES = {
   OTP_BLOCKED: 'otp_blocked',
   CAPTCHA_BLOCKED: 'captcha_blocked',
   PORTAL_READ_ONLY: 'portal_read_only',
+  NOT_FOUND: 'not_found',
+  LOGIN_BLOCKED: 'login_blocked',
+  SESSION_BLOCKED: 'session_blocked',
   DRAFT: 'draft',
   SUBMITTED: 'submitted',
   ERROR: 'error',
@@ -55,6 +58,18 @@ export function deriveFlow3Readiness({ submissionStatus = null, metadata = null 
   }
   if (sessionState === 'otp_blocked' || blockedReason.includes('otp')) {
     return { state: FLOW3_READINESS_STATES.BLOCKED, uiStatus: FLOW3_UI_STATUSES.OTP_BLOCKED };
+  }
+  if (blockedReason === 'member_not_found' || blockedReason === 'not_found') {
+    return { state: FLOW3_READINESS_STATES.BLOCKED, uiStatus: FLOW3_UI_STATUSES.NOT_FOUND };
+  }
+  if (sessionState === 'login_blocked' || blockedReason.includes('login_not_advanced')) {
+    return { state: FLOW3_READINESS_STATES.BLOCKED, uiStatus: FLOW3_UI_STATUSES.LOGIN_BLOCKED };
+  }
+  if (sessionState === 'session_conflict' || blockedReason.includes('session_conflict')) {
+    return {
+      state: FLOW3_READINESS_STATES.BLOCKED,
+      uiStatus: FLOW3_UI_STATUSES.SESSION_BLOCKED,
+    };
   }
   if (blockedReason.includes('read_only') || blockedReason.includes('no_claim_form')) {
     return { state: FLOW3_READINESS_STATES.BLOCKED, uiStatus: FLOW3_UI_STATUSES.PORTAL_READ_ONLY };
