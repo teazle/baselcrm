@@ -218,21 +218,16 @@ export async function getOtpCode(options = {}) {
       const sinceDate = new Date(Date.now() - lookbackMinutes * 60 * 1000);
       const messages = await readRecentMessages(client, sinceDate);
 
-      // Log a summary of ALL emails found on first poll and every 10th poll for debugging
+      // Keep CI logs PHI-safe: only log counts/timestamps, not sender names or subjects.
       if (pollCount === 1 || pollCount % 10 === 0) {
-        const emailSummary = messages.slice(0, 20).map(msg => {
-          const fromAddr = msg.envelope?.from?.[0]?.address || '';
-          const fromName = msg.envelope?.from?.[0]?.name || '';
-          const subj = String(msg.envelope?.subject || '').slice(0, 80);
-          const date = msg.internalDate ? new Date(msg.internalDate).toISOString() : '';
-          return { from: `${fromName} <${fromAddr}>`, subject: subj, date };
-        });
         logger.info('[OTP] Inbox scan summary', {
           portal,
           poll: pollCount,
           totalMessages: messages.length,
           sinceDate: sinceDate.toISOString(),
-          emails: emailSummary,
+          newestMessageAt: messages[0]?.internalDate
+            ? new Date(messages[0].internalDate).toISOString()
+            : null,
         });
       }
 
