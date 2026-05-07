@@ -556,9 +556,10 @@ async function submitClaimsBatch() {
 
     for (let i = 0; i < visits.length; i++) {
       const visit = visits[i];
-      logger.info(
-        `[${i + 1}/${visits.length}] Processing: ${visit.patient_name} (${visit.pay_type})`
-      );
+      logger.info(`[${i + 1}/${visits.length}] Processing visit`, {
+        visitId: visit.id || null,
+        payType: visit.pay_type || null,
+      });
 
       let rowStatus = 'error';
       let rowNotes = '';
@@ -588,7 +589,10 @@ async function submitClaimsBatch() {
           }
         } else if (result.reason === 'not_found') {
           notStartedCount++;
-          logger.warn(`Member not found in portal: ${visit.patient_name} (${visit.pay_type})`);
+          logger.warn('Member not found in portal', {
+            visitId: visit.id || null,
+            payType: visit.pay_type || null,
+          });
           rowStatus = 'not_found';
           rowNotes = result.error || result.reason || 'Member not found in portal';
         } else if (isDeterministicPortalBlocked(result)) {

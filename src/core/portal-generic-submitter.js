@@ -1917,7 +1917,7 @@ export class GenericPortalSubmitter {
           reason: 'not_found',
           blocked_reason: 'member_not_found',
           detailReason: 'member_not_found',
-          error: `Member not found in ${this.portalName}: ${search.nric || 'unknown'}`,
+          error: `Member not found in ${this.portalName}`,
           portalUrl: activeCredential?.url || null,
         });
       }
