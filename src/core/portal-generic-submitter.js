@@ -410,6 +410,8 @@ export class GenericPortalSubmitter {
       typeof config?.adjustFillVerification === 'function' ? config.adjustFillVerification : null;
     this.requiredFieldResolver =
       typeof config?.requiredFieldResolver === 'function' ? config.requiredFieldResolver : null;
+    this.loginSubmitter =
+      typeof config?.loginSubmitter === 'function' ? config.loginSubmitter : null;
     this.verifyFilledValues = toBoolean(process.env.FLOW3_VERIFY_FILLED_VALUES, true);
     this.compareHistorical = toBoolean(process.env.FLOW3_COMPARE_HISTORICAL, true);
   }
@@ -422,6 +424,21 @@ export class GenericPortalSubmitter {
         if (!doc) return null;
         const norm = v => String(v || '').trim();
         const slice = (arr, n = 40) => arr.filter(Boolean).slice(0, n);
+        const redactDebugFieldValue = field => {
+          const haystack = [
+            field?.type,
+            field?.name,
+            field?.id,
+            field?.placeholder,
+            field?.ariaLabel,
+          ]
+            .map(value => String(value || '').toLowerCase())
+            .join(' ');
+          if (/pass|pwd|otp|token|secret|code|ucr/.test(haystack)) {
+            return field?.value ? '[redacted]' : '';
+          }
+          return field?.value || '';
+        };
         const inputs = Array.from(doc.querySelectorAll('input, textarea, select')).map(el => ({
           tag: el.tagName.toLowerCase(),
           type: 'type' in el ? norm(el.type) : '',
@@ -448,7 +465,10 @@ export class GenericPortalSubmitter {
           url: loc?.href || '',
           title: doc.title || '',
           bodySnippet: norm(doc.body?.innerText || '').slice(0, 1200),
-          inputs: slice(inputs),
+          inputs: slice(inputs).map(input => ({
+            ...input,
+            value: redactDebugFieldValue(input),
+          })),
           buttons: slice(buttons),
         };
       })
@@ -981,7 +1001,23 @@ export class GenericPortalSubmitter {
       return false;
     }
 
-    const submitSelector = await this._clickFirst(this.selectors.loginSubmit, { timeout: 3500 });
+    const submitSelector = this.loginSubmitter
+      ? await this.loginSubmitter({
+          page,
+          state,
+          visit,
+          selectors: this.selectors,
+          helpers: {
+            clickFirst: (...args) => this._clickFirst(...args),
+            waitForFirst: (...args) => this._waitForFirst(...args),
+          },
+        }).catch(error => {
+          logger.warn(`[${this.portalTarget}] custom login submitter failed`, {
+            error: error?.message || String(error),
+          });
+          return null;
+        })
+      : await this._clickFirst(this.selectors.loginSubmit, { timeout: 3500 });
     if (!submitSelector) {
       state.login_state = 'login_submit_missing';
       state.evidence = await this._safeScreenshot(visit, 'login-submit-missing');

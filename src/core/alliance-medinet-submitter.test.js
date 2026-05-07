@@ -57,14 +57,17 @@ test('Alliance Medinet fill verification exposes shadow-filled fields', () => {
     fillResult: {
       doctorName: 'Tan Guoping Kelvin',
       diagnosisPortalMatch: {
-        blocked: false,
-        selectedOption: { text: 'J06.9 - Acute upper respiratory infection' },
+        match_text: 'J06.9 - Acute upper respiratory infection',
+      },
+      readback: {
+        fee: { selector: 'input[formcontrolname*="consultationFee"]', value: '38.00' },
       },
     },
   });
 
-  assert.equal(verification.visitDate.status, 'filled_unverified');
+  assert.equal(verification.visitDate.status, 'portal_managed');
   assert.equal(verification.diagnosis.status, 'verified');
+  assert.equal(verification.fee.status, 'verified');
   assert.equal(verification.fee.expected, '38.00');
   assert.equal(verification.doctor.status, 'verified');
 });

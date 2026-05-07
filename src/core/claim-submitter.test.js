@@ -38,6 +38,49 @@ test('_pickDobForVisit normalizes common Flow 1/Flow 2 DOB shapes for Allianz', 
   );
 });
 
+test('_lookupCrmDobForVisit hydrates Allianz DOB from linked CRM contact', async () => {
+  const submitter = Object.create(ClaimSubmitter.prototype);
+  submitter.supabase = {
+    from(table) {
+      if (table === 'cases') {
+        return {
+          select() {
+            return this;
+          },
+          eq() {
+            return this;
+          },
+          async maybeSingle() {
+            return { data: { contact_id: 'contact-1' }, error: null };
+          },
+        };
+      }
+      if (table === 'contacts') {
+        return {
+          select() {
+            return this;
+          },
+          eq() {
+            return this;
+          },
+          async maybeSingle() {
+            return { data: { date_of_birth: '1988-11-09' }, error: null };
+          },
+        };
+      }
+      throw new Error(`Unexpected table ${table}`);
+    },
+  };
+
+  const dob = await submitter._lookupCrmDobForVisit({
+    id: 'visit-1',
+    case_id: 'case-1',
+    extraction_metadata: {},
+  });
+
+  assert.equal(dob, '1988-11-09');
+});
+
 test('_getRequestedMode preserves non-shadow requests so submitClaim can block them', () => {
   const originalFlow3Mode = process.env.FLOW3_MODE;
   const originalSaveDraft = process.env.WORKFLOW_SAVE_DRAFT;

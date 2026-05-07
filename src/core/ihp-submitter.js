@@ -44,6 +44,37 @@ function buildSelectors() {
   });
 }
 
+export async function submitIhpEncryptedLogin({ page, helpers }) {
+  const submittedByValidate = await page
+    .evaluate(() => {
+      const form = globalThis.document?.forms?.form1;
+      const password = globalThis.document?.querySelector?.('#txtPassword');
+      // IHP's login script reads document.form1.txtPassword. Some Chromium
+      // builds expose id-only controls there, but setting the name makes the
+      // encrypted-login path deterministic.
+      if (password && !password.getAttribute('name')) {
+        password.setAttribute('name', 'txtPassword');
+      }
+      if (form && typeof globalThis.validate === 'function') {
+        globalThis.validate('');
+        return true;
+      }
+      return false;
+    })
+    .catch(() => false);
+  if (submittedByValidate) return 'ihp:validate-encrypted-login';
+  return helpers?.clickFirst?.(
+    [
+      'button[name="btnSubmit"]',
+      'button.btn-login',
+      'button:has-text("LOG IN")',
+      'button:has-text("Login")',
+      'input[type="submit"]',
+    ],
+    { timeout: 3500 }
+  );
+}
+
 /**
  * Dedicated submit service boundary for IHP portal flow.
  */
@@ -60,6 +91,7 @@ export class IHPSubmitter {
       defaultPassword: PORTALS.IHP?.password || '',
       supportsOtp: true,
       selectors: buildSelectors(),
+      loginSubmitter: submitIhpEncryptedLogin,
     });
   }
 

@@ -51,34 +51,95 @@ async function captureAlliancePageSnapshot(page) {
     .catch(() => null);
 }
 
+function normalizeAmount(value) {
+  const match = String(value || '')
+    .replace(/,/g, '')
+    .match(/-?\d+(?:\.\d+)?/);
+  if (!match) return '';
+  const num = Number(match[0]);
+  return Number.isFinite(num) ? num.toFixed(2) : '';
+}
+
+function normalizeText(value) {
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+function observedStatus({
+  expected,
+  observed,
+  fallbackStatus = 'filled_unverified',
+  type = 'text',
+}) {
+  if (!String(expected || '').trim()) return 'missing_source';
+  if (!String(observed || '').trim()) return fallbackStatus;
+  if (type === 'amount') {
+    return normalizeAmount(expected) && normalizeAmount(expected) === normalizeAmount(observed)
+      ? 'verified'
+      : 'mismatch';
+  }
+  const e = normalizeText(expected);
+  const o = normalizeText(observed);
+  if (!e || !o) return fallbackStatus;
+  return o.includes(e) || e.includes(o) ? 'verified' : 'mismatch';
+}
+
 export function buildAllianceFillVerification({ visit, doctor, fillResult } = {}) {
   const metadata = visit?.extraction_metadata || {};
   const diagnosisMatch = fillResult?.diagnosisPortalMatch || null;
+  const readback = fillResult?.readback || {};
   const diagnosisObserved =
+    readback?.diagnosis?.value ||
     diagnosisMatch?.selectedOption?.text ||
     diagnosisMatch?.selectedText ||
     diagnosisMatch?.text ||
+    diagnosisMatch?.match_text ||
     metadata?.diagnosis_description ||
     visit?.diagnosis_description ||
     null;
+  const expectedDiagnosis = metadata?.diagnosis_description || visit?.diagnosis_description || null;
+  const feeObserved = readback?.fee?.value || null;
+  const feeExpected = visit?.total_amount || null;
+  const diagnosisWasSelected = Boolean(
+    diagnosisMatch &&
+    diagnosisMatch.blocked !== true &&
+    (diagnosisMatch.match_text ||
+      diagnosisMatch.selected_text ||
+      diagnosisMatch.selectedText ||
+      diagnosisMatch.text ||
+      diagnosisMatch.selectedOption?.text)
+  );
   return {
     visitDate: {
-      status: visit?.visit_date ? 'filled_unverified' : 'missing_source',
+      status: visit?.visit_date ? 'portal_managed' : 'missing_source',
       expected: visit?.visit_date || null,
-      observed: null,
-      selector: null,
+      observed: readback?.visitDate?.value || null,
+      selector: readback?.visitDate?.selector || null,
     },
     diagnosis: {
-      status: diagnosisMatch && diagnosisMatch.blocked === false ? 'verified' : 'filled_unverified',
-      expected: metadata?.diagnosis_description || visit?.diagnosis_description || null,
+      status: diagnosisWasSelected
+        ? 'verified'
+        : observedStatus({
+            expected: expectedDiagnosis,
+            observed: diagnosisObserved,
+          }),
+      expected: expectedDiagnosis,
       observed: diagnosisObserved,
-      selector: diagnosisMatch?.selector || null,
+      selector: readback?.diagnosis?.selector || diagnosisMatch?.selector || null,
     },
     fee: {
-      status: visit?.total_amount ? 'filled_unverified' : 'missing_source',
-      expected: visit?.total_amount || null,
-      observed: null,
-      selector: null,
+      status: observedStatus({ expected: feeExpected, observed: feeObserved, type: 'amount' }),
+      expected: feeExpected,
+      observed: feeObserved,
+      selector: readback?.fee?.selector || null,
+    },
+    mcDays: {
+      status: readback?.mcDays?.value ? 'verified' : 'filled_unverified',
+      expected: metadata?.mcDays ?? visit?.mc_days ?? visit?.mcDays ?? 0,
+      observed: readback?.mcDays?.value || null,
+      selector: readback?.mcDays?.selector || null,
     },
     doctor: {
       status: doctor?.doctorName ? 'verified' : 'missing_source',

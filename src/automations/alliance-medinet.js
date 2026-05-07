@@ -2009,6 +2009,66 @@ export class AllianceMedinetAutomation {
     return this._fillFirstVisible(preferred, text, label);
   }
 
+  async _readFirstVisibleValue(selectors = []) {
+    for (const selector of selectors) {
+      const locator = this.page.locator(selector).first();
+      const count = await locator.count().catch(() => 0);
+      if (!count) continue;
+      const visible = await locator.isVisible().catch(() => false);
+      if (!visible) continue;
+      const value = await locator
+        .inputValue({ timeout: 800 })
+        .catch(async () => locator.innerText({ timeout: 800 }).catch(() => ''));
+      const normalized = String(value || '')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (normalized) return { selector, value: normalized };
+    }
+    return { selector: null, value: null };
+  }
+
+  async _readClaimFormReadback() {
+    const [fee, mcDays, mcStartDate, consultationFeeType, treatment, remark] = await Promise.all([
+      this._readFirstVisibleValue([
+        'input[aria-label*="Consultation Fee" i]',
+        'input[placeholder*="Consultation Fee" i]',
+        'input[formcontrolname*="consultationFee" i]',
+      ]),
+      this._readFirstVisibleValue([
+        'input[aria-label*="MC Days" i]',
+        'input[placeholder*="MC Days" i]',
+        'input[name*="mc" i][name*="day" i]',
+        'input[id*="mc" i][id*="day" i]',
+      ]),
+      this._readFirstVisibleValue([
+        'input[aria-label*="MC Start Date" i]',
+        'input[placeholder*="MC Start Date" i]',
+        'input[name*="mc" i][name*="start" i]',
+        'input[id*="mc" i][id*="start" i]',
+      ]),
+      this._readFirstVisibleValue([
+        'mat-select[formcontrolname*="consultationFeeGroupItem" i]',
+        'mat-form-field:has-text("Consultation Fee Type")',
+      ]),
+      this._readFirstVisibleValue(['textarea[name*="treatment" i]', 'textarea[id*="treatment" i]']),
+      this._readFirstVisibleValue(['textarea[name*="remark" i]', 'textarea[id*="remark" i]']),
+    ]);
+    return {
+      fee,
+      mcDays,
+      mcStartDate,
+      consultationFeeType,
+      treatment,
+      remark,
+      diagnosis: this.lastDiagnosisPortalMatch?.match_text
+        ? {
+            selector: this.lastDiagnosisPortalMatch?.selector || 'diagnosis-dialog-selection',
+            value: this.lastDiagnosisPortalMatch.match_text,
+          }
+        : { selector: null, value: null },
+    };
+  }
+
   async validateRequiredFields({ nric, doctorName }) {
     const missingCore = [];
     if (!String(nric || '').trim()) missingCore.push('NRIC/Member UIN');
@@ -2094,6 +2154,7 @@ export class AllianceMedinetAutomation {
       }
 
       await this.page.waitForTimeout(600);
+      const readback = await this._readClaimFormReadback().catch(() => null);
       const screenshotPath = `screenshots/alliance-medinet-final-form-${visit?.id || 'unknown'}.png`;
       await this.page
         .screenshot({
@@ -2104,6 +2165,7 @@ export class AllianceMedinetAutomation {
       return {
         doctorName: mappedDoctorName,
         diagnosisPortalMatch: this.lastDiagnosisPortalMatch || null,
+        readback,
         screenshot: screenshotPath,
       };
     } catch (error) {

@@ -27,11 +27,25 @@ test('GE / NTUC fill verification exposes popup-filled fields', () => {
     mcDays: '0',
     mcReason: 'Pain-unspecified',
     remarks: 'Shadow fill only',
+    readback: {
+      fee: { selector: '#ctl00_MainContent_uc_MakeClaim_txtFeeAmount', value: '42.00' },
+      mcDays: { selector: '#ctl00_MainContent_uc_MakeClaim_txtMcDays', value: '0' },
+      mcReason: {
+        selector: '#ctl00_MainContent_uc_MakeClaim_ddlMcReasons',
+        value: 'Pain-unspecified',
+      },
+      remarks: {
+        selector: '#ctl00_MainContent_uc_MakeClaim_txtClaimRemarks',
+        value: 'Shadow fill only',
+      },
+    },
   });
 
   assert.equal(verification.visitDate.status, 'portal_managed');
   assert.equal(verification.diagnosis.status, 'verified');
+  assert.equal(verification.fee.status, 'verified');
   assert.equal(verification.fee.observed, '42.00');
   assert.equal(verification.chargeType.status, 'verified');
+  assert.equal(verification.mcDays.status, 'verified');
   assert.equal(verification.remarks.expected, 'Shadow fill only');
 });

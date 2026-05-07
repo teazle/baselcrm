@@ -2130,6 +2130,65 @@ export class ClaimSubmitter {
     return '';
   }
 
+  async _lookupCrmDobForVisit(visit) {
+    if (!this.supabase || !visit) return '';
+    const existing = this._pickDobForVisit(visit);
+    if (existing) return existing;
+
+    const normalize = value => this._pickDobForVisit({ dob: value });
+    const readContactDob = async contactId => {
+      if (!contactId) return '';
+      const { data, error } = await this.supabase
+        .from('contacts')
+        .select('date_of_birth')
+        .eq('id', contactId)
+        .maybeSingle();
+      if (error) {
+        logger.warn('[SUBMIT] Failed to load contact DOB for Allianz', {
+          visitId: visit?.id || null,
+          error: error.message,
+        });
+        return '';
+      }
+      return normalize(data?.date_of_birth);
+    };
+
+    if (visit.case_id) {
+      const { data: caseRow, error: caseError } = await this.supabase
+        .from('cases')
+        .select('contact_id')
+        .eq('id', visit.case_id)
+        .maybeSingle();
+      if (caseError) {
+        logger.warn('[SUBMIT] Failed to load case contact for Allianz DOB lookup', {
+          visitId: visit?.id || null,
+          error: caseError.message,
+        });
+      }
+      const dob = await readContactDob(caseRow?.contact_id);
+      if (dob) return dob;
+    }
+
+    const nric = this._pickNricForVisit(visit);
+    if (nric) {
+      const { data, error } = await this.supabase
+        .from('contacts')
+        .select('date_of_birth')
+        .or(`ic_passport_no.eq.${nric},registration_no.eq.${nric}`)
+        .limit(1);
+      if (error) {
+        logger.warn('[SUBMIT] Failed to load contact DOB by NRIC for Allianz', {
+          visitId: visit?.id || null,
+          error: error.message,
+        });
+      }
+      const dob = normalize(data?.[0]?.date_of_birth);
+      if (dob) return dob;
+    }
+
+    return '';
+  }
+
   async submitToAllianceMedinet(visit) {
     await this._applyRuntimeCredential('ALLIANCE_MEDINET', this.allianceMedinet?.config);
     try {
@@ -2211,7 +2270,14 @@ export class ClaimSubmitter {
     // Allianz AMOS portal requires DOB to enable the SEARCH button. We attach
     // a normalized visit.dob (YYYY-MM-DD) sourced from extraction_metadata.flow1.dob
     // so the submitter's searchAttemptBuilder can fill the DOB field.
-    const dob = this._pickDobForVisit(visit);
+    const dob = (await this._lookupCrmDobForVisit(visit)) || this._pickDobForVisit(visit);
+    if (dob && !this._pickDobForVisit(visit)) {
+      await this._mergeVisitExtractionMetadataPatch(visit?.id, {
+        dob,
+        dobSource: 'crm_contact',
+        allianzDobRefreshAt: new Date().toISOString(),
+      });
+    }
     const enrichedVisit = dob ? { ...visit, dob } : visit;
     return this._withIsolatedContext(AllianzSubmitter, enrichedVisit, runtimeCredential);
   }

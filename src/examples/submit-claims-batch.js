@@ -211,6 +211,14 @@ function parseCliArgs(argv) {
   return opts;
 }
 
+function isoDateDaysAgoFrom(anchorDate, days) {
+  const anchor = String(anchorDate || '').match(/^\d{4}-\d{2}-\d{2}$/)
+    ? new Date(`${anchorDate}T00:00:00.000Z`)
+    : new Date();
+  const next = new Date(anchor.getTime() - Number(days || 0) * 24 * 60 * 60 * 1000);
+  return next.toISOString().slice(0, 10);
+}
+
 /**
  * Batch submit claims to portals
  *
@@ -541,13 +549,49 @@ async function submitClaimsBatch() {
 
   try {
     // Get visits to submit (either specific IDs or all pending)
-    const visits = await submitter.getPendingClaims(payType, visitIds, {
+    let visits = await submitter.getPendingClaims(payType, visitIds, {
       from,
       to,
       portalOnly,
       portalTargets: normalizedPortalTargets,
       limit,
     });
+
+    const fallbackDays = Number(process.env.FLOW3_SHADOW_CANDIDATE_FALLBACK_DAYS || 0);
+    const canUseShadowCandidateFallback =
+      mode === 'fill_evidence' &&
+      visits.length === 0 &&
+      !visitIds?.length &&
+      Array.isArray(normalizedPortalTargets) &&
+      normalizedPortalTargets.length === 1 &&
+      Number.isFinite(fallbackDays) &&
+      fallbackDays > 0;
+    if (canUseShadowCandidateFallback) {
+      const fallbackFrom = isoDateDaysAgoFrom(
+        to || new Date().toISOString().slice(0, 10),
+        fallbackDays
+      );
+      logger.warn(
+        '[SUBMIT-BATCH] No visits matched initial scope; trying older shadow candidate fallback',
+        {
+          portalTarget: normalizedPortalTargets[0],
+          originalFrom: from || null,
+          originalTo: to || null,
+          fallbackFrom,
+          fallbackDays,
+        }
+      );
+      visits = await submitter.getPendingClaims(payType, visitIds, {
+        from: fallbackFrom,
+        to,
+        portalOnly,
+        portalTargets: normalizedPortalTargets,
+        limit,
+      });
+      if (visits.length > 0) {
+        reportScope.candidateFallback = `${fallbackFrom}..${to || '-'}`;
+      }
+    }
 
     totalRecords = visits.length;
     logger.info(`Found ${totalRecords} visit(s) to process`);

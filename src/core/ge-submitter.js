@@ -41,6 +41,43 @@ async function captureGePageSnapshot(page) {
     .catch(() => null);
 }
 
+async function captureGeFieldReadback(page) {
+  if (!page) return {};
+  return page
+    .evaluate(() => {
+      const norm = value =>
+        String(value || '')
+          .replace(/\s+/g, ' ')
+          .trim();
+      const read = selector => {
+        const node = globalThis.document?.querySelector?.(selector);
+        if (!node) return { selector: null, value: null };
+        const value =
+          node.tagName === 'SELECT'
+            ? norm(node.options?.[node.selectedIndex]?.text || node.value || '')
+            : norm(node.value || node.textContent || '');
+        return { selector, value: value || null };
+      };
+      return {
+        fee: read('#ctl00_MainContent_uc_MakeClaim_txtFeeAmount'),
+        mcDays: read('#ctl00_MainContent_uc_MakeClaim_txtMcDays'),
+        mcReason: read('#ctl00_MainContent_uc_MakeClaim_ddlMcReasons'),
+        remarks: read('#ctl00_MainContent_uc_MakeClaim_txtClaimRemarks'),
+        chargeType: read('#ctl00_MainContent_uc_MakeClaim_ddlFeeType'),
+      };
+    })
+    .catch(() => ({}));
+}
+
+function normalizeAmount(value) {
+  const match = String(value || '')
+    .replace(/,/g, '')
+    .match(/-?\d+(?:\.\d+)?/);
+  if (!match) return '';
+  const num = Number(match[0]);
+  return Number.isFinite(num) ? num.toFixed(2) : '';
+}
+
 export function buildGeFillVerification({
   visit,
   diagnosisResult,
@@ -49,6 +86,7 @@ export function buildGeFillVerification({
   mcDays,
   mcReason,
   remarks,
+  readback = {},
 } = {}) {
   const metadata = visit?.extraction_metadata || {};
   const diagnosisState = diagnosisResult?.diagnosisState || {};
@@ -72,10 +110,15 @@ export function buildGeFillVerification({
       selector: diagnosisResult?.selector || null,
     },
     fee: {
-      status: feeAmount ? 'filled_unverified' : 'missing_source',
+      status: feeAmount
+        ? normalizeAmount(feeAmount) &&
+          normalizeAmount(feeAmount) === normalizeAmount(readback?.fee?.value)
+          ? 'verified'
+          : 'filled_unverified'
+        : 'missing_source',
       expected: feeAmount || visit?.total_amount || null,
-      observed: feeAmount || null,
-      selector: '#ctl00_MainContent_uc_MakeClaim_txtFeeAmount',
+      observed: readback?.fee?.value || feeAmount || null,
+      selector: readback?.fee?.selector || '#ctl00_MainContent_uc_MakeClaim_txtFeeAmount',
     },
     chargeType: {
       status: feeTypeState?.selected ? 'verified' : 'filled_unverified',
@@ -84,22 +127,35 @@ export function buildGeFillVerification({
       selector: feeTypeState?.by || null,
     },
     mcDays: {
-      status: mcDays !== null && mcDays !== undefined ? 'filled_unverified' : 'missing_source',
+      status:
+        mcDays !== null && mcDays !== undefined
+          ? String(readback?.mcDays?.value || '') === String(mcDays)
+            ? 'verified'
+            : 'filled_unverified'
+          : 'missing_source',
       expected: mcDays ?? null,
-      observed: mcDays ?? null,
-      selector: '#ctl00_MainContent_uc_MakeClaim_txtMcDays',
+      observed: readback?.mcDays?.value ?? mcDays ?? null,
+      selector: readback?.mcDays?.selector || '#ctl00_MainContent_uc_MakeClaim_txtMcDays',
     },
     mcReason: {
-      status: mcReason ? 'filled_unverified' : 'missing_source',
+      status: mcReason
+        ? readback?.mcReason?.value
+          ? 'verified'
+          : 'filled_unverified'
+        : 'missing_source',
       expected: mcReason || null,
-      observed: mcReason || null,
-      selector: '#ctl00_MainContent_uc_MakeClaim_ddlMcReasons',
+      observed: readback?.mcReason?.value || mcReason || null,
+      selector: readback?.mcReason?.selector || '#ctl00_MainContent_uc_MakeClaim_ddlMcReasons',
     },
     remarks: {
-      status: remarks ? 'filled_unverified' : 'not_applicable',
+      status: remarks
+        ? readback?.remarks?.value
+          ? 'verified'
+          : 'filled_unverified'
+        : 'not_applicable',
       expected: remarks || null,
-      observed: remarks || null,
-      selector: '#ctl00_MainContent_uc_MakeClaim_txtClaimRemarks',
+      observed: readback?.remarks?.value || remarks || null,
+      selector: readback?.remarks?.selector || '#ctl00_MainContent_uc_MakeClaim_txtClaimRemarks',
     },
   };
 }
@@ -118,6 +174,7 @@ async function buildGeEvidenceBundle({
   remarks,
   submittedTruthCapture,
 } = {}) {
+  const readback = await captureGeFieldReadback(page);
   const fillVerification = buildGeFillVerification({
     visit,
     diagnosisResult,
@@ -126,6 +183,7 @@ async function buildGeEvidenceBundle({
     mcDays,
     mcReason,
     remarks,
+    readback,
   });
   const botSnapshot = buildGenericBotSnapshot({
     visit,
