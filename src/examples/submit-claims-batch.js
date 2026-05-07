@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { BrowserManager } from '../utils/browser.js';
 import { ClaimSubmitter } from '../core/claim-submitter.js';
+import { AllianzDobRefresher } from '../core/allianz-dob-refresher.js';
 import { createSupabaseClient } from '../utils/supabase-client.js';
 import { logger } from '../utils/logger.js';
 import { registerRunExitHandler, markRunFinalized } from '../utils/run-exit-handler.js';
@@ -219,6 +220,44 @@ function isoDateDaysAgoFrom(anchorDate, days) {
   return next.toISOString().slice(0, 10);
 }
 
+function pickDobForBatchVisit(visit) {
+  const md = visit?.extraction_metadata || {};
+  const candidates = [
+    visit?.dob,
+    visit?.date_of_birth,
+    visit?.patient_dob,
+    md?.dob,
+    md?.date_of_birth,
+    md?.dateOfBirth,
+    md?.patientDob,
+    md?.patient_dob,
+    md?.flow1?.dob,
+    md?.flow1?.dateOfBirth,
+    md?.flow1?.patientDob,
+    md?.flow2?.dob,
+    md?.flow2?.dateOfBirth,
+    md?.flow2?.patientDob,
+  ];
+  for (const candidate of candidates) {
+    const s = String(candidate || '').trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(s)) return s;
+  }
+  return '';
+}
+
+function shouldRefreshAllianzDobForVisit(visit, { mode = 'fill_evidence' } = {}) {
+  if (String(process.env.FLOW3_ALLIANZ_DOB_REFRESH || '1') === '0') return false;
+  if (String(mode || '').toLowerCase() !== 'fill_evidence') return false;
+  const portalTarget = resolveFlow3PortalTarget(
+    visit?.pay_type || null,
+    visit?.patient_name || null,
+    visit?.extraction_metadata || null
+  );
+  if (normalizeFlow3PortalTarget(portalTarget) !== 'ALLIANZ') return false;
+  return !pickDobForBatchVisit(visit);
+}
+
 /**
  * Batch submit claims to portals
  *
@@ -329,6 +368,7 @@ async function submitClaimsBatch() {
   const browserManager = new BrowserManager();
   const mhcAsiaPage = await browserManager.newPage();
   const submitter = new ClaimSubmitter(mhcAsiaPage);
+  let allianzDobRefresher = null;
 
   process.env.FLOW3_MODE = mode;
   process.env.WORKFLOW_SAVE_DRAFT = '0';
@@ -599,11 +639,42 @@ async function submitClaimsBatch() {
     await updateRun(supabase, runId, { total_records: totalRecords });
 
     for (let i = 0; i < visits.length; i++) {
-      const visit = visits[i];
+      let visit = visits[i];
       logger.info(`[${i + 1}/${visits.length}] Processing visit`, {
         visitId: visit.id || null,
         payType: visit.pay_type || null,
       });
+
+      if (shouldRefreshAllianzDobForVisit(visit, { mode })) {
+        try {
+          if (!allianzDobRefresher) {
+            const clinicAssistPage = await browserManager.newPage();
+            allianzDobRefresher = new AllianzDobRefresher({
+              clinicAssistPage,
+              supabase,
+            });
+          }
+          const refresh = await allianzDobRefresher.refreshVisitDob(visit);
+          if (refresh?.visit) {
+            visit = refresh.visit;
+            visits[i] = refresh.visit;
+          }
+          logger.info('[SUBMIT-BATCH] Allianz DOB refresh completed', {
+            visitId: visit.id || null,
+            status: refresh?.status || 'unknown',
+            hasDob: Boolean(refresh?.dob),
+            reason: refresh?.reason || null,
+          });
+        } catch (error) {
+          logger.warn(
+            '[SUBMIT-BATCH] Allianz DOB refresh failed; portal will return source block',
+            {
+              visitId: visit.id || null,
+              error: error?.message || String(error),
+            }
+          );
+        }
+      }
 
       let rowStatus = 'error';
       let rowNotes = '';
@@ -850,4 +921,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   });
 }
 
-export { parseCliArgs, submitClaimsBatch };
+export { parseCliArgs, shouldRefreshAllianzDobForVisit, submitClaimsBatch };

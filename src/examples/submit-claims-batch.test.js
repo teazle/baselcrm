@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { parseCliArgs } from './submit-claims-batch.js';
+import { parseCliArgs, shouldRefreshAllianzDobForVisit } from './submit-claims-batch.js';
 
 test('parseCliArgs accepts a positive processing limit', () => {
   const parsed = parseCliArgs([
@@ -77,4 +77,27 @@ test('parseCliArgs allows ec2-only shadow fill with EC2 marker', () => {
     if (previous === undefined) delete process.env.FLOW3_EC2_RUNNER;
     else process.env.FLOW3_EC2_RUNNER = previous;
   }
+});
+
+test('shouldRefreshAllianzDobForVisit targets only missing-DOB Allianz shadow visits', () => {
+  const base = {
+    id: 'visit-1',
+    pay_type: 'ALLIANZ',
+    patient_name: 'TEST PATIENT',
+    extraction_metadata: {},
+  };
+
+  assert.equal(shouldRefreshAllianzDobForVisit(base, { mode: 'fill_evidence' }), true);
+  assert.equal(
+    shouldRefreshAllianzDobForVisit(
+      { ...base, extraction_metadata: { flow1: { dob: '1985-04-03' } } },
+      { mode: 'fill_evidence' }
+    ),
+    false
+  );
+  assert.equal(
+    shouldRefreshAllianzDobForVisit({ ...base, pay_type: 'MHC' }, { mode: 'fill_evidence' }),
+    false
+  );
+  assert.equal(shouldRefreshAllianzDobForVisit(base, { mode: 'draft' }), false);
 });
