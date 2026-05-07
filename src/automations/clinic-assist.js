@@ -2047,6 +2047,45 @@ export class ClinicAssistAutomation {
           };
         }
 
+        const monthNames = {
+          jan: '01',
+          january: '01',
+          feb: '02',
+          february: '02',
+          mar: '03',
+          march: '03',
+          apr: '04',
+          april: '04',
+          may: '05',
+          jun: '06',
+          june: '06',
+          jul: '07',
+          july: '07',
+          aug: '08',
+          august: '08',
+          sep: '09',
+          sept: '09',
+          september: '09',
+          oct: '10',
+          october: '10',
+          nov: '11',
+          november: '11',
+          dec: '12',
+          december: '12',
+        };
+        const dmyMonth = text.match(/^(\d{1,2})[\s/-]+([A-Za-z]{3,9})[\s/-]+(\d{4})$/);
+        if (dmyMonth) {
+          const day = Number(dmyMonth[1]);
+          const month = monthNames[String(dmyMonth[2] || '').toLowerCase()];
+          const year = Number(dmyMonth[3]);
+          if (month && year >= 1900 && year <= 2100 && day >= 1 && day <= 31) {
+            return {
+              iso: `${dmyMonth[3]}-${month}-${String(day).padStart(2, '0')}`,
+              raw: text,
+            };
+          }
+        }
+
         return null;
       };
 
@@ -2059,14 +2098,78 @@ export class ClinicAssistAutomation {
         }
       }
 
+      const formControlDob = await this.page
+        .evaluate(() => {
+          const norm = s =>
+            String(s || '')
+              .replace(/\s+/g, ' ')
+              .trim();
+          const valueOf = el => {
+            if (!el) return '';
+            if ('value' in el && norm(el.value)) return norm(el.value);
+            if (el.getAttribute && norm(el.getAttribute('value')))
+              return norm(el.getAttribute('value'));
+            return norm(el.textContent || '');
+          };
+          const fieldSelectors = [
+            'input[name*="dob" i]',
+            'input[id*="dob" i]',
+            'input[placeholder*="dob" i]',
+            'input[name*="birth" i]',
+            'input[id*="birth" i]',
+            'input[placeholder*="birth" i]',
+            'select[name*="dob" i]',
+            'select[id*="dob" i]',
+            'select[name*="birth" i]',
+            'select[id*="birth" i]',
+          ];
+          for (const selector of fieldSelectors) {
+            const value = valueOf(document.querySelector(selector));
+            if (value) return value;
+          }
+
+          const labelRe = /date\s+of\s+birth|\bd\.?\s*o\.?\s*b\.?\b|\bbirth\s+date\b|\bbirthday\b/i;
+          const candidates = Array.from(document.querySelectorAll('label, div, span, td, th'));
+          for (const el of candidates) {
+            const text = norm(el.textContent);
+            if (!labelRe.test(text)) continue;
+            const nextValue = valueOf(el.nextElementSibling);
+            if (nextValue) return nextValue;
+            const controlValue = valueOf(
+              el.querySelector?.('input, select') ||
+                el.parentElement?.querySelector?.('input, select')
+            );
+            if (controlValue && !labelRe.test(controlValue)) return controlValue;
+            const row = el.closest('tr');
+            if (row) {
+              const cells = Array.from(row.querySelectorAll('td, th'));
+              const idx = cells.indexOf(el.closest('td, th') || el);
+              for (const cell of cells.slice(Math.max(0, idx + 1))) {
+                const rowValue = valueOf(cell.querySelector('input, select')) || valueOf(cell);
+                if (rowValue && !labelRe.test(rowValue)) return rowValue;
+              }
+            }
+          }
+          return '';
+        })
+        .catch(() => '');
+      const parsedFormControlDob = parseDob(formControlDob);
+      if (parsedFormControlDob?.iso) {
+        this._logStep('DOB found in patient form control', { iso: parsedFormControlDob.iso });
+        return { ...parsedFormControlDob, source: 'form_control' };
+      }
+
       const bodyText = await this.page.textContent('body').catch(() => '');
       const bodyPatterns = [
         /date of birth\s*[:#-]?\s*(\d{4}-\d{2}-\d{2})/i,
         /date of birth\s*[:#-]?\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/i,
+        /date of birth\s*[:#-]?\s*(\d{1,2}[\s/-]+[A-Za-z]{3,9}[\s/-]+\d{4})/i,
         /\bdob\b\s*[:#-]?\s*(\d{4}-\d{2}-\d{2})/i,
         /\bdob\b\s*[:#-]?\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/i,
+        /\bdob\b\s*[:#-]?\s*(\d{1,2}[\s/-]+[A-Za-z]{3,9}[\s/-]+\d{4})/i,
         /\bbirth\s*date\b\s*[:#-]?\s*(\d{4}-\d{2}-\d{2})/i,
         /\bbirth\s*date\b\s*[:#-]?\s*(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4})/i,
+        /\bbirth\s*date\b\s*[:#-]?\s*(\d{1,2}[\s/-]+[A-Za-z]{3,9}[\s/-]+\d{4})/i,
       ];
 
       for (const pattern of bodyPatterns) {
