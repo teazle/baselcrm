@@ -615,7 +615,7 @@ export class ClaimSubmitter {
     const payTypeRaw = String(visit.pay_type || '').toUpperCase();
     const requestedMode = this._getRequestedMode();
 
-    this.steps.step(1, `Submitting claim for ${visit.patient_name}`, {
+    this.steps.step(1, 'Submitting claim', {
       payType: payTypeRaw || null,
       visitId: visit.id,
       mode: requestedMode,
@@ -825,8 +825,13 @@ export class ClaimSubmitter {
 
       return result;
     } catch (error) {
-      logger.error(`[SUBMIT] Error submitting claim for ${visit.patient_name}`, {
-        error: error.message,
+      const sanitizedError = String(error?.message || error)
+        .replace(/[STFGM]\d{7}[A-Z]/gi, '[redacted-id]')
+        .replace(/nric=[^,)]+/gi, 'nric=[redacted]');
+      logger.error('[SUBMIT] Error submitting claim', {
+        visitId: visit.id || null,
+        payType: payTypeRaw || null,
+        error: sanitizedError,
       });
 
       const failureMetadata =
@@ -867,7 +872,7 @@ export class ClaimSubmitter {
         logger.info('[SUBMIT] Verification run: not persisting submission_status=error', {
           visitId: visit.id,
           payType: payTypeRaw || null,
-          error: error.message,
+          error: sanitizedError,
         });
       }
 
@@ -1553,7 +1558,7 @@ export class ClaimSubmitter {
       }
       if (!ok) {
         const err = new Error(
-          `diagnosis_mapping_failed: unable to apply generic portal diagnosis fallback (visitId=${visit.id}, nric=${nric})`
+          `diagnosis_mapping_failed: unable to apply generic portal diagnosis fallback (visitId=${visit.id})`
         );
         err.submissionMetadata = {
           success: false,
@@ -1582,9 +1587,14 @@ export class ClaimSubmitter {
           .fillDiagnosisPrimary(diagObj, { allowTextFallback: false })
           .catch(() => false);
       }
+      if (!ok && requestedMode !== 'submit') {
+        ok = await this.mhcAsia
+          .fillDiagnosisPrimary(diagObj, { allowTextFallback: true })
+          .catch(() => false);
+      }
       if (!ok) {
         const err = new Error(
-          `diagnosis_mapping_failed: unable to select matched diagnosis option on portal (visitId=${visit.id}, nric=${nric})`
+          `diagnosis_mapping_failed: unable to select matched diagnosis option on portal (visitId=${visit.id})`
         );
         err.submissionMetadata = {
           success: false,
