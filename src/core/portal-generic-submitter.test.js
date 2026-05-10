@@ -5,6 +5,7 @@ import {
   buildCredentialCandidates,
   buildGenericBotSnapshot,
   GenericPortalSubmitter,
+  shouldTryNextCredentialCandidate,
 } from './portal-generic-submitter.js';
 
 function createNoControlPage(bodyText = '') {
@@ -125,6 +126,36 @@ test('buildCredentialCandidates does not duplicate identical runtime and env cre
 
   assert.equal(candidates.length, 1);
   assert.equal(candidates[0].source, 'runtime');
+});
+
+test('buildCredentialCandidates expands configured URL candidates with the same credentials', () => {
+  const candidates = buildCredentialCandidates({
+    runtimeCredential: null,
+    config: {
+      defaultUrl: 'https://portal.example/primary',
+      defaultUrlCandidates: ['https://portal.example/primary', 'https://portal.example/fallback'],
+      defaultUsername: 'env-user',
+      defaultPassword: 'env-pass',
+    },
+    defaultUrl: 'https://portal.example/primary',
+  });
+
+  assert.deepEqual(
+    candidates.map(candidate => [candidate.source, candidate.url]),
+    [
+      ['env', 'https://portal.example/primary'],
+      ['env_url_candidate', 'https://portal.example/fallback'],
+    ]
+  );
+});
+
+test('shouldTryNextCredentialCandidate retries only recoverable login states', () => {
+  assert.equal(shouldTryNextCredentialCandidate('portal_unavailable'), true);
+  assert.equal(shouldTryNextCredentialCandidate('login_inputs_missing'), true);
+  assert.equal(shouldTryNextCredentialCandidate('login_submit_missing'), true);
+  assert.equal(shouldTryNextCredentialCandidate('login_invalid_credentials'), true);
+  assert.equal(shouldTryNextCredentialCandidate('portal_captcha_blocked'), false);
+  assert.equal(shouldTryNextCredentialCandidate('otp_required'), false);
 });
 
 test('GenericPortalSubmitter treats service unavailable login page as portal unavailable', async () => {

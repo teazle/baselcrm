@@ -11,6 +11,31 @@ function withOverrides(base, overrides) {
   return next;
 }
 
+export function parseAllianzUrlCandidates(defaultUrl) {
+  const configured = String(process.env.ALLIANZ_PORTAL_URL_CANDIDATES || '')
+    .split(',')
+    .map(value => value.trim())
+    .filter(Boolean);
+  const baseUrl = String(defaultUrl || 'https://my.allianzworldwidecare.com/sol/login.do').trim();
+  let origin = '';
+  try {
+    origin = new URL(baseUrl).origin;
+  } catch {
+    origin = '';
+  }
+  return [
+    ...new Set(
+      [
+        ...configured,
+        baseUrl,
+        origin ? `${origin}/sol/login.do` : null,
+        origin ? `${origin}/sol/` : null,
+        origin ? `${origin}/login.do` : null,
+      ].filter(Boolean)
+    ),
+  ];
+}
+
 function buildSelectors() {
   const selectors = withOverrides(createDefaultSelectors(), {
     loginUsername: [
@@ -554,12 +579,14 @@ async function ensureAllianzClaimForm({ page, state, helpers }) {
 export class AllianzSubmitter {
   constructor(page, steps = null) {
     this.steps = steps;
+    const defaultUrl = PORTALS.ALLIANZ?.url || 'https://my.allianzworldwidecare.com/sol/login.do';
     this.runtime = new GenericPortalSubmitter({
       page,
       steps,
       portalTarget: 'ALLIANZ',
       portalName: 'Allianz Worldwide Care',
-      defaultUrl: PORTALS.ALLIANZ?.url || 'https://my.allianzworldwidecare.com/sol/login.do',
+      defaultUrl,
+      defaultUrlCandidates: parseAllianzUrlCandidates(defaultUrl),
       defaultUsername: PORTALS.ALLIANZ?.username || '',
       defaultPassword: PORTALS.ALLIANZ?.password || '',
       supportsOtp: true,

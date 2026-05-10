@@ -310,6 +310,17 @@ export function buildCredentialCandidates({ runtimeCredential, config, defaultUr
     if (candidates.some(existing => credentialFingerprint(existing) === fp)) return;
     candidates.push(normalized);
   };
+  const pushUrlCandidates = ({ source, urls, username, password }) => {
+    const list = Array.isArray(urls)
+      ? urls
+      : String(urls || '')
+          .split(',')
+          .map(value => value.trim())
+          .filter(Boolean);
+    for (const url of list) {
+      push({ source, url, username, password });
+    }
+  };
 
   push({
     source: 'runtime',
@@ -323,7 +334,22 @@ export function buildCredentialCandidates({ runtimeCredential, config, defaultUr
     username: config?.defaultUsername,
     password: config?.defaultPassword,
   });
+  pushUrlCandidates({
+    source: 'env_url_candidate',
+    urls: config?.defaultUrlCandidates,
+    username: config?.defaultUsername,
+    password: config?.defaultPassword,
+  });
   return candidates;
+}
+
+export function shouldTryNextCredentialCandidate(loginState) {
+  return [
+    'login_invalid_credentials',
+    'portal_unavailable',
+    'login_inputs_missing',
+    'login_submit_missing',
+  ].includes(String(loginState || '').trim());
 }
 
 function normalizeDateValue(value) {
@@ -1891,12 +1917,13 @@ export class GenericPortalSubmitter {
         );
         if (loggedIn) break;
         const canRetryWithFallback =
-          state.login_state === 'login_invalid_credentials' &&
+          shouldTryNextCredentialCandidate(state.login_state) &&
           idx < credentialCandidates.length - 1;
         if (!canRetryWithFallback) break;
         state.login_fallback_attempted = true;
-        logger.warn(`[${this.portalTarget}] Runtime credential failed; retrying env credential`, {
+        logger.warn(`[${this.portalTarget}] Login candidate failed; retrying next candidate`, {
           failedSource: activeCredential.source,
+          loginState: state.login_state || null,
           nextSource: credentialCandidates[idx + 1]?.source || null,
         });
       }

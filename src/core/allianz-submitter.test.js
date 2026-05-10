@@ -1,7 +1,40 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { AllianzSubmitter } from './allianz-submitter.js';
+import { AllianzSubmitter, parseAllianzUrlCandidates } from './allianz-submitter.js';
+
+test('Allianz runtime includes deterministic URL candidates for AMOS variants', () => {
+  const submitter = new AllianzSubmitter({});
+
+  assert.deepEqual(submitter.runtime.config.defaultUrlCandidates, [
+    'https://my.allianzworldwidecare.com/sol/login.do',
+    'https://my.allianzworldwidecare.com/sol/',
+    'https://my.allianzworldwidecare.com/login.do',
+  ]);
+});
+
+test('parseAllianzUrlCandidates prepends configured candidates and de-duplicates defaults', () => {
+  const original = process.env.ALLIANZ_PORTAL_URL_CANDIDATES;
+  process.env.ALLIANZ_PORTAL_URL_CANDIDATES =
+    'https://custom.example/login, https://my.allianzworldwidecare.com/sol/login.do';
+  try {
+    assert.deepEqual(
+      parseAllianzUrlCandidates('https://my.allianzworldwidecare.com/sol/login.do'),
+      [
+        'https://custom.example/login',
+        'https://my.allianzworldwidecare.com/sol/login.do',
+        'https://my.allianzworldwidecare.com/sol/',
+        'https://my.allianzworldwidecare.com/login.do',
+      ]
+    );
+  } finally {
+    if (original === undefined) {
+      delete process.env.ALLIANZ_PORTAL_URL_CANDIDATES;
+    } else {
+      process.env.ALLIANZ_PORTAL_URL_CANDIDATES = original;
+    }
+  }
+});
 
 test('Allianz search uses DOB when available and attaches the AMOS DOB value', () => {
   const submitter = new AllianzSubmitter({});
