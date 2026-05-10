@@ -188,3 +188,36 @@ test('refreshVisitDob preserves current Supabase metadata when persisting DOB', 
   assert.equal(updates[0].extraction_metadata.flow1.dob, '1985-04-03');
   assert.equal(updates[0].extraction_metadata.staleOnly, undefined);
 });
+
+test('refreshVisitDob uses Clinic Assist DOB wrapper when available', async () => {
+  let directExtractorCalled = false;
+  const clinicAssist = {
+    async login() {},
+    async navigateToPatientPage() {
+      return true;
+    },
+    async searchPatientByNumber() {
+      return true;
+    },
+    async openPatientFromSearchResultsByNumber() {
+      return true;
+    },
+    async getPatientDOB() {
+      return { iso: '1985-04-03', raw: '03/04/1985', source: 'basic_info_tab' };
+    },
+    async extractPatientDobFromPatientInfo() {
+      directExtractorCalled = true;
+      return null;
+    },
+  };
+
+  const refresher = new AllianzDobRefresher({ clinicAssist, supabase: null });
+  const result = await refresher.refreshVisitDob({
+    id: 'visit-1',
+    extraction_metadata: { pcno: '12345' },
+  });
+
+  assert.equal(result.status, 'refreshed');
+  assert.equal(result.dob, '1985-04-03');
+  assert.equal(directExtractorCalled, false);
+});

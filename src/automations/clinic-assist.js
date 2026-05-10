@@ -2227,6 +2227,68 @@ export class ClinicAssistAutomation {
   }
 
   /**
+   * Get patient DOB from the current patient record page.
+   * Clinic Assist can place biodata on the landing page or behind profile tabs.
+   * @returns {Promise<{iso:string,raw:string,source:string}|null>}
+   */
+  async getPatientDOB() {
+    try {
+      this._logStep('Get patient DOB');
+
+      const directDob = await this.extractPatientDobFromPatientInfo();
+      if (directDob?.iso) return directDob;
+
+      const tabSelectors = [
+        'a:has-text("Basic Info")',
+        'button:has-text("Basic Info")',
+        '[href*="BasicInfo" i]',
+        'a:has-text("Patient Info")',
+        'button:has-text("Patient Info")',
+        '[href*="PatientInfo" i]',
+        'a:has-text("Biodata")',
+        'button:has-text("Biodata")',
+        '[href*="Biodata" i]',
+        'a:has-text("Profile")',
+        'button:has-text("Profile")',
+        '[href*="Profile" i]',
+        'a:has-text("Personal")',
+        'button:has-text("Personal")',
+        '[href*="Personal" i]',
+        'a:has-text("Edit")',
+        'button:has-text("Edit")',
+      ];
+
+      for (const selector of tabSelectors) {
+        const tab = this.page.locator(selector).first();
+        const count = await tab.count().catch(() => 0);
+        if (count === 0) continue;
+        const visible = await tab.isVisible().catch(() => false);
+        if (!visible) continue;
+        this._logStep('Trying patient DOB tab/link', { selector });
+        await tab.click({ timeout: 3000 }).catch(async () => tab.click({ force: true }));
+        await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+        await this.page.waitForTimeout(800);
+        const dob = await this.extractPatientDobFromPatientInfo();
+        if (dob?.iso) {
+          return {
+            ...dob,
+            source:
+              dob.source && dob.source !== 'body_text' && dob.source !== 'form_control'
+                ? dob.source
+                : `tab:${selector}`,
+          };
+        }
+      }
+
+      logger.warn('Could not find patient DOB');
+      return null;
+    } catch (error) {
+      logger.error('Error getting patient DOB:', error);
+      return null;
+    }
+  }
+
+  /**
    * Navigate to Reports section in Clinic Assist
    * @returns {Promise<boolean>} True if navigation successful
    */

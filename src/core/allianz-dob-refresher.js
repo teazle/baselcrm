@@ -175,7 +175,10 @@ export class AllianzDobRefresher {
       return { status: 'skipped', reason: 'missing_patient_identifier', dob: null, visit };
     }
 
-    const dobInfo = await this.clinicAssist.extractPatientDobFromPatientInfo();
+    const dobInfo =
+      typeof this.clinicAssist.getPatientDOB === 'function'
+        ? await this.clinicAssist.getPatientDOB()
+        : await this.clinicAssist.extractPatientDobFromPatientInfo();
     if (!dobInfo?.iso) {
       logger.warn('[ALLIANZ DOB] Clinic Assist patient page did not expose DOB', {
         visitId: visit?.id || null,
