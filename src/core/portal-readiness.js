@@ -15,6 +15,7 @@ export const FLOW3_UI_STATUSES = {
   OTP_BLOCKED: 'otp_blocked',
   CAPTCHA_BLOCKED: 'captcha_blocked',
   PORTAL_READ_ONLY: 'portal_read_only',
+  PORTAL_UNAVAILABLE: 'portal_unavailable',
   NOT_FOUND: 'not_found',
   LOGIN_BLOCKED: 'login_blocked',
   SESSION_BLOCKED: 'session_blocked',
@@ -73,6 +74,12 @@ export function deriveFlow3Readiness({ submissionStatus = null, metadata = null 
   }
   if (blockedReason.includes('read_only') || blockedReason.includes('no_claim_form')) {
     return { state: FLOW3_READINESS_STATES.BLOCKED, uiStatus: FLOW3_UI_STATUSES.PORTAL_READ_ONLY };
+  }
+  if (sessionState === 'portal_unavailable' || blockedReason === 'portal_unavailable') {
+    return {
+      state: FLOW3_READINESS_STATES.BLOCKED,
+      uiStatus: FLOW3_UI_STATUSES.PORTAL_UNAVAILABLE,
+    };
   }
   if (status === 'error' || lower(md.success) === 'false') {
     return { state: FLOW3_READINESS_STATES.BLOCKED, uiStatus: FLOW3_UI_STATUSES.ERROR };

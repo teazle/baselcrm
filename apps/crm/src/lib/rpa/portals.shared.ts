@@ -86,6 +86,7 @@ export const FLOW3_UI_STATUSES = [
   'otp_blocked',
   'captcha_blocked',
   'portal_read_only',
+  'portal_unavailable',
   'not_found',
   'login_blocked',
   'session_blocked',
@@ -158,6 +159,8 @@ export function deriveFlow3UiStatus(
     return 'session_blocked';
   if (blockedReason.includes('read_only') || blockedReason.includes('no_claim_form'))
     return 'portal_read_only';
+  if (sessionState === 'portal_unavailable' || blockedReason === 'portal_unavailable')
+    return 'portal_unavailable';
   if (status === 'error' || md.success === false) return 'error';
   if (hasRealFlow3Mismatches(comparison)) return 'drift_mismatch';
   if (md.submittedTruthSnapshot || submittedTruthCapture?.found === true) return 'truth_captured';

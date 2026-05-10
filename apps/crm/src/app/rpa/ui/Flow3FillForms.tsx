@@ -72,6 +72,7 @@ type FilterKey =
   | 'otp_blocked'
   | 'captcha_blocked'
   | 'portal_read_only'
+  | 'portal_unavailable'
   | 'not_found'
   | 'login_blocked'
   | 'session_blocked'
@@ -90,6 +91,7 @@ const filters: Array<{ key: FilterKey; label: string }> = [
   { key: 'otp_blocked', label: 'OTP blocked' },
   { key: 'captcha_blocked', label: 'CAPTCHA blocked' },
   { key: 'portal_read_only', label: 'Portal read-only' },
+  { key: 'portal_unavailable', label: 'Portal unavailable' },
   { key: 'not_found', label: 'Not found' },
   { key: 'login_blocked', label: 'Login blocked' },
   { key: 'session_blocked', label: 'Session blocked' },
@@ -261,6 +263,8 @@ export default function Flow3FillForms() {
           return status === 'captcha_blocked';
         case 'portal_read_only':
           return status === 'portal_read_only';
+        case 'portal_unavailable':
+          return status === 'portal_unavailable';
         case 'draft':
           return status === 'draft';
         case 'submitted':
@@ -350,6 +354,7 @@ export default function Flow3FillForms() {
     if (status === 'otp_blocked') return 'OTP blocked';
     if (status === 'captcha_blocked') return 'CAPTCHA blocked';
     if (status === 'portal_read_only') return 'Portal read-only';
+    if (status === 'portal_unavailable') return 'Portal unavailable';
     if (status === 'not_found') return 'Not found';
     if (status === 'login_blocked') return 'Login blocked';
     if (status === 'session_blocked') return 'Session blocked';
@@ -618,6 +623,7 @@ export default function Flow3FillForms() {
                                 : status === 'otp_blocked' ||
                                     status === 'captcha_blocked' ||
                                     status === 'portal_read_only' ||
+                                    status === 'portal_unavailable' ||
                                     status === 'login_blocked' ||
                                     status === 'session_blocked'
                                   ? 'border-red-200 bg-red-50 text-red-700'
