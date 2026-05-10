@@ -34,6 +34,9 @@ async function captureAlliancePageSnapshot(page) {
           type: norm(node.getAttribute?.('type')),
           id: norm(node.getAttribute?.('id')),
           name: norm(node.getAttribute?.('name')),
+          formControlName: norm(node.getAttribute?.('formcontrolname')),
+          ariaLabel: norm(node.getAttribute?.('aria-label')),
+          placeholder: norm(node.getAttribute?.('placeholder')),
           value:
             node.tagName === 'SELECT'
               ? norm(node.options?.[node.selectedIndex]?.text || node.value || '')
@@ -67,6 +70,110 @@ function normalizeText(value) {
     .toLowerCase();
 }
 
+function fieldIdentity(field = {}) {
+  return [
+    field.id,
+    field.name,
+    field.formControlName,
+    field.ariaLabel,
+    field.placeholder,
+    field.type,
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+}
+
+function pickPageSnapshotField(fields = [], identityPatterns = [], valuePattern = null) {
+  for (const field of fields || []) {
+    const value = String(field?.value || '').trim();
+    if (!value) continue;
+    const identity = fieldIdentity(field);
+    const identityMatched = identityPatterns.some(pattern => pattern.test(identity));
+    const valueMatched = valuePattern ? valuePattern.test(value) : true;
+    if (identityMatched && valueMatched) {
+      return {
+        selector: field?.id
+          ? `#${field.id}`
+          : field?.name
+            ? `[name="${field.name}"]`
+            : field?.formControlName
+              ? `[formcontrolname="${field.formControlName}"]`
+              : null,
+        value,
+        source: 'page_snapshot',
+      };
+    }
+  }
+  return { selector: null, value: null };
+}
+
+export function deriveAllianceReadbackFromPageSnapshot(pageSnapshot = null) {
+  const fields = Array.isArray(pageSnapshot?.fields) ? pageSnapshot.fields : [];
+  if (!fields.length) return {};
+  return {
+    fee: pickPageSnapshotField(
+      fields,
+      [
+        /consultation\s*fee/,
+        /consultationfee/,
+        /claim\s*amount/,
+        /claimamount/,
+        /amount/,
+        /\bfee\b/,
+      ],
+      /\d/
+    ),
+    mcDays: pickPageSnapshotField(
+      fields,
+      [/mc\s*days?/, /mcdays?/, /medical\s*certificate/, /medicalcertificate/],
+      /\d/
+    ),
+    mcStartDate: pickPageSnapshotField(
+      fields,
+      [/mc\s*start/, /mcstart/, /medical\s*certificate.*start/, /start\s*date/],
+      /\d/
+    ),
+    visitDate: pickPageSnapshotField(
+      fields,
+      [/visit\s*date/, /visitdate/, /consult\s*date/, /consultdate/, /treatment\s*date/],
+      /\d{1,4}[/-]\d{1,2}[/-]\d{1,4}/
+    ),
+    diagnosis: pickPageSnapshotField(fields, [/diagnosis/, /\bdiag\b/], /\S/),
+  };
+}
+
+function mergeReadback(primary = {}, fallback = {}) {
+  const merged = { ...(fallback || {}), ...(primary || {}) };
+  for (const key of Object.keys(fallback || {})) {
+    const primaryValue = primary?.[key]?.value;
+    if (!String(primaryValue || '').trim() && fallback?.[key]?.value) {
+      merged[key] = fallback[key];
+    }
+  }
+  return merged;
+}
+
+function normalizeIntegerLike(value) {
+  const raw = String(value ?? '').trim();
+  if (!raw) return null;
+  const match = raw.match(/-?\d+/);
+  if (!match) return null;
+  const num = Number(match[0]);
+  return Number.isFinite(num) ? num : null;
+}
+
+function mcDaysStatus({ expected, observed }) {
+  const expectedNum = normalizeIntegerLike(expected ?? 0);
+  const observedNum = normalizeIntegerLike(observed);
+  if ((expectedNum === null || expectedNum === 0) && (observedNum === null || observedNum === 0)) {
+    return 'verified';
+  }
+  if (expectedNum === null) return observedNum === null ? 'missing_source' : 'filled_unverified';
+  if (observedNum === null) return 'filled_unverified';
+  return expectedNum === observedNum ? 'verified' : 'mismatch';
+}
+
 function observedStatus({
   expected,
   observed,
@@ -86,10 +193,13 @@ function observedStatus({
   return o.includes(e) || e.includes(o) ? 'verified' : 'mismatch';
 }
 
-export function buildAllianceFillVerification({ visit, doctor, fillResult } = {}) {
+export function buildAllianceFillVerification({ visit, doctor, fillResult, pageSnapshot } = {}) {
   const metadata = visit?.extraction_metadata || {};
   const diagnosisMatch = fillResult?.diagnosisPortalMatch || null;
-  const readback = fillResult?.readback || {};
+  const readback = mergeReadback(
+    fillResult?.readback || {},
+    deriveAllianceReadbackFromPageSnapshot(pageSnapshot)
+  );
   const diagnosisObserved =
     readback?.diagnosis?.value ||
     diagnosisMatch?.selectedOption?.text ||
@@ -102,6 +212,7 @@ export function buildAllianceFillVerification({ visit, doctor, fillResult } = {}
   const expectedDiagnosis = metadata?.diagnosis_description || visit?.diagnosis_description || null;
   const feeObserved = readback?.fee?.value || null;
   const feeExpected = visit?.total_amount || null;
+  const expectedMcDays = metadata?.mcDays ?? visit?.mc_days ?? visit?.mcDays ?? 0;
   const diagnosisWasSelected = Boolean(
     diagnosisMatch &&
     diagnosisMatch.blocked !== true &&
@@ -136,8 +247,11 @@ export function buildAllianceFillVerification({ visit, doctor, fillResult } = {}
       selector: readback?.fee?.selector || null,
     },
     mcDays: {
-      status: readback?.mcDays?.value ? 'verified' : 'filled_unverified',
-      expected: metadata?.mcDays ?? visit?.mc_days ?? visit?.mcDays ?? 0,
+      status: mcDaysStatus({
+        expected: expectedMcDays,
+        observed: readback?.mcDays?.value || null,
+      }),
+      expected: expectedMcDays,
       observed: readback?.mcDays?.value || null,
       selector: readback?.mcDays?.selector || null,
     },
@@ -158,14 +272,20 @@ async function buildAllianceEvidenceBundle({
   doctor,
   submittedTruthCapture,
 } = {}) {
-  const fillVerification = buildAllianceFillVerification({ visit, doctor, fillResult });
+  const pageSnapshot = await captureAlliancePageSnapshot(page);
+  const fillVerification = buildAllianceFillVerification({
+    visit,
+    doctor,
+    fillResult,
+    pageSnapshot,
+  });
   const botSnapshot = buildGenericBotSnapshot({
     visit,
     portalTarget: 'ALLIANCE_MEDINET',
     portalName: 'Alliance Medinet',
     mode: flow3Mode || 'fill_evidence',
     fillVerification,
-    pageSnapshot: await captureAlliancePageSnapshot(page),
+    pageSnapshot,
     evidence: fillResult?.screenshot || null,
   });
   const comparison = comparePortalTruthSnapshots({

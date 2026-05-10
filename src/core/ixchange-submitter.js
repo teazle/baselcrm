@@ -36,10 +36,24 @@ function extractIxchangeSearchIdentifiers(visit) {
     visit?.memberId,
     md?.member_id,
     md?.memberId,
+    visit?.patient_no,
+    visit?.patientNo,
+    md?.patient_no,
+    md?.patientNo,
+    visit?.card_no,
+    visit?.cardNo,
+    md?.card_no,
+    md?.cardNo,
+    md?.policy_no,
+    md?.policyNo,
     md?.healthCardNo,
     md?.healthcardNo,
     md?.externalId,
     md?.staffId,
+    md?.claimDetails?.memberId,
+    md?.claimDetails?.member_id,
+    md?.claimDetails?.cardNo,
+    md?.claimDetails?.policyNo,
   ]
     .map(normalizeIdentifier)
     .filter(Boolean);
@@ -141,29 +155,44 @@ function buildIxchangeSearchAttempts({ visit, state, selectors }) {
   state.search_tags = getIxchangeTags(visit);
 
   const attempts = [];
-  if (mode === 'PARKWAY') {
-    for (const id of idCandidates) {
-      attempts.push({
-        value: id,
-        inputSelectors: selectors.searchInputPatientId,
-        label: 'parkway_nric',
-      });
-    }
-    return attempts;
-  }
-
   const nameVariants = [];
   for (const name of nameCandidates) {
     const reordered = reorderClinicAssistName(name);
     if (reordered) nameVariants.push(reordered);
     nameVariants.push(name);
   }
-  for (const name of [...new Set(nameVariants.map(normalizeName).filter(Boolean))]) {
+  const uniqueNameVariants = [...new Set(nameVariants.map(normalizeName).filter(Boolean))];
+
+  if (mode === 'PARKWAY') {
+    for (const id of idCandidates) {
+      attempts.push({
+        value: id,
+        inputSelectors: selectors.searchInputPatientId,
+        label: 'parkway_nric',
+        attemptKind: 'patient_id',
+        searchMode: mode,
+      });
+    }
+    for (const name of uniqueNameVariants) {
+      attempts.push({
+        value: name,
+        normalize: false,
+        inputSelectors: selectors.searchInputPatientName,
+        label: 'parkway_name_fallback',
+        attemptKind: 'patient_name',
+        searchMode: mode,
+      });
+    }
+    return attempts;
+  }
+  for (const name of uniqueNameVariants) {
     attempts.push({
       value: name,
       normalize: false,
       inputSelectors: selectors.searchInputPatientName,
       label: 'all_name',
+      attemptKind: 'patient_name',
+      searchMode: mode,
     });
   }
   for (const id of idCandidates) {
@@ -171,6 +200,8 @@ function buildIxchangeSearchAttempts({ visit, state, selectors }) {
       value: id,
       inputSelectors: selectors.searchInputPatientId,
       label: 'all_identifier_fallback',
+      attemptKind: 'patient_id',
+      searchMode: mode,
     });
   }
   return attempts;

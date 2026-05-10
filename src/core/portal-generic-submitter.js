@@ -1293,6 +1293,12 @@ export class GenericPortalSubmitter {
                 value,
                 inputSelectors,
                 label: String(item?.label || '').trim() || null,
+                attemptKind: String(item?.attemptKind || '').trim() || null,
+                searchMode: String(item?.searchMode || item?.mode || '').trim() || null,
+                modeSignals:
+                  item?.modeSignals && typeof item.modeSignals === 'object'
+                    ? item.modeSignals
+                    : undefined,
                 // Preserve extraInputs so multi-field attempts (e.g. Allianz
                 // AMOS Surname + DOB) actually fill the secondary field.
                 // Stripping this during normalization silently collapsed the
@@ -1341,6 +1347,9 @@ export class GenericPortalSubmitter {
     state.search_attempts = attempts.map(attempt => ({
       value: attempt.value,
       label: attempt.label || null,
+      attemptKind: attempt.attemptKind || null,
+      searchMode: attempt.searchMode || null,
+      modeSignals: attempt.modeSignals || undefined,
     }));
 
     const searchVisitDateSelectors = Array.isArray(this.selectors.searchVisitDate)

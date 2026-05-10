@@ -12,18 +12,23 @@ test('buildIxchangeSearchAttempts marks Parkway identifier attempts with Parkway
     visit: {
       pay_type: 'PARKWAY',
       nric: 's1234567a',
-      patient_name: 'Ignored Name',
+      patient_name: 'Doe, Jane',
     },
   });
 
   assert.equal(resolveIxchangeMode({ pay_type: 'PARKWAY' }), 'PARKWAY');
-  assert.equal(attempts.length, 1);
+  assert.equal(attempts.length, 3);
   assert.equal(attempts[0].label, 'parkway_nric');
   assert.equal(attempts[0].attemptKind, 'patient_id');
   assert.equal(attempts[0].mode, 'PARKWAY');
   assert.equal(attempts[0].modeSignals.parkway, true);
   assert.equal(attempts[0].modeSignals.all, false);
   assert.equal(attempts[0].portalTarget, 'IXCHANGE');
+  assert.equal(attempts[1].label, 'parkway_name_fallback');
+  assert.equal(attempts[1].attemptKind, 'patient_name');
+  assert.equal(attempts[1].value, 'Jane Doe');
+  assert.equal(attempts[2].label, 'parkway_name_fallback');
+  assert.equal(attempts[2].value, 'Doe, Jane');
 });
 
 test('buildIxchangeSubmittedTruthCaptureUnavailable keeps ALL mode signals in attempts metadata', () => {

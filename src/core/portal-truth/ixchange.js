@@ -95,10 +95,24 @@ function extractIxchangeSearchIdentifiers(visit) {
     visit?.memberId,
     md?.member_id,
     md?.memberId,
+    visit?.patient_no,
+    visit?.patientNo,
+    md?.patient_no,
+    md?.patientNo,
+    visit?.card_no,
+    visit?.cardNo,
+    md?.card_no,
+    md?.cardNo,
+    md?.policy_no,
+    md?.policyNo,
     md?.healthCardNo,
     md?.healthcardNo,
     md?.externalId,
     md?.staffId,
+    md?.claimDetails?.memberId,
+    md?.claimDetails?.member_id,
+    md?.claimDetails?.cardNo,
+    md?.claimDetails?.policyNo,
   ]
     .map(normalizeIdentifier)
     .filter(Boolean);
@@ -157,8 +171,16 @@ export function buildIxchangeSearchAttempts({
       ? selectors.searchInputPatientName
       : IXCHANGE_PATIENT_NAME_SELECTORS;
 
+  const nameVariants = [];
+  for (const name of nameCandidates) {
+    const reordered = reorderClinicAssistName(name);
+    if (reordered) nameVariants.push(reordered);
+    nameVariants.push(name);
+  }
+  const uniqueNameVariants = [...new Set(nameVariants.map(normalizeName).filter(Boolean))];
+
   if (mode === 'PARKWAY') {
-    return idCandidates.map(value =>
+    const attempts = idCandidates.map(value =>
       decorateAttempt({
         value,
         inputSelectors: patientIdSelectors,
@@ -169,15 +191,23 @@ export function buildIxchangeSearchAttempts({
         purpose,
       })
     );
+    for (const value of uniqueNameVariants) {
+      attempts.push(
+        decorateAttempt({
+          value,
+          inputSelectors: patientNameSelectors,
+          label: 'parkway_name_fallback',
+          mode,
+          tags,
+          attemptKind: 'patient_name',
+          purpose,
+        })
+      );
+    }
+    return attempts;
   }
 
-  const nameVariants = [];
-  for (const name of nameCandidates) {
-    const reordered = reorderClinicAssistName(name);
-    if (reordered) nameVariants.push(reordered);
-    nameVariants.push(name);
-  }
-  const attempts = [...new Set(nameVariants.map(normalizeName).filter(Boolean))].map(value =>
+  const attempts = uniqueNameVariants.map(value =>
     decorateAttempt({
       value,
       inputSelectors: patientNameSelectors,

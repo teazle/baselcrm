@@ -71,3 +71,63 @@ test('Alliance Medinet fill verification exposes shadow-filled fields', () => {
   assert.equal(verification.fee.expected, '38.00');
   assert.equal(verification.doctor.status, 'verified');
 });
+
+test('Alliance Medinet fill verification uses page snapshot readback fallback', () => {
+  const verification = buildAllianceFillVerification({
+    visit: {
+      visit_date: '2026-05-04',
+      total_amount: '38.00',
+      diagnosis_description: 'Upper respiratory tract infection',
+      extraction_metadata: {},
+    },
+    doctor: { doctorName: 'Tan Guoping Kelvin' },
+    fillResult: {
+      doctorName: 'Tan Guoping Kelvin',
+      diagnosisPortalMatch: {
+        match_text: 'J06.9 - Acute upper respiratory infection',
+      },
+      readback: {},
+    },
+    pageSnapshot: {
+      fields: [
+        {
+          formControlName: 'consultationFee',
+          value: '38.00',
+        },
+        {
+          formControlName: 'mcDays',
+          value: '0',
+        },
+      ],
+    },
+  });
+
+  assert.equal(verification.fee.status, 'verified');
+  assert.equal(verification.fee.observed, '38.00');
+  assert.equal(verification.mcDays.status, 'verified');
+  assert.equal(verification.mcDays.observed, '0');
+});
+
+test('Alliance Medinet does not mark absent MC fields unverified when no MC is expected', () => {
+  const verification = buildAllianceFillVerification({
+    visit: {
+      visit_date: '2026-05-04',
+      total_amount: '38.00',
+      diagnosis_description: 'Upper respiratory tract infection',
+      extraction_metadata: { mcDays: 0 },
+    },
+    doctor: { doctorName: 'Tan Guoping Kelvin' },
+    fillResult: {
+      doctorName: 'Tan Guoping Kelvin',
+      diagnosisPortalMatch: {
+        match_text: 'J06.9 - Acute upper respiratory infection',
+      },
+      readback: {
+        fee: { selector: 'input[formcontrolname*="consultationFee"]', value: '38.00' },
+      },
+    },
+  });
+
+  assert.equal(verification.mcDays.status, 'verified');
+  assert.equal(verification.mcDays.observed, null);
+});
