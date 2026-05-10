@@ -396,6 +396,29 @@ export class ClaimSubmitter {
     return error;
   }
 
+  async _closePortalResource(label, operation, { timeoutMs = 10000, browser = null } = {}) {
+    let timeoutHandle = null;
+    try {
+      await Promise.race([
+        operation(),
+        new Promise((_, reject) => {
+          timeoutHandle = globalThis.setTimeout(
+            () => reject(new Error(`${label} timed out after ${timeoutMs}ms`)),
+            timeoutMs
+          );
+        }),
+      ]);
+    } catch (error) {
+      logger.warn(`[SUBMITTER] ${label} did not complete cleanly`, {
+        error: error?.message || String(error),
+      });
+      const processHandle = typeof browser?.process === 'function' ? browser.process() : null;
+      processHandle?.kill?.('SIGKILL');
+    } finally {
+      if (timeoutHandle) globalThis.clearTimeout(timeoutHandle);
+    }
+  }
+
   _normalizePortalResult(result, visit, route) {
     const requestedMode = this._getRequestedMode();
     const portalResult = result && typeof result === 'object' ? result : {};
@@ -2316,8 +2339,18 @@ export class ClaimSubmitter {
       return result;
     } finally {
       if (timeoutHandle) globalThis.clearTimeout(timeoutHandle);
-      if (isolatedPage) await isolatedPage.close().catch(() => {});
-      if (isolatedContext) await isolatedContext.close().catch(() => {});
+      if (isolatedPage) {
+        await this._closePortalResource('isolated portal page close', () => isolatedPage.close(), {
+          browser,
+        });
+      }
+      if (isolatedContext) {
+        await this._closePortalResource(
+          'isolated portal context close',
+          () => isolatedContext.close(),
+          { browser }
+        );
+      }
     }
   }
 
