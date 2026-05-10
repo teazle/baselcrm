@@ -2256,6 +2256,15 @@ export class ClinicAssistAutomation {
         '[href*="Personal" i]',
         'a:has-text("Edit")',
         'button:has-text("Edit")',
+        'a[title*="Edit" i]',
+        'button[title*="Edit" i]',
+        'a[aria-label*="Edit" i]',
+        'button[aria-label*="Edit" i]',
+        'a[href*="Edit" i]',
+        'a[href*="PatientEdit" i]',
+        'a[href*="Patient/Edit" i]',
+        'a[onclick*="Edit" i]',
+        'button[onclick*="Edit" i]',
       ];
 
       for (const selector of tabSelectors) {
@@ -2280,12 +2289,78 @@ export class ClinicAssistAutomation {
         }
       }
 
+      const diagnostic = await this._collectPatientDobDiagnostic().catch(() => null);
+      if (diagnostic) {
+        this._logStep('Patient DOB diagnostic summary', diagnostic);
+      }
+
       logger.warn('Could not find patient DOB');
       return null;
     } catch (error) {
       logger.error('Error getting patient DOB:', error);
       return null;
     }
+  }
+
+  async _collectPatientDobDiagnostic() {
+    return await this.page.evaluate(() => {
+      const clean = value =>
+        String(value || '')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .slice(0, 80);
+      const safeToken = value => {
+        const text = clean(value);
+        if (!text) return '';
+        if (/edit|bio|birth|dob|info|profile|personal|detail|patient/i.test(text)) return text;
+        return '';
+      };
+      const dateLike = value =>
+        /\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b|\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}[\s/-]+[A-Za-z]{3,9}[\s/-]+\d{4}\b/.test(
+          String(value || '')
+        );
+      const controls = Array.from(document.querySelectorAll('input, select, textarea'))
+        .slice(0, 80)
+        .map(el => ({
+          tag: el.tagName.toLowerCase(),
+          type: clean(el.getAttribute('type')),
+          name: clean(el.getAttribute('name')),
+          id: clean(el.getAttribute('id')),
+          placeholder: safeToken(el.getAttribute('placeholder')),
+          title: safeToken(el.getAttribute('title')),
+          aria: safeToken(el.getAttribute('aria-label')),
+          hasValue: Boolean(clean(el.value || el.getAttribute('value'))),
+          valueLooksLikeDate: dateLike(el.value || el.getAttribute('value')),
+        }))
+        .filter(
+          item =>
+            item.name ||
+            item.id ||
+            item.placeholder ||
+            item.title ||
+            item.aria ||
+            item.hasValue ||
+            item.valueLooksLikeDate
+        );
+      const actions = Array.from(document.querySelectorAll('a, button, [role="button"]'))
+        .map(el => ({
+          tag: el.tagName.toLowerCase(),
+          text: safeToken(el.textContent),
+          href: safeToken(el.getAttribute('href')),
+          title: safeToken(el.getAttribute('title')),
+          aria: safeToken(el.getAttribute('aria-label')),
+          onclick: safeToken(el.getAttribute('onclick')),
+          visible: Boolean(el.offsetWidth || el.offsetHeight || el.getClientRects?.().length),
+        }))
+        .filter(item => item.text || item.href || item.title || item.aria || item.onclick)
+        .slice(0, 80);
+      return {
+        urlPath: window.location.pathname,
+        title: safeToken(document.title),
+        controls,
+        actions,
+      };
+    });
   }
 
   /**
