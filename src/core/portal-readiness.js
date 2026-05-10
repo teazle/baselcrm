@@ -63,7 +63,12 @@ export function deriveFlow3Readiness({ submissionStatus = null, metadata = null 
   if (blockedReason === 'member_not_found' || blockedReason === 'not_found') {
     return { state: FLOW3_READINESS_STATES.BLOCKED, uiStatus: FLOW3_UI_STATUSES.NOT_FOUND };
   }
-  if (sessionState === 'login_blocked' || blockedReason.includes('login_not_advanced')) {
+  if (
+    sessionState === 'login_blocked' ||
+    blockedReason.includes('login_not_advanced') ||
+    blockedReason.includes('invalid_credentials') ||
+    blockedReason.includes('auth_failed')
+  ) {
     return { state: FLOW3_READINESS_STATES.BLOCKED, uiStatus: FLOW3_UI_STATUSES.LOGIN_BLOCKED };
   }
   if (sessionState === 'session_conflict' || blockedReason.includes('session_conflict')) {

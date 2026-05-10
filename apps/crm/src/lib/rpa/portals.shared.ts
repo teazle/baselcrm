@@ -153,7 +153,12 @@ export function deriveFlow3UiStatus(
     return 'captcha_blocked';
   if (sessionState === 'otp_blocked' || blockedReason.includes('otp')) return 'otp_blocked';
   if (blockedReason === 'member_not_found' || blockedReason === 'not_found') return 'not_found';
-  if (sessionState === 'login_blocked' || blockedReason.includes('login_not_advanced'))
+  if (
+    sessionState === 'login_blocked' ||
+    blockedReason.includes('login_not_advanced') ||
+    blockedReason.includes('invalid_credentials') ||
+    blockedReason.includes('auth_failed')
+  )
     return 'login_blocked';
   if (sessionState === 'session_conflict' || blockedReason.includes('session_conflict'))
     return 'session_blocked';

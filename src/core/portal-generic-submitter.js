@@ -1931,7 +1931,7 @@ export class GenericPortalSubmitter {
       if (!loggedIn) {
         const loginBlockedReason =
           state.login_state === 'login_invalid_credentials'
-            ? 'portal_auth_failed'
+            ? 'portal_invalid_credentials'
             : state.login_state === 'session_conflict'
               ? 'portal_session_conflict'
               : state.login_state === 'login_not_advanced'
@@ -1949,7 +1949,8 @@ export class GenericPortalSubmitter {
           sessionState:
             state.login_state === 'session_conflict'
               ? 'session_conflict'
-              : state.login_state === 'login_not_advanced'
+              : state.login_state === 'login_not_advanced' ||
+                  state.login_state === 'login_invalid_credentials'
                 ? 'login_blocked'
                 : state.login_state === 'portal_unavailable'
                   ? 'portal_unavailable'

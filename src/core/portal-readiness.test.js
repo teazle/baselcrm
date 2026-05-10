@@ -73,6 +73,10 @@ test('deriveFlow3Readiness preserves deterministic portal blocked states', () =>
     FLOW3_UI_STATUSES.LOGIN_BLOCKED
   );
   assert.equal(
+    deriveFlow3Readiness({ metadata: { blocked_reason: 'portal_invalid_credentials' } }).uiStatus,
+    FLOW3_UI_STATUSES.LOGIN_BLOCKED
+  );
+  assert.equal(
     deriveFlow3Readiness({ metadata: { blocked_reason: 'portal_session_conflict' } }).uiStatus,
     FLOW3_UI_STATUSES.SESSION_BLOCKED
   );
