@@ -915,10 +915,16 @@ async function updateRun(supabase, runId, updates) {
 
 // Run if called directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  submitClaimsBatch().catch(error => {
-    console.error('Fatal error:', error);
-    process.exit(1);
-  });
+  submitClaimsBatch()
+    .then(() => {
+      if (process.env.FLOW3_EC2_RUNNER === '1' || process.env.FLOW3_FORCE_EXIT_AFTER_RUN === '1') {
+        process.exit(0);
+      }
+    })
+    .catch(error => {
+      console.error('Fatal error:', error);
+      process.exit(1);
+    });
 }
 
 export { parseCliArgs, shouldRefreshAllianzDobForVisit, submitClaimsBatch };
