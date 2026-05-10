@@ -7,6 +7,12 @@ function sleep(ms) {
   return new Promise(resolve => globalThis.setTimeout(resolve, ms));
 }
 
+function isPortalUnavailableText(value) {
+  return /service unavailable|temporarily unable to service|maintenance downtime|capacity problems|temporarily unavailable|bad gateway|gateway timeout|http\s*50[234]/i.test(
+    String(value || '')
+  );
+}
+
 function toDdMmYyyy(dateStr) {
   const raw = String(dateStr || '').trim();
   if (!raw) return '';
@@ -891,6 +897,15 @@ export class GenericPortalSubmitter {
     const bodyBeforeLogin = await page
       .evaluate(() => String(globalThis.document?.body?.innerText || ''))
       .catch(() => '');
+    if (isPortalUnavailableText(bodyBeforeLogin)) {
+      state.login_state = 'portal_unavailable';
+      state.evidence = await this._safeScreenshot(visit, 'portal-unavailable');
+      state.login_debug = await this._captureSearchDebug();
+      logger.warn(`[${this.portalTarget}] Portal unavailable before login`, {
+        url: page.url(),
+      });
+      return false;
+    }
     const sessionConflictPatterns =
       /only one browser window.*can be open|click here to login again|session has expired|session timeout|your session.*expired|access denied|please login again|already logged in/i;
     if (sessionConflictPatterns.test(bodyBeforeLogin)) {
@@ -1894,7 +1909,8 @@ export class GenericPortalSubmitter {
               ? 'portal_session_conflict'
               : state.login_state === 'login_not_advanced'
                 ? 'portal_login_not_advanced'
-                : state.login_state === 'login_inputs_missing' ||
+                : state.login_state === 'portal_unavailable' ||
+                    state.login_state === 'login_inputs_missing' ||
                     state.login_state === 'login_submit_missing'
                   ? 'portal_unavailable'
                   : 'portal_login_failed';
@@ -1908,7 +1924,9 @@ export class GenericPortalSubmitter {
               ? 'session_conflict'
               : state.login_state === 'login_not_advanced'
                 ? 'login_blocked'
-                : 'blocked',
+                : state.login_state === 'portal_unavailable'
+                  ? 'portal_unavailable'
+                  : 'blocked',
           portalUrl: activeCredential?.url || null,
         });
       }

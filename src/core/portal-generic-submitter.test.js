@@ -1,7 +1,42 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { buildCredentialCandidates, buildGenericBotSnapshot } from './portal-generic-submitter.js';
+import {
+  buildCredentialCandidates,
+  buildGenericBotSnapshot,
+  GenericPortalSubmitter,
+} from './portal-generic-submitter.js';
+
+function createNoControlPage(bodyText = '') {
+  return {
+    url: () => 'https://portal.example/login',
+    goto: async () => {},
+    waitForTimeout: async () => {},
+    waitForLoadState: async () => {},
+    frames: () => [],
+    mainFrame: () => ({}),
+    screenshot: async () => {},
+    locator: () => ({
+      count: async () => 0,
+      nth: () => ({
+        waitFor: async () => {
+          throw new Error('not found');
+        },
+      }),
+    }),
+    evaluate: async fn => {
+      const source = String(fn || '');
+      if (source.includes("querySelectorAll?.('input')")) return [];
+      if (source.includes('hasLogout') && source.includes('hasDashboard')) {
+        return { hasLogout: false, hasDashboard: false, hasLoginForm: false };
+      }
+      if (source.includes('/welcome/i')) return false;
+      if (source.includes('only one browser window')) return false;
+      if (source.includes('body?.innerText') || source.includes('document?.body')) return bodyText;
+      return null;
+    },
+  };
+}
 
 test('buildGenericBotSnapshot normalizes core audit fields from visit and verification evidence', () => {
   const snapshot = buildGenericBotSnapshot({
@@ -90,4 +125,28 @@ test('buildCredentialCandidates does not duplicate identical runtime and env cre
 
   assert.equal(candidates.length, 1);
   assert.equal(candidates[0].source, 'runtime');
+});
+
+test('GenericPortalSubmitter treats service unavailable login page as portal unavailable', async () => {
+  const submitter = new GenericPortalSubmitter({
+    page: createNoControlPage(
+      'Service Unavailable\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems.'
+    ),
+    portalTarget: 'ALLIANZ',
+    portalName: 'Allianz',
+    defaultUrl: 'https://portal.example/login',
+    selectors: {
+      loginUsername: ['input[name="username"]'],
+      loginPassword: ['input[name="password"]'],
+      loginSubmit: ['button:has-text("Login")'],
+    },
+  });
+  const state = { login_state: 'pending' };
+
+  const ok = await submitter._login('https://portal.example/login', 'user', 'pass', state, {
+    id: 'visit-1',
+  });
+
+  assert.equal(ok, false);
+  assert.equal(state.login_state, 'portal_unavailable');
 });
