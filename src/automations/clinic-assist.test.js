@@ -58,3 +58,17 @@ test('extractPatientDobFromPatientInfo reads DOB from patient form controls', as
     source: 'form_control',
   });
 });
+
+test('extractPatientDobFromPatientInfo parses DOB embedded in Clinic Assist form values', async () => {
+  const automation = new ClinicAssistAutomation(createStubPage('', '13/02/1990 12:00:00 AM'));
+  automation._logStep = () => {};
+  automation._extractLabeledValue = async () => null;
+
+  const dob = await automation.extractPatientDobFromPatientInfo();
+
+  assert.deepEqual(dob, {
+    iso: '1990-02-13',
+    raw: '13/02/1990',
+    source: 'form_control',
+  });
+});

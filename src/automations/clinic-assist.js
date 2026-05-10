@@ -2027,6 +2027,13 @@ export class ClinicAssistAutomation {
         const text = String(raw || '').trim();
         if (!text) return null;
 
+        const embeddedDate = text.match(
+          /\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}\b|\b\d{1,2}[\s/-]+[A-Za-z]{3,9}[\s/-]+\d{4}\b/
+        );
+        if (embeddedDate && embeddedDate[0] !== text) {
+          return parseDob(embeddedDate[0]);
+        }
+
         const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})$/);
         if (iso) {
           return { iso: `${iso[1]}-${iso[2]}-${iso[3]}`, raw: text };
