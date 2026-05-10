@@ -950,25 +950,54 @@ export class BrowserManager {
    * Close browser
    */
   async close() {
+    const closeTimeoutMs = Number(process.env.BROWSER_CLOSE_TIMEOUT_MS || 15000);
+    const withCloseTimeout = async (label, operation, onTimeout = null) => {
+      let timeoutId = null;
+      try {
+        await Promise.race([
+          operation(),
+          new Promise((_, reject) => {
+            timeoutId = globalThis.setTimeout(
+              () => reject(new Error(`${label} timed out after ${closeTimeoutMs}ms`)),
+              closeTimeoutMs
+            );
+          }),
+        ]);
+      } catch (error) {
+        logger.warn(`[BROWSER] ${label} did not complete cleanly`, {
+          error: error?.message || String(error),
+        });
+        if (typeof onTimeout === 'function') {
+          await onTimeout().catch(() => {});
+        }
+      } finally {
+        if (timeoutId) globalThis.clearTimeout(timeoutId);
+      }
+    };
+
     // Close any extra isolated contexts first
     if (this.extraContexts?.length) {
       for (const ctx of this.extraContexts) {
-        try {
-          await ctx.close();
-        } catch {
-          // context may already be closed
-        }
+        await withCloseTimeout('extra context close', () => ctx.close());
       }
       this.extraContexts = [];
     }
 
     if (this.context) {
-      await this._persistSessionState(this.context);
-      await this.context.close();
+      await withCloseTimeout('session persist', () => this._persistSessionState(this.context));
+      await withCloseTimeout('browser context close', () => this.context.close());
       logger.info('Browser closed');
     }
     if (this.browser) {
-      await this.browser.close();
+      await withCloseTimeout(
+        'browser close',
+        () => this.browser.close(),
+        async () => {
+          const processHandle =
+            typeof this.browser?.process === 'function' ? this.browser.process() : null;
+          processHandle?.kill?.('SIGKILL');
+        }
+      );
     }
   }
 
