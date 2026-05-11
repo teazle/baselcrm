@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { extractCodeFromText } from './portal-otp.js';
+import { extractCodeFromText, parseMailboxList } from './portal-otp.js';
 
 test('extracts Fullerton 2xSecure OTP when subject and sender carry the portal identity', () => {
   const text = [
@@ -30,4 +30,20 @@ test('extracts OTP when code appears before the OTP label', () => {
     extractCodeFromText('Use 123456 as your OTP to continue signing in.', 'FULLERTON')?.code,
     '123456'
   );
+});
+
+test('extracts IXCHANGE/SPOS OTP from portal-labelled email text', () => {
+  assert.equal(
+    extractCodeFromText('SPOS verification code: 654321. This code expires soon.', 'IXCHANGE')
+      ?.code,
+    '654321'
+  );
+});
+
+test('parseMailboxList defaults to inbox plus Gmail all mail and de-duplicates overrides', () => {
+  assert.deepEqual(parseMailboxList(''), ['INBOX', '[Gmail]/All Mail']);
+  assert.deepEqual(parseMailboxList('INBOX, [Gmail]/All Mail, INBOX'), [
+    'INBOX',
+    '[Gmail]/All Mail',
+  ]);
 });

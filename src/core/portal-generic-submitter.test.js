@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   buildCredentialCandidates,
   buildGenericBotSnapshot,
+  deriveOtpBlockedReason,
   GenericPortalSubmitter,
   shouldTryNextCredentialCandidate,
 } from './portal-generic-submitter.js';
@@ -156,6 +157,15 @@ test('shouldTryNextCredentialCandidate retries only recoverable login states', (
   assert.equal(shouldTryNextCredentialCandidate('login_invalid_credentials'), true);
   assert.equal(shouldTryNextCredentialCandidate('portal_captcha_blocked'), false);
   assert.equal(shouldTryNextCredentialCandidate('otp_required'), false);
+});
+
+test('deriveOtpBlockedReason preserves actionable OTP mailbox failures', () => {
+  assert.equal(deriveOtpBlockedReason('config_missing'), 'portal_otp_mail_config_missing');
+  assert.equal(deriveOtpBlockedReason('imap_auth_error'), 'portal_otp_mail_auth_failed');
+  assert.equal(deriveOtpBlockedReason('imap_error'), 'portal_otp_mail_error');
+  assert.equal(deriveOtpBlockedReason('otp_not_received'), 'portal_otp_not_received');
+  assert.equal(deriveOtpBlockedReason('otp_stale_only'), 'portal_otp_stale_only');
+  assert.equal(deriveOtpBlockedReason('otp_unparseable'), 'portal_otp_unparseable');
 });
 
 test('GenericPortalSubmitter treats service unavailable login page as portal unavailable', async () => {

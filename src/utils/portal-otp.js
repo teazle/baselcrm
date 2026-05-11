@@ -11,6 +11,8 @@ const DEFAULT_POLL_INTERVAL_MS = 3000;
 // Total timeout: must be long enough for slow portals (Fullerton, Allianz can take >2min
 // to send the OTP email when their backend is loaded). 180s gives adequate headroom.
 const DEFAULT_TIMEOUT_MS = 180000;
+const DEFAULT_MAILBOXES = ['INBOX', '[Gmail]/All Mail'];
+const DEFAULT_MAX_MESSAGES_PER_MAILBOX = 80;
 
 const PORTAL_MATCHERS = {
   ALLIANZ: {
@@ -55,6 +57,25 @@ function normalizePortal(portal) {
     .toUpperCase();
 }
 
+function maskEmail(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  const [local, domain] = raw.split('@');
+  if (!domain) return raw.length > 2 ? `${raw.slice(0, 2)}***` : '***';
+  return `${local.slice(0, 2)}***@${domain}`;
+}
+
+export function parseMailboxList(value) {
+  const raw = String(value || '').trim();
+  const items = raw
+    ? raw
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean)
+    : DEFAULT_MAILBOXES;
+  return [...new Set(items)];
+}
+
 function buildOtpRegexes(portal) {
   const key = normalizePortal(portal);
   if (key === 'ALLIANZ') {
@@ -85,7 +106,7 @@ function buildOtpRegexes(portal) {
   return GENERIC_OTP_REGEXES;
 }
 
-function shouldConsiderMessage(portal, envelope, parsed) {
+function shouldConsiderMessage(portal, envelope, parsed = null) {
   const key = normalizePortal(portal);
   const matcher = PORTAL_MATCHERS[key];
   if (!matcher) return true;
@@ -119,30 +140,42 @@ export function extractCodeFromText(text, portal) {
 
 function getMailConfig() {
   const email = String(process.env.OTP_GMAIL_EMAIL || '').trim();
-  const appPassword = String(process.env.OTP_GMAIL_APP_PASSWORD || '').trim();
+  const appPassword = String(
+    process.env.OTP_GMAIL_APP_PASSWORD || process.env.OTP_GMAIL_PASSWORD || ''
+  ).trim();
 
   return {
     email,
     appPassword,
+    authSource: process.env.OTP_GMAIL_APP_PASSWORD
+      ? 'app_password'
+      : process.env.OTP_GMAIL_PASSWORD
+        ? 'password'
+        : 'missing',
     host: String(process.env.OTP_GMAIL_IMAP_HOST || DEFAULT_IMAP_HOST).trim() || DEFAULT_IMAP_HOST,
     port: Number(process.env.OTP_GMAIL_IMAP_PORT || DEFAULT_IMAP_PORT),
     secure: toBoolean(process.env.OTP_GMAIL_IMAP_SECURE, DEFAULT_IMAP_SECURE),
+    mailboxes: parseMailboxList(process.env.OTP_GMAIL_MAILBOXES),
+    maxMessagesPerMailbox: Number(
+      process.env.OTP_GMAIL_MAX_MESSAGES_PER_MAILBOX || DEFAULT_MAX_MESSAGES_PER_MAILBOX
+    ),
     lookbackMinutes: Number(process.env.OTP_GMAIL_LOOKBACK_MINUTES || DEFAULT_LOOKBACK_MINUTES),
     pollIntervalMs: Number(process.env.OTP_GMAIL_POLL_INTERVAL_MS || DEFAULT_POLL_INTERVAL_MS),
     timeoutMs: Number(process.env.OTP_GMAIL_TIMEOUT_MS || DEFAULT_TIMEOUT_MS),
   };
 }
 
-async function readRecentMessages(client, sinceDate) {
+async function readRecentMessages(client, sinceDate, maxMessages) {
   const uids = await client.search({ since: sinceDate }).catch(() => []);
   if (!uids || uids.length === 0) return [];
-  const latest = [...uids].sort((a, b) => b - a).slice(0, 40);
+  const latest = [...uids]
+    .sort((a, b) => b - a)
+    .slice(0, Number.isFinite(maxMessages) && maxMessages > 0 ? maxMessages : 40);
   const messages = [];
   for await (const message of client.fetch(latest, {
     uid: true,
     envelope: true,
     internalDate: true,
-    source: true,
   })) {
     messages.push(message);
   }
@@ -152,6 +185,38 @@ async function readRecentMessages(client, sinceDate) {
     return tb - ta;
   });
   return messages;
+}
+
+async function fetchMessageSource(client, uid) {
+  if (!uid) return null;
+  for await (const message of client.fetch(
+    [uid],
+    {
+      uid: true,
+      source: true,
+    },
+    { uid: true }
+  )) {
+    return message?.source || null;
+  }
+  return null;
+}
+
+function classifyImapError(error) {
+  const details = [
+    error?.message || String(error),
+    error?.responseText || null,
+    error?.responseStatusText || null,
+    error?.code || null,
+  ]
+    .filter(Boolean)
+    .join(' | ');
+  const status = /auth|invalid credentials|application-specific password|login failed/i.test(
+    details
+  )
+    ? 'imap_auth_error'
+    : 'imap_error';
+  return { status, details: details || status };
 }
 
 export async function getOtpCode(options = {}) {
@@ -164,6 +229,12 @@ export async function getOtpCode(options = {}) {
   );
   const pollIntervalMs = Number(
     options.pollIntervalMs || config.pollIntervalMs || DEFAULT_POLL_INTERVAL_MS
+  );
+  const mailboxes = parseMailboxList(options.mailboxes || config.mailboxes);
+  const maxMessagesPerMailbox = Number(
+    options.maxMessagesPerMailbox ||
+      config.maxMessagesPerMailbox ||
+      DEFAULT_MAX_MESSAGES_PER_MAILBOX
   );
   // STALENESS GUARD: caller can pass `triggeredAfter` (epoch ms or Date) to
   // filter out OTP emails that arrived before the current login submit. This
@@ -199,145 +270,184 @@ export async function getOtpCode(options = {}) {
 
   const startedAt = Date.now();
   const deadline = startedAt + timeoutMs;
-  let lock = null;
 
   try {
     await client.connect();
-    lock = await client.getMailboxLock('INBOX');
     logger.info('[OTP] Connected to Gmail IMAP', {
       portal,
-      email: config.email,
+      email: maskEmail(config.email),
+      authSource: config.authSource,
+      mailboxes,
       lookbackMinutes,
       timeoutMs,
       triggeredAfter: triggeredAfterMs ? new Date(triggeredAfterMs).toISOString() : null,
     });
 
     let pollCount = 0;
+    let newestMessageAt = null;
+    let newestMatchingMessageAt = null;
+    let matchingMessagesSeen = 0;
+    let staleMatchingMessagesSeen = 0;
+    let unparseableMatchingMessagesSeen = 0;
     while (Date.now() < deadline) {
       pollCount += 1;
       const sinceDate = new Date(Date.now() - lookbackMinutes * 60 * 1000);
-      const messages = await readRecentMessages(client, sinceDate);
+      const mailboxSummaries = [];
+
+      for (const mailbox of mailboxes) {
+        let lock = null;
+        try {
+          lock = await client.getMailboxLock(mailbox);
+          const messages = await readRecentMessages(client, sinceDate, maxMessagesPerMailbox);
+          const mailboxNewestAt = messages[0]?.internalDate
+            ? new Date(messages[0].internalDate).toISOString()
+            : null;
+          newestMessageAt = newestMessageAt || mailboxNewestAt;
+          mailboxSummaries.push({
+            mailbox,
+            totalMessages: messages.length,
+            newestMessageAt: mailboxNewestAt,
+          });
+
+          for (const message of messages) {
+            const msgTime = new Date(message.internalDate || 0).getTime();
+            if (!Number.isFinite(msgTime) || msgTime < sinceDate.getTime()) continue;
+            if (!shouldConsiderMessage(portal, message.envelope)) continue;
+
+            matchingMessagesSeen += 1;
+            newestMatchingMessageAt =
+              !newestMatchingMessageAt || msgTime > new Date(newestMatchingMessageAt).getTime()
+                ? new Date(msgTime).toISOString()
+                : newestMatchingMessageAt;
+
+            // STALENESS GUARD: if caller anchored the polling window to the OTP
+            // trigger timestamp, reject any email that pre-dates the trigger.
+            // Protects against back-to-back visits reading the PREVIOUS visit's
+            // (already-consumed) OTP email.
+            if (triggeredAfterMs !== null && msgTime < triggeredAfterMs) {
+              staleMatchingMessagesSeen += 1;
+              logger.debug('[OTP] Skipping stale matching email (pre-trigger)', {
+                portal,
+                mailbox,
+                msgTime: new Date(msgTime).toISOString(),
+                triggeredAfter: new Date(triggeredAfterMs).toISOString(),
+              });
+              continue;
+            }
+
+            const source = await fetchMessageSource(client, message.uid);
+            let parsed = null;
+            try {
+              parsed = await simpleParser(source);
+            } catch (error) {
+              unparseableMatchingMessagesSeen += 1;
+              logger.warn('[OTP] Failed to parse matching email source', {
+                portal,
+                mailbox,
+                uid: message.uid || null,
+                error: error?.message || String(error),
+              });
+              continue;
+            }
+
+            const subject = String(parsed?.subject || message?.envelope?.subject || '').trim();
+            const textBody = [
+              parsed?.text || '',
+              parsed?.html ? String(parsed.html).replace(/<[^>]+>/g, ' ') : '',
+            ]
+              .join('\n')
+              .replace(/\s+/g, ' ')
+              .trim();
+
+            const match = extractCodeFromText(`${subject}\n${textBody}`, portal);
+            if (!match) {
+              unparseableMatchingMessagesSeen += 1;
+              logger.debug('[OTP] Matching email found but no OTP code extracted', {
+                portal,
+                mailbox,
+                receivedAt: message.internalDate
+                  ? new Date(message.internalDate).toISOString()
+                  : null,
+              });
+              continue;
+            }
+
+            return {
+              ok: true,
+              status: 'auto_read',
+              portal,
+              code: match.code,
+              matchedBy: match.matchedBy,
+              messageId: parsed?.messageId || null,
+              receivedAt: message.internalDate
+                ? new Date(message.internalDate).toISOString()
+                : null,
+              subject,
+              mailbox,
+            };
+          }
+        } catch (error) {
+          logger.warn('[OTP] Mailbox scan failed', {
+            portal,
+            mailbox,
+            error: error?.message || String(error),
+          });
+        } finally {
+          try {
+            if (lock) lock.release();
+          } catch {
+            // no-op
+          }
+        }
+      }
 
       // Keep CI logs PHI-safe: only log counts/timestamps, not sender names or subjects.
       if (pollCount === 1 || pollCount % 10 === 0) {
-        logger.info('[OTP] Inbox scan summary', {
+        logger.info('[OTP] Mailbox scan summary', {
           portal,
           poll: pollCount,
-          totalMessages: messages.length,
           sinceDate: sinceDate.toISOString(),
-          newestMessageAt: messages[0]?.internalDate
-            ? new Date(messages[0].internalDate).toISOString()
-            : null,
+          mailboxes: mailboxSummaries,
+          newestMessageAt,
+          newestMatchingMessageAt,
+          matchingMessagesSeen,
+          staleMatchingMessagesSeen,
+          unparseableMatchingMessagesSeen,
         });
       }
 
-      for (const message of messages) {
-        const msgTime = new Date(message.internalDate || 0).getTime();
-        if (!Number.isFinite(msgTime) || msgTime < sinceDate.getTime()) continue;
-        // STALENESS GUARD: if caller anchored the polling window to the OTP
-        // trigger timestamp, reject any email that pre-dates the trigger.
-        // Protects against back-to-back visits reading the PREVIOUS visit's
-        // (already-consumed) OTP email.
-        if (triggeredAfterMs !== null && msgTime < triggeredAfterMs) {
-          const fromAddr = message.envelope?.from?.[0]?.address || '';
-          const subj = String(message.envelope?.subject || '').slice(0, 60);
-          logger.debug('[OTP] Skipping stale email (pre-trigger)', {
-            portal,
-            from: fromAddr,
-            subject: subj,
-            msgTime: new Date(msgTime).toISOString(),
-            triggeredAfter: new Date(triggeredAfterMs).toISOString(),
-          });
-          continue;
-        }
-
-        let parsed = null;
-        try {
-          parsed = await simpleParser(message.source);
-        } catch (error) {
-          logger.warn('[OTP] Failed to parse email source', {
-            portal,
-            uid: message.uid || null,
-            error: error?.message || String(error),
-          });
-          continue;
-        }
-
-        if (!shouldConsiderMessage(portal, message.envelope, parsed)) {
-          const fromAddr = message.envelope?.from?.[0]?.address || '';
-          const fromName = message.envelope?.from?.[0]?.name || '';
-          const subj = String(message.envelope?.subject || '').slice(0, 60);
-          logger.debug('[OTP] Skipping non-matching email', {
-            portal,
-            from: `${fromName} <${fromAddr}>`,
-            subject: subj,
-          });
-          continue;
-        }
-
-        const subject = String(parsed?.subject || message?.envelope?.subject || '').trim();
-        const textBody = [
-          parsed?.text || '',
-          parsed?.html ? String(parsed.html).replace(/<[^>]+>/g, ' ') : '',
-        ]
-          .join('\n')
-          .replace(/\s+/g, ' ')
-          .trim();
-
-        const match = extractCodeFromText(`${subject}\n${textBody}`, portal);
-        if (!match) {
-          logger.debug('[OTP] Matching email found but no OTP code extracted', {
-            portal,
-            subject: subject.slice(0, 80),
-            bodyPreview: textBody.slice(0, 200),
-          });
-          continue;
-        }
-
-        return {
-          ok: true,
-          status: 'auto_read',
-          portal,
-          code: match.code,
-          matchedBy: match.matchedBy,
-          messageId: parsed?.messageId || null,
-          receivedAt: message.internalDate ? new Date(message.internalDate).toISOString() : null,
-          subject,
-        };
+      if (Date.now() + pollIntervalMs < deadline) {
+        await sleep(pollIntervalMs);
       }
+    }
 
-      await sleep(pollIntervalMs);
+    let status = 'otp_not_received';
+    if (staleMatchingMessagesSeen > 0 && matchingMessagesSeen === staleMatchingMessagesSeen) {
+      status = 'otp_stale_only';
+    } else if (unparseableMatchingMessagesSeen > 0) {
+      status = 'otp_unparseable';
     }
 
     return {
       ok: false,
-      status: 'timeout',
+      status,
       portal,
-      error: `Timed out waiting for OTP email after ${timeoutMs}ms (${pollCount} polls, checked ${lookbackMinutes}min window${triggeredAfterMs ? `, triggered-after ${new Date(triggeredAfterMs).toISOString()}` : ''})`,
+      error: `Timed out waiting for OTP email after ${timeoutMs}ms (${pollCount} polls, checked ${lookbackMinutes}min window across ${mailboxes.join(', ')}${triggeredAfterMs ? `, triggered-after ${new Date(triggeredAfterMs).toISOString()}` : ''})`,
+      newestMessageAt,
+      newestMatchingMessageAt,
+      matchingMessagesSeen,
+      staleMatchingMessagesSeen,
+      unparseableMatchingMessagesSeen,
     };
   } catch (error) {
-    const details = [
-      error?.message || String(error),
-      error?.responseText || null,
-      error?.responseStatusText || null,
-      error?.code || null,
-    ]
-      .filter(Boolean)
-      .join(' | ');
+    const { status, details } = classifyImapError(error);
     return {
       ok: false,
-      status: 'imap_error',
+      status,
       portal,
-      error: details || 'imap_error',
+      error: details,
     };
   } finally {
-    try {
-      if (lock) {
-        lock.release();
-      }
-    } catch {
-      // no-op
-    }
     await client.logout().catch(() => {});
   }
 }

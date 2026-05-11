@@ -352,6 +352,19 @@ export function shouldTryNextCredentialCandidate(loginState) {
   ].includes(String(loginState || '').trim());
 }
 
+export function deriveOtpBlockedReason(otpState) {
+  const normalized = String(otpState || '').trim();
+  if (normalized === 'config_missing') return 'portal_otp_mail_config_missing';
+  if (normalized === 'imap_auth_error') return 'portal_otp_mail_auth_failed';
+  if (normalized === 'imap_error') return 'portal_otp_mail_error';
+  if (normalized === 'otp_not_received') return 'portal_otp_not_received';
+  if (normalized === 'otp_stale_only') return 'portal_otp_stale_only';
+  if (normalized === 'otp_unparseable' || normalized === 'parse_failed') {
+    return 'portal_otp_unparseable';
+  }
+  return 'portal_otp_required';
+}
+
 function normalizeDateValue(value) {
   const raw = String(value || '')
     .replace(/\s+/g, ' ')
@@ -1178,7 +1191,7 @@ export class GenericPortalSubmitter {
         }
       );
       state.evidence = await this._safeScreenshot(visit, 'otp-headless-skip');
-      state.otp_state = 'skipped_headless';
+      state.otp_headless_manual_skipped = true;
       return false;
     }
 
@@ -1970,9 +1983,10 @@ export class GenericPortalSubmitter {
 
       const otpOk = await this._handleOtp(state, visit);
       if (!otpOk) {
+        const otpBlockedReason = deriveOtpBlockedReason(state.otp_state);
         return this._buildResult(state, {
           reason: 'otp_required',
-          blocked_reason: 'portal_otp_required',
+          blocked_reason: otpBlockedReason,
           detailReason: state.otp_state || 'otp_failed',
           error: `${this.portalTarget} OTP was not completed`,
           sessionState: 'otp_blocked',
@@ -1989,9 +2003,10 @@ export class GenericPortalSubmitter {
         if (otpVisibleLate) {
           const otpLateOk = await this._handleOtp(state, visit);
           if (!otpLateOk) {
+            const otpBlockedReason = deriveOtpBlockedReason(state.otp_state);
             return this._buildResult(state, {
               reason: 'otp_required',
-              blocked_reason: 'portal_otp_required',
+              blocked_reason: otpBlockedReason,
               detailReason: state.otp_state || 'otp_failed',
               error: `${this.portalTarget} OTP was not completed`,
               sessionState: 'otp_blocked',
