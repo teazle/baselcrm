@@ -27,7 +27,8 @@ jobs:
             DEPLOY_PATH="${DEPLOY_PATH/#\~/$HOME}"
             cd "$DEPLOY_PATH"
 
-            node --input-type=module <<'NODE'
+            TMP_SCRIPT="$(mktemp)"
+            cat > "$TMP_SCRIPT" <<'NODE'
             import 'dotenv/config';
             import { ImapFlow } from 'imapflow';
 
@@ -81,3 +82,5 @@ jobs:
               process.exit(1);
             }
             NODE
+            node "$TMP_SCRIPT"
+            rm -f "$TMP_SCRIPT"
