@@ -1244,6 +1244,7 @@ export class IXChangeSubmitter {
       defaultPassword: PORTALS.IXCHANGE?.password || '',
       supportsOtp: true,
       selectors: buildSelectors(),
+      clearCookiesOnLogin: ['o2ixchange.com', 'parkwaydigihealth.com'],
       disableDefaultSearchFallback: true,
       searchAttemptBuilder: buildIxchangeSearchAttempts,
       afterLoginPageLoad: async ({ page: runPage, state }) => {
