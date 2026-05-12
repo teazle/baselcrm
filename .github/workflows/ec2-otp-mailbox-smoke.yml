@@ -19,7 +19,7 @@ jobs:
           port: ${{ secrets.EC2_PORT || 22 }}
           timeout: 60s
           command_timeout: 10m
-          script_stop: true
+          script_stop: false
           script: |
             set -euo pipefail
 
