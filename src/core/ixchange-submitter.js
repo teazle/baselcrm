@@ -211,6 +211,11 @@ function buildSelectors() {
   return withOverrides(createDefaultSelectors(), {
     loginUsername: ['input[name*="username" i]', 'input[id*="username" i]'],
     loginPassword: ['input[name*="password" i]', 'input[id*="password" i]'],
+    loginSubmit: [
+      'button#login-button-id',
+      '#login-button-id',
+      'button.btn-login-custom:has-text("Login")',
+    ],
     otpInputs: ['input[placeholder*="OTP" i]', 'input[name*="otp" i]', 'input[id*="otp" i]'],
     otpSubmit: ['button:has-text("Submit")', 'button:has-text("Verify")'],
     preSearchClicks: [
