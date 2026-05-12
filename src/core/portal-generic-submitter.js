@@ -755,6 +755,17 @@ export class GenericPortalSubmitter {
         input.dispatchEvent(new globalThis.Event('change', { bubbles: true }));
       }, String(value));
     }
+    if (options.fireDomEventsAfterFill) {
+      await found.locator
+        .evaluate(el => {
+          if (!el) return;
+          el.dispatchEvent(new globalThis.Event('input', { bubbles: true }));
+          el.dispatchEvent(new globalThis.Event('change', { bubbles: true }));
+          el.dispatchEvent(new globalThis.KeyboardEvent('keyup', { key: 'Tab', bubbles: true }));
+          el.dispatchEvent(new globalThis.FocusEvent('blur', { bubbles: true }));
+        })
+        .catch(() => null);
+    }
     return found.selector;
   }
 
@@ -1445,6 +1456,8 @@ export class GenericPortalSubmitter {
                 // Stripping this during normalization silently collapsed the
                 // surname_and_dob attempt to surname-only.
                 extraInputs: Array.isArray(item?.extraInputs) ? item.extraInputs : undefined,
+                blurAfterFill: item?.blurAfterFill === true,
+                fireDomEventsAfterFill: item?.fireDomEventsAfterFill === true,
               };
             })
             .filter(Boolean);
@@ -1520,6 +1533,7 @@ export class GenericPortalSubmitter {
         identifier,
         {
           timeout: 3500,
+          fireDomEventsAfterFill: attempt.fireDomEventsAfterFill === true,
         }
       );
       if (!filled) {
@@ -1549,6 +1563,7 @@ export class GenericPortalSubmitter {
         if (!extra || !extra.value) continue;
         const extraFilled = await this._fillFirst(extra.inputSelectors || [], extra.value, {
           timeout: 2500,
+          fireDomEventsAfterFill: extra.fireDomEventsAfterFill === true,
         });
         extraFillResults.push({ label: extra.label || 'extra', filled: Boolean(extraFilled) });
         if (!extraFilled) {

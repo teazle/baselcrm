@@ -1176,43 +1176,76 @@ export class AllianceMedinetAutomation {
       });
       this._setLastAction('select-member.clicked-add');
 
-      // Wait briefly for any popup to materialize, then check
+      // Wait briefly for any popup to materialize, then poll all context pages.
+      // GE/NTUC sometimes opens as about:blank first and redirects to pcube later.
       const popupPage = await popupPromise;
-      if (popupPage) {
-        // Give the popup time to navigate to its final URL
-        await popupPage.waitForLoadState('domcontentloaded').catch(() => {});
-        await popupPage.waitForTimeout(1500).catch(() => {});
-        const popupUrl = popupPage.url() || null;
-        logger.info('[ALLIANCE] Popup detected after Add click', { popupUrl });
-        // The GE/NTUC_IM panel-claim popup is hosted on pcube.com.sg's
-        // MakePanelClaim.aspx (the ASP.NET WebForms shell identified by
-        // ctl00_MainContent_uc_MakeClaim_*). Great Eastern's own
-        // greateasternlife.com host is an older alias; in current rollouts
-        // Alliance Medinet emits popups pointing at pcube.com.sg for the
-        // same underlying MakeClaim form, and the GE submitter can drive
-        // either. Treat both as the GE/NTUC popup so the member-add flow
-        // yields to GENtucSubmitter rather than attempting to render the
-        // Alliance claim form (which fails with a portal runtime error).
-        const isGePopup = /(?:greateasternlife|pcube)\.com/i.test(String(popupUrl || ''));
-        if (isGePopup) {
-          this.lastGePopupPage = popupPage;
-          this.lastGePopupUrl = popupUrl;
-          // Tag the popup with the NRIC it was opened for. GENtucSubmitter
-          // checks this before reusing the popup on the next visit.
-          this.lastGePopupNric = this._lastSearchedNric || null;
-          this.page.off('console', onConsole);
-          throw this._buildAllianceError(
-            'ge_popup_redirect',
-            'Alliance Medinet redirected this member to GE/NTUC portal popup',
-            {
-              networkCode: networkCode || null,
-              gePopupUrl: popupUrl,
-              suggestedPortal: 'GE_NTUC',
-            }
-          );
+      const popupCandidates = popupPage ? [popupPage] : [];
+      const isGePopupPage = async page => {
+        if (!page || page.isClosed?.()) return false;
+        await page.waitForLoadState('domcontentloaded', { timeout: 2500 }).catch(() => null);
+        const popupUrl = String(page.url?.() || '');
+        if (/(?:greateasternlife|pcube)\.com|MakePanelClaim\.aspx/i.test(popupUrl)) {
+          return true;
         }
-        // Non-GE popup — might be another portal's popup, store for debugging
-        logger.info('[ALLIANCE] Non-GE popup captured', { popupUrl });
+        return page
+          .evaluate(() =>
+            /ctl00_MainContent_uc_MakeClaim|make panel claim|makeclaim/i.test(
+              String(globalThis.document?.body?.innerHTML || '')
+            )
+          )
+          .catch(() => false);
+      };
+
+      let gePopupPage = null;
+      const popupDeadline = Date.now() + 12000;
+      while (Date.now() < popupDeadline && !gePopupPage) {
+        for (const candidate of [...popupCandidates, ...this.page.context().pages()]) {
+          if (await isGePopupPage(candidate)) {
+            gePopupPage = candidate;
+            break;
+          }
+        }
+        if (!gePopupPage) await this.page.waitForTimeout(500).catch(() => null);
+      }
+
+      if (popupPage) {
+        logger.info('[ALLIANCE] Popup detected after Add click', {
+          popupUrl: popupPage.url() || null,
+          gePopupCaptured: Boolean(gePopupPage),
+        });
+      }
+
+      // The GE/NTUC_IM panel-claim popup is hosted on pcube.com.sg's
+      // MakePanelClaim.aspx (the ASP.NET WebForms shell identified by
+      // ctl00_MainContent_uc_MakeClaim_*). Great Eastern's own
+      // greateasternlife.com host is an older alias; in current rollouts
+      // Alliance Medinet emits popups pointing at pcube.com.sg for the
+      // same underlying MakeClaim form, and the GE submitter can drive
+      // either. Treat both as the GE/NTUC popup so the member-add flow
+      // yields to GENtucSubmitter rather than attempting to render the
+      // Alliance claim form (which fails with a portal runtime error).
+      if (gePopupPage) {
+        const popupUrl = gePopupPage.url() || null;
+        this.lastGePopupPage = gePopupPage;
+        this.lastGePopupUrl = popupUrl;
+        // Tag the popup with the NRIC it was opened for. GENtucSubmitter
+        // checks this before reusing the popup on the next visit.
+        this.lastGePopupNric = this._lastSearchedNric || null;
+        this.page.off('console', onConsole);
+        throw this._buildAllianceError(
+          'ge_popup_redirect',
+          'Alliance Medinet redirected this member to GE/NTUC portal popup',
+          {
+            networkCode: networkCode || null,
+            gePopupUrl: popupUrl,
+            suggestedPortal: 'GE_NTUC',
+          }
+        );
+      }
+
+      if (popupPage) {
+        // Non-GE popup — might be another portal's popup, store for debugging.
+        logger.info('[ALLIANCE] Non-GE popup captured', { popupUrl: popupPage.url() || null });
       }
 
       let formOpened = false;

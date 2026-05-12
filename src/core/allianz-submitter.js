@@ -707,6 +707,7 @@ export class AllianzSubmitter {
             value: surname,
             inputSelectors: ['input[name*="surname" i]', 'input[id*="surname" i]'],
             blurAfterFill: true,
+            fireDomEventsAfterFill: true,
             extraInputs: [
               {
                 value: dobAmos,
@@ -724,6 +725,7 @@ export class AllianzSubmitter {
                 // SEARCH button stays .Disabled and the click is a no-op. Press Tab
                 // after filling so the onblur handler enables SEARCH.
                 blurAfterFill: true,
+                fireDomEventsAfterFill: true,
               },
             ],
           });

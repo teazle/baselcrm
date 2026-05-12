@@ -522,6 +522,34 @@ async function submitIxchangeLogin({ page, state, selectors, helpers }) {
       .catch(error => ({ error: error?.message || String(error) }));
     state.ixchange_login_submit_fallback = fallback;
     await page.keyboard.press('Enter').catch(() => null);
+    await page.waitForTimeout(1800);
+    const stillOnLoginAfterFallback = await page
+      .evaluate(() => {
+        const url = String(globalThis.location?.href || '');
+        const hasUser = Boolean(
+          globalThis.document?.querySelector?.('input[name*="username" i], input[id*="username" i]')
+        );
+        const hasPassword = Boolean(
+          globalThis.document?.querySelector?.(
+            'input[name*="password" i], input[id*="password" i], input[type="password"]'
+          )
+        );
+        const hasAuthError =
+          /invalid|incorrect|failed|unsuccessful|wrong password|authentication failed|login failed/i.test(
+            String(globalThis.document?.body?.innerText || '')
+          );
+        return /\/login/i.test(url) && hasUser && hasPassword && !hasAuthError;
+      })
+      .catch(() => false);
+    if (stillOnLoginAfterFallback) {
+      await page
+        .goto('https://spos.o2ixchange.com/spos/search-patient', {
+          waitUntil: 'domcontentloaded',
+          timeout: 45000,
+        })
+        .catch(() => null);
+      state.ixchange_login_route_probe = page.url();
+    }
   }
 
   return clickedSelector;
