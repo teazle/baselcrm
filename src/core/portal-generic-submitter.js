@@ -366,6 +366,9 @@ export function detectLoginFailureSignals(bodyText) {
 
 export function deriveOtpBlockedReason(otpState) {
   const normalized = String(otpState || '').trim();
+  if (normalized === 'otp_email_waiting') return 'portal_otp_email_waiting';
+  if (normalized === 'portal_sms_otp_required' || normalized === 'sms_otp_required')
+    return 'portal_sms_otp_required';
   if (normalized === 'config_missing') return 'portal_otp_mail_config_missing';
   if (normalized === 'imap_auth_error') return 'portal_otp_mail_auth_failed';
   if (normalized === 'imap_error') return 'portal_otp_mail_error';
@@ -375,6 +378,34 @@ export function deriveOtpBlockedReason(otpState) {
     return 'portal_otp_unparseable';
   }
   return 'portal_otp_required';
+}
+
+export function detectOtpPromptSignals({ bodyText = '', fields = [], buttons = [] } = {}) {
+  const text = normalizeText(
+    [
+      bodyText,
+      ...fields.map(field =>
+        [field?.type, field?.name, field?.id, field?.placeholder, field?.ariaLabel].join(' ')
+      ),
+      ...buttons.map(button => [button?.text, button?.value, button?.name, button?.id].join(' ')),
+    ].join(' ')
+  );
+  const hasOtp =
+    /otp|one[-\s]?time password|verification code|security code|2-step verification|validate otp|resend otp|authentication code|passcode|token/.test(
+      text
+    );
+  if (!hasOtp) {
+    return { hasOtp: false, kind: 'none', hasEmail: false, hasSms: false };
+  }
+  const hasEmail = /email|e-mail|mailbox|gmail|inbox|sent to your mail|registered email/.test(text);
+  const hasSms =
+    /sms|text message|mobile|handphone|phone|registered number|sent to your number/.test(text);
+  return {
+    hasOtp: true,
+    kind: hasSms && !hasEmail ? 'sms' : 'email_or_unknown',
+    hasEmail,
+    hasSms,
+  };
 }
 
 function normalizeDateValue(value) {
@@ -532,6 +563,19 @@ export class GenericPortalSubmitter {
         };
       })
       .catch(() => null);
+  }
+
+  async _captureOtpDebug() {
+    const debug = await this._captureSearchDebug();
+    if (!debug) return null;
+    return {
+      ...debug,
+      otpPrompt: detectOtpPromptSignals({
+        bodyText: debug.bodySnippet,
+        fields: debug.inputs,
+        buttons: debug.buttons,
+      }),
+    };
   }
 
   async _safeScreenshot(visit, stage) {
@@ -1135,6 +1179,19 @@ export class GenericPortalSubmitter {
     // Extra settle time for slow table-based portals
     await page.waitForTimeout(1500);
 
+    const bodyAfterLogin = await page
+      .evaluate(() => String(globalThis.document?.body?.innerText || ''))
+      .catch(() => '');
+    if (isPortalUnavailableText(bodyAfterLogin)) {
+      state.login_state = 'portal_unavailable';
+      state.evidence = await this._safeScreenshot(visit, 'portal-unavailable');
+      state.login_debug = await this._captureSearchDebug();
+      logger.warn(`[${this.portalTarget}] Portal unavailable after login submit`, {
+        url: page.url(),
+      });
+      return false;
+    }
+
     const hasLoginUser = await this._waitForFirst(this.selectors.loginUsername, {
       timeout: 2500,
       visibleOnly: true,
@@ -1158,7 +1215,12 @@ export class GenericPortalSubmitter {
         hasCredentialDecryptError,
         url: page.url(),
       });
-      state.evidence = await this._safeScreenshot(visit, 'login-not-advanced');
+      state.evidence = await this._safeScreenshot(
+        visit,
+        state.login_state === 'login_invalid_credentials'
+          ? 'invalid-credentials'
+          : 'login-not-advanced'
+      );
       state.login_debug = await this._captureSearchDebug();
       return false;
     }
@@ -1181,7 +1243,20 @@ export class GenericPortalSubmitter {
       return true;
     }
 
-    state.otp_state = 'required';
+    const otpDebug = await this._captureOtpDebug();
+    state.otp_debug = otpDebug;
+    const otpPrompt = otpDebug?.otpPrompt || {};
+    if (otpPrompt.kind === 'sms') {
+      state.otp_state = 'portal_sms_otp_required';
+      state.evidence = await this._safeScreenshot(visit, 'sms-otp-required');
+      logger.warn(`[${this.portalTarget}] Portal requires SMS OTP; Gmail OTP is not applicable`, {
+        hasSms: otpPrompt.hasSms === true,
+        hasEmail: otpPrompt.hasEmail === true,
+      });
+      return false;
+    }
+
+    state.otp_state = 'otp_email_waiting';
     // Anchor the OTP lookup to ~5s before now so we only accept OTP emails
     // that arrived AFTER the current login-submit. This prevents back-to-back
     // visits (same portal, same mailbox) from reading the PREVIOUS visit's
@@ -1219,7 +1294,8 @@ export class GenericPortalSubmitter {
         return true;
       }
     } else {
-      state.otp_state = otpResult?.status || 'timeout';
+      const otpStatus = otpResult?.status || 'timeout';
+      state.otp_state = otpStatus === 'otp_not_received' ? 'otp_email_waiting' : otpStatus;
     }
 
     // In headless / cloud mode there is no operator to enter the code manually.

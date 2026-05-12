@@ -21,6 +21,7 @@ import {
   getPortalScopeOrFilter,
   isFlow2EligibleVisit,
   matchesFlow3PortalTargets,
+  resolveFlow3PortalRouting,
   resolveFlow3PortalTarget,
 } from '../../apps/crm/src/lib/rpa/portals.shared.js';
 
@@ -422,11 +423,25 @@ export class ClaimSubmitter {
   _normalizePortalResult(result, visit, route) {
     const requestedMode = this._getRequestedMode();
     const portalResult = result && typeof result === 'object' ? result : {};
+    const routing = resolveFlow3PortalRouting(
+      visit?.pay_type || null,
+      visit?.patient_name || null,
+      visit?.extraction_metadata || null
+    );
     return {
       mode: requestedMode,
       success: portalResult.success === true,
       portal: portalResult.portal || route || visit?.pay_type || null,
       portalService: portalResult.portalService || route || null,
+      portalTarget: routing.portalTarget || route || null,
+      portalRoutingSource:
+        routing.reason === 'explicit_ca_tag'
+          ? 'tpa_user_interface_guide'
+          : routing.reason === 'metadata_hint'
+            ? 'extraction_metadata'
+            : null,
+      portalTag: routing.tag || null,
+      portalRoutingReason: routing.reason || 'portal_unknown',
       savedAsDraft: portalResult.savedAsDraft === true,
       submitted: portalResult.submitted === true,
       reason: portalResult.reason || null,

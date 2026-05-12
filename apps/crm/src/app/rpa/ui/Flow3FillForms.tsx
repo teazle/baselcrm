@@ -66,10 +66,12 @@ type FilterKey =
   | 'candidate_pending'
   | 'manual_review'
   | 'shadow_fill_ready'
+  | 'filled_unverified'
   | 'truth_unavailable'
   | 'truth_captured'
   | 'drift_mismatch'
   | 'otp_blocked'
+  | 'sms_otp_required'
   | 'captcha_blocked'
   | 'portal_read_only'
   | 'portal_unavailable'
@@ -85,10 +87,12 @@ const filters: Array<{ key: FilterKey; label: string }> = [
   { key: 'candidate_pending', label: 'Candidate pending' },
   { key: 'manual_review', label: 'Manual review' },
   { key: 'shadow_fill_ready', label: 'Shadow fill ready' },
+  { key: 'filled_unverified', label: 'Filled unverified' },
   { key: 'truth_unavailable', label: 'Truth unavailable' },
   { key: 'truth_captured', label: 'Truth captured' },
   { key: 'drift_mismatch', label: 'Drift mismatch' },
   { key: 'otp_blocked', label: 'OTP blocked' },
+  { key: 'sms_otp_required', label: 'SMS OTP required' },
   { key: 'captcha_blocked', label: 'CAPTCHA blocked' },
   { key: 'portal_read_only', label: 'Portal read-only' },
   { key: 'portal_unavailable', label: 'Portal unavailable' },
@@ -101,7 +105,7 @@ const filters: Array<{ key: FilterKey; label: string }> = [
 ];
 
 const portalTargetOptions: Array<{ key: string; label: string }> = [
-  { key: 'MHC', label: 'MHC / AIA / AVIVA / SINGLIFE / MHCAXA' },
+  { key: 'MHC', label: 'MHC / AVIVA / NTUC_IM / MHCAXA' },
   { key: 'ALLIANCE_MEDINET', label: 'Alliance Medinet' },
   { key: 'ALLIANZ', label: 'Allianz Worldwide Care' },
   { key: 'FULLERTON', label: 'Fullerton' },
@@ -251,6 +255,8 @@ export default function Flow3FillForms() {
           return status === 'manual_review';
         case 'shadow_fill_ready':
           return status === 'shadow_fill_ready';
+        case 'filled_unverified':
+          return status === 'filled_unverified';
         case 'truth_unavailable':
           return status === 'truth_unavailable';
         case 'truth_captured':
@@ -259,6 +265,8 @@ export default function Flow3FillForms() {
           return status === 'drift_mismatch';
         case 'otp_blocked':
           return status === 'otp_blocked';
+        case 'sms_otp_required':
+          return status === 'sms_otp_required';
         case 'captcha_blocked':
           return status === 'captcha_blocked';
         case 'portal_read_only':
@@ -302,9 +310,13 @@ export default function Flow3FillForms() {
     ).length;
     const manualReview = scopedRows.filter(r => getSubmissionStatus(r) === 'manual_review').length;
     const filledEvidence = scopedRows.filter(r =>
-      ['shadow_fill_ready', 'truth_unavailable', 'truth_captured', 'drift_mismatch'].includes(
-        getSubmissionStatus(r)
-      )
+      [
+        'shadow_fill_ready',
+        'filled_unverified',
+        'truth_unavailable',
+        'truth_captured',
+        'drift_mismatch',
+      ].includes(getSubmissionStatus(r))
     ).length;
     const draft = scopedRows.filter(r => getSubmissionStatus(r) === 'draft').length;
     const submitted = scopedRows.filter(r => getSubmissionStatus(r) === 'submitted').length;
@@ -348,10 +360,12 @@ export default function Flow3FillForms() {
     if (status === 'candidate_pending') return 'Candidate pending';
     if (status === 'manual_review') return 'Manual review';
     if (status === 'shadow_fill_ready') return 'Shadow fill ready';
+    if (status === 'filled_unverified') return 'Filled unverified';
     if (status === 'truth_unavailable') return 'Truth unavailable';
     if (status === 'truth_captured') return 'Truth captured';
     if (status === 'drift_mismatch') return 'Drift mismatch';
     if (status === 'otp_blocked') return 'OTP blocked';
+    if (status === 'sms_otp_required') return 'SMS OTP required';
     if (status === 'captcha_blocked') return 'CAPTCHA blocked';
     if (status === 'portal_read_only') return 'Portal read-only';
     if (status === 'portal_unavailable') return 'Portal unavailable';
@@ -613,6 +627,7 @@ export default function Flow3FillForms() {
                         status === 'submitted'
                           ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                           : status === 'shadow_fill_ready' ||
+                              status === 'filled_unverified' ||
                               status === 'truth_unavailable' ||
                               status === 'truth_captured'
                             ? 'border-sky-200 bg-sky-50 text-sky-700'
@@ -621,6 +636,7 @@ export default function Flow3FillForms() {
                               : status === 'draft'
                                 ? 'border-blue-200 bg-blue-50 text-blue-700'
                                 : status === 'otp_blocked' ||
+                                    status === 'sms_otp_required' ||
                                     status === 'captcha_blocked' ||
                                     status === 'portal_read_only' ||
                                     status === 'portal_unavailable' ||

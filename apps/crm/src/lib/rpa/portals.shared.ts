@@ -10,17 +10,40 @@
 export const ALLIANCE_MEDINET_TAGS = [
   'TOKIOM',
   'ALLIANC',
-  'ALLIANCE',
   'ALLSING',
   'AXAMED',
+  'ALLIMED',
+  'HSBCLIFE',
   'PRUDEN',
 ] as const;
 export const ALLIANZ_TAGS = ['ALLIANZ'] as const;
-export const FULLERTON_TAGS = ['FULLERT'] as const;
+export const FULLERTON_TAGS = ['FULLERT', 'AONCARE'] as const;
 export const IHP_TAGS = ['IHP'] as const;
-export const IXCHANGE_TAGS = ['PARKWAY', 'ALL'] as const;
-export const GE_NTUC_TAGS = ['GE', 'NTUC_IM'] as const;
-export const MHC_TAGS = ['MHC', 'AIA', 'AIACLIENT', 'AVIVA', 'SINGLIFE', 'MHCAXA'] as const;
+export const IXCHANGE_TAGS = ['ALL', 'ALL_PW', 'PARKWAY'] as const;
+export const GE_NTUC_TAGS = ['GE'] as const;
+export const MHC_TAGS = ['MHC', 'AVIVA', 'NTUC_IM', 'MHCAXA'] as const;
+export const AMBIGUOUS_INSURER_NAMES = [
+  'AIA',
+  'AIACLIENT',
+  'SINGLIFE',
+  'GREAT EASTERN',
+  'GREATEASTERN',
+  'PRUDENTIAL',
+  'QBE',
+  'AXA',
+  'HSBC',
+  'INCOME',
+  'TOKIO MARINE',
+] as const;
+export const CA_PORTAL_TAG_ROUTES = Object.freeze({
+  MHC: ['MHC', 'AVIVA', 'NTUC_IM'],
+  ALLIANZ: ['ALLIANZ'],
+  FULLERTON: ['FULLERT', 'AONCARE'],
+  IHP: ['IHP'],
+  IXCHANGE: ['ALL', 'ALL_PW', 'PARKWAY'],
+  ALLIANCE_MEDINET: ['ALLIANC', 'ALLSING', 'AXAMED', 'ALLIMED', 'HSBCLIFE', 'PRUDEN', 'TOKIOM'],
+  GE_NTUC: ['GE'],
+} satisfies Record<Flow3PortalTarget, readonly string[]>);
 export const SUPPORTED_PORTALS = [...MHC_TAGS, ...ALLIANCE_MEDINET_TAGS] as const;
 export const UNSUPPORTED_PORTALS = [
   ...ALLIANZ_TAGS,
@@ -28,7 +51,6 @@ export const UNSUPPORTED_PORTALS = [
   ...IHP_TAGS,
   ...IXCHANGE_TAGS,
   ...GE_NTUC_TAGS,
-  'ALLIMED',
 ] as const;
 export const FLOW3_PORTAL_TARGETS = [
   'MHC',
@@ -49,8 +71,11 @@ export const PORTAL_PAY_TYPES = [
   'FULLERT',
   'IHP',
   'PARKWAY',
+  'ALL_PW',
   'ALL',
   'ALLIMED',
+  'AONCARE',
+  'HSBCLIFE',
   'ALLIANZ',
   'ALLIANCE',
   'GE',
@@ -64,10 +89,14 @@ export const PATIENT_NAME_PORTAL_TAGS = [
   'ALLSING',
   'AXAMED',
   'PRUDEN',
+  'ALLIMED',
+  'HSBCLIFE',
   'ALLIANZ',
   'ALLIANCE',
   'FULLERT',
+  'AONCARE',
   'PARKWAY',
+  'ALL_PW',
   'NTUC_IM',
   'MHCAXA',
 ] as const;
@@ -80,10 +109,12 @@ export const FLOW3_UI_STATUSES = [
   'candidate_pending',
   'manual_review',
   'shadow_fill_ready',
+  'filled_unverified',
   'truth_unavailable',
   'truth_captured',
   'drift_mismatch',
   'otp_blocked',
+  'sms_otp_required',
   'captcha_blocked',
   'portal_read_only',
   'portal_unavailable',
@@ -106,8 +137,16 @@ export type ClaimCandidateClassification = {
   status: ClaimCandidateStatus;
   reasons: string[];
   portalTarget: Flow3PortalTarget | null;
+  portalRouting?: Flow3PortalRouting;
   normalizedPayType: string;
   hasNric: boolean;
+};
+
+export type Flow3PortalRouting = {
+  portalTarget: Flow3PortalTarget | null;
+  source: string | null;
+  tag: string | null;
+  reason: string;
 };
 
 function lowerMeta(value: unknown): string {
@@ -124,6 +163,18 @@ function hasRealFlow3Mismatches(comparison: unknown): boolean {
   return categories.some(category => {
     const key = lowerMeta(category);
     return key.length > 0 && key !== 'submitted_truth_unavailable';
+  });
+}
+
+function hasFilledUnverifiedFields(fillVerification: unknown): boolean {
+  const fv =
+    fillVerification && typeof fillVerification === 'object'
+      ? (fillVerification as Record<string, unknown>)
+      : null;
+  if (!fv) return false;
+  return Object.values(fv).some(value => {
+    const node = value && typeof value === 'object' ? (value as Record<string, unknown>) : null;
+    return lowerMeta(node?.status) === 'filled_unverified';
   });
 }
 
@@ -151,6 +202,8 @@ export function deriveFlow3UiStatus(
   if (status === 'draft') return 'draft';
   if (sessionState === 'captcha_blocked' || blockedReason.includes('captcha'))
     return 'captcha_blocked';
+  if (blockedReason === 'portal_sms_otp_required' || sessionState === 'sms_otp_required')
+    return 'sms_otp_required';
   if (sessionState === 'otp_blocked' || blockedReason.includes('otp')) return 'otp_blocked';
   if (blockedReason === 'member_not_found' || blockedReason === 'not_found') return 'not_found';
   if (
@@ -175,6 +228,14 @@ export function deriveFlow3UiStatus(
     comparison?.unavailableReason === 'submitted_truth_unavailable'
   ) {
     return 'truth_unavailable';
+  }
+  if (
+    lowerMeta(md.mode) === 'fill_evidence' &&
+    md.success === true &&
+    md.botSnapshot &&
+    hasFilledUnverifiedFields(md.fillVerification)
+  ) {
+    return 'filled_unverified';
   }
   if (lowerMeta(md.mode) === 'fill_evidence' && md.success === true && md.botSnapshot) {
     return 'shadow_fill_ready';
@@ -231,6 +292,15 @@ function normalizeMetadataPortalHint(value: unknown): string {
     .trim();
 }
 
+function normalizedAmbiguousInsurerName(value: string | null | undefined): string | null {
+  const raw = normalizePortalTag(value).replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!raw) return null;
+  for (const name of AMBIGUOUS_INSURER_NAMES) {
+    if (raw === name || raw.includes(` ${name} `) || raw.startsWith(`${name} `)) return name;
+  }
+  return null;
+}
+
 function normalizeCandidateStatus(value: unknown): ClaimCandidateStatus | null {
   const raw = String(value || '')
     .trim()
@@ -261,19 +331,116 @@ function looksLikeCashOrSelfPay(value: string): boolean {
   return /\b(CASH|SELF\s*PAY(?:MENT)?|PRIVATE\s*PAY|SELFPAY)\b/.test(value);
 }
 
-function containsAnyTag(
+function findMatchedPortalTag(
   payType: string | null | undefined,
   patientName: string | null | undefined,
-  tags: readonly string[]
-): boolean {
-  const sources = [normalizePortalTag(payType), normalizePortalTag(patientName)];
+  tags: readonly string[],
+  { includePatientName = true }: { includePatientName?: boolean } = {}
+): { tag: string; source: string } | null {
+  const sources = [
+    { source: 'pay_type', value: normalizePortalTag(payType) },
+    includePatientName ? { source: 'patient_name', value: normalizePortalTag(patientName) } : null,
+  ].filter(Boolean) as Array<{ source: string; value: string }>;
   for (const source of sources) {
-    if (!source) continue;
+    if (!source.value) continue;
     for (const tag of tags) {
-      if (hasPortalTagToken(source, tag)) return true;
+      if (hasPortalTagToken(source.value, tag)) {
+        return { tag, source: source.source };
+      }
     }
   }
-  return false;
+  return null;
+}
+
+export function resolveFlow3PortalRouting(
+  payType: string | null | undefined,
+  patientName: string | null | undefined,
+  extractionMetadata: unknown = null
+): Flow3PortalRouting {
+  for (const [portalTarget, tags] of Object.entries(CA_PORTAL_TAG_ROUTES) as Array<
+    [Flow3PortalTarget, readonly string[]]
+  >) {
+    const matched = findMatchedPortalTag(payType, patientName, tags, {
+      includePatientName: portalTarget !== 'MHC',
+    });
+    if (matched) {
+      return {
+        portalTarget,
+        source: matched.source,
+        tag: matched.tag,
+        reason: 'explicit_ca_tag',
+      };
+    }
+  }
+
+  const hint = extractAlliancePortalHint(extractionMetadata);
+  if (hint) {
+    return {
+      portalTarget: hint,
+      source: 'extraction_metadata',
+      tag: null,
+      reason: 'metadata_hint',
+    };
+  }
+
+  const ambiguous = normalizedAmbiguousInsurerName(payType);
+  if (ambiguous) {
+    return {
+      portalTarget: null,
+      source: null,
+      tag: ambiguous,
+      reason: 'ambiguous_insurer_name',
+    };
+  }
+
+  const legacyChecks: Array<[Flow3PortalTarget, readonly string[], boolean]> = [
+    ['MHC', MHC_TAGS, false],
+    ['ALLIANCE_MEDINET', ALLIANCE_MEDINET_TAGS, true],
+    ['ALLIANZ', ALLIANZ_TAGS, true],
+    ['FULLERTON', FULLERTON_TAGS, true],
+    ['IHP', IHP_TAGS, true],
+    ['GE_NTUC', GE_NTUC_TAGS, true],
+    ['IXCHANGE', IXCHANGE_TAGS, true],
+  ];
+  for (const [portalTarget, tags, includePatientName] of legacyChecks) {
+    const matched = findMatchedPortalTag(payType, patientName, tags, { includePatientName });
+    if (matched) {
+      return {
+        portalTarget,
+        source: matched.source,
+        tag: matched.tag,
+        reason: 'legacy_portal_tag',
+      };
+    }
+  }
+
+  return {
+    portalTarget: null,
+    source: null,
+    tag: null,
+    reason: 'portal_unknown',
+  };
+}
+
+export function describePortalRouting(
+  payType: string | null | undefined,
+  patientName: string | null | undefined,
+  extractionMetadata: unknown = null
+) {
+  const routing = resolveFlow3PortalRouting(payType, patientName, extractionMetadata);
+  return {
+    portalTarget: routing.portalTarget,
+    portalTag: routing.tag,
+    portalRoutingSource:
+      routing.reason === 'explicit_ca_tag'
+        ? 'tpa_user_interface_guide'
+        : routing.reason === 'metadata_hint'
+          ? 'extraction_metadata'
+          : null,
+    reason: routing.reason,
+    source: routing.source,
+    tag: routing.tag,
+  };
 }
 
 export function extractAlliancePortalHint(extractionMetadata: unknown): Flow3PortalTarget | null {
@@ -293,22 +460,33 @@ export function extractAlliancePortalHint(extractionMetadata: unknown): Flow3Por
   for (const candidate of candidates) {
     const normalized = normalizeMetadataPortalHint(candidate);
     if (!normalized) continue;
-    if (normalized === 'GE' || normalized === 'NTUCIM') return 'GE_NTUC';
+    if (normalized === 'GE') return 'GE_NTUC';
     if (normalized === 'ALLIANZ') return 'ALLIANZ';
-    if (normalized === 'FULLERT' || normalized === 'FULLERTON') return 'FULLERTON';
+    if (normalized === 'FULLERT' || normalized === 'FULLERTON' || normalized === 'AONCARE')
+      return 'FULLERTON';
     if (normalized === 'IHP') return 'IHP';
-    if (normalized === 'IXCHANGE' || normalized === 'PARKWAY') return 'IXCHANGE';
+    if (normalized === 'IXCHANGE' || normalized === 'PARKWAY' || normalized === 'ALLPW')
+      return 'IXCHANGE';
     if (
       normalized === 'MHC' ||
-      normalized === 'AIA' ||
-      normalized === 'AIACLIENT' ||
       normalized === 'AVIVA' ||
-      normalized === 'SINGLIFE' ||
+      normalized === 'NTUCIM' ||
       normalized === 'MHCAXA'
     ) {
       return 'MHC';
     }
-    if (normalized === 'ALLIANCEMEDINET') return 'ALLIANCE_MEDINET';
+    if (
+      normalized === 'ALLIANCEMEDINET' ||
+      normalized === 'ALLIANC' ||
+      normalized === 'ALLIANCE' ||
+      normalized === 'ALLSING' ||
+      normalized === 'AXAMED' ||
+      normalized === 'ALLIMED' ||
+      normalized === 'HSBCLIFE' ||
+      normalized === 'PRUDEN' ||
+      normalized === 'TOKIOM'
+    )
+      return 'ALLIANCE_MEDINET';
   }
   return null;
 }
@@ -352,9 +530,12 @@ export function normalizeFlow3PortalTarget(
     .trim()
     .toUpperCase();
   if (!code) return null;
-  if (code === 'FULLERT') code = 'FULLERTON';
-  if (code === 'GE' || code === 'NTUC_IM' || code === 'NTUCIM') code = 'GE_NTUC';
-  if (code === 'ALLIMED' || code === 'ALL') code = 'IXCHANGE';
+  if (code === 'FULLERT' || code === 'AONCARE') code = 'FULLERTON';
+  if (code === 'GE') code = 'GE_NTUC';
+  if (code === 'NTUC_IM' || code === 'NTUCIM' || code === 'AVIVA' || code === 'MHCAXA')
+    code = 'MHC';
+  if (code === 'ALLIMED' || code === 'HSBCLIFE') code = 'ALLIANCE_MEDINET';
+  if (code === 'ALL' || code === 'ALL_PW' || code === 'PARKWAY') code = 'IXCHANGE';
   return FLOW3_PORTAL_TARGETS.includes(code as Flow3PortalTarget)
     ? (code as Flow3PortalTarget)
     : null;
@@ -365,28 +546,7 @@ export function resolveFlow3PortalTarget(
   patientName: string | null | undefined,
   extractionMetadata: unknown = null
 ): Flow3PortalTarget | null {
-  if (containsAnyTag(payType, null, MHC_TAGS)) {
-    return 'MHC';
-  }
-  if (extractAllianceMedinetTag(payType, patientName)) {
-    // Route Alliance-Medinet-tagged records to Alliance Medinet first.
-    // GE/other reroutes are decided by runtime portal behavior (popup/network response).
-    return 'ALLIANCE_MEDINET';
-  }
-  const hint = extractAlliancePortalHint(extractionMetadata);
-  if (hint) return hint;
-  if (containsAnyTag(payType, patientName, ALLIANZ_TAGS)) return 'ALLIANZ';
-  if (containsAnyTag(payType, patientName, FULLERTON_TAGS)) return 'FULLERTON';
-  if (containsAnyTag(payType, patientName, IHP_TAGS)) return 'IHP';
-  if (containsAnyTag(payType, patientName, GE_NTUC_TAGS)) return 'GE_NTUC';
-  if (containsAnyTag(payType, patientName, IXCHANGE_TAGS)) return 'IXCHANGE';
-  if (
-    String(payType || '')
-      .toUpperCase()
-      .includes('ALLIMED')
-  )
-    return 'IXCHANGE';
-  return null;
+  return resolveFlow3PortalRouting(payType, patientName, extractionMetadata).portalTarget;
 }
 
 export function classifyVisitForRpa(
@@ -403,7 +563,8 @@ export function classifyVisitForRpa(
           (extractionMetadata as Record<string, unknown>).claimCandidateStatus
         )
       : null;
-  const route = resolveFlow3PortalTarget(payType, patientName, extractionMetadata);
+  const routing = resolveFlow3PortalRouting(payType, patientName, extractionMetadata);
+  const route = routing.portalTarget;
   const metadataNric =
     extractionMetadata && typeof extractionMetadata === 'object'
       ? String((extractionMetadata as Record<string, unknown>).nric || '').trim()
@@ -449,6 +610,7 @@ export function classifyVisitForRpa(
       status: hasNric ? 'claim_candidate' : 'manual_review',
       reasons,
       portalTarget: route,
+      portalRouting: routing,
       normalizedPayType,
       hasNric,
     };
@@ -457,7 +619,7 @@ export function classifyVisitForRpa(
   if (existingStatus) {
     return {
       status: existingStatus,
-      reasons: uniqueStrings(['portal_unknown']),
+      reasons: uniqueStrings([routing.reason || 'portal_unknown']),
       portalTarget: route,
       normalizedPayType,
       hasNric,
@@ -466,7 +628,7 @@ export function classifyVisitForRpa(
 
   return {
     status: 'manual_review',
-    reasons: ['portal_unknown'],
+    reasons: [routing.reason || 'portal_unknown'],
     portalTarget: null,
     normalizedPayType,
     hasNric,

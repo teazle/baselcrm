@@ -13,7 +13,9 @@ export const FLOW3_UI_STATUSES = {
   TRUTH_CAPTURED: 'truth_captured',
   DRIFT_MISMATCH: 'drift_mismatch',
   OTP_BLOCKED: 'otp_blocked',
+  SMS_OTP_REQUIRED: 'sms_otp_required',
   CAPTCHA_BLOCKED: 'captcha_blocked',
+  FILLED_UNVERIFIED: 'filled_unverified',
   PORTAL_READ_ONLY: 'portal_read_only',
   PORTAL_UNAVAILABLE: 'portal_unavailable',
   NOT_FOUND: 'not_found',
@@ -41,6 +43,11 @@ function hasRealMismatches(comparison) {
   });
 }
 
+function hasFilledUnverifiedEvidence(fillVerification) {
+  if (!fillVerification || typeof fillVerification !== 'object') return false;
+  return Object.values(fillVerification).some(item => lower(item?.status) === 'filled_unverified');
+}
+
 export function deriveFlow3Readiness({ submissionStatus = null, metadata = null } = {}) {
   const md = metadata && typeof metadata === 'object' ? metadata : {};
   const status = lower(submissionStatus);
@@ -56,6 +63,12 @@ export function deriveFlow3Readiness({ submissionStatus = null, metadata = null 
   }
   if (sessionState === 'captcha_blocked' || blockedReason.includes('captcha')) {
     return { state: FLOW3_READINESS_STATES.BLOCKED, uiStatus: FLOW3_UI_STATUSES.CAPTCHA_BLOCKED };
+  }
+  if (blockedReason === 'portal_sms_otp_required') {
+    return {
+      state: FLOW3_READINESS_STATES.BLOCKED,
+      uiStatus: FLOW3_UI_STATUSES.SMS_OTP_REQUIRED,
+    };
   }
   if (sessionState === 'otp_blocked' || blockedReason.includes('otp')) {
     return { state: FLOW3_READINESS_STATES.BLOCKED, uiStatus: FLOW3_UI_STATUSES.OTP_BLOCKED };
@@ -109,6 +122,17 @@ export function deriveFlow3Readiness({ submissionStatus = null, metadata = null 
     return {
       state: FLOW3_READINESS_STATES.PRODUCTION_SHADOW_READY,
       uiStatus: FLOW3_UI_STATUSES.TRUTH_UNAVAILABLE,
+    };
+  }
+  if (
+    lower(md.mode) === 'fill_evidence' &&
+    md.success === true &&
+    md.botSnapshot &&
+    hasFilledUnverifiedEvidence(md.fillVerification)
+  ) {
+    return {
+      state: FLOW3_READINESS_STATES.PRODUCTION_SHADOW_READY,
+      uiStatus: FLOW3_UI_STATUSES.FILLED_UNVERIFIED,
     };
   }
   if (lower(md.mode) === 'fill_evidence' && md.success === true && md.botSnapshot) {

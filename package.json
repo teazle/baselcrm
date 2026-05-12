@@ -18,6 +18,7 @@
     "extract-visit-details": "node src/examples/extract-visit-details-batch.js",
     "demo-visit-details": "node src/examples/demo-visit-details-extraction.js",
     "test-visit-details-date": "node src/examples/test-visit-details-date.js",
+    "validate-routing": "node src/examples/portal-routing-validation-report.js",
     "test-mhcasia-access": "node src/examples/test-mhcasia-access.js",
     "setup-urban-vpn": "node scripts/setup-urban-vpn.js",
     "format": "prettier --write .",

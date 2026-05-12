@@ -57,10 +57,30 @@ test('deriveFlow3Readiness maps OTP, CAPTCHA, and read-only blocked states', () 
     FLOW3_UI_STATUSES.OTP_BLOCKED
   );
   assert.equal(
+    deriveFlow3Readiness({ metadata: { blocked_reason: 'portal_sms_otp_required' } }).uiStatus,
+    FLOW3_UI_STATUSES.SMS_OTP_REQUIRED
+  );
+  assert.equal(
     deriveFlow3Readiness({ metadata: { blocked_reason: 'portal_read_only_no_claim_form' } })
       .uiStatus,
     FLOW3_UI_STATUSES.PORTAL_READ_ONLY
   );
+});
+
+test('deriveFlow3Readiness exposes filled but unverified shadow evidence', () => {
+  const readiness = deriveFlow3Readiness({
+    metadata: {
+      mode: 'fill_evidence',
+      success: true,
+      botSnapshot: { patientName: 'Test Patient' },
+      fillVerification: {
+        fee: { status: 'filled_unverified' },
+      },
+    },
+  });
+
+  assert.equal(readiness.state, FLOW3_READINESS_STATES.PRODUCTION_SHADOW_READY);
+  assert.equal(readiness.uiStatus, FLOW3_UI_STATUSES.FILLED_UNVERIFIED);
 });
 
 test('deriveFlow3Readiness preserves deterministic portal blocked states', () => {

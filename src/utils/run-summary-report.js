@@ -30,7 +30,8 @@ export function portalTargetToLabel(target) {
   if (key === 'FULLERTON' || key === 'FULLERT') return 'Fullerton';
   if (key === 'IHP') return 'IHP';
   if (key === 'IXCHANGE' || key === 'ALL' || key === 'PARKWAY') return 'iXchange';
-  if (key === 'GE_NTUC' || key === 'GE' || key === 'NTUC_IM' || key === 'NTUCIM') return 'GE/NTUC';
+  if (key === 'NTUC_IM' || key === 'NTUCIM') return 'MHC Asia';
+  if (key === 'GE_NTUC' || key === 'GE') return 'GE/NTUC';
   return key || 'Unknown';
 }
 
@@ -53,19 +54,19 @@ function toMarkdown({ flowName, generatedAt, scope = {}, totals = {}, rows = [] 
   lines.push('');
   lines.push('## Records');
   lines.push(
-    '| Date | Patient Name | NRIC | Pay Type | TPA/Portal | Status | Diagnosis Status | Fill Verification | Comparison | Bot Snapshot | Submitted Truth | Flow2 vs Truth | Bot vs Truth | Blocked Reason | Evidence | Notes |'
+    '| Date | Patient Name | NRIC | Pay Type | TPA/Portal | Portal Target | Route Source | Route Tag | Route Reason | Status | Diagnosis Status | Fill Verification | Comparison | Bot Snapshot | Submitted Truth | Flow2 vs Truth | Bot vs Truth | Blocked Reason | Evidence | Notes |'
   );
   lines.push(
-    '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |'
+    '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |'
   );
   for (const row of rows) {
     lines.push(
-      `| ${escapeCell(row.date)} | ${escapeCell(row.patientName)} | ${escapeCell(row.nric)} | ${escapeCell(row.payType)} | ${escapeCell(row.portal)} | ${escapeCell(row.status)} | ${escapeCell(row.diagnosisStatus)} | ${escapeCell(row.fillVerification)} | ${escapeCell(row.comparison)} | ${escapeCell(row.botSnapshot)} | ${escapeCell(row.submittedTruth)} | ${escapeCell(row.flow2VsSubmittedTruth)} | ${escapeCell(row.botVsSubmittedTruth)} | ${escapeCell(row.blockedReason)} | ${escapeCell(row.evidence)} | ${escapeCell(row.notes)} |`
+      `| ${escapeCell(row.date)} | ${escapeCell(row.patientName)} | ${escapeCell(row.nric)} | ${escapeCell(row.payType)} | ${escapeCell(row.portal)} | ${escapeCell(row.portalTarget)} | ${escapeCell(row.routingSource)} | ${escapeCell(row.routingTag)} | ${escapeCell(row.routingReason)} | ${escapeCell(row.status)} | ${escapeCell(row.diagnosisStatus)} | ${escapeCell(row.fillVerification)} | ${escapeCell(row.comparison)} | ${escapeCell(row.botSnapshot)} | ${escapeCell(row.submittedTruth)} | ${escapeCell(row.flow2VsSubmittedTruth)} | ${escapeCell(row.botVsSubmittedTruth)} | ${escapeCell(row.blockedReason)} | ${escapeCell(row.evidence)} | ${escapeCell(row.notes)} |`
     );
   }
   if (!rows.length) {
     lines.push(
-      '| - | - | - | - | - | no_records | - | - | - | - | - | - | - | - | - | No records for this run |'
+      '| - | - | - | - | - | - | - | - | - | no_records | - | - | - | - | - | - | - | - | - | No records for this run |'
     );
   }
   lines.push('');

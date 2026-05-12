@@ -121,6 +121,7 @@ export default function RpaOverview() {
         };
         const evidenceStatuses = new Set([
           'shadow_fill_ready',
+          'filled_unverified',
           'truth_unavailable',
           'truth_captured',
           'drift_mismatch',
@@ -128,8 +129,12 @@ export default function RpaOverview() {
         const blockedStatuses = new Set([
           'error',
           'otp_blocked',
+          'sms_otp_required',
           'captcha_blocked',
           'portal_read_only',
+          'portal_unavailable',
+          'login_blocked',
+          'session_blocked',
         ]);
 
         setVisitSummary({

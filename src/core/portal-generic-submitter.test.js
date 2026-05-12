@@ -5,6 +5,7 @@ import {
   buildCredentialCandidates,
   buildGenericBotSnapshot,
   detectLoginFailureSignals,
+  detectOtpPromptSignals,
   deriveOtpBlockedReason,
   GenericPortalSubmitter,
   shouldTryNextCredentialCandidate,
@@ -161,12 +162,33 @@ test('shouldTryNextCredentialCandidate retries only recoverable login states', (
 });
 
 test('deriveOtpBlockedReason preserves actionable OTP mailbox failures', () => {
+  assert.equal(deriveOtpBlockedReason('otp_email_waiting'), 'portal_otp_email_waiting');
+  assert.equal(deriveOtpBlockedReason('portal_sms_otp_required'), 'portal_sms_otp_required');
+  assert.equal(deriveOtpBlockedReason('sms_otp_required'), 'portal_sms_otp_required');
   assert.equal(deriveOtpBlockedReason('config_missing'), 'portal_otp_mail_config_missing');
   assert.equal(deriveOtpBlockedReason('imap_auth_error'), 'portal_otp_mail_auth_failed');
   assert.equal(deriveOtpBlockedReason('imap_error'), 'portal_otp_mail_error');
   assert.equal(deriveOtpBlockedReason('otp_not_received'), 'portal_otp_not_received');
   assert.equal(deriveOtpBlockedReason('otp_stale_only'), 'portal_otp_stale_only');
   assert.equal(deriveOtpBlockedReason('otp_unparseable'), 'portal_otp_unparseable');
+});
+
+test('detectOtpPromptSignals distinguishes email OTP from SMS-only OTP prompts', () => {
+  assert.deepEqual(
+    detectOtpPromptSignals({
+      bodyText: 'Enter the OTP sent to your registered email address.',
+      fields: [{ name: 'verificationCode', placeholder: 'OTP' }],
+    }),
+    { hasOtp: true, kind: 'email_or_unknown', hasEmail: true, hasSms: false }
+  );
+
+  assert.deepEqual(
+    detectOtpPromptSignals({
+      bodyText: 'Please enter the OTP sent by SMS to your registered mobile number.',
+      fields: [{ name: 'txtOTP' }],
+    }),
+    { hasOtp: true, kind: 'sms', hasEmail: false, hasSms: true }
+  );
 });
 
 test('detectLoginFailureSignals catches delayed IXCHANGE login toast text', () => {

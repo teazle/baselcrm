@@ -6,8 +6,10 @@ import { createSupabaseClient } from '../utils/supabase-client.js';
 import { logger } from '../utils/logger.js';
 import { registerRunExitHandler, markRunFinalized } from '../utils/run-exit-handler.js';
 import {
+  describePortalRouting,
   getFlow3PortalTargets,
   normalizeFlow3PortalTarget,
+  resolveFlow3PortalRouting,
   resolveFlow3PortalTarget,
 } from '../../apps/crm/src/lib/rpa/portals.shared.js';
 import { portalTargetToLabel, writeRunSummaryReport } from '../utils/run-summary-report.js';
@@ -416,20 +418,34 @@ async function submitClaimsBatch() {
   };
 
   const buildPortalLabel = (visit, result = null) => {
-    const route = resolveFlow3PortalTarget(
+    const route = resolveFlow3PortalRouting(
       visit?.pay_type || null,
       visit?.patient_name || null,
       visit?.extraction_metadata || null
     );
     const hinted =
       normalizeFlow3PortalTarget(result?.portalService || result?.portal || null) ||
-      normalizeFlow3PortalTarget(route || null) ||
-      route ||
+      normalizeFlow3PortalTarget(route?.portalTarget || null) ||
+      route?.portalTarget ||
       result?.portalService ||
       result?.portal ||
       visit?.pay_type ||
       'Unknown';
     return portalTargetToLabel(hinted);
+  };
+
+  const buildRoutingDetails = visit => {
+    const routing = describePortalRouting(
+      visit?.pay_type || null,
+      visit?.patient_name || null,
+      visit?.extraction_metadata || null
+    );
+    return {
+      portalTarget: routing?.portalTarget || '-',
+      routingSource: routing?.portalRoutingSource || '-',
+      routingTag: routing?.portalTag || '-',
+      routingReason: routing?.reason || 'portal_unknown',
+    };
   };
 
   const isDeterministicPortalBlocked = result => {
@@ -443,6 +459,8 @@ async function submitClaimsBatch() {
       'portal_login_not_advanced',
       'portal_login_failed',
       'portal_otp_required',
+      'portal_otp_email_waiting',
+      'portal_sms_otp_required',
       'portal_otp_mail_config_missing',
       'portal_otp_mail_auth_failed',
       'portal_otp_mail_error',
@@ -757,8 +775,10 @@ async function submitClaimsBatch() {
         rowNotes = error.message;
       }
 
+      const routingDetails = buildRoutingDetails(visit);
       reportRows.push({
         ...buildFlow3StructuredSummary(rowResult),
+        ...routingDetails,
         date: visit.visit_date || '-',
         patientName: visit.patient_name || '-',
         nric: visit.nric || '-',
