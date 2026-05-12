@@ -447,6 +447,8 @@ export class GenericPortalSubmitter {
     this.selectors = config?.selectors || {};
     this.steps = config?.steps || null;
     this.beforeLogin = typeof config?.beforeLogin === 'function' ? config.beforeLogin : null;
+    this.afterLoginPageLoad =
+      typeof config?.afterLoginPageLoad === 'function' ? config.afterLoginPageLoad : null;
     this.beforeSearch = typeof config?.beforeSearch === 'function' ? config.beforeSearch : null;
     this.beforeForm = typeof config?.beforeForm === 'function' ? config.beforeForm : null;
     // Optional list of cookie-domain substrings to clear before navigating to the
@@ -957,6 +959,25 @@ export class GenericPortalSubmitter {
 
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForTimeout(1200);
+
+    if (this.afterLoginPageLoad) {
+      try {
+        await this.afterLoginPageLoad({
+          page,
+          state,
+          visit,
+          url,
+          helpers: {
+            _fillFirst: (...a) => this._fillFirst(...a),
+            _clickFirst: (...a) => this._clickFirst(...a),
+          },
+        });
+      } catch (error) {
+        logger.warn(`[${this.portalTarget}] afterLoginPageLoad hook failed`, {
+          error: error?.message || String(error),
+        });
+      }
+    }
 
     // Session-conflict guard: portals (Allianz, IXCHANGE, Fullerton, IHP) may show
     // a single-session page, expired-session redirect, or access-denied interstitial

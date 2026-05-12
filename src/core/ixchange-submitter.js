@@ -433,6 +433,33 @@ async function ensureIxchangeSearchReady(page, state = null) {
   return ready;
 }
 
+async function clearIxchangeFailedLoginCounter(page, state = null) {
+  const result = await page
+    .evaluate(() => {
+      const keys = ['check-login-false', 'USERNAME'];
+      const removed = [];
+      for (const key of keys) {
+        if (globalThis.localStorage?.getItem(key) !== null) {
+          globalThis.localStorage.removeItem(key);
+          removed.push(key);
+        }
+      }
+      return { removed };
+    })
+    .catch(error => ({ error: error?.message || String(error), removed: [] }));
+
+  if (state && Array.isArray(result?.removed) && result.removed.length) {
+    state.clearedLoginLocalState = result.removed;
+  }
+
+  if (Array.isArray(result?.removed) && result.removed.length) {
+    await page.reload({ waitUntil: 'domcontentloaded', timeout: 45000 }).catch(() => null);
+    await page.waitForTimeout(1000);
+  }
+
+  return result;
+}
+
 async function selectProgramType({ page, state, helpers }) {
   const candidates = getProgramTypeCandidates();
   if (!candidates.length) return false;
@@ -1214,6 +1241,9 @@ export class IXChangeSubmitter {
       selectors: buildSelectors(),
       disableDefaultSearchFallback: true,
       searchAttemptBuilder: buildIxchangeSearchAttempts,
+      afterLoginPageLoad: async ({ page: runPage, state }) => {
+        await clearIxchangeFailedLoginCounter(runPage, state);
+      },
       beforeSearch: async ({ page: runPage, state, helpers }) => {
         state.search_page_ready = await ensureIxchangeSearchReady(runPage, state);
         const programSelected = await selectProgramType({ page: runPage, state, helpers });
