@@ -27,7 +27,7 @@ jobs:
             DEPLOY_PATH="${DEPLOY_PATH/#\~/$HOME}"
             cd "$DEPLOY_PATH"
 
-            TMP_SCRIPT="$(mktemp /tmp/otp-smoke-XXXXXX.mjs)"
+            TMP_SCRIPT=".otp-smoke-$$.mjs"
             cat > "$TMP_SCRIPT" <<'NODE'
             import 'dotenv/config';
             import { ImapFlow } from 'imapflow';
