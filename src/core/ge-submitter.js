@@ -1641,6 +1641,7 @@ export class GENtucSubmitter {
             sessionState: 'blocked',
             error: 'GE/NTUC popup was not captured after Alliance Medinet reroute',
             screenshot: screenshotPath,
+            evidence: screenshotPath,
             evidenceArtifacts: {
               screenshot: screenshotPath,
             },
