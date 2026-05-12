@@ -218,6 +218,28 @@ test('detectOtpPromptSignals distinguishes email OTP from SMS-only OTP prompts',
   );
 });
 
+test('GenericPortalSubmitter blocks configured SMS OTP without polling Gmail', async () => {
+  const submitter = new GenericPortalSubmitter({
+    page: createNoControlPage('Enter OTP'),
+    portalTarget: 'IHP',
+    portalName: 'IHP',
+    supportsOtp: true,
+    otpChannel: 'sms',
+  });
+  submitter._isOtpVisible = async () => true;
+  submitter._captureOtpDebug = async () => ({
+    otpPrompt: { hasOtp: true, kind: 'email_or_unknown', hasEmail: false, hasSms: false },
+  });
+  submitter._safeScreenshot = async () => 'screenshots/sms-otp-required.png';
+  const state = {};
+
+  const ok = await submitter._handleOtp(state, { id: 'visit-1' });
+
+  assert.equal(ok, false);
+  assert.equal(state.otp_state, 'portal_sms_otp_required');
+  assert.equal(state.evidence, 'screenshots/sms-otp-required.png');
+});
+
 test('detectLoginFailureSignals catches delayed IXCHANGE login toast text', () => {
   const signals = detectLoginFailureSignals(
     'ERROR Login unsuccessful. Please try again or use the Forgot Password function to reset your login credentials.'

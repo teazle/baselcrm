@@ -482,6 +482,9 @@ export class GenericPortalSubmitter {
     this.portalName = config?.portalName || this.portalTarget;
     this.defaultUrl = config?.defaultUrl || '';
     this.supportsOtp = config?.supportsOtp === true;
+    this.otpChannel = String(config?.otpChannel || '')
+      .trim()
+      .toLowerCase();
     this.selectors = config?.selectors || {};
     this.steps = config?.steps || null;
     this.beforeLogin = typeof config?.beforeLogin === 'function' ? config.beforeLogin : null;
@@ -1253,10 +1256,11 @@ export class GenericPortalSubmitter {
     const otpDebug = await this._captureOtpDebug();
     state.otp_debug = otpDebug;
     const otpPrompt = otpDebug?.otpPrompt || {};
-    if (otpPrompt.kind === 'sms') {
+    if (this.otpChannel === 'sms' || otpPrompt.kind === 'sms') {
       state.otp_state = 'portal_sms_otp_required';
       state.evidence = await this._safeScreenshot(visit, 'sms-otp-required');
       logger.warn(`[${this.portalTarget}] Portal requires SMS OTP; Gmail OTP is not applicable`, {
+        configuredOtpChannel: this.otpChannel || null,
         hasSms: otpPrompt.hasSms === true,
         hasEmail: otpPrompt.hasEmail === true,
       });

@@ -377,9 +377,9 @@ export class ClaimSubmitter {
     const configuredDefault = Number(process.env.FLOW3_PORTAL_TIMEOUT_MS || 0);
     if (Number.isFinite(configuredDefault) && configuredDefault > 0) return configuredDefault;
     const defaults = {
-      IHP: 90000,
-      IXCHANGE: 120000,
-      FULLERTON: 120000,
+      IHP: 300000,
+      IXCHANGE: 300000,
+      FULLERTON: 300000,
       ALLIANZ: 240000,
       ALLIANCE_MEDINET: 180000,
       GE_NTUC: 180000,

@@ -136,6 +136,21 @@ test('_applyRuntimeCredential keeps env credentials as operational source by def
   }
 });
 
+test('_getPortalTimeoutMs allows OTP portals to finish mailbox wait before timing out', () => {
+  const original = process.env.FLOW3_PORTAL_TIMEOUT_MS;
+  const submitter = Object.create(ClaimSubmitter.prototype);
+
+  try {
+    delete process.env.FLOW3_PORTAL_TIMEOUT_MS;
+    assert.equal(submitter._getPortalTimeoutMs('FULLERTON'), 300000);
+    assert.equal(submitter._getPortalTimeoutMs('IHP'), 300000);
+    assert.equal(submitter._getPortalTimeoutMs('IXCHANGE'), 300000);
+  } finally {
+    if (original === undefined) delete process.env.FLOW3_PORTAL_TIMEOUT_MS;
+    else process.env.FLOW3_PORTAL_TIMEOUT_MS = original;
+  }
+});
+
 test('_getRequestedMode preserves non-shadow requests so submitClaim can block them', () => {
   const originalFlow3Mode = process.env.FLOW3_MODE;
   const originalSaveDraft = process.env.WORKFLOW_SAVE_DRAFT;
