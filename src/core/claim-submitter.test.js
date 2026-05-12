@@ -81,6 +81,61 @@ test('_lookupCrmDobForVisit hydrates Allianz DOB from linked CRM contact', async
   assert.equal(dob, '1988-11-09');
 });
 
+test('_preferShadowRunnableVisits does not let missing-NRIC rows consume shadow probe limit', () => {
+  const submitter = Object.create(ClaimSubmitter.prototype);
+  const rows = [
+    {
+      id: 'missing',
+      pay_type: 'ALLSING',
+      patient_name: 'MISSING ID',
+      nric: '',
+      extraction_metadata: {},
+    },
+    {
+      id: 'runnable',
+      pay_type: 'ALLSING',
+      patient_name: 'HAS ID',
+      nric: 'S1234567A',
+      extraction_metadata: {},
+    },
+  ];
+
+  const picked = submitter._preferShadowRunnableVisits(rows, 1);
+
+  assert.equal(picked.length, 1);
+  assert.equal(picked[0].id, 'runnable');
+});
+
+test('_applyRuntimeCredential keeps env credentials as operational source by default', async () => {
+  const original = process.env.FLOW3_PREFER_DB_CREDENTIALS;
+  const submitter = Object.create(ClaimSubmitter.prototype);
+  submitter._getPortalCredential = async () => ({
+    url: 'https://db.example/login',
+    username: 'db-user',
+    password: 'db-pass',
+  });
+  const config = {
+    url: 'https://env.example/login',
+    username: 'env-user',
+    password: 'env-pass',
+  };
+
+  try {
+    delete process.env.FLOW3_PREFER_DB_CREDENTIALS;
+    const credential = await submitter._applyRuntimeCredential('FULLERTON', config);
+
+    assert.equal(credential, null);
+    assert.deepEqual(config, {
+      url: 'https://env.example/login',
+      username: 'env-user',
+      password: 'env-pass',
+    });
+  } finally {
+    if (original === undefined) delete process.env.FLOW3_PREFER_DB_CREDENTIALS;
+    else process.env.FLOW3_PREFER_DB_CREDENTIALS = original;
+  }
+});
+
 test('_getRequestedMode preserves non-shadow requests so submitClaim can block them', () => {
   const originalFlow3Mode = process.env.FLOW3_MODE;
   const originalSaveDraft = process.env.WORKFLOW_SAVE_DRAFT;

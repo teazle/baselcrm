@@ -322,18 +322,25 @@ export function buildCredentialCandidates({ runtimeCredential, config, defaultUr
     }
   };
 
-  push({
-    source: 'runtime',
-    url: runtimeCredential?.url || defaultUrl,
-    username: runtimeCredential?.username,
-    password: runtimeCredential?.password,
-  });
-  push({
-    source: 'env',
-    url: config?.defaultUrl || defaultUrl,
-    username: config?.defaultUsername,
-    password: config?.defaultPassword,
-  });
+  const preferRuntimeFirst = toBoolean(process.env.FLOW3_PREFER_DB_CREDENTIALS, false);
+  const pushRuntime = () =>
+    push({
+      source: 'runtime',
+      url: runtimeCredential?.url || defaultUrl,
+      username: runtimeCredential?.username,
+      password: runtimeCredential?.password,
+    });
+  const pushEnv = () =>
+    push({
+      source: 'env',
+      url: config?.defaultUrl || defaultUrl,
+      username: config?.defaultUsername,
+      password: config?.defaultPassword,
+    });
+
+  if (preferRuntimeFirst) pushRuntime();
+  pushEnv();
+  if (!preferRuntimeFirst) pushRuntime();
   pushUrlCandidates({
     source: 'env_url_candidate',
     urls: config?.defaultUrlCandidates,

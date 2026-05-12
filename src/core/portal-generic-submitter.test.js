@@ -91,7 +91,7 @@ test('buildGenericBotSnapshot normalizes core audit fields from visit and verifi
   assert.equal(snapshot.diagnosisResolution.status, 'ambiguous');
 });
 
-test('buildCredentialCandidates tries runtime credentials before distinct env fallback', () => {
+test('buildCredentialCandidates tries env credentials before stale runtime fallback by default', () => {
   const candidates = buildCredentialCandidates({
     runtimeCredential: {
       url: 'https://portal.example/login',
@@ -107,9 +107,36 @@ test('buildCredentialCandidates tries runtime credentials before distinct env fa
   });
 
   assert.equal(candidates.length, 2);
-  assert.equal(candidates[0].source, 'runtime');
-  assert.equal(candidates[1].source, 'env');
-  assert.equal(candidates[1].username, 'env-user');
+  assert.equal(candidates[0].source, 'env');
+  assert.equal(candidates[0].username, 'env-user');
+  assert.equal(candidates[1].source, 'runtime');
+});
+
+test('buildCredentialCandidates can prefer runtime credentials when explicitly enabled', () => {
+  const original = process.env.FLOW3_PREFER_DB_CREDENTIALS;
+  try {
+    process.env.FLOW3_PREFER_DB_CREDENTIALS = '1';
+    const candidates = buildCredentialCandidates({
+      runtimeCredential: {
+        url: 'https://portal.example/login',
+        username: 'db-user',
+        password: 'db-pass',
+      },
+      config: {
+        defaultUrl: 'https://portal.example/login',
+        defaultUsername: 'env-user',
+        defaultPassword: 'env-pass',
+      },
+      defaultUrl: 'https://portal.example/login',
+    });
+
+    assert.equal(candidates.length, 2);
+    assert.equal(candidates[0].source, 'runtime');
+    assert.equal(candidates[1].source, 'env');
+  } finally {
+    if (original === undefined) delete process.env.FLOW3_PREFER_DB_CREDENTIALS;
+    else process.env.FLOW3_PREFER_DB_CREDENTIALS = original;
+  }
 });
 
 test('buildCredentialCandidates does not duplicate identical runtime and env credentials', () => {
@@ -128,7 +155,7 @@ test('buildCredentialCandidates does not duplicate identical runtime and env cre
   });
 
   assert.equal(candidates.length, 1);
-  assert.equal(candidates[0].source, 'runtime');
+  assert.equal(candidates[0].source, 'env');
 });
 
 test('buildCredentialCandidates expands configured URL candidates with the same credentials', () => {

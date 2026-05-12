@@ -329,6 +329,15 @@ export class ClaimSubmitter {
 
   async _applyRuntimeCredential(target, portalConfig) {
     if (!portalConfig || typeof portalConfig !== 'object') return null;
+    const preferDbCredentials =
+      String(process.env.FLOW3_PREFER_DB_CREDENTIALS || '')
+        .trim()
+        .toLowerCase() === '1';
+    const hasEnvCredential =
+      String(portalConfig.url || '').trim() &&
+      String(portalConfig.username || '').trim() &&
+      String(portalConfig.password || '').trim();
+    if (hasEnvCredential && !preferDbCredentials) return null;
     const credential = await this._getPortalCredential(target);
     if (!credential) return null;
     if (credential.url) portalConfig.url = credential.url;
@@ -591,7 +600,10 @@ export class ClaimSubmitter {
     }
 
     if (maxRows) {
-      rows = rows.slice(0, maxRows);
+      rows =
+        requestedMode === 'fill_evidence' && !explicitVisitIds
+          ? this._preferShadowRunnableVisits(rows, maxRows)
+          : rows.slice(0, maxRows);
     }
 
     return rows;
@@ -2110,6 +2122,52 @@ export class ClaimSubmitter {
       if (/^[STFGM]\d{7}[A-Z]$/i.test(cleaned)) return cleaned;
     }
     return '';
+  }
+
+  _hasPortalSearchIdentifier(visit) {
+    const md = visit?.extraction_metadata || {};
+    if (this._pickNricForVisit(visit, md)) return true;
+    const candidates = [
+      visit?.member_id,
+      visit?.memberId,
+      visit?.patient_no,
+      visit?.patient_number,
+      visit?.patientId,
+      md?.member_id,
+      md?.memberId,
+      md?.healthCardNo,
+      md?.healthcardNo,
+      md?.patient_no,
+      md?.patient_number,
+      md?.patientId,
+      md?.idNumber,
+      md?.idNo,
+    ];
+    return candidates.some(value => String(value || '').trim());
+  }
+
+  _isShadowRunnableVisit(visit) {
+    const candidate = classifyVisitForRpa(
+      visit?.pay_type || null,
+      visit?.patient_name || null,
+      visit?.nric || null,
+      visit?.extraction_metadata || null,
+      visit?.submission_status || null
+    );
+    const reasons = Array.isArray(candidate?.reasons) ? candidate.reasons : [];
+    if (reasons.includes('missing_nric') && !this._hasPortalSearchIdentifier(visit)) return false;
+    return this._hasPortalSearchIdentifier(visit);
+  }
+
+  _preferShadowRunnableVisits(rows, maxRows) {
+    const list = Array.isArray(rows) ? rows : [];
+    const runnable = [];
+    const blocked = [];
+    for (const row of list) {
+      if (this._isShadowRunnableVisit(row)) runnable.push(row);
+      else blocked.push(row);
+    }
+    return [...runnable, ...blocked].slice(0, maxRows);
   }
 
   /**
