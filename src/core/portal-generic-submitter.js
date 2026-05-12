@@ -352,6 +352,18 @@ export function shouldTryNextCredentialCandidate(loginState) {
   ].includes(String(loginState || '').trim());
 }
 
+export function detectLoginFailureSignals(bodyText) {
+  const text = String(bodyText || '');
+  return {
+    hasAuthError:
+      /invalid|incorrect|failed|unsuccessful|wrong password|wrong username|authentication failed|failed authentication|login failed|login unsuccessful|please try again.*forgot password|forgot password function/i.test(
+        text
+      ),
+    hasCredentialDecryptError:
+      /problem decrypting login credential|decrypting login credential/i.test(text),
+  };
+}
+
 export function deriveOtpBlockedReason(otpState) {
   const normalized = String(otpState || '').trim();
   if (normalized === 'config_missing') return 'portal_otp_mail_config_missing';
@@ -836,6 +848,22 @@ export class GenericPortalSubmitter {
     return false;
   }
 
+  async _waitForLoginFailureSignals(timeoutMs = 9000) {
+    const deadline = Date.now() + Math.max(0, Number(timeoutMs || 0));
+    let last = { hasAuthError: false, hasCredentialDecryptError: false, bodyText: '' };
+    while (Date.now() <= deadline) {
+      const bodyText = await this.page
+        .evaluate(() => String(globalThis.document?.body?.innerText || ''))
+        .catch(() => '');
+      const signals = detectLoginFailureSignals(bodyText);
+      last = { ...signals, bodyText };
+      if (signals.hasAuthError || signals.hasCredentialDecryptError) return last;
+      if (Date.now() >= deadline) break;
+      await sleep(750);
+    }
+    return last;
+  }
+
   _buildResult(base, overrides = {}) {
     const requestedMode =
       String(process.env.FLOW3_MODE || '')
@@ -1096,17 +1124,9 @@ export class GenericPortalSubmitter {
     }).catch(() => null);
     const otpVisible = await this._isOtpVisible();
     if (hasLoginUser && hasLoginPassword && !otpVisible) {
-      const bodyText = await page
-        .evaluate(() => String(globalThis.document?.body?.innerText || ''))
-        .catch(() => '');
-      const hasAuthError =
-        /invalid|incorrect|failed|unsuccessful|wrong password|wrong username|authentication failed|failed authentication|login failed|login unsuccessful/i.test(
-          bodyText
-        );
-      const hasCredentialDecryptError =
-        /problem decrypting login credential|decrypting login credential|login credential/i.test(
-          bodyText
-        );
+      const { hasAuthError, hasCredentialDecryptError } = await this._waitForLoginFailureSignals(
+        Number(process.env.FLOW3_LOGIN_ERROR_WAIT_MS || 9000)
+      );
       state.login_state =
         hasAuthError || hasCredentialDecryptError
           ? 'login_invalid_credentials'

@@ -4,6 +4,7 @@ import test from 'node:test';
 import {
   buildCredentialCandidates,
   buildGenericBotSnapshot,
+  detectLoginFailureSignals,
   deriveOtpBlockedReason,
   GenericPortalSubmitter,
   shouldTryNextCredentialCandidate,
@@ -166,6 +167,15 @@ test('deriveOtpBlockedReason preserves actionable OTP mailbox failures', () => {
   assert.equal(deriveOtpBlockedReason('otp_not_received'), 'portal_otp_not_received');
   assert.equal(deriveOtpBlockedReason('otp_stale_only'), 'portal_otp_stale_only');
   assert.equal(deriveOtpBlockedReason('otp_unparseable'), 'portal_otp_unparseable');
+});
+
+test('detectLoginFailureSignals catches delayed IXCHANGE login toast text', () => {
+  const signals = detectLoginFailureSignals(
+    'ERROR Login unsuccessful. Please try again or use the Forgot Password function to reset your login credentials.'
+  );
+
+  assert.equal(signals.hasAuthError, true);
+  assert.equal(signals.hasCredentialDecryptError, false);
 });
 
 test('GenericPortalSubmitter treats service unavailable login page as portal unavailable', async () => {
