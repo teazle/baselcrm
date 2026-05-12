@@ -465,6 +465,68 @@ async function clearIxchangeFailedLoginCounter(page, state = null) {
   return result;
 }
 
+async function submitIxchangeLogin({ page, state, selectors, helpers }) {
+  const clickedSelector = await helpers.clickFirst(selectors.loginSubmit, {
+    timeout: 3500,
+    clickTimeout: 3000,
+    force: true,
+    visibleOnly: false,
+  });
+  if (!clickedSelector) return null;
+
+  await page.waitForTimeout(900);
+  const stillOnLogin = await page
+    .evaluate(() => {
+      const url = String(globalThis.location?.href || '');
+      const hasUser = Boolean(
+        globalThis.document?.querySelector?.('input[name*="username" i], input[id*="username" i]')
+      );
+      const hasPassword = Boolean(
+        globalThis.document?.querySelector?.(
+          'input[name*="password" i], input[id*="password" i], input[type="password"]'
+        )
+      );
+      return /\/login/i.test(url) && hasUser && hasPassword;
+    })
+    .catch(() => false);
+
+  if (stillOnLogin) {
+    const fallback = await page
+      .evaluate(() => {
+        const button =
+          globalThis.document?.querySelector?.('button#login-button-id') ||
+          globalThis.document?.querySelector?.('#login-button-id') ||
+          Array.from(
+            globalThis.document?.querySelectorAll?.('button, input[type="submit"]') || []
+          ).find(el => /login/i.test(String(el.textContent || el.value || '')));
+        const form = button?.closest?.('form') || globalThis.document?.querySelector?.('form');
+        if (button) {
+          const evt = { bubbles: true, cancelable: true, view: globalThis.window };
+          button.dispatchEvent(new globalThis.MouseEvent('mousedown', evt));
+          button.dispatchEvent(new globalThis.MouseEvent('mouseup', evt));
+          button.dispatchEvent(new globalThis.MouseEvent('click', evt));
+        }
+        if (form?.requestSubmit) {
+          form.requestSubmit(button || undefined);
+        } else if (form) {
+          form.dispatchEvent(new globalThis.Event('submit', { bubbles: true, cancelable: true }));
+        }
+        return {
+          buttonFound: Boolean(button),
+          formFound: Boolean(form),
+          buttonText: String(button?.textContent || button?.value || '')
+            .trim()
+            .slice(0, 60),
+        };
+      })
+      .catch(error => ({ error: error?.message || String(error) }));
+    state.ixchange_login_submit_fallback = fallback;
+    await page.keyboard.press('Enter').catch(() => null);
+  }
+
+  return clickedSelector;
+}
+
 async function selectProgramType({ page, state, helpers }) {
   const candidates = getProgramTypeCandidates();
   if (!candidates.length) return false;
@@ -1250,6 +1312,7 @@ export class IXChangeSubmitter {
       afterLoginPageLoad: async ({ page: runPage, state }) => {
         await clearIxchangeFailedLoginCounter(runPage, state);
       },
+      loginSubmitter: submitIxchangeLogin,
       beforeSearch: async ({ page: runPage, state, helpers }) => {
         state.search_page_ready = await ensureIxchangeSearchReady(runPage, state);
         const programSelected = await selectProgramType({ page: runPage, state, helpers });

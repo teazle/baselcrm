@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { extractCodeFromText, parseMailboxList } from './portal-otp.js';
+import { extractCodeFromText, parseMailboxList, shouldConsiderMessage } from './portal-otp.js';
 
 test('extracts Fullerton 2xSecure OTP when subject and sender carry the portal identity', () => {
   const text = [
@@ -29,6 +29,16 @@ test('extracts OTP when code appears before the OTP label', () => {
   assert.equal(
     extractCodeFromText('Use 123456 as your OTP to continue signing in.', 'FULLERTON')?.code,
     '123456'
+  );
+});
+
+test('considers generic OTP-labelled Fullerton emails when sender is not portal-branded', () => {
+  assert.equal(
+    shouldConsiderMessage('FULLERTON', {
+      subject: 'OTP Notification',
+      from: [{ name: 'Notification Service', address: 'no-reply@example.test' }],
+    }),
+    true
   );
 });
 

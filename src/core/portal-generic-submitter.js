@@ -1306,7 +1306,7 @@ export class GenericPortalSubmitter {
       }
     } else {
       const otpStatus = otpResult?.status || 'timeout';
-      state.otp_state = otpStatus === 'otp_not_received' ? 'otp_email_waiting' : otpStatus;
+      state.otp_state = otpStatus;
     }
 
     // In headless / cloud mode there is no operator to enter the code manually.
@@ -1533,6 +1533,10 @@ export class GenericPortalSubmitter {
         state.search_state = 'search_input_missing';
         state.search_debug = await this._captureSearchDebug();
         return { ok: false, reason: 'search_input_missing', nric: identifier || nric || null };
+      }
+      if (attempt.blurAfterFill) {
+        await this.page.keyboard.press('Tab').catch(() => null);
+        await this.page.waitForTimeout(250);
       }
 
       // Multi-field attempts: portals like Allianz AMOS need Surname + DOB.
@@ -2161,7 +2165,9 @@ export class GenericPortalSubmitter {
         const blockedReason =
           detailReason === 'allianz_dob_required'
             ? 'portal_search_requires_dob'
-            : 'portal_search_failed';
+            : detailReason === 'edge_blocked'
+              ? 'portal_edge_blocked'
+              : 'portal_search_failed';
         return this._buildResult(state, {
           reason: 'search_failed',
           blocked_reason: blockedReason,

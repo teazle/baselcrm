@@ -1630,7 +1630,21 @@ export class GENtucSubmitter {
         popup = this.allianceAutomation.lastGePopupPage;
         if (!popup) {
           if (lastAddError) throw lastAddError;
-          throw new Error('GE popup not captured after Alliance Medinet reroute');
+          const screenshotPath = `screenshots/ge-ntuc-popup-not-captured-${visit?.id || nric}-${Date.now()}.png`;
+          await this.allianceAutomation?.page
+            ?.screenshot({ path: screenshotPath, fullPage: true })
+            .catch(() => null);
+          return baseResult({
+            success: false,
+            reason: 'ge_popup_not_captured',
+            blocked_reason: 'ge_popup_not_captured',
+            sessionState: 'blocked',
+            error: 'GE/NTUC popup was not captured after Alliance Medinet reroute',
+            screenshot: screenshotPath,
+            evidenceArtifacts: {
+              screenshot: screenshotPath,
+            },
+          });
         }
       }
 

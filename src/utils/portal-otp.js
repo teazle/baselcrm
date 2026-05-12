@@ -20,7 +20,17 @@ const PORTAL_MATCHERS = {
     from: [/allianz/i],
   },
   FULLERTON: {
-    labels: [/fullerton/i, /fhn/i, /fhn3/i, /2xsecure/i],
+    labels: [
+      /fullerton/i,
+      /fhn/i,
+      /fhn3/i,
+      /2xsecure/i,
+      /otp/i,
+      /one[-\s]?time/i,
+      /verification\s*code/i,
+      /security\s*code/i,
+      /authentication\s*(?:code|token)?/i,
+    ],
     from: [/fullerton/i, /fhn/i, /2xsecure/i],
   },
   IHP: {
@@ -106,7 +116,7 @@ function buildOtpRegexes(portal) {
   return GENERIC_OTP_REGEXES;
 }
 
-function shouldConsiderMessage(portal, envelope, parsed = null) {
+export function shouldConsiderMessage(portal, envelope, parsed = null) {
   const key = normalizePortal(portal);
   const matcher = PORTAL_MATCHERS[key];
   if (!matcher) return true;

@@ -706,6 +706,7 @@ export class AllianzSubmitter {
             normalize: false,
             value: surname,
             inputSelectors: ['input[name*="surname" i]', 'input[id*="surname" i]'],
+            blurAfterFill: true,
             extraInputs: [
               {
                 value: dobAmos,

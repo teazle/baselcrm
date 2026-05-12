@@ -470,6 +470,8 @@ async function submitClaimsBatch() {
       'portal_read_only_no_claim_form',
       'portal_search_failed',
       'portal_search_requires_dob',
+      'portal_edge_blocked',
+      'ge_popup_not_captured',
       'portal_session_expired',
       'portal_session_conflict',
       'portal_timeout',
