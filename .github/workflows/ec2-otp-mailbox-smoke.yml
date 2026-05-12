@@ -1,0 +1,83 @@
+name: EC2 OTP Mailbox Smoke
+
+on:
+  workflow_dispatch:
+
+jobs:
+  otp-mailbox-smoke:
+    name: Verify EC2 OTP mailbox
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Verify EC2 OTP mailbox
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || 22 }}
+          timeout: 60s
+          command_timeout: 10m
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            DEPLOY_PATH="${{ secrets.EC2_DEPLOY_PATH || '~/Baselrpacrm' }}"
+            DEPLOY_PATH="${DEPLOY_PATH/#\~/$HOME}"
+            cd "$DEPLOY_PATH"
+
+            node --input-type=module <<'NODE'
+            import 'dotenv/config';
+            import { ImapFlow } from 'imapflow';
+
+            const maskEmail = value => {
+              const raw = String(value || '').trim();
+              const [local, domain] = raw.split('@');
+              if (!raw || !domain) return raw ? 'set' : 'missing';
+              return `${local.slice(0, 2)}***@${domain}`;
+            };
+
+            const email = String(process.env.OTP_GMAIL_EMAIL || '').trim();
+            const password = String(process.env.OTP_GMAIL_APP_PASSWORD || '').trim();
+            if (!email || !password) {
+              console.log(JSON.stringify({
+                ok: false,
+                status: 'config_missing',
+                email: maskEmail(email),
+                passwordSet: Boolean(password),
+              }));
+              process.exit(1);
+            }
+
+            const client = new ImapFlow({
+              host: process.env.OTP_GMAIL_IMAP_HOST || 'imap.gmail.com',
+              port: Number(process.env.OTP_GMAIL_IMAP_PORT || 993),
+              secure: String(process.env.OTP_GMAIL_IMAP_SECURE || 'true') !== 'false',
+              auth: { user: email, pass: password },
+              logger: false,
+            });
+
+            try {
+              await client.connect();
+              const lock = await client.getMailboxLock('INBOX');
+              const inboxCount = client.mailbox?.exists ?? null;
+              lock.release();
+              await client.logout().catch(() => {});
+              console.log(JSON.stringify({
+                ok: true,
+                status: 'imap_connected',
+                email: maskEmail(email),
+                inboxCount,
+              }));
+            } catch (error) {
+              await client.logout().catch(() => {});
+              console.log(JSON.stringify({
+                ok: false,
+                status: 'imap_error',
+                email: maskEmail(email),
+                error: error?.code || error?.responseStatusText || error?.message || 'imap_error',
+              }));
+              process.exit(1);
+            }
+            NODE
