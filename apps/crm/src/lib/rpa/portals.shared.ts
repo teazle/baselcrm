@@ -343,7 +343,7 @@ function findMatchedPortalTag(
   ].filter(Boolean) as Array<{ source: string; value: string }>;
   for (const source of sources) {
     if (!source.value) continue;
-    for (const tag of tags) {
+    for (const tag of [...tags].sort((a, b) => String(b).length - String(a).length)) {
       if (hasPortalTagToken(source.value, tag)) {
         return { tag, source: source.source };
       }
@@ -368,7 +368,7 @@ export function resolveFlow3PortalRouting(
         portalTarget,
         source: matched.source,
         tag: matched.tag,
-        reason: 'explicit_ca_tag',
+        reason: 'ca_portal_tag_guide',
       };
     }
   }
@@ -432,7 +432,7 @@ export function describePortalRouting(
     portalTarget: routing.portalTarget,
     portalTag: routing.tag,
     portalRoutingSource:
-      routing.reason === 'explicit_ca_tag'
+      routing.reason === 'ca_portal_tag_guide'
         ? 'tpa_user_interface_guide'
         : routing.reason === 'metadata_hint'
           ? 'extraction_metadata'

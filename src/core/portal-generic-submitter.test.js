@@ -8,6 +8,7 @@ import {
   detectOtpPromptSignals,
   deriveOtpBlockedReason,
   GenericPortalSubmitter,
+  shouldBlockSmsOtpPrompt,
   shouldTryNextCredentialCandidate,
 } from './portal-generic-submitter.js';
 
@@ -215,6 +216,20 @@ test('detectOtpPromptSignals distinguishes email OTP from SMS-only OTP prompts',
       fields: [{ name: 'txtOTP' }],
     }),
     { hasOtp: true, kind: 'sms', hasEmail: false, hasSms: true }
+  );
+});
+
+test('shouldBlockSmsOtpPrompt allows configured email-forwarded OTP for SMS-worded pages', () => {
+  const smsPrompt = { kind: 'sms', hasSms: true, hasEmail: false };
+
+  assert.equal(
+    shouldBlockSmsOtpPrompt({ configuredOtpChannel: 'sms', otpPrompt: smsPrompt }),
+    true
+  );
+  assert.equal(shouldBlockSmsOtpPrompt({ configuredOtpChannel: '', otpPrompt: smsPrompt }), true);
+  assert.equal(
+    shouldBlockSmsOtpPrompt({ configuredOtpChannel: 'email', otpPrompt: smsPrompt }),
+    false
   );
 });
 

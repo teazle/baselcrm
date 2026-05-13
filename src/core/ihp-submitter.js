@@ -90,7 +90,7 @@ export class IHPSubmitter {
       defaultUsername: PORTALS.IHP?.username || '',
       defaultPassword: PORTALS.IHP?.password || '',
       supportsOtp: true,
-      otpChannel: 'sms',
+      otpChannel: process.env.IHP_OTP_CHANNEL || 'sms',
       selectors: buildSelectors(),
       loginSubmitter: submitIhpEncryptedLogin,
     });

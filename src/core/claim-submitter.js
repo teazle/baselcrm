@@ -444,7 +444,7 @@ export class ClaimSubmitter {
       portalService: portalResult.portalService || route || null,
       portalTarget: routing.portalTarget || route || null,
       portalRoutingSource:
-        routing.reason === 'explicit_ca_tag'
+        routing.reason === 'ca_portal_tag_guide'
           ? 'tpa_user_interface_guide'
           : routing.reason === 'metadata_hint'
             ? 'extraction_metadata'

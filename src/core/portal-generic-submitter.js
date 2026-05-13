@@ -288,6 +288,15 @@ function toBoolean(value, fallback = false) {
   return fallback;
 }
 
+export function shouldBlockSmsOtpPrompt({ configuredOtpChannel, otpPrompt } = {}) {
+  const channel = String(configuredOtpChannel || '')
+    .trim()
+    .toLowerCase();
+  if (channel === 'email') return false;
+  if (channel === 'sms') return true;
+  return otpPrompt?.kind === 'sms';
+}
+
 function credentialFingerprint(credential) {
   return [
     String(credential?.url || '').trim(),
@@ -1267,7 +1276,7 @@ export class GenericPortalSubmitter {
     const otpDebug = await this._captureOtpDebug();
     state.otp_debug = otpDebug;
     const otpPrompt = otpDebug?.otpPrompt || {};
-    if (this.otpChannel === 'sms' || otpPrompt.kind === 'sms') {
+    if (shouldBlockSmsOtpPrompt({ configuredOtpChannel: this.otpChannel, otpPrompt })) {
       state.otp_state = 'portal_sms_otp_required';
       state.evidence = await this._safeScreenshot(visit, 'sms-otp-required');
       logger.warn(`[${this.portalTarget}] Portal requires SMS OTP; Gmail OTP is not applicable`, {

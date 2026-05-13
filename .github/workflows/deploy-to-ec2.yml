@@ -106,6 +106,10 @@ jobs:
               fi
             fi
 
+            # These variables can contain full secret files from GitHub Actions.
+            # Drop them before any long-lived process is started or PM2 will retain them.
+            unset DEPLOY_ENV_FILE DEPLOY_CRM_ENV_LOCAL
+
             echo "📦 Refreshing root dependencies..."
             npm install || { echo "⚠️  Warning: root npm install failed"; }
             npm run install-browsers || { echo "⚠️  Warning: install-browsers failed"; }
