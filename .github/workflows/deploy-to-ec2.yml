@@ -126,6 +126,8 @@ jobs:
               fi
               # Kill any remaining process on port 3000
               sudo fuser -k 3000/tcp 2>/dev/null || true
+              pkill -f "next build" 2>/dev/null || true
+              rm -f .next/lock 2>/dev/null || true
               sleep 2
               
               echo "📦 Installing CRM dependencies..."
