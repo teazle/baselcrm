@@ -15,6 +15,7 @@ export class AllianceMedinetAutomation {
     // patient during a prior visit in the same batch run.
     this.lastGePopupNric = null;
     this.lastDiagnosisPortalMatch = null;
+    this.lastConsultationFeeFill = null;
   }
 
   _setLastAction(action) {
@@ -1772,6 +1773,7 @@ export class AllianceMedinetAutomation {
     const numeric = Number(amount);
     if (!Number.isFinite(numeric) || numeric <= 0) return false;
     let effectiveAmount = numeric;
+    let basis = 'clinic_assist_total_amount';
     const selectedType = await this.page
       .locator('mat-select[formcontrolname*="consultationFeeGroupItem" i]')
       .first()
@@ -1779,12 +1781,13 @@ export class AllianceMedinetAutomation {
       .catch(() => '');
     if (/follow/i.test(String(selectedType || '')) && effectiveAmount >= 70) {
       effectiveAmount = 69;
+      basis = 'portal_follow_up_fee_cap';
       logger.warn('[ALLIANCE] Consultation Fee capped for Follow Up type', {
         originalAmount: numeric,
         cappedAmount: effectiveAmount,
       });
     }
-    return this._setInputValue(
+    const filled = await this._setInputValue(
       [
         'input[aria-label*="Consultation Fee" i]',
         'input[placeholder*="Consultation Fee" i]',
@@ -1793,6 +1796,13 @@ export class AllianceMedinetAutomation {
       effectiveAmount.toFixed(2),
       'Consultation Fee'
     );
+    if (!filled) return false;
+    this.lastConsultationFeeFill = {
+      sourceAmount: numeric.toFixed(2),
+      amount: effectiveAmount.toFixed(2),
+      basis,
+    };
+    return this.lastConsultationFeeFill;
   }
 
   async _fillMcDetails(visit) {
@@ -1993,7 +2003,17 @@ export class AllianceMedinetAutomation {
           if (Number.isFinite(feeLimit) && feeLimit > 1) {
             adjustedConsultationFee = true;
             const adjusted = Math.max(1, Number(feeLimit) - 1);
-            await this._fillConsultationFeeAmount(adjusted).catch(() => false);
+            const originalSourceAmount = this.lastConsultationFeeFill?.sourceAmount || null;
+            const feeFill = await this._fillConsultationFeeAmount(adjusted).catch(() => false);
+            if (feeFill?.amount) {
+              this.lastConsultationFeeFill = {
+                ...feeFill,
+                sourceAmount: originalSourceAmount || feeFill.sourceAmount || '',
+                amount: feeFill.amount,
+                basis: 'portal_validation_fee_limit',
+                portalLimit: feeLimit.toFixed(2),
+              };
+            }
             await this._clickFirstVisible(
               ['button:has-text("Calculate Claim")', 'input[value*="Calculate Claim" i]'],
               'Calculate Claim (consultation-fee retry)'
@@ -2165,6 +2185,7 @@ export class AllianceMedinetAutomation {
       await this._setConsultationFeeType(
         visit?.extraction_metadata?.chargeType || visit?.charge_type || null
       );
+      this.lastConsultationFeeFill = null;
       await this._fillConsultationFeeAmount(visit?.total_amount).catch(() => false);
       await this._fillOptionalTextField('treatment', visit?.treatment_detail, [
         'textarea[name*="treatment" i]',
@@ -2198,6 +2219,9 @@ export class AllianceMedinetAutomation {
       return {
         doctorName: mappedDoctorName,
         diagnosisPortalMatch: this.lastDiagnosisPortalMatch || null,
+        feeExpectedForVerification: this.lastConsultationFeeFill?.amount || null,
+        feeVerificationBasis: this.lastConsultationFeeFill?.basis || null,
+        feeFill: this.lastConsultationFeeFill || null,
         readback,
         screenshot: screenshotPath,
       };

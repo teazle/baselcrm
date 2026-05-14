@@ -211,7 +211,22 @@ export function buildAllianceFillVerification({ visit, doctor, fillResult, pageS
     null;
   const expectedDiagnosis = metadata?.diagnosis_description || visit?.diagnosis_description || null;
   const feeObserved = readback?.fee?.value || null;
-  const feeExpected = visit?.total_amount || null;
+  const feeSourceExpected = visit?.total_amount || null;
+  const feeExpected = fillResult?.feeExpectedForVerification || feeSourceExpected;
+  const feeBasis = fillResult?.feeVerificationBasis || 'clinic_assist_total_amount';
+  const feeStatus = observedStatus({
+    expected: feeExpected,
+    observed: feeObserved,
+    type: 'amount',
+  });
+  const feeSourceComparisonStatus =
+    feeExpected &&
+    feeSourceExpected &&
+    normalizeAmount(feeExpected) &&
+    normalizeAmount(feeSourceExpected) &&
+    normalizeAmount(feeExpected) !== normalizeAmount(feeSourceExpected)
+      ? 'fee_basis_difference'
+      : null;
   const expectedMcDays = metadata?.mcDays ?? visit?.mc_days ?? visit?.mcDays ?? 0;
   const diagnosisWasSelected = Boolean(
     diagnosisMatch &&
@@ -241,10 +256,13 @@ export function buildAllianceFillVerification({ visit, doctor, fillResult, pageS
       selector: readback?.diagnosis?.selector || diagnosisMatch?.selector || null,
     },
     fee: {
-      status: observedStatus({ expected: feeExpected, observed: feeObserved, type: 'amount' }),
+      status: feeStatus,
       expected: feeExpected,
+      sourceExpected: feeSourceExpected,
       observed: feeObserved,
       selector: readback?.fee?.selector || null,
+      basis: feeBasis,
+      sourceComparisonStatus: feeSourceComparisonStatus,
     },
     mcDays: {
       status: mcDaysStatus({

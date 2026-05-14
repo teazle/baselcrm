@@ -108,6 +108,35 @@ test('Alliance Medinet fill verification uses page snapshot readback fallback', 
   assert.equal(verification.mcDays.observed, '0');
 });
 
+test('Alliance Medinet verifies portal accepted fee separately from Clinic Assist total amount', () => {
+  const verification = buildAllianceFillVerification({
+    visit: {
+      visit_date: '2026-05-04',
+      total_amount: '75.00',
+      diagnosis_description: 'Upper respiratory tract infection',
+      extraction_metadata: {},
+    },
+    doctor: { doctorName: 'Tan Guoping Kelvin' },
+    fillResult: {
+      doctorName: 'Tan Guoping Kelvin',
+      feeExpectedForVerification: '69.00',
+      feeVerificationBasis: 'portal_accepted_consultation_fee',
+      diagnosisPortalMatch: {
+        match_text: 'J06.9 - Acute upper respiratory infection',
+      },
+      readback: {
+        fee: { selector: 'input[formcontrolname*="consultationFee"]', value: '69.00' },
+      },
+    },
+  });
+
+  assert.equal(verification.fee.status, 'verified');
+  assert.equal(verification.fee.expected, '69.00');
+  assert.equal(verification.fee.sourceExpected, '75.00');
+  assert.equal(verification.fee.basis, 'portal_accepted_consultation_fee');
+  assert.equal(verification.fee.sourceComparisonStatus, 'fee_basis_difference');
+});
+
 test('Alliance Medinet does not mark absent MC fields unverified when no MC is expected', () => {
   const verification = buildAllianceFillVerification({
     visit: {
