@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { extractCodeFromText, parseMailboxList, shouldConsiderMessage } from './portal-otp.js';
+import {
+  extractCodeFromText,
+  getMailConfigsFromEnv,
+  parseMailboxList,
+  shouldConsiderMessage,
+} from './portal-otp.js';
 
 test('extracts Fullerton 2xSecure OTP when subject and sender carry the portal identity', () => {
   const text = [
@@ -56,4 +61,21 @@ test('parseMailboxList defaults to inbox plus Gmail all mail and de-duplicates o
     'INBOX',
     '[Gmail]/All Mail',
   ]);
+});
+
+test('getMailConfigsFromEnv supports extra OTP Gmail accounts without replacing primary', () => {
+  const configs = getMailConfigsFromEnv({
+    OTP_GMAIL_EMAIL: 'inbox@example.test',
+    OTP_GMAIL_APP_PASSWORD: 'primary-app-password',
+    OTP_GMAIL_EMAIL_2: 'salesforce@example.test',
+    OTP_GMAIL_APP_PASSWORD_2: 'secondary-app-password',
+    OTP_GMAIL_EMAIL_3: 'inbox@example.test',
+    OTP_GMAIL_APP_PASSWORD_3: 'duplicate-app-password',
+  });
+
+  assert.equal(configs.length, 2);
+  assert.equal(configs[0].email, 'inbox@example.test');
+  assert.equal(configs[0].authSource, 'app_password');
+  assert.equal(configs[1].email, 'salesforce@example.test');
+  assert.equal(configs[1].suffix, '_2');
 });
