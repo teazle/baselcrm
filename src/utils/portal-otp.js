@@ -11,6 +11,7 @@ const DEFAULT_POLL_INTERVAL_MS = 3000;
 // Total timeout: must be long enough for slow portals (Fullerton, Allianz can take >2min
 // to send the OTP email when their backend is loaded). 180s gives adequate headroom.
 const DEFAULT_TIMEOUT_MS = 180000;
+const DEFAULT_SOCKET_TIMEOUT_MS = 30000;
 const DEFAULT_MAILBOXES = ['INBOX', '[Gmail]/All Mail'];
 const DEFAULT_MAX_MESSAGES_PER_MAILBOX = 80;
 
@@ -177,6 +178,7 @@ function buildMailAccountConfig({
     lookbackMinutes: Number(process.env.OTP_GMAIL_LOOKBACK_MINUTES || DEFAULT_LOOKBACK_MINUTES),
     pollIntervalMs: Number(process.env.OTP_GMAIL_POLL_INTERVAL_MS || DEFAULT_POLL_INTERVAL_MS),
     timeoutMs: Number(process.env.OTP_GMAIL_TIMEOUT_MS || DEFAULT_TIMEOUT_MS),
+    socketTimeoutMs: Number(process.env.OTP_GMAIL_SOCKET_TIMEOUT_MS || DEFAULT_SOCKET_TIMEOUT_MS),
   };
 }
 
@@ -304,6 +306,9 @@ export async function getOtpCode(options = {}) {
       primaryConfig.maxMessagesPerMailbox ||
       DEFAULT_MAX_MESSAGES_PER_MAILBOX
   );
+  const socketTimeoutMs = Number(
+    options.socketTimeoutMs || primaryConfig.socketTimeoutMs || DEFAULT_SOCKET_TIMEOUT_MS
+  );
   // STALENESS GUARD: caller can pass `triggeredAfter` (epoch ms or Date) to
   // filter out OTP emails that arrived before the current login submit. This
   // prevents back-to-back visits from reading the PREVIOUS visit's OTP (which
@@ -337,16 +342,35 @@ export async function getOtpCode(options = {}) {
         host: config.host,
         port: config.port,
         secure: config.secure,
+        socketTimeout:
+          Number.isFinite(socketTimeoutMs) && socketTimeoutMs > 0
+            ? socketTimeoutMs
+            : DEFAULT_SOCKET_TIMEOUT_MS,
         auth: {
           user: config.email,
           pass: config.appPassword,
         },
         logger: false,
       });
+      let clientError = null;
+      client.on('error', error => {
+        clientError = error;
+        logger.warn('[OTP] Gmail IMAP socket error', {
+          portal,
+          email: maskEmail(config.email),
+          suffix: config.suffix || null,
+          error: error?.message || String(error),
+          code: error?.code || null,
+        });
+      });
 
       try {
         await client.connect();
-        connectedAccounts.push({ config, client });
+        connectedAccounts.push({
+          config,
+          client,
+          getClientError: () => clientError,
+        });
         logger.info('[OTP] Connected to Gmail IMAP', {
           portal,
           email: maskEmail(config.email),
@@ -398,8 +422,20 @@ export async function getOtpCode(options = {}) {
       const sinceDate = new Date(Date.now() - lookbackMinutes * 60 * 1000);
       const mailboxSummaries = [];
 
-      for (const { config, client } of connectedAccounts) {
+      for (const { config, client, getClientError } of connectedAccounts) {
         for (const mailbox of mailboxes) {
+          if (Date.now() >= deadline) break;
+          const pendingClientError = getClientError?.();
+          if (pendingClientError) {
+            const { status, details } = classifyImapError(pendingClientError);
+            accountErrors.push({
+              email: maskEmail(config.email),
+              suffix: config.suffix || null,
+              status,
+              error: details,
+            });
+            continue;
+          }
           let lock = null;
           try {
             lock = await client.getMailboxLock(mailbox);
