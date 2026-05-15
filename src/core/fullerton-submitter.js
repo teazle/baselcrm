@@ -128,6 +128,23 @@ async function ensureFullertonVisitForm({ page, state, helpers }) {
       })
       .catch(() => false);
 
+  const detectDuplicateVisit = () =>
+    page
+      .evaluate(() => {
+        const body = String(globalThis.document?.body?.innerText || '');
+        const duplicatePatient = globalThis.document?.querySelector?.('#duplicatePatient');
+        const duplicateValue = String(duplicatePatient?.value || '')
+          .trim()
+          .toLowerCase();
+        return (
+          duplicateValue === 'true' ||
+          /duplicate\s+(?:patient|visit|claim)|already\s+(?:registered|exists|submitted)|pending\s+visit/i.test(
+            body
+          )
+        );
+      })
+      .catch(() => false);
+
   const waitForEditPage = async timeoutMs => {
     const deadline = Math.min(Date.now() + timeoutMs, globalDeadline);
     while (Date.now() < deadline) {
@@ -246,8 +263,13 @@ async function ensureFullertonVisitForm({ page, state, helpers }) {
     }
   }
 
+  const duplicateVisit = await detectDuplicateVisit();
   state.form_navigation = {
-    mode: isExpired() ? 'global_timeout' : 'register_not_advanced',
+    mode: duplicateVisit
+      ? 'duplicate_visit'
+      : isExpired()
+        ? 'global_timeout'
+        : 'register_not_advanced',
     url: String(page.url() || ''),
     timeoutMs: GLOBAL_TIMEOUT_MS,
   };
@@ -268,14 +290,21 @@ function classifyFullertonFormNavigation(state) {
 
   if (mode === 'global_timeout') {
     state.form_detail_reason = 'fullerton_register_timeout';
-    state.form_blocked_reason = 'portal_timeout';
+    state.form_blocked_reason = 'fullerton_form_navigation_timeout';
     state.sessionState = 'timeout';
+    return;
+  }
+
+  if (mode === 'duplicate_visit') {
+    state.form_detail_reason = 'fullerton_duplicate_visit';
+    state.form_blocked_reason = 'duplicate_visit';
+    state.sessionState = 'blocked';
     return;
   }
 
   if (mode === 'register_not_advanced') {
     state.form_detail_reason = 'fullerton_register_not_advanced';
-    state.form_blocked_reason = 'portal_contract_unvalidated';
+    state.form_blocked_reason = 'fullerton_register_not_advanced';
     state.sessionState = 'blocked';
   }
 }
