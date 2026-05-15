@@ -128,8 +128,9 @@ jobs:
               sudo fuser -k 3000/tcp 2>/dev/null || true
               # Next build can leave a lock if a prior deploy was cancelled or overlapped.
               # Kill stale build processes before removing the lock so the next build is real.
-              pkill -f "next build" 2>/dev/null || true
-              pkill -f "next-server" 2>/dev/null || true
+              ps -eo pid=,comm=,args= |
+                awk '$2 ~ /^node/ && ($0 ~ /next build/ || $0 ~ /next-server/) {print $1}' |
+                xargs -r kill 2>/dev/null || true
               rm -f .next/lock 2>/dev/null || true
               sleep 2
               
