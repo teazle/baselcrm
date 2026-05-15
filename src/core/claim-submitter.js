@@ -372,19 +372,32 @@ export class ClaimSubmitter {
     const normalizedRoute = String(route || 'DEFAULT')
       .trim()
       .toUpperCase();
+    const otpRoutes = new Set(['FULLERTON', 'IHP', 'IXCHANGE']);
+    const headlessOtpTimeoutMs = Number(
+      process.env.FLOW3_HEADLESS_OTP_TIMEOUT_MS || process.env.OTP_HEADLESS_TIMEOUT_MS || 0
+    );
+    const hasOtpBudget =
+      otpRoutes.has(normalizedRoute) &&
+      Number.isFinite(headlessOtpTimeoutMs) &&
+      headlessOtpTimeoutMs > 0;
+    const otpMinimumTimeoutMs = hasOtpBudget ? headlessOtpTimeoutMs + 120000 : 0;
     const specific = Number(process.env[`FLOW3_${normalizedRoute}_TIMEOUT_MS`] || 0);
-    if (Number.isFinite(specific) && specific > 0) return specific;
+    if (Number.isFinite(specific) && specific > 0) {
+      return Math.max(specific, otpMinimumTimeoutMs);
+    }
     const configuredDefault = Number(process.env.FLOW3_PORTAL_TIMEOUT_MS || 0);
-    if (Number.isFinite(configuredDefault) && configuredDefault > 0) return configuredDefault;
+    if (Number.isFinite(configuredDefault) && configuredDefault > 0) {
+      return Math.max(configuredDefault, otpMinimumTimeoutMs);
+    }
     const defaults = {
-      IHP: 300000,
-      IXCHANGE: 300000,
-      FULLERTON: 300000,
+      IHP: 420000,
+      IXCHANGE: 420000,
+      FULLERTON: 420000,
       ALLIANZ: 240000,
       ALLIANCE_MEDINET: 180000,
       GE_NTUC: 180000,
     };
-    return defaults[normalizedRoute] || 180000;
+    return Math.max(defaults[normalizedRoute] || 180000, otpMinimumTimeoutMs);
   }
 
   _buildPortalTimeoutError(route, timeoutMs, visit) {

@@ -138,16 +138,25 @@ test('_applyRuntimeCredential keeps env credentials as operational source by def
 
 test('_getPortalTimeoutMs allows OTP portals to finish mailbox wait before timing out', () => {
   const original = process.env.FLOW3_PORTAL_TIMEOUT_MS;
+  const originalHeadlessOtp = process.env.FLOW3_HEADLESS_OTP_TIMEOUT_MS;
   const submitter = Object.create(ClaimSubmitter.prototype);
 
   try {
     delete process.env.FLOW3_PORTAL_TIMEOUT_MS;
-    assert.equal(submitter._getPortalTimeoutMs('FULLERTON'), 300000);
-    assert.equal(submitter._getPortalTimeoutMs('IHP'), 300000);
-    assert.equal(submitter._getPortalTimeoutMs('IXCHANGE'), 300000);
+    process.env.FLOW3_HEADLESS_OTP_TIMEOUT_MS = '240000';
+    assert.equal(submitter._getPortalTimeoutMs('FULLERTON'), 420000);
+    assert.equal(submitter._getPortalTimeoutMs('IHP'), 420000);
+    assert.equal(submitter._getPortalTimeoutMs('IXCHANGE'), 420000);
+
+    process.env.FLOW3_PORTAL_TIMEOUT_MS = '300000';
+    assert.equal(submitter._getPortalTimeoutMs('FULLERTON'), 360000);
+    assert.equal(submitter._getPortalTimeoutMs('IHP'), 360000);
+    assert.equal(submitter._getPortalTimeoutMs('IXCHANGE'), 360000);
   } finally {
     if (original === undefined) delete process.env.FLOW3_PORTAL_TIMEOUT_MS;
     else process.env.FLOW3_PORTAL_TIMEOUT_MS = original;
+    if (originalHeadlessOtp === undefined) delete process.env.FLOW3_HEADLESS_OTP_TIMEOUT_MS;
+    else process.env.FLOW3_HEADLESS_OTP_TIMEOUT_MS = originalHeadlessOtp;
   }
 });
 
